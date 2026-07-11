@@ -13,8 +13,12 @@ public class JetSuitMarkerConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
+		float[] array = new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] };
+		string[] array2 = refined_METALS;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] }, refined_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.PreventIdleTraversalPastBuilding = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingUse;
@@ -32,8 +36,7 @@ public class JetSuitMarkerConfig : IBuildingConfig
 		};
 		suitMarker.PathFlag = PathFinder.PotentialPath.Flags.HasJetPack;
 		suitMarker.interactAnim = Assets.GetAnim("anim_interacts_changingarea_jetsuit_arrow_kanim");
-		AnimTileable animTileable = go.AddOrGet<AnimTileable>();
-		animTileable.tags = new Tag[]
+		go.AddOrGet<AnimTileable>().tags = new Tag[]
 		{
 			new Tag("JetSuitMarker"),
 			new Tag("JetSuitLocker")

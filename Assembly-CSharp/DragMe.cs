@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class DragMe : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IEventSystemHandler
+public class DragMe : MonoBehaviour, IBeginDragHandler, IEventSystemHandler, IDragHandler, IEndDragHandler
 {
 	public void OnBeginDrag(PointerEventData eventData)
 	{
@@ -21,8 +21,7 @@ public class DragMe : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 		this.m_DraggingIcon.name = "dragObj";
 		this.m_DraggingIcon.transform.SetParent(canvas.transform, false);
 		this.m_DraggingIcon.transform.SetAsLastSibling();
-		RectTransform component2 = this.m_DraggingIcon.GetComponent<RectTransform>();
-		component2.pivot = Vector2.zero;
+		this.m_DraggingIcon.GetComponent<RectTransform>().pivot = Vector2.zero;
 		if (this.dragOnSurfaces)
 		{
 			this.m_DraggingPlane = base.transform as RectTransform;
@@ -71,9 +70,9 @@ public class DragMe : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 	{
 		if (go == null)
 		{
-			return (T)((object)null);
+			return default(T);
 		}
-		T t = (T)((object)null);
+		T t = default(T);
 		Transform transform = go.transform.parent;
 		while (transform != null && t == null)
 		{

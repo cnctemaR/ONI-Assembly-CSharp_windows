@@ -2,7 +2,7 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Filter
 {
-	public class Billow : FilterModule, IModule3D, IModule2D, IModule
+	public class Billow : FilterModule, IModule3D, IModule, IModule2D
 	{
 		public float Scale
 		{

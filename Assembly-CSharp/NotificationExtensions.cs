@@ -15,13 +15,12 @@ public static class NotificationExtensions
 			}
 			dictionary[notification.NotifierName] = num + 1;
 		}
-		string text = string.Empty;
+		string text = "";
 		foreach (KeyValuePair<string, int> keyValuePair in dictionary)
 		{
 			if (countNames)
 			{
-				string text2 = text;
-				text = string.Concat(new object[] { text2, "\n", keyValuePair.Key, "(", keyValuePair.Value, ")" });
+				text = string.Concat(new object[] { text, "\n", keyValuePair.Key, "(", keyValuePair.Value, ")" });
 			}
 			else
 			{

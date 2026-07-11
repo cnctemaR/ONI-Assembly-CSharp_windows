@@ -4,19 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 {
 	public class ImageRenderer : AbstractImageRenderer
 	{
-		public ImageRenderer()
-		{
-			this._lightEnabled = false;
-			this._WrapEnabled = false;
-			this._lightAzimuth = 45f;
-			this._lightBrightness = 1f;
-			this._lightContrast = 1f;
-			this._lightElevation = 45f;
-			this._lightIntensity = 1f;
-			this._lightColor = Color.WHITE;
-			this._recalcLightValues = true;
-		}
-
 		public bool LightEnabled
 		{
 			get
@@ -148,6 +135,19 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 			{
 				this._lightColor = value;
 			}
+		}
+
+		public ImageRenderer()
+		{
+			this._lightEnabled = false;
+			this._WrapEnabled = false;
+			this._lightAzimuth = 45f;
+			this._lightBrightness = 1f;
+			this._lightContrast = 1f;
+			this._lightElevation = 45f;
+			this._lightIntensity = 1f;
+			this._lightColor = Color.WHITE;
+			this._recalcLightValues = true;
 		}
 
 		public override void Render()

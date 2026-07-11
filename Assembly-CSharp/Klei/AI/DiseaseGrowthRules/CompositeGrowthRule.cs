@@ -11,53 +11,37 @@ namespace Klei.AI.DiseaseGrowthRules
 
 		public void Overlay(GrowthRule rule)
 		{
-			float? num = rule.underPopulationDeathRate;
-			if (num != null)
+			if (rule.underPopulationDeathRate != null)
 			{
-				float? num2 = rule.underPopulationDeathRate;
-				this.underPopulationDeathRate = num2.Value;
+				this.underPopulationDeathRate = rule.underPopulationDeathRate.Value;
 			}
-			float? num3 = rule.populationHalfLife;
-			if (num3 != null)
+			if (rule.populationHalfLife != null)
 			{
-				float? num4 = rule.populationHalfLife;
-				this.populationHalfLife = num4.Value;
+				this.populationHalfLife = rule.populationHalfLife.Value;
 			}
-			float? num5 = rule.overPopulationHalfLife;
-			if (num5 != null)
+			if (rule.overPopulationHalfLife != null)
 			{
-				float? num6 = rule.overPopulationHalfLife;
-				this.overPopulationHalfLife = num6.Value;
+				this.overPopulationHalfLife = rule.overPopulationHalfLife.Value;
 			}
-			float? num7 = rule.diffusionScale;
-			if (num7 != null)
+			if (rule.diffusionScale != null)
 			{
-				float? num8 = rule.diffusionScale;
-				this.diffusionScale = num8.Value;
+				this.diffusionScale = rule.diffusionScale.Value;
 			}
-			float? num9 = rule.minCountPerKG;
-			if (num9 != null)
+			if (rule.minCountPerKG != null)
 			{
-				float? num10 = rule.minCountPerKG;
-				this.minCountPerKG = num10.Value;
+				this.minCountPerKG = rule.minCountPerKG.Value;
 			}
-			float? num11 = rule.maxCountPerKG;
-			if (num11 != null)
+			if (rule.maxCountPerKG != null)
 			{
-				float? num12 = rule.maxCountPerKG;
-				this.maxCountPerKG = num12.Value;
+				this.maxCountPerKG = rule.maxCountPerKG.Value;
 			}
-			int? num13 = rule.minDiffusionCount;
-			if (num13 != null)
+			if (rule.minDiffusionCount != null)
 			{
-				int? num14 = rule.minDiffusionCount;
-				this.minDiffusionCount = num14.Value;
+				this.minDiffusionCount = rule.minDiffusionCount.Value;
 			}
-			byte? b = rule.minDiffusionInfestationTickCount;
-			if (b != null)
+			if (rule.minDiffusionInfestationTickCount != null)
 			{
-				byte? b2 = rule.minDiffusionInfestationTickCount;
-				this.minDiffusionInfestationTickCount = b2.Value;
+				this.minDiffusionInfestationTickCount = rule.minDiffusionInfestationTickCount.Value;
 			}
 			this.name = rule.Name();
 		}

@@ -2,7 +2,11 @@
 
 namespace System
 {
-	public class GopherStyleUriParser : global::System.UriParser
+	public class GopherStyleUriParser : UriParser
 	{
+		public GopherStyleUriParser()
+			: base(UriParser.GopherUri.Flags)
+		{
+		}
 	}
 }

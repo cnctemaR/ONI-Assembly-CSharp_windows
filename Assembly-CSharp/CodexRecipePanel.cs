@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
@@ -7,6 +6,8 @@ using UnityEngine.UI;
 
 public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 {
+	public string linkID { get; set; }
+
 	public CodexRecipePanel()
 	{
 	}
@@ -21,8 +22,6 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 		this.recipe = rec;
 	}
 
-	public string linkID { get; set; }
-
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
 	{
 		HierarchyReferences component = contentGameObject.GetComponent<HierarchyReferences>();
@@ -36,8 +35,9 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 		if (this.recipe != null)
 		{
 			this.ConfigureRecipe();
+			return;
 		}
-		else if (this.complexRecipe != null)
+		if (this.complexRecipe != null)
 		{
 			this.ConfigureComplexRecipe();
 		}
@@ -50,7 +50,7 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.materialPrefab, this.ingredientsContainer, true);
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			Tuple<Sprite, Color> uisprite = Def.GetUISprite(ingredient.tag, "ui", false);
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(ingredient.tag, "ui", false);
 			component.GetReference<Image>("Icon").sprite = uisprite.first;
 			component.GetReference<Image>("Icon").color = uisprite.second;
 			component.GetReference<LocText>("Amount").text = GameUtil.GetFormattedByTag(ingredient.tag, ingredient.amount, GameUtil.TimeSlice.None);
@@ -65,7 +65,7 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 		}
 		GameObject gameObject2 = Util.KInstantiateUI(this.materialPrefab, this.resultsContainer, true);
 		HierarchyReferences component2 = gameObject2.GetComponent<HierarchyReferences>();
-		Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(this.recipe.Result, "ui", false);
+		global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(this.recipe.Result, "ui", false);
 		component2.GetReference<Image>("Icon").sprite = uisprite2.first;
 		component2.GetReference<Image>("Icon").color = uisprite2.second;
 		component2.GetReference<LocText>("Amount").text = GameUtil.GetFormattedByTag(this.recipe.Result, this.recipe.OutputUnits, GameUtil.TimeSlice.None);
@@ -82,13 +82,12 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 	private void ConfigureComplexRecipe()
 	{
 		this.title.text = this.complexRecipe.results[0].material.ProperName();
-		ComplexRecipe.RecipeElement[] ingredients = this.complexRecipe.ingredients;
-		for (int i = 0; i < ingredients.Length; i++)
+		ComplexRecipe.RecipeElement[] array = this.complexRecipe.ingredients;
+		for (int i = 0; i < array.Length; i++)
 		{
-			ComplexRecipe.RecipeElement ing = ingredients[i];
-			GameObject gameObject = Util.KInstantiateUI(this.materialPrefab, this.ingredientsContainer, true);
-			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			Tuple<Sprite, Color> uisprite = Def.GetUISprite(ing.material, "ui", false);
+			ComplexRecipe.RecipeElement ing = array[i];
+			HierarchyReferences component = Util.KInstantiateUI(this.materialPrefab, this.ingredientsContainer, true).GetComponent<HierarchyReferences>();
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(ing.material, "ui", false);
 			component.GetReference<Image>("Icon").sprite = uisprite.first;
 			component.GetReference<Image>("Icon").color = uisprite.second;
 			component.GetReference<LocText>("Amount").text = GameUtil.GetFormattedByTag(ing.material, ing.amount, GameUtil.TimeSlice.None);
@@ -105,13 +104,12 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 				ManagementMenu.Instance.codexScreen.ChangeArticle(CodexCache.FormatLinkID(ing.material.ToString()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			};
 		}
-		ComplexRecipe.RecipeElement[] results = this.complexRecipe.results;
-		for (int j = 0; j < results.Length; j++)
+		array = this.complexRecipe.results;
+		for (int i = 0; i < array.Length; i++)
 		{
-			ComplexRecipe.RecipeElement res = results[j];
-			GameObject gameObject2 = Util.KInstantiateUI(this.materialPrefab, this.resultsContainer, true);
-			HierarchyReferences component2 = gameObject2.GetComponent<HierarchyReferences>();
-			Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(res.material, "ui", false);
+			ComplexRecipe.RecipeElement res = array[i];
+			HierarchyReferences component2 = Util.KInstantiateUI(this.materialPrefab, this.resultsContainer, true).GetComponent<HierarchyReferences>();
+			global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(res.material, "ui", false);
 			component2.GetReference<Image>("Icon").sprite = uisprite2.first;
 			component2.GetReference<Image>("Icon").color = uisprite2.second;
 			component2.GetReference<LocText>("Amount").text = GameUtil.GetFormattedByTag(res.material, res.amount, GameUtil.TimeSlice.None);
@@ -129,9 +127,8 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 			};
 		}
 		string fabricatorId = this.complexRecipe.id.Substring(0, this.complexRecipe.id.IndexOf('_'));
-		GameObject gameObject3 = Util.KInstantiateUI(this.fabricatorPrefab, this.fabricatorContainer, true);
-		HierarchyReferences component3 = gameObject3.GetComponent<HierarchyReferences>();
-		Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(fabricatorId, "ui", false);
+		HierarchyReferences component3 = Util.KInstantiateUI(this.fabricatorPrefab, this.fabricatorContainer, true).GetComponent<HierarchyReferences>();
+		global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(fabricatorId, "ui", false);
 		component3.GetReference<Image>("Icon").sprite = uisprite3.first;
 		component3.GetReference<Image>("Icon").color = uisprite3.second;
 		component3.GetReference<LocText>("Time").text = GameUtil.GetFormattedTime(this.complexRecipe.time);
@@ -146,59 +143,17 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 
 	private void ClearPanel()
 	{
-		IEnumerator enumerator = this.ingredientsContainer.transform.GetEnumerator();
-		try
+		foreach (object obj in this.ingredientsContainer.transform)
 		{
-			while (enumerator.MoveNext())
-			{
-				object obj = enumerator.Current;
-				Transform transform = (Transform)obj;
-				global::UnityEngine.Object.Destroy(transform.gameObject);
-			}
+			global::UnityEngine.Object.Destroy(((Transform)obj).gameObject);
 		}
-		finally
+		foreach (object obj2 in this.resultsContainer.transform)
 		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
-			}
+			global::UnityEngine.Object.Destroy(((Transform)obj2).gameObject);
 		}
-		IEnumerator enumerator2 = this.resultsContainer.transform.GetEnumerator();
-		try
+		foreach (object obj3 in this.fabricatorContainer.transform)
 		{
-			while (enumerator2.MoveNext())
-			{
-				object obj2 = enumerator2.Current;
-				Transform transform2 = (Transform)obj2;
-				global::UnityEngine.Object.Destroy(transform2.gameObject);
-			}
-		}
-		finally
-		{
-			IDisposable disposable2;
-			if ((disposable2 = enumerator2 as IDisposable) != null)
-			{
-				disposable2.Dispose();
-			}
-		}
-		IEnumerator enumerator3 = this.fabricatorContainer.transform.GetEnumerator();
-		try
-		{
-			while (enumerator3.MoveNext())
-			{
-				object obj3 = enumerator3.Current;
-				Transform transform3 = (Transform)obj3;
-				global::UnityEngine.Object.Destroy(transform3.gameObject);
-			}
-		}
-		finally
-		{
-			IDisposable disposable3;
-			if ((disposable3 = enumerator3 as IDisposable) != null)
-			{
-				disposable3.Dispose();
-			}
+			global::UnityEngine.Object.Destroy(((Transform)obj3).gameObject);
 		}
 	}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UnityEngine.Timeline
 {
@@ -10,11 +11,15 @@ namespace UnityEngine.Timeline
 
 		void AddFromClip(AnimationClip clip);
 
+		void AddFromClips(IEnumerable<AnimationClip> clips);
+
 		void AddFromName<T>(string name) where T : Component;
 
 		void AddFromName(string name);
 
 		void AddFromClip(GameObject obj, AnimationClip clip);
+
+		void AddFromClips(GameObject obj, IEnumerable<AnimationClip> clips);
 
 		void AddFromName<T>(GameObject obj, string name) where T : Component;
 

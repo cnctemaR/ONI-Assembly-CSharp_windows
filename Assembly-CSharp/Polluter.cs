@@ -3,11 +3,6 @@ using UnityEngine;
 
 public class Polluter : IPolluter
 {
-	public Polluter(int radius)
-	{
-		this.radius = radius;
-	}
-
 	public int radius
 	{
 		get
@@ -51,6 +46,11 @@ public class Polluter : IPolluter
 	public GameObject GetGameObject()
 	{
 		return this.gameObject;
+	}
+
+	public Polluter(int radius)
+	{
+		this.radius = radius;
 	}
 
 	public void SetSplat(NoiseSplat new_splat)

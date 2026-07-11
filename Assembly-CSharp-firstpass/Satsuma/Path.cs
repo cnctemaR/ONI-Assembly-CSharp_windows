@@ -4,8 +4,14 @@ using System.Linq;
 
 namespace Satsuma
 {
-	public sealed class Path : IPath, IClearable, IGraph, IArcLookup
+	public sealed class Path : IPath, IGraph, IArcLookup, IClearable
 	{
+		public IGraph Graph { get; private set; }
+
+		public Node FirstNode { get; private set; }
+
+		public Node LastNode { get; private set; }
+
 		public Path(IGraph graph)
 		{
 			this.Graph = graph;
@@ -14,12 +20,6 @@ namespace Satsuma
 			this.arcs = new HashSet<Arc>();
 			this.Clear();
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public Node FirstNode { get; private set; }
-
-		public Node LastNode { get; private set; }
 
 		public void Clear()
 		{
@@ -47,7 +47,7 @@ namespace Satsuma
 		{
 			Node node = this.U(arc);
 			Node node2 = this.V(arc);
-			Node node3 = ((!(node == this.FirstNode)) ? node : node2);
+			Node node3 = ((node == this.FirstNode) ? node2 : node);
 			if ((node != this.FirstNode && node2 != this.FirstNode) || this.nextArc.ContainsKey(node3) || this.prevArc.ContainsKey(this.FirstNode))
 			{
 				throw new ArgumentException("Arc not valid or path is a cycle.");
@@ -73,7 +73,7 @@ namespace Satsuma
 		{
 			Node node = this.U(arc);
 			Node node2 = this.V(arc);
-			Node node3 = ((!(node == this.LastNode)) ? node : node2);
+			Node node3 = ((node == this.LastNode) ? node2 : node);
 			if ((node != this.LastNode && node2 != this.LastNode) || this.nextArc.ContainsKey(this.LastNode) || this.prevArc.ContainsKey(node3))
 			{
 				throw new ArgumentException("Arc not valid or path is a cycle.");
@@ -108,13 +108,21 @@ namespace Satsuma
 		public Arc NextArc(Node node)
 		{
 			Arc arc;
-			return (!this.nextArc.TryGetValue(node, out arc)) ? Arc.Invalid : arc;
+			if (!this.nextArc.TryGetValue(node, out arc))
+			{
+				return Arc.Invalid;
+			}
+			return arc;
 		}
 
 		public Arc PrevArc(Node node)
 		{
 			Arc arc;
-			return (!this.prevArc.TryGetValue(node, out arc)) ? Arc.Invalid : arc;
+			if (!this.prevArc.TryGetValue(node, out arc))
+			{
+				return Arc.Invalid;
+			}
+			return arc;
 		}
 
 		public Node U(Arc arc)
@@ -156,7 +164,6 @@ namespace Satsuma
 			yield break;
 			Block_3:
 			yield break;
-			yield break;
 		}
 
 		public IEnumerable<Arc> Arcs(ArcFilter filter = ArcFilter.All)
@@ -191,7 +198,11 @@ namespace Satsuma
 
 		public int ArcCount(ArcFilter filter = ArcFilter.All)
 		{
-			return (filter != ArcFilter.All) ? this.edgeCount : this.arcs.Count;
+			if (filter != ArcFilter.All)
+			{
+				return this.edgeCount;
+			}
+			return this.arcs.Count;
 		}
 
 		public int ArcCount(Node u, ArcFilter filter = ArcFilter.All)

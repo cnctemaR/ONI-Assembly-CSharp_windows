@@ -2,86 +2,94 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Class that manages capturing mouse events.</para>
-	/// </summary>
 	public static class MouseCaptureController
 	{
 		internal static IEventHandler mouseCapture { get; private set; }
 
-		/// <summary>
-		///   <para>Checks if there is a handler assigned to capturing the mouse.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Returns true if a handler is assigned to capture the mouse, false otherwise.</para>
-		/// </returns>
+		[Obsolete("Use IsMouseCaptured instead of IsMouseCaptureTaken.")]
 		public static bool IsMouseCaptureTaken()
+		{
+			return MouseCaptureController.IsMouseCaptured();
+		}
+
+		public static bool IsMouseCaptured()
 		{
 			return MouseCaptureController.mouseCapture != null;
 		}
 
-		/// <summary>
-		///   <para>Checks if the event handler is capturing the mouse.</para>
-		/// </summary>
-		/// <param name="handler">Event handler to check.</param>
-		/// <returns>
-		///   <para>True if the handler captures the mouse.</para>
-		/// </returns>
 		public static bool HasMouseCapture(this IEventHandler handler)
 		{
 			return MouseCaptureController.mouseCapture == handler;
 		}
 
-		/// <summary>
-		///   <para>Assigns an event handler to capture the mouse.</para>
-		/// </summary>
-		/// <param name="handler">The event handler to capture the mouse.</param>
+		[Obsolete("Use CaptureMouse instead of TakeMouseCapture.")]
 		public static void TakeMouseCapture(this IEventHandler handler)
+		{
+			handler.CaptureMouse();
+		}
+
+		public static void CaptureMouse(this IEventHandler handler)
 		{
 			if (MouseCaptureController.mouseCapture != handler)
 			{
-				if (GUIUtility.hotControl != 0)
+				if (handler == null)
+				{
+					MouseCaptureController.ReleaseMouse();
+				}
+				else if (GUIUtility.hotControl != 0)
 				{
 					Debug.Log("Should not be capturing when there is a hotcontrol");
 				}
 				else
 				{
-					MouseCaptureController.ReleaseMouseCapture();
+					IEventHandler mouseCapture = MouseCaptureController.mouseCapture;
 					MouseCaptureController.mouseCapture = handler;
-					using (MouseCaptureEvent pooled = MouseCaptureEventBase<MouseCaptureEvent>.GetPooled(MouseCaptureController.mouseCapture))
+					if (mouseCapture != null)
 					{
-						UIElementsUtility.eventDispatcher.DispatchEvent(pooled, null);
+						using (MouseCaptureOutEvent pooled = MouseCaptureEventBase<MouseCaptureOutEvent>.GetPooled(mouseCapture, MouseCaptureController.mouseCapture))
+						{
+							mouseCapture.SendEvent(pooled);
+						}
+					}
+					using (MouseCaptureEvent pooled2 = MouseCaptureEventBase<MouseCaptureEvent>.GetPooled(MouseCaptureController.mouseCapture, mouseCapture))
+					{
+						MouseCaptureController.mouseCapture.SendEvent(pooled2);
 					}
 				}
 			}
 		}
 
-		/// <summary>
-		///   <para>Stops an event handler from capturing the mouse.</para>
-		/// </summary>
-		/// <param name="handler">The event handler to stop capturing the mouse. If this handler is not assigned to capturing the mouse, nothing happens.</param>
+		[Obsolete("Use ReleaseMouse instead of ReleaseMouseCapture.")]
 		public static void ReleaseMouseCapture(this IEventHandler handler)
+		{
+			handler.ReleaseMouse();
+		}
+
+		public static void ReleaseMouse(this IEventHandler handler)
 		{
 			if (handler == MouseCaptureController.mouseCapture)
 			{
-				MouseCaptureController.ReleaseMouseCapture();
+				MouseCaptureController.ReleaseMouse();
 			}
 		}
 
-		/// <summary>
-		///   <para>Stops an event handler from capturing the mouse.</para>
-		/// </summary>
-		/// <param name="handler">The event handler to stop capturing the mouse. If this handler is not assigned to capturing the mouse, nothing happens.</param>
+		[Obsolete("Use ReleaseMouse instead of ReleaseMouseCapture.")]
 		public static void ReleaseMouseCapture()
+		{
+			MouseCaptureController.ReleaseMouse();
+		}
+
+		public static void ReleaseMouse()
 		{
 			if (MouseCaptureController.mouseCapture != null)
 			{
-				using (MouseCaptureOutEvent pooled = MouseCaptureEventBase<MouseCaptureOutEvent>.GetPooled(MouseCaptureController.mouseCapture))
+				IEventHandler mouseCapture = MouseCaptureController.mouseCapture;
+				MouseCaptureController.mouseCapture = null;
+				using (MouseCaptureOutEvent pooled = MouseCaptureEventBase<MouseCaptureOutEvent>.GetPooled(mouseCapture, null))
 				{
-					UIElementsUtility.eventDispatcher.DispatchEvent(pooled, null);
+					mouseCapture.SendEvent(pooled);
 				}
 			}
-			MouseCaptureController.mouseCapture = null;
 		}
 	}
 }

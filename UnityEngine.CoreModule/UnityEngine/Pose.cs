@@ -2,11 +2,8 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Representation of a Position, and a Rotation in 3D Space</para>
-	/// </summary>
 	[Serializable]
-	public struct Pose
+	public struct Pose : IEquatable<Pose>
 	{
 		public Pose(Vector3 position, Quaternion rotation)
 		{
@@ -24,10 +21,6 @@ namespace UnityEngine
 			return string.Format("({0}, {1})", this.position.ToString(format), this.rotation.ToString(format));
 		}
 
-		/// <summary>
-		///   <para>Transforms the current pose into the local space of the provided pose.</para>
-		/// </summary>
-		/// <param name="lhs"></param>
 		public Pose GetTransformedBy(Pose lhs)
 		{
 			return new Pose
@@ -37,10 +30,6 @@ namespace UnityEngine
 			};
 		}
 
-		/// <summary>
-		///   <para>Transforms the current pose into the local space of the provided pose.</para>
-		/// </summary>
-		/// <param name="lhs"></param>
 		public Pose GetTransformedBy(Transform lhs)
 		{
 			return new Pose
@@ -50,9 +39,6 @@ namespace UnityEngine
 			};
 		}
 
-		/// <summary>
-		///   <para>Returns the forward vector of the pose.</para>
-		/// </summary>
 		public Vector3 forward
 		{
 			get
@@ -61,9 +47,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the right vector of the pose.</para>
-		/// </summary>
 		public Vector3 right
 		{
 			get
@@ -72,9 +55,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the up vector of the pose.</para>
-		/// </summary>
 		public Vector3 up
 		{
 			get
@@ -83,9 +63,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Shorthand for pose which represents zero position, and an identity rotation.</para>
-		/// </summary>
 		public static Pose identity
 		{
 			get
@@ -94,14 +71,33 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The position component of the pose.</para>
-		/// </summary>
+		public override bool Equals(object obj)
+		{
+			return obj is Pose && this.Equals((Pose)obj);
+		}
+
+		public bool Equals(Pose other)
+		{
+			return this.position == other.position && this.rotation == other.rotation;
+		}
+
+		public override int GetHashCode()
+		{
+			return this.position.GetHashCode() ^ (this.rotation.GetHashCode() << 1);
+		}
+
+		public static bool operator ==(Pose a, Pose b)
+		{
+			return a.Equals(b);
+		}
+
+		public static bool operator !=(Pose a, Pose b)
+		{
+			return !(a == b);
+		}
+
 		public Vector3 position;
 
-		/// <summary>
-		///   <para>The rotation component of the pose.</para>
-		/// </summary>
 		public Quaternion rotation;
 
 		private static readonly Pose k_Identity = new Pose(Vector3.zero, Quaternion.identity);

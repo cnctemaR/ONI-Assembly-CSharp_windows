@@ -7,14 +7,6 @@ namespace ProcGen
 	[Serializable]
 	public class FeatureSettings
 	{
-		public FeatureSettings()
-		{
-			this.ElementChoiceGroups = new Dictionary<string, ElementChoiceGroup<WeightedSimHash>>();
-			this.borders = new List<int>();
-			this.tags = new List<string>();
-			this.internalMobs = new List<MobReference>();
-		}
-
 		[StringEnumConverter]
 		public Room.Shape shape { get; private set; }
 
@@ -31,6 +23,14 @@ namespace ProcGen
 		public List<string> tags { get; private set; }
 
 		public Dictionary<string, ElementChoiceGroup<WeightedSimHash>> ElementChoiceGroups { get; private set; }
+
+		public FeatureSettings()
+		{
+			this.ElementChoiceGroups = new Dictionary<string, ElementChoiceGroup<WeightedSimHash>>();
+			this.borders = new List<int>();
+			this.tags = new List<string>();
+			this.internalMobs = new List<MobReference>();
+		}
 
 		public bool HasGroup(string item)
 		{

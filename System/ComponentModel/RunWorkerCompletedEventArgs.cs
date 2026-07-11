@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class RunWorkerCompletedEventArgs : AsyncCompletedEventArgs
 	{
 		public RunWorkerCompletedEventArgs(object result, Exception error, bool cancelled)
@@ -25,7 +27,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return null;
+				return base.UserState;
 			}
 		}
 

@@ -22,7 +22,7 @@ public class NewGameSettingToggle : NewGameSettingWidget
 	public override void Refresh()
 	{
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(this.config);
-		this.Toggle.ChangeState((!this.config.IsOnLevel(currentQualitySetting.id)) ? 0 : 1);
+		this.Toggle.ChangeState(this.config.IsOnLevel(currentQualitySetting.id) ? 1 : 0);
 		this.ToggleToolTip.toolTip = currentQualitySetting.tooltip;
 	}
 

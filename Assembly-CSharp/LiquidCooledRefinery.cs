@@ -20,8 +20,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 		this.meter_metal.SetPositionPercent(1f);
 		this.smi = new LiquidCooledRefinery.StatesInstance(this);
 		this.smi.StartSM();
-		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
-		liquidConduitFlow.AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Default);
+		Game.Instance.liquidConduitFlow.AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Default);
 		Building component2 = base.GetComponent<Building>();
 		this.outputCell = component2.GetUtilityOutputCell();
 		this.workable.OnWorkTickActions = delegate(Worker worker, float dt)
@@ -39,17 +38,14 @@ public class LiquidCooledRefinery : ComplexFabricator
 
 	private void OnConduitUpdate(float dt)
 	{
-		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
-		bool flag = liquidConduitFlow.GetContents(this.outputCell).mass > 0f;
+		bool flag = Game.Instance.liquidConduitFlow.GetContents(this.outputCell).mass > 0f;
 		this.smi.sm.outputBlocked.Set(flag, this.smi);
 		this.operational.SetFlag(LiquidCooledRefinery.coolantOutputPipeEmpty, !flag);
 	}
 
 	public bool HasEnoughCoolant()
 	{
-		float num = this.inStorage.GetAmountAvailable(this.coolantTag);
-		num += this.buildStorage.GetAmountAvailable(this.coolantTag);
-		return num >= this.minCoolantMass;
+		return this.inStorage.GetAmountAvailable(this.coolantTag) + this.buildStorage.GetAmountAvailable(this.coolantTag) >= this.minCoolantMass;
 	}
 
 	private void OnStorageChange(object data)
@@ -65,8 +61,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 
 	protected override bool HasIngredients(ComplexRecipe recipe, Storage storage)
 	{
-		float amountAvailable = storage.GetAmountAvailable(this.coolantTag);
-		return amountAvailable >= this.minCoolantMass && base.HasIngredients(recipe, storage);
+		return storage.GetAmountAvailable(this.coolantTag) >= this.minCoolantMass && base.HasIngredients(recipe, storage);
 	}
 
 	protected override void TransferCurrentRecipeIngredientsForBuild()
@@ -124,14 +119,12 @@ public class LiquidCooledRefinery : ComplexFabricator
 	public override List<Descriptor> AdditionalEffectsForRecipe(ComplexRecipe recipe)
 	{
 		List<Descriptor> list = base.AdditionalEffectsForRecipe(recipe);
-		GameObject prefab = Assets.GetPrefab(recipe.results[0].material);
-		PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+		PrimaryElement component = Assets.GetPrefab(recipe.results[0].material).GetComponent<PrimaryElement>();
 		PrimaryElement primaryElement = this.inStorage.FindFirstWithMass(this.coolantTag);
 		string text = UI.BUILDINGEFFECTS.TOOLTIPS.REFINEMENT_ENERGY_HAS_COOLANT;
 		if (primaryElement == null)
 		{
-			GameObject prefab2 = Assets.GetPrefab(GameTags.Water);
-			primaryElement = prefab2.GetComponent<PrimaryElement>();
+			primaryElement = Assets.GetPrefab(GameTags.Water).GetComponent<PrimaryElement>();
 			text = UI.BUILDINGEFFECTS.TOOLTIPS.REFINEMENT_ENERGY_NO_COOLANT;
 		}
 		float num = -GameUtil.CalculateEnergyDeltaForElementChange(component.Element.specificHeatCapacity, recipe.results[0].amount, component.Element.highTemp, this.outputTemperature);

@@ -28,25 +28,8 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	{
 		if (base.smi.IsInsideState(base.smi.sm.closed) && !this.used)
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo;
-			if (this.chore != null)
-			{
-				string text = "action_empty_contents";
-				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
-				global::System.Action action = new global::System.Action(this.OnClickCancel);
-				string text3 = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
-				buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-			}
-			else
-			{
-				string text3 = "action_empty_contents";
-				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME;
-				global::System.Action action = new global::System.Action(this.OnClickOpen);
-				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP;
-				buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-			}
-			KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+			KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore != null) ? new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.OPENPOI.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF, true) : new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.OPENPOI.NAME, new global::System.Action(this.OnClickOpen), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.OPENPOI.TOOLTIP, true));
+			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 		}
 	}
 
@@ -101,7 +84,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	public Vector2I dropOffset = Vector2I.zero;
 
 	[Serialize]
-	private string contents = string.Empty;
+	private string contents = "";
 
 	private static readonly EventSystem.IntraObjectHandler<SetLocker> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<SetLocker>(delegate(SetLocker component, object data)
 	{

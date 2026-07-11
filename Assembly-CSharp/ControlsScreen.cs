@@ -6,7 +6,7 @@ public class ControlsScreen : KScreen
 	protected override void OnPrefabInit()
 	{
 		BindingEntry[] bindingEntries = GameInputMapping.GetBindingEntries();
-		string text = string.Empty;
+		string text = "";
 		foreach (BindingEntry bindingEntry in bindingEntries)
 		{
 			text += bindingEntry.mAction.ToString();

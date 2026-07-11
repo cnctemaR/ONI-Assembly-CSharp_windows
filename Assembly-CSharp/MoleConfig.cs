@@ -17,20 +17,17 @@ public class MoleConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -MoleTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
-		List<Diet.Info> list = BaseMoleConfig.SimpleOreDiet(new List<Tag>
+		Diet diet = new Diet(BaseMoleConfig.SimpleOreDiet(new List<Tag>
 		{
 			SimHashes.Regolith.CreateTag(),
 			SimHashes.Dirt.CreateTag(),
 			SimHashes.IronOre.CreateTag()
-		}, MoleConfig.CALORIES_PER_KG_OF_DIRT, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL);
-		Diet diet = new Diet(list.ToArray());
+		}, MoleConfig.CALORIES_PER_KG_OF_DIRT, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL).ToArray());
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
 		def.minPoopSizeInCalories = MoleConfig.MIN_POOP_SIZE_IN_CALORIES;
-		SolidConsumerMonitor.Def def2 = gameObject.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def2.diet = diet;
-		OvercrowdingMonitor.Def def3 = gameObject.AddOrGetDef<OvercrowdingMonitor.Def>();
-		def3.spaceRequiredPerCreature = 0;
+		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
+		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = 0;
 		gameObject.AddOrGet<LoopingSounds>();
 		return gameObject;
 	}
@@ -38,7 +35,6 @@ public class MoleConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = MoleConfig.CreateMole("Mole", global::STRINGS.CREATURES.SPECIES.MOLE.NAME, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "driller_kanim", false);
-		GameObject gameObject2 = gameObject;
 		string text = "MoleEgg";
 		string text2 = global::STRINGS.CREATURES.SPECIES.MOLE.EGG_NAME;
 		string text3 = global::STRINGS.CREATURES.SPECIES.MOLE.DESC;
@@ -48,7 +44,7 @@ public class MoleConfig : IEntityConfig
 		float num = 60.000004f;
 		float num2 = 20f;
 		int egg_SORT_ORDER = MoleConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -70,14 +66,10 @@ public class MoleConfig : IEntityConfig
 			{
 				component.SetCurrentNavType(NavType.Solid);
 				inst.transform.SetPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.FXFront));
-				KBatchedAnimController component2 = inst.GetComponent<KBatchedAnimController>();
-				component2.SetSceneLayer(Grid.SceneLayer.FXFront);
+				inst.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.FXFront);
+				return;
 			}
-			else
-			{
-				KBatchedAnimController component3 = inst.GetComponent<KBatchedAnimController>();
-				component3.SetSceneLayer(Grid.SceneLayer.Creatures);
-			}
+			inst.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 		}
 	}
 

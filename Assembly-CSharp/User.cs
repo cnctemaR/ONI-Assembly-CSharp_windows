@@ -4,14 +4,11 @@ public class User : KMonoBehaviour
 {
 	public void OnStateMachineStop(string reason, StateMachine.Status status)
 	{
-		bool flag = status == StateMachine.Status.Success;
-		if (flag)
+		if (status == StateMachine.Status.Success)
 		{
 			base.Trigger(58624316, null);
+			return;
 		}
-		else
-		{
-			base.Trigger(1572098533, null);
-		}
+		base.Trigger(1572098533, null);
 	}
 }

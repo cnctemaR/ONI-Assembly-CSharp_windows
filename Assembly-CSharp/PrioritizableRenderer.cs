@@ -4,6 +4,18 @@ using UnityEngine;
 
 public class PrioritizableRenderer
 {
+	public PrioritizeTool currentTool
+	{
+		get
+		{
+			return this.tool;
+		}
+		set
+		{
+			this.tool = value;
+		}
+	}
+
 	public PrioritizableRenderer()
 	{
 		this.layer = LayerMask.NameToLayer("UI");
@@ -15,18 +27,6 @@ public class PrioritizableRenderer
 		this.mesh = new Mesh();
 		this.mesh.name = "Prioritizables";
 		this.mesh.MarkDynamic();
-	}
-
-	public PrioritizeTool currentTool
-	{
-		get
-		{
-			return this.tool;
-		}
-		set
-		{
-			this.tool = value;
-		}
 	}
 
 	public void Cleanup()
@@ -105,7 +105,7 @@ public class PrioritizableRenderer
 							}
 							if (masterPriority.priority_class >= PriorityScreen.PriorityClass.topPriority)
 							{
-								num6 = num6;
+								num6 += 0f;
 							}
 							num6 += (float)masterPriority.priority_value;
 							float num7 = num5 * num6;

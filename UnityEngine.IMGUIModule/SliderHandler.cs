@@ -119,7 +119,7 @@ namespace UnityEngine
 		private float OnRepaint()
 		{
 			this.slider.Draw(this.position, GUIContent.none, this.id);
-			if (!this.IsEmptySlider())
+			if (!this.IsEmptySlider() && this.currentValue >= this.MinValue() && this.currentValue <= this.MaxValue())
 			{
 				this.thumb.Draw(this.ThumbRect(), GUIContent.none, this.id);
 			}

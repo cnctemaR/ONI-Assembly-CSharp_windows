@@ -6,17 +6,17 @@ namespace Delaunay
 {
 	public sealed class Triangle : Delaunay.Utils.IDisposable
 	{
-		public Triangle(Site a, Site b, Site c)
-		{
-			this._sites = new List<Site> { a, b, c };
-		}
-
 		public List<Site> sites
 		{
 			get
 			{
 				return this._sites;
 			}
+		}
+
+		public Triangle(Site a, Site b, Site c)
+		{
+			this._sites = new List<Site> { a, b, c };
 		}
 
 		public void Dispose()

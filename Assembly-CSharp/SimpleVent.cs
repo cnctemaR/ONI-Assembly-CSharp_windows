@@ -18,11 +18,9 @@ public class SimpleVent : KMonoBehaviour
 		if (this.operational.IsFunctional)
 		{
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, this);
+			return;
 		}
-		else
-		{
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, null, null);
-		}
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, null, null);
 	}
 
 	[MyCmpGet]

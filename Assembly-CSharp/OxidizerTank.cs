@@ -124,8 +124,9 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		if (ElementLoader.FindElementByHash(element).IsLiquid)
 		{
 			this.storage.AddLiquid(element, this.targetFillMass, ElementLoader.FindElementByHash(element).defaultValues.temperature, 0, 0, false, true);
+			return;
 		}
-		else if (ElementLoader.FindElementByHash(element).IsSolid)
+		if (ElementLoader.FindElementByHash(element).IsSolid)
 		{
 			GameObject gameObject = ElementLoader.FindElementByHash(element).substance.SpawnResource(base.gameObject.transform.GetPosition(), this.targetFillMass, 300f, byte.MaxValue, 0, false, false, false);
 			this.storage.Store(gameObject, false, false, true, false);
@@ -144,8 +145,7 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		OxidizerTank component = gameObject.GetComponent<OxidizerTank>();
+		OxidizerTank component = ((GameObject)data).GetComponent<OxidizerTank>();
 		if (component != null)
 		{
 			this.UserMaxCapacity = component.UserMaxCapacity;

@@ -6,11 +6,11 @@ public static class SoundUtil
 	public static float GetLiquidDepth(int cell)
 	{
 		float num = 0f;
-		num += Grid.Mass[cell] * ((!Grid.Element[cell].IsLiquid) ? 0f : 1f);
+		num += Grid.Mass[cell] * (Grid.Element[cell].IsLiquid ? 1f : 0f);
 		int num2 = Grid.CellBelow(cell);
 		if (Grid.IsValidCell(num2))
 		{
-			num += Grid.Mass[num2] * ((!Grid.Element[num2].IsLiquid) ? 0f : 1f);
+			num += Grid.Mass[num2] * (Grid.Element[num2].IsLiquid ? 1f : 0f);
 		}
 		return Mathf.Min(num / 1000f, 1f);
 	}

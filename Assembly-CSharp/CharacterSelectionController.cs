@@ -51,7 +51,7 @@ public class CharacterSelectionController : KModalScreen
 		}
 		else
 		{
-			this.numberOfCarePackageOptions = ((global::UnityEngine.Random.Range(0, 101) <= 70) ? 1 : 2);
+			this.numberOfCarePackageOptions = ((global::UnityEngine.Random.Range(0, 101) > 70) ? 2 : 1);
 			this.numberOfDuplicantOptions = 4 - this.numberOfCarePackageOptions;
 		}
 		for (int i = 0; i < this.numberOfDuplicantOptions; i++)

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IEventSystemHandler
+public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
 {
 	public MinionIdentity Identity
 	{
@@ -40,7 +40,7 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		this.identity = _identity;
 		if (this.portrait == null)
 		{
-			GameObject gameObject = ((!(this.crewPortraitParent != null)) ? base.gameObject : this.crewPortraitParent);
+			GameObject gameObject = ((this.crewPortraitParent != null) ? this.crewPortraitParent : base.gameObject);
 			this.portrait = Util.KInstantiateUI<CrewPortrait>(this.PortraitPrefab.gameObject, gameObject, false);
 			if (this.crewPortraitParent == null)
 			{
@@ -64,8 +64,7 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 
 	private string seniorityString()
 	{
-		Attributes attributes = this.identity.GetAttributes();
-		return attributes.GetProfessionString(true);
+		return this.identity.GetAttributes().GetProfessionString(true);
 	}
 
 	public void SelectCrewMember(bool focus)
@@ -73,11 +72,9 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		if (focus)
 		{
 			SelectTool.Instance.SelectAndFocus(this.identity.transform.GetPosition(), this.identity.GetComponent<KSelectable>(), new Vector3(8f, 0f, 0f));
+			return;
 		}
-		else
-		{
-			SelectTool.Instance.Select(this.identity.GetComponent<KSelectable>(), false);
-		}
+		SelectTool.Instance.Select(this.identity.GetComponent<KSelectable>(), false);
 	}
 
 	protected MinionIdentity identity;

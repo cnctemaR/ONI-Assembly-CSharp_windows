@@ -2,38 +2,24 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>An event sent when a contextual menu needs to be filled with menu item.</para>
-	/// </summary>
 	public class ContextualMenuPopulateEvent : MouseEventBase<ContextualMenuPopulateEvent>
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public ContextualMenuPopulateEvent()
 		{
 			this.Init();
 		}
 
-		/// <summary>
-		///   <para>The menu to populate.</para>
-		/// </summary>
-		public ContextualMenu menu { get; private set; }
+		public DropdownMenu menu { get; private set; }
 
-		/// <summary>
-		///   <para>Retrieves an event from the event pool. Use this method to retrieve a mouse event and initialize the event, instead of creating a new mouse event.</para>
-		/// </summary>
-		/// <param name="triggerEvent">The event that triggered the display of the contextual menu.</param>
-		/// <param name="menu">The menu to populate.</param>
-		/// <param name="target">The element that triggered the display of the contextual menu.</param>
-		/// <returns>
-		///   <para>The event.</para>
-		/// </returns>
-		public static ContextualMenuPopulateEvent GetPooled(EventBase triggerEvent, ContextualMenu menu, IEventHandler target)
+		public EventBase triggerEvent { get; private set; }
+
+		public static ContextualMenuPopulateEvent GetPooled(EventBase triggerEvent, DropdownMenu menu, IEventHandler target, ContextualMenuManager menuManager)
 		{
 			ContextualMenuPopulateEvent pooled = EventBase<ContextualMenuPopulateEvent>.GetPooled();
 			if (triggerEvent != null)
 			{
+				triggerEvent.Acquire();
+				pooled.triggerEvent = triggerEvent;
 				IMouseEvent mouseEvent = triggerEvent as IMouseEvent;
 				if (mouseEvent != null)
 				{
@@ -49,19 +35,34 @@ namespace UnityEngine.Experimental.UIElements
 				{
 					((IMouseEventInternal)pooled).hasUnderlyingPhysicalEvent = mouseEventInternal.hasUnderlyingPhysicalEvent;
 				}
-				pooled.target = target;
-				pooled.menu = menu;
 			}
+			pooled.target = target;
+			pooled.menu = menu;
+			pooled.m_ContextualMenuManager = menuManager;
 			return pooled;
 		}
 
-		/// <summary>
-		///   <para>Reset the event members to their initial value.</para>
-		/// </summary>
 		protected override void Init()
 		{
 			base.Init();
 			this.menu = null;
+			this.m_ContextualMenuManager = null;
+			if (this.triggerEvent != null)
+			{
+				this.triggerEvent.Dispose();
+				this.triggerEvent = null;
+			}
 		}
+
+		protected internal override void PostDispatch()
+		{
+			if (!base.isDefaultPrevented && this.m_ContextualMenuManager != null)
+			{
+				this.menu.PrepareForDisplay(this.triggerEvent);
+				this.m_ContextualMenuManager.DoDisplayMenu(this.menu, this.triggerEvent);
+			}
+		}
+
+		private ContextualMenuManager m_ContextualMenuManager;
 	}
 }

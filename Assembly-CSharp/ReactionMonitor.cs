@@ -94,20 +94,14 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			for (int j = 0; j < pooledList.Count; j++)
 			{
 				Reactable reactable2 = pooledList[j].obj as Reactable;
-				if (reactable2 != null && reactable2 != this.lastReactable)
+				if (reactable2 != null && reactable2 != this.lastReactable && (!this.lastReactTimes.ContainsKey(reactable2.id) || GameClock.Instance.GetTime() - this.lastReactTimes[reactable2.id] >= reactable2.minReactorTime) && reactable2.CanBegin(base.gameObject, transition))
 				{
-					if (!this.lastReactTimes.ContainsKey(reactable2.id) || GameClock.Instance.GetTime() - this.lastReactTimes[reactable2.id] >= reactable2.minReactorTime)
-					{
-						if (reactable2.CanBegin(base.gameObject, transition))
-						{
-							this.justReacted = true;
-							this.lastReactable = reactable2;
-							this.lastReactTimes[reactable2.id] = GameClock.Instance.GetTime();
-							base.sm.reactable.Set(reactable2, base.smi);
-							base.smi.GoTo(base.sm.reacting);
-							break;
-						}
-					}
+					this.justReacted = true;
+					this.lastReactable = reactable2;
+					this.lastReactTimes[reactable2.id] = GameClock.Instance.GetTime();
+					base.sm.reactable.Set(reactable2, base.smi);
+					base.smi.GoTo(base.sm.reacting);
+					break;
 				}
 			}
 			pooledList.Recycle();
@@ -144,7 +138,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 				if (cancel_target == reactable)
 				{
 					reactable.Cleanup();
-					break;
+					return;
 				}
 			}
 		}

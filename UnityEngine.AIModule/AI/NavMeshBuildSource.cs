@@ -5,16 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>The input to the NavMesh builder is a list of NavMesh build sources.</para>
-	/// </summary>
-	[UsedByNativeCode]
 	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
+	[UsedByNativeCode]
 	public struct NavMeshBuildSource
 	{
-		/// <summary>
-		///   <para>Describes the local to world transformation matrix of the build source. That is, position and orientation and scale of the shape.</para>
-		/// </summary>
 		public Matrix4x4 transform
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Describes the dimensions of the shape.</para>
-		/// </summary>
 		public Vector3 size
 		{
 			get
@@ -42,9 +33,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The type of the shape this source describes. See Also: NavMeshBuildSourceShape.</para>
-		/// </summary>
 		public NavMeshBuildSourceShape shape
 		{
 			get
@@ -57,9 +45,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Describes the area type of the NavMesh surface for this object.</para>
-		/// </summary>
 		public int area
 		{
 			get
@@ -72,9 +57,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Describes the object referenced for Mesh and Terrain types of input sources.</para>
-		/// </summary>
 		public Object sourceObject
 		{
 			get
@@ -87,9 +69,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Points to the owning component - if available, otherwise null.</para>
-		/// </summary>
 		public Component component
 		{
 			get

@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity;
 
 namespace System.Diagnostics
 {
@@ -15,6 +16,11 @@ namespace System.Diagnostics
 			{
 				return this.data;
 			}
+		}
+
+		internal DataReceivedEventArgs()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private string data;

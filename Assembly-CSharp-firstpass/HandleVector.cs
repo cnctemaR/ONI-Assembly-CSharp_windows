@@ -4,14 +4,6 @@ using System.Diagnostics;
 
 public class HandleVector<T>
 {
-	public HandleVector(int initial_size)
-	{
-		this.freeHandles = new Stack<HandleVector<T>.Handle>(initial_size);
-		this.items = new List<T>(initial_size);
-		this.versions = new List<byte>(initial_size);
-		this.Initialize(initial_size);
-	}
-
 	public List<T> Items
 	{
 		get
@@ -33,6 +25,14 @@ public class HandleVector<T>
 		this.items.Clear();
 		this.freeHandles.Clear();
 		this.versions.Clear();
+	}
+
+	public HandleVector(int initial_size)
+	{
+		this.freeHandles = new Stack<HandleVector<T>.Handle>(initial_size);
+		this.items = new List<T>(initial_size);
+		this.versions = new List<byte>(initial_size);
+		this.Initialize(initial_size);
 	}
 
 	private void Initialize(int size)

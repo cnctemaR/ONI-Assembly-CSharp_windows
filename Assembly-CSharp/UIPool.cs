@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class UIPool<T> where T : MonoBehaviour
 {
-	public UIPool(T prefab)
-	{
-		this.prefab = prefab;
-		this.freeElements = new List<T>();
-		this.activeElements = new List<T>();
-	}
-
 	public int ActiveElementsCount
 	{
 		get
@@ -33,6 +26,13 @@ public class UIPool<T> where T : MonoBehaviour
 		{
 			return this.ActiveElementsCount + this.FreeElementsCount;
 		}
+	}
+
+	public UIPool(T prefab)
+	{
+		this.prefab = prefab;
+		this.freeElements = new List<T>();
+		this.activeElements = new List<T>();
 	}
 
 	public T GetFreeElement(GameObject instantiateParent = null, bool forceActive = false)
@@ -63,8 +63,7 @@ public class UIPool<T> where T : MonoBehaviour
 	{
 		if (!this.activeElements.Contains(element))
 		{
-			string text = ((!this.freeElements.Contains(element)) ? "The element provided does not belong to this pool" : "The element provided is already inactive");
-			global::Debug.LogError(text);
+			global::Debug.LogError(this.freeElements.Contains(element) ? "The element provided is already inactive" : "The element provided does not belong to this pool");
 			return;
 		}
 		if (this.disabledElementParent != null)
@@ -82,11 +81,9 @@ public class UIPool<T> where T : MonoBehaviour
 		{
 			if (this.disabledElementParent != null)
 			{
-				T t = this.activeElements[0];
-				t.gameObject.transform.SetParent(this.disabledElementParent);
+				this.activeElements[0].gameObject.transform.SetParent(this.disabledElementParent);
 			}
-			T t2 = this.activeElements[0];
-			t2.gameObject.SetActive(false);
+			this.activeElements[0].gameObject.SetActive(false);
 			this.freeElements.Add(this.activeElements[0]);
 			this.activeElements.RemoveAt(0);
 		}

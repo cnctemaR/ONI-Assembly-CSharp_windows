@@ -2,13 +2,14 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Reflection.Emit
 {
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_EnumBuilder))]
 	[ComVisible(true)]
-	public sealed class EnumBuilder : Type, _EnumBuilder
+	public sealed class EnumBuilder : TypeInfo, _EnumBuilder
 	{
 		internal EnumBuilder(ModuleBuilder mb, string name, TypeAttributes visibility, Type underlyingType)
 		{
@@ -18,29 +19,19 @@ namespace System.Reflection.Emit
 			this.setup_enum_type(this._tb);
 		}
 
-		void _EnumBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EnumBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EnumBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EnumBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		internal TypeBuilder GetTypeBuilder()
 		{
 			return this._tb;
+		}
+
+		internal override Type InternalResolve()
+		{
+			return this._tb.InternalResolve();
+		}
+
+		internal override Type RuntimeResolve()
+		{
+			return this._tb.RuntimeResolve();
 		}
 
 		public override Assembly Assembly
@@ -158,6 +149,16 @@ namespace System.Reflection.Emit
 		public Type CreateType()
 		{
 			return this._tb.CreateType();
+		}
+
+		public TypeInfo CreateTypeInfo()
+		{
+			return this._tb.CreateTypeInfo();
+		}
+
+		public override Type GetEnumUnderlyingType()
+		{
+			return this._underlyingType;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -369,6 +370,52 @@ namespace System.Reflection.Emit
 		private Exception CreateNotSupportedException()
 		{
 			return new NotSupportedException("The invoked member is not supported in a dynamic module.");
+		}
+
+		void _EnumBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EnumBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EnumBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EnumBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal override bool IsUserType
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override bool IsConstructedGenericType
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override bool IsAssignableFrom(TypeInfo typeInfo)
+		{
+			return base.IsAssignableFrom(typeInfo);
+		}
+
+		internal EnumBuilder()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private TypeBuilder _tb;

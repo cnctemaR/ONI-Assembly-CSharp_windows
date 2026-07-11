@@ -20,8 +20,7 @@ namespace Delaunay
 			{
 				for (int i = 0; i < this._sites.Count; i++)
 				{
-					Site site = this._sites[i];
-					site.Dispose();
+					this._sites[i].Dispose();
 				}
 				this._sites.Clear();
 				this._sites = null;
@@ -51,7 +50,10 @@ namespace Delaunay
 			}
 			if (this._currentIndex < this._sites.Count)
 			{
-				return this._sites[this._currentIndex++];
+				List<Site> sites = this._sites;
+				int currentIndex = this._currentIndex;
+				this._currentIndex = currentIndex + 1;
+				return sites[currentIndex];
 			}
 			return null;
 		}

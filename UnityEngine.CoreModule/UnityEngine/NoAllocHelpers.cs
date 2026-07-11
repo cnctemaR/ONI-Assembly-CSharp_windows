@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Export/NoAllocHelpers.bindings.h")]
 	internal sealed class NoAllocHelpers
 	{
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_ResizeList(object list, int size);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Array ExtractArrayFromList(object list);
-
 		public static void ResizeList<T>(List<T> list, int size)
 		{
 			if (list == null)
@@ -55,5 +48,13 @@ namespace UnityEngine
 		{
 			return (T[])NoAllocHelpers.ExtractArrayFromList(list);
 		}
+
+		[FreeFunction("NoAllocHelpers_Bindings::Internal_ResizeList")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void Internal_ResizeList(object list, int size);
+
+		[FreeFunction("NoAllocHelpers_Bindings::ExtractArrayFromList")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern Array ExtractArrayFromList(object list);
 	}
 }

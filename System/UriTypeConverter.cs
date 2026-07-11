@@ -2,18 +2,17 @@
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.Reflection;
 
 namespace System
 {
-	public class UriTypeConverter : global::System.ComponentModel.TypeConverter
+	public class UriTypeConverter : TypeConverter
 	{
 		private bool CanConvert(Type type)
 		{
-			return type == typeof(string) || type == typeof(global::System.Uri) || type == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor);
+			return type == typeof(string) || type == typeof(Uri) || type == typeof(InstanceDescriptor);
 		}
 
-		public override bool CanConvertFrom(global::System.ComponentModel.ITypeDescriptorContext context, Type sourceType)
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			if (sourceType == null)
 			{
@@ -22,12 +21,12 @@ namespace System
 			return this.CanConvert(sourceType);
 		}
 
-		public override bool CanConvertTo(global::System.ComponentModel.ITypeDescriptorContext context, Type destinationType)
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType != null && this.CanConvert(destinationType);
+			return !(destinationType == null) && this.CanConvert(destinationType);
 		}
 
-		public override object ConvertFrom(global::System.ComponentModel.ITypeDescriptorContext context, CultureInfo culture, object value)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			if (value == null)
 			{
@@ -37,16 +36,16 @@ namespace System
 			{
 				throw new NotSupportedException(global::Locale.GetText("Cannot convert from value."));
 			}
-			if (value is global::System.Uri)
+			if (value is Uri)
 			{
 				return value;
 			}
 			string text = value as string;
 			if (text != null)
 			{
-				return new global::System.Uri(text, global::System.UriKind.RelativeOrAbsolute);
+				return new Uri(text, UriKind.RelativeOrAbsolute);
 			}
-			global::System.ComponentModel.Design.Serialization.InstanceDescriptor instanceDescriptor = value as global::System.ComponentModel.Design.Serialization.InstanceDescriptor;
+			InstanceDescriptor instanceDescriptor = value as InstanceDescriptor;
 			if (instanceDescriptor != null)
 			{
 				return instanceDescriptor.Invoke();
@@ -54,43 +53,42 @@ namespace System
 			return base.ConvertFrom(context, culture, value);
 		}
 
-		public override object ConvertTo(global::System.ComponentModel.ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
 			if (!this.CanConvertTo(context, destinationType))
 			{
 				throw new NotSupportedException(global::Locale.GetText("Cannot convert to destination type."));
 			}
-			global::System.Uri uri = value as global::System.Uri;
+			Uri uri = value as Uri;
 			if (uri != null)
 			{
 				if (destinationType == typeof(string))
 				{
 					return uri.ToString();
 				}
-				if (destinationType == typeof(global::System.Uri))
+				if (destinationType == typeof(Uri))
 				{
 					return uri;
 				}
-				if (destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor))
+				if (destinationType == typeof(InstanceDescriptor))
 				{
-					ConstructorInfo constructor = typeof(global::System.Uri).GetConstructor(new Type[]
+					return new InstanceDescriptor(typeof(Uri).GetConstructor(new Type[]
 					{
 						typeof(string),
-						typeof(global::System.UriKind)
-					});
-					return new global::System.ComponentModel.Design.Serialization.InstanceDescriptor(constructor, new object[]
+						typeof(UriKind)
+					}), new object[]
 					{
 						uri.ToString(),
-						(!uri.IsAbsoluteUri) ? global::System.UriKind.Relative : global::System.UriKind.Absolute
+						uri.IsAbsoluteUri ? UriKind.Absolute : UriKind.Relative
 					});
 				}
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override bool IsValid(global::System.ComponentModel.ITypeDescriptorContext context, object value)
+		public override bool IsValid(ITypeDescriptorContext context, object value)
 		{
-			return value != null && (value is string || value is global::System.Uri);
+			return value != null && (value is string || value is Uri);
 		}
 	}
 }

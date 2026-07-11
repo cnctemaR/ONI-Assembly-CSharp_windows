@@ -16,7 +16,7 @@ namespace System.Security.Principal
 			{
 				throw new ArgumentException(Locale.GetText("Empty"), "name");
 			}
-			this._value = name.ToUpper();
+			this._value = name;
 		}
 
 		public NTAccount(string domainName, string accountName)
@@ -31,12 +31,10 @@ namespace System.Security.Principal
 			}
 			if (domainName == null)
 			{
-				this._value = domainName.ToUpper();
+				this._value = accountName;
+				return;
 			}
-			else
-			{
-				this._value = domainName.ToUpper() + "\\" + domainName.ToUpper();
-			}
+			this._value = domainName + "\\" + accountName;
 		}
 
 		public override string Value
@@ -74,7 +72,16 @@ namespace System.Security.Principal
 			{
 				return this;
 			}
-			return null;
+			if (!(targetType == typeof(SecurityIdentifier)))
+			{
+				throw new ArgumentException("Unknown type", "targetType");
+			}
+			WellKnownAccount wellKnownAccount = WellKnownAccount.LookupByName(this.Value);
+			if (wellKnownAccount == null || wellKnownAccount.Sid == null)
+			{
+				throw new IdentityNotMappedException("Cannot map account name: " + this.Value);
+			}
+			return new SecurityIdentifier(wellKnownAccount.Sid);
 		}
 
 		public static bool operator ==(NTAccount left, NTAccount right)

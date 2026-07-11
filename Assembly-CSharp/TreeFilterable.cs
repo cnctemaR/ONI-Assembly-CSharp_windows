@@ -24,17 +24,14 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 			{
 				foreach (Tag tag2 in this.storage.storageFilters)
 				{
-					if (!(tag2 == category_tag))
+					if (!(tag2 == category_tag) && WorldInventory.Instance.IsDiscovered(tag2))
 					{
-						if (WorldInventory.Instance.IsDiscovered(tag2))
+						flag = true;
+						foreach (Tag tag3 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2))
 						{
-							flag = true;
-							foreach (Tag tag3 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2))
+							if (!this.acceptedTags.Contains(tag3))
 							{
-								if (!this.acceptedTags.Contains(tag3))
-								{
-									return;
-								}
+								return;
 							}
 						}
 					}
@@ -46,12 +43,9 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 			}
 			foreach (Tag tag4 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(category_tag))
 			{
-				if (!(tag4 == tag))
+				if (!(tag4 == tag) && !this.acceptedTags.Contains(tag4))
 				{
-					if (!this.acceptedTags.Contains(tag4))
-					{
-						return;
-					}
+					return;
 				}
 			}
 			this.AddTagToFilter(tag);
@@ -114,8 +108,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		TreeFilterable component = gameObject.GetComponent<TreeFilterable>();
+		TreeFilterable component = ((GameObject)data).GetComponent<TreeFilterable>();
 		if (component != null)
 		{
 			this.UpdateFilters(component.GetTags());

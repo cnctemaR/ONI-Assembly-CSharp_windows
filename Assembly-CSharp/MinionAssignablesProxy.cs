@@ -136,12 +136,11 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 				if (component != null)
 				{
 					this.SetTarget(component, instance.gameObject);
+					return;
 				}
-				else
-				{
-					global::Debug.LogWarningFormat("RestoreTargetFromInstanceID target ID {0} was found but it wasn't an IAssignableIdentity, destroying proxy object.", new object[] { this.target_instance_id });
-					Util.KDestroyGameObject(base.gameObject);
-				}
+				global::Debug.LogWarningFormat("RestoreTargetFromInstanceID target ID {0} was found but it wasn't an IAssignableIdentity, destroying proxy object.", new object[] { this.target_instance_id });
+				Util.KDestroyGameObject(base.gameObject);
+				return;
 			}
 			else
 			{
@@ -175,8 +174,7 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 	{
 		if (!this.target.IsNull())
 		{
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)this.target;
-			kmonoBehaviour.Trigger(-1585839766, data);
+			((KMonoBehaviour)this.target).Trigger(-1585839766, data);
 		}
 	}
 
@@ -194,14 +192,12 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 					if (minionIdentity)
 					{
 						minionIdentity.ValidateProxy();
+						return;
 					}
-					else
+					StoredMinionIdentity storedMinionIdentity = this.target as StoredMinionIdentity;
+					if (storedMinionIdentity)
 					{
-						StoredMinionIdentity storedMinionIdentity = this.target as StoredMinionIdentity;
-						if (storedMinionIdentity)
-						{
-							storedMinionIdentity.ValidateProxy();
-						}
+						storedMinionIdentity.ValidateProxy();
 					}
 				}
 			}

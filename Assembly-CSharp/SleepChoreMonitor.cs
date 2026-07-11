@@ -16,19 +16,17 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 		this.checkforbed.Enter("SetBed", delegate(SleepChoreMonitor.Instance smi)
 		{
 			smi.UpdateBed();
-			StaminaMonitor.Instance smi2 = smi.GetSMI<StaminaMonitor.Instance>();
-			if (smi2.NeedsToSleep())
+			if (smi.GetSMI<StaminaMonitor.Instance>().NeedsToSleep())
 			{
 				smi.GoTo(this.passingout);
+				return;
 			}
-			else if (this.bed.Get(smi) == null || !smi.IsBedReachable())
+			if (this.bed.Get(smi) == null || !smi.IsBedReachable())
 			{
 				smi.GoTo(this.sleeponfloor);
+				return;
 			}
-			else
-			{
-				smi.GoTo(this.bedassigned);
-			}
+			smi.GoTo(this.bedassigned);
 		});
 		this.passingout.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreatePassingOutChore), this.satisfied, this.satisfied);
 		this.sleeponfloor.EventTransition(GameHashes.AssignablesChanged, this.checkforbed, null).EventTransition(GameHashes.AssignableReachabilityChanged, this.checkforbed, (SleepChoreMonitor.Instance smi) => smi.IsBedReachable()).ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied, this.satisfied);
@@ -89,8 +87,7 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 					assignable2 = soleOwner.AutoAssignSlot(Db.Get().AssignableSlots.Bed);
 					if (assignable2 != null)
 					{
-						AssignableReachabilitySensor sensor = base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>();
-						sensor.Update();
+						base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>().Update();
 					}
 				}
 			}

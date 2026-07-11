@@ -7,45 +7,45 @@ namespace System.Data.Odbc
 {
 	public sealed class OdbcFactory : DbProviderFactory
 	{
-		internal OdbcFactory()
+		private OdbcFactory()
 		{
 		}
 
 		public override DbCommand CreateCommand()
 		{
-			throw null;
+			return new OdbcCommand();
 		}
 
 		public override DbCommandBuilder CreateCommandBuilder()
 		{
-			throw null;
+			return new OdbcCommandBuilder();
 		}
 
 		public override DbConnection CreateConnection()
 		{
-			throw null;
+			return new OdbcConnection();
 		}
 
 		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			throw null;
+			return new OdbcConnectionStringBuilder();
 		}
 
 		public override DbDataAdapter CreateDataAdapter()
 		{
-			throw null;
+			return new OdbcDataAdapter();
 		}
 
 		public override DbParameter CreateParameter()
 		{
-			throw null;
+			return new OdbcParameter();
 		}
 
 		public override CodeAccessPermission CreatePermission(PermissionState state)
 		{
-			throw null;
+			return new OdbcPermission(state);
 		}
 
-		public static readonly OdbcFactory Instance;
+		public static readonly OdbcFactory Instance = new OdbcFactory();
 	}
 }

@@ -10,11 +10,9 @@ public class ShadowRect : MonoBehaviour
 		{
 			this.RectShadow.name = "Shadow_" + this.RectMain.name;
 			this.MatchRect();
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("Shadowrect is missing rectshadow: " + base.gameObject.name);
-		}
+		global::Debug.LogWarning("Shadowrect is missing rectshadow: " + base.gameObject.name);
 	}
 
 	private void Update()

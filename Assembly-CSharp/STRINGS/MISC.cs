@@ -993,7 +993,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on effective temperature management";
 
-				public static LocString MESSAGEBODY = string.Empty;
+				public static LocString MESSAGEBODY = "The temperature of an environment can have positive or negative effects on the wellbeing of my Duplicants, and the plants and critters in my colony. Selecting " + UI.FormatAsHotkey("[F3]") + " will open the Temperature Overlay where I can check for hot and cold spots.\n\nI can use a Utility like an Ice-E Fan or a Space Heater to make an area colder or hotter. However, I will have limited success changing the temperature of a room unless I build the area with insulating tiles to prevent cold or warm air from escaping.";
 			}
 
 			public class PLUMBING
@@ -1016,16 +1016,16 @@ namespace STRINGS
 
 			public class NOMESSAGES
 			{
-				public static LocString NAME = string.Empty;
+				public static LocString NAME = "";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class NOALERTS
 			{
-				public static LocString NAME = string.Empty;
+				public static LocString NAME = "";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class NEWTRAIT
@@ -1371,28 +1371,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "The colony is entering a cloud of gas";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class GASCLOUDPEAK
 			{
 				public static LocString NAME = "The gas cloud is at its densest point";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class GASCLOUDDEPARTING
 			{
 				public static LocString NAME = "The gas cloud is receding";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class GASCLOUDGONE
 			{
 				public static LocString NAME = "The colony is once again in open space";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class AVAILABLE
@@ -1486,14 +1486,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "These Duplicants had their genetic makeup modified:";
 
-				public static LocString SUFFIX = string.Concat(new string[]
-				{
-					" has developed ",
-					UI.PRE_KEYWORD,
-					"{0}",
-					UI.PST_KEYWORD,
-					string.Empty
-				});
+				public static LocString SUFFIX = (" has developed " + UI.PRE_KEYWORD + "{0}" + UI.PST_KEYWORD) ?? "";
 			}
 
 			public class HEALINGTRAITGAIN
@@ -1509,14 +1502,7 @@ namespace STRINGS
 					" as a result:"
 				});
 
-				public static LocString SUFFIX = string.Concat(new string[]
-				{
-					" has developed ",
-					UI.PRE_KEYWORD,
-					"{0}",
-					UI.PST_KEYWORD,
-					string.Empty
-				});
+				public static LocString SUFFIX = (" has developed " + UI.PRE_KEYWORD + "{0}" + UI.PST_KEYWORD) ?? "";
 			}
 
 			public class COLONYLOST

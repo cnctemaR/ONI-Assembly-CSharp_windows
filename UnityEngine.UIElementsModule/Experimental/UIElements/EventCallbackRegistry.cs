@@ -77,7 +77,7 @@ namespace UnityEngine.Experimental.UIElements
 			return flag;
 		}
 
-		private bool UnregisterCallback(long eventTypeId, Delegate callback, Capture useCapture)
+		private bool UnregisterCallback(long eventTypeId, Delegate callback, TrickleDown useTrickleDown)
 		{
 			bool flag;
 			if (callback == null)
@@ -87,44 +87,111 @@ namespace UnityEngine.Experimental.UIElements
 			else
 			{
 				EventCallbackList callbackListForWriting = this.GetCallbackListForWriting();
-				CallbackPhase callbackPhase = ((useCapture != Capture.Capture) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.CaptureAndTarget);
+				CallbackPhase callbackPhase = ((useTrickleDown != TrickleDown.TrickleDown) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.TrickleDownAndTarget);
 				flag = callbackListForWriting.Remove(eventTypeId, callback, callbackPhase);
 			}
 			return flag;
 		}
 
-		public void RegisterCallback<TEventType>(EventCallback<TEventType> callback, Capture useCapture = Capture.NoCapture) where TEventType : EventBase<TEventType>, new()
+		[Obsolete("Use TrickleDown instead of Capture.")]
+		public void RegisterCallback<TEventType>(EventCallback<TEventType> callback, Capture useCapture) where TEventType : EventBase<TEventType>, new()
 		{
-			long num = EventBase<TEventType>.TypeId();
-			CallbackPhase callbackPhase = ((useCapture != Capture.Capture) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.CaptureAndTarget);
-			if (this.ShouldRegisterCallback(num, callback, callbackPhase))
+			this.RegisterCallback<TEventType>(callback, (TrickleDown)useCapture);
+		}
+
+		public void RegisterCallback<TEventType>(EventCallback<TEventType> callback, TrickleDown useTrickleDown = TrickleDown.NoTrickleDown) where TEventType : EventBase<TEventType>, new()
+		{
+			if (callback == null)
 			{
-				EventCallbackList callbackListForWriting = this.GetCallbackListForWriting();
-				callbackListForWriting.Add(new EventCallbackFunctor<TEventType>(callback, callbackPhase));
+				throw new ArgumentException("callback parameter is null");
+			}
+			long num = EventBase<TEventType>.TypeId();
+			CallbackPhase callbackPhase = ((useTrickleDown != TrickleDown.TrickleDown) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.TrickleDownAndTarget);
+			EventCallbackList eventCallbackList = this.GetCallbackListForReading();
+			if (eventCallbackList == null || !eventCallbackList.Contains(num, callback, callbackPhase))
+			{
+				eventCallbackList = this.GetCallbackListForWriting();
+				eventCallbackList.Add(new EventCallbackFunctor<TEventType>(callback, callbackPhase));
 			}
 		}
 
-		public void RegisterCallback<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, TCallbackArgs userArgs, Capture useCapture = Capture.NoCapture) where TEventType : EventBase<TEventType>, new()
+		[Obsolete("Use TrickleDown instead of Capture.")]
+		public void RegisterCallback<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, TCallbackArgs userArgs, Capture useCapture) where TEventType : EventBase<TEventType>, new()
 		{
-			long num = EventBase<TEventType>.TypeId();
-			CallbackPhase callbackPhase = ((useCapture != Capture.Capture) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.CaptureAndTarget);
-			if (this.ShouldRegisterCallback(num, callback, callbackPhase))
+			this.RegisterCallback<TEventType, TCallbackArgs>(callback, userArgs, (TrickleDown)useCapture);
+		}
+
+		public void RegisterCallback<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, TCallbackArgs userArgs, TrickleDown useTrickleDown = TrickleDown.NoTrickleDown) where TEventType : EventBase<TEventType>, new()
+		{
+			if (callback == null)
 			{
-				EventCallbackList callbackListForWriting = this.GetCallbackListForWriting();
-				callbackListForWriting.Add(new EventCallbackFunctor<TEventType, TCallbackArgs>(callback, userArgs, callbackPhase));
+				throw new ArgumentException("callback parameter is null");
 			}
+			long num = EventBase<TEventType>.TypeId();
+			CallbackPhase callbackPhase = ((useTrickleDown != TrickleDown.TrickleDown) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.TrickleDownAndTarget);
+			EventCallbackList eventCallbackList = this.GetCallbackListForReading();
+			if (eventCallbackList != null)
+			{
+				EventCallbackFunctor<TEventType, TCallbackArgs> eventCallbackFunctor = eventCallbackList.Find(num, callback, callbackPhase) as EventCallbackFunctor<TEventType, TCallbackArgs>;
+				if (eventCallbackFunctor != null)
+				{
+					eventCallbackFunctor.userArgs = userArgs;
+					return;
+				}
+			}
+			eventCallbackList = this.GetCallbackListForWriting();
+			eventCallbackList.Add(new EventCallbackFunctor<TEventType, TCallbackArgs>(callback, userArgs, callbackPhase));
 		}
 
-		public bool UnregisterCallback<TEventType>(EventCallback<TEventType> callback, Capture useCapture = Capture.NoCapture) where TEventType : EventBase<TEventType>, new()
+		[Obsolete("Use TrickleDown instead of Capture.")]
+		public bool UnregisterCallback<TEventType>(EventCallback<TEventType> callback, Capture useCapture) where TEventType : EventBase<TEventType>, new()
 		{
-			long num = EventBase<TEventType>.TypeId();
-			return this.UnregisterCallback(num, callback, useCapture);
+			return this.UnregisterCallback<TEventType>(callback, (TrickleDown)useCapture);
 		}
 
-		public bool UnregisterCallback<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, Capture useCapture = Capture.NoCapture) where TEventType : EventBase<TEventType>, new()
+		public bool UnregisterCallback<TEventType>(EventCallback<TEventType> callback, TrickleDown useTrickleDown = TrickleDown.NoTrickleDown) where TEventType : EventBase<TEventType>, new()
 		{
 			long num = EventBase<TEventType>.TypeId();
-			return this.UnregisterCallback(num, callback, useCapture);
+			return this.UnregisterCallback(num, callback, useTrickleDown);
+		}
+
+		[Obsolete("Use TrickleDown instead of Capture.")]
+		public bool UnregisterCallback<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, Capture useCapture) where TEventType : EventBase<TEventType>, new()
+		{
+			return this.UnregisterCallback<TEventType, TCallbackArgs>(callback, (TrickleDown)useCapture);
+		}
+
+		public bool UnregisterCallback<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, TrickleDown useTrickleDown = TrickleDown.NoTrickleDown) where TEventType : EventBase<TEventType>, new()
+		{
+			long num = EventBase<TEventType>.TypeId();
+			return this.UnregisterCallback(num, callback, useTrickleDown);
+		}
+
+		internal bool TryGetUserArgs<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, TrickleDown useTrickleDown, out TCallbackArgs userArgs) where TEventType : EventBase<TEventType>, new()
+		{
+			userArgs = default(TCallbackArgs);
+			bool flag;
+			if (callback == null)
+			{
+				flag = false;
+			}
+			else
+			{
+				EventCallbackList callbackListForReading = this.GetCallbackListForReading();
+				long num = EventBase<TEventType>.TypeId();
+				CallbackPhase callbackPhase = ((useTrickleDown != TrickleDown.TrickleDown) ? CallbackPhase.TargetAndBubbleUp : CallbackPhase.TrickleDownAndTarget);
+				EventCallbackFunctor<TEventType, TCallbackArgs> eventCallbackFunctor = callbackListForReading.Find(num, callback, callbackPhase) as EventCallbackFunctor<TEventType, TCallbackArgs>;
+				if (eventCallbackFunctor == null)
+				{
+					flag = false;
+				}
+				else
+				{
+					userArgs = eventCallbackFunctor.userArgs;
+					flag = true;
+				}
+			}
+			return flag;
 		}
 
 		public void InvokeCallbacks(EventBase evt)
@@ -154,14 +221,20 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		[Obsolete("Use HasTrickleDownHandlers instead of HasCaptureHandlers.")]
 		public bool HasCaptureHandlers()
 		{
-			return this.m_Callbacks != null && this.m_Callbacks.capturingCallbackCount > 0;
+			return this.HasTrickleDownHandlers();
+		}
+
+		public bool HasTrickleDownHandlers()
+		{
+			return this.m_Callbacks != null && this.m_Callbacks.trickleDownCallbackCount > 0;
 		}
 
 		public bool HasBubbleHandlers()
 		{
-			return this.m_Callbacks != null && this.m_Callbacks.bubblingCallbackCount > 0;
+			return this.m_Callbacks != null && this.m_Callbacks.bubbleUpCallbackCount > 0;
 		}
 
 		private static readonly EventCallbackListPool s_ListPool = new EventCallbackListPool();

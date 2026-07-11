@@ -6,8 +6,7 @@ public class HarvestToolHoverTextCard : HoverTextConfiguration
 {
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		ToolParameterMenu toolParameterMenu = ToolMenu.Instance.toolParameterMenu;
-		string lastEnabledFilter = toolParameterMenu.GetLastEnabledFilter();
+		string lastEnabledFilter = ToolMenu.Instance.toolParameterMenu.GetLastEnabledFilter();
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
 		hoverTextDrawer.BeginShadowBar(false);
@@ -23,8 +22,7 @@ public class HarvestToolHoverTextCard : HoverTextConfiguration
 
 	protected override void ConfigureTitle(HoverTextScreen screen)
 	{
-		ToolParameterMenu toolParameterMenu = ToolMenu.Instance.toolParameterMenu;
-		string lastEnabledFilter = toolParameterMenu.GetLastEnabledFilter();
+		string lastEnabledFilter = ToolMenu.Instance.toolParameterMenu.GetLastEnabledFilter();
 		if (string.IsNullOrEmpty(this.ToolName) || lastEnabledFilter == "ALL")
 		{
 			this.ToolName = Strings.Get(this.ToolNameStringKey).String.ToUpper();

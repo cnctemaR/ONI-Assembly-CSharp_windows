@@ -31,7 +31,7 @@ namespace Database
 		public override string GetProgress(bool complete)
 		{
 			float num = (float)GameClock.Instance.GetCycle() + GameClock.Instance.GetCurrentCycleAsPercentage();
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.FRACTIONAL_CYCLE, (!complete) ? num : this.fractionalCycleNumber, this.fractionalCycleNumber);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.FRACTIONAL_CYCLE, complete ? this.fractionalCycleNumber : num, this.fractionalCycleNumber);
 		}
 
 		private float fractionalCycleNumber;

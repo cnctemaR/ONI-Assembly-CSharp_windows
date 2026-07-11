@@ -7,12 +7,17 @@ public class PropLightConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropLight", global::STRINGS.BUILDINGS.PREFABS.PROPLIGHT.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPLIGHT.DESC, 50f, Assets.GetAnim("setpiece_light_kanim"), "off", Grid.SceneLayer.Building, 1, 1, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		string text = "PropLight";
+		string text2 = global::STRINGS.BUILDINGS.PREFABS.PROPLIGHT.NAME;
+		string text3 = global::STRINGS.BUILDINGS.PREFABS.PROPLIGHT.DESC;
+		float num = 50f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("setpiece_light_kanim"), "off", Grid.SceneLayer.Building, 1, 1, tier, tier2, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Steel);
 		component.Temperature = 294.15f;
-		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
-		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		return gameObject;
 	}
 

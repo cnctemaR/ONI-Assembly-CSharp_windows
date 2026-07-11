@@ -41,8 +41,7 @@ public class MonumentTopConfig : IBuildingConfig
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
-		MonumentPart monumentPart = go.AddOrGet<MonumentPart>();
-		monumentPart.part = MonumentPart.Part.Top;
+		go.AddOrGet<MonumentPart>().part = MonumentPart.Part.Top;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -60,25 +59,25 @@ public class MonumentTopConfig : IBuildingConfig
 		{
 			MonumentPart monumentPart = game_object.AddOrGet<MonumentPart>();
 			monumentPart.part = MonumentPart.Part.Top;
-			monumentPart.selectableStatesAndSymbols = new List<Tuple<string, string>>();
+			monumentPart.selectableStatesAndSymbols = new List<global::Tuple<string, string>>();
 			monumentPart.stateUISymbol = "upper";
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_a", "leira"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_b", "mae"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_c", "puft"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_d", "nikola"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_e", "burt"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_f", "rowan"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_g", "nisbet"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_h", "joshua"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_i", "ren"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_j", "hatch"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_k", "drecko"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_l", "driller"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_m", "gassymoo"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_n", "glom"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_o", "lightbug"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_p", "slickster"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_q", "pacu"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_a", "leira"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_b", "mae"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_c", "puft"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_d", "nikola"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_e", "burt"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_f", "rowan"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_g", "nisbet"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_h", "joshua"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_i", "ren"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_j", "hatch"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_k", "drecko"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_l", "driller"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_m", "gassymoo"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_n", "glom"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_o", "lightbug"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_p", "slickster"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_q", "pacu"));
 		};
 	}
 

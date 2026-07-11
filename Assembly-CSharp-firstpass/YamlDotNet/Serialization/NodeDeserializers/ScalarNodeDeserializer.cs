@@ -138,26 +138,20 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					}
 					i++;
 				}
-				switch (num2)
+				if (num2 <= 8)
 				{
-				case 8:
-					break;
-				default:
-					if (num2 != 2)
+					if (num2 == 2 || num2 == 8)
 					{
-						if (num2 != 16)
-						{
-							goto IL_0129;
-						}
-						num = ulong.Parse(stringBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
-						goto IL_0129;
+						num = Convert.ToUInt64(stringBuilder.ToString(), num2);
 					}
-					break;
-				case 10:
-					goto IL_0129;
 				}
-				num = Convert.ToUInt64(stringBuilder.ToString(), num2);
-				IL_0129:;
+				else if (num2 != 10)
+				{
+					if (num2 == 16)
+					{
+						num = ulong.Parse(stringBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
+					}
+				}
 			}
 			else
 			{
@@ -166,17 +160,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				for (int j = 0; j < array.Length; j++)
 				{
 					num *= 60UL;
-					num += ulong.Parse(array[j].Replace("_", string.Empty));
+					num += ulong.Parse(array[j].Replace("_", ""));
 				}
 			}
-			checked
+			if (flag)
 			{
-				if (flag)
-				{
-					return ScalarNodeDeserializer.CastInteger((long)(unchecked((ulong)0) - (ulong)((long)num)), typeCode);
-				}
-				return ScalarNodeDeserializer.CastInteger(num, typeCode);
+				return ScalarNodeDeserializer.CastInteger(checked(0L - (long)num), typeCode);
 			}
+			return ScalarNodeDeserializer.CastInteger(num, typeCode);
 		}
 
 		private static object CastInteger(long number, TypeCode typeCode)

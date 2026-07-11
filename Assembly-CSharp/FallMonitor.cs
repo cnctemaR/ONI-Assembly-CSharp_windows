@@ -102,18 +102,16 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			int num = Grid.PosToCell(this.navigator);
 			foreach (NavGrid.Transition transition in this.navigator.NavGrid.transitions)
 			{
-				if (transition.isEscape)
+				if (transition.isEscape && this.navigator.CurrentNavType == transition.start)
 				{
-					if (this.navigator.CurrentNavType == transition.start)
+					int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable);
+					if (Grid.InvalidCell != num2)
 					{
-						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable);
-						if (Grid.InvalidCell != num2)
-						{
-							Vector2I vector2I = Grid.CellToXY(num);
-							this.flipRecoverEmote = Grid.CellToXY(num2).x < vector2I.x;
-							this.navigator.BeginTransition(transition);
-							break;
-						}
+						Vector2I vector2I = Grid.CellToXY(num);
+						Vector2I vector2I2 = Grid.CellToXY(num2);
+						this.flipRecoverEmote = vector2I2.x < vector2I.x;
+						this.navigator.BeginTransition(transition);
+						return;
 					}
 				}
 			}
@@ -121,11 +119,9 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public void RecoverEmote()
 		{
-			int num = global::UnityEngine.Random.Range(0, 9);
-			if (num == 8)
+			if (global::UnityEngine.Random.Range(0, 9) == 8)
 			{
-				ChoreProvider component = base.master.GetComponent<ChoreProvider>();
-				new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_floor_missing_kanim", new HashedString[] { "react" }, KAnim.PlayMode.Once, this.flipRecoverEmote);
+				new EmoteChore(base.master.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_floor_missing_kanim", new HashedString[] { "react" }, KAnim.PlayMode.Once, this.flipRecoverEmote);
 			}
 		}
 
@@ -144,16 +140,13 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			int num = Grid.PosToCell(this.navigator);
 			foreach (NavGrid.Transition transition in this.navigator.NavGrid.transitions)
 			{
-				if (transition.isEscape)
+				if (transition.isEscape && this.navigator.CurrentNavType == transition.start)
 				{
-					if (this.navigator.CurrentNavType == transition.start)
+					int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable);
+					if (Grid.InvalidCell != num2)
 					{
-						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable);
-						if (Grid.InvalidCell != num2)
-						{
-							base.smi.GoTo(base.smi.sm.recoverinitialfall);
-							break;
-						}
+						base.smi.GoTo(base.smi.sm.recoverinitialfall);
+						return;
 					}
 				}
 			}
@@ -190,17 +183,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				return false;
 			}
 			int num = Grid.PosToCell(base.master.transform.GetPosition());
-			if (!Grid.IsValidCell(num))
-			{
-				return false;
-			}
-			int num2 = Grid.CellBelow(num);
-			if (!Grid.IsValidCell(num2))
-			{
-				return false;
-			}
-			bool flag = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
-			return !flag;
+			return Grid.IsValidCell(num) && Grid.IsValidCell(Grid.CellBelow(num)) && !this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
 		}
 
 		public void UpdateFalling()
@@ -211,8 +194,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			{
 				int num = Grid.PosToCell(base.transform.GetPosition());
 				int num2 = Grid.CellAbove(num);
-				bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
-				flag3 = flag3 && (!base.gameObject.HasTag(GameTags.Incapacitated) || (this.navigator.CurrentNavType != NavType.Ladder && this.navigator.CurrentNavType != NavType.Pole));
+				bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType) && (!base.gameObject.HasTag(GameTags.Incapacitated) || (this.navigator.CurrentNavType != NavType.Ladder && this.navigator.CurrentNavType != NavType.Pole));
 				flag2 = !flag3 && ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]));
 				flag = !flag3 && !flag2;
 			}
@@ -253,17 +235,14 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				{
 					int num3 = Grid.OffsetCell(num, cellOffset2);
 					int num4 = Grid.CellAbove(num3);
-					if (Grid.IsValidCell(num4))
+					if (Grid.IsValidCell(num4) && !Grid.Solid[num3] && !Grid.Solid[num4])
 					{
-						if (!Grid.Solid[num3] && !Grid.Solid[num4])
-						{
-							base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
-							base.transform.GetComponent<Navigator>().Stop(false);
-							base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-							this.UpdateFalling();
-							this.GoTo(base.sm.standing);
-							return;
-						}
+						base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
+						base.transform.GetComponent<Navigator>().Stop(false);
+						base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+						this.UpdateFalling();
+						this.GoTo(base.sm.standing);
+						return;
 					}
 				}
 			}

@@ -35,15 +35,12 @@ public class SolarPanelConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
-		Tinkerable.MakePowerTinkerable(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Repairable repairable = go.AddOrGet<Repairable>();
-		repairable.expectedRepairTime = 52.5f;
-		SolarPanel solarPanel = go.AddOrGet<SolarPanel>();
-		solarPanel.powerDistributionOrder = 9;
+		go.AddOrGet<Repairable>().expectedRepairTime = 52.5f;
+		go.AddOrGet<SolarPanel>().powerDistributionOrder = 9;
 		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 

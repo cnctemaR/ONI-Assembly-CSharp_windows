@@ -7,8 +7,8 @@ namespace UnityEngine.Advertisements
 	[NativeHeader("Modules/UnityConnect/UnityAds/UnityAdsSettings.h")]
 	internal static class UnityAdsSettings
 	{
-		[ThreadAndSerializationSafe]
 		[StaticAccessor("GetUnityAdsSettings()", StaticAccessorType.Dot)]
+		[ThreadAndSerializationSafe]
 		public static extern bool enabled
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

@@ -48,8 +48,8 @@ public class NoiseNodeCanvas : NodeCanvas
 
 	public override void AdditionalSaveMethods(string sceneCanvasName, NodeCanvas.CompleteLoadCallback onComplete)
 	{
-		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-		if (GUILayout.Button(new GUIContent("Load Yaml", "Loads the Canvas from a Yaml Save File"), new GUILayoutOption[0]))
+		GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+		if (GUILayout.Button(new GUIContent("Load Yaml", "Loads the Canvas from a Yaml Save File"), Array.Empty<GUILayoutOption>()))
 		{
 			this.Load(sceneCanvasName, onComplete);
 		}
@@ -69,15 +69,24 @@ public class NoiseNodeCanvas : NodeCanvas
 		{
 			this.ntf = YamlIO.LoadFile<NoiseTreeFiles>(NoiseTreeFiles.GetPath(), null, null);
 		}
-		if (this.ntf != null && GUILayout.Button(new GUIContent("Load Tree", "Loads the Canvas from Trees list"), new GUILayoutOption[0]))
+		if (this.ntf != null && GUILayout.Button(new GUIContent("Load Tree", "Loads the Canvas from Trees list"), Array.Empty<GUILayoutOption>()))
 		{
 			GenericMenu genericMenu = new GenericMenu();
+			PopupMenu.MenuFunctionData <>9__0;
 			foreach (string text in this.ntf.tree_files)
 			{
-				genericMenu.AddItem(new GUIContent(text), false, delegate(object fileName)
+				GenericMenu genericMenu2 = genericMenu;
+				GUIContent guicontent = new GUIContent(text);
+				bool flag = false;
+				PopupMenu.MenuFunctionData menuFunctionData;
+				if ((menuFunctionData = <>9__0) == null)
 				{
-					this.Load((string)fileName, onComplete);
-				}, text);
+					menuFunctionData = (<>9__0 = delegate(object fileName)
+					{
+						this.Load((string)fileName, onComplete);
+					});
+				}
+				genericMenu2.AddItem(guicontent, flag, menuFunctionData, text);
 			}
 			genericMenu.Show(this.lastRectPos.position, 40f);
 		}
@@ -94,8 +103,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		{
 			foreach (Node node in this.nodes)
 			{
-				Type type = node.GetType();
-				if (type == typeof(TerminalNodeEditor))
+				if (node.GetType() == typeof(TerminalNodeEditor))
 				{
 					if (this.terminator == null)
 					{
@@ -113,8 +121,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			}
 		}
 		Vector2 vector = this.terminator.rect.min + new Vector2(0f, -290f);
-		DisplayNodeEditor displayNodeEditor = (DisplayNodeEditor)Node.Create("displayNodeEditor", vector);
-		displayNodeEditor.Inputs[0].ApplyConnection(this.terminator.Outputs[0]);
+		((DisplayNodeEditor)Node.Create("displayNodeEditor", vector)).Inputs[0].ApplyConnection(this.terminator.Outputs[0]);
 	}
 
 	private Link GetLink(Node node)
@@ -124,56 +131,56 @@ public class NoiseNodeCanvas : NodeCanvas
 		if (type == typeof(PrimitiveNodeEditor))
 		{
 			PrimitiveNodeEditor primitiveNodeEditor = node as PrimitiveNodeEditor;
-			global::Debug.Assert(primitiveNodeEditor.target.name != null && primitiveNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(primitiveNodeEditor.target.name != null && primitiveNodeEditor.target.name != "", "Invalid target name");
 			link.name = primitiveNodeEditor.target.name;
 			link.type = Link.Type.Primitive;
 		}
 		else if (type == typeof(FilterNodeEditor))
 		{
 			FilterNodeEditor filterNodeEditor = node as FilterNodeEditor;
-			global::Debug.Assert(filterNodeEditor.target.name != null && filterNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(filterNodeEditor.target.name != null && filterNodeEditor.target.name != "", "Invalid target name");
 			link.name = filterNodeEditor.target.name;
 			link.type = Link.Type.Filter;
 		}
 		else if (type == typeof(TransformerNodeEditor))
 		{
 			TransformerNodeEditor transformerNodeEditor = node as TransformerNodeEditor;
-			global::Debug.Assert(transformerNodeEditor.target.name != null && transformerNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(transformerNodeEditor.target.name != null && transformerNodeEditor.target.name != "", "Invalid target name");
 			link.name = transformerNodeEditor.target.name;
 			link.type = Link.Type.Transformer;
 		}
 		else if (type == typeof(SelectorModuleNodeEditor))
 		{
 			SelectorModuleNodeEditor selectorModuleNodeEditor = node as SelectorModuleNodeEditor;
-			global::Debug.Assert(selectorModuleNodeEditor.target.name != null && selectorModuleNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(selectorModuleNodeEditor.target.name != null && selectorModuleNodeEditor.target.name != "", "Invalid target name");
 			link.name = selectorModuleNodeEditor.target.name;
 			link.type = Link.Type.Selector;
 		}
 		else if (type == typeof(ModifierModuleNodeEditor))
 		{
 			ModifierModuleNodeEditor modifierModuleNodeEditor = node as ModifierModuleNodeEditor;
-			global::Debug.Assert(modifierModuleNodeEditor.target.name != null && modifierModuleNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(modifierModuleNodeEditor.target.name != null && modifierModuleNodeEditor.target.name != "", "Invalid target name");
 			link.name = modifierModuleNodeEditor.target.name;
 			link.type = Link.Type.Modifier;
 		}
 		else if (type == typeof(CombinerModuleNodeEditor))
 		{
 			CombinerModuleNodeEditor combinerModuleNodeEditor = node as CombinerModuleNodeEditor;
-			global::Debug.Assert(combinerModuleNodeEditor.target.name != null && combinerModuleNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(combinerModuleNodeEditor.target.name != null && combinerModuleNodeEditor.target.name != "", "Invalid target name");
 			link.name = combinerModuleNodeEditor.target.name;
 			link.type = Link.Type.Combiner;
 		}
 		else if (type == typeof(FloatPointsNodeEditor))
 		{
 			FloatPointsNodeEditor floatPointsNodeEditor = node as FloatPointsNodeEditor;
-			global::Debug.Assert(floatPointsNodeEditor.target.name != null && floatPointsNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(floatPointsNodeEditor.target.name != null && floatPointsNodeEditor.target.name != "", "Invalid target name");
 			link.name = floatPointsNodeEditor.target.name;
 			link.type = Link.Type.FloatPoints;
 		}
 		else if (type == typeof(ControlPointsNodeEditor))
 		{
 			ControlPointsNodeEditor controlPointsNodeEditor = node as ControlPointsNodeEditor;
-			global::Debug.Assert(controlPointsNodeEditor.target.name != null && controlPointsNodeEditor.target.name != string.Empty, "Invalid target name");
+			global::Debug.Assert(controlPointsNodeEditor.target.name != null && controlPointsNodeEditor.target.name != "", "Invalid target name");
 			link.name = controlPointsNodeEditor.target.name;
 			link.type = Link.Type.ControlPoints;
 		}
@@ -195,7 +202,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			if (type == typeof(PrimitiveNodeEditor))
 			{
 				PrimitiveNodeEditor primitiveNodeEditor = node as PrimitiveNodeEditor;
-				if (primitiveNodeEditor.target.name == null || primitiveNodeEditor.target.name == string.Empty || tree.primitives.ContainsKey(primitiveNodeEditor.target.name))
+				if (primitiveNodeEditor.target.name == null || primitiveNodeEditor.target.name == "" || tree.primitives.ContainsKey(primitiveNodeEditor.target.name))
 				{
 					primitiveNodeEditor.target.name = "Primitive" + tree.primitives.Count;
 				}
@@ -204,7 +211,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(FilterNodeEditor))
 			{
 				FilterNodeEditor filterNodeEditor = node as FilterNodeEditor;
-				if (filterNodeEditor.target.name == null || filterNodeEditor.target.name == string.Empty || tree.filters.ContainsKey(filterNodeEditor.target.name))
+				if (filterNodeEditor.target.name == null || filterNodeEditor.target.name == "" || tree.filters.ContainsKey(filterNodeEditor.target.name))
 				{
 					filterNodeEditor.target.name = "Filter" + tree.filters.Count;
 				}
@@ -213,7 +220,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(TransformerNodeEditor))
 			{
 				TransformerNodeEditor transformerNodeEditor = node as TransformerNodeEditor;
-				if (transformerNodeEditor.target.name == null || transformerNodeEditor.target.name == string.Empty || tree.transformers.ContainsKey(transformerNodeEditor.target.name))
+				if (transformerNodeEditor.target.name == null || transformerNodeEditor.target.name == "" || tree.transformers.ContainsKey(transformerNodeEditor.target.name))
 				{
 					transformerNodeEditor.target.name = "Transformer" + tree.transformers.Count;
 				}
@@ -222,7 +229,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(SelectorModuleNodeEditor))
 			{
 				SelectorModuleNodeEditor selectorModuleNodeEditor = node as SelectorModuleNodeEditor;
-				if (selectorModuleNodeEditor.target.name == null || selectorModuleNodeEditor.target.name == string.Empty || tree.selectors.ContainsKey(selectorModuleNodeEditor.target.name))
+				if (selectorModuleNodeEditor.target.name == null || selectorModuleNodeEditor.target.name == "" || tree.selectors.ContainsKey(selectorModuleNodeEditor.target.name))
 				{
 					selectorModuleNodeEditor.target.name = "Selector" + tree.selectors.Count;
 				}
@@ -231,7 +238,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(ModifierModuleNodeEditor))
 			{
 				ModifierModuleNodeEditor modifierModuleNodeEditor = node as ModifierModuleNodeEditor;
-				if (modifierModuleNodeEditor.target.name == null || modifierModuleNodeEditor.target.name == string.Empty || tree.modifiers.ContainsKey(modifierModuleNodeEditor.target.name))
+				if (modifierModuleNodeEditor.target.name == null || modifierModuleNodeEditor.target.name == "" || tree.modifiers.ContainsKey(modifierModuleNodeEditor.target.name))
 				{
 					modifierModuleNodeEditor.target.name = "Modifier" + tree.modifiers.Count;
 				}
@@ -240,7 +247,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(CombinerModuleNodeEditor))
 			{
 				CombinerModuleNodeEditor combinerModuleNodeEditor = node as CombinerModuleNodeEditor;
-				if (combinerModuleNodeEditor.target.name == null || combinerModuleNodeEditor.target.name == string.Empty || tree.combiners.ContainsKey(combinerModuleNodeEditor.target.name))
+				if (combinerModuleNodeEditor.target.name == null || combinerModuleNodeEditor.target.name == "" || tree.combiners.ContainsKey(combinerModuleNodeEditor.target.name))
 				{
 					combinerModuleNodeEditor.target.name = "Combiner" + tree.combiners.Count;
 				}
@@ -249,7 +256,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(FloatPointsNodeEditor))
 			{
 				FloatPointsNodeEditor floatPointsNodeEditor = node as FloatPointsNodeEditor;
-				if (floatPointsNodeEditor.target.name == null || floatPointsNodeEditor.target.name == string.Empty || tree.floats.ContainsKey(floatPointsNodeEditor.target.name))
+				if (floatPointsNodeEditor.target.name == null || floatPointsNodeEditor.target.name == "" || tree.floats.ContainsKey(floatPointsNodeEditor.target.name))
 				{
 					floatPointsNodeEditor.target.name = "Terrace Control" + tree.combiners.Count;
 				}
@@ -258,7 +265,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			else if (type == typeof(ControlPointsNodeEditor))
 			{
 				ControlPointsNodeEditor controlPointsNodeEditor = node as ControlPointsNodeEditor;
-				if (controlPointsNodeEditor.target.name == null || controlPointsNodeEditor.target.name == string.Empty || tree.controlpoints.ContainsKey(controlPointsNodeEditor.target.name))
+				if (controlPointsNodeEditor.target.name == null || controlPointsNodeEditor.target.name == "" || tree.controlpoints.ContainsKey(controlPointsNodeEditor.target.name))
 				{
 					controlPointsNodeEditor.target.name = "Curve Control" + tree.combiners.Count;
 				}
@@ -377,11 +384,10 @@ public class NoiseNodeCanvas : NodeCanvas
 	private NodeCanvas Load(string name, NodeCanvas.CompleteLoadCallback onComplete)
 	{
 		NodeCanvas nodeCanvas = null;
-		string treeFilePath = NoiseTreeFiles.GetTreeFilePath(name);
-		Tree tree = YamlIO.LoadFile<Tree>(treeFilePath, null, null);
+		Tree tree = YamlIO.LoadFile<Tree>(NoiseTreeFiles.GetTreeFilePath(name), null, null);
 		if (tree != null)
 		{
-			if (tree.settings.name == null || tree.settings.name == string.Empty)
+			if (tree.settings.name == null || tree.settings.name == "")
 			{
 				tree.settings.name = name;
 			}
@@ -476,10 +482,9 @@ public class NoiseNodeCanvas : NodeCanvas
 
 	private static NoiseNodeCanvas PopulateNoiseNodeEditor(Tree tree)
 	{
-		NoiseNodeCanvas noiseNodeCanvas = NoiseNodeCanvas.CreateInstance();
-		NodeEditor.curNodeCanvas = noiseNodeCanvas;
-		noiseNodeCanvas.Populate(tree);
-		return noiseNodeCanvas;
+		NodeCanvas nodeCanvas = (NodeEditor.curNodeCanvas = NoiseNodeCanvas.CreateInstance());
+		nodeCanvas.Populate(tree);
+		return nodeCanvas;
 	}
 
 	private void Populate(Tree tree)
@@ -549,8 +554,7 @@ public class NoiseNodeCanvas : NodeCanvas
 			controlPointsNodeEditor.target = keyValuePair8.Value;
 			this.ctrlpointsLookup.Add(keyValuePair8.Key, controlPointsNodeEditor);
 		}
-		int i = 0;
-		while (i < tree.links.Count)
+		for (int i = 0; i < tree.links.Count; i++)
 		{
 			NodeLink nodeLink = tree.links[i];
 			Node nodeFromLink = this.GetNodeFromLink(nodeLink.target);
@@ -581,7 +585,6 @@ public class NoiseNodeCanvas : NodeCanvas
 				node2 = this.GetNodeFromLink(nodeLink.source1);
 				break;
 			}
-			IL_05DA:
 			if (node != null)
 			{
 				if (nodeFromLink.Inputs.Count == 0)
@@ -620,9 +623,6 @@ public class NoiseNodeCanvas : NodeCanvas
 			{
 				nodeFromLink.Inputs[3].ApplyConnection(node4.Outputs[0]);
 			}
-			i++;
-			continue;
-			goto IL_05DA;
 		}
 		this.UpdateTerminator();
 	}

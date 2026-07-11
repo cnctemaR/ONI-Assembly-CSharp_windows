@@ -8,12 +8,6 @@ using UnityEngine;
 [Serializable]
 public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 {
-	public Vector2I(int a, int b)
-	{
-		this.x = a;
-		this.y = b;
-	}
-
 	public int X
 	{
 		get
@@ -36,6 +30,12 @@ public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 		{
 			this.y = value;
 		}
+	}
+
+	public Vector2I(int a, int b)
+	{
+		this.x = a;
+		this.y = b;
 	}
 
 	public static Vector2I operator +(Vector2I u, Vector2I v)
@@ -90,12 +90,12 @@ public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 
 	public static Vector2I Min(Vector2I v, Vector2I w)
 	{
-		return new Vector2I((v.x >= w.x) ? w.x : v.x, (v.y >= w.y) ? w.y : v.y);
+		return new Vector2I((v.x < w.x) ? v.x : w.x, (v.y < w.y) ? v.y : w.y);
 	}
 
 	public static Vector2I Max(Vector2I v, Vector2I w)
 	{
-		return new Vector2I((v.x <= w.x) ? w.x : v.x, (v.y <= w.y) ? w.y : v.y);
+		return new Vector2I((v.x > w.x) ? v.x : w.x, (v.y > w.y) ? v.y : w.y);
 	}
 
 	public static bool operator <(Vector2I u, Vector2I v)

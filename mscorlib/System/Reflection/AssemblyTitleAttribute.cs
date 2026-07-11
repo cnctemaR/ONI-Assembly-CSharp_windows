@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyTitleAttribute(string title)
 		{
-			this.name = title;
+			this.m_title = title;
 		}
 
 		public string Title
 		{
 			get
 			{
-				return this.name;
+				return this.m_title;
 			}
 		}
 
-		private string name;
+		private string m_title;
 	}
 }

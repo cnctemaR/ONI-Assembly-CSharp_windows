@@ -5,14 +5,6 @@ namespace Satsuma
 {
 	public sealed class CheapestLinkTsp<TNode> : ITsp<TNode>
 	{
-		public CheapestLinkTsp(IList<TNode> nodes, Func<TNode, TNode, double> cost)
-		{
-			this.Nodes = nodes;
-			this.Cost = cost;
-			this.tour = new List<TNode>();
-			this.Run();
-		}
-
 		public IList<TNode> Nodes { get; private set; }
 
 		public Func<TNode, TNode, double> Cost { get; private set; }
@@ -27,6 +19,14 @@ namespace Satsuma
 
 		public double TourCost { get; private set; }
 
+		public CheapestLinkTsp(IList<TNode> nodes, Func<TNode, TNode, double> cost)
+		{
+			this.Nodes = nodes;
+			this.Cost = cost;
+			this.tour = new List<TNode>();
+			this.Run();
+		}
+
 		private void Run()
 		{
 			CompleteGraph graph = new CompleteGraph(this.Nodes.Count, Directedness.Undirected);
@@ -38,9 +38,9 @@ namespace Satsuma
 			foreach (Arc arc4 in kruskal.Forest)
 			{
 				Node node = graph.U(arc4);
-				((!dictionary.ContainsKey(node)) ? dictionary : dictionary2)[node] = arc4;
+				(dictionary.ContainsKey(node) ? dictionary2 : dictionary)[node] = arc4;
 				Node node2 = graph.V(arc4);
-				((!dictionary.ContainsKey(node2)) ? dictionary : dictionary2)[node2] = arc4;
+				(dictionary.ContainsKey(node2) ? dictionary2 : dictionary)[node2] = arc4;
 			}
 			foreach (Node node3 in graph.Nodes())
 			{
@@ -56,7 +56,7 @@ namespace Satsuma
 							break;
 						}
 						Arc arc3 = dictionary[node4];
-						arc2 = ((!(arc3 != arc2)) ? dictionary2[node4] : arc3);
+						arc2 = ((arc3 != arc2) ? arc3 : dictionary2[node4]);
 						node4 = graph.Other(arc2, node4);
 					}
 					this.tour.Add(this.Nodes[graph.GetNodeIndex(node3)]);

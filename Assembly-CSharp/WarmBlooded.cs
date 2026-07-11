@@ -106,7 +106,7 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 			this.root.EventTransition(GameHashes.Died, this.dead, null).Enter(delegate(WarmBlooded.StatesInstance smi)
 			{
 				PrimaryElement component = smi.master.GetComponent<PrimaryElement>();
-				float num = SimUtil.EnergyFlowToTemperatureDelta(0.083680004f, component.Element.specificHeatCapacity, component.Mass);
+				float num = SimUtil.EnergyFlowToTemperatureDelta(0.08368001f, component.Element.specificHeatCapacity, component.Mass);
 				smi.baseTemperatureModification.SetValue(num);
 				CreatureSimTemperatureTransfer component2 = smi.master.GetComponent<CreatureSimTemperatureTransfer>();
 				component2.NonSimTemperatureModifiers.Add(smi.baseTemperatureModification);
@@ -117,7 +117,7 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 			this.alive.cold.regulating.Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold(), UpdateRate.SIM_200ms).Update("ColdRegulating", delegate(WarmBlooded.StatesInstance smi, float dt)
 			{
 				PrimaryElement component3 = smi.master.GetComponent<PrimaryElement>();
-				float num2 = SimUtil.EnergyFlowToTemperatureDelta(0.083680004f, component3.Element.specificHeatCapacity, component3.Mass);
+				float num2 = SimUtil.EnergyFlowToTemperatureDelta(0.08368001f, component3.Element.specificHeatCapacity, component3.Mass);
 				float num3 = SimUtil.EnergyFlowToTemperatureDelta(0.5578667f, component3.Element.specificHeatCapacity, component3.Mass);
 				float num4 = 310.15f - smi.BodyTemperature;
 				float num5 = 1f;

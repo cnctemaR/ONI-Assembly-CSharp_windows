@@ -34,22 +34,20 @@ namespace Klei.AI.DiseaseGrowthRules
 		{
 			float num = this.minCountPerKG * kg;
 			float num2 = this.maxCountPerKG * kg;
-			float num4;
+			float num3;
 			if (num <= (float)disease_count && (float)disease_count <= num2)
 			{
-				float num3 = Disease.HalfLifeToGrowthRate(this.populationHalfLife, dt);
-				num4 = (num3 - 1f) * (float)disease_count;
+				num3 = (Disease.HalfLifeToGrowthRate(this.populationHalfLife, dt) - 1f) * (float)disease_count;
 			}
 			else if ((float)disease_count < num)
 			{
-				num4 = -this.underPopulationDeathRate * dt;
+				num3 = -this.underPopulationDeathRate * dt;
 			}
 			else
 			{
-				float num5 = Disease.HalfLifeToGrowthRate(this.overPopulationHalfLife, dt);
-				num4 = (num5 - 1f) * (float)disease_count;
+				num3 = (Disease.HalfLifeToGrowthRate(this.overPopulationHalfLife, dt) - 1f) * (float)disease_count;
 			}
-			return num4;
+			return num3;
 		}
 
 		public float underPopulationDeathRate;

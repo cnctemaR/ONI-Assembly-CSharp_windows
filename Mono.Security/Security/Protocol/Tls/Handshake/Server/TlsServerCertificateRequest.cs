@@ -1,5 +1,4 @@
 ﻿using System;
-using Mono.Security.X509;
 
 namespace Mono.Security.Protocol.Tls.Handshake.Server
 {
@@ -24,22 +23,7 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 			{
 				this.WriteByte((byte)serverContext.ServerSettings.CertificateTypes[i]);
 			}
-			if (serverContext.ServerSettings.DistinguisedNames.Length > 0)
-			{
-				TlsStream tlsStream = new TlsStream();
-				foreach (string text in serverContext.ServerSettings.DistinguisedNames)
-				{
-					byte[] bytes = X501.FromString(text).GetBytes();
-					tlsStream.Write((short)bytes.Length);
-					tlsStream.Write(bytes);
-				}
-				base.Write((short)tlsStream.Length);
-				base.Write(tlsStream.ToArray());
-			}
-			else
-			{
-				base.Write(0);
-			}
+			base.Write(0);
 		}
 	}
 }

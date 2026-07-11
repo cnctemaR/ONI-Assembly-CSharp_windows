@@ -4,21 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 {
 	public class RotatePoint : TransformerModule, IModule3D, IModule
 	{
-		public RotatePoint()
-		{
-		}
-
-		public RotatePoint(IModule source)
-		{
-			this._sourceModule = source;
-		}
-
-		public RotatePoint(IModule source, float xAngle, float yAngle, float zAngle)
-		{
-			this._sourceModule = source;
-			this.SetAngles(xAngle, yAngle, zAngle);
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -65,6 +50,21 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 			{
 				this.SetAngles(this._xAngle, this._yAngle, value);
 			}
+		}
+
+		public RotatePoint()
+		{
+		}
+
+		public RotatePoint(IModule source)
+		{
+			this._sourceModule = source;
+		}
+
+		public RotatePoint(IModule source, float xAngle, float yAngle, float zAngle)
+		{
+			this._sourceModule = source;
+			this.SetAngles(xAngle, yAngle, zAngle);
 		}
 
 		public void SetAngles(float xAngle, float yAngle, float zAngle)

@@ -38,17 +38,26 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				array = new StylePropertyID[styleRule.properties.Length];
 				for (int i = 0; i < array.Length; i++)
 				{
-					array[i] = StyleSheetCache.GetPropertyID(styleRule.properties[i].name);
+					array[i] = StyleSheetCache.GetPropertyID(sheet, styleRule, i);
 				}
 				StyleSheetCache.s_RulePropertyIDsCache.Add(sheetHandleKey, array);
 			}
 			return array;
 		}
 
-		private static StylePropertyID GetPropertyID(string name)
+		private static string MapDeprecatedPropertyName(string name, string styleSheetName, int line)
 		{
+			string text;
+			StyleSheetCache.s_DeprecatedNames.TryGetValue(name, out text);
+			return text ?? name;
+		}
+
+		private static StylePropertyID GetPropertyID(StyleSheet sheet, StyleRule rule, int index)
+		{
+			string text = rule.properties[index].name;
+			text = StyleSheetCache.MapDeprecatedPropertyName(text, sheet.name, rule.line);
 			StylePropertyID stylePropertyID;
-			if (!StyleSheetCache.s_NameToIDCache.TryGetValue(name, out stylePropertyID))
+			if (!StyleSheetCache.s_NameToIDCache.TryGetValue(text, out stylePropertyID))
 			{
 				stylePropertyID = StylePropertyID.Custom;
 			}
@@ -112,19 +121,19 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.Overflow
 			},
 			{
-				"position-left",
+				"left",
 				StylePropertyID.PositionLeft
 			},
 			{
-				"position-top",
+				"top",
 				StylePropertyID.PositionTop
 			},
 			{
-				"position-right",
+				"right",
 				StylePropertyID.PositionRight
 			},
 			{
-				"position-bottom",
+				"bottom",
 				StylePropertyID.PositionBottom
 			},
 			{
@@ -144,22 +153,6 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.MarginBottom
 			},
 			{
-				"border-left",
-				StylePropertyID.BorderLeft
-			},
-			{
-				"border-top",
-				StylePropertyID.BorderTop
-			},
-			{
-				"border-right",
-				StylePropertyID.BorderRight
-			},
-			{
-				"border-bottom",
-				StylePropertyID.BorderBottom
-			},
-			{
 				"padding-left",
 				StylePropertyID.PaddingLeft
 			},
@@ -176,7 +169,11 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.PaddingBottom
 			},
 			{
-				"position-type",
+				"position",
+				StylePropertyID.Position
+			},
+			{
+				"-unity-position",
 				StylePropertyID.PositionType
 			},
 			{
@@ -184,19 +181,19 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.AlignSelf
 			},
 			{
-				"text-alignment",
-				StylePropertyID.TextAlignment
+				"-unity-text-align",
+				StylePropertyID.UnityTextAlign
 			},
 			{
-				"font-style",
-				StylePropertyID.FontStyle
+				"-unity-font-style",
+				StylePropertyID.FontStyleAndWeight
 			},
 			{
-				"text-clipping",
+				"-unity-clipping",
 				StylePropertyID.TextClipping
 			},
 			{
-				"font",
+				"-unity-font",
 				StylePropertyID.Font
 			},
 			{
@@ -204,12 +201,12 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.FontSize
 			},
 			{
-				"word-wrap",
+				"-unity-word-wrap",
 				StylePropertyID.WordWrap
 			},
 			{
-				"text-color",
-				StylePropertyID.TextColor
+				"color",
+				StylePropertyID.Color
 			},
 			{
 				"flex-direction",
@@ -228,8 +225,8 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.BackgroundImage
 			},
 			{
-				"background-size",
-				StylePropertyID.BackgroundSize
+				"-unity-background-scale-mode",
+				StylePropertyID.BackgroundScaleMode
 			},
 			{
 				"align-items",
@@ -280,19 +277,19 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				StylePropertyID.BorderBottomLeftRadius
 			},
 			{
-				"slice-left",
+				"-unity-slice-left",
 				StylePropertyID.SliceLeft
 			},
 			{
-				"slice-top",
+				"-unity-slice-top",
 				StylePropertyID.SliceTop
 			},
 			{
-				"slice-right",
+				"-unity-slice-right",
 				StylePropertyID.SliceRight
 			},
 			{
-				"slice-bottom",
+				"-unity-slice-bottom",
 				StylePropertyID.SliceBottom
 			},
 			{
@@ -307,6 +304,30 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				"visibility",
 				StylePropertyID.Visibility
 			}
+		};
+
+		private static Dictionary<string, string> s_DeprecatedNames = new Dictionary<string, string>
+		{
+			{ "position-left", "left" },
+			{ "position-top", "top" },
+			{ "position-right", "right" },
+			{ "position-bottom", "bottom" },
+			{ "text-color", "color" },
+			{ "slice-left", "-unity-slice-left" },
+			{ "slice-top", "-unity-slice-top" },
+			{ "slice-right", "-unity-slice-right" },
+			{ "slice-bottom", "-unity-slice-bottom" },
+			{ "text-alignment", "-unity-text-align" },
+			{ "word-wrap", "-unity-word-wrap" },
+			{ "font", "-unity-font" },
+			{ "background-size", "-unity-background-scale-mode" },
+			{ "font-style", "-unity-font-style" },
+			{ "position-type", "-unity-position" },
+			{ "text-clipping", "-unity-clipping" },
+			{ "border-left", "border-left-width" },
+			{ "border-top", "border-top-width" },
+			{ "border-right", "border-right-width" },
+			{ "border-bottom", "border-bottom-width" }
 		};
 
 		private struct SheetHandleKey

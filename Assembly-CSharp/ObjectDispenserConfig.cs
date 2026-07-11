@@ -44,8 +44,7 @@ public class ObjectDispenserConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		ObjectDispenser objectDispenser = go.AddOrGet<ObjectDispenser>();
-		objectDispenser.dropOffset = new CellOffset(1, 0);
+		go.AddOrGet<ObjectDispenser>().dropOffset = new CellOffset(1, 0);
 		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
@@ -54,8 +53,7 @@ public class ObjectDispenserConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.StorageLocker;
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.StorageLocker;
 		GeneratedBuildings.RegisterLogicPorts(go, ObjectDispenserConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicOperationalController>());
 	}

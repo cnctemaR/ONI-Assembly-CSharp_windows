@@ -36,12 +36,12 @@ public class UniformGrid<T> where T : IUniformGridObject
 
 	public void Add(T item)
 	{
-		Vector2 vector = item.PosMin();
-		Vector2 vector2 = item.PosMax();
-		int num = (int)Math.Max(vector.x / (float)this.cellWidth, 0f);
-		int num2 = (int)Math.Max(vector2.y / (float)this.cellHeight, 0f);
-		int num3 = Math.Min(this.numXCells - 1, (int)Math.Ceiling((double)(vector2.x / (float)this.cellWidth)));
-		int num4 = Math.Min(this.numYCells - 1, (int)Math.Ceiling((double)(vector2.y / (float)this.cellHeight)));
+		ref Vector2 ptr = item.PosMin();
+		Vector2 vector = item.PosMax();
+		int num = (int)Math.Max(ptr.x / (float)this.cellWidth, 0f);
+		int num2 = (int)Math.Max(vector.y / (float)this.cellHeight, 0f);
+		int num3 = Math.Min(this.numXCells - 1, (int)Math.Ceiling((double)(vector.x / (float)this.cellWidth)));
+		int num4 = Math.Min(this.numYCells - 1, (int)Math.Ceiling((double)(vector.y / (float)this.cellHeight)));
 		for (int i = num2; i <= num4; i++)
 		{
 			for (int j = num; j <= num3; j++)
@@ -61,25 +61,21 @@ public class UniformGrid<T> where T : IUniformGridObject
 
 	public void Remove(T item)
 	{
-		Vector2 vector = item.PosMin();
-		Vector2 vector2 = item.PosMax();
-		int num = (int)Math.Max(vector.x / (float)this.cellWidth, 0f);
-		int num2 = (int)Math.Max(vector2.y / (float)this.cellHeight, 0f);
-		int num3 = Math.Min(this.numXCells - 1, (int)Math.Ceiling((double)(vector2.x / (float)this.cellWidth)));
-		int num4 = Math.Min(this.numYCells - 1, (int)Math.Ceiling((double)(vector2.y / (float)this.cellHeight)));
+		ref Vector2 ptr = item.PosMin();
+		Vector2 vector = item.PosMax();
+		int num = (int)Math.Max(ptr.x / (float)this.cellWidth, 0f);
+		int num2 = (int)Math.Max(vector.y / (float)this.cellHeight, 0f);
+		int num3 = Math.Min(this.numXCells - 1, (int)Math.Ceiling((double)(vector.x / (float)this.cellWidth)));
+		int num4 = Math.Min(this.numYCells - 1, (int)Math.Ceiling((double)(vector.y / (float)this.cellHeight)));
 		for (int i = num2; i <= num4; i++)
 		{
 			for (int j = num; j <= num3; j++)
 			{
 				List<T> list = this.cells[i * this.numXCells + j];
-				if (list != null)
+				if (list != null && list.IndexOf(item) != -1)
 				{
-					int num5 = list.IndexOf(item);
-					if (num5 != -1)
-					{
-						list.Remove(item);
-						this.items.Remove(item);
-					}
+					list.Remove(item);
+					this.items.Remove(item);
 				}
 			}
 		}

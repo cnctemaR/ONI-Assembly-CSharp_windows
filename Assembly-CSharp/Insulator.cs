@@ -6,16 +6,12 @@ public class Insulator : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		num = Grid.OffsetCell(num, this.offset);
-		SimMessages.SetInsulation(num, this.building.Def.ThermalConductivity);
+		SimMessages.SetInsulation(Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), this.offset), this.building.Def.ThermalConductivity);
 	}
 
 	protected override void OnCleanUp()
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		num = Grid.OffsetCell(num, this.offset);
-		SimMessages.SetInsulation(num, 1f);
+		SimMessages.SetInsulation(Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), this.offset), 1f);
 	}
 
 	[MyCmpReq]

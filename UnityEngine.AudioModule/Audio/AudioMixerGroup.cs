@@ -5,9 +5,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Audio
 {
-	/// <summary>
-	///   <para>Object representing a group in the mixer.</para>
-	/// </summary>
 	public class AudioMixerGroup : Object, ISubAssetNotDuplicatable
 	{
 		internal AudioMixerGroup()

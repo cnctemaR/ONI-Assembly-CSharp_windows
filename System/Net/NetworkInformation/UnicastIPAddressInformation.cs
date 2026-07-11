@@ -12,10 +12,18 @@ namespace System.Net.NetworkInformation
 
 		public abstract DuplicateAddressDetectionState DuplicateAddressDetectionState { get; }
 
-		public abstract IPAddress IPv4Mask { get; }
-
 		public abstract PrefixOrigin PrefixOrigin { get; }
 
 		public abstract SuffixOrigin SuffixOrigin { get; }
+
+		public abstract IPAddress IPv4Mask { get; }
+
+		public virtual int PrefixLength
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 	}
 }

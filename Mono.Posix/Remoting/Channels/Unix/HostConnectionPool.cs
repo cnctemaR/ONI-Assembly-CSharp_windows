@@ -22,23 +22,23 @@ namespace Mono.Remoting.Channels.Unix
 				{
 					if (this._pool.Count <= 0)
 					{
-						goto IL_006F;
+						goto IL_006A;
 					}
 					unixConnection = (UnixConnection)this._pool[this._pool.Count - 1];
 					this._pool.RemoveAt(this._pool.Count - 1);
 					if (unixConnection.IsAlive)
 					{
-						goto IL_006F;
+						goto IL_006A;
 					}
 					this.CancelConnection(unixConnection);
 					unixConnection = null;
-					IL_009C:
+					IL_008B:
 					if (unixConnection != null)
 					{
 						break;
 					}
 					continue;
-					IL_006F:
+					IL_006A:
 					if (unixConnection == null && this._activeConnections < UnixConnectionPool.MaxOpenConnections)
 					{
 						break;
@@ -46,9 +46,9 @@ namespace Mono.Remoting.Channels.Unix
 					if (unixConnection == null)
 					{
 						Monitor.Wait(this._pool);
-						goto IL_009C;
+						goto IL_008B;
 					}
-					goto IL_009C;
+					goto IL_008B;
 				}
 			}
 			if (unixConnection == null)
@@ -80,7 +80,7 @@ namespace Mono.Remoting.Channels.Unix
 			ArrayList pool = this._pool;
 			lock (pool)
 			{
-				entry.ControlTime = DateTime.Now;
+				entry.ControlTime = DateTime.UtcNow;
 				this._pool.Add(entry);
 				Monitor.Pulse(this._pool);
 			}
@@ -106,7 +106,7 @@ namespace Mono.Remoting.Channels.Unix
 				for (int i = 0; i < this._pool.Count; i++)
 				{
 					UnixConnection unixConnection = (UnixConnection)this._pool[i];
-					if ((DateTime.Now - unixConnection.ControlTime).TotalSeconds > (double)UnixConnectionPool.KeepAliveSeconds)
+					if ((DateTime.UtcNow - unixConnection.ControlTime).TotalSeconds > (double)UnixConnectionPool.KeepAliveSeconds)
 					{
 						this.CancelConnection(unixConnection);
 						this._pool.RemoveAt(i);

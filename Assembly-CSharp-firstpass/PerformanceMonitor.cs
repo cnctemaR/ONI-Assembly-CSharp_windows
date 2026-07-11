@@ -60,7 +60,11 @@ public class PerformanceMonitor : MonoBehaviour
 	{
 		get
 		{
-			return (this.frameTimeTotal != 0f) ? ((float)this.frameTimes.Count / this.frameTimeTotal) : 0f;
+			if (this.frameTimeTotal != 0f)
+			{
+				return (float)this.frameTimes.Count / this.frameTimeTotal;
+			}
+			return 0f;
 		}
 	}
 

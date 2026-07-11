@@ -59,11 +59,9 @@ public class BreakdownList : KMonoBehaviour
 		{
 			this.infoTextLabel.gameObject.SetActive(true);
 			this.infoTextLabel.text = description;
+			return;
 		}
-		else
-		{
-			this.infoTextLabel.gameObject.SetActive(false);
-		}
+		this.infoTextLabel.gameObject.SetActive(false);
 	}
 
 	public void SetIcon(Sprite icon)

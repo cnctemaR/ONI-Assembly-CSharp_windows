@@ -7,11 +7,12 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking
 {
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public sealed class NetworkServer
 	{
 		private NetworkServer()
 		{
-			NetworkTransport.Init();
+			NetworkManager.activeTransport.Init();
 			if (LogFilter.logDev)
 			{
 				Debug.Log("NetworkServer Created version " + Version.Current);
@@ -194,8 +195,8 @@ namespace UnityEngine.Networking
 
 		public static void Reset()
 		{
-			NetworkTransport.Shutdown();
-			NetworkTransport.Init();
+			NetworkManager.activeTransport.Shutdown();
+			NetworkManager.activeTransport.Init();
 			NetworkServer.s_Instance = null;
 			NetworkServer.s_Active = false;
 		}

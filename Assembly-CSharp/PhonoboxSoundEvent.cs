@@ -50,7 +50,7 @@ public class PhonoboxSoundEvent : SoundEvent
 		}
 		catch (Exception ex)
 		{
-			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + base.sound == null) ? "null" : base.sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
+			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + base.sound != null) ? base.sound.ToString() : "null", behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
 			global::Debug.LogError(text);
 			throw new ArgumentException(text, ex);
 		}

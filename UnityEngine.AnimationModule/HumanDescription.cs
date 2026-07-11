@@ -3,16 +3,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Class that holds humanoid avatar parameters to pass to the AvatarBuilder.BuildHumanAvatar function.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
+	[NativeHeader("Runtime/Animation/HumanDescription.h")]
 	public struct HumanDescription
 	{
-		/// <summary>
-		///   <para>Defines how the upper arm's roll/twisting is distributed between the shoulder and elbow joints.</para>
-		/// </summary>
 		public float upperArmTwist
 		{
 			get
@@ -25,9 +19,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines how the lower arm's roll/twisting is distributed between the elbow and wrist joints.</para>
-		/// </summary>
 		public float lowerArmTwist
 		{
 			get
@@ -40,9 +31,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines how the upper leg's roll/twisting is distributed between the thigh and knee joints.</para>
-		/// </summary>
 		public float upperLegTwist
 		{
 			get
@@ -55,9 +43,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines how the lower leg's roll/twisting is distributed between the knee and ankle.</para>
-		/// </summary>
 		public float lowerLegTwist
 		{
 			get
@@ -70,9 +55,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Amount by which the arm's length is allowed to stretch when using IK.</para>
-		/// </summary>
 		public float armStretch
 		{
 			get
@@ -85,9 +67,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Amount by which the leg's length is allowed to stretch when using IK.</para>
-		/// </summary>
 		public float legStretch
 		{
 			get
@@ -100,9 +79,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Modification to the minimum distance between the feet of a humanoid model.</para>
-		/// </summary>
 		public float feetSpacing
 		{
 			get
@@ -115,9 +91,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>True for any human that has a translation Degree of Freedom (DoF). It is set to false by default.</para>
-		/// </summary>
 		public bool hasTranslationDoF
 		{
 			get
@@ -130,15 +103,9 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Mapping between Mecanim bone names and bone names in the rig.</para>
-		/// </summary>
 		[NativeName("m_Human")]
 		public HumanBone[] human;
 
-		/// <summary>
-		///   <para>List of bone Transforms to include in the model.</para>
-		/// </summary>
 		[NativeName("m_Skeleton")]
 		public SkeletonBone[] skeleton;
 

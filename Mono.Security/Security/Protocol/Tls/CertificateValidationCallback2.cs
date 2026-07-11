@@ -1,4 +1,5 @@
 ﻿using System;
+using Mono.Security.Interface;
 using Mono.Security.X509;
 
 namespace Mono.Security.Protocol.Tls

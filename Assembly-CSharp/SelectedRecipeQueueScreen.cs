@@ -63,7 +63,7 @@ public class SelectedRecipeQueueScreen : KScreen
 		this.target = target;
 		this.selectedRecipe = recipe;
 		this.recipeName.text = recipe.GetUIName(false);
-		Tuple<Sprite, Color> uisprite = Def.GetUISprite((recipe.nameDisplay != ComplexRecipe.RecipeNameDisplay.Ingredient) ? recipe.results[0].material : recipe.ingredients[0].material, "ui", false);
+		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite((recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? recipe.ingredients[0].material : recipe.results[0].material, "ui", false);
 		this.recipeIcon.sprite = uisprite.first;
 		this.recipeIcon.color = uisprite.second;
 		this.RefreshIngredientDescriptors();
@@ -80,7 +80,7 @@ public class SelectedRecipeQueueScreen : KScreen
 		}
 		else
 		{
-			this.QueueCount.SetDisplayValue(string.Empty);
+			this.QueueCount.SetDisplayValue("");
 		}
 		this.InfiniteIcon.gameObject.SetActive(flag);
 	}
@@ -143,8 +143,7 @@ public class SelectedRecipeQueueScreen : KScreen
 			GameObject prefab = Assets.GetPrefab(recipeElement.material);
 			string formattedByTag = GameUtil.GetFormattedByTag(recipeElement.material, recipeElement.amount, GameUtil.TimeSlice.None);
 			string formattedByTag2 = GameUtil.GetFormattedByTag(recipeElement.material, WorldInventory.Instance.GetAmount(recipeElement.material), GameUtil.TimeSlice.None);
-			bool flag = WorldInventory.Instance.GetAmount(recipeElement.material) >= recipeElement.amount;
-			string text = ((!flag) ? ("<color=#F44A47>" + string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) + "</color>") : string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2));
+			string text = ((WorldInventory.Instance.GetAmount(recipeElement.material) >= recipeElement.amount) ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) : ("<color=#F44A47>" + string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) + "</color>"));
 			list.Add(new Descriptor(text, text, Descriptor.DescriptorType.Requirement, false));
 		}
 		return list;
@@ -155,11 +154,9 @@ public class SelectedRecipeQueueScreen : KScreen
 		if (this.isEditing)
 		{
 			e.Consumed = true;
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public Image recipeIcon;

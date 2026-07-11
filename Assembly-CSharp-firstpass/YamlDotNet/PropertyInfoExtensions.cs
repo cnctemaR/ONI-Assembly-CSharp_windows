@@ -7,7 +7,7 @@ namespace YamlDotNet
 	{
 		public static object ReadValue(this PropertyInfo property, object target)
 		{
-			return property.GetValue(target, null);
+			return property.GetGetMethod().Invoke(target, null);
 		}
 	}
 }

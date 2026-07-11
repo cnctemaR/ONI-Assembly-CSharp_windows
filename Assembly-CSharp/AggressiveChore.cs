@@ -19,12 +19,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 	{
 		if (Grid.Solid[base.smi.sm.wallCellToBreak] && Grid.StrengthInfo[base.smi.sm.wallCellToBreak] < 100)
 		{
-			WorldDamage instance = WorldDamage.Instance;
-			int wallCellToBreak = base.smi.sm.wallCellToBreak;
-			float num = 0.06f * dt;
-			int wallCellToBreak2 = base.smi.sm.wallCellToBreak;
-			string text = BUILDINGS.DAMAGESOURCES.MINION_DESTRUCTION;
-			instance.ApplyDamage(wallCellToBreak, num, wallCellToBreak2, -1, text, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.MINION_DESTRUCTION);
+			WorldDamage.Instance.ApplyDamage(base.smi.sm.wallCellToBreak, 0.06f * dt, base.smi.sm.wallCellToBreak, -1, BUILDINGS.DAMAGESOURCES.MINION_DESTRUCTION, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.MINION_DESTRUCTION);
 		}
 	}
 
@@ -45,19 +40,13 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			{
 				foreach (Breakable breakable2 in Components.Breakables.Items)
 				{
-					if (!(breakable2 == null))
+					if (!(breakable2 == null) && !breakable2.isBroken())
 					{
-						if (!breakable2.isBroken())
+						int navigationCost = navigator.GetNavigationCost(breakable2);
+						if (navigationCost != -1 && navigationCost < num)
 						{
-							int navigationCost = navigator.GetNavigationCost(breakable2);
-							if (navigationCost != -1)
-							{
-								if (navigationCost < num)
-								{
-									num = navigationCost;
-									breakable = breakable2;
-								}
-							}
+							num = navigationCost;
+							breakable = breakable2;
 						}
 					}
 				}
@@ -67,12 +56,10 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 				int num2 = GameUtil.FloodFillFind<object>((int cell, object arg) => !Grid.Solid[cell] && navigator.CanReach(cell) && ((Grid.IsValidCell(Grid.CellLeft(cell)) && Grid.Solid[Grid.CellLeft(cell)]) || (Grid.IsValidCell(Grid.CellRight(cell)) && Grid.Solid[Grid.CellRight(cell)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, 1, 1)) && Grid.Solid[Grid.OffsetCell(cell, 1, 1)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, -1, 1)) && Grid.Solid[Grid.OffsetCell(cell, -1, 1)])), null, Grid.PosToCell(navigator.gameObject), 128, true, true);
 				base.sm.moveToWallTarget.Set(num2, base.smi);
 				this.GoTo(base.sm.move_notarget);
+				return;
 			}
-			else
-			{
-				base.sm.breakable.Set(breakable, base.smi);
-				this.GoTo(base.sm.move_target);
-			}
+			base.sm.breakable.Set(breakable, base.smi);
+			this.GoTo(base.sm.move_target);
 		}
 	}
 

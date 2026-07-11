@@ -2,8 +2,11 @@
 
 namespace System
 {
-	[global::System.MonoTODO]
-	public class NewsStyleUriParser : global::System.UriParser
+	public class NewsStyleUriParser : UriParser
 	{
+		public NewsStyleUriParser()
+			: base(UriParser.NewsUri.Flags)
+		{
+		}
 	}
 }

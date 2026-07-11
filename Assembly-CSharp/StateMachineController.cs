@@ -136,7 +136,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	{
 		if (!this.defHandle.IsValid())
 		{
-			return (DefType)((object)null);
+			return default(DefType);
 		}
 		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
 		{
@@ -146,7 +146,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 				return defType;
 			}
 		}
-		return (DefType)((object)null);
+		return default(DefType);
 	}
 
 	public List<DefType> GetDefs<DefType>() where DefType : StateMachine.BaseDef

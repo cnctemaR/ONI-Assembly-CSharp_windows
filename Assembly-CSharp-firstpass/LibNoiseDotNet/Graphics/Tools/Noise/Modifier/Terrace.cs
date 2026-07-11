@@ -5,6 +5,18 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
 	public class Terrace : ModifierModule, IModule3D, IModule
 	{
+		public bool Invert
+		{
+			get
+			{
+				return this._invert;
+			}
+			set
+			{
+				this._invert = value;
+			}
+		}
+
 		public Terrace()
 		{
 		}
@@ -18,18 +30,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 			: base(source)
 		{
 			this._invert = invert;
-		}
-
-		public bool Invert
-		{
-			get
-			{
-				return this._invert;
-			}
-			set
-			{
-				this._invert = value;
-			}
 		}
 
 		public void AddControlPoint(float input)
@@ -76,30 +76,27 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 		public float GetValue(float x, float y, float z)
 		{
 			float value = ((IModule3D)this._sourceModule).GetValue(x, y, z);
-			int i;
-			for (i = 0; i < this._controlPoints.Count; i++)
+			int num = 0;
+			while (num < this._controlPoints.Count && value >= this._controlPoints[num])
 			{
-				if (value < this._controlPoints[i])
-				{
-					break;
-				}
+				num++;
 			}
-			int num = Libnoise.Clamp(i - 1, 0, this._controlPoints.Count - 1);
-			int num2 = Libnoise.Clamp(i, 0, this._controlPoints.Count - 1);
-			if (num == num2)
+			int num2 = Libnoise.Clamp(num - 1, 0, this._controlPoints.Count - 1);
+			int num3 = Libnoise.Clamp(num, 0, this._controlPoints.Count - 1);
+			if (num2 == num3)
 			{
-				return this._controlPoints[num2];
+				return this._controlPoints[num3];
 			}
-			float num3 = this._controlPoints[num];
 			float num4 = this._controlPoints[num2];
-			float num5 = (value - num3) / (num4 - num3);
+			float num5 = this._controlPoints[num3];
+			float num6 = (value - num4) / (num5 - num4);
 			if (this._invert)
 			{
-				num5 = 1f - num5;
-				Libnoise.SwapValues(ref num3, ref num4);
+				num6 = 1f - num6;
+				Libnoise.SwapValues(ref num4, ref num5);
 			}
-			num5 *= num5;
-			return Libnoise.Lerp(num3, num4, num5);
+			num6 *= num6;
+			return Libnoise.Lerp(num4, num5, num6);
 		}
 
 		protected void SortControlPoints()

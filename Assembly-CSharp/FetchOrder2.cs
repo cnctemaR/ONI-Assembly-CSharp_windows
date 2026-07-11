@@ -4,29 +4,6 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
-	{
-		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
-		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("FetchOrder2 {0} is requesting {1} {2} to {3}", new object[]
-			{
-				chore_type.Id,
-				tags[0],
-				amount,
-				(!(destination != null)) ? "to nowhere" : destination.name
-			}) });
-		}
-		this.choreType = chore_type;
-		this.Tags = tags;
-		this.RequiredTags = required_tags;
-		this.ForbiddenTags = forbidden_tags;
-		this.Destination = destination;
-		this.TotalAmount = amount;
-		this.UnfetchedAmount = amount;
-		this.PriorityMod = priorityMod;
-		this.operationalRequirement = operationalRequirementDEPRECATED;
-	}
-
 	public float TotalAmount { get; set; }
 
 	public int PriorityMod { get; set; }
@@ -53,17 +30,43 @@ public class FetchOrder2
 		}
 	}
 
+	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
+	{
+		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+		{
+			DebugUtil.LogWarningArgs(new object[] { string.Format("FetchOrder2 {0} is requesting {1} {2} to {3}", new object[]
+			{
+				chore_type.Id,
+				tags[0],
+				amount,
+				(destination != null) ? destination.name : "to nowhere"
+			}) });
+		}
+		this.choreType = chore_type;
+		this.Tags = tags;
+		this.RequiredTags = required_tags;
+		this.ForbiddenTags = forbidden_tags;
+		this.Destination = destination;
+		this.TotalAmount = amount;
+		this.UnfetchedAmount = amount;
+		this.PriorityMod = priorityMod;
+		this.operationalRequirement = operationalRequirementDEPRECATED;
+	}
+
 	public bool InProgress
 	{
 		get
 		{
 			bool flag = false;
-			foreach (FetchChore fetchChore in this.Chores)
+			using (List<FetchChore>.Enumerator enumerator = this.Chores.GetEnumerator())
 			{
-				if (fetchChore.InProgress())
+				while (enumerator.MoveNext())
 				{
-					flag = true;
-					break;
+					if (enumerator.Current.InProgress())
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
 			return flag;
@@ -156,16 +159,15 @@ public class FetchOrder2
 		{
 			Pickupable pickupable = null;
 			this.UnfetchedAmount = this.GetRemaining(out pickupable);
-			if (this.UnfetchedAmount <= this.Destination.storageFullMargin)
-			{
-				if (this.OnComplete != null)
-				{
-					this.OnComplete(this, pickupable);
-				}
-			}
-			else
+			if (this.UnfetchedAmount > this.Destination.storageFullMargin)
 			{
 				this.IssueTask();
+				return;
+			}
+			if (this.OnComplete != null)
+			{
+				this.OnComplete(this, pickupable);
+				return;
 			}
 		}
 		else

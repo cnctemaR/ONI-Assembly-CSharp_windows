@@ -11,7 +11,7 @@ public class CropSleepingMonitor : GameStateMachine<CropSleepingMonitor, CropSle
 		this.root.Update("CropSleepingMonitor.root", delegate(CropSleepingMonitor.Instance smi, float dt)
 		{
 			int num = Grid.PosToCell(smi.master.gameObject);
-			GameStateMachine<CropSleepingMonitor, CropSleepingMonitor.Instance, IStateMachineTarget, CropSleepingMonitor.Def>.State state = ((!smi.IsCellSafe(num)) ? this.sleeping : this.awake);
+			GameStateMachine<CropSleepingMonitor, CropSleepingMonitor.Instance, IStateMachineTarget, CropSleepingMonitor.Def>.State state = (smi.IsCellSafe(num) ? this.awake : this.sleeping);
 			smi.GoTo(state);
 		}, UpdateRate.SIM_1000ms, false);
 		this.sleeping.TriggerOnEnter(GameHashes.CropSleep, null).ToggleStatusItem(Db.Get().CreatureStatusItems.CropSleeping, (CropSleepingMonitor.Instance smi) => smi);
@@ -43,14 +43,17 @@ public class CropSleepingMonitor : GameStateMachine<CropSleepingMonitor, CropSle
 
 		public bool IsSleeping()
 		{
-			StateMachine.BaseState currentState = this.GetCurrentState();
-			return currentState == base.smi.sm.sleeping;
+			return this.GetCurrentState() == base.smi.sm.sleeping;
 		}
 
 		public bool IsCellSafe(int cell)
 		{
 			float num = (float)Grid.LightIntensity[cell];
-			return (!base.def.prefersDarkness) ? (num >= base.def.lightIntensityThreshold) : (num <= base.def.lightIntensityThreshold);
+			if (!base.def.prefersDarkness)
+			{
+				return num >= base.def.lightIntensityThreshold;
+			}
+			return num <= base.def.lightIntensityThreshold;
 		}
 	}
 }

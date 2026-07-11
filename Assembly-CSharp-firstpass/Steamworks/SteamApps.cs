@@ -76,7 +76,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameBufferSize);
 			bool flag = NativeMethods.ISteamApps_BGetDLCDataByIndex(CSteamAPIContext.GetSteamApps(), iDLC, out pAppID, out pbAvailable, intPtr, cchNameBufferSize);
-			pchName = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchName = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}
@@ -104,7 +104,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameBufferSize);
 			bool flag = NativeMethods.ISteamApps_GetCurrentBetaName(CSteamAPIContext.GetSteamApps(), intPtr, cchNameBufferSize);
-			pchName = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchName = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}
@@ -126,7 +126,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchFolderBufferSize);
 			uint num = NativeMethods.ISteamApps_GetAppInstallDir(CSteamAPIContext.GetSteamApps(), appID, intPtr, cchFolderBufferSize);
-			pchFolder = ((num == 0U) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchFolder = ((num != 0U) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return num;
 		}
@@ -188,7 +188,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cubCommandLine);
 			int num = NativeMethods.ISteamApps_GetLaunchCommandLine(CSteamAPIContext.GetSteamApps(), intPtr, cubCommandLine);
-			pszCommandLine = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pszCommandLine = ((num != -1) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return num;
 		}

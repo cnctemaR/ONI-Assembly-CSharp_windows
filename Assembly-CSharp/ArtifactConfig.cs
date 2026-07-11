@@ -87,8 +87,7 @@ public class ArtifactConfig : IMultiEntityConfig
 	public static GameObject CreateArtifact(string id, string name, string desc, string initial_anim, string ui_anim, ArtifactTier artifact_tier, ArtifactConfig.PostInitFn postInitFn = null, SimHashes element = SimHashes.Creature)
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("artifact_" + id.ToLower(), name, desc, 25f, true, Assets.GetAnim("artifacts_kanim"), initial_anim, Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 1f, 1f, true, SORTORDER.BUILDINGELEMENTS, element, new List<Tag> { GameTags.MiscPickupable });
-		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
-		occupyArea.OccupiedCellsOffsets = EntityTemplates.GenerateOffsets(1, 1);
+		gameObject.AddOrGet<OccupyArea>().OccupiedCellsOffsets = EntityTemplates.GenerateOffsets(1, 1);
 		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
 		decorProvider.SetValues(artifact_tier.decorValues);
 		decorProvider.overrideName = gameObject.name;

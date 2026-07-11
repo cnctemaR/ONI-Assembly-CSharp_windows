@@ -42,31 +42,25 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 				float num = dt / totalTime;
 				Sicknesses sicknesses = base.master.GetComponent<MinionModifiers>().sicknesses;
 				SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
-				for (int i = 0; i < sicknesses.Count; i++)
+				int num2 = 0;
+				while (num2 < sicknesses.Count && sicknesses[num2].modifier.sicknessType != Sickness.SicknessType.Pathogen)
 				{
-					SicknessInstance sicknessInstance = sicknesses[i];
-					if (sicknessInstance.modifier.sicknessType == Sickness.SicknessType.Pathogen)
-					{
-						break;
-					}
+					num2++;
 				}
 				Facing component = base.sm.vomiter.Get(base.smi).GetComponent<Facing>();
-				int num2 = Grid.PosToCell(component.transform.GetPosition());
-				int frontCell = component.GetFrontCell();
-				int num3 = frontCell;
-				if (!VomitChore.StatesInstance.CanEmitLiquid(num3))
+				int num3 = Grid.PosToCell(component.transform.GetPosition());
+				int num4 = component.GetFrontCell();
+				if (!VomitChore.StatesInstance.CanEmitLiquid(num4))
 				{
-					num3 = num2;
+					num4 = num3;
 				}
 				Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
 				if (equippable != null)
 				{
 					equippable.GetComponent<Storage>().AddLiquid(SimHashes.DirtyWater, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, false, true);
+					return;
 				}
-				else
-				{
-					SimMessages.AddRemoveSubstance(num3, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, true, -1);
-				}
+				SimMessages.AddRemoveSubstance(num4, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, true, -1);
 			}
 		}
 

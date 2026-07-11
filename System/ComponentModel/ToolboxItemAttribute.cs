@@ -1,44 +1,52 @@
 ﻿using System;
+using System.Globalization;
 
 namespace System.ComponentModel
 {
 	[AttributeUsage(AttributeTargets.All)]
 	public class ToolboxItemAttribute : Attribute
 	{
+		public override bool IsDefaultAttribute()
+		{
+			return this.Equals(ToolboxItemAttribute.Default);
+		}
+
 		public ToolboxItemAttribute(bool defaultType)
 		{
 			if (defaultType)
 			{
-				this.itemTypeName = "System.Drawing.Design.ToolboxItem, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+				this.toolboxItemTypeName = "System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 			}
 		}
 
-		public ToolboxItemAttribute(string toolboxItemName)
+		public ToolboxItemAttribute(string toolboxItemTypeName)
 		{
-			this.itemTypeName = toolboxItemName;
+			toolboxItemTypeName.ToUpper(CultureInfo.InvariantCulture);
+			this.toolboxItemTypeName = toolboxItemTypeName;
 		}
 
 		public ToolboxItemAttribute(Type toolboxItemType)
 		{
-			this.itemType = toolboxItemType;
+			this.toolboxItemType = toolboxItemType;
+			this.toolboxItemTypeName = toolboxItemType.AssemblyQualifiedName;
 		}
 
 		public Type ToolboxItemType
 		{
 			get
 			{
-				if (this.itemType == null && this.itemTypeName != null)
+				if (this.toolboxItemType == null && this.toolboxItemTypeName != null)
 				{
 					try
 					{
-						this.itemType = Type.GetType(this.itemTypeName, true);
+						this.toolboxItemType = Type.GetType(this.toolboxItemTypeName, true);
 					}
 					catch (Exception ex)
 					{
-						throw new ArgumentException("Failed to create ToolboxItem of type: " + this.itemTypeName, ex);
+						throw new ArgumentException(global::SR.GetString("Failed to create ToolboxItem of type: {0}", new object[] { this.toolboxItemTypeName }), ex);
 					}
 				}
-				return this.itemType;
+				return this.toolboxItemType;
 			}
 		}
 
@@ -46,46 +54,39 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.itemTypeName == null)
+				if (this.toolboxItemTypeName == null)
 				{
-					if (this.itemType == null)
-					{
-						return string.Empty;
-					}
-					this.itemTypeName = this.itemType.AssemblyQualifiedName;
+					return string.Empty;
 				}
-				return this.itemTypeName;
+				return this.toolboxItemTypeName;
 			}
 		}
 
-		public override bool Equals(object o)
+		public override bool Equals(object obj)
 		{
-			ToolboxItemAttribute toolboxItemAttribute = o as ToolboxItemAttribute;
+			if (obj == this)
+			{
+				return true;
+			}
+			ToolboxItemAttribute toolboxItemAttribute = obj as ToolboxItemAttribute;
 			return toolboxItemAttribute != null && toolboxItemAttribute.ToolboxItemTypeName == this.ToolboxItemTypeName;
 		}
 
 		public override int GetHashCode()
 		{
-			if (this.itemTypeName != null)
+			if (this.toolboxItemTypeName != null)
 			{
-				return this.itemTypeName.GetHashCode();
+				return this.toolboxItemTypeName.GetHashCode();
 			}
 			return base.GetHashCode();
 		}
 
-		public override bool IsDefaultAttribute()
-		{
-			return this.Equals(ToolboxItemAttribute.Default);
-		}
+		private Type toolboxItemType;
 
-		private const string defaultItemType = "System.Drawing.Design.ToolboxItem, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+		private string toolboxItemTypeName;
 
-		public static readonly ToolboxItemAttribute Default = new ToolboxItemAttribute("System.Drawing.Design.ToolboxItem, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+		public static readonly ToolboxItemAttribute Default = new ToolboxItemAttribute("System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
 
 		public static readonly ToolboxItemAttribute None = new ToolboxItemAttribute(false);
-
-		private Type itemType;
-
-		private string itemTypeName;
 	}
 }

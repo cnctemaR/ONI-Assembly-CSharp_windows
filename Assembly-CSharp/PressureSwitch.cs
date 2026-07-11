@@ -11,7 +11,7 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch, IS
 		int num = Grid.PosToCell(this);
 		if (this.sampleIdx < 8)
 		{
-			float num2 = ((!Grid.Element[num].IsState(this.desiredState)) ? 0f : Grid.Mass[num]);
+			float num2 = (Grid.Element[num].IsState(this.desiredState) ? Grid.Mass[num] : 0f);
 			this.samples[this.sampleIdx] = num2;
 			this.sampleIdx++;
 			return;
@@ -23,6 +23,7 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch, IS
 			if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
 			{
 				this.Toggle();
+				return;
 			}
 		}
 		else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue <= this.threshold && !base.IsSwitchedOn))
@@ -33,7 +34,7 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch, IS
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 
@@ -92,12 +93,20 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch, IS
 
 	public float GetRangeMinInputField()
 	{
-		return (this.desiredState != Element.State.Gas) ? this.rangeMin : (this.rangeMin * 1000f);
+		if (this.desiredState != Element.State.Gas)
+		{
+			return this.rangeMin;
+		}
+		return this.rangeMin * 1000f;
 	}
 
 	public float GetRangeMaxInputField()
 	{
-		return (this.desiredState != Element.State.Gas) ? this.rangeMax : (this.rangeMax * 1000f);
+		if (this.desiredState != Element.State.Gas)
+		{
+			return this.rangeMax;
+		}
+		return this.rangeMax * 1000f;
 	}
 
 	public LocString Title

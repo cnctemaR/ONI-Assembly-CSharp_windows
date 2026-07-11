@@ -15,8 +15,7 @@ namespace Database
 		public override bool Success()
 		{
 			float num = 0f;
-			IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(ConduitType.Gas);
-			foreach (UtilityNetwork utilityNetwork in networkManager.GetNetworks())
+			foreach (UtilityNetwork utilityNetwork in Conduit.GetNetworkManager(ConduitType.Gas).GetNetworks())
 			{
 				FlowUtilityNetwork flowUtilityNetwork = utilityNetwork as FlowUtilityNetwork;
 				if (flowUtilityNetwork != null)
@@ -49,8 +48,7 @@ namespace Database
 		public override string GetProgress(bool complete)
 		{
 			float num = 0f;
-			IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(ConduitType.Gas);
-			foreach (UtilityNetwork utilityNetwork in networkManager.GetNetworks())
+			foreach (UtilityNetwork utilityNetwork in Conduit.GetNetworkManager(ConduitType.Gas).GetNetworks())
 			{
 				FlowUtilityNetwork flowUtilityNetwork = utilityNetwork as FlowUtilityNetwork;
 				if (flowUtilityNetwork != null)
@@ -65,7 +63,7 @@ namespace Database
 					}
 				}
 			}
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.VENTED_MASS, GameUtil.GetFormattedMass((!complete) ? num : this.kilogramsToVent, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(this.kilogramsToVent, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.VENTED_MASS, GameUtil.GetFormattedMass(complete ? this.kilogramsToVent : num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(this.kilogramsToVent, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
 		}
 
 		private SimHashes element;

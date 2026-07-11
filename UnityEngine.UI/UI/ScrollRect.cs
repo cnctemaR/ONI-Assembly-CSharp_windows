@@ -6,7 +6,7 @@ namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Scroll Rect", 37)]
 	[SelectionBase]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
 	public class ScrollRect : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup, IEventSystemHandler, ILayoutController
@@ -334,6 +334,7 @@ namespace UnityEngine.UI
 			{
 				this.m_VerticalScrollbar.onValueChanged.RemoveListener(new UnityAction<float>(this.SetVerticalNormalizedPosition));
 			}
+			this.m_Scrolling = false;
 			this.m_HasRebuiltLayout = false;
 			this.m_Tracker.Clear();
 			this.m_Velocity = Vector2.zero;
@@ -382,6 +383,10 @@ namespace UnityEngine.UI
 						scrollDelta.x = scrollDelta.y;
 					}
 					scrollDelta.y = 0f;
+				}
+				if (data.IsScrolling())
+				{
+					this.m_Scrolling = true;
 				}
 				Vector2 vector = this.m_Content.anchoredPosition;
 				vector += scrollDelta * this.m_ScrollSensitivity;
@@ -489,7 +494,12 @@ namespace UnityEngine.UI
 						if (this.m_MovementType == ScrollRect.MovementType.Elastic && vector[i] != 0f)
 						{
 							float num = this.m_Velocity[i];
-							vector2[i] = Mathf.SmoothDamp(this.m_Content.anchoredPosition[i], this.m_Content.anchoredPosition[i] + vector[i], ref num, this.m_Elasticity, float.PositiveInfinity, unscaledDeltaTime);
+							float num2 = this.m_Elasticity;
+							if (this.m_Scrolling)
+							{
+								num2 *= 3f;
+							}
+							vector2[i] = Mathf.SmoothDamp(this.m_Content.anchoredPosition[i], this.m_Content.anchoredPosition[i] + vector[i], ref num, num2, float.PositiveInfinity, unscaledDeltaTime);
 							if (Mathf.Abs(num) < 1f)
 							{
 								num = 0f;
@@ -499,15 +509,15 @@ namespace UnityEngine.UI
 						else if (this.m_Inertia)
 						{
 							ref Vector2 ptr = ref this.m_Velocity;
-							int num2;
-							this.m_Velocity[num2 = i] = ptr[num2] * Mathf.Pow(this.m_DecelerationRate, unscaledDeltaTime);
+							int num3;
+							this.m_Velocity[num3 = i] = ptr[num3] * Mathf.Pow(this.m_DecelerationRate, unscaledDeltaTime);
 							if (Mathf.Abs(this.m_Velocity[i]) < 1f)
 							{
 								this.m_Velocity[i] = 0f;
 							}
 							ptr = ref vector2;
-							int num3;
-							vector2[num3 = i] = ptr[num3] + this.m_Velocity[i] * unscaledDeltaTime;
+							int num4;
+							vector2[num4 = i] = ptr[num4] + this.m_Velocity[i] * unscaledDeltaTime;
 						}
 						else
 						{
@@ -534,6 +544,7 @@ namespace UnityEngine.UI
 					this.UpdatePrevData();
 				}
 				this.UpdateScrollbarVisibility();
+				this.m_Scrolling = false;
 			}
 		}
 
@@ -598,7 +609,7 @@ namespace UnityEngine.UI
 			{
 				this.UpdateBounds();
 				float num;
-				if (this.m_ContentBounds.size.x <= this.m_ViewBounds.size.x)
+				if (this.m_ContentBounds.size.x <= this.m_ViewBounds.size.x || Mathf.Approximately(this.m_ContentBounds.size.x, this.m_ViewBounds.size.x))
 				{
 					num = (float)((this.m_ViewBounds.min.x <= this.m_ContentBounds.min.x) ? 0 : 1);
 				}
@@ -620,7 +631,7 @@ namespace UnityEngine.UI
 			{
 				this.UpdateBounds();
 				float num;
-				if (this.m_ContentBounds.size.y <= this.m_ViewBounds.size.y)
+				if (this.m_ContentBounds.size.y <= this.m_ViewBounds.size.y || Mathf.Approximately(this.m_ContentBounds.size.y, this.m_ViewBounds.size.y))
 				{
 					num = (float)((this.m_ViewBounds.min.y <= this.m_ContentBounds.min.y) ? 0 : 1);
 				}
@@ -1076,6 +1087,8 @@ namespace UnityEngine.UI
 		private Vector2 m_Velocity;
 
 		private bool m_Dragging;
+
+		private bool m_Scrolling;
 
 		private Vector2 m_PrevPosition = Vector2.zero;
 

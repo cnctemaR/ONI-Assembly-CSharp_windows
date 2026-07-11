@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ComponentConverter : ReferenceConverter
 	{
 		public ComponentConverter(Type type)

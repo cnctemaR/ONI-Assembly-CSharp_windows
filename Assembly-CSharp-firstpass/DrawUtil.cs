@@ -25,7 +25,7 @@ public static class DrawUtil
 		{
 			return;
 		}
-		Quaternion quaternion = Quaternion.LookRotation(vector, Vector3.up);
+		Quaternion.LookRotation(vector, Vector3.up);
 	}
 
 	public static void Circle(Vector3 pos, float radius)
@@ -35,7 +35,7 @@ public static class DrawUtil
 
 	public static void Circle(Vector3 pos, float radius, Color color, Vector3? normal = null, float time = 0f)
 	{
-		Vector3 vector = ((normal == null) ? Vector3.up : normal.Value);
+		Vector3 vector = normal ?? Vector3.up;
 		int num = 40;
 		if (DrawUtil.circlePointCache == null)
 		{
@@ -46,7 +46,7 @@ public static class DrawUtil
 				DrawUtil.circlePointCache[i] = new Vector3(Mathf.Cos(num2 * (float)i), Mathf.Sin(num2 * (float)i), 0f);
 			}
 		}
-		Quaternion quaternion = Quaternion.FromToRotation(Vector3.forward, vector);
+		Quaternion.FromToRotation(Vector3.forward, vector);
 		for (int j = 0; j < num - 1; j++)
 		{
 		}
@@ -59,7 +59,6 @@ public static class DrawUtil
 
 	public static void Box(Vector3 pos, Color color, float size = 1f, float time = 1f)
 	{
-		float num = size * 0.5f;
 	}
 
 	public static void Sphere(Vector3 pos, float radius, Color color, float time = 0f)

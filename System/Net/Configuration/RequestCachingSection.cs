@@ -36,11 +36,11 @@ namespace System.Net.Configuration
 		}
 
 		[ConfigurationProperty("defaultPolicyLevel", DefaultValue = "BypassCache")]
-		public global::System.Net.Cache.RequestCacheLevel DefaultPolicyLevel
+		public RequestCacheLevel DefaultPolicyLevel
 		{
 			get
 			{
-				return (global::System.Net.Cache.RequestCacheLevel)((int)base[RequestCachingSection.defaultPolicyLevelProp]);
+				return (RequestCacheLevel)base[RequestCachingSection.defaultPolicyLevelProp];
 			}
 			set
 			{
@@ -95,13 +95,13 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected override void PostDeserialize()
 		{
 			base.PostDeserialize();
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected override void DeserializeElement(XmlReader reader, bool serializeCollectionKey)
 		{
 			base.DeserializeElement(reader, serializeCollectionKey);
@@ -113,7 +113,7 @@ namespace System.Net.Configuration
 
 		private static ConfigurationProperty defaultHttpCachePolicyProp = new ConfigurationProperty("defaultHttpCachePolicy", typeof(HttpCachePolicyElement));
 
-		private static ConfigurationProperty defaultPolicyLevelProp = new ConfigurationProperty("defaultPolicyLevel", typeof(global::System.Net.Cache.RequestCacheLevel), global::System.Net.Cache.RequestCacheLevel.BypassCache);
+		private static ConfigurationProperty defaultPolicyLevelProp = new ConfigurationProperty("defaultPolicyLevel", typeof(RequestCacheLevel), RequestCacheLevel.BypassCache);
 
 		private static ConfigurationProperty disableAllCachingProp = new ConfigurationProperty("disableAllCaching", typeof(bool), false);
 

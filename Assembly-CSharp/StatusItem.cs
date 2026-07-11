@@ -15,22 +15,14 @@ public class StatusItem : Resource
 	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022)
 		: this(id, "STRINGS." + prefix + ".STATUSITEMS." + id.ToUpper())
 	{
-		if (icon_type != StatusItem.IconType.Info)
+		switch (icon_type)
 		{
-			if (icon_type != StatusItem.IconType.Exclamation)
-			{
-				if (icon_type != StatusItem.IconType.Custom)
-				{
-				}
-			}
-			else
-			{
-				icon = "status_item_exclamation";
-			}
-		}
-		else
-		{
+		case StatusItem.IconType.Info:
 			icon = "dash";
+			break;
+		case StatusItem.IconType.Exclamation:
+			icon = "status_item_exclamation";
+			break;
 		}
 		this.iconName = icon;
 		this.notificationType = notification_type;
@@ -49,22 +41,14 @@ public class StatusItem : Resource
 	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 129022)
 		: base(id, name)
 	{
-		if (icon_type != StatusItem.IconType.Info)
+		switch (icon_type)
 		{
-			if (icon_type != StatusItem.IconType.Exclamation)
-			{
-				if (icon_type != StatusItem.IconType.Custom)
-				{
-				}
-			}
-			else
-			{
-				icon = "status_item_exclamation";
-			}
-		}
-		else
-		{
+		case StatusItem.IconType.Info:
 			icon = "dash";
+			break;
+		case StatusItem.IconType.Exclamation:
+			icon = "status_item_exclamation";
+			break;
 		}
 		this.iconName = icon;
 		this.notificationType = notification_type;
@@ -87,13 +71,13 @@ public class StatusItem : Resource
 		if (sound_path == null)
 		{
 			NotificationType notificationType = this.notificationType;
-			if (notificationType != NotificationType.Bad)
+			if (notificationType == NotificationType.Bad)
 			{
-				this.soundPath = "Notification";
+				this.soundPath = "Warning";
 			}
 			else
 			{
-				this.soundPath = "Warning";
+				this.soundPath = "Notification";
 			}
 		}
 		else
@@ -112,12 +96,10 @@ public class StatusItem : Resource
 		if (notification_tooltip != null)
 		{
 			this.notificationTooltipText = notification_tooltip;
+			return;
 		}
-		else
-		{
-			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!");
-			this.notificationTooltipText = Strings.Get(this.composedPrefix + ".NOTIFICATION_TOOLTIP");
-		}
+		DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!");
+		this.notificationTooltipText = Strings.Get(this.composedPrefix + ".NOTIFICATION_TOOLTIP");
 	}
 
 	public virtual string GetName(object data)

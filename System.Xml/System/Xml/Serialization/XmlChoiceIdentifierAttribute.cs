@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Text;
+using System.Reflection;
 
 namespace System.Xml.Serialization
 {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
 	public class XmlChoiceIdentifierAttribute : Attribute
 	{
 		public XmlChoiceIdentifierAttribute()
@@ -12,32 +12,39 @@ namespace System.Xml.Serialization
 
 		public XmlChoiceIdentifierAttribute(string name)
 		{
-			this.memberName = name;
+			this.name = name;
 		}
 
 		public string MemberName
 		{
 			get
 			{
-				if (this.memberName == null)
+				if (this.name != null)
 				{
-					return string.Empty;
+					return this.name;
 				}
-				return this.memberName;
+				return string.Empty;
 			}
 			set
 			{
-				this.memberName = value;
+				this.name = value;
 			}
 		}
 
-		internal void AddKeyHash(StringBuilder sb)
+		internal MemberInfo MemberInfo
 		{
-			sb.Append("XCA ");
-			KeyHelper.AddField(sb, 1, this.memberName);
-			sb.Append('|');
+			get
+			{
+				return this.memberInfo;
+			}
+			set
+			{
+				this.memberInfo = value;
+			}
 		}
 
-		private string memberName;
+		private string name;
+
+		private MemberInfo memberInfo;
 	}
 }

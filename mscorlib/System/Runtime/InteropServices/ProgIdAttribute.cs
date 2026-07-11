@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public ProgIdAttribute(string progId)
 		{
-			this.pid = progId;
+			this._val = progId;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this.pid;
+				return this._val;
 			}
 		}
 
-		private string pid;
+		internal string _val;
 	}
 }

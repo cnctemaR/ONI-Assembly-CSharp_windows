@@ -16,19 +16,15 @@ public struct FallerComponent
 		if (component != null)
 		{
 			this.offset = component.radius;
+			return;
 		}
-		else
+		KCollider2D component2 = transform.GetComponent<KCollider2D>();
+		if (component2 != null)
 		{
-			KCollider2D component2 = transform.GetComponent<KCollider2D>();
-			if (component2 != null)
-			{
-				this.offset = transform.GetPosition().y - component2.bounds.min.y;
-			}
-			else
-			{
-				this.offset = 0f;
-			}
+			this.offset = transform.GetPosition().y - component2.bounds.min.y;
+			return;
 		}
+		this.offset = 0f;
 	}
 
 	public Transform transform;

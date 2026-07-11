@@ -18,28 +18,20 @@ namespace Database
 					foreach (ILogicEventReceiver logicEventReceiver in logicCircuitNetwork.Receivers)
 					{
 						GameObject gameObject = Grid.Objects[logicEventReceiver.GetLogicCell(), 1];
-						if (gameObject != null)
+						if (gameObject != null && !gameObject.GetComponent<KPrefabID>().HasTag(GameTags.TemplateBuilding))
 						{
-							KPrefabID component = gameObject.GetComponent<KPrefabID>();
-							if (!component.HasTag(GameTags.TemplateBuilding))
-							{
-								flag = true;
-								break;
-							}
+							flag = true;
+							break;
 						}
 					}
 					bool flag2 = false;
 					foreach (ILogicEventSender logicEventSender in logicCircuitNetwork.Senders)
 					{
 						GameObject gameObject2 = Grid.Objects[logicEventSender.GetLogicCell(), 1];
-						if (gameObject2 != null)
+						if (gameObject2 != null && !gameObject2.GetComponent<KPrefabID>().HasTag(GameTags.TemplateBuilding))
 						{
-							KPrefabID component2 = gameObject2.GetComponent<KPrefabID>();
-							if (!component2.HasTag(GameTags.TemplateBuilding))
-							{
-								flag2 = true;
-								break;
-							}
+							flag2 = true;
+							break;
 						}
 					}
 					if (flag && flag2)

@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[Flags]
 	[Map]
+	[Flags]
 	[CLSCompliant(false)]
 	public enum MmapProts
 	{

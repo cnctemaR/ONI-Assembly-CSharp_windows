@@ -76,8 +76,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
 			public T GetCustomAttribute<T>() where T : Attribute
 			{
-				object[] customAttributes = this._propertyInfo.GetCustomAttributes(typeof(T), true);
-				return (T)((object)customAttributes.FirstOrDefault<object>());
+				return (T)((object)this._propertyInfo.GetCustomAttributes(typeof(T), true).FirstOrDefault<object>());
 			}
 
 			public IObjectDescriptor Read(object target)

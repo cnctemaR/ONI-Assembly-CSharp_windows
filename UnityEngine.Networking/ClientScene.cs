@@ -4,6 +4,7 @@ using UnityEngine.Networking.NetworkSystem;
 
 namespace UnityEngine.Networking
 {
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class ClientScene
 	{
 		private static bool hasMigrationPending()
@@ -92,8 +93,8 @@ namespace UnityEngine.Networking
 			ClientScene.s_IsReady = false;
 			ClientScene.s_IsSpawnFinished = false;
 			ClientScene.s_ReconnectId = -1;
-			NetworkTransport.Shutdown();
-			NetworkTransport.Init();
+			NetworkManager.activeTransport.Shutdown();
+			NetworkManager.activeTransport.Init();
 		}
 
 		internal static bool GetPlayerController(short playerControllerId, out PlayerController player)

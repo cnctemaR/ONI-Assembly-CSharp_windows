@@ -13,12 +13,7 @@ namespace YamlDotNet.Core
 			if (t == null)
 			{
 				ParsingEvent parsingEvent = parser.Current;
-				throw new YamlException(parsingEvent.Start, parsingEvent.End, string.Format(CultureInfo.InvariantCulture, "Expected '{0}', got '{1}' (at {2}).", new object[]
-				{
-					typeof(T).Name,
-					parsingEvent.GetType().Name,
-					parsingEvent.Start
-				}));
+				throw new YamlException(parsingEvent.Start, parsingEvent.End, string.Format(CultureInfo.InvariantCulture, "Expected '{0}', got '{1}' (at {2}).", typeof(T).Name, parsingEvent.GetType().Name, parsingEvent.Start));
 			}
 			return t;
 		}
@@ -36,7 +31,7 @@ namespace YamlDotNet.Core
 		{
 			if (!parser.Accept<T>())
 			{
-				return (T)((object)null);
+				return default(T);
 			}
 			T t = (T)((object)parser.Current);
 			parser.MoveNext();
@@ -47,7 +42,7 @@ namespace YamlDotNet.Core
 		{
 			if (!parser.Accept<T>())
 			{
-				return (T)((object)null);
+				return default(T);
 			}
 			return (T)((object)parser.Current);
 		}

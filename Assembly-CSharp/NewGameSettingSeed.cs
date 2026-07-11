@@ -36,7 +36,11 @@ public class NewGameSettingSeed : NewGameSettingWidget
 
 	private char ValidateInput(string text, int charIndex, char addedChar)
 	{
-		return ('0' > addedChar || addedChar > '9') ? '\0' : addedChar;
+		if ('0' > addedChar || addedChar > '9')
+		{
+			return '\0';
+		}
+		return addedChar;
 	}
 
 	private void OnEndEdit(string text)
@@ -75,7 +79,7 @@ public class NewGameSettingSeed : NewGameSettingWidget
 			}
 			else
 			{
-				this.Input.text = string.Empty;
+				this.Input.text = "";
 			}
 		}
 		if (num > 2147483647)

@@ -67,6 +67,7 @@ public class ProgressBar : KMonoBehaviour
 			if (!base.gameObject.activeSelf)
 			{
 				base.gameObject.SetActive(true);
+				return;
 			}
 		}
 		else if (base.gameObject.activeSelf)
@@ -99,7 +100,7 @@ public class ProgressBar : KMonoBehaviour
 		ProgressBar progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
 		progressBar.SetUpdateFunc(updateFunc);
 		progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
-		progressBar.name = ((!(entity != null)) ? string.Empty : (entity.name + "_")) + " ProgressBar";
+		progressBar.name = ((entity != null) ? (entity.name + "_") : "") + " ProgressBar";
 		progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
 		progressBar.Update();
 		Vector3 vector = entity.transform.GetPosition() + Vector3.down * 0.5f;

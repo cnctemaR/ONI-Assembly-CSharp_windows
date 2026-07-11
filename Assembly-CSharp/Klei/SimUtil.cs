@@ -9,14 +9,12 @@ namespace Klei
 	{
 		public static float CalculateEnergyFlow(float source_temp, float source_thermal_conductivity, float dest_temp, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
 		{
-			float num = source_temp - dest_temp;
-			return num * Math.Min(source_thermal_conductivity, dest_thermal_conductivity) * (surface_area / thickness);
+			return (source_temp - dest_temp) * Math.Min(source_thermal_conductivity, dest_thermal_conductivity) * (surface_area / thickness);
 		}
 
 		public static float CalculateEnergyFlow(int cell, float dest_temp, float dest_specific_heat_capacity, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
 		{
-			float num = Grid.Mass[cell];
-			if (num <= 0f)
+			if (Grid.Mass[cell] <= 0f)
 			{
 				return 0f;
 			}
@@ -25,10 +23,9 @@ namespace Klei
 			{
 				return 0f;
 			}
-			float num2 = Grid.Temperature[cell];
+			float num = Grid.Temperature[cell];
 			float thermalConductivity = element.thermalConductivity;
-			float num3 = SimUtil.CalculateEnergyFlow(num2, thermalConductivity, dest_temp, dest_thermal_conductivity, surface_area, thickness);
-			return num3 * 0.001f;
+			return SimUtil.CalculateEnergyFlow(num, thermalConductivity, dest_temp, dest_thermal_conductivity, surface_area, thickness) * 0.001f;
 		}
 
 		public static float ClampEnergyTransfer(float dt, float source_temp, float source_mass, float source_specific_heat_capacity, float dest_temp, float dest_mass, float dest_specific_heat_capacity, float max_watts_transferred)
@@ -47,20 +44,24 @@ namespace Klei
 			SimUtil.CheckValidValue(num4);
 			SimUtil.CheckValidValue(num5);
 			num4 = Mathf.Clamp(num4, num2, num3);
-			num5 = Mathf.Clamp(num5, num2, num3);
-			float num6 = Math.Abs(num4 - source_temp);
-			float num7 = Math.Abs(num5 - dest_temp);
-			float num8 = num6 * source_heat_capacity;
-			float num9 = num7 * dest_heat_capacity;
-			float num10 = ((max_watts_transferred >= 0f) ? 1f : (-1f));
-			float num11 = Math.Min(num8, num9) * num10;
-			SimUtil.CheckValidValue(num11);
-			return num11;
+			float num6 = Mathf.Clamp(num5, num2, num3);
+			float num7 = Math.Abs(num4 - source_temp);
+			float num8 = Math.Abs(num6 - dest_temp);
+			float num9 = num7 * source_heat_capacity;
+			float num10 = num8 * dest_heat_capacity;
+			float num11 = ((max_watts_transferred < 0f) ? (-1f) : 1f);
+			float num12 = Math.Min(num9, num10) * num11;
+			SimUtil.CheckValidValue(num12);
+			return num12;
 		}
 
 		private static float GetMassAreaScale(Element element)
 		{
-			return (!element.IsGas) ? 0.01f : 10f;
+			if (!element.IsGas)
+			{
+				return 0.01f;
+			}
+			return 10f;
 		}
 
 		public static float CalculateEnergyFlowCreatures(int cell, float creature_temperature, float creature_shc, float creature_thermal_conductivity, float creature_surface_area = 1f, float creature_surface_thickness = 1f)
@@ -86,28 +87,28 @@ namespace Klei
 			}
 			float num2 = mass1 * temp1;
 			float num3 = mass2 * temp2;
-			float num4 = num2 + num3;
-			float num5 = num4 / num;
+			float num4 = (num2 + num3) / num;
+			float num5;
 			float num6;
-			float num7;
 			if (temp1 > temp2)
 			{
-				num6 = temp2;
-				num7 = temp1;
+				num5 = temp2;
+				num6 = temp1;
 			}
 			else
 			{
-				num6 = temp1;
-				num7 = temp2;
+				num5 = temp1;
+				num6 = temp2;
 			}
-			return Math.Max(num6, Math.Min(num7, num5));
+			return Math.Max(num5, Math.Min(num6, num4));
 		}
 
 		[Conditional("STRICT_CHECKING")]
 		public static void CheckValidValue(float value)
 		{
-			if (float.IsNaN(value) || float.IsInfinity(value))
+			if (!float.IsNaN(value))
 			{
+				float.IsInfinity(value);
 			}
 		}
 

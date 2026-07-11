@@ -3,13 +3,13 @@
 namespace System.Runtime.InteropServices.ComTypes
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("0000000c-0000-0000-c000-000000000046")]
+	[Guid("0000000c-0000-0000-C000-000000000046")]
 	[ComImport]
 	public interface IStream
 	{
-		void Read([MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 1)] [Out] byte[] pv, int cb, IntPtr pcbRead);
+		void Read([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [Out] byte[] pv, int cb, IntPtr pcbRead);
 
-		void Write([MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 1)] byte[] pv, int cb, IntPtr pcbWritten);
+		void Write([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] pv, int cb, IntPtr pcbWritten);
 
 		void Seek(long dlibMove, int dwOrigin, IntPtr plibNewPosition);
 

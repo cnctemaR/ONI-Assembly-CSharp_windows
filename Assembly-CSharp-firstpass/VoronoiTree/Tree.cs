@@ -7,6 +7,8 @@ namespace VoronoiTree
 {
 	public class Tree : Node
 	{
+		public SeededRandom myRandom { get; private set; }
+
 		public Tree()
 			: base(Node.NodeType.Internal)
 		{
@@ -38,8 +40,6 @@ namespace VoronoiTree
 			this.children = children;
 			this.SetSeed(seed);
 		}
-
-		public SeededRandom myRandom { get; private set; }
 
 		public void SetSeed(int seed)
 		{
@@ -137,13 +137,9 @@ namespace VoronoiTree
 				{
 					for (int k = 0; k < this.children.Count; k++)
 					{
-						if (this.children[k].type == Node.NodeType.Internal)
+						if (this.children[k].type == Node.NodeType.Internal && !(this.children[k] as Tree).ComputeChildrenRecursive(depth + 1, pd))
 						{
-							Tree tree = this.children[k] as Tree;
-							if (!tree.ComputeChildrenRecursive(depth + 1, pd))
-							{
-								return false;
-							}
+							return false;
 						}
 					}
 				}
@@ -152,13 +148,9 @@ namespace VoronoiTree
 			{
 				for (int l = 0; l < this.children.Count; l++)
 				{
-					if (this.children[l].type == Node.NodeType.Internal)
+					if (this.children[l].type == Node.NodeType.Internal && !(this.children[l] as Tree).ComputeChildrenRecursive(depth + 1, false))
 					{
-						Tree tree2 = this.children[l] as Tree;
-						if (!tree2.ComputeChildrenRecursive(depth + 1, false))
-						{
-							return false;
-						}
+						return false;
 					}
 				}
 			}
@@ -225,8 +217,7 @@ namespace VoronoiTree
 				{
 					if (this.children[i].type == Node.NodeType.Internal)
 					{
-						Tree tree = this.children[i] as Tree;
-						tree.Reset();
+						(this.children[i] as Tree).Reset();
 					}
 				}
 			}
@@ -246,8 +237,7 @@ namespace VoronoiTree
 				int num3 = num2 + 1;
 				if (this.children[i].type == Node.NodeType.Internal)
 				{
-					Tree tree = this.children[i] as Tree;
-					num3 = tree.MaxDepth(num2);
+					num3 = (this.children[i] as Tree).MaxDepth(num2);
 				}
 				if (num3 > num)
 				{
@@ -355,13 +345,9 @@ namespace VoronoiTree
 				{
 					num += Vector2.Distance(this.children[k].site.position, list[k].poly.Centroid());
 					this.children[k].site.position = list[k].poly.Centroid();
-					if (this.children[k].type == Node.NodeType.Internal)
+					if (this.children[k].type == Node.NodeType.Internal && !(this.children[k] as Tree).ComputeChildren(depth, false, false))
 					{
-						Tree tree2 = this.children[k] as Tree;
-						if (!tree2.ComputeChildren(depth, false, false))
-						{
-							return 0f;
-						}
+						return 0f;
 					}
 				}
 			}
@@ -427,8 +413,7 @@ namespace VoronoiTree
 				{
 					if (this.children[i].type == Node.NodeType.Internal)
 					{
-						Tree tree = this.children[i] as Tree;
-						return tree.GetNodeForSite(target);
+						return (this.children[i] as Tree).GetNodeForSite(target);
 					}
 					return this.children[i];
 				}
@@ -548,24 +533,21 @@ namespace VoronoiTree
 		{
 			for (int i = 0; i < this.children.Count; i++)
 			{
-				if (this.children[i] != null)
+				if (this.children[i] != null && this.children[i].type == Node.NodeType.Internal)
 				{
-					if (this.children[i].type == Node.NodeType.Internal)
+					Tree tree = (Tree)this.children[i];
+					if (tree.ChildCount() > 1)
 					{
-						Tree tree = (Tree)this.children[i];
-						if (tree.ChildCount() > 1)
+						tree.Collapse();
+					}
+					else
+					{
+						Node node = this.children[i];
+						this.children[i] = new Leaf(tree.site, this);
+						this.children[i].log = node.log;
+						if (tree.tags != null)
 						{
-							tree.Collapse();
-						}
-						else
-						{
-							Node node = this.children[i];
-							this.children[i] = new Leaf(tree.site, this);
-							this.children[i].log = node.log;
-							if (tree.tags != null)
-							{
-								this.children[i].SetTags(tree.tags);
-							}
+							this.children[i].SetTags(tree.tags);
 						}
 					}
 				}

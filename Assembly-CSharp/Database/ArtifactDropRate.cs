@@ -7,14 +7,14 @@ namespace Database
 	{
 		public void AddItem(ArtifactTier tier, float weight)
 		{
-			this.rates.Add(new Tuple<ArtifactTier, float>(tier, weight));
+			this.rates.Add(new global::Tuple<ArtifactTier, float>(tier, weight));
 			this.totalWeight += weight;
 		}
 
 		public float GetTierWeight(ArtifactTier tier)
 		{
 			float num = 0f;
-			foreach (Tuple<ArtifactTier, float> tuple in this.rates)
+			foreach (global::Tuple<ArtifactTier, float> tuple in this.rates)
 			{
 				if (tuple.first == tier)
 				{
@@ -24,7 +24,7 @@ namespace Database
 			return num;
 		}
 
-		public List<Tuple<ArtifactTier, float>> rates = new List<Tuple<ArtifactTier, float>>();
+		public List<global::Tuple<ArtifactTier, float>> rates = new List<global::Tuple<ArtifactTier, float>>();
 
 		public float totalWeight;
 	}

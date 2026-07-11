@@ -42,8 +42,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 
 	public void Sim200ms(float dt)
 	{
-		Building component = base.GetComponent<Building>();
-		Extents extents = component.GetExtents();
+		Extents extents = base.GetComponent<Building>().GetExtents();
 		int num = Mathf.Max(0, extents.x - this.clearScanCellRadius);
 		int num2 = Mathf.Min(new int[] { extents.x + this.clearScanCellRadius });
 		int num3 = extents.y + extents.height - 3;
@@ -58,22 +57,22 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 				num7++;
 			}
 		}
-		Operational component2 = base.GetComponent<Operational>();
-		component2.SetFlag(Telescope.visibleSkyFlag, num7 > 0);
+		Operational component = base.GetComponent<Operational>();
+		component.SetFlag(Telescope.visibleSkyFlag, num7 > 0);
 		bool flag = num7 < num4;
-		KSelectable component3 = base.GetComponent<KSelectable>();
+		KSelectable component2 = base.GetComponent<KSelectable>();
 		if (num7 > 0)
 		{
-			component3.ToggleStatusItem(Telescope.noVisibilityStatusItem, false, null);
-			component3.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, flag, this);
+			component2.ToggleStatusItem(Telescope.noVisibilityStatusItem, false, null);
+			component2.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, flag, this);
 		}
 		else
 		{
-			component3.ToggleStatusItem(Telescope.noVisibilityStatusItem, true, this);
-			component3.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, false, null);
+			component2.ToggleStatusItem(Telescope.noVisibilityStatusItem, true, this);
+			component2.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, false, null);
 		}
 		this.percentClear = (float)num7 / (float)num4;
-		if (!component2.IsActive && component2.IsOperational && this.chore == null)
+		if (!component.IsActive && component.IsOperational && this.chore == null)
 		{
 			this.chore = this.CreateChore();
 			base.SetWorkTime(float.PositiveInfinity);
@@ -83,8 +82,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 	private static string GetStatusItemString(string src_str, object data)
 	{
 		Telescope telescope = (Telescope)data;
-		string text = src_str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(telescope.percentClear * 100f, GameUtil.TimeSlice.None));
-		return text.Replace("{RADIUS}", telescope.clearScanCellRadius.ToString());
+		return src_str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(telescope.percentClear * 100f, GameUtil.TimeSlice.None)).Replace("{RADIUS}", telescope.clearScanCellRadius.ToString());
 	}
 
 	private void OnWorkableEvent(Workable.WorkableEvent ev)
@@ -96,17 +94,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		}
 		OxygenBreather component = worker.GetComponent<OxygenBreather>();
 		KPrefabID component2 = worker.GetComponent<KPrefabID>();
-		if (ev != Workable.WorkableEvent.WorkStarted)
-		{
-			if (ev == Workable.WorkableEvent.WorkStopped)
-			{
-				component.SetGasProvider(this.workerGasProvider);
-				component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
-				base.ShowProgressBar(false);
-				component2.RemoveTag(GameTags.Shaded);
-			}
-		}
-		else
+		if (ev == Workable.WorkableEvent.WorkStarted)
 		{
 			base.ShowProgressBar(true);
 			this.progressBar.SetUpdateFunc(delegate
@@ -121,7 +109,16 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 			component.SetGasProvider(this);
 			component.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 			component2.AddTag(GameTags.Shaded, false);
+			return;
 		}
+		if (ev != Workable.WorkableEvent.WorkStopped)
+		{
+			return;
+		}
+		component.SetGasProvider(this.workerGasProvider);
+		component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
+		base.ShowProgressBar(false);
+		component2.RemoveTag(GameTags.Shaded);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -133,10 +130,9 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 			float num = 1f / (float)destination.OneBasedDistance;
 			float num2 = (float)ROCKETRY.DESTINATION_ANALYSIS.DISCOVERED;
 			float default_CYCLES_PER_DISCOVERY = ROCKETRY.DESTINATION_ANALYSIS.DEFAULT_CYCLES_PER_DISCOVERY;
-			float num3 = num2 / default_CYCLES_PER_DISCOVERY;
-			float num4 = num3 / 600f;
-			float num5 = dt * num * num4;
-			SpacecraftManager.instance.EarnDestinationAnalysisPoints(starmapAnalysisDestinationID, num5);
+			float num3 = num2 / default_CYCLES_PER_DISCOVERY / 600f;
+			float num4 = dt * num * num3;
+			SpacecraftManager.instance.EarnDestinationAnalysisPoints(starmapAnalysisDestinationID, num4);
 		}
 		return base.OnWorkTick(worker, dt);
 	}
@@ -233,9 +229,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		description = DUPLICANTS.CHORES.PRECONDITIONS.CONTAINS_OXYGEN,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Storage component = context.chore.target.GetComponent<Storage>();
-			PrimaryElement primaryElement = component.FindFirstWithMass(GameTags.Oxygen);
-			return primaryElement != null;
+			return context.chore.target.GetComponent<Storage>().FindFirstWithMass(GameTags.Oxygen) != null;
 		}
 	};
 

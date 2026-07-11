@@ -95,8 +95,7 @@ public class DemoTimer : MonoBehaviour
 			return;
 		}
 		this.demoOver = true;
-		GameObject gameObject = Util.KInstantiateUI(this.Prefab_DemoOverScreen, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
-		gameObject.GetComponent<DemoOverScreen>().Show(true);
+		Util.KInstantiateUI(this.Prefab_DemoOverScreen, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false).GetComponent<DemoOverScreen>().Show(true);
 	}
 
 	public static DemoTimer Instance;
@@ -121,5 +120,5 @@ public class DemoTimer : MonoBehaviour
 
 	private GameObject fadeOutScreen;
 
-	private Color fadeOutColor = default(Color);
+	private Color fadeOutColor;
 }

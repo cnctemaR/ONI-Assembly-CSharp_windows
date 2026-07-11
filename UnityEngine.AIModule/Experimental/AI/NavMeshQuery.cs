@@ -2,34 +2,23 @@
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.AI;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.AI
 {
-	/// <summary>
-	///   <para>Object used for doing navigation operations in a NavMeshWorld.</para>
-	/// </summary>
-	[NativeContainer]
 	[NativeHeader("Modules/AI/NavMeshExperimental.bindings.h")]
-	[NativeHeader("Runtime/Math/Matrix4x4.h")]
 	[StaticAccessor("NavMeshQueryBindings", StaticAccessorType.DoubleColon)]
+	[NativeContainer]
+	[NativeHeader("Runtime/Math/Matrix4x4.h")]
+	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
 	public struct NavMeshQuery : IDisposable
 	{
-		/// <summary>
-		///   <para>Creates the NavMeshQuery object and allocates memory to store NavMesh node information, if required.</para>
-		/// </summary>
-		/// <param name="world">NavMeshWorld object used as an entry point to the collection of NavMesh objects. This object that can be used by query operations.</param>
-		/// <param name="allocator">Label indicating the desired life time of the object. (Known issue: Currently allocator has no effect).</param>
-		/// <param name="pathNodePoolSize">The number of nodes that can be temporarily stored in the query during search operations. This value defaults to 0 if no other value is specified.</param>
 		public NavMeshQuery(NavMeshWorld world, Allocator allocator, int pathNodePoolSize = 0)
 		{
-			this.m_Allocator = allocator;
 			this.m_NavMeshQuery = NavMeshQuery.Create(world, pathNodePoolSize);
 		}
 
-		/// <summary>
-		///   <para>Destroys the NavMeshQuery and deallocates all memory used by it.</para>
-		/// </summary>
 		public void Dispose()
 		{
 			NavMeshQuery.Destroy(this.m_NavMeshQuery);
@@ -89,19 +78,11 @@ namespace UnityEngine.Experimental.AI
 			return NavMeshQuery.IsValidPolygon_Injected(navMeshQuery, ref polygon);
 		}
 
-		/// <summary>
-		///   <para>Returns true if the node referenced by the specified PolygonId is active in the NavMesh.</para>
-		/// </summary>
-		/// <param name="polygon">Identifier of the NavMesh node to be checked.</param>
 		public bool IsValid(PolygonId polygon)
 		{
 			return polygon.polyRef != 0UL && NavMeshQuery.IsValidPolygon(this.m_NavMeshQuery, polygon);
 		}
 
-		/// <summary>
-		///   <para>Returns true if the node referenced by the PolygonId contained in the NavMeshLocation is active in the NavMesh.</para>
-		/// </summary>
-		/// <param name="location">Location on the NavMesh to be checked. Same as checking location.polygon directly.</param>
 		public bool IsValid(NavMeshLocation location)
 		{
 			return this.IsValid(location.polygon);
@@ -113,13 +94,6 @@ namespace UnityEngine.Experimental.AI
 			return NavMeshQuery.GetAgentTypeIdForPolygon_Injected(navMeshQuery, ref polygon);
 		}
 
-		/// <summary>
-		///   <para>Returns the identifier of the agent type the NavMesh was baked for or for which the link has been configured.</para>
-		/// </summary>
-		/// <param name="polygon">Identifier of a node from a NavMesh surface or link.</param>
-		/// <returns>
-		///   <para>Agent type identifier.</para>
-		/// </returns>
 		public int GetAgentTypeIdForPolygon(PolygonId polygon)
 		{
 			return NavMeshQuery.GetAgentTypeIdForPolygon(this.m_NavMeshQuery, polygon);
@@ -137,14 +111,6 @@ namespace UnityEngine.Experimental.AI
 			return NavMeshQuery.GetClosestPointOnPoly_Injected(navMeshQuery, ref polygon, ref position, out nearest);
 		}
 
-		/// <summary>
-		///   <para>Returns a valid NavMeshLocation for a position and a polygon provided by the user.</para>
-		/// </summary>
-		/// <param name="position">World position of the NavMeshLocation to be created.</param>
-		/// <param name="polygon">Valid identifier for the NavMesh node.</param>
-		/// <returns>
-		///   <para>Object containing the desired position and NavMesh node.</para>
-		/// </returns>
 		public NavMeshLocation CreateLocation(Vector3 position, PolygonId polygon)
 		{
 			Vector3 vector;
@@ -160,18 +126,6 @@ namespace UnityEngine.Experimental.AI
 			return navMeshLocation;
 		}
 
-		/// <summary>
-		///   <para>Finds the closest point and PolygonId on the NavMesh for a given world position.</para>
-		/// </summary>
-		/// <param name="position">World position for which the closest point on the NavMesh needs to be found.</param>
-		/// <param name="extents">Maximum distance, from the specified position, expanding along all three axes, within which NavMesh surfaces are searched.</param>
-		/// <param name="agentTypeID">Identifier for the agent type whose NavMesh surfaces should be selected for this operation. The Humanoid agent type exists for all NavMeshes and has an ID of 0. Other agent types can be defined manually through the Editor. A separate NavMesh surface needs to be baked for each agent type.</param>
-		/// <param name="areaMask">Bitmask used to represent areas of the NavMesh that should (value of 1) or shouldn't (values of 0) be sampled. This parameter is optional and defaults to NavMesh.AllAreas if unspecified. See Also:.</param>
-		/// <returns>
-		///   <para>An object with position and valid PolygonId  - when a point on the NavMesh has been found.
-		///
-		/// An invalid object - when no NavMesh surface with the desired features has been found within the search area. See Also: NavMeshQuery.IsValid.</para>
-		/// </returns>
 		public NavMeshLocation MapLocation(Vector3 position, Vector3 extents, int agentTypeID, int areaMask = -1)
 		{
 			return NavMeshQuery.MapLocation(this.m_NavMeshQuery, position, extents, agentTypeID, areaMask);
@@ -203,17 +157,6 @@ namespace UnityEngine.Experimental.AI
 			return navMeshLocation;
 		}
 
-		/// <summary>
-		///   <para>Translates a NavMesh location to another position without losing contact with the surface.</para>
-		/// </summary>
-		/// <param name="location">Position to be moved across the NavMesh surface.</param>
-		/// <param name="target">World position you require the agent to move to.</param>
-		/// <param name="areaMask">Bitmask with values of 1 set at the indices corresponding to areas that can be traversed, and with values of 0 for areas that should not be traversed. This parameter can be omitted, in which case it defaults to NavMesh.AllAreas. See Also:.</param>
-		/// <returns>
-		///   <para>A new location on the NavMesh placed as closely as possible to the specified target position.
-		///
-		/// The start location is returned when that start is inside an area which is not allowed by the areaMask.</para>
-		/// </returns>
 		public NavMeshLocation MoveLocation(NavMeshLocation location, Vector3 target, int areaMask = -1)
 		{
 			return NavMeshQuery.MoveLocation(this.m_NavMeshQuery, location, target, areaMask);
@@ -238,15 +181,6 @@ namespace UnityEngine.Experimental.AI
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Returns the transformation matrix of the NavMesh surface that contains the specified NavMesh node (Read Only).</para>
-		/// </summary>
-		/// <param name="polygon">NavMesh node for which its owner's transform must be determined.</param>
-		/// <returns>
-		///   <para>Transformation matrix for the surface owning the specified polygon.
-		///
-		/// Matrix4x4.identity when the NavMesh node is a.</para>
-		/// </returns>
 		public Matrix4x4 PolygonLocalToWorldMatrix(PolygonId polygon)
 		{
 			return NavMeshQuery.PolygonLocalToWorldMatrix(this.m_NavMeshQuery, polygon);
@@ -260,15 +194,6 @@ namespace UnityEngine.Experimental.AI
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Returns the inverse transformation matrix of the NavMesh surface that contains the specified NavMesh node (Read Only).</para>
-		/// </summary>
-		/// <param name="polygon">NavMesh node for which its owner's inverse transform must be determined.</param>
-		/// <returns>
-		///   <para>Inverse transformation matrix of the surface owning the specified polygon.
-		///
-		/// Matrix4x4.identity when the NavMesh node is a.</para>
-		/// </returns>
 		public Matrix4x4 PolygonWorldToLocalMatrix(PolygonId polygon)
 		{
 			return NavMeshQuery.PolygonWorldToLocalMatrix(this.m_NavMeshQuery, polygon);
@@ -280,18 +205,31 @@ namespace UnityEngine.Experimental.AI
 			return NavMeshQuery.GetPolygonType_Injected(navMeshQuery, ref polygon);
 		}
 
-		/// <summary>
-		///   <para>Returns whether the NavMesh node is a polygon or a link.</para>
-		/// </summary>
-		/// <param name="polygon">Identifier of a node from a NavMesh surface or link.</param>
-		/// <returns>
-		///   <para>Ground when the node is a polygon on a NavMesh surface.
-		///
-		/// OffMeshConnection when the node is a.</para>
-		/// </returns>
 		public NavMeshPolyTypes GetPolygonType(PolygonId polygon)
 		{
 			return NavMeshQuery.GetPolygonType(this.m_NavMeshQuery, polygon);
+		}
+
+		[ThreadSafe]
+		private unsafe static PathQueryStatus Raycast(IntPtr navMeshQuery, NavMeshLocation start, Vector3 targetPosition, int areaMask, void* costs, out NavMeshHit hit, void* path, out int pathCount, int maxPath)
+		{
+			return NavMeshQuery.Raycast_Injected(navMeshQuery, ref start, ref targetPosition, areaMask, costs, out hit, path, out pathCount, maxPath);
+		}
+
+		public unsafe PathQueryStatus Raycast(out NavMeshHit hit, NavMeshLocation start, Vector3 targetPosition, int areaMask = -1, NativeArray<float> costs = default(NativeArray<float>))
+		{
+			void* ptr = ((costs.Length != 32) ? null : costs.GetUnsafePtr<float>());
+			int num;
+			PathQueryStatus pathQueryStatus = NavMeshQuery.Raycast(this.m_NavMeshQuery, start, targetPosition, areaMask, ptr, out hit, null, out num, 0);
+			return pathQueryStatus & ~PathQueryStatus.BufferTooSmall;
+		}
+
+		public unsafe PathQueryStatus Raycast(out NavMeshHit hit, NativeSlice<PolygonId> path, out int pathCount, NavMeshLocation start, Vector3 targetPosition, int areaMask = -1, NativeArray<float> costs = default(NativeArray<float>))
+		{
+			void* ptr = ((costs.Length != 32) ? null : costs.GetUnsafePtr<float>());
+			void* ptr2 = ((path.Length <= 0) ? null : path.GetUnsafePtr<PolygonId>());
+			int num = ((ptr2 == null) ? 0 : path.Length);
+			return NavMeshQuery.Raycast(this.m_NavMeshQuery, start, targetPosition, areaMask, ptr, out hit, ptr2, out pathCount, num);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -330,11 +268,10 @@ namespace UnityEngine.Experimental.AI
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern NavMeshPolyTypes GetPolygonType_Injected(IntPtr navMeshQuery, ref PolygonId polygon);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern PathQueryStatus Raycast_Injected(IntPtr navMeshQuery, ref NavMeshLocation start, ref Vector3 targetPosition, int areaMask, void* costs, out NavMeshHit hit, void* path, out int pathCount, int maxPath);
+
 		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr m_NavMeshQuery;
-
-		private Allocator m_Allocator;
-
-		private const string k_NoBufferAllocatedErrorMessage = "This query has no buffer allocated for pathfinding operations. Create a different NavMeshQuery with an explicit node pool size.";
 	}
 }

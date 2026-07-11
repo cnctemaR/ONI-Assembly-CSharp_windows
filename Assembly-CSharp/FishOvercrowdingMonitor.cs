@@ -12,8 +12,7 @@ public class FishOvercrowdingMonitor : GameStateMachine<FishOvercrowdingMonitor,
 
 	private static void Register(FishOvercrowdingMonitor.Instance smi)
 	{
-		FishOvercrowingManager instance = FishOvercrowingManager.Instance;
-		instance.Add(smi);
+		FishOvercrowingManager.Instance.Add(smi);
 	}
 
 	private static void Unregister(FishOvercrowdingMonitor.Instance smi)

@@ -4,16 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The HingeJoint groups together 2 rigid bodies, constraining them to move like connected by a hinge.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Dynamics/HingeJoint.h")]
 	[NativeClass("Unity::HingeJoint")]
+	[NativeHeader("Runtime/Dynamics/HingeJoint.h")]
 	public class HingeJoint : Joint
 	{
-		/// <summary>
-		///   <para>The motor will apply a force up to a maximum force to achieve the target velocity in degrees per second.</para>
-		/// </summary>
 		public JointMotor motor
 		{
 			get
@@ -28,9 +22,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Limit of angular rotation (in degrees) on the hinge joint.</para>
-		/// </summary>
 		public JointLimits limits
 		{
 			get
@@ -45,9 +36,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The spring attempts to reach a target angle by adding spring and damping forces.</para>
-		/// </summary>
 		public JointSpring spring
 		{
 			get
@@ -62,9 +50,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Enables the joint's motor. Disabled by default.</para>
-		/// </summary>
 		public extern bool useMotor
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -73,9 +58,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Enables the joint's limits. Disabled by default.</para>
-		/// </summary>
 		public extern bool useLimits
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -84,9 +66,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Enables the joint's spring. Disabled by default.</para>
-		/// </summary>
 		public extern bool useSpring
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -95,18 +74,12 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The angular velocity of the joint in degrees per second. (Read Only)</para>
-		/// </summary>
 		public extern float velocity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The current angle in degrees of the joint relative to its rest position. (Read Only)</para>
-		/// </summary>
 		public extern float angle
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

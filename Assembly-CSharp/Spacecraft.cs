@@ -73,16 +73,15 @@ public class Spacecraft
 
 	private float GetPilotNavigationEfficiency()
 	{
-		MinionStorage component = this.launchConditions.GetComponent<MinionStorage>();
-		List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
+		List<MinionStorage.Info> storedMinionInfo = this.launchConditions.GetComponent<MinionStorage>().GetStoredMinionInfo();
 		if (storedMinionInfo.Count < 1)
 		{
 			return 1f;
 		}
-		StoredMinionIdentity component2 = storedMinionInfo[0].serializedMinion.Get().GetComponent<StoredMinionIdentity>();
+		StoredMinionIdentity component = storedMinionInfo[0].serializedMinion.Get().GetComponent<StoredMinionIdentity>();
 		string text = Db.Get().Attributes.SpaceNavigation.Id;
 		float num = 1f;
-		foreach (KeyValuePair<string, bool> keyValuePair in component2.MasteryBySkillID)
+		foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
 		{
 			foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
 			{
@@ -144,6 +143,7 @@ public class Spacecraft
 
 	public void TemporallyTear()
 	{
+		SpacecraftManager.instance.hasVisitedWormHole = true;
 		LaunchConditionManager launchConditions = this.launchConditions;
 		for (int i = launchConditions.rocketModules.Count - 1; i >= 0; i--)
 		{

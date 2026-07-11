@@ -2,9 +2,6 @@
 
 namespace Unity.Jobs.LowLevel.Unsafe
 {
-	/// <summary>
-	///   <para>Struct used to schedule batch query jobs.</para>
-	/// </summary>
 	public struct BatchQueryJobStruct<T> where T : struct
 	{
 		public static IntPtr Initialize()

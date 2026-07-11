@@ -1,43 +1,71 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection.Emit;
+using System.Diagnostics;
+using System.Dynamic.Utils;
+using Unity;
 
 namespace System.Linq.Expressions
 {
+	[DebuggerTypeProxy(typeof(Expression.ListInitExpressionProxy))]
 	public sealed class ListInitExpression : Expression
 	{
-		internal ListInitExpression(NewExpression new_expression, ReadOnlyCollection<ElementInit> initializers)
-			: base(ExpressionType.ListInit, new_expression.Type)
+		internal ListInitExpression(NewExpression newExpression, ReadOnlyCollection<ElementInit> initializers)
 		{
-			this.new_expression = new_expression;
-			this.initializers = initializers;
+			this.NewExpression = newExpression;
+			this.Initializers = initializers;
 		}
 
-		public NewExpression NewExpression
-		{
-			get
-			{
-				return this.new_expression;
-			}
-		}
-
-		public ReadOnlyCollection<ElementInit> Initializers
+		public sealed override ExpressionType NodeType
 		{
 			get
 			{
-				return this.initializers;
+				return ExpressionType.ListInit;
 			}
 		}
 
-		internal override void Emit(EmitContext ec)
+		public sealed override Type Type
 		{
-			LocalBuilder localBuilder = ec.EmitStored(this.new_expression);
-			ec.EmitCollection(this.initializers, localBuilder);
-			ec.EmitLoad(localBuilder);
+			get
+			{
+				return this.NewExpression.Type;
+			}
 		}
 
-		private NewExpression new_expression;
+		public override bool CanReduce
+		{
+			get
+			{
+				return true;
+			}
+		}
 
-		private ReadOnlyCollection<ElementInit> initializers;
+		public NewExpression NewExpression { get; }
+
+		public ReadOnlyCollection<ElementInit> Initializers { get; }
+
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitListInit(this);
+		}
+
+		public override Expression Reduce()
+		{
+			return MemberInitExpression.ReduceListInit(this.NewExpression, this.Initializers, true);
+		}
+
+		public ListInitExpression Update(NewExpression newExpression, IEnumerable<ElementInit> initializers)
+		{
+			if (((newExpression == this.NewExpression) & (initializers != null)) && ExpressionUtils.SameElements<ElementInit>(ref initializers, this.Initializers))
+			{
+				return this;
+			}
+			return Expression.ListInit(newExpression, initializers);
+		}
+
+		internal ListInitExpression()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
 	}
 }

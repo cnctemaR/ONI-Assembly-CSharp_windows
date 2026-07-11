@@ -9,19 +9,15 @@ public static class BaseCrabConfig
 	public static GameObject BaseCrab(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null, string onDeathDropID = "CrabShell")
 	{
 		float num = 100f;
-		KAnimFile anim = Assets.GetAnim(anim_file);
-		int num2 = ((!is_baby) ? 2 : 1);
+		int num2 = (is_baby ? 1 : 2);
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, "idle_loop", Grid.SceneLayer.Creatures, 1, num2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, num2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		string text = "WalkerNavGrid1x2";
 		if (is_baby)
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		GameObject gameObject2 = gameObject;
-		FactionManager.FactionID factionID = FactionManager.FactionID.Pest;
-		string text2 = text;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, NavType.Floor, 32, 2f, onDeathDropID, 1, false, false, 288.15f, 343.15f, 243.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, 1, false, false, 288.15f, 343.15f, 243.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -29,8 +25,7 @@ public static class BaseCrabConfig
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		ThreatMonitor.Def def = gameObject.AddOrGetDef<ThreatMonitor.Def>();
-		def.fleethresholdState = Health.HealthState.Dead;
+		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
 		gameObject.AddWeapon(2f, 3f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("FloorSoundEvent", "Hatch_footstep", NOISE_POLLUTION.CREATURES.TIER1);
@@ -86,8 +81,7 @@ public static class BaseCrabConfig
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
 		def.minPoopSizeInCalories = referenceCaloriesPerKg * minPoopSizeInKg;
-		SolidConsumerMonitor.Def def2 = prefab.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def2.diet = diet;
+		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}
 

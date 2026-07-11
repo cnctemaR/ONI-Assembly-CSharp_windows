@@ -12,7 +12,7 @@ namespace Mono.Unix.Native
 
 		public override bool Equals(object obj)
 		{
-			return obj != null && obj.GetType() == base.GetType() && ((Timezone)obj).tz_minuteswest == this.tz_minuteswest;
+			return obj != null && !(obj.GetType() != base.GetType()) && ((Timezone)obj).tz_minuteswest == this.tz_minuteswest;
 		}
 
 		public bool Equals(Timezone value)

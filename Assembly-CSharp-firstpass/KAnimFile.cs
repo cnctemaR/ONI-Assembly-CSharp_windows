@@ -8,7 +8,15 @@ public class KAnimFile : ScriptableObject
 	{
 		get
 		{
-			return (this.mod != null) ? this.mod.anim : ((!(this.animFile != null)) ? null : this.animFile.bytes);
+			if (this.mod != null)
+			{
+				return this.mod.anim;
+			}
+			if (!(this.animFile != null))
+			{
+				return null;
+			}
+			return this.animFile.bytes;
 		}
 	}
 
@@ -16,7 +24,15 @@ public class KAnimFile : ScriptableObject
 	{
 		get
 		{
-			return (this.mod != null) ? this.mod.build : ((!(this.buildFile != null)) ? null : this.buildFile.bytes);
+			if (this.mod != null)
+			{
+				return this.mod.build;
+			}
+			if (!(this.buildFile != null))
+			{
+				return null;
+			}
+			return this.buildFile.bytes;
 		}
 	}
 
@@ -24,7 +40,11 @@ public class KAnimFile : ScriptableObject
 	{
 		get
 		{
-			return (this.mod != null) ? this.mod.textures : this.textures;
+			if (this.mod != null)
+			{
+				return this.mod.textures;
+			}
+			return this.textures;
 		}
 	}
 
@@ -44,7 +64,7 @@ public class KAnimFile : ScriptableObject
 			{
 				return this._batchTag;
 			}
-			if (this.homedirectory == null || this.homedirectory == string.Empty)
+			if (this.homedirectory == null || this.homedirectory == "")
 			{
 				return KAnimBatchManager.NO_BATCH;
 			}
@@ -83,7 +103,7 @@ public class KAnimFile : ScriptableObject
 
 	private HashedString _batchTag;
 
-	public string homedirectory = string.Empty;
+	public string homedirectory = "";
 
 	public class Mod
 	{

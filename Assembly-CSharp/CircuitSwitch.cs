@@ -11,7 +11,7 @@ public class CircuitSwitch : Switch
 		base.OnToggle += this.CircuitOnToggle;
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
-		Wire wire = ((!(gameObject != null)) ? null : gameObject.GetComponent<Wire>());
+		Wire wire = ((gameObject != null) ? gameObject.GetComponent<Wire>() : null);
 		if (wire == null)
 		{
 			this.wireConnectedGUID = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
@@ -19,8 +19,7 @@ public class CircuitSwitch : Switch
 		this.AttachWire(wire);
 		this.wasOn = this.switchedOn;
 		this.UpdateCircuit(true);
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.Play((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+		base.GetComponent<KBatchedAnimController>().Play(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	protected override void OnCleanUp()
@@ -63,8 +62,9 @@ public class CircuitSwitch : Switch
 			this.SubscribeToWire(this.attachedWire);
 			this.UpdateCircuit(true);
 			this.wireConnectedGUID = base.GetComponent<KSelectable>().RemoveStatusItem(this.wireConnectedGUID, false);
+			return;
 		}
-		else if (this.wireConnectedGUID == Guid.Empty)
+		if (this.wireConnectedGUID == Guid.Empty)
 		{
 			this.wireConnectedGUID = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
 		}
@@ -113,8 +113,8 @@ public class CircuitSwitch : Switch
 		if (should_update_anim && this.wasOn != this.switchedOn)
 		{
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 			Game.Instance.userMenu.Refresh(base.gameObject);
 		}
 		this.wasOn = this.switchedOn;

@@ -33,7 +33,11 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 			this.headers.RemoveAt(num);
 			this.payloads.RemoveAt(num);
 		}
-		return (!flag) ? handle : HandleVector<int>.InvalidHandle;
+		if (!flag)
+		{
+			return handle;
+		}
+		return HandleVector<int>.InvalidHandle;
 	}
 
 	public void GetData(HandleVector<int>.Handle handle, out Header header, out Payload payload)
@@ -123,13 +127,6 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 
 	private struct Enumerator : IEnumerator
 	{
-		public Enumerator(List<Header>.Enumerator headerEnumerator, List<Payload>.Enumerator payloadEnumerator)
-		{
-			this.headerBegin = headerEnumerator;
-			this.payloadBegin = payloadEnumerator;
-			this.Reset();
-		}
-
 		public object Current
 		{
 			get
@@ -140,6 +137,13 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 					payload = this.payloadCurrent.Current
 				};
 			}
+		}
+
+		public Enumerator(List<Header>.Enumerator headerEnumerator, List<Payload>.Enumerator payloadEnumerator)
+		{
+			this.headerBegin = headerEnumerator;
+			this.payloadBegin = payloadEnumerator;
+			this.Reset();
 		}
 
 		public bool MoveNext()

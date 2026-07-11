@@ -29,7 +29,8 @@ namespace Satsuma
 				while (i < j)
 				{
 					yield return new KeyValuePair<TElement, TPriority>(this.payloads[i], this.priorities[i]);
-					i++;
+					int num = i;
+					i = num + 1;
 				}
 				yield break;
 			}
@@ -52,10 +53,12 @@ namespace Satsuma
 					if (num2 < 0)
 					{
 						this.MoveUp(num);
+						return;
 					}
-					else if (num2 > 0)
+					if (num2 > 0)
 					{
 						this.MoveDown(num);
+						return;
 					}
 				}
 				else
@@ -108,8 +111,9 @@ namespace Satsuma
 				if (num > 0)
 				{
 					this.MoveDown(pos);
+					return;
 				}
-				else if (num < 0)
+				if (num < 0)
 				{
 					this.MoveUp(pos);
 				}

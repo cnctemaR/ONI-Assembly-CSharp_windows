@@ -49,7 +49,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cubBuffer);
 			bool flag = NativeMethods.ISteamUser_GetUserDataFolder(CSteamAPIContext.GetSteamUser(), intPtr, cubBuffer);
-			pchBuffer = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchBuffer = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}

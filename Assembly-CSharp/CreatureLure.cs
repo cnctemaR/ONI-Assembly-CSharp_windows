@@ -15,8 +15,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		CreatureLure component = gameObject.GetComponent<CreatureLure>();
+		CreatureLure component = ((GameObject)data).GetComponent<CreatureLure>();
 		if (component != null)
 		{
 			this.ChangeBaitSetting(component.activeBaitSetting);
@@ -64,6 +63,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 			if (base.smi.master.baitStorage.IsEmpty())
 			{
 				this.CreateFetchChore();
+				return;
 			}
 		}
 		else
@@ -135,8 +135,9 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 					if (smi.master.baitStorage.IsEmpty())
 					{
 						smi.master.CreateFetchChore();
+						return;
 					}
-					else if (smi.master.operational.IsOperational)
+					if (smi.master.operational.IsOperational)
 					{
 						smi.GoTo(this.working);
 					}
@@ -168,8 +169,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 
 		private static void ClearBait(StateMachine.Instance smi)
 		{
-			Lure.Instance smi2 = smi.GetSMI<Lure.Instance>();
-			if (smi2 != null)
+			if (smi.GetSMI<Lure.Instance>() != null)
 			{
 				smi.GetSMI<Lure.Instance>().SetActiveLures(null);
 			}

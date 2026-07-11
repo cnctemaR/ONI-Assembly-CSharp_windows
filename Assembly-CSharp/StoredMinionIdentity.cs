@@ -166,8 +166,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 					});
 					info = new MinionStorage.Info(this.storedName, new Ref<KPrefabID>(component));
 					storedMinionInfo[i] = info;
-					Assignable component2 = minionStorage.GetComponent<Assignable>();
-					component2.Assign(this);
+					minionStorage.GetComponent<Assignable>().Assign(this);
 					flag2 = true;
 					break;
 				}
@@ -212,12 +211,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	{
 		for (int i = 0; i < this.accessories.Count; i++)
 		{
-			if (this.accessories[i].Get() != null)
+			if (this.accessories[i].Get() != null && this.accessories[i].Get().slot == slot)
 			{
-				if (this.accessories[i].Get().slot == slot)
-				{
-					return this.accessories[i].Get();
-				}
+				return this.accessories[i].Get();
 			}
 		}
 		return null;
@@ -233,24 +229,30 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
 		{
-			foreach (MinionStorage.Info info in minionStorage.GetStoredMinionInfo())
+			using (List<MinionStorage.Info>.Enumerator enumerator2 = minionStorage.GetStoredMinionInfo().GetEnumerator())
 			{
-				if (info.serializedMinion.Get() == component)
+				while (enumerator2.MoveNext())
 				{
-					return minionStorage.GetProperName();
+					if (enumerator2.Current.serializedMinion.Get() == component)
+					{
+						return minionStorage.GetProperName();
+					}
 				}
 			}
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public bool IsPermittedToConsume(string consumable)
 	{
-		foreach (Tag tag in this.forbiddenTags)
+		using (List<Tag>.Enumerator enumerator = this.forbiddenTags.GetEnumerator())
 		{
-			if (tag == consumable)
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (enumerator.Current == consumable)
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -265,9 +267,10 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 				Trait trait = Db.Get().traits.Get(text);
 				if (trait.disabledChoreGroups != null)
 				{
-					foreach (ChoreGroup choreGroup in trait.disabledChoreGroups)
+					ChoreGroup[] disabledChoreGroups = trait.disabledChoreGroups;
+					for (int i = 0; i < disabledChoreGroups.Length; i++)
 					{
-						if (choreGroup.IdHash == chore_group.IdHash)
+						if (disabledChoreGroups[i].IdHash == chore_group.IdHash)
 						{
 							return true;
 						}

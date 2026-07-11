@@ -2,9 +2,9 @@
 
 namespace Mono.Unix.Native
 {
-	[CLSCompliant(false)]
-	[Flags]
 	[Map]
+	[Flags]
+	[CLSCompliant(false)]
 	public enum MmapFlags
 	{
 		MAP_SHARED = 1,

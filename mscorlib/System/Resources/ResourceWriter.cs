@@ -1,27 +1,29 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Versioning;
+using System.Security;
 using System.Text;
 
 namespace System.Resources
 {
 	[ComVisible(true)]
-	public sealed class ResourceWriter : IDisposable, IResourceWriter
+	public sealed class ResourceWriter : IResourceWriter, IDisposable
 	{
-		public ResourceWriter(Stream stream)
+		public Func<Type, string> TypeNameConverter
 		{
-			if (stream == null)
+			get
 			{
-				throw new ArgumentNullException("stream");
+				return this.typeConverter;
 			}
-			if (!stream.CanWrite)
+			set
 			{
-				throw new ArgumentException("Stream was not writable.");
+				this.typeConverter = value;
 			}
-			this.stream = stream;
 		}
 
 		public ResourceWriter(string fileName)
@@ -30,41 +32,24 @@ namespace System.Resources
 			{
 				throw new ArgumentNullException("fileName");
 			}
-			this.stream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+			this._output = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+			this._resourceList = new Dictionary<string, object>(1000, FastResourceComparer.Default);
+			this._caseInsensitiveDups = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		}
 
-		public void AddResource(string name, byte[] value)
+		public ResourceWriter(Stream stream)
 		{
-			if (name == null)
+			if (stream == null)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException("stream");
 			}
-			if (this.resources == null)
+			if (!stream.CanWrite)
 			{
-				throw new InvalidOperationException("The resource writer has already been closed and cannot be edited");
+				throw new ArgumentException(Environment.GetResourceString("Stream was not writable."));
 			}
-			if (this.resources[name] != null)
-			{
-				throw new ArgumentException("Resource already present: " + name);
-			}
-			this.resources.Add(name, value);
-		}
-
-		public void AddResource(string name, object value)
-		{
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			if (this.resources == null)
-			{
-				throw new InvalidOperationException("The resource writer has already been closed and cannot be edited");
-			}
-			if (this.resources[name] != null)
-			{
-				throw new ArgumentException("Resource already present: " + name);
-			}
-			this.resources.Add(name, value);
+			this._output = stream;
+			this._resourceList = new Dictionary<string, object>(1000, FastResourceComparer.Default);
+			this._caseInsensitiveDups = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		}
 
 		public void AddResource(string name, string value)
@@ -73,43 +58,87 @@ namespace System.Resources
 			{
 				throw new ArgumentNullException("name");
 			}
-			if (this.resources == null)
+			if (this._resourceList == null)
 			{
-				throw new InvalidOperationException("The resource writer has already been closed and cannot be edited");
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
 			}
-			if (this.resources[name] != null)
-			{
-				throw new ArgumentException("Resource already present: " + name);
-			}
-			this.resources.Add(name, value);
+			this._caseInsensitiveDups.Add(name, null);
+			this._resourceList.Add(name, value);
 		}
 
-		public void Close()
+		public void AddResource(string name, object value)
 		{
-			this.Dispose(true);
-		}
-
-		public void Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		private void Dispose(bool disposing)
-		{
-			if (disposing)
+			if (name == null)
 			{
-				if (this.resources != null)
-				{
-					this.Generate();
-				}
-				if (this.stream != null)
-				{
-					this.stream.Close();
-				}
-				GC.SuppressFinalize(this);
+				throw new ArgumentNullException("name");
 			}
-			this.resources = null;
-			this.stream = null;
+			if (this._resourceList == null)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
+			}
+			if (value != null && value is Stream)
+			{
+				this.AddResourceInternal(name, (Stream)value, false);
+				return;
+			}
+			this._caseInsensitiveDups.Add(name, null);
+			this._resourceList.Add(name, value);
+		}
+
+		public void AddResource(string name, Stream value)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (this._resourceList == null)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
+			}
+			this.AddResourceInternal(name, value, false);
+		}
+
+		public void AddResource(string name, Stream value, bool closeAfterWrite)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (this._resourceList == null)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
+			}
+			this.AddResourceInternal(name, value, closeAfterWrite);
+		}
+
+		private void AddResourceInternal(string name, Stream value, bool closeAfterWrite)
+		{
+			if (value == null)
+			{
+				this._caseInsensitiveDups.Add(name, null);
+				this._resourceList.Add(name, value);
+				return;
+			}
+			if (!value.CanSeek)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Stream does not support seeking."));
+			}
+			this._caseInsensitiveDups.Add(name, null);
+			this._resourceList.Add(name, new ResourceWriter.StreamWrapper(value, closeAfterWrite));
+		}
+
+		public void AddResource(string name, byte[] value)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (this._resourceList == null)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
+			}
+			this._caseInsensitiveDups.Add(name, null);
+			this._resourceList.Add(name, value);
 		}
 
 		public void AddResourceData(string name, string typeName, byte[] serializedData)
@@ -126,280 +155,425 @@ namespace System.Resources
 			{
 				throw new ArgumentNullException("serializedData");
 			}
-			this.AddResource(name, new ResourceWriter.TypeByNameObject(typeName, serializedData));
+			if (this._resourceList == null)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
+			}
+			this._caseInsensitiveDups.Add(name, null);
+			if (this._preserializedData == null)
+			{
+				this._preserializedData = new Dictionary<string, ResourceWriter.PrecannedResource>(FastResourceComparer.Default);
+			}
+			this._preserializedData.Add(name, new ResourceWriter.PrecannedResource(typeName, serializedData));
 		}
 
+		public void Close()
+		{
+			this.Dispose(true);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (this._resourceList != null)
+				{
+					this.Generate();
+				}
+				if (this._output != null)
+				{
+					this._output.Close();
+				}
+			}
+			this._output = null;
+			this._caseInsensitiveDups = null;
+		}
+
+		public void Dispose()
+		{
+			this.Dispose(true);
+		}
+
+		[SecuritySafeCritical]
 		public void Generate()
 		{
-			if (this.resources == null)
+			if (this._resourceList == null)
 			{
-				throw new InvalidOperationException("The resource writer has already been closed and cannot be edited");
+				throw new InvalidOperationException(Environment.GetResourceString("The resource writer has already been closed and cannot be edited."));
 			}
-			BinaryWriter binaryWriter = new BinaryWriter(this.stream, Encoding.UTF8);
-			IFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File | StreamingContextStates.Persistence));
+			BinaryWriter binaryWriter = new BinaryWriter(this._output, Encoding.UTF8);
+			List<string> list = new List<string>();
 			binaryWriter.Write(ResourceManager.MagicNumber);
 			binaryWriter.Write(ResourceManager.HeaderVersionNumber);
-			MemoryStream memoryStream = new MemoryStream();
-			BinaryWriter binaryWriter2 = new BinaryWriter(memoryStream, Encoding.UTF8);
-			binaryWriter2.Write(typeof(ResourceReader).AssemblyQualifiedName);
-			binaryWriter2.Write(typeof(RuntimeResourceSet).FullName);
-			int num = (int)memoryStream.Length;
-			binaryWriter.Write(num);
-			binaryWriter.Write(memoryStream.GetBuffer(), 0, num);
-			MemoryStream memoryStream2 = new MemoryStream();
-			BinaryWriter binaryWriter3 = new BinaryWriter(memoryStream2, Encoding.Unicode);
-			MemoryStream memoryStream3 = new MemoryStream();
-			BinaryWriter binaryWriter4 = new BinaryWriter(memoryStream3, Encoding.UTF8);
-			ArrayList arrayList = new ArrayList();
-			int[] array = new int[this.resources.Count];
-			int[] array2 = new int[this.resources.Count];
-			int num2 = 0;
-			IDictionaryEnumerator enumerator = this.resources.GetEnumerator();
-			while (enumerator.MoveNext())
+			MemoryStream memoryStream = new MemoryStream(240);
+			BinaryWriter binaryWriter2 = new BinaryWriter(memoryStream);
+			binaryWriter2.Write(MultitargetingHelpers.GetAssemblyQualifiedName(typeof(ResourceReader), this.typeConverter));
+			binaryWriter2.Write(ResourceManager.ResSetTypeName);
+			binaryWriter2.Flush();
+			binaryWriter.Write((int)memoryStream.Length);
+			binaryWriter.Write(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+			binaryWriter.Write(2);
+			int num = this._resourceList.Count;
+			if (this._preserializedData != null)
 			{
-				array[num2] = this.GetHash((string)enumerator.Key);
-				array2[num2] = (int)binaryWriter3.BaseStream.Position;
-				binaryWriter3.Write((string)enumerator.Key);
-				binaryWriter3.Write((int)binaryWriter4.BaseStream.Position);
-				if (enumerator.Value == null)
+				num += this._preserializedData.Count;
+			}
+			binaryWriter.Write(num);
+			int[] array = new int[num];
+			int[] array2 = new int[num];
+			int num2 = 0;
+			MemoryStream memoryStream2 = new MemoryStream(num * 40);
+			BinaryWriter binaryWriter3 = new BinaryWriter(memoryStream2, Encoding.Unicode);
+			Stream stream = null;
+			try
+			{
+				string tempFileName = Path.GetTempFileName();
+				File.SetAttributes(tempFileName, FileAttributes.NotContentIndexed | FileAttributes.Temporary);
+				stream = new FileStream(tempFileName, FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose | FileOptions.SequentialScan);
+			}
+			catch (UnauthorizedAccessException)
+			{
+				stream = new MemoryStream();
+			}
+			catch (IOException)
+			{
+				stream = new MemoryStream();
+			}
+			using (stream)
+			{
+				BinaryWriter binaryWriter4 = new BinaryWriter(stream, Encoding.UTF8);
+				IFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File | StreamingContextStates.Persistence));
+				SortedList sortedList = new SortedList(this._resourceList, FastResourceComparer.Default);
+				if (this._preserializedData != null)
 				{
-					this.Write7BitEncodedInt(binaryWriter4, -1);
-					num2++;
+					foreach (KeyValuePair<string, ResourceWriter.PrecannedResource> keyValuePair in this._preserializedData)
+					{
+						sortedList.Add(keyValuePair.Key, keyValuePair.Value);
+					}
 				}
-				else
+				IDictionaryEnumerator enumerator2 = sortedList.GetEnumerator();
+				while (enumerator2.MoveNext())
 				{
-					ResourceWriter.TypeByNameObject typeByNameObject = enumerator.Value as ResourceWriter.TypeByNameObject;
-					Type type = ((typeByNameObject == null) ? enumerator.Value.GetType() : null);
-					object obj = ((typeByNameObject == null) ? type : typeByNameObject.TypeName);
-					switch ((type == null || type.IsEnum) ? TypeCode.Empty : Type.GetTypeCode(type))
+					array[num2] = FastResourceComparer.HashFunction((string)enumerator2.Key);
+					array2[num2++] = (int)binaryWriter3.Seek(0, SeekOrigin.Current);
+					binaryWriter3.Write((string)enumerator2.Key);
+					binaryWriter3.Write((int)binaryWriter4.Seek(0, SeekOrigin.Current));
+					object value = enumerator2.Value;
+					ResourceTypeCode resourceTypeCode = this.FindTypeCode(value, list);
+					ResourceWriter.Write7BitEncodedInt(binaryWriter4, (int)resourceTypeCode);
+					ResourceWriter.PrecannedResource precannedResource = value as ResourceWriter.PrecannedResource;
+					if (precannedResource != null)
 					{
-					case TypeCode.SByte:
-					case TypeCode.Byte:
-					case TypeCode.Int16:
-					case TypeCode.UInt16:
-					case TypeCode.Int32:
-					case TypeCode.UInt32:
-					case TypeCode.Int64:
-					case TypeCode.UInt64:
-					case TypeCode.Single:
-					case TypeCode.Double:
-					case TypeCode.Decimal:
-					case TypeCode.DateTime:
-					case TypeCode.String:
-						break;
-					case (TypeCode)17:
-						goto IL_022E;
-					default:
-						goto IL_022E;
-					}
-					IL_02A1:
-					if (typeByNameObject != null)
-					{
-						binaryWriter4.Write(typeByNameObject.Value);
-					}
-					else if (type == typeof(byte))
-					{
-						binaryWriter4.Write(4);
-						binaryWriter4.Write((byte)enumerator.Value);
-					}
-					else if (type == typeof(decimal))
-					{
-						binaryWriter4.Write(14);
-						binaryWriter4.Write((decimal)enumerator.Value);
-					}
-					else if (type == typeof(DateTime))
-					{
-						binaryWriter4.Write(15);
-						binaryWriter4.Write(((DateTime)enumerator.Value).Ticks);
-					}
-					else if (type == typeof(double))
-					{
-						binaryWriter4.Write(13);
-						binaryWriter4.Write((double)enumerator.Value);
-					}
-					else if (type == typeof(short))
-					{
-						binaryWriter4.Write(6);
-						binaryWriter4.Write((short)enumerator.Value);
-					}
-					else if (type == typeof(int))
-					{
-						binaryWriter4.Write(8);
-						binaryWriter4.Write((int)enumerator.Value);
-					}
-					else if (type == typeof(long))
-					{
-						binaryWriter4.Write(10);
-						binaryWriter4.Write((long)enumerator.Value);
-					}
-					else if (type == typeof(sbyte))
-					{
-						binaryWriter4.Write(5);
-						binaryWriter4.Write((sbyte)enumerator.Value);
-					}
-					else if (type == typeof(float))
-					{
-						binaryWriter4.Write(12);
-						binaryWriter4.Write((float)enumerator.Value);
-					}
-					else if (type == typeof(string))
-					{
-						binaryWriter4.Write(1);
-						binaryWriter4.Write((string)enumerator.Value);
-					}
-					else if (type == typeof(TimeSpan))
-					{
-						binaryWriter4.Write(16);
-						binaryWriter4.Write(((TimeSpan)enumerator.Value).Ticks);
-					}
-					else if (type == typeof(ushort))
-					{
-						binaryWriter4.Write(7);
-						binaryWriter4.Write((ushort)enumerator.Value);
-					}
-					else if (type == typeof(uint))
-					{
-						binaryWriter4.Write(9);
-						binaryWriter4.Write((uint)enumerator.Value);
-					}
-					else if (type == typeof(ulong))
-					{
-						binaryWriter4.Write(11);
-						binaryWriter4.Write((ulong)enumerator.Value);
-					}
-					else if (type == typeof(byte[]))
-					{
-						binaryWriter4.Write(32);
-						byte[] array3 = (byte[])enumerator.Value;
-						binaryWriter4.Write((uint)array3.Length);
-						binaryWriter4.Write(array3, 0, array3.Length);
-					}
-					else if (type == typeof(MemoryStream))
-					{
-						binaryWriter4.Write(33);
-						byte[] array4 = ((MemoryStream)enumerator.Value).ToArray();
-						binaryWriter4.Write((uint)array4.Length);
-						binaryWriter4.Write(array4, 0, array4.Length);
+						binaryWriter4.Write(precannedResource.Data);
 					}
 					else
 					{
-						formatter.Serialize(binaryWriter4.BaseStream, enumerator.Value);
+						this.WriteValue(resourceTypeCode, value, binaryWriter4, formatter);
 					}
-					num2++;
-					continue;
-					IL_022E:
-					if (type == typeof(TimeSpan))
+				}
+				binaryWriter.Write(list.Count);
+				for (int i = 0; i < list.Count; i++)
+				{
+					binaryWriter.Write(list[i]);
+				}
+				Array.Sort<int, int>(array, array2);
+				binaryWriter.Flush();
+				int num3 = (int)binaryWriter.BaseStream.Position & 7;
+				if (num3 > 0)
+				{
+					for (int j = 0; j < 8 - num3; j++)
 					{
-						goto IL_02A1;
+						binaryWriter.Write("PAD"[j % 3]);
 					}
-					if (type == typeof(MemoryStream))
-					{
-						goto IL_02A1;
-					}
-					if (type == typeof(byte[]))
-					{
-						goto IL_02A1;
-					}
-					if (!arrayList.Contains(obj))
-					{
-						arrayList.Add(obj);
-					}
-					this.Write7BitEncodedInt(binaryWriter4, 64 + arrayList.IndexOf(obj));
-					goto IL_02A1;
+				}
+				foreach (int num4 in array)
+				{
+					binaryWriter.Write(num4);
+				}
+				foreach (int num5 in array2)
+				{
+					binaryWriter.Write(num5);
+				}
+				binaryWriter.Flush();
+				binaryWriter3.Flush();
+				binaryWriter4.Flush();
+				int num6 = (int)(binaryWriter.Seek(0, SeekOrigin.Current) + memoryStream2.Length);
+				num6 += 4;
+				binaryWriter.Write(num6);
+				binaryWriter.Write(memoryStream2.GetBuffer(), 0, (int)memoryStream2.Length);
+				binaryWriter3.Close();
+				stream.Position = 0L;
+				stream.CopyTo(binaryWriter.BaseStream);
+				binaryWriter4.Close();
+			}
+			binaryWriter.Flush();
+			this._resourceList = null;
+		}
+
+		private ResourceTypeCode FindTypeCode(object value, List<string> types)
+		{
+			if (value == null)
+			{
+				return ResourceTypeCode.Null;
+			}
+			Type type = value.GetType();
+			if (type == typeof(string))
+			{
+				return ResourceTypeCode.String;
+			}
+			if (type == typeof(int))
+			{
+				return ResourceTypeCode.Int32;
+			}
+			if (type == typeof(bool))
+			{
+				return ResourceTypeCode.Boolean;
+			}
+			if (type == typeof(char))
+			{
+				return ResourceTypeCode.Char;
+			}
+			if (type == typeof(byte))
+			{
+				return ResourceTypeCode.Byte;
+			}
+			if (type == typeof(sbyte))
+			{
+				return ResourceTypeCode.SByte;
+			}
+			if (type == typeof(short))
+			{
+				return ResourceTypeCode.Int16;
+			}
+			if (type == typeof(long))
+			{
+				return ResourceTypeCode.Int64;
+			}
+			if (type == typeof(ushort))
+			{
+				return ResourceTypeCode.UInt16;
+			}
+			if (type == typeof(uint))
+			{
+				return ResourceTypeCode.UInt32;
+			}
+			if (type == typeof(ulong))
+			{
+				return ResourceTypeCode.UInt64;
+			}
+			if (type == typeof(float))
+			{
+				return ResourceTypeCode.Single;
+			}
+			if (type == typeof(double))
+			{
+				return ResourceTypeCode.Double;
+			}
+			if (type == typeof(decimal))
+			{
+				return ResourceTypeCode.Decimal;
+			}
+			if (type == typeof(DateTime))
+			{
+				return ResourceTypeCode.DateTime;
+			}
+			if (type == typeof(TimeSpan))
+			{
+				return ResourceTypeCode.TimeSpan;
+			}
+			if (type == typeof(byte[]))
+			{
+				return ResourceTypeCode.ByteArray;
+			}
+			if (type == typeof(ResourceWriter.StreamWrapper))
+			{
+				return ResourceTypeCode.Stream;
+			}
+			string text;
+			if (type == typeof(ResourceWriter.PrecannedResource))
+			{
+				text = ((ResourceWriter.PrecannedResource)value).TypeName;
+				if (text.StartsWith("ResourceTypeCode.", StringComparison.Ordinal))
+				{
+					text = text.Substring(17);
+					return (ResourceTypeCode)Enum.Parse(typeof(ResourceTypeCode), text);
 				}
 			}
-			Array.Sort<int, int>(array, array2);
-			binaryWriter.Write(2);
-			binaryWriter.Write(this.resources.Count);
-			binaryWriter.Write(arrayList.Count);
-			foreach (object obj2 in arrayList)
+			else
 			{
-				if (obj2 is Type)
+				text = MultitargetingHelpers.GetAssemblyQualifiedName(type, this.typeConverter);
+			}
+			int num = types.IndexOf(text);
+			if (num == -1)
+			{
+				num = types.Count;
+				types.Add(text);
+			}
+			return num + ResourceTypeCode.StartOfUserTypes;
+		}
+
+		private void WriteValue(ResourceTypeCode typeCode, object value, BinaryWriter writer, IFormatter objFormatter)
+		{
+			switch (typeCode)
+			{
+			case ResourceTypeCode.Null:
+				return;
+			case ResourceTypeCode.String:
+				writer.Write((string)value);
+				return;
+			case ResourceTypeCode.Boolean:
+				writer.Write((bool)value);
+				return;
+			case ResourceTypeCode.Char:
+				writer.Write((ushort)((char)value));
+				return;
+			case ResourceTypeCode.Byte:
+				writer.Write((byte)value);
+				return;
+			case ResourceTypeCode.SByte:
+				writer.Write((sbyte)value);
+				return;
+			case ResourceTypeCode.Int16:
+				writer.Write((short)value);
+				return;
+			case ResourceTypeCode.UInt16:
+				writer.Write((ushort)value);
+				return;
+			case ResourceTypeCode.Int32:
+				writer.Write((int)value);
+				return;
+			case ResourceTypeCode.UInt32:
+				writer.Write((uint)value);
+				return;
+			case ResourceTypeCode.Int64:
+				writer.Write((long)value);
+				return;
+			case ResourceTypeCode.UInt64:
+				writer.Write((ulong)value);
+				return;
+			case ResourceTypeCode.Single:
+				writer.Write((float)value);
+				return;
+			case ResourceTypeCode.Double:
+				writer.Write((double)value);
+				return;
+			case ResourceTypeCode.Decimal:
+				writer.Write((decimal)value);
+				return;
+			case ResourceTypeCode.DateTime:
+			{
+				long num = ((DateTime)value).ToBinary();
+				writer.Write(num);
+				return;
+			}
+			case ResourceTypeCode.TimeSpan:
+				writer.Write(((TimeSpan)value).Ticks);
+				return;
+			case ResourceTypeCode.ByteArray:
+			{
+				byte[] array = (byte[])value;
+				writer.Write(array.Length);
+				writer.Write(array, 0, array.Length);
+				return;
+			}
+			case ResourceTypeCode.Stream:
+			{
+				ResourceWriter.StreamWrapper streamWrapper = (ResourceWriter.StreamWrapper)value;
+				if (streamWrapper.m_stream.GetType() == typeof(MemoryStream))
 				{
-					binaryWriter.Write(((Type)obj2).AssemblyQualifiedName);
+					MemoryStream memoryStream = (MemoryStream)streamWrapper.m_stream;
+					if (memoryStream.Length > 2147483647L)
+					{
+						throw new ArgumentException(Environment.GetResourceString("Stream length must be non-negative and less than 2^31 - 1 - origin."));
+					}
+					int num2;
+					int num3;
+					memoryStream.InternalGetOriginAndLength(out num2, out num3);
+					byte[] array2 = memoryStream.InternalGetBuffer();
+					writer.Write(num3);
+					writer.Write(array2, num2, num3);
+					return;
 				}
 				else
 				{
-					binaryWriter.Write((string)obj2);
+					Stream stream = streamWrapper.m_stream;
+					if (stream.Length > 2147483647L)
+					{
+						throw new ArgumentException(Environment.GetResourceString("Stream length must be non-negative and less than 2^31 - 1 - origin."));
+					}
+					stream.Position = 0L;
+					writer.Write((int)stream.Length);
+					byte[] array3 = new byte[4096];
+					int num4;
+					while ((num4 = stream.Read(array3, 0, array3.Length)) != 0)
+					{
+						writer.Write(array3, 0, num4);
+					}
+					if (streamWrapper.m_closeAfterWrite)
+					{
+						stream.Close();
+						return;
+					}
+					return;
 				}
+				break;
 			}
-			int num3 = (int)(binaryWriter.BaseStream.Position & 7L);
-			int num4 = 0;
-			if (num3 != 0)
-			{
-				num4 = 8 - num3;
 			}
-			for (int i = 0; i < num4; i++)
-			{
-				binaryWriter.Write((byte)"PAD"[i % 3]);
-			}
-			for (int j = 0; j < this.resources.Count; j++)
-			{
-				binaryWriter.Write(array[j]);
-			}
-			for (int k = 0; k < this.resources.Count; k++)
-			{
-				binaryWriter.Write(array2[k]);
-			}
-			int num5 = (int)binaryWriter.BaseStream.Position + (int)memoryStream2.Length + 4;
-			binaryWriter.Write(num5);
-			binaryWriter.Write(memoryStream2.GetBuffer(), 0, (int)memoryStream2.Length);
-			binaryWriter.Write(memoryStream3.GetBuffer(), 0, (int)memoryStream3.Length);
-			binaryWriter3.Close();
-			binaryWriter4.Close();
-			binaryWriter.Flush();
-			this.resources = null;
+			objFormatter.Serialize(writer.BaseStream, value);
 		}
 
-		private int GetHash(string name)
+		private static void Write7BitEncodedInt(BinaryWriter store, int value)
 		{
-			uint num = 5381U;
-			for (int i = 0; i < name.Length; i++)
+			uint num;
+			for (num = (uint)value; num >= 128U; num >>= 7)
 			{
-				num = ((num << 5) + num) ^ (uint)name[i];
+				store.Write((byte)(num | 128U));
 			}
-			return (int)num;
+			store.Write((byte)num);
 		}
 
-		private void Write7BitEncodedInt(BinaryWriter writer, int value)
+		private Func<Type, string> typeConverter;
+
+		private const int _ExpectedNumberOfResources = 1000;
+
+		private const int AverageNameSize = 40;
+
+		private const int AverageValueSize = 40;
+
+		private Dictionary<string, object> _resourceList;
+
+		internal Stream _output;
+
+		private Dictionary<string, object> _caseInsensitiveDups;
+
+		private Dictionary<string, ResourceWriter.PrecannedResource> _preserializedData;
+
+		private const int _DefaultBufferSize = 4096;
+
+		private class PrecannedResource
 		{
-			do
-			{
-				int num = (value >> 7) & 33554431;
-				byte b = (byte)(value & 127);
-				if (num != 0)
-				{
-					b |= 128;
-				}
-				writer.Write(b);
-				value = num;
-			}
-			while (value != 0);
-		}
-
-		internal Stream Stream
-		{
-			get
-			{
-				return this.stream;
-			}
-		}
-
-		private SortedList resources = new SortedList(StringComparer.OrdinalIgnoreCase);
-
-		private Stream stream;
-
-		private class TypeByNameObject
-		{
-			public TypeByNameObject(string typeName, byte[] value)
+			internal PrecannedResource(string typeName, byte[] data)
 			{
 				this.TypeName = typeName;
-				this.Value = (byte[])value.Clone();
+				this.Data = data;
 			}
 
-			public readonly string TypeName;
+			internal string TypeName;
 
-			public readonly byte[] Value;
+			internal byte[] Data;
+		}
+
+		private class StreamWrapper
+		{
+			internal StreamWrapper(Stream s, bool closeAfterWrite)
+			{
+				this.m_stream = s;
+				this.m_closeAfterWrite = closeAfterWrite;
+			}
+
+			internal Stream m_stream;
+
+			internal bool m_closeAfterWrite;
 		}
 	}
 }

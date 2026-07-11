@@ -57,20 +57,17 @@ public class TelescopeSideScreen : SideScreenContent
 		{
 			return;
 		}
-		Telescope component = SelectTool.Instance.selected.GetComponent<Telescope>();
-		if (component == null)
+		if (SelectTool.Instance.selected.GetComponent<Telescope>() == null)
 		{
 			return;
 		}
 		if (!SpacecraftManager.instance.HasAnalysisTarget())
 		{
 			this.DescriptionText.text = "<b><color=#FF0000>" + UI.UISIDESCREENS.TELESCOPESIDESCREEN.NO_SELECTED_ANALYSIS_TARGET + "</color></b>";
+			return;
 		}
-		else
-		{
-			string text = UI.UISIDESCREENS.TELESCOPESIDESCREEN.ANALYSIS_TARGET_SELECTED;
-			this.DescriptionText.text = text;
-		}
+		string text = UI.UISIDESCREENS.TELESCOPESIDESCREEN.ANALYSIS_TARGET_SELECTED;
+		this.DescriptionText.text = text;
 	}
 
 	public KButton selectStarmapScreen;

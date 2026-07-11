@@ -23,16 +23,13 @@ public class SicknessMonitor : GameStateMachine<SicknessMonitor, SicknessMonitor
 			});
 		this.post_nocheer.Enter(delegate(SicknessMonitor.Instance smi)
 		{
-			StateMachine.Instance instance = new SicknessCuredFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
-			instance.StartSM();
+			new SicknessCuredFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f)).StartSM();
 			if (smi.IsSleepingOrSleepSchedule())
 			{
 				smi.GoTo(this.healthy);
+				return;
 			}
-			else
-			{
-				smi.GoTo(this.post);
-			}
+			smi.GoTo(this.post);
 		});
 		this.post.ToggleChore((SicknessMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, SicknessMonitor.SickPostKAnim, SicknessMonitor.SickPostAnims, KAnim.PlayMode.Once, false), this.healthy);
 	}
@@ -76,11 +73,14 @@ public class SicknessMonitor : GameStateMachine<SicknessMonitor, SicknessMonitor
 
 		public bool HasMajorDisease()
 		{
-			foreach (SicknessInstance sicknessInstance in this.sicknesses)
+			using (IEnumerator<SicknessInstance> enumerator = this.sicknesses.GetEnumerator())
 			{
-				if (sicknessInstance.modifier.severity >= Sickness.Severity.Major)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current.modifier.severity >= Sickness.Severity.Major)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -104,7 +104,7 @@ public class SicknessMonitor : GameStateMachine<SicknessMonitor, SicknessMonitor
 
 		public void UnassignClinic()
 		{
-			Ownables soleOwner = base.sm.masterTarget.Get(base.smi).GetComponent<MinionIdentity>().GetSoleOwner();
+			Assignables soleOwner = base.sm.masterTarget.Get(base.smi).GetComponent<MinionIdentity>().GetSoleOwner();
 			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
 			AssignableSlotInstance slot = soleOwner.GetSlot(clinic);
 			if (slot != null)

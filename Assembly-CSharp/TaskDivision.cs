@@ -30,9 +30,10 @@ internal class TaskDivision<Task, SharedData> where Task : DivisibleTask<SharedD
 
 	public void Run(SharedData sharedData)
 	{
-		foreach (Task task in this.tasks)
+		Task[] array = this.tasks;
+		for (int i = 0; i < array.Length; i++)
 		{
-			task.Run(sharedData);
+			array[i].Run(sharedData);
 		}
 	}
 

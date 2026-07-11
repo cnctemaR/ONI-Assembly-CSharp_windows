@@ -57,12 +57,6 @@ public class Conversation
 
 	public class Topic
 	{
-		public Topic(string topic, Conversation.ModeType mode)
-		{
-			this.topic = topic;
-			this.mode = mode;
-		}
-
 		public static Dictionary<int, Conversation.Mode> Modes
 		{
 			get
@@ -77,6 +71,12 @@ public class Conversation
 				}
 				return Conversation.Topic._modes;
 			}
+		}
+
+		public Topic(string topic, Conversation.ModeType mode)
+		{
+			this.topic = topic;
+			this.mode = mode;
 		}
 
 		public static List<Conversation.Mode> modeList = new List<Conversation.Mode>

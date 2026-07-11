@@ -6,14 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	/// <summary>
-	///   <para>An IPlayableOutput implementation that will be used to manipulate textures.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/TexturePlayableOutput.bindings.h")]
 	[NativeHeader("Runtime/Graphics/Director/TexturePlayableOutput.h")]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[StaticAccessor("TexturePlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
 	public struct TexturePlayableOutput : IPlayableOutput
 	{
 		internal TexturePlayableOutput(PlayableOutputHandle handle)
@@ -45,9 +42,6 @@ namespace UnityEngine.Experimental.Playables
 			return texturePlayableOutput;
 		}
 
-		/// <summary>
-		///   <para>Returns an invalid TexturePlayableOutput.</para>
-		/// </summary>
 		public static TexturePlayableOutput Null
 		{
 			get
@@ -81,9 +75,11 @@ namespace UnityEngine.Experimental.Playables
 			TexturePlayableOutput.InternalSetTarget(ref this.m_Handle, value);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern RenderTexture InternalGetTarget(ref PlayableOutputHandle output);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalSetTarget(ref PlayableOutputHandle output, RenderTexture target);
 

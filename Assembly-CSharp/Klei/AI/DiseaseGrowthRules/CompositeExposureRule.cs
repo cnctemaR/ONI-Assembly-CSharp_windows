@@ -11,11 +11,9 @@ namespace Klei.AI.DiseaseGrowthRules
 
 		public void Overlay(ExposureRule rule)
 		{
-			float? num = rule.populationHalfLife;
-			if (num != null)
+			if (rule.populationHalfLife != null)
 			{
-				float? num2 = rule.populationHalfLife;
-				this.populationHalfLife = num2.Value;
+				this.populationHalfLife = rule.populationHalfLife.Value;
 			}
 			this.name = rule.Name();
 		}

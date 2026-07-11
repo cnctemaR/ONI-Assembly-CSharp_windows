@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>Extensions for all the types that implements IPlayable.</para>
-	/// </summary>
 	public static class PlayableExtensions
 	{
 		public static bool IsNull<U>(this U playable) where U : struct, IPlayable
@@ -234,6 +231,16 @@ namespace UnityEngine.Playables
 		public static void SetTraversalMode<U>(this U playable, PlayableTraversalMode mode) where U : struct, IPlayable
 		{
 			playable.GetHandle().SetTraversalMode(mode);
+		}
+
+		internal static DirectorWrapMode GetTimeWrapMode<U>(this U playable) where U : struct, IPlayable
+		{
+			return playable.GetHandle().GetTimeWrapMode();
+		}
+
+		internal static void SetTimeWrapMode<U>(this U playable, DirectorWrapMode value) where U : struct, IPlayable
+		{
+			playable.GetHandle().SetTimeWrapMode(value);
 		}
 	}
 }

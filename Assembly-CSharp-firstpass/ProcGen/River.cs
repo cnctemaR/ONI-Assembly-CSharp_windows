@@ -8,6 +8,22 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptOut)]
 	public class River : Path
 	{
+		public string element { get; set; }
+
+		public string backgroundElement { get; set; }
+
+		public float widthCenter { get; set; }
+
+		public float widthBorder { get; set; }
+
+		public float temperature { get; set; }
+
+		public float maxMass { get; set; }
+
+		public float flowIn { get; set; }
+
+		public float flowOut { get; set; }
+
 		public River()
 		{
 			this.pathElements = new List<Segment>();
@@ -42,22 +58,6 @@ namespace ProcGen
 			this.widthCenter = other.widthCenter;
 			this.widthBorder = other.widthBorder;
 		}
-
-		public string element { get; set; }
-
-		public string backgroundElement { get; set; }
-
-		public float widthCenter { get; set; }
-
-		public float widthBorder { get; set; }
-
-		public float temperature { get; set; }
-
-		public float maxMass { get; set; }
-
-		public float flowIn { get; set; }
-
-		public float flowOut { get; set; }
 
 		public void AddSection(Node t0, Node t1)
 		{

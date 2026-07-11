@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Text;
 using System.Xml.Schema;
 
 namespace System.Xml.Serialization
 {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
 	public class XmlArrayAttribute : Attribute
 	{
 		public XmlArrayAttribute()
@@ -20,39 +19,15 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				if (this.elementName == null)
+				if (this.elementName != null)
 				{
-					return string.Empty;
+					return this.elementName;
 				}
-				return this.elementName;
+				return string.Empty;
 			}
 			set
 			{
 				this.elementName = value;
-			}
-		}
-
-		public XmlSchemaForm Form
-		{
-			get
-			{
-				return this.form;
-			}
-			set
-			{
-				this.form = value;
-			}
-		}
-
-		public bool IsNullable
-		{
-			get
-			{
-				return this.isNullable;
-			}
-			set
-			{
-				this.isNullable = value;
 			}
 		}
 
@@ -68,7 +43,30 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		[MonoTODO]
+		public bool IsNullable
+		{
+			get
+			{
+				return this.nullable;
+			}
+			set
+			{
+				this.nullable = value;
+			}
+		}
+
+		public XmlSchemaForm Form
+		{
+			get
+			{
+				return this.form;
+			}
+			set
+			{
+				this.form = value;
+			}
+		}
+
 		public int Order
 		{
 			get
@@ -77,27 +75,21 @@ namespace System.Xml.Serialization
 			}
 			set
 			{
+				if (value < 0)
+				{
+					throw new ArgumentException(Res.GetString("Negative values are prohibited."), "Order");
+				}
 				this.order = value;
 			}
 		}
 
-		internal void AddKeyHash(StringBuilder sb)
-		{
-			sb.Append("XAAT ");
-			KeyHelper.AddField(sb, 1, this.ns);
-			KeyHelper.AddField(sb, 2, this.elementName);
-			KeyHelper.AddField(sb, 3, this.form.ToString(), XmlSchemaForm.None.ToString());
-			KeyHelper.AddField(sb, 4, this.isNullable);
-			sb.Append('|');
-		}
-
 		private string elementName;
 
-		private XmlSchemaForm form;
-
-		private bool isNullable;
-
 		private string ns;
+
+		private bool nullable;
+
+		private XmlSchemaForm form;
 
 		private int order = -1;
 	}

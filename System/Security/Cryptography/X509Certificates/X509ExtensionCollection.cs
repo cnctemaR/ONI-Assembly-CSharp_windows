@@ -12,56 +12,35 @@ namespace System.Security.Cryptography.X509Certificates
 			this._list = new ArrayList();
 		}
 
-		internal X509ExtensionCollection(X509Certificate cert)
+		internal X509ExtensionCollection(Mono.Security.X509.X509Certificate cert)
 		{
 			this._list = new ArrayList(cert.Extensions.Count);
 			if (cert.Extensions.Count == 0)
 			{
 				return;
 			}
-			object[] array = new object[2];
 			foreach (object obj in cert.Extensions)
 			{
-				X509Extension x509Extension = (X509Extension)obj;
+				Mono.Security.X509.X509Extension x509Extension = (Mono.Security.X509.X509Extension)obj;
 				bool critical = x509Extension.Critical;
 				string oid = x509Extension.Oid;
-				byte[] array2 = null;
-				ASN1 value = x509Extension.Value;
+				byte[] array = null;
+				Mono.Security.ASN1 value = x509Extension.Value;
 				if (value.Tag == 4 && value.Count > 0)
 				{
-					array2 = value[0].GetBytes();
+					array = value[0].GetBytes();
 				}
-				array[0] = new AsnEncodedData(oid, array2);
-				array[1] = critical;
-				X509Extension x509Extension2 = (X509Extension)CryptoConfig.CreateFromName(oid, array);
+				global::System.Security.Cryptography.X509Certificates.X509Extension x509Extension2 = (global::System.Security.Cryptography.X509Certificates.X509Extension)CryptoConfig.CreateFromName(oid, new object[]
+				{
+					new AsnEncodedData(oid, array ?? global::System.Security.Cryptography.X509Certificates.X509ExtensionCollection.Empty),
+					critical
+				});
 				if (x509Extension2 == null)
 				{
-					x509Extension2 = new X509Extension(oid, array2, critical);
+					x509Extension2 = new global::System.Security.Cryptography.X509Certificates.X509Extension(oid, array ?? global::System.Security.Cryptography.X509Certificates.X509ExtensionCollection.Empty, critical);
 				}
 				this._list.Add(x509Extension2);
 			}
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("negative index");
-			}
-			if (index >= array.Length)
-			{
-				throw new ArgumentOutOfRangeException("index >= array.Length");
-			}
-			this._list.CopyTo(array, index);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new X509ExtensionEnumerator(this._list);
 		}
 
 		public int Count
@@ -88,7 +67,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		public X509Extension this[int index]
+		public global::System.Security.Cryptography.X509Certificates.X509Extension this[int index]
 		{
 			get
 			{
@@ -96,11 +75,11 @@ namespace System.Security.Cryptography.X509Certificates
 				{
 					throw new InvalidOperationException("index");
 				}
-				return (X509Extension)this._list[index];
+				return (global::System.Security.Cryptography.X509Certificates.X509Extension)this._list[index];
 			}
 		}
 
-		public X509Extension this[string oid]
+		public global::System.Security.Cryptography.X509Certificates.X509Extension this[string oid]
 		{
 			get
 			{
@@ -114,7 +93,7 @@ namespace System.Security.Cryptography.X509Certificates
 				}
 				foreach (object obj in this._list)
 				{
-					X509Extension x509Extension = (X509Extension)obj;
+					global::System.Security.Cryptography.X509Certificates.X509Extension x509Extension = (global::System.Security.Cryptography.X509Certificates.X509Extension)obj;
 					if (x509Extension.Oid.Value.Equals(oid))
 					{
 						return x509Extension;
@@ -124,7 +103,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		public int Add(X509Extension extension)
+		public int Add(global::System.Security.Cryptography.X509Certificates.X509Extension extension)
 		{
 			if (extension == null)
 			{
@@ -133,7 +112,24 @@ namespace System.Security.Cryptography.X509Certificates
 			return this._list.Add(extension);
 		}
 
-		public void CopyTo(X509Extension[] array, int index)
+		public void CopyTo(global::System.Security.Cryptography.X509Certificates.X509Extension[] array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("negative index");
+			}
+			if (index >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("index >= array.Length");
+			}
+			this._list.CopyTo(array, index);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
 		{
 			if (array == null)
 			{
@@ -154,6 +150,13 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			return new X509ExtensionEnumerator(this._list);
 		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new X509ExtensionEnumerator(this._list);
+		}
+
+		private static byte[] Empty = new byte[0];
 
 		private ArrayList _list;
 	}

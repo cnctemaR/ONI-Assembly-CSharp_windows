@@ -30,7 +30,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < notificationList.Count; i++)
 		{
 			Notification notification = notificationList[i];
@@ -91,17 +91,13 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		{
 			base.serializable = true;
 			default_state = this.alive;
-			GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State state = this.dead;
-			string text = CREATURES.STATUSITEMS.DEAD.NAME;
-			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
-			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main).Enter(delegate(StandardCropPlant.StatesInstance smi)
+			this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (smi.master.rm.Replanted && !smi.master.GetComponent<KPrefabID>().HasTag(GameTags.Uprooted))
 				{
 					Notifier notifier = smi.master.gameObject.AddOrGet<Notifier>();
 					Notification notification = smi.master.CreateDeathNotification();
-					notifier.Add(notification, string.Empty);
+					notifier.Add(notification, "");
 				}
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				Harvestable component = smi.master.GetComponent<Harvestable>();

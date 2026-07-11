@@ -16,7 +16,7 @@ public class EquipmentTemplates
 		equipmentDef.Anim = Assets.GetAnim(Anim);
 		equipmentDef.SnapOn = SnapOn;
 		equipmentDef.SnapOn1 = SnapOn1;
-		equipmentDef.BuildOverride = ((BuildOverride == null || BuildOverride.Length <= 0) ? null : Assets.GetAnim(BuildOverride));
+		equipmentDef.BuildOverride = ((BuildOverride != null && BuildOverride.Length > 0) ? Assets.GetAnim(BuildOverride) : null);
 		equipmentDef.BuildOverridePriority = BuildOverridePriority;
 		equipmentDef.IsBody = IsBody;
 		equipmentDef.AttributeModifiers = AttributeModifiers;

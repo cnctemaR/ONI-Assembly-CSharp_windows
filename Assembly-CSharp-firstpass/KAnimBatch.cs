@@ -4,20 +4,6 @@ using UnityEngine;
 
 public class KAnimBatch
 {
-	public KAnimBatch(KAnimBatchGroup group, int layer, float z, KAnimBatchGroup.MaterialType material_type)
-	{
-		this.id = KAnimBatch.nextBatchId++;
-		this.active = true;
-		this.group = group;
-		this.layer = layer;
-		this.batchGroup = group.batchID;
-		this.materialType = material_type;
-		this.matProperties = new MaterialPropertyBlock();
-		this.position = new Vector3(0f, 0f, z);
-		this.symbolInstanceSlots = new KAnimBatch.SymbolInstanceSlot[group.maxGroupSize];
-		this.symbolOverrideInfoSlots = new KAnimBatch.SymbolOverrideInfoSlot[group.maxGroupSize];
-	}
-
 	public int id { get; private set; }
 
 	public bool dirty
@@ -75,6 +61,20 @@ public class KAnimBatch
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry symbolInstanceTex { get; private set; }
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry symbolOverrideInfoTex { get; private set; }
+
+	public KAnimBatch(KAnimBatchGroup group, int layer, float z, KAnimBatchGroup.MaterialType material_type)
+	{
+		this.id = KAnimBatch.nextBatchId++;
+		this.active = true;
+		this.group = group;
+		this.layer = layer;
+		this.batchGroup = group.batchID;
+		this.materialType = material_type;
+		this.matProperties = new MaterialPropertyBlock();
+		this.position = new Vector3(0f, 0f, z);
+		this.symbolInstanceSlots = new KAnimBatch.SymbolInstanceSlot[group.maxGroupSize];
+		this.symbolOverrideInfoSlots = new KAnimBatch.SymbolOverrideInfoSlot[group.maxGroupSize];
+	}
 
 	public void DestroyTex()
 	{
@@ -196,8 +196,7 @@ public class KAnimBatch
 		{
 			return;
 		}
-		int num = this.controllers.IndexOf(controller);
-		if (num >= 0)
+		if (this.controllers.IndexOf(controller) >= 0)
 		{
 			if (!this.controllers.Remove(controller))
 			{
@@ -322,8 +321,7 @@ public class KAnimBatch
 					this.WriteBatchedAnimInstanceData(num, animConverter);
 					bool flag3 = this.WriteSymbolInstanceData(num, animConverter);
 					flag = flag || flag3;
-					bool flag4 = animConverter.ApplySymbolOverrides();
-					if (flag4)
+					if (animConverter.ApplySymbolOverrides())
 					{
 						if (this.symbolOverrideInfoTex == null)
 						{
@@ -332,10 +330,11 @@ public class KAnimBatch
 							this.symbolOverrideInfoTex.SetTextureAndSize(this.matProperties);
 							this.matProperties.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, 1f);
 						}
-						bool flag5 = this.WriteSymbolOverrideInfoTex(num, animConverter);
-						flag2 = flag2 || flag5;
+						bool flag4 = this.WriteSymbolOverrideInfoTex(num, animConverter);
+						flag2 = flag2 || flag4;
 					}
-					this.writtenLastFrame++;
+					int writtenLastFrame = this.writtenLastFrame;
+					this.writtenLastFrame = writtenLastFrame + 1;
 				}
 			}
 			if (this.writtenLastFrame != 0)

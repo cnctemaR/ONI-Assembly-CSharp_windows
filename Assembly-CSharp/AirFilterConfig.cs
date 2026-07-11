@@ -64,8 +64,7 @@ public class AirFilterConfig : IBuildingConfig
 		manualDeliveryKG.capacity = 320.00003f;
 		manualDeliveryKG.refillMass = 32.000004f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
-		AirFilter airFilter = go.AddOrGet<AirFilter>();
-		airFilter.filterTag = new Tag("Filter");
+		go.AddOrGet<AirFilter>().filterTag = new Tag("Filter");
 		go.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 	}
 

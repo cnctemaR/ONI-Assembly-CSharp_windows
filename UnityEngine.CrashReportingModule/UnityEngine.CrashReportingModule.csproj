@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF6A}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935674}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.CrashReportHandler</RootNamespace>
     <AssemblyName>UnityEngine.CrashReportingModule</AssemblyName>
@@ -18,12 +18,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF7F}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935687}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

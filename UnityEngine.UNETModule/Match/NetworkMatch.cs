@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking.Match
 {
-	/// <summary>
-	///   <para>A component for communicating with the Unity Multiplayer Matchmaking service.</para>
-	/// </summary>
+	[Obsolete("The matchmaker and relay feature will be removed in the future, minimal support will continue until this can be safely done.")]
 	public class NetworkMatch : MonoBehaviour
 	{
-		/// <summary>
-		///   <para>The base URI of the MatchMaker that this NetworkMatch will communicate with.</para>
-		/// </summary>
 		public Uri baseUri
 		{
 			get
@@ -25,10 +21,7 @@ namespace UnityEngine.Networking.Match
 			}
 		}
 
-		/// <summary>
-		///   <para>This method is deprecated. Please instead log in through the editor services panel and setup the project under the Unity Multiplayer section. This will populate the required infomation from the cloud site automatically.</para>
-		/// </summary>
-		/// <param name="programAppID">Deprecated, see description.</param>
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This function is not used any longer to interface with the matchmaker. Please set up your project by logging in through the editor connect dialog.", true)]
 		public void SetProgramAppID(AppID programAppID)
 		{
@@ -369,11 +362,6 @@ namespace UnityEngine.Networking.Match
 
 		private Uri m_BaseUri = new Uri("https://mm.unet.unity3d.com");
 
-		/// <summary>
-		///   <para>A delegate that can handle MatchMaker responses that return basic response types (generally only indicating success or failure and extended information if a failure did happen).</para>
-		/// </summary>
-		/// <param name="success">Indicates if the request succeeded.</param>
-		/// <param name="extendedInfo">A text description of the failure if success is false.</param>
 		public delegate void BasicResponseDelegate(bool success, string extendedInfo);
 
 		public delegate void DataResponseDelegate<T>(bool success, string extendedInfo, T responseData);

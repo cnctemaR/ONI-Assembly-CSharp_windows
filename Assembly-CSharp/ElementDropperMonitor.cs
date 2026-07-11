@@ -90,8 +90,7 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 			float temperature = base.GetComponent<PrimaryElement>().Temperature;
 			if (element.IsGas || element.IsLiquid)
 			{
-				int num = Grid.PosToCell(base.transform.GetPosition());
-				SimMessages.AddRemoveSubstance(num, element_id, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, disease_idx, disease_count, true, -1);
+				SimMessages.AddRemoveSubstance(Grid.PosToCell(base.transform.GetPosition()), element_id, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, disease_idx, disease_count, true, -1);
 			}
 			else if (element.IsSolid)
 			{

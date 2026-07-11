@@ -12,23 +12,19 @@ namespace KSerialization
 			{
 				return;
 			}
-			if (msg_level != DebugLog.Level.Info)
+			switch (msg_level)
 			{
-				if (msg_level != DebugLog.Level.Warning)
-				{
-					if (msg_level == DebugLog.Level.Error)
-					{
-						global::Debug.LogError(msg);
-					}
-				}
-				else
-				{
-					global::Debug.LogWarning(msg);
-				}
-			}
-			else
-			{
+			case DebugLog.Level.Error:
+				global::Debug.LogError(msg);
+				return;
+			case DebugLog.Level.Warning:
+				global::Debug.LogWarning(msg);
+				return;
+			case DebugLog.Level.Info:
 				global::Debug.Log(msg);
+				return;
+			default:
+				return;
 			}
 		}
 

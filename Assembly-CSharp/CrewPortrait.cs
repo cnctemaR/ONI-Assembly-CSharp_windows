@@ -116,12 +116,10 @@ public class CrewPortrait : KMonoBehaviour
 			if (string.IsNullOrEmpty(newTitle))
 			{
 				this.subTitle.gameObject.SetActive(false);
+				return;
 			}
-			else
-			{
-				this.subTitle.gameObject.SetActive(true);
-				this.subTitle.SetText(newTitle);
-			}
+			this.subTitle.gameObject.SetActive(true);
+			this.subTitle.SetText(newTitle);
 		}
 	}
 
@@ -179,10 +177,10 @@ public class CrewPortrait : KMonoBehaviour
 		CrewPortrait.SetPortraitData(this.identityObject, this.controller, this.useDefaultExpression);
 		if (this.useLabels && this.duplicantName != null)
 		{
-			this.duplicantName.SetText((this.identityObject == null) ? string.Empty : this.identityObject.GetProperName());
+			this.duplicantName.SetText((this.identityObject != null) ? this.identityObject.GetProperName() : "");
 			if (this.identityObject is MinionIdentity && this.duplicantJob != null)
 			{
-				this.duplicantJob.SetText((this.identityObject == null) ? string.Empty : (this.identityObject as MinionIdentity).GetComponent<MinionResume>().GetSkillsSubtitle());
+				this.duplicantJob.SetText((this.identityObject != null) ? (this.identityObject as MinionIdentity).GetComponent<MinionResume>().GetSkillsSubtitle() : "");
 				this.duplicantJob.GetComponent<ToolTip>().toolTip = (this.identityObject as MinionIdentity).GetComponent<MinionResume>().GetSkillsSubtitle();
 			}
 		}
@@ -190,12 +188,11 @@ public class CrewPortrait : KMonoBehaviour
 
 	private static void RefreshHat(IAssignableIdentity identityObject, KBatchedAnimController controller)
 	{
-		string text = string.Empty;
+		string text = "";
 		MinionIdentity minionIdentity = identityObject as MinionIdentity;
 		if (minionIdentity != null)
 		{
-			MinionResume component = minionIdentity.GetComponent<MinionResume>();
-			text = component.CurrentHat;
+			text = minionIdentity.GetComponent<MinionResume>().CurrentHat;
 		}
 		else if (identityObject as StoredMinionIdentity != null)
 		{

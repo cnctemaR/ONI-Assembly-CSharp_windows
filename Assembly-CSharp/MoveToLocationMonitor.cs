@@ -1,6 +1,5 @@
 ﻿using System;
 using STRINGS;
-using UnityEngine;
 
 public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance>
 {
@@ -25,13 +24,7 @@ public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, Mov
 
 		private void OnRefreshUserMenu(object data)
 		{
-			UserMenu userMenu = Game.Instance.userMenu;
-			GameObject gameObject = base.gameObject;
-			string text = "action_control";
-			string text2 = UI.USERMENUACTIONS.MOVETOLOCATION.NAME;
-			global::System.Action action = new global::System.Action(this.OnClickMoveToLocation);
-			string text3 = UI.USERMENUACTIONS.MOVETOLOCATION.TOOLTIP;
-			userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.2f);
+			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.MOVETOLOCATION.NAME, new global::System.Action(this.OnClickMoveToLocation), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MOVETOLOCATION.TOOLTIP, true), 0.2f);
 		}
 
 		private void OnClickMoveToLocation()

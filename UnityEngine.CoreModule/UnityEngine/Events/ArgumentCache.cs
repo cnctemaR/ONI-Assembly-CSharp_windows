@@ -125,8 +125,8 @@ namespace UnityEngine.Events
 		[SerializeField]
 		private string m_ObjectArgumentAssemblyTypeName;
 
-		[FormerlySerializedAs("intArgument")]
 		[SerializeField]
+		[FormerlySerializedAs("intArgument")]
 		private int m_IntArgument;
 
 		[FormerlySerializedAs("floatArgument")]

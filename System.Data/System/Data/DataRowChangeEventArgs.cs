@@ -6,22 +6,12 @@ namespace System.Data
 	{
 		public DataRowChangeEventArgs(DataRow row, DataRowAction action)
 		{
+			this.Row = row;
+			this.Action = action;
 		}
 
-		public DataRowAction Action
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public DataRow Row { get; }
 
-		public DataRow Row
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public DataRowAction Action { get; }
 	}
 }

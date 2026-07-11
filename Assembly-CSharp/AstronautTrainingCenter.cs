@@ -3,20 +3,6 @@ using STRINGS;
 
 public class AstronautTrainingCenter : Workable
 {
-	public AstronautTrainingCenter()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsNotMarkedForDeconstruction";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DECONSTRUCTION;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			Deconstructable deconstructable = data as Deconstructable;
-			return deconstructable == null || !deconstructable.IsMarkedForDeconstruction();
-		};
-		this.IsNotMarkedForDeconstruction = precondition;
-		base..ctor();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -36,7 +22,8 @@ public class AstronautTrainingCenter : Workable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		return !(worker == null) || true;
+		worker == null;
+		return true;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -57,11 +44,22 @@ public class AstronautTrainingCenter : Workable
 
 	public override float GetPercentComplete()
 	{
-		if (base.worker == null)
-		{
-			return 0f;
-		}
+		base.worker == null;
 		return 0f;
+	}
+
+	public AstronautTrainingCenter()
+	{
+		Chore.Precondition precondition = default(Chore.Precondition);
+		precondition.id = "IsNotMarkedForDeconstruction";
+		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DECONSTRUCTION;
+		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Deconstructable deconstructable = data as Deconstructable;
+			return deconstructable == null || !deconstructable.IsMarkedForDeconstruction();
+		};
+		this.IsNotMarkedForDeconstruction = precondition;
+		base..ctor();
 	}
 
 	public float daysToMasterRole;

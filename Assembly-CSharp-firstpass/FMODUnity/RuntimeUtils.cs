@@ -103,8 +103,7 @@ namespace FMODUnity
 		internal static string GetPluginPath(string pluginName)
 		{
 			string text = pluginName + ".dll";
-			string text2 = Application.dataPath + "/Plugins/";
-			return text2 + text;
+			return Application.dataPath + "/Plugins/" + text;
 		}
 
 		public static void EnforceLibraryOrder()
@@ -113,7 +112,7 @@ namespace FMODUnity
 			int num2;
 			Memory.GetStats(out num, out num2);
 			Guid guid;
-			global::FMOD.Studio.Util.ParseID(string.Empty, out guid);
+			global::FMOD.Studio.Util.ParseID("", out guid);
 		}
 
 		public const string LogFileName = "fmod.log";

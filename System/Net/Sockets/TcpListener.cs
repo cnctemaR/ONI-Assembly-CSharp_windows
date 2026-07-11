@@ -1,53 +1,76 @@
 ﻿using System;
+using System.Security.Permissions;
+using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
 	public class TcpListener
 	{
-		[Obsolete("Use TcpListener (IPAddress address, int port) instead")]
+		public TcpListener(IPEndPoint localEP)
+		{
+			bool on = Logging.On;
+			if (localEP == null)
+			{
+				throw new ArgumentNullException("localEP");
+			}
+			this.m_ServerSocketEP = localEP;
+			this.m_ServerSocket = new Socket(this.m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			bool on2 = Logging.On;
+		}
+
+		public TcpListener(IPAddress localaddr, int port)
+		{
+			bool on = Logging.On;
+			if (localaddr == null)
+			{
+				throw new ArgumentNullException("localaddr");
+			}
+			if (!ValidationHelper.ValidateTcpPort(port))
+			{
+				throw new ArgumentOutOfRangeException("port");
+			}
+			this.m_ServerSocketEP = new IPEndPoint(localaddr, port);
+			this.m_ServerSocket = new Socket(this.m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			bool on2 = Logging.On;
+		}
+
+		[Obsolete("This method has been deprecated. Please use TcpListener(IPAddress localaddr, int port) instead. http://go.microsoft.com/fwlink/?linkid=14202")]
 		public TcpListener(int port)
 		{
-			if (port < 0 || port > 65535)
+			if (!ValidationHelper.ValidateTcpPort(port))
 			{
 				throw new ArgumentOutOfRangeException("port");
 			}
-			this.Init(AddressFamily.InterNetwork, new IPEndPoint(IPAddress.Any, port));
+			this.m_ServerSocketEP = new IPEndPoint(IPAddress.Any, port);
+			this.m_ServerSocket = new Socket(this.m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 		}
 
-		public TcpListener(IPEndPoint local_end_point)
+		public static TcpListener Create(int port)
 		{
-			if (local_end_point == null)
-			{
-				throw new ArgumentNullException("local_end_point");
-			}
-			this.Init(local_end_point.AddressFamily, local_end_point);
-		}
-
-		public TcpListener(IPAddress listen_ip, int port)
-		{
-			if (listen_ip == null)
-			{
-				throw new ArgumentNullException("listen_ip");
-			}
-			if (port < 0 || port > 65535)
+			bool on = Logging.On;
+			if (!ValidationHelper.ValidateTcpPort(port))
 			{
 				throw new ArgumentOutOfRangeException("port");
 			}
-			this.Init(listen_ip.AddressFamily, new IPEndPoint(listen_ip, port));
+			TcpListener tcpListener = new TcpListener(IPAddress.IPv6Any, port);
+			tcpListener.Server.DualMode = true;
+			bool on2 = Logging.On;
+			return tcpListener;
 		}
 
-		private void Init(AddressFamily family, EndPoint ep)
+		public Socket Server
 		{
-			this.active = false;
-			this.server = new Socket(family, SocketType.Stream, ProtocolType.Tcp);
-			this.savedEP = ep;
+			get
+			{
+				return this.m_ServerSocket;
+			}
 		}
 
 		protected bool Active
 		{
 			get
 			{
-				return this.active;
+				return this.m_Active;
 			}
 		}
 
@@ -55,19 +78,11 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				if (this.active)
+				if (!this.m_Active)
 				{
-					return this.server.LocalEndPoint;
+					return this.m_ServerSocketEP;
 				}
-				return this.savedEP;
-			}
-		}
-
-		public Socket Server
-		{
-			get
-			{
-				return this.server;
+				return this.m_ServerSocket.LocalEndPoint;
 			}
 		}
 
@@ -75,133 +90,198 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				if (this.server == null)
-				{
-					throw new ObjectDisposedException(base.GetType().ToString());
-				}
-				if (this.active)
-				{
-					throw new InvalidOperationException("The TcpListener has been started");
-				}
-				return this.server.ExclusiveAddressUse;
+				return this.m_ServerSocket.ExclusiveAddressUse;
 			}
 			set
 			{
-				if (this.server == null)
+				if (this.m_Active)
 				{
-					throw new ObjectDisposedException(base.GetType().ToString());
+					throw new InvalidOperationException(global::SR.GetString("The TcpListener must not be listening before performing this operation."));
 				}
-				if (this.active)
-				{
-					throw new InvalidOperationException("The TcpListener has been started");
-				}
-				this.server.ExclusiveAddressUse = value;
+				this.m_ServerSocket.ExclusiveAddressUse = value;
+				this.m_ExclusiveAddressUse = value;
 			}
 		}
 
-		public Socket AcceptSocket()
+		public void AllowNatTraversal(bool allowed)
 		{
-			if (!this.active)
+			if (this.m_Active)
 			{
-				throw new InvalidOperationException("Socket is not listening");
+				throw new InvalidOperationException(global::SR.GetString("The TcpListener must not be listening before performing this operation."));
 			}
-			return this.server.Accept();
-		}
-
-		public TcpClient AcceptTcpClient()
-		{
-			if (!this.active)
+			if (allowed)
 			{
-				throw new InvalidOperationException("Socket is not listening");
+				this.m_ServerSocket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
+				return;
 			}
-			Socket socket = this.server.Accept();
-			TcpClient tcpClient = new TcpClient();
-			tcpClient.SetTcpClient(socket);
-			return tcpClient;
-		}
-
-		~TcpListener()
-		{
-			if (this.active)
-			{
-				this.Stop();
-			}
-		}
-
-		public bool Pending()
-		{
-			if (!this.active)
-			{
-				throw new InvalidOperationException("Socket is not listening");
-			}
-			return this.server.Poll(0, SelectMode.SelectRead);
+			this.m_ServerSocket.SetIPProtectionLevel(IPProtectionLevel.EdgeRestricted);
 		}
 
 		public void Start()
 		{
-			this.Start(5);
+			this.Start(int.MaxValue);
 		}
 
 		public void Start(int backlog)
 		{
-			if (this.active)
+			if (backlog > 2147483647 || backlog < 0)
 			{
+				throw new ArgumentOutOfRangeException("backlog");
+			}
+			bool on = Logging.On;
+			if (this.m_ServerSocket == null)
+			{
+				throw new InvalidOperationException(global::SR.GetString("The socket handle is not valid."));
+			}
+			if (this.m_Active)
+			{
+				bool on2 = Logging.On;
 				return;
 			}
-			if (this.server == null)
+			this.m_ServerSocket.Bind(this.m_ServerSocketEP);
+			try
 			{
-				throw new InvalidOperationException("Invalid server socket");
+				this.m_ServerSocket.Listen(backlog);
 			}
-			this.server.Bind(this.savedEP);
-			this.server.Listen(backlog);
-			this.active = true;
-		}
-
-		public IAsyncResult BeginAcceptSocket(AsyncCallback callback, object state)
-		{
-			if (this.server == null)
+			catch (SocketException)
 			{
-				throw new ObjectDisposedException(base.GetType().ToString());
+				this.Stop();
+				throw;
 			}
-			return this.server.BeginAccept(callback, state);
-		}
-
-		public IAsyncResult BeginAcceptTcpClient(AsyncCallback callback, object state)
-		{
-			if (this.server == null)
-			{
-				throw new ObjectDisposedException(base.GetType().ToString());
-			}
-			return this.server.BeginAccept(callback, state);
-		}
-
-		public Socket EndAcceptSocket(IAsyncResult asyncResult)
-		{
-			return this.server.EndAccept(asyncResult);
-		}
-
-		public TcpClient EndAcceptTcpClient(IAsyncResult asyncResult)
-		{
-			Socket socket = this.server.EndAccept(asyncResult);
-			TcpClient tcpClient = new TcpClient();
-			tcpClient.SetTcpClient(socket);
-			return tcpClient;
+			this.m_Active = true;
+			bool on3 = Logging.On;
 		}
 
 		public void Stop()
 		{
-			if (this.active)
+			bool on = Logging.On;
+			if (this.m_ServerSocket != null)
 			{
-				this.server.Close();
-				this.server = null;
+				this.m_ServerSocket.Close();
+				this.m_ServerSocket = null;
 			}
-			this.Init(AddressFamily.InterNetwork, this.savedEP);
+			this.m_Active = false;
+			this.m_ServerSocket = new Socket(this.m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			if (this.m_ExclusiveAddressUse)
+			{
+				this.m_ServerSocket.ExclusiveAddressUse = true;
+			}
+			bool on2 = Logging.On;
 		}
 
-		private bool active;
+		public bool Pending()
+		{
+			if (!this.m_Active)
+			{
+				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+			}
+			return this.m_ServerSocket.Poll(0, SelectMode.SelectRead);
+		}
 
-		private Socket server;
+		public Socket AcceptSocket()
+		{
+			bool on = Logging.On;
+			if (!this.m_Active)
+			{
+				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+			}
+			Socket socket = this.m_ServerSocket.Accept();
+			bool on2 = Logging.On;
+			return socket;
+		}
 
-		private EndPoint savedEP;
+		public TcpClient AcceptTcpClient()
+		{
+			bool on = Logging.On;
+			if (!this.m_Active)
+			{
+				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+			}
+			TcpClient tcpClient = new TcpClient(this.m_ServerSocket.Accept());
+			bool on2 = Logging.On;
+			return tcpClient;
+		}
+
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public IAsyncResult BeginAcceptSocket(AsyncCallback callback, object state)
+		{
+			bool on = Logging.On;
+			if (!this.m_Active)
+			{
+				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+			}
+			IAsyncResult asyncResult = this.m_ServerSocket.BeginAccept(callback, state);
+			bool on2 = Logging.On;
+			return asyncResult;
+		}
+
+		public Socket EndAcceptSocket(IAsyncResult asyncResult)
+		{
+			bool on = Logging.On;
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
+			SocketAsyncResult socketAsyncResult = asyncResult as SocketAsyncResult;
+			object obj = ((socketAsyncResult == null) ? null : socketAsyncResult.socket);
+			if (obj == null)
+			{
+				throw new ArgumentException(global::SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
+			}
+			Socket socket = obj.EndAccept(asyncResult);
+			bool on2 = Logging.On;
+			return socket;
+		}
+
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public IAsyncResult BeginAcceptTcpClient(AsyncCallback callback, object state)
+		{
+			bool on = Logging.On;
+			if (!this.m_Active)
+			{
+				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+			}
+			IAsyncResult asyncResult = this.m_ServerSocket.BeginAccept(callback, state);
+			bool on2 = Logging.On;
+			return asyncResult;
+		}
+
+		public TcpClient EndAcceptTcpClient(IAsyncResult asyncResult)
+		{
+			bool on = Logging.On;
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
+			SocketAsyncResult socketAsyncResult = asyncResult as SocketAsyncResult;
+			object obj = ((socketAsyncResult == null) ? null : socketAsyncResult.socket);
+			if (obj == null)
+			{
+				throw new ArgumentException(global::SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
+			}
+			Socket socket = obj.EndAccept(asyncResult);
+			bool on2 = Logging.On;
+			return new TcpClient(socket);
+		}
+
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public Task<Socket> AcceptSocketAsync()
+		{
+			return Task<Socket>.Factory.FromAsync(new Func<AsyncCallback, object, IAsyncResult>(this.BeginAcceptSocket), new Func<IAsyncResult, Socket>(this.EndAcceptSocket), null);
+		}
+
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public Task<TcpClient> AcceptTcpClientAsync()
+		{
+			return Task<TcpClient>.Factory.FromAsync(new Func<AsyncCallback, object, IAsyncResult>(this.BeginAcceptTcpClient), new Func<IAsyncResult, TcpClient>(this.EndAcceptTcpClient), null);
+		}
+
+		private IPEndPoint m_ServerSocketEP;
+
+		private Socket m_ServerSocket;
+
+		private bool m_Active;
+
+		private bool m_ExclusiveAddressUse;
 	}
 }

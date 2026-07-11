@@ -12,10 +12,8 @@ public class BeanPlantConfig : IEntityConfig
 		string text2 = global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.NAME;
 		string text3 = global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DESC;
 		float num = 2f;
-		KAnimFile kanimFile = Assets.GetAnim("beanplant_kanim");
-		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 258.15f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("beanplant_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 258.15f);
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 198.15f, 248.15f, 273.15f, 323.15f, null, true, 0f, 0.15f, "BeanPlantSeed", true, true, true, true, 2400f);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
@@ -33,25 +31,12 @@ public class BeanPlantConfig : IEntityConfig
 				massConsumptionRate = 0.008333334f
 			}
 		});
-		PressureVulnerable pressureVulnerable = gameObject.AddOrGet<PressureVulnerable>();
-		PressureVulnerable pressureVulnerable2 = pressureVulnerable;
-		num = 0.025f;
-		float num2 = 0f;
-		SimHashes[] array = new SimHashes[] { SimHashes.CarbonDioxide };
-		pressureVulnerable2.Configure(num, num2, 10f, 30f, array);
-		UprootedMonitor component = gameObject.GetComponent<UprootedMonitor>();
-		component.monitorCell = new CellOffset(0, -1);
+		gameObject.AddOrGet<PressureVulnerable>().Configure(0.025f, 0f, 10f, 30f, new SimHashes[] { SimHashes.CarbonDioxide });
+		gameObject.GetComponent<UprootedMonitor>().monitorCell = new CellOffset(0, -1);
 		gameObject.AddOrGet<StandardCropPlant>();
-		GameObject gameObject2 = gameObject;
-		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
-		text4 = "BeanPlantSeed";
-		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.NAME;
-		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.DESC;
-		kanimFile = Assets.GetAnim("seed_beanplant_kanim");
-		List<Tag> list = new List<Tag> { GameTags.CropSeed };
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, string.Empty, false);
-		EntityTemplates.ExtendEntityToFood(gameObject3, FOOD.FOOD_TYPES.BEAN);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
+		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "BeanPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.DESC, Assets.GetAnim("seed_beanplant_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", false);
+		EntityTemplates.ExtendEntityToFood(gameObject2, FOOD.FOOD_TYPES.BEAN);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
 		return gameObject;
 	}
 

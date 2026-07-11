@@ -40,6 +40,7 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 			if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
 			{
 				this.Toggle();
+				return;
 			}
 		}
 		else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
@@ -161,24 +162,17 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 	public LocString ThresholdValueUnits()
 	{
 		LocString locString = null;
-		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
-		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
+		switch (GameUtil.temperatureUnit)
 		{
-			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
-			{
-				if (temperatureUnit == GameUtil.TemperatureUnit.Kelvin)
-				{
-					locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
-				}
-			}
-			else
-			{
-				locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
-			}
-		}
-		else
-		{
+		case GameUtil.TemperatureUnit.Celsius:
 			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
+			break;
+		case GameUtil.TemperatureUnit.Fahrenheit:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
+			break;
+		case GameUtil.TemperatureUnit.Kelvin:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
+			break;
 		}
 		return locString;
 	}

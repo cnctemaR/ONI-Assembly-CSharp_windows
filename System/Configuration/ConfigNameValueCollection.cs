@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 
 namespace System.Configuration
 {
-	internal class ConfigNameValueCollection : global::System.Collections.Specialized.NameValueCollection
+	internal class ConfigNameValueCollection : NameValueCollection
 	{
 		public ConfigNameValueCollection()
 		{

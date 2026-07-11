@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Allows the asynchronous read back of GPU resources.</para>
-	/// </summary>
 	[StaticAccessor("AsyncGPUReadbackManager::GetInstance()", StaticAccessorType.Dot)]
 	public static class AsyncGPUReadback
 	{

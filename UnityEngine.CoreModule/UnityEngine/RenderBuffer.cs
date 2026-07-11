@@ -5,9 +5,6 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Color or depth buffer part of a RenderTexture.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public struct RenderBuffer
 	{
@@ -35,9 +32,6 @@ namespace UnityEngine
 			return RenderBuffer.GetStoreAction_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Returns native RenderBuffer. Be warned this is not native Texture, but rather pointer to unity struct that can be used with native unity API. Currently such API exists only on iOS.</para>
-		/// </summary>
 		[FreeFunction(Name = "RenderBufferScripting::GetNativeRenderBufferPtr", HasExplicitThis = true)]
 		public IntPtr GetNativeRenderBufferPtr()
 		{

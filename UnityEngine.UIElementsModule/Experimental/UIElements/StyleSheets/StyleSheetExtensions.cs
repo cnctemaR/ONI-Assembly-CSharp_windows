@@ -9,7 +9,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 		{
 			if (handles[0].valueType == StyleValueType.Keyword && handles[0].valueIndex == 2)
 			{
-				StyleSheetApplicator.ApplyDefault<T>(specificity, ref property);
+				StyleSheetApplicator.ApplyValue<T>(specificity, ref property, default(T));
 			}
 			else
 			{
@@ -19,39 +19,28 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		public static void ApplyShorthand(this StyleSheet sheet, StyleValueHandle[] handles, int specificity, VisualElementStylesData styleData, ShorthandApplicatorFunction applicatorFunc)
 		{
-			if (handles[0].valueType != StyleValueType.Keyword && handles[0].valueIndex != 2)
-			{
-				applicatorFunc(sheet, handles, specificity, styleData);
-			}
+			applicatorFunc(sheet, handles, specificity, styleData);
 		}
 
 		public static string ReadAsString(this StyleSheet sheet, StyleValueHandle handle)
 		{
-			string text = string.Empty;
+			string empty = string.Empty;
 			switch (handle.valueType)
 			{
 			case StyleValueType.Keyword:
-				text = sheet.ReadKeyword(handle).ToString();
-				break;
+				return sheet.ReadKeyword(handle).ToString();
 			case StyleValueType.Float:
-				text = sheet.ReadFloat(handle).ToString();
-				break;
+				return sheet.ReadFloat(handle).ToString();
 			case StyleValueType.Color:
-				text = sheet.ReadColor(handle).ToString();
-				break;
+				return sheet.ReadColor(handle).ToString();
 			case StyleValueType.ResourcePath:
-				text = sheet.ReadResourcePath(handle);
-				break;
+				return sheet.ReadResourcePath(handle);
 			case StyleValueType.Enum:
-				text = sheet.ReadEnum(handle);
-				break;
+				return sheet.ReadEnum(handle);
 			case StyleValueType.String:
-				text = sheet.ReadString(handle);
-				break;
-			default:
-				throw new ArgumentException("Unhandled type " + handle.valueType);
+				return sheet.ReadString(handle);
 			}
-			return text;
+			throw new ArgumentException("Unhandled type " + handle.valueType);
 		}
 	}
 }

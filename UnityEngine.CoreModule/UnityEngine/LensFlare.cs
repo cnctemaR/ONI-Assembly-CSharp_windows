@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Script interface for a.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Camera/Flare.h")]
 	public sealed class LensFlare : Behaviour
 	{
-		/// <summary>
-		///   <para>The strength of the flare.</para>
-		/// </summary>
 		public extern float brightness
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -21,9 +15,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The fade speed of the flare.</para>
-		/// </summary>
 		public extern float fadeSpeed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -32,9 +23,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The color of the flare.</para>
-		/// </summary>
 		public Color color
 		{
 			get
@@ -49,9 +37,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The to use.</para>
-		/// </summary>
 		public extern Flare flare
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

@@ -6,14 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that produces a Camera texture.</para>
-	/// </summary>
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
 	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{
 		internal CameraPlayable(PlayableHandle handle)
@@ -28,14 +25,6 @@ namespace UnityEngine.Experimental.Playables
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates a CameraPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph object that will own the CameraPlayable.</param>
-		/// <param name="camera">Camera used to produce a texture in the PlayableGraph.</param>
-		/// <returns>
-		///   <para>A CameraPlayable linked to the PlayableGraph.</para>
-		/// </returns>
 		public static CameraPlayable Create(PlayableGraph graph, Camera camera)
 		{
 			PlayableHandle playableHandle = CameraPlayable.CreateHandle(graph, camera);
@@ -87,15 +76,19 @@ namespace UnityEngine.Experimental.Playables
 			CameraPlayable.SetCameraInternal(ref this.m_Handle, value);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Camera GetCameraInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetCameraInternal(ref PlayableHandle hdl, Camera camera);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool InternalCreateCameraPlayable(ref PlayableGraph graph, Camera camera, ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
 

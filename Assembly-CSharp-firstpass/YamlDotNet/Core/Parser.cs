@@ -8,16 +8,6 @@ namespace YamlDotNet.Core
 {
 	public class Parser : IParser
 	{
-		public Parser(TextReader input)
-			: this(new Scanner(input, true))
-		{
-		}
-
-		public Parser(IScanner scanner)
-		{
-			this.scanner = scanner;
-		}
-
 		private Token GetCurrentToken()
 		{
 			if (this.currentToken == null)
@@ -31,10 +21,19 @@ namespace YamlDotNet.Core
 						break;
 					}
 					this.pendingEvents.Enqueue(new YamlDotNet.Core.Events.Comment(comment.Value, comment.IsInline, comment.Start, comment.End));
-					this.scanner.ConsumeCurrent();
 				}
 			}
 			return this.currentToken;
+		}
+
+		public Parser(TextReader input)
+			: this(new Scanner(input, true))
+		{
+		}
+
+		public Parser(IScanner scanner)
+		{
+			this.scanner = scanner;
 		}
 
 		public ParsingEvent Current
@@ -198,7 +197,7 @@ namespace YamlDotNet.Core
 					}
 					if (versionDirective2.Version.Major != 1 || versionDirective2.Version.Minor != 1)
 					{
-						goto IL_0055;
+						goto IL_0049;
 					}
 					versionDirective = versionDirective2;
 					flag = true;
@@ -207,7 +206,7 @@ namespace YamlDotNet.Core
 				{
 					if ((tagDirective = this.GetCurrentToken() as TagDirective) == null)
 					{
-						goto IL_00BD;
+						goto IL_00AE;
 					}
 					if (tags.Contains(tagDirective.Handle))
 					{
@@ -219,11 +218,11 @@ namespace YamlDotNet.Core
 				this.Skip();
 			}
 			throw new SemanticErrorException(versionDirective2.Start, versionDirective2.End, "Found duplicate %YAML directive.");
-			IL_0055:
+			IL_0049:
 			throw new SemanticErrorException(versionDirective2.Start, versionDirective2.End, "Found incompatible YAML document.");
 			Block_5:
 			throw new SemanticErrorException(tagDirective.Start, tagDirective.End, "Found duplicate %TAG directive.");
-			IL_00BD:
+			IL_00AE:
 			Parser.AddTagDirectives(tags, Constants.DefaultTagDirectives);
 			if (flag)
 			{
@@ -307,7 +306,7 @@ namespace YamlDotNet.Core
 			{
 				text = null;
 			}
-			string text2 = ((anchor == null) ? null : ((!string.IsNullOrEmpty(anchor.Value)) ? anchor.Value : null));
+			string text2 = ((anchor != null) ? (string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value) : null);
 			bool flag = string.IsNullOrEmpty(text);
 			if (isIndentlessSequence && this.GetCurrentToken() is BlockEntry)
 			{
@@ -352,8 +351,7 @@ namespace YamlDotNet.Core
 					this.state = ParserState.BlockSequenceFirstEntry;
 					return new SequenceStart(text2, text, flag, SequenceStyle.Block, start, blockSequenceStart.End);
 				}
-				BlockMappingStart blockMappingStart = this.GetCurrentToken() as BlockMappingStart;
-				if (blockMappingStart != null)
+				if (this.GetCurrentToken() is BlockMappingStart)
 				{
 					this.state = ParserState.BlockMappingFirstKey;
 					return new MappingStart(text2, text, flag, MappingStyle.Block, start, this.GetCurrentToken().End);
@@ -492,7 +490,6 @@ namespace YamlDotNet.Core
 				this.GetCurrentToken();
 				this.Skip();
 			}
-			ParsingEvent parsingEvent;
 			if (!(this.GetCurrentToken() is FlowSequenceEnd))
 			{
 				if (!isFirst)
@@ -507,7 +504,7 @@ namespace YamlDotNet.Core
 				if (this.GetCurrentToken() is Key)
 				{
 					this.state = ParserState.FlowSequenceEntryMappingKey;
-					parsingEvent = new MappingStart(null, null, true, MappingStyle.Flow);
+					ParsingEvent parsingEvent = new MappingStart(null, null, true, MappingStyle.Flow);
 					this.Skip();
 					return parsingEvent;
 				}
@@ -518,9 +515,9 @@ namespace YamlDotNet.Core
 				}
 			}
 			this.state = this.states.Pop();
-			parsingEvent = new SequenceEnd(this.GetCurrentToken().Start, this.GetCurrentToken().End);
+			ParsingEvent parsingEvent2 = new SequenceEnd(this.GetCurrentToken().Start, this.GetCurrentToken().End);
 			this.Skip();
-			return parsingEvent;
+			return parsingEvent2;
 		}
 
 		private ParsingEvent ParseFlowSequenceEntryMappingKey()
@@ -637,19 +634,21 @@ namespace YamlDotNet.Core
 			public void Enqueue(ParsingEvent @event)
 			{
 				EventType type = @event.Type;
-				if (type != EventType.StreamStart && type != EventType.DocumentStart)
-				{
-					this.normalPriorityEvents.Enqueue(@event);
-				}
-				else
+				if (type == EventType.StreamStart || type == EventType.DocumentStart)
 				{
 					this.highPriorityEvents.Enqueue(@event);
+					return;
 				}
+				this.normalPriorityEvents.Enqueue(@event);
 			}
 
 			public ParsingEvent Dequeue()
 			{
-				return (this.highPriorityEvents.Count <= 0) ? this.normalPriorityEvents.Dequeue() : this.highPriorityEvents.Dequeue();
+				if (this.highPriorityEvents.Count <= 0)
+				{
+					return this.normalPriorityEvents.Dequeue();
+				}
+				return this.highPriorityEvents.Dequeue();
 			}
 
 			public int Count

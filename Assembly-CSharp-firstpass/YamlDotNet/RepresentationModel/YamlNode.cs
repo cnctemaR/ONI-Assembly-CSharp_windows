@@ -58,11 +58,9 @@ namespace YamlDotNet.RepresentationModel
 			if (!string.IsNullOrEmpty(this.Anchor) && !state.EmittedAnchors.Add(this.Anchor))
 			{
 				emitter.Emit(new AnchorAlias(this.Anchor));
+				return;
 			}
-			else
-			{
-				this.Emit(emitter, state);
-			}
+			this.Emit(emitter, state);
 		}
 
 		internal abstract void Emit(IEmitter emitter, EmitterState state);
@@ -90,7 +88,11 @@ namespace YamlDotNet.RepresentationModel
 
 		protected static int GetHashCode(object value)
 		{
-			return (value != null) ? value.GetHashCode() : 0;
+			if (value != null)
+			{
+				return value.GetHashCode();
+			}
+			return 0;
 		}
 
 		protected static int CombineHashCodes(int h1, int h2)

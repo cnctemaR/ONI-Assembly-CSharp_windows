@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IEventSystemHandler
+public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
 	public int CurrentState
 	{
@@ -99,12 +99,9 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		}
 		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
 		{
-			if (!(statePresentationSetting.image_target == null))
+			if (!(statePresentationSetting.image_target == null) && statePresentationSetting.use_color_on_hover)
 			{
-				if (statePresentationSetting.use_color_on_hover)
-				{
-					statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
-				}
+				statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
 			}
 		}
 		if (this.onEnter != null)
@@ -123,15 +120,9 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 			}
 			foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
 			{
-				if (!(statePresentationSetting.image_target == null))
+				if (!(statePresentationSetting.image_target == null) && !(statePresentationSetting.image_target == null) && statePresentationSetting.use_color_on_hover)
 				{
-					if (!(statePresentationSetting.image_target == null))
-					{
-						if (statePresentationSetting.use_color_on_hover)
-						{
-							statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
-						}
-					}
+					statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
 				}
 			}
 		}
@@ -159,12 +150,9 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		}
 		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
 		{
-			if (!(statePresentationSetting.image_target == null))
+			if (!(statePresentationSetting.image_target == null) && statePresentationSetting.use_color_on_hover)
 			{
-				if (statePresentationSetting.use_color_on_hover)
-				{
-					statePresentationSetting.image_target.color = statePresentationSetting.color;
-				}
+				statePresentationSetting.image_target.color = statePresentationSetting.color;
 			}
 		}
 		if (this.onExit != null)
@@ -178,14 +166,12 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		this.clickHeldDown = true;
 		if (this.play_sound_on_click)
 		{
-			if (this.states[this.state].on_click_override_sound_path == string.Empty)
+			if (this.states[this.state].on_click_override_sound_path == "")
 			{
 				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
+				return;
 			}
-			else
-			{
-				KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
-			}
+			KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
 		}
 	}
 
@@ -193,7 +179,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	{
 		if (this.clickHeldDown)
 		{
-			if (this.play_sound_on_release && this.states[this.state].on_release_override_sound_path != string.Empty)
+			if (this.play_sound_on_release && this.states[this.state].on_release_override_sound_path != "")
 			{
 				KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_release_override_sound_path, false));
 			}

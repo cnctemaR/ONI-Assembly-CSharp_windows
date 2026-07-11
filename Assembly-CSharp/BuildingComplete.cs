@@ -116,38 +116,54 @@ public class BuildingComplete : Building
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
 		this.hasSpawnedKComponents = true;
 		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, this, base.GetExtents(), GameScenePartitioner.Instance.completeBuildings, null);
+		if (this.prefabid.HasTag(GameTags.TemplateBuilding))
+		{
+			Components.TemplateBuildings.Add(this);
+		}
 		Attributes attributes = this.GetAttributes();
 		if (attributes != null)
 		{
 			Deconstructable component5 = base.GetComponent<Deconstructable>();
 			if (component5 != null)
 			{
-				for (int k = 1; k < component5.constructionElements.Length; k++)
+				int k = 1;
+				while (k < component5.constructionElements.Length)
 				{
 					Tag tag = component5.constructionElements[k];
 					Element element = ElementLoader.GetElement(tag);
 					if (element != null)
 					{
-						foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+						using (List<AttributeModifier>.Enumerator enumerator = element.attributeModifiers.GetEnumerator())
 						{
-							attributes.Add(attributeModifier);
-						}
-					}
-					else
-					{
-						GameObject gameObject = Assets.TryGetPrefab(tag);
-						if (gameObject != null)
-						{
-							PrefabAttributeModifiers component6 = gameObject.GetComponent<PrefabAttributeModifiers>();
-							if (component6 != null)
+							while (enumerator.MoveNext())
 							{
-								foreach (AttributeModifier attributeModifier2 in component6.descriptors)
-								{
-									attributes.Add(attributeModifier2);
-								}
+								AttributeModifier attributeModifier = enumerator.Current;
+								attributes.Add(attributeModifier);
 							}
+							goto IL_03D9;
 						}
+						goto IL_0378;
 					}
+					goto IL_0378;
+					IL_03D9:
+					k++;
+					continue;
+					IL_0378:
+					GameObject gameObject = Assets.TryGetPrefab(tag);
+					if (!(gameObject != null))
+					{
+						goto IL_03D9;
+					}
+					PrefabAttributeModifiers component6 = gameObject.GetComponent<PrefabAttributeModifiers>();
+					if (component6 != null)
+					{
+						foreach (AttributeModifier attributeModifier2 in component6.descriptors)
+						{
+							attributes.Add(attributeModifier2);
+						}
+						goto IL_03D9;
+					}
+					goto IL_03D9;
 				}
 			}
 		}
@@ -165,8 +181,7 @@ public class BuildingComplete : Building
 
 	private string GetInspectSound()
 	{
-		string text = "AI_Inspect_" + base.GetComponent<KPrefabID>().PrefabTag.Name;
-		return GlobalAssets.GetSound(text, false);
+		return GlobalAssets.GetSound("AI_Inspect_" + base.GetComponent<KPrefabID>().PrefabTag.Name, false);
 	}
 
 	protected override void OnCleanUp()

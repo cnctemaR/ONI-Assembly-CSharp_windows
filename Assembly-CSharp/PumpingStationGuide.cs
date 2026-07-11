@@ -66,11 +66,7 @@ public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 		{
 			int num3 = Grid.OffsetCell(root_cell, 0, -i);
 			int num4 = Grid.OffsetCell(root_cell, 1, -i);
-			if (!Grid.IsValidCell(num3) || Grid.Solid[num3] || !Grid.IsValidCell(num4) || Grid.Solid[num4])
-			{
-				break;
-			}
-			if ((Grid.ObjectLayers[1].ContainsKey(num3) && !(Grid.ObjectLayers[1][num3] == null) && !(Grid.ObjectLayers[1][num3] == pump)) || (Grid.ObjectLayers[1].ContainsKey(num4) && !(Grid.ObjectLayers[1][num4] == null) && !(Grid.ObjectLayers[1][num4] == pump)))
+			if (!Grid.IsValidCell(num3) || Grid.Solid[num3] || !Grid.IsValidCell(num4) || Grid.Solid[num4] || (Grid.ObjectLayers[1].ContainsKey(num3) && !(Grid.ObjectLayers[1][num3] == null) && !(Grid.ObjectLayers[1][num3] == pump)) || (Grid.ObjectLayers[1].ContainsKey(num4) && !(Grid.ObjectLayers[1][num4] == null) && !(Grid.ObjectLayers[1][num4] == pump)))
 			{
 				break;
 			}

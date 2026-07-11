@@ -54,10 +54,9 @@ public class ResearchScreen : KModalScreen
 		this.currentZoom = Mathf.Lerp(this.currentZoom, this.targetZoom, num);
 		Vector2 vector = Vector2.zero;
 		Vector2 vector2 = KInputManager.GetMousePos();
-		Vector2 vector3 = ((!this.zoomCenterLock) ? (component.InverseTransformPoint(vector2) * this.currentZoom) : (component.InverseTransformPoint(new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2))) * this.currentZoom));
+		Vector2 vector3 = (this.zoomCenterLock ? (component.InverseTransformPoint(new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2))) * this.currentZoom) : (component.InverseTransformPoint(vector2) * this.currentZoom));
 		component.localScale = new Vector3(this.currentZoom, this.currentZoom, 1f);
-		Vector2 vector4 = ((!this.zoomCenterLock) ? (component.InverseTransformPoint(vector2) * this.currentZoom) : (component.InverseTransformPoint(new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2))) * this.currentZoom));
-		vector = vector4 - vector3;
+		vector = (this.zoomCenterLock ? (component.InverseTransformPoint(new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2))) * this.currentZoom) : (component.InverseTransformPoint(vector2) * this.currentZoom)) - vector3;
 		float num2 = this.keyboardScrollSpeed;
 		if (this.panUp)
 		{
@@ -75,48 +74,47 @@ public class ResearchScreen : KModalScreen
 		{
 			this.keyPanDelta -= Vector2.right * Time.unscaledDeltaTime * num2;
 		}
-		Vector2 vector5 = new Vector2(Mathf.Lerp(0f, this.keyPanDelta.x, Time.unscaledDeltaTime * this.keyPanEasing), Mathf.Lerp(0f, this.keyPanDelta.y, Time.unscaledDeltaTime * this.keyPanEasing));
-		this.keyPanDelta -= vector5;
-		Vector2 vector6 = Vector2.zero;
+		Vector2 vector4 = new Vector2(Mathf.Lerp(0f, this.keyPanDelta.x, Time.unscaledDeltaTime * this.keyPanEasing), Mathf.Lerp(0f, this.keyPanDelta.y, Time.unscaledDeltaTime * this.keyPanEasing));
+		this.keyPanDelta -= vector4;
+		Vector2 vector5 = Vector2.zero;
 		if (this.isDragging)
 		{
-			Vector2 vector7 = KInputManager.GetMousePos() - this.dragLastPosition;
-			vector6 += vector7;
+			Vector2 vector6 = KInputManager.GetMousePos() - this.dragLastPosition;
+			vector5 += vector6;
 			this.dragLastPosition = KInputManager.GetMousePos();
 		}
-		Vector2 vector8 = anchoredPosition + vector + this.keyPanDelta + vector6;
+		Vector2 vector7 = anchoredPosition + vector + this.keyPanDelta + vector5;
 		if (!this.isDragging)
 		{
-			Vector2 vector9 = component.rect.size * -0.5f * this.currentZoom;
-			Vector2 vector10 = component.rect.size * 0.5f * this.currentZoom;
-			Vector2 vector11 = new Vector2(Mathf.Clamp(vector8.x, vector9.x, vector10.x), Mathf.Clamp(vector8.y, vector9.y, vector10.y));
-			Vector2 vector12 = vector11 - vector8;
+			Vector2 vector8 = component.rect.size * -0.5f * this.currentZoom;
+			Vector2 vector9 = component.rect.size * 0.5f * this.currentZoom;
+			Vector2 vector10 = new Vector2(Mathf.Clamp(vector7.x, vector8.x, vector9.x), Mathf.Clamp(vector7.y, vector8.y, vector9.y)) - vector7;
 			if (!this.panLeft && !this.panRight && !this.panUp && !this.panDown)
 			{
-				vector8 += vector12 * this.edgeClampFactor * Time.unscaledDeltaTime;
+				vector7 += vector10 * this.edgeClampFactor * Time.unscaledDeltaTime;
 			}
 			else
 			{
-				vector8 += vector12;
-				if (vector12.x < 0f)
+				vector7 += vector10;
+				if (vector10.x < 0f)
 				{
 					this.keyPanDelta.x = Mathf.Min(0f, this.keyPanDelta.x);
 				}
-				if (vector12.x > 0f)
+				if (vector10.x > 0f)
 				{
 					this.keyPanDelta.x = Mathf.Max(0f, this.keyPanDelta.x);
 				}
-				if (vector12.y < 0f)
+				if (vector10.y < 0f)
 				{
 					this.keyPanDelta.y = Mathf.Min(0f, this.keyPanDelta.y);
 				}
-				if (vector12.y > 0f)
+				if (vector10.y > 0f)
 				{
 					this.keyPanDelta.y = Mathf.Max(0f, this.keyPanDelta.y);
 				}
 			}
 		}
-		component.anchoredPosition = vector8;
+		component.anchoredPosition = vector7;
 	}
 
 	protected override void OnSpawn()
@@ -131,8 +129,8 @@ public class ResearchScreen : KModalScreen
 		this.filterField.onValueChanged.AddListener(new UnityAction<string>(this.OnFilterChanged));
 		this.filterClearButton.onClick += delegate
 		{
-			this.filterField.text = string.Empty;
-			this.OnFilterChanged(string.Empty);
+			this.filterField.text = "";
+			this.OnFilterChanged("");
 		};
 		this.pointDisplayMap = new Dictionary<string, LocText>();
 		foreach (ResearchType researchType in Research.Instance.researchTypes.Types)
@@ -197,12 +195,8 @@ public class ResearchScreen : KModalScreen
 					}
 					else
 					{
-						switch (edge.edgeType)
-						{
-						case ResourceTreeNode.Edge.EdgeType.PolyLineEdge:
-						case ResourceTreeNode.Edge.EdgeType.QuadCurveEdge:
-						case ResourceTreeNode.Edge.EdgeType.BezierEdge:
-						case ResourceTreeNode.Edge.EdgeType.GenericEdge:
+						ResourceTreeNode.Edge.EdgeType edgeType = edge.edgeType;
+						if (edgeType <= ResourceTreeNode.Edge.EdgeType.QuadCurveEdge || edgeType - ResourceTreeNode.Edge.EdgeType.BezierEdge <= 1)
 						{
 							list.Add(edge.SrcTarget[0]);
 							list.Add(edge.path[0]);
@@ -213,12 +207,12 @@ public class ResearchScreen : KModalScreen
 							}
 							list.Add(edge.path[edge.path.Count - 1]);
 							list.Add(edge.SrcTarget[1]);
-							goto IL_058C;
 						}
+						else
+						{
+							list.AddRange(edge.path);
 						}
-						list.AddRange(edge.path);
 					}
-					IL_058C:;
 				}
 			}
 		}
@@ -261,10 +255,10 @@ public class ResearchScreen : KModalScreen
 	private IEnumerator WaitAndSetActiveResearch()
 	{
 		yield return new WaitForEndOfFrame();
-		TechInstance tech = Research.Instance.GetTargetResearch();
-		if (tech != null)
+		TechInstance targetResearch = Research.Instance.GetTargetResearch();
+		if (targetResearch != null)
 		{
-			this.SetActiveResearch(tech.tech);
+			this.SetActiveResearch(targetResearch.tech);
 		}
 		yield break;
 	}
@@ -417,8 +411,8 @@ public class ResearchScreen : KModalScreen
 			DetailsScreen.Instance.gameObject.SetActive(true);
 			DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
 		}
-		this.filterField.text = string.Empty;
-		this.OnFilterChanged(string.Empty);
+		this.filterField.text = "";
+		this.OnFilterChanged("");
 		this.UpdateProgressBars();
 		this.UpdatePointDisplay();
 	}
@@ -529,8 +523,7 @@ public class ResearchScreen : KModalScreen
 		filter_text = filter_text.ToLower();
 		foreach (KeyValuePair<Tech, ResearchEntry> keyValuePair in this.entryMap)
 		{
-			ResearchEntry value = keyValuePair.Value;
-			value.UpdateFilterState(filter_text);
+			keyValuePair.Value.UpdateFilterState(filter_text);
 		}
 	}
 

@@ -8,16 +8,16 @@ namespace Satsuma.IO
 {
 	public sealed class SimpleGraphFormat
 	{
-		public SimpleGraphFormat()
-		{
-			this.Extensions = new List<Dictionary<Arc, string>>();
-		}
-
 		public IGraph Graph { get; set; }
 
 		public IList<Dictionary<Arc, string>> Extensions { get; private set; }
 
 		public int StartIndex { get; set; }
+
+		public SimpleGraphFormat()
+		{
+			this.Extensions = new List<Dictionary<Arc, string>>();
+		}
 
 		public Node[] Load(TextReader reader, Directedness directedness)
 		{
@@ -105,7 +105,7 @@ namespace Satsuma.IO
 					{
 						throw new ArgumentException("Extension value is empty or contains whitespaces.");
 					}
-					writer.Write(' ' + dictionary4[arc]);
+					writer.Write(" " + dictionary4[arc]);
 				}
 				writer.WriteLine();
 			}

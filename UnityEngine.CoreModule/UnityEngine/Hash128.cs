@@ -5,21 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Represent the hash value.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Utilities/Hash128.h")]
 	[Serializable]
 	public struct Hash128 : IComparable, IComparable<Hash128>, IEquatable<Hash128>
 	{
-		/// <summary>
-		///   <para>Construct the Hash128.</para>
-		/// </summary>
-		/// <param name="u32_0"></param>
-		/// <param name="u32_1"></param>
-		/// <param name="u32_2"></param>
-		/// <param name="u32_3"></param>
 		public Hash128(uint u32_0, uint u32_1, uint u32_2, uint u32_3)
 		{
 			this.m_u32_0 = u32_0;
@@ -28,9 +18,36 @@ namespace UnityEngine
 			this.m_u32_3 = u32_3;
 		}
 
-		/// <summary>
-		///   <para>Get if the hash value is valid or not. (Read Only)</para>
-		/// </summary>
+		public unsafe Hash128(ulong u64_0, ulong u64_1)
+		{
+			this.m_u32_0 = (uint)u64_0;
+			this.m_u32_1 = *((ref u64_0) + 4);
+			this.m_u32_2 = (uint)u64_1;
+			this.m_u32_3 = *((ref u64_1) + 4);
+		}
+
+		internal unsafe ulong u64_0
+		{
+			get
+			{
+				fixed (uint* ptr = &this.m_u32_0)
+				{
+					return (ulong)(*(long*)ptr);
+				}
+			}
+		}
+
+		internal unsafe ulong u64_1
+		{
+			get
+			{
+				fixed (uint* ptr = &this.m_u32_1)
+				{
+					return (ulong)(*(long*)ptr);
+				}
+			}
+		}
+
 		public bool isValid
 		{
 			get
@@ -57,18 +74,11 @@ namespace UnityEngine
 			return num;
 		}
 
-		/// <summary>
-		///   <para>Convert Hash128 to string.</para>
-		/// </summary>
 		public override string ToString()
 		{
 			return Hash128.Internal_Hash128ToString(this);
 		}
 
-		/// <summary>
-		///   <para>Convert the input string to Hash128.</para>
-		/// </summary>
-		/// <param name="hashString"></param>
 		[FreeFunction("StringToHash128")]
 		public static Hash128 Parse(string hashString)
 		{
@@ -83,10 +93,6 @@ namespace UnityEngine
 			return Hash128.Internal_Hash128ToString_Injected(ref hash128);
 		}
 
-		/// <summary>
-		///   <para>Compute a hash of the input string.</para>
-		/// </summary>
-		/// <param name="hashString"></param>
 		[FreeFunction("ComputeHash128FromString")]
 		public static Hash128 Compute(string hashString)
 		{

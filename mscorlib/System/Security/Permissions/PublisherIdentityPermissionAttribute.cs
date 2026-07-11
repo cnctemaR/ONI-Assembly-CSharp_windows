@@ -5,8 +5,8 @@ using Mono.Security.Cryptography;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class PublisherIdentityPermissionAttribute : CodeAccessSecurityAttribute
 	{
@@ -59,19 +59,15 @@ namespace System.Security.Permissions
 			}
 			if (this.x509data != null)
 			{
-				byte[] array = CryptoConvert.FromHex(this.x509data);
-				X509Certificate x509Certificate = new X509Certificate(array);
-				return new PublisherIdentityPermission(x509Certificate);
+				return new PublisherIdentityPermission(new X509Certificate(CryptoConvert.FromHex(this.x509data)));
 			}
 			if (this.certFile != null)
 			{
-				X509Certificate x509Certificate = global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromCertFile(this.certFile);
-				return new PublisherIdentityPermission(x509Certificate);
+				return new PublisherIdentityPermission(global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromCertFile(this.certFile));
 			}
 			if (this.signedFile != null)
 			{
-				X509Certificate x509Certificate = global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(this.signedFile);
-				return new PublisherIdentityPermission(x509Certificate);
+				return new PublisherIdentityPermission(global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(this.signedFile));
 			}
 			return new PublisherIdentityPermission(PermissionState.None);
 		}

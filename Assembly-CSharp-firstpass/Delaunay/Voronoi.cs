@@ -9,24 +9,6 @@ namespace Delaunay
 {
 	public sealed class Voronoi : Delaunay.Utils.IDisposable
 	{
-		public Voronoi(List<Vector2> points, List<uint> colors, List<float> weights, Rect plotBounds)
-		{
-			this._plotBounds = plotBounds;
-			this.min_weight = float.MaxValue;
-			this.max_weight = float.MinValue;
-			this._sites = new SiteList();
-			this._sitesIndexedByLocation = new Dictionary<Vector2, Site>();
-			this._triangles = new List<Triangle>();
-			this._edges = new List<Edge>();
-			this.AddSites(points, colors, weights);
-			float num = this.max_weight - this.min_weight;
-			if (num > 0f)
-			{
-				this._sites.ScaleWeight(1f + num);
-			}
-			this.FortunesAlgorithm();
-		}
-
 		public Rect plotBounds
 		{
 			get
@@ -65,12 +47,30 @@ namespace Delaunay
 			this._sitesIndexedByLocation = null;
 		}
 
+		public Voronoi(List<Vector2> points, List<uint> colors, List<float> weights, Rect plotBounds)
+		{
+			this._plotBounds = plotBounds;
+			this.min_weight = float.MaxValue;
+			this.max_weight = float.MinValue;
+			this._sites = new SiteList();
+			this._sitesIndexedByLocation = new Dictionary<Vector2, Site>();
+			this._triangles = new List<Triangle>();
+			this._edges = new List<Edge>();
+			this.AddSites(points, colors, weights);
+			float num = this.max_weight - this.min_weight;
+			if (num > 0f)
+			{
+				this._sites.ScaleWeight(1f + num);
+			}
+			this.FortunesAlgorithm();
+		}
+
 		private void AddSites(List<Vector2> points, List<uint> colors, List<float> weights)
 		{
 			this.weightSum = 0f;
 			for (int i = 0; i < points.Count; i++)
 			{
-				this.AddSite(points[i], (colors == null) ? 0U : colors[i], i, (weights != null) ? weights[i] : 1f);
+				this.AddSite(points[i], (colors != null) ? colors[i] : 0U, i, (weights == null) ? 1f : weights[i]);
 			}
 		}
 
@@ -216,9 +216,7 @@ namespace Delaunay
 
 		public List<LineSegment> SpanningTree(KruskalType type = KruskalType.MINIMUM)
 		{
-			List<Edge> list = DelaunayHelpers.SelectNonIntersectingEdges(this._edges);
-			List<LineSegment> list2 = DelaunayHelpers.DelaunayLinesForEdges(list);
-			return DelaunayHelpers.Kruskal(list2, type);
+			return DelaunayHelpers.Kruskal(DelaunayHelpers.DelaunayLinesForEdges(DelaunayHelpers.SelectNonIntersectingEdges(this._edges)), type);
 		}
 
 		public List<List<Vector2>> Regions()
@@ -299,12 +297,8 @@ namespace Delaunay
 					Site site3 = this.FortunesAlgorithm_rightRegion(halfedge2);
 					Vertex vertex2 = halfedge.vertex;
 					vertex2.SetIndex();
-					Edge edge2 = halfedge.edge;
-					Side? leftRight = halfedge.leftRight;
-					edge2.SetVertex(leftRight.Value, vertex2);
-					Edge edge3 = halfedge2.edge;
-					Side? leftRight2 = halfedge2.leftRight;
-					edge3.SetVertex(leftRight2.Value, vertex2);
+					halfedge.edge.SetVertex(halfedge.leftRight.Value, vertex2);
+					halfedge2.edge.SetVertex(halfedge2.leftRight.Value, vertex2);
 					edgeList.Remove(halfedge);
 					halfedgePriorityQueue.Remove(halfedge2);
 					edgeList.Remove(halfedge2);
@@ -344,8 +338,7 @@ namespace Delaunay
 			edgeList.Dispose();
 			for (int i = 0; i < list.Count; i++)
 			{
-				Halfedge halfedge4 = list[i];
-				halfedge4.ReallyDispose();
+				list[i].ReallyDispose();
 			}
 			list.Clear();
 			for (int j = 0; j < this._edges.Count; j++)
@@ -368,9 +361,7 @@ namespace Delaunay
 			{
 				return this.fortunesAlgorithm_bottomMostSite;
 			}
-			Edge edge2 = edge;
-			Side? leftRight = he.leftRight;
-			return edge2.Site(leftRight.Value);
+			return edge.Site(he.leftRight.Value);
 		}
 
 		private Site FortunesAlgorithm_rightRegion(Halfedge he)
@@ -380,9 +371,7 @@ namespace Delaunay
 			{
 				return this.fortunesAlgorithm_bottomMostSite;
 			}
-			Edge edge2 = edge;
-			Side? leftRight = he.leftRight;
-			return edge2.Site(SideHelper.Other(leftRight.Value));
+			return edge.Site(SideHelper.Other(he.leftRight.Value));
 		}
 
 		public static int CompareByYThenX(Site s1, Site s2)

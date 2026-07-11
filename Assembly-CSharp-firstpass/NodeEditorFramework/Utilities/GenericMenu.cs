@@ -5,17 +5,17 @@ namespace NodeEditorFramework.Utilities
 {
 	public class GenericMenu
 	{
-		public GenericMenu()
-		{
-			GenericMenu.popup = new PopupMenu();
-		}
-
 		public Vector2 Position
 		{
 			get
 			{
 				return GenericMenu.popup.Position;
 			}
+		}
+
+		public GenericMenu()
+		{
+			GenericMenu.popup = new PopupMenu();
 		}
 
 		public void ShowAsContext()

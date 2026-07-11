@@ -5,6 +5,12 @@ namespace Satsuma
 {
 	public sealed class CompleteBipartiteGraph : IGraph, IArcLookup
 	{
+		public int RedNodeCount { get; private set; }
+
+		public int BlueNodeCount { get; private set; }
+
+		public bool Directed { get; private set; }
+
 		public CompleteBipartiteGraph(int redNodeCount, int blueNodeCount, Directedness directedness)
 		{
 			if (redNodeCount < 0 || blueNodeCount < 0)
@@ -19,12 +25,6 @@ namespace Satsuma
 			this.BlueNodeCount = blueNodeCount;
 			this.Directed = directedness == Directedness.Directed;
 		}
-
-		public int RedNodeCount { get; private set; }
-
-		public int BlueNodeCount { get; private set; }
-
-		public bool Directed { get; private set; }
 
 		public Node GetRedNode(int index)
 		{
@@ -81,17 +81,21 @@ namespace Satsuma
 			{
 				if (color == CompleteBipartiteGraph.Color.Blue)
 				{
-					for (int i = 0; i < this.BlueNodeCount; i++)
+					int num;
+					for (int i = 0; i < this.BlueNodeCount; i = num + 1)
 					{
 						yield return this.GetBlueNode(i);
+						num = i;
 					}
 				}
 			}
 			else
 			{
-				for (int j = 0; j < this.RedNodeCount; j++)
+				int num;
+				for (int i = 0; i < this.RedNodeCount; i = num + 1)
 				{
-					yield return this.GetRedNode(j);
+					yield return this.GetRedNode(i);
+					num = i;
 				}
 			}
 			yield break;
@@ -99,13 +103,16 @@ namespace Satsuma
 
 		public IEnumerable<Node> Nodes()
 		{
-			for (int i = 0; i < this.RedNodeCount; i++)
+			int num;
+			for (int i = 0; i < this.RedNodeCount; i = num + 1)
 			{
 				yield return this.GetRedNode(i);
+				num = i;
 			}
-			for (int j = 0; j < this.BlueNodeCount; j++)
+			for (int i = 0; i < this.BlueNodeCount; i = num + 1)
 			{
-				yield return this.GetBlueNode(j);
+				yield return this.GetBlueNode(i);
+				num = i;
 			}
 			yield break;
 		}
@@ -116,35 +123,42 @@ namespace Satsuma
 			{
 				yield break;
 			}
-			for (int i = 0; i < this.RedNodeCount; i++)
+			int num;
+			for (int i = 0; i < this.RedNodeCount; i = num + 1)
 			{
-				for (int j = 0; j < this.BlueNodeCount; j++)
+				for (int j = 0; j < this.BlueNodeCount; j = num + 1)
 				{
 					yield return this.GetArc(this.GetRedNode(i), this.GetBlueNode(j));
+					num = j;
 				}
+				num = i;
 			}
 			yield break;
 		}
 
 		public IEnumerable<Arc> Arcs(Node u, ArcFilter filter = ArcFilter.All)
 		{
-			bool isRed = this.IsRed(u);
-			if (this.Directed && (filter == ArcFilter.Edge || (filter == ArcFilter.Forward && !isRed) || (filter == ArcFilter.Backward && isRed)))
+			bool flag = this.IsRed(u);
+			if (this.Directed && (filter == ArcFilter.Edge || (filter == ArcFilter.Forward && !flag) || (filter == ArcFilter.Backward && flag)))
 			{
 				yield break;
 			}
-			if (isRed)
+			if (flag)
 			{
-				for (int i = 0; i < this.BlueNodeCount; i++)
+				int num;
+				for (int i = 0; i < this.BlueNodeCount; i = num + 1)
 				{
 					yield return this.GetArc(u, this.GetBlueNode(i));
+					num = i;
 				}
 			}
 			else
 			{
-				for (int j = 0; j < this.RedNodeCount; j++)
+				int num;
+				for (int i = 0; i < this.RedNodeCount; i = num + 1)
 				{
-					yield return this.GetArc(this.GetRedNode(j), u);
+					yield return this.GetArc(this.GetRedNode(i), u);
+					num = i;
 				}
 			}
 			yield break;
@@ -181,7 +195,11 @@ namespace Satsuma
 			{
 				return 0;
 			}
-			return (!flag) ? this.RedNodeCount : this.BlueNodeCount;
+			if (!flag)
+			{
+				return this.RedNodeCount;
+			}
+			return this.BlueNodeCount;
 		}
 
 		public int ArcCount(Node u, Node v, ArcFilter filter = ArcFilter.All)
@@ -190,7 +208,11 @@ namespace Satsuma
 			{
 				return 0;
 			}
-			return (this.ArcCount(u, filter) <= 0) ? 0 : 1;
+			if (this.ArcCount(u, filter) <= 0)
+			{
+				return 0;
+			}
+			return 1;
 		}
 
 		public bool HasNode(Node node)

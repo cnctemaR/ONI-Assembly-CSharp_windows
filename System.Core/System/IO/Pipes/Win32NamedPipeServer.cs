@@ -1,33 +1,19 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	internal class Win32NamedPipeServer : Win32NamedPipe, IPipe, INamedPipeServer
+	internal class Win32NamedPipeServer : Win32NamedPipe, INamedPipeServer, IPipe
 	{
 		public Win32NamedPipeServer(NamedPipeServerStream owner, SafePipeHandle safePipeHandle)
 		{
 			this.handle = safePipeHandle;
 		}
 
-		public Win32NamedPipeServer(NamedPipeServerStream owner, string pipeName, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeAccessRights rights, PipeOptions options, int inBufferSize, int outBufferSize, HandleInheritability inheritability)
+		public unsafe Win32NamedPipeServer(NamedPipeServerStream owner, string pipeName, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeAccessRights rights, PipeOptions options, int inBufferSize, int outBufferSize, PipeSecurity pipeSecurity, HandleInheritability inheritability)
 		{
 			string text = string.Format("\\\\.\\pipe\\{0}", pipeName);
-			uint num = 0U;
-			if ((rights & PipeAccessRights.ReadData) != (PipeAccessRights)0)
-			{
-				num |= 1U;
-			}
-			if ((rights & PipeAccessRights.WriteData) != (PipeAccessRights)0)
-			{
-				num |= 2U;
-			}
-			if ((options & PipeOptions.WriteThrough) != PipeOptions.None)
-			{
-				num |= 2147483648U;
-			}
+			uint num = (uint)(rights | (PipeAccessRights)options);
 			int num2 = 0;
 			if ((owner.TransmissionMode & PipeTransmissionMode.Message) != PipeTransmissionMode.Byte)
 			{
@@ -37,13 +23,29 @@ namespace System.IO.Pipes
 			{
 				num2 |= 1;
 			}
-			SecurityAttributesHack securityAttributesHack = new SecurityAttributesHack(inheritability == HandleInheritability.Inheritable);
-			IntPtr intPtr = Win32Marshal.CreateNamedPipe(text, num, num2, maxNumberOfServerInstances, outBufferSize, inBufferSize, 0, ref securityAttributesHack, IntPtr.Zero);
+			byte[] array = null;
+			if (pipeSecurity != null)
+			{
+				array = pipeSecurity.GetSecurityDescriptorBinaryForm();
+			}
+			byte[] array2;
+			byte* ptr;
+			if ((array2 = array) == null || array2.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array2[0];
+			}
+			SecurityAttributes securityAttributes = new SecurityAttributes(inheritability, (IntPtr)((void*)ptr));
+			IntPtr intPtr = Win32Marshal.CreateNamedPipe(text, num, num2, maxNumberOfServerInstances, outBufferSize, inBufferSize, 0, ref securityAttributes, IntPtr.Zero);
 			if (intPtr == new IntPtr(-1L))
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				throw Win32PipeError.GetException();
 			}
 			this.handle = new SafePipeHandle(intPtr, true);
+			array2 = null;
 		}
 
 		public override SafePipeHandle Handle
@@ -63,7 +65,7 @@ namespace System.IO.Pipes
 		{
 			if (!Win32Marshal.ConnectNamedPipe(this.Handle, IntPtr.Zero))
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				throw Win32PipeError.GetException();
 			}
 		}
 

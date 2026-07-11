@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -16,20 +15,16 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 			{
 				this.animController.Play(ConduitSensor.ON_ANIMS, KAnim.PlayMode.Loop);
 				int num = Grid.PosToCell(this);
-				ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-				ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+				ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
 				Color32 color = Color.white;
 				if (contents.diseaseIdx != 255)
 				{
-					Disease disease = Db.Get().Diseases[(int)contents.diseaseIdx];
-					color = disease.overlayColour;
+					color = Db.Get().Diseases[(int)contents.diseaseIdx].overlayColour;
 				}
 				this.animController.SetSymbolTint(ConduitDiseaseSensor.TINT_SYMBOL, color);
+				return;
 			}
-			else
-			{
-				this.animController.Play(ConduitSensor.OFF_ANIMS, KAnim.PlayMode.Once);
-			}
+			this.animController.Play(ConduitSensor.OFF_ANIMS, KAnim.PlayMode.Once);
 		}
 	}
 
@@ -38,8 +33,7 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 		get
 		{
 			int num = Grid.PosToCell(this);
-			ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-			ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+			ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
 			if (contents.mass > 0f)
 			{
 				this.lastValue = (float)contents.diseaseCount;

@@ -276,7 +276,7 @@ namespace FMODUnity
 						num5 += dsp_METERING_INFO.rmslevel[i] * dsp_METERING_INFO.rmslevel[i];
 					}
 					num5 = Mathf.Sqrt(num5 / (float)dsp_METERING_INFO.numchannels);
-					float num6 = ((num5 <= 0f) ? (-80f) : (20f * Mathf.Log10(num5 * Mathf.Sqrt(2f))));
+					float num6 = ((num5 > 0f) ? (20f * Mathf.Log10(num5 * Mathf.Sqrt(2f))) : (-80f));
 					if (num6 > 10f)
 					{
 						num6 = 10f;
@@ -319,11 +319,9 @@ namespace FMODUnity
 				if (pauseStatus)
 				{
 					this.lowlevelSystem.mixerSuspend();
+					return;
 				}
-				else
-				{
-					this.lowlevelSystem.mixerResume();
-				}
+				this.lowlevelSystem.mixerResume();
 			}
 		}
 
@@ -337,16 +335,15 @@ namespace FMODUnity
 					loadedBank.Bank.loadSampleData();
 				}
 				RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank);
+				return;
 			}
-			else
+			if (loadResult == RESULT.ERR_EVENT_ALREADY_LOADED)
 			{
-				if (loadResult != RESULT.ERR_EVENT_ALREADY_LOADED)
-				{
-					throw new BankLoadException(bankPath, loadResult);
-				}
 				loadedBank.RefCount = 2;
 				RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank);
+				return;
 			}
+			throw new BankLoadException(bankPath, loadResult);
 		}
 
 		public static void LoadBank(string bankName, bool loadSamples = false)
@@ -360,14 +357,12 @@ namespace FMODUnity
 					loadedBank.Bank.loadSampleData();
 				}
 				RuntimeManager.Instance.loadedBanks[bankName] = loadedBank;
+				return;
 			}
-			else
-			{
-				string bankPath = RuntimeUtils.GetBankPath(bankName);
-				RuntimeManager.LoadedBank loadedBank2 = default(RuntimeManager.LoadedBank);
-				RESULT result = RuntimeManager.Instance.studioSystem.loadBankFile(bankPath, LOAD_BANK_FLAGS.NORMAL, out loadedBank2.Bank);
-				RuntimeManager.Instance.loadedBankRegister(loadedBank2, bankPath, bankName, loadSamples, result);
-			}
+			string bankPath = RuntimeUtils.GetBankPath(bankName);
+			RuntimeManager.LoadedBank loadedBank2 = default(RuntimeManager.LoadedBank);
+			RESULT result = RuntimeManager.Instance.studioSystem.loadBankFile(bankPath, LOAD_BANK_FLAGS.NORMAL, out loadedBank2.Bank);
+			RuntimeManager.Instance.loadedBankRegister(loadedBank2, bankPath, bankName, loadSamples, result);
 		}
 
 		public static void LoadBank(TextAsset asset, bool loadSamples = false)
@@ -380,6 +375,7 @@ namespace FMODUnity
 				if (loadSamples)
 				{
 					loadedBank.Bank.loadSampleData();
+					return;
 				}
 			}
 			else
@@ -393,16 +389,18 @@ namespace FMODUnity
 					if (loadSamples)
 					{
 						loadedBank2.Bank.loadSampleData();
+						return;
 					}
 				}
 				else
 				{
-					if (result != RESULT.ERR_EVENT_ALREADY_LOADED)
+					if (result == RESULT.ERR_EVENT_ALREADY_LOADED)
 					{
-						throw new BankLoadException(name, result);
+						loadedBank2.RefCount = 2;
+						RuntimeManager.Instance.loadedBanks.Add(name, loadedBank2);
+						return;
 					}
-					loadedBank2.RefCount = 2;
-					RuntimeManager.Instance.loadedBanks.Add(name, loadedBank2);
+					throw new BankLoadException(name, result);
 				}
 			}
 		}
@@ -452,8 +450,9 @@ namespace FMODUnity
 			bool flag = false;
 			foreach (RuntimeManager.LoadedBank loadedBank in RuntimeManager.Instance.loadedBanks.Values)
 			{
+				Bank bank = loadedBank.Bank;
 				LOADING_STATE loading_STATE;
-				loadedBank.Bank.getSampleLoadingState(out loading_STATE);
+				bank.getSampleLoadingState(out loading_STATE);
 				flag |= loading_STATE == LOADING_STATE.LOADING;
 			}
 			return flag;
@@ -471,13 +470,9 @@ namespace FMODUnity
 			{
 				global::FMOD.Studio.Util.ParseID(path, out empty);
 			}
-			else
+			else if (RuntimeManager.Instance.studioSystem.lookupID(path, out empty) == RESULT.ERR_EVENT_NOTFOUND)
 			{
-				RESULT result = RuntimeManager.Instance.studioSystem.lookupID(path, out empty);
-				if (result == RESULT.ERR_EVENT_NOTFOUND)
-				{
-					throw new EventNotFoundException(path);
-				}
+				throw new EventNotFoundException(path);
 			}
 			return empty;
 		}
@@ -566,8 +561,7 @@ namespace FMODUnity
 			}
 			else
 			{
-				RESULT eventByID = RuntimeManager.Instance.studioSystem.getEventByID(guid, out eventDescription);
-				if (eventByID != RESULT.OK)
+				if (RuntimeManager.Instance.studioSystem.getEventByID(guid, out eventDescription) != RESULT.OK)
 				{
 					throw new EventNotFoundException(guid);
 				}

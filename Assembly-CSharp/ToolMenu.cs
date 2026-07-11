@@ -126,35 +126,33 @@ public class ToolMenu : KScreen
 		if (PlayerController.Instance.ActiveTool == null || PlayerController.Instance.ActiveTool == SelectTool.Instance)
 		{
 			this.toolEffectDisplayPlane.SetActive(false);
+			return;
 		}
-		else
+		PlayerController.Instance.ActiveTool.GetOverlayColorData(out this.colors);
+		Array.Clear(this.toolEffectDisplayBytes, 0, this.toolEffectDisplayBytes.Length);
+		if (this.colors != null)
 		{
-			PlayerController.Instance.ActiveTool.GetOverlayColorData(out this.colors);
-			Array.Clear(this.toolEffectDisplayBytes, 0, this.toolEffectDisplayBytes.Length);
-			if (this.colors != null)
+			foreach (ToolMenu.CellColorData cellColorData in this.colors)
 			{
-				foreach (ToolMenu.CellColorData cellColorData in this.colors)
+				if (Grid.IsValidCell(cellColorData.cell))
 				{
-					if (Grid.IsValidCell(cellColorData.cell))
+					int num = cellColorData.cell * 4;
+					if (num >= 0)
 					{
-						int num = cellColorData.cell * 4;
-						if (num >= 0)
-						{
-							this.toolEffectDisplayBytes[num] = (byte)(Mathf.Min(cellColorData.color.r, 1f) * 255f);
-							this.toolEffectDisplayBytes[num + 1] = (byte)(Mathf.Min(cellColorData.color.g, 1f) * 255f);
-							this.toolEffectDisplayBytes[num + 2] = (byte)(Mathf.Min(cellColorData.color.b, 1f) * 255f);
-							this.toolEffectDisplayBytes[num + 3] = (byte)(Mathf.Min(cellColorData.color.a, 1f) * 255f);
-						}
+						this.toolEffectDisplayBytes[num] = (byte)(Mathf.Min(cellColorData.color.r, 1f) * 255f);
+						this.toolEffectDisplayBytes[num + 1] = (byte)(Mathf.Min(cellColorData.color.g, 1f) * 255f);
+						this.toolEffectDisplayBytes[num + 2] = (byte)(Mathf.Min(cellColorData.color.b, 1f) * 255f);
+						this.toolEffectDisplayBytes[num + 3] = (byte)(Mathf.Min(cellColorData.color.a, 1f) * 255f);
 					}
 				}
 			}
-			if (!this.toolEffectDisplayPlane.activeSelf)
-			{
-				this.toolEffectDisplayPlane.SetActive(true);
-			}
-			this.toolEffectDisplayPlaneTexture.LoadRawTextureData(this.toolEffectDisplayBytes);
-			this.toolEffectDisplayPlaneTexture.Apply();
 		}
+		if (!this.toolEffectDisplayPlane.activeSelf)
+		{
+			this.toolEffectDisplayPlane.SetActive(true);
+		}
+		this.toolEffectDisplayPlaneTexture.LoadRawTextureData(this.toolEffectDisplayBytes);
+		this.toolEffectDisplayPlaneTexture.Apply();
 	}
 
 	public void ToggleSandboxUI(object data = null)
@@ -166,8 +164,7 @@ public class ToolMenu : KScreen
 
 	public static ToolMenu.ToolCollection CreateToolCollection(LocString collection_name, string icon_name, global::Action hotkey, string tool_name, LocString tooltip, bool largeIcon)
 	{
-		string text = collection_name;
-		ToolMenu.ToolCollection toolCollection = new ToolMenu.ToolCollection(text, icon_name, string.Empty, false, global::Action.NumActions, largeIcon);
+		ToolMenu.ToolCollection toolCollection = new ToolMenu.ToolCollection(collection_name, icon_name, "", false, global::Action.NumActions, largeIcon);
 		new ToolMenu.ToolInfo(collection_name, icon_name, hotkey, tool_name, toolCollection, tooltip, null, null);
 		return toolCollection;
 	}
@@ -222,11 +219,11 @@ public class ToolMenu : KScreen
 			}
 			else
 			{
-				gameObject7 = ((!flag) ? gameObject4 : gameObject5);
+				gameObject7 = (flag ? gameObject5 : gameObject4);
 				flag = !flag;
 			}
 			ToolMenu.ToolCollection tc = collections[i];
-			tc.toggle = Util.KInstantiateUI((collections[i].tools.Count <= 1) ? ((collections != this.sandboxTools) ? ((!collections[i].largeIcon) ? this.toolIconPrefab : this.toolIconLargePrefab) : this.sandboxToolIconPrefab) : this.collectionIconPrefab, gameObject7, true);
+			tc.toggle = Util.KInstantiateUI((collections[i].tools.Count > 1) ? this.collectionIconPrefab : ((collections == this.sandboxTools) ? this.sandboxToolIconPrefab : (collections[i].largeIcon ? this.toolIconLargePrefab : this.toolIconPrefab)), gameObject7, true);
 			KToggle component = tc.toggle.GetComponent<KToggle>();
 			component.soundPlayer.Enabled = false;
 			component.onClick += delegate
@@ -258,10 +255,11 @@ public class ToolMenu : KScreen
 					gameObject8.SetActive(false);
 				}
 				tc.UIMenuDisplay = gameObject8;
+				Action<object> <>9__2;
 				for (int j = 0; j < tc.tools.Count; j++)
 				{
 					ToolMenu.ToolInfo ti = tc.tools[j];
-					GameObject gameObject9 = Util.KInstantiateUI((collections != this.sandboxTools) ? ((!collections[i].largeIcon) ? this.toolIconPrefab : this.toolIconLargePrefab) : this.sandboxToolIconPrefab, tc.MaskContainer, true);
+					GameObject gameObject9 = Util.KInstantiateUI((collections == this.sandboxTools) ? this.sandboxToolIconPrefab : (collections[i].largeIcon ? this.toolIconLargePrefab : this.toolIconPrefab), tc.MaskContainer, true);
 					gameObject9.name = ti.text;
 					ti.toggle = gameObject9.GetComponent<KToggle>();
 					if (ti.collection.tools.Count > 1)
@@ -277,11 +275,17 @@ public class ToolMenu : KScreen
 					{
 						this.ChooseTool(ti);
 					};
-					tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapse(delegate(object s)
+					ExpandRevealUIContent component2 = tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>();
+					Action<object> action;
+					if ((action = <>9__2) == null)
 					{
-						this.SetToggleState(tc.toggle.GetComponent<KToggle>(), false);
-						tc.UIMenuDisplay.SetActive(false);
-					});
+						action = (<>9__2 = delegate(object s)
+						{
+							this.SetToggleState(tc.toggle.GetComponent<KToggle>(), false);
+							tc.UIMenuDisplay.SetActive(false);
+						});
+					}
+					component2.Collapse(action);
 				}
 			}
 		}
@@ -453,12 +457,10 @@ public class ToolMenu : KScreen
 		{
 			toggle.Select();
 			toggle.isOn = true;
+			return;
 		}
-		else
-		{
-			toggle.Deselect();
-			toggle.isOn = false;
-		}
+		toggle.Deselect();
+		toggle.isOn = false;
 	}
 
 	public void ClearSelection()
@@ -493,7 +495,8 @@ public class ToolMenu : KScreen
 			{
 				if (list != this.sandboxTools || Game.Instance.SandboxModeActive)
 				{
-					for (int i = 0; i < list.Count; i++)
+					int i = 0;
+					while (i < list.Count)
 					{
 						global::Action toolHotkey = list[i].hotkey;
 						if (toolHotkey != global::Action.NumActions && e.IsAction(toolHotkey) && (this.currentlySelectedCollection == null || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Find((ToolMenu.ToolInfo t) => GameInputMapping.CompareActionKeyCodes(t.hotkey, toolHotkey)) == null)))
@@ -502,41 +505,48 @@ public class ToolMenu : KScreen
 							{
 								this.ChooseCollection(list[i], false);
 								this.ChooseTool(list[i].tools[0]);
+								break;
 							}
-							else if (this.currentlySelectedCollection.tools.Count > 1)
+							if (this.currentlySelectedCollection.tools.Count <= 1)
 							{
-								e.Consumed = true;
-								this.ChooseCollection(null, true);
-								this.ChooseTool(null);
-								string sound = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
-								if (sound != null)
-								{
-									KMonoBehaviour.PlaySound(sound);
-								}
+								break;
+							}
+							e.Consumed = true;
+							this.ChooseCollection(null, true);
+							this.ChooseTool(null);
+							string sound = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
+							if (sound != null)
+							{
+								KMonoBehaviour.PlaySound(sound);
+								break;
 							}
 							break;
 						}
-						for (int j = 0; j < list[i].tools.Count; j++)
+						else
 						{
-							if ((this.currentlySelectedCollection == null && list[i].tools.Count == 1) || this.currentlySelectedCollection == list[i] || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Count == 1 && list[i].tools.Count == 1))
+							for (int j = 0; j < list[i].tools.Count; j++)
 							{
-								global::Action hotkey = list[i].tools[j].hotkey;
-								if (e.IsAction(hotkey) && e.TryConsume(hotkey))
+								if ((this.currentlySelectedCollection == null && list[i].tools.Count == 1) || this.currentlySelectedCollection == list[i] || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Count == 1 && list[i].tools.Count == 1))
 								{
-									if (list[i].tools.Count == 1 && this.currentlySelectedCollection != list[i])
+									global::Action hotkey = list[i].tools[j].hotkey;
+									if (e.IsAction(hotkey) && e.TryConsume(hotkey))
 									{
-										this.ChooseCollection(list[i], false);
+										if (list[i].tools.Count == 1 && this.currentlySelectedCollection != list[i])
+										{
+											this.ChooseCollection(list[i], false);
+										}
+										else if (this.currentlySelectedTool != list[i].tools[j])
+										{
+											this.ChooseTool(list[i].tools[j]);
+										}
 									}
-									else if (this.currentlySelectedTool != list[i].tools[j])
+									else if (GameInputMapping.CompareActionKeyCodes(e.GetAction(), hotkey))
 									{
-										this.ChooseTool(list[i].tools[j]);
+										e.Consumed = true;
 									}
-								}
-								else if (GameInputMapping.CompareActionKeyCodes(e.GetAction(), hotkey))
-								{
-									e.Consumed = true;
 								}
 							}
+							i++;
 						}
 					}
 				}
@@ -618,27 +628,26 @@ public class ToolMenu : KScreen
 				{
 					if (sprite != null && sprite.name == toolCollection.icon)
 					{
-						Image component = toggle.transform.Find("FG").GetComponent<Image>();
-						component.sprite = sprite;
+						toggle.transform.Find("FG").GetComponent<Image>().sprite = sprite;
 						break;
 					}
 				}
 				Transform transform = toggle.transform.Find("Text");
 				if (transform != null)
 				{
-					LocText component2 = transform.GetComponent<LocText>();
-					if (component2 != null)
+					LocText component = transform.GetComponent<LocText>();
+					if (component != null)
 					{
-						component2.text = toolCollection.text;
+						component.text = toolCollection.text;
 					}
 				}
-				ToolTip component3 = toggle.GetComponent<ToolTip>();
-				if (component3)
+				ToolTip component2 = toggle.GetComponent<ToolTip>();
+				if (component2)
 				{
 					if (row[i].tools.Count == 1)
 					{
 						string text = GameUtil.ReplaceHotkeyString(row[i].tools[0].tooltip, row[i].tools[0].hotkey);
-						component3.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
+						component2.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
 					}
 					else
 					{
@@ -647,7 +656,7 @@ public class ToolMenu : KScreen
 						{
 							text2 = GameUtil.ReplaceHotkeyString(text2, row[i].hotkey);
 						}
-						component3.AddMultiStringTooltip(text2, this.ToggleToolTipTextStyleSetting);
+						component2.AddMultiStringTooltip(text2, this.ToggleToolTipTextStyleSetting);
 					}
 				}
 			}
@@ -668,25 +677,24 @@ public class ToolMenu : KScreen
 					{
 						if (sprite != null && sprite.name == toolCollection.tools[j].icon)
 						{
-							Image component = gameObject.transform.Find("FG").GetComponent<Image>();
-							component.sprite = sprite;
+							gameObject.transform.Find("FG").GetComponent<Image>().sprite = sprite;
 							break;
 						}
 					}
 					Transform transform = gameObject.transform.Find("Text");
 					if (transform != null)
 					{
-						LocText component2 = transform.GetComponent<LocText>();
-						if (component2 != null)
+						LocText component = transform.GetComponent<LocText>();
+						if (component != null)
 						{
-							component2.text = toolCollection.tools[j].text;
+							component.text = toolCollection.tools[j].text;
 						}
 					}
-					ToolTip component3 = gameObject.GetComponent<ToolTip>();
-					if (component3)
+					ToolTip component2 = gameObject.GetComponent<ToolTip>();
+					if (component2)
 					{
-						string text = ((toolCollection.tools.Count <= 1) ? GameUtil.ReplaceHotkeyString(toolCollection.tools[j].tooltip, toolCollection.tools[j].hotkey) : GameUtil.ReplaceHotkeyString(toolCollection.tools[j].tooltip, toolCollection.hotkey, toolCollection.tools[j].hotkey));
-						component3.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
+						string text = ((toolCollection.tools.Count > 1) ? GameUtil.ReplaceHotkeyString(toolCollection.tools[j].tooltip, toolCollection.hotkey, toolCollection.tools[j].hotkey) : GameUtil.ReplaceHotkeyString(toolCollection.tools[j].tooltip, toolCollection.tools[j].hotkey));
+						component2.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
 					}
 				}
 			}

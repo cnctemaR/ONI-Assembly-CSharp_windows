@@ -4,17 +4,11 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.XR
 {
-	/// <summary>
-	///   <para>Class used to override a camera's default background rendering path to instead render a given Texture and/or Material. This will typically be used with images from the color camera for rendering the AR background on mobile devices.</para>
-	/// </summary>
 	public class ARBackgroundRenderer
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action backgroundRendererChanged = null;
 
-		/// <summary>
-		///   <para>The Material used for AR rendering.</para>
-		/// </summary>
 		public Material backgroundMaterial
 		{
 			get
@@ -36,9 +30,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>An optional Texture used for AR rendering. If this property is not set then the texture set in XR.ARBackgroundRenderer._backgroundMaterial as "_MainTex" is used.</para>
-		/// </summary>
 		public Texture backgroundTexture
 		{
 			get
@@ -61,9 +52,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>An optional Camera whose background rendering will be overridden by this class. If this property is not set then the main Camera in the scene is used.</para>
-		/// </summary>
 		public Camera camera
 		{
 			get
@@ -85,9 +73,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>When set to XR.ARRenderMode.StandardBackground (default) the camera is not overridden to display the background image. Setting this property to XR.ARRenderMode.MaterialAsBackground will render the texture specified by XR.ARBackgroundRenderer._backgroundMaterial and or XR.ARBackgroundRenderer._backgroundTexture as the background.</para>
-		/// </summary>
 		public ARRenderMode mode
 		{
 			get
@@ -164,9 +149,6 @@ namespace UnityEngine.XR
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Disables AR background rendering. This method is called internally but can be overridden by users who wish to subclass XR.ARBackgroundRenderer to customize handling of AR background rendering.</para>
-		/// </summary>
 		protected void DisableARBackgroundRendering()
 		{
 			if (this.m_CommandBuffer != null)

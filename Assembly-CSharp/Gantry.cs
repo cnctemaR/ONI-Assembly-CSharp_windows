@@ -8,7 +8,7 @@ public class Gantry : Switch
 		base.OnSpawn();
 		if (Gantry.infoStatusItem == null)
 		{
-			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			Gantry.infoStatusItem.resolveStringCallback = new Func<string, object, string>(Gantry.ResolveInfoStatusItemString);
 		}
 		base.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 0.5f;
@@ -95,8 +95,8 @@ public class Gantry : Switch
 	private static string ResolveInfoStatusItemString(string format_str, object data)
 	{
 		Gantry.Instance instance = (Gantry.Instance)data;
-		string text = ((!instance.IsAutomated()) ? BUILDING.STATUSITEMS.GANTRY.MANUAL_CONTROL : BUILDING.STATUSITEMS.GANTRY.AUTOMATION_CONTROL);
-		string text2 = ((!instance.IsExtended()) ? BUILDING.STATUSITEMS.GANTRY.RETRACTED : BUILDING.STATUSITEMS.GANTRY.EXTENDED);
+		string text = (instance.IsAutomated() ? BUILDING.STATUSITEMS.GANTRY.AUTOMATION_CONTROL : BUILDING.STATUSITEMS.GANTRY.MANUAL_CONTROL);
+		string text2 = (instance.IsExtended() ? BUILDING.STATUSITEMS.GANTRY.EXTENDED : BUILDING.STATUSITEMS.GANTRY.RETRACTED);
 		return string.Format(text, text2);
 	}
 
@@ -187,7 +187,11 @@ public class Gantry : Switch
 
 		public bool IsExtended()
 		{
-			return (!this.IsAutomated()) ? this.manual_on : this.logic_on;
+			if (!this.IsAutomated())
+			{
+				return this.manual_on;
+			}
+			return this.logic_on;
 		}
 
 		public void SetSwitchState(bool on)
@@ -226,11 +230,9 @@ public class Gantry : Switch
 			if (this.IsAutomated())
 			{
 				base.smi.sm.should_extend.Set(this.logic_on, base.smi);
+				return;
 			}
-			else
-			{
-				base.smi.sm.should_extend.Set(this.manual_on, base.smi);
-			}
+			base.smi.sm.should_extend.Set(this.manual_on, base.smi);
 		}
 
 		private Operational operational;

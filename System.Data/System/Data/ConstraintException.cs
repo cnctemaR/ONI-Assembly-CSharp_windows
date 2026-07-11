@@ -6,20 +6,28 @@ namespace System.Data
 	[Serializable]
 	public class ConstraintException : DataException
 	{
-		public ConstraintException()
+		protected ConstraintException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
+			throw new PlatformNotSupportedException();
 		}
 
-		protected ConstraintException(SerializationInfo info, StreamingContext context)
+		public ConstraintException()
+			: base("Constraint Exception.")
 		{
+			base.HResult = -2146232022;
 		}
 
 		public ConstraintException(string s)
+			: base(s)
 		{
+			base.HResult = -2146232022;
 		}
 
 		public ConstraintException(string message, Exception innerException)
+			: base(message, innerException)
 		{
+			base.HResult = -2146232022;
 		}
 	}
 }

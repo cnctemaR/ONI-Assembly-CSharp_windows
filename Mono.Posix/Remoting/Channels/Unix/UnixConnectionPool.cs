@@ -73,11 +73,9 @@ namespace Mono.Remoting.Channels.Unix
 				Hashtable pools = UnixConnectionPool._pools;
 				lock (pools)
 				{
-					ICollection values = UnixConnectionPool._pools.Values;
-					foreach (object obj in values)
+					foreach (object obj in UnixConnectionPool._pools.Values)
 					{
-						HostConnectionPool hostConnectionPool = (HostConnectionPool)obj;
-						hostConnectionPool.PurgeConnections();
+						((HostConnectionPool)obj).PurgeConnections();
 					}
 				}
 			}

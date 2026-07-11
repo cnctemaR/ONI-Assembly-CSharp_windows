@@ -50,11 +50,9 @@ public class MoveToLocationTool : InterfaceTool
 				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 				smi.MoveToLocation(mouseCell);
 				SelectTool.Instance.Activate();
+				return;
 			}
-			else
-			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
-			}
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 		}
 	}
 

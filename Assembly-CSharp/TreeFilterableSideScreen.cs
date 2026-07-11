@@ -22,16 +22,17 @@ public class TreeFilterableSideScreen : SideScreenContent
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
 			TreeFilterableSideScreenRow.State allCheckboxState = this.GetAllCheckboxState();
-			if (allCheckboxState != TreeFilterableSideScreenRow.State.On)
+			if (allCheckboxState > TreeFilterableSideScreenRow.State.Mixed)
 			{
-				if (allCheckboxState == TreeFilterableSideScreenRow.State.Mixed || allCheckboxState == TreeFilterableSideScreenRow.State.Off)
+				if (allCheckboxState == TreeFilterableSideScreenRow.State.On)
 				{
-					this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.On);
+					this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.Off);
+					return;
 				}
 			}
 			else
 			{
-				this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.Off);
+				this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.On);
 			}
 		}));
 		this.onlyAllowTransportItemsImg = this.onlyAllowTransportItemsCheckBox.gameObject.GetComponentInChildrenOnly<KImage>();
@@ -47,24 +48,17 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private void UpdateAllCheckBoxVisualState()
 	{
-		TreeFilterableSideScreenRow.State allCheckboxState = this.GetAllCheckboxState();
-		if (allCheckboxState != TreeFilterableSideScreenRow.State.Off)
+		switch (this.GetAllCheckboxState())
 		{
-			if (allCheckboxState != TreeFilterableSideScreenRow.State.Mixed)
-			{
-				if (allCheckboxState == TreeFilterableSideScreenRow.State.On)
-				{
-					this.allCheckBox.ChangeState(2);
-				}
-			}
-			else
-			{
-				this.allCheckBox.ChangeState(1);
-			}
-		}
-		else
-		{
+		case TreeFilterableSideScreenRow.State.Off:
 			this.allCheckBox.ChangeState(0);
+			break;
+		case TreeFilterableSideScreenRow.State.Mixed:
+			this.allCheckBox.ChangeState(1);
+			break;
+		case TreeFilterableSideScreenRow.State.On:
+			this.allCheckBox.ChangeState(2);
+			break;
 		}
 		this.visualDirty = false;
 	}
@@ -97,24 +91,17 @@ public class TreeFilterableSideScreen : SideScreenContent
 		bool flag3 = false;
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
 		{
-			TreeFilterableSideScreenRow.State state = keyValuePair.Value.GetState();
-			if (state != TreeFilterableSideScreenRow.State.Mixed)
+			switch (keyValuePair.Value.GetState())
 			{
-				if (state != TreeFilterableSideScreenRow.State.On)
-				{
-					if (state == TreeFilterableSideScreenRow.State.Off)
-					{
-						flag2 = true;
-					}
-				}
-				else
-				{
-					flag = true;
-				}
-			}
-			else
-			{
+			case TreeFilterableSideScreenRow.State.Off:
+				flag2 = true;
+				break;
+			case TreeFilterableSideScreenRow.State.Mixed:
 				flag3 = true;
+				break;
+			case TreeFilterableSideScreenRow.State.On:
+				flag = true;
+				break;
 			}
 		}
 		if (flag3)
@@ -138,26 +125,33 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private void SetAllCheckboxState(TreeFilterableSideScreenRow.State newState)
 	{
-		if (newState != TreeFilterableSideScreenRow.State.Off)
+		switch (newState)
 		{
-			if (newState != TreeFilterableSideScreenRow.State.Mixed)
+		case TreeFilterableSideScreenRow.State.Off:
+		{
+			using (Dictionary<Tag, TreeFilterableSideScreenRow>.Enumerator enumerator = this.tagRowMap.GetEnumerator())
 			{
-				if (newState == TreeFilterableSideScreenRow.State.On)
+				while (enumerator.MoveNext())
 				{
-					foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
-					{
-						keyValuePair.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
-					}
+					KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair = enumerator.Current;
+					keyValuePair.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
 				}
+				goto IL_008C;
 			}
+			break;
 		}
-		else
+		case TreeFilterableSideScreenRow.State.Mixed:
+			goto IL_008C;
+		case TreeFilterableSideScreenRow.State.On:
+			break;
+		default:
+			goto IL_008C;
+		}
+		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair2 in this.tagRowMap)
 		{
-			foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair2 in this.tagRowMap)
-			{
-				keyValuePair2.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
-			}
+			keyValuePair2.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
 		}
+		IL_008C:
 		this.visualDirty = true;
 	}
 
@@ -208,11 +202,9 @@ public class TreeFilterableSideScreen : SideScreenContent
 			this.onlyallowTransportItemsRow.SetActive(true);
 			this.onlyAllowTransportItemsCheckBox.isOn = this.storage.GetOnlyFetchMarkedItems();
 			this.onlyAllowTransportItemsImg.enabled = this.storage.GetOnlyFetchMarkedItems();
+			return;
 		}
-		else
-		{
-			this.onlyallowTransportItemsRow.SetActive(false);
-		}
+		this.onlyallowTransportItemsRow.SetActive(false);
 	}
 
 	public bool IsTagAllowed(Tag tag)
@@ -259,8 +251,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		freeElement.Parent = this;
 		this.tagRowMap.Add(rowTag, freeElement);
 		Dictionary<Tag, bool> dictionary = new Dictionary<Tag, bool>();
-		List<TreeFilterableSideScreen.TagOrderInfo> tagsSortedAlphabetically = this.GetTagsSortedAlphabetically(WorldInventory.Instance.GetDiscoveredResourcesFromTag(rowTag));
-		foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in tagsSortedAlphabetically)
+		foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in this.GetTagsSortedAlphabetically(WorldInventory.Instance.GetDiscoveredResourcesFromTag(rowTag)))
 		{
 			dictionary.Add(tagOrderInfo.tag, this.targetFilterable.ContainsTag(tagOrderInfo.tag) || this.targetFilterable.ContainsTag(rowTag));
 		}
@@ -283,22 +274,18 @@ public class TreeFilterableSideScreen : SideScreenContent
 		if (this.storage.storageFilters != null && this.storage.storageFilters.Count >= 1)
 		{
 			bool flag = this.target.GetComponent<CreatureDeliveryPoint>() != null;
-			List<TreeFilterableSideScreen.TagOrderInfo> tagsSortedAlphabetically = this.GetTagsSortedAlphabetically(this.storage.storageFilters);
-			foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in tagsSortedAlphabetically)
+			foreach (TreeFilterableSideScreen.TagOrderInfo tagOrderInfo in this.GetTagsSortedAlphabetically(this.storage.storageFilters))
 			{
 				Tag tag = tagOrderInfo.tag;
-				bool flag2 = flag || WorldInventory.Instance.IsDiscovered(tag);
-				if (flag2)
+				if (flag || WorldInventory.Instance.IsDiscovered(tag))
 				{
 					this.AddRow(tag);
 				}
 			}
 			this.visualDirty = true;
+			return;
 		}
-		else
-		{
-			global::Debug.LogError("If you're filtering, your storage filter should have the filters set on it");
-		}
+		global::Debug.LogError("If you're filtering, your storage filter should have the filters set on it");
 	}
 
 	protected override void OnCmpDisable()

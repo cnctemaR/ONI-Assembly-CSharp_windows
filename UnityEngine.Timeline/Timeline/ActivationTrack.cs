@@ -33,22 +33,8 @@ namespace UnityEngine.Timeline
 		{
 			ScriptPlayable<ActivationMixerPlayable> scriptPlayable = ActivationMixerPlayable.Create(graph, inputCount);
 			this.m_ActivationMixer = scriptPlayable.GetBehaviour();
-			PlayableDirector component = go.GetComponent<PlayableDirector>();
-			this.UpdateBoundGameObject(component);
 			this.UpdateTrackMode();
 			return scriptPlayable;
-		}
-
-		private void UpdateBoundGameObject(PlayableDirector director)
-		{
-			if (director != null)
-			{
-				GameObject gameObject = director.GetGenericBinding(this) as GameObject;
-				if (gameObject != null && this.m_ActivationMixer != null)
-				{
-					this.m_ActivationMixer.boundGameObject = gameObject;
-				}
-			}
 		}
 
 		internal void UpdateTrackMode()

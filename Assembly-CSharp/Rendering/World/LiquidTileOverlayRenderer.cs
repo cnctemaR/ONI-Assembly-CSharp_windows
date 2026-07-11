@@ -90,33 +90,32 @@ namespace Rendering.World
 
 		private void SetBrushIdx(int i, ref Tile tile, int substance_idx, LiquidTileOverlayRenderer.LiquidConnections connections, Brush[] brush_array, int[] brush_grid)
 		{
-			if (connections != LiquidTileOverlayRenderer.LiquidConnections.Empty)
+			if (connections == LiquidTileOverlayRenderer.LiquidConnections.Empty)
 			{
-				Brush brush = brush_array[substance_idx * tile.MaskCount + connections - LiquidTileOverlayRenderer.LiquidConnections.Left];
-				brush.Add(tile.Idx);
-				brush_grid[tile.Idx * 4 + i] = brush.Id;
+				brush_grid[tile.Idx * 4 + i] = -1;
 				return;
 			}
-			brush_grid[tile.Idx * 4 + i] = -1;
+			Brush brush = brush_array[substance_idx * tile.MaskCount + connections - LiquidTileOverlayRenderer.LiquidConnections.Left];
+			brush.Add(tile.Idx);
+			brush_grid[tile.Idx * 4 + i] = brush.Id;
 		}
 
 		public override void MarkDirty(ref Tile tile, Brush[] brush_array, int[] brush_grid)
 		{
-			if (this.RenderLiquid(tile.TileCells.Cell0, tile.TileCells.Cell2))
+			if (!this.RenderLiquid(tile.TileCells.Cell0, tile.TileCells.Cell2))
 			{
 				if (this.RenderLiquid(tile.TileCells.Cell1, tile.TileCells.Cell3))
 				{
-					this.SetBrushIdx(0, ref tile, Grid.Element[tile.TileCells.Cell2].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Both, brush_array, brush_grid);
+					this.SetBrushIdx(1, ref tile, Grid.Element[tile.TileCells.Cell3].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Right, brush_array, brush_grid);
 				}
-				else
-				{
-					this.SetBrushIdx(0, ref tile, Grid.Element[tile.TileCells.Cell2].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Left, brush_array, brush_grid);
-				}
+				return;
 			}
-			else if (this.RenderLiquid(tile.TileCells.Cell1, tile.TileCells.Cell3))
+			if (this.RenderLiquid(tile.TileCells.Cell1, tile.TileCells.Cell3))
 			{
-				this.SetBrushIdx(1, ref tile, Grid.Element[tile.TileCells.Cell3].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Right, brush_array, brush_grid);
+				this.SetBrushIdx(0, ref tile, Grid.Element[tile.TileCells.Cell2].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Both, brush_array, brush_grid);
+				return;
 			}
+			this.SetBrushIdx(0, ref tile, Grid.Element[tile.TileCells.Cell2].substance.idx, LiquidTileOverlayRenderer.LiquidConnections.Left, brush_array, brush_grid);
 		}
 
 		public static LiquidTileOverlayRenderer Instance;

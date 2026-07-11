@@ -4,26 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 {
 	public class Turbulence : TransformerModule, IModule3D, IModule
 	{
-		public Turbulence()
-		{
-			this._power = 1f;
-		}
-
-		public Turbulence(IModule source)
-			: this()
-		{
-			this._sourceModule = source;
-		}
-
-		public Turbulence(IModule source, IModule xDistortModule, IModule yDistortModule, IModule zDistortModule, float power)
-		{
-			this._sourceModule = source;
-			this._xDistortModule = xDistortModule;
-			this._yDistortModule = yDistortModule;
-			this._zDistortModule = zDistortModule;
-			this._power = power;
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -82,6 +62,26 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 			{
 				this._power = value;
 			}
+		}
+
+		public Turbulence()
+		{
+			this._power = 1f;
+		}
+
+		public Turbulence(IModule source)
+			: this()
+		{
+			this._sourceModule = source;
+		}
+
+		public Turbulence(IModule source, IModule xDistortModule, IModule yDistortModule, IModule zDistortModule, float power)
+		{
+			this._sourceModule = source;
+			this._xDistortModule = xDistortModule;
+			this._yDistortModule = yDistortModule;
+			this._zDistortModule = zDistortModule;
+			this._power = power;
 		}
 
 		public float GetValue(float x, float y, float z)

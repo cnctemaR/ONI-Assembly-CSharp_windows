@@ -17,7 +17,7 @@ public class MiningSounds : KMonoBehaviour
 			if (element != null)
 			{
 				string text = element.substance.GetMiningSound();
-				if (text == null || text == string.Empty)
+				if (text == null || text == "")
 				{
 					return;
 				}

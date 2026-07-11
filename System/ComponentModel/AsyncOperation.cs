@@ -1,30 +1,26 @@
 ﻿using System;
+using System.Security.Permissions;
 using System.Threading;
+using Unity;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public sealed class AsyncOperation
 	{
-		internal AsyncOperation(SynchronizationContext ctx, object state)
+		private AsyncOperation(object userSuppliedState, SynchronizationContext syncContext)
 		{
-			this.ctx = ctx;
-			this.state = state;
-			ctx.OperationStarted();
+			this.userSuppliedState = userSuppliedState;
+			this.syncContext = syncContext;
+			this.alreadyCompleted = false;
+			this.syncContext.OperationStarted();
 		}
 
 		~AsyncOperation()
 		{
-			if (!this.done && this.ctx != null)
+			if (!this.alreadyCompleted && this.syncContext != null)
 			{
-				this.ctx.OperationCompleted();
-			}
-		}
-
-		public SynchronizationContext SynchronizationContext
-		{
-			get
-			{
-				return this.ctx;
+				this.syncContext.OperationCompleted();
 			}
 		}
 
@@ -32,43 +28,80 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.state;
+				return this.userSuppliedState;
 			}
 		}
 
-		public void OperationCompleted()
+		public SynchronizationContext SynchronizationContext
 		{
-			if (this.done)
+			get
 			{
-				throw new InvalidOperationException("This task is already completed. Multiple call to OperationCompleted is not allowed.");
+				return this.syncContext;
 			}
-			this.ctx.OperationCompleted();
-			this.done = true;
 		}
 
 		public void Post(SendOrPostCallback d, object arg)
 		{
-			if (this.done)
-			{
-				throw new InvalidOperationException("This task is already completed. Multiple call to Post is not allowed.");
-			}
-			this.ctx.Post(d, arg);
+			this.VerifyNotCompleted();
+			this.VerifyDelegateNotNull(d);
+			this.syncContext.Post(d, arg);
 		}
 
 		public void PostOperationCompleted(SendOrPostCallback d, object arg)
 		{
-			if (this.done)
-			{
-				throw new InvalidOperationException("This task is already completed. Multiple call to PostOperationCompleted is not allowed.");
-			}
 			this.Post(d, arg);
-			this.OperationCompleted();
+			this.OperationCompletedCore();
 		}
 
-		private SynchronizationContext ctx;
+		public void OperationCompleted()
+		{
+			this.VerifyNotCompleted();
+			this.OperationCompletedCore();
+		}
 
-		private object state;
+		private void OperationCompletedCore()
+		{
+			try
+			{
+				this.syncContext.OperationCompleted();
+			}
+			finally
+			{
+				this.alreadyCompleted = true;
+				GC.SuppressFinalize(this);
+			}
+		}
 
-		private bool done;
+		private void VerifyNotCompleted()
+		{
+			if (this.alreadyCompleted)
+			{
+				throw new InvalidOperationException(global::SR.GetString("This operation has already had OperationCompleted called on it and further calls are illegal."));
+			}
+		}
+
+		private void VerifyDelegateNotNull(SendOrPostCallback d)
+		{
+			if (d == null)
+			{
+				throw new ArgumentNullException(global::SR.GetString("A non-null SendOrPostCallback must be supplied."), "d");
+			}
+		}
+
+		internal static AsyncOperation CreateOperation(object userSuppliedState, SynchronizationContext syncContext)
+		{
+			return new AsyncOperation(userSuppliedState, syncContext);
+		}
+
+		internal AsyncOperation()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		private SynchronizationContext syncContext;
+
+		private object userSuppliedState;
+
+		private bool alreadyCompleted;
 	}
 }

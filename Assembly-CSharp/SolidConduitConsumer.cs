@@ -58,7 +58,7 @@ public class SolidConduitConsumer : KMonoBehaviour
 			SolidConduitFlow.ConduitContents contents = conduitFlow.GetContents(this.utilityCell);
 			if (contents.pickupableHandle.IsValid() && (this.alwaysConsume || this.operational.IsOperational))
 			{
-				float num = ((!(this.capacityTag != GameTags.Any)) ? this.storage.MassStored() : this.storage.GetMassAvailable(this.capacityTag));
+				float num = ((this.capacityTag != GameTags.Any) ? this.storage.GetMassAvailable(this.capacityTag) : this.storage.MassStored());
 				float num2 = Mathf.Min(this.storage.capacityKg, this.capacityKG);
 				float num3 = Mathf.Max(0f, num2 - num);
 				if (num3 > 0f)
@@ -83,9 +83,13 @@ public class SolidConduitConsumer : KMonoBehaviour
 	private int GetConnectedNetworkID()
 	{
 		GameObject gameObject = Grid.Objects[this.utilityCell, 20];
-		SolidConduit solidConduit = ((!(gameObject != null)) ? null : gameObject.GetComponent<SolidConduit>());
-		UtilityNetwork utilityNetwork = ((!(solidConduit != null)) ? null : solidConduit.GetNetwork());
-		return (utilityNetwork == null) ? (-1) : utilityNetwork.id;
+		SolidConduit solidConduit = ((gameObject != null) ? gameObject.GetComponent<SolidConduit>() : null);
+		UtilityNetwork utilityNetwork = ((solidConduit != null) ? solidConduit.GetNetwork() : null);
+		if (utilityNetwork == null)
+		{
+			return -1;
+		}
+		return utilityNetwork.id;
 	}
 
 	[SerializeField]

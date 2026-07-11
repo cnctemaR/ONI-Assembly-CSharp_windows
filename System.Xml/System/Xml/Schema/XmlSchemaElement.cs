@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.ComponentModel;
 using System.Xml.Serialization;
 
@@ -7,32 +6,6 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaElement : XmlSchemaParticle
 	{
-		public XmlSchemaElement()
-		{
-			this.block = XmlSchemaDerivationMethod.None;
-			this.final = XmlSchemaDerivationMethod.None;
-			this.constraints = new XmlSchemaObjectCollection();
-			this.refName = XmlQualifiedName.Empty;
-			this.schemaTypeName = XmlQualifiedName.Empty;
-			this.substitutionGroup = XmlQualifiedName.Empty;
-			this.InitPostCompileInformations();
-		}
-
-		private void InitPostCompileInformations()
-		{
-			this.qName = XmlQualifiedName.Empty;
-			this.schema = null;
-			this.blockResolved = XmlSchemaDerivationMethod.None;
-			this.finalResolved = XmlSchemaDerivationMethod.None;
-			this.referencedElement = null;
-			this.substitutingElements.Clear();
-			this.substitutionGroupElement = null;
-			this.actualIsAbstract = false;
-			this.actualIsNillable = false;
-			this.validatedDefaultValue = null;
-			this.validatedFixedValue = null;
-		}
-
 		[DefaultValue(false)]
 		[XmlAttribute("abstract")]
 		public bool IsAbstract
@@ -44,11 +17,12 @@ namespace System.Xml.Schema
 			set
 			{
 				this.isAbstract = value;
+				this.hasAbstractAttribute = true;
 			}
 		}
 
-		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		[XmlAttribute("block")]
+		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		public XmlSchemaDerivationMethod Block
 		{
 			get
@@ -75,8 +49,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("final")]
 		[DefaultValue(XmlSchemaDerivationMethod.None)]
+		[XmlAttribute("final")]
 		public XmlSchemaDerivationMethod Final
 		{
 			get
@@ -89,8 +63,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(null)]
 		[XmlAttribute("fixed")]
+		[DefaultValue(null)]
 		public string FixedValue
 		{
 			get
@@ -103,8 +77,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(XmlSchemaForm.None)]
 		[XmlAttribute("form")]
+		[DefaultValue(XmlSchemaForm.None)]
 		public XmlSchemaForm Form
 		{
 			get
@@ -117,8 +91,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue("")]
 		[XmlAttribute("name")]
+		[DefaultValue("")]
 		public string Name
 		{
 			get
@@ -142,6 +116,25 @@ namespace System.Xml.Schema
 			set
 			{
 				this.isNillable = value;
+				this.hasNillableAttribute = true;
+			}
+		}
+
+		[XmlIgnore]
+		internal bool HasNillableAttribute
+		{
+			get
+			{
+				return this.hasNillableAttribute;
+			}
+		}
+
+		[XmlIgnore]
+		internal bool HasAbstractAttribute
+		{
+			get
+			{
+				return this.hasAbstractAttribute;
 			}
 		}
 
@@ -154,7 +147,7 @@ namespace System.Xml.Schema
 			}
 			set
 			{
-				this.refName = value;
+				this.refName = ((value == null) ? XmlQualifiedName.Empty : value);
 			}
 		}
 
@@ -167,7 +160,7 @@ namespace System.Xml.Schema
 			}
 			set
 			{
-				this.substitutionGroup = value;
+				this.substitutionGroup = ((value == null) ? XmlQualifiedName.Empty : value);
 			}
 		}
 
@@ -176,11 +169,11 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.schemaTypeName;
+				return this.typeName;
 			}
 			set
 			{
-				this.schemaTypeName = value;
+				this.typeName = ((value == null) ? XmlQualifiedName.Empty : value);
 			}
 		}
 
@@ -190,21 +183,25 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.schemaType;
+				return this.type;
 			}
 			set
 			{
-				this.schemaType = value;
+				this.type = value;
 			}
 		}
 
-		[XmlElement("keyref", typeof(XmlSchemaKeyref))]
 		[XmlElement("unique", typeof(XmlSchemaUnique))]
+		[XmlElement("keyref", typeof(XmlSchemaKeyref))]
 		[XmlElement("key", typeof(XmlSchemaKey))]
 		public XmlSchemaObjectCollection Constraints
 		{
 			get
 			{
+				if (this.constraints == null)
+				{
+					this.constraints = new XmlSchemaObjectCollection();
+				}
 				return this.constraints;
 			}
 		}
@@ -214,19 +211,23 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.qName;
+				return this.qualifiedName;
 			}
 		}
 
 		[XmlIgnore]
-		[Obsolete]
+		[Obsolete("This property has been deprecated. Please use ElementSchemaType property that returns a strongly typed element type. http://go.microsoft.com/fwlink/?linkid=14202")]
 		public object ElementType
 		{
 			get
 			{
-				if (this.referencedElement != null)
+				if (this.elementType == null)
 				{
-					return this.referencedElement.ElementType;
+					return null;
+				}
+				if (this.elementType.QualifiedName.Namespace == "http://www.w3.org/2001/XMLSchema")
+				{
+					return this.elementType.Datatype;
 				}
 				return this.elementType;
 			}
@@ -237,11 +238,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.ElementSchemaType;
-				}
-				return this.elementSchemaType;
+				return this.elementType;
 			}
 		}
 
@@ -250,10 +247,6 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.BlockResolved;
-				}
 				return this.blockResolved;
 			}
 		}
@@ -263,1109 +256,167 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.FinalResolved;
-				}
 				return this.finalResolved;
 			}
 		}
 
-		internal bool ActualIsNillable
+		internal XmlReader Validate(XmlReader reader, XmlResolver resolver, XmlSchemaSet schemaSet, ValidationEventHandler valEventHandler)
+		{
+			if (schemaSet != null)
+			{
+				XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+				xmlReaderSettings.ValidationType = ValidationType.Schema;
+				xmlReaderSettings.Schemas = schemaSet;
+				xmlReaderSettings.ValidationEventHandler += valEventHandler;
+				return new XsdValidatingReader(reader, resolver, xmlReaderSettings, this);
+			}
+			return null;
+		}
+
+		internal void SetQualifiedName(XmlQualifiedName value)
+		{
+			this.qualifiedName = value;
+		}
+
+		internal void SetElementType(XmlSchemaType value)
+		{
+			this.elementType = value;
+		}
+
+		internal void SetBlockResolved(XmlSchemaDerivationMethod value)
+		{
+			this.blockResolved = value;
+		}
+
+		internal void SetFinalResolved(XmlSchemaDerivationMethod value)
+		{
+			this.finalResolved = value;
+		}
+
+		[XmlIgnore]
+		internal bool HasDefault
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.ActualIsNillable;
-				}
-				return this.actualIsNillable;
+				return this.defaultValue != null && this.defaultValue.Length > 0;
 			}
 		}
 
-		internal bool ActualIsAbstract
+		internal bool HasConstraints
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.ActualIsAbstract;
-				}
-				return this.actualIsAbstract;
+				return this.constraints != null && this.constraints.Count > 0;
 			}
 		}
 
-		internal string ValidatedDefaultValue
+		internal bool IsLocalTypeDerivationChecked
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.ValidatedDefaultValue;
-				}
-				return this.validatedDefaultValue;
+				return this.isLocalTypeDerivationChecked;
+			}
+			set
+			{
+				this.isLocalTypeDerivationChecked = value;
 			}
 		}
 
-		internal string ValidatedFixedValue
+		internal SchemaElementDecl ElementDecl
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.ValidatedFixedValue;
-				}
-				return this.validatedFixedValue;
+				return this.elementDecl;
+			}
+			set
+			{
+				this.elementDecl = value;
 			}
 		}
 
-		internal ArrayList SubstitutingElements
+		[XmlIgnore]
+		internal override string NameAttribute
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.SubstitutingElements;
-				}
-				return this.substitutingElements;
+				return this.Name;
+			}
+			set
+			{
+				this.Name = value;
 			}
 		}
 
-		internal XmlSchemaElement SubstitutionGroupElement
+		[XmlIgnore]
+		internal override string NameString
 		{
 			get
 			{
-				if (this.referencedElement != null)
-				{
-					return this.referencedElement.SubstitutionGroupElement;
-				}
-				return this.substitutionGroupElement;
+				return this.qualifiedName.ToString();
 			}
 		}
 
-		internal override void SetParent(XmlSchemaObject parent)
+		internal override XmlSchemaObject Clone()
 		{
-			base.SetParent(parent);
-			if (this.SchemaType != null)
-			{
-				this.SchemaType.SetParent(this);
-			}
-			foreach (XmlSchemaObject xmlSchemaObject in this.Constraints)
-			{
-				xmlSchemaObject.SetParent(this);
-			}
+			return this.Clone(null);
 		}
 
-		internal override int Compile(ValidationEventHandler h, XmlSchema schema)
+		internal XmlSchemaObject Clone(XmlSchema parentSchema)
 		{
-			if (this.CompilationId == schema.CompilationId)
+			XmlSchemaElement xmlSchemaElement = (XmlSchemaElement)base.MemberwiseClone();
+			xmlSchemaElement.refName = this.refName.Clone();
+			xmlSchemaElement.substitutionGroup = this.substitutionGroup.Clone();
+			xmlSchemaElement.typeName = this.typeName.Clone();
+			xmlSchemaElement.qualifiedName = this.qualifiedName.Clone();
+			XmlSchemaComplexType xmlSchemaComplexType = this.type as XmlSchemaComplexType;
+			if (xmlSchemaComplexType != null && xmlSchemaComplexType.QualifiedName.IsEmpty)
 			{
-				return 0;
+				xmlSchemaElement.type = (XmlSchemaType)xmlSchemaComplexType.Clone(parentSchema);
 			}
-			this.InitPostCompileInformations();
-			this.schema = schema;
-			if (this.defaultValue != null && this.fixedValue != null)
-			{
-				base.error(h, "both default and fixed can't be present");
-			}
-			if (this.parentIsSchema || this.isRedefineChild)
-			{
-				if (this.refName != null && !this.RefName.IsEmpty)
-				{
-					base.error(h, "ref must be absent");
-				}
-				if (this.name == null)
-				{
-					base.error(h, "Required attribute name must be present");
-				}
-				else if (!XmlSchemaUtil.CheckNCName(this.name))
-				{
-					base.error(h, "attribute name must be NCName");
-				}
-				else
-				{
-					this.qName = new XmlQualifiedName(this.name, base.AncestorSchema.TargetNamespace);
-				}
-				if (this.form != XmlSchemaForm.None)
-				{
-					base.error(h, "form must be absent");
-				}
-				if (base.MinOccursString != null)
-				{
-					base.error(h, "minOccurs must be absent");
-				}
-				if (base.MaxOccursString != null)
-				{
-					base.error(h, "maxOccurs must be absent");
-				}
-				XmlSchemaDerivationMethod xmlSchemaDerivationMethod = XmlSchemaDerivationMethod.Extension | XmlSchemaDerivationMethod.Restriction;
-				if (this.final == XmlSchemaDerivationMethod.All)
-				{
-					this.finalResolved = xmlSchemaDerivationMethod;
-				}
-				else if (this.final == XmlSchemaDerivationMethod.None)
-				{
-					this.finalResolved = XmlSchemaDerivationMethod.Empty;
-				}
-				else
-				{
-					if ((this.final | XmlSchemaUtil.FinalAllowed) != XmlSchemaUtil.FinalAllowed)
-					{
-						base.error(h, "some values for final are invalid in this context");
-					}
-					this.finalResolved = this.final & xmlSchemaDerivationMethod;
-				}
-				if (this.schemaType != null && this.schemaTypeName != null && !this.schemaTypeName.IsEmpty)
-				{
-					base.error(h, "both schemaType and content can't be present");
-				}
-				if (this.schemaType != null)
-				{
-					if (this.schemaType is XmlSchemaSimpleType)
-					{
-						this.errorCount += ((XmlSchemaSimpleType)this.schemaType).Compile(h, schema);
-					}
-					else if (this.schemaType is XmlSchemaComplexType)
-					{
-						this.errorCount += ((XmlSchemaComplexType)this.schemaType).Compile(h, schema);
-					}
-					else
-					{
-						base.error(h, "only simpletype or complextype is allowed");
-					}
-				}
-				if (this.schemaTypeName != null && !this.schemaTypeName.IsEmpty && !XmlSchemaUtil.CheckQName(this.SchemaTypeName))
-				{
-					base.error(h, "SchemaTypeName must be an XmlQualifiedName");
-				}
-				if (this.SubstitutionGroup != null && !this.SubstitutionGroup.IsEmpty && !XmlSchemaUtil.CheckQName(this.SubstitutionGroup))
-				{
-					base.error(h, "SubstitutionGroup must be a valid XmlQualifiedName");
-				}
-				foreach (XmlSchemaObject xmlSchemaObject in this.constraints)
-				{
-					if (xmlSchemaObject is XmlSchemaUnique)
-					{
-						this.errorCount += ((XmlSchemaUnique)xmlSchemaObject).Compile(h, schema);
-					}
-					else if (xmlSchemaObject is XmlSchemaKey)
-					{
-						this.errorCount += ((XmlSchemaKey)xmlSchemaObject).Compile(h, schema);
-					}
-					else if (xmlSchemaObject is XmlSchemaKeyref)
-					{
-						this.errorCount += ((XmlSchemaKeyref)xmlSchemaObject).Compile(h, schema);
-					}
-				}
-			}
-			else
-			{
-				if (this.substitutionGroup != null && !this.substitutionGroup.IsEmpty)
-				{
-					base.error(h, "substitutionGroup must be absent");
-				}
-				if (this.final != XmlSchemaDerivationMethod.None)
-				{
-					base.error(h, "final must be absent");
-				}
-				base.CompileOccurence(h, schema);
-				if (this.refName == null || this.RefName.IsEmpty)
-				{
-					string text = string.Empty;
-					if (this.form == XmlSchemaForm.Qualified || (this.form == XmlSchemaForm.None && base.AncestorSchema.ElementFormDefault == XmlSchemaForm.Qualified))
-					{
-						text = base.AncestorSchema.TargetNamespace;
-					}
-					if (this.name == null)
-					{
-						base.error(h, "Required attribute name must be present");
-					}
-					else if (!XmlSchemaUtil.CheckNCName(this.name))
-					{
-						base.error(h, "attribute name must be NCName");
-					}
-					else
-					{
-						this.qName = new XmlQualifiedName(this.name, text);
-					}
-					if (this.schemaType != null && this.schemaTypeName != null && !this.schemaTypeName.IsEmpty)
-					{
-						base.error(h, "both schemaType and content can't be present");
-					}
-					if (this.schemaType != null)
-					{
-						if (this.schemaType is XmlSchemaSimpleType)
-						{
-							this.errorCount += ((XmlSchemaSimpleType)this.schemaType).Compile(h, schema);
-						}
-						else if (this.schemaType is XmlSchemaComplexType)
-						{
-							this.errorCount += ((XmlSchemaComplexType)this.schemaType).Compile(h, schema);
-						}
-						else
-						{
-							base.error(h, "only simpletype or complextype is allowed");
-						}
-					}
-					if (this.schemaTypeName != null && !this.schemaTypeName.IsEmpty && !XmlSchemaUtil.CheckQName(this.SchemaTypeName))
-					{
-						base.error(h, "SchemaTypeName must be an XmlQualifiedName");
-					}
-					if (this.SubstitutionGroup != null && !this.SubstitutionGroup.IsEmpty && !XmlSchemaUtil.CheckQName(this.SubstitutionGroup))
-					{
-						base.error(h, "SubstitutionGroup must be a valid XmlQualifiedName");
-					}
-					foreach (XmlSchemaObject xmlSchemaObject2 in this.constraints)
-					{
-						if (xmlSchemaObject2 is XmlSchemaUnique)
-						{
-							this.errorCount += ((XmlSchemaUnique)xmlSchemaObject2).Compile(h, schema);
-						}
-						else if (xmlSchemaObject2 is XmlSchemaKey)
-						{
-							this.errorCount += ((XmlSchemaKey)xmlSchemaObject2).Compile(h, schema);
-						}
-						else if (xmlSchemaObject2 is XmlSchemaKeyref)
-						{
-							this.errorCount += ((XmlSchemaKeyref)xmlSchemaObject2).Compile(h, schema);
-						}
-					}
-				}
-				else
-				{
-					if (!XmlSchemaUtil.CheckQName(this.RefName))
-					{
-						base.error(h, "RefName must be a XmlQualifiedName");
-					}
-					if (this.name != null)
-					{
-						base.error(h, "name must not be present when ref is present");
-					}
-					if (this.Constraints.Count != 0)
-					{
-						base.error(h, "key, keyref and unique must be absent");
-					}
-					if (this.isNillable)
-					{
-						base.error(h, "nillable must be absent");
-					}
-					if (this.defaultValue != null)
-					{
-						base.error(h, "default must be absent");
-					}
-					if (this.fixedValue != null)
-					{
-						base.error(h, "fixed must be null");
-					}
-					if (this.form != XmlSchemaForm.None)
-					{
-						base.error(h, "form must be absent");
-					}
-					if (this.block != XmlSchemaDerivationMethod.None)
-					{
-						base.error(h, "block must be absent");
-					}
-					if (this.schemaTypeName != null && !this.schemaTypeName.IsEmpty)
-					{
-						base.error(h, "type must be absent");
-					}
-					if (this.SchemaType != null)
-					{
-						base.error(h, "simpleType or complexType must be absent");
-					}
-					this.qName = this.RefName;
-				}
-			}
-			XmlSchemaDerivationMethod xmlSchemaDerivationMethod2 = this.block;
-			if (xmlSchemaDerivationMethod2 != XmlSchemaDerivationMethod.All)
-			{
-				if (xmlSchemaDerivationMethod2 != XmlSchemaDerivationMethod.None)
-				{
-					if ((this.block | XmlSchemaUtil.ElementBlockAllowed) != XmlSchemaUtil.ElementBlockAllowed)
-					{
-						base.error(h, "Some of the values for block are invalid in this context");
-					}
-					this.blockResolved = this.block;
-				}
-				else
-				{
-					this.blockResolved = XmlSchemaDerivationMethod.Empty;
-				}
-			}
-			else
-			{
-				this.blockResolved = XmlSchemaDerivationMethod.All;
-			}
-			if (this.Constraints != null)
-			{
-				XmlSchemaObjectTable xmlSchemaObjectTable = new XmlSchemaObjectTable();
-				foreach (XmlSchemaObject xmlSchemaObject3 in this.Constraints)
-				{
-					XmlSchemaIdentityConstraint xmlSchemaIdentityConstraint = (XmlSchemaIdentityConstraint)xmlSchemaObject3;
-					XmlSchemaUtil.AddToTable(xmlSchemaObjectTable, xmlSchemaIdentityConstraint, xmlSchemaIdentityConstraint.QualifiedName, h);
-				}
-			}
-			XmlSchemaUtil.CompileID(base.Id, this, schema.IDCollection, h);
-			this.CompilationId = schema.CompilationId;
-			return this.errorCount;
-		}
-
-		internal override XmlSchemaParticle GetOptimizedParticle(bool isTop)
-		{
-			if (this.OptimizedParticle != null)
-			{
-				return this.OptimizedParticle;
-			}
-			if (this.RefName != null && this.RefName != XmlQualifiedName.Empty)
-			{
-				this.referencedElement = this.schema.FindElement(this.RefName);
-			}
-			if (base.ValidatedMaxOccurs == 0m)
-			{
-				this.OptimizedParticle = XmlSchemaParticle.Empty;
-			}
-			else if (this.SubstitutingElements != null && this.SubstitutingElements.Count > 0)
-			{
-				XmlSchemaChoice xmlSchemaChoice = new XmlSchemaChoice();
-				xmlSchemaChoice.MinOccurs = base.MinOccurs;
-				xmlSchemaChoice.MaxOccurs = base.MaxOccurs;
-				xmlSchemaChoice.Compile(null, this.schema);
-				XmlSchemaElement xmlSchemaElement = base.MemberwiseClone() as XmlSchemaElement;
-				xmlSchemaElement.MinOccurs = 1m;
-				xmlSchemaElement.MaxOccurs = 1m;
-				xmlSchemaElement.substitutionGroupElement = null;
-				xmlSchemaElement.substitutingElements = null;
-				for (int i = 0; i < this.SubstitutingElements.Count; i++)
-				{
-					XmlSchemaElement xmlSchemaElement2 = this.SubstitutingElements[i] as XmlSchemaElement;
-					this.AddSubstElementRecursively(xmlSchemaChoice.Items, xmlSchemaElement2);
-					this.AddSubstElementRecursively(xmlSchemaChoice.CompiledItems, xmlSchemaElement2);
-				}
-				if (!xmlSchemaChoice.Items.Contains(xmlSchemaElement))
-				{
-					xmlSchemaChoice.Items.Add(xmlSchemaElement);
-					xmlSchemaChoice.CompiledItems.Add(xmlSchemaElement);
-				}
-				this.OptimizedParticle = xmlSchemaChoice;
-			}
-			else
-			{
-				this.OptimizedParticle = this;
-			}
-			return this.OptimizedParticle;
-		}
-
-		private void AddSubstElementRecursively(XmlSchemaObjectCollection col, XmlSchemaElement el)
-		{
-			if (el.SubstitutingElements != null)
-			{
-				for (int i = 0; i < el.SubstitutingElements.Count; i++)
-				{
-					this.AddSubstElementRecursively(col, el.SubstitutingElements[i] as XmlSchemaElement);
-				}
-			}
-			if (!col.Contains(el))
-			{
-				col.Add(el);
-			}
-		}
-
-		internal void FillSubstitutionElementInfo()
-		{
-			if (this.substitutionGroupElement != null)
-			{
-				return;
-			}
-			if (this.SubstitutionGroup != XmlQualifiedName.Empty)
-			{
-				XmlSchemaElement xmlSchemaElement = this.schema.FindElement(this.SubstitutionGroup);
-				this.substitutionGroupElement = xmlSchemaElement;
-				if (xmlSchemaElement != null)
-				{
-					xmlSchemaElement.substitutingElements.Add(this);
-				}
-			}
-		}
-
-		internal override int Validate(ValidationEventHandler h, XmlSchema schema)
-		{
-			if (base.IsValidated(schema.CompilationId))
-			{
-				return this.errorCount;
-			}
-			this.actualIsNillable = this.IsNillable;
-			this.actualIsAbstract = this.IsAbstract;
-			if (this.SubstitutionGroup != XmlQualifiedName.Empty)
-			{
-				XmlSchemaElement xmlSchemaElement = this.substitutionGroupElement;
-				if (xmlSchemaElement != null)
-				{
-					xmlSchemaElement.Validate(h, schema);
-				}
-			}
-			XmlSchemaDatatype xmlSchemaDatatype = null;
-			if (this.schemaType != null)
-			{
-				this.elementType = this.schemaType;
-			}
-			else if (this.SchemaTypeName != XmlQualifiedName.Empty)
-			{
-				XmlSchemaType xmlSchemaType = schema.FindSchemaType(this.SchemaTypeName);
-				if (xmlSchemaType != null)
-				{
-					xmlSchemaType.Validate(h, schema);
-					this.elementType = xmlSchemaType;
-				}
-				else if (this.SchemaTypeName == XmlSchemaComplexType.AnyTypeName)
-				{
-					this.elementType = XmlSchemaComplexType.AnyType;
-				}
-				else if (XmlSchemaUtil.IsBuiltInDatatypeName(this.SchemaTypeName))
-				{
-					xmlSchemaDatatype = XmlSchemaDatatype.FromName(this.SchemaTypeName);
-					if (xmlSchemaDatatype == null)
-					{
-						base.error(h, "Invalid schema datatype was specified.");
-					}
-					else
-					{
-						this.elementType = xmlSchemaDatatype;
-					}
-				}
-				else if (!schema.IsNamespaceAbsent(this.SchemaTypeName.Namespace))
-				{
-					base.error(h, "Referenced element schema type " + this.SchemaTypeName + " was not found in the corresponding schema.");
-				}
-			}
-			else if (this.RefName != XmlQualifiedName.Empty)
-			{
-				XmlSchemaElement xmlSchemaElement2 = schema.FindElement(this.RefName);
-				if (xmlSchemaElement2 != null)
-				{
-					this.referencedElement = xmlSchemaElement2;
-					this.errorCount += xmlSchemaElement2.Validate(h, schema);
-				}
-				else if (!schema.IsNamespaceAbsent(this.RefName.Namespace))
-				{
-					base.error(h, "Referenced element " + this.RefName + " was not found in the corresponding schema.");
-				}
-			}
-			if (this.referencedElement == null)
-			{
-				if (this.elementType == null && this.substitutionGroupElement != null)
-				{
-					this.elementType = this.substitutionGroupElement.ElementType;
-				}
-				if (this.elementType == null)
-				{
-					this.elementType = XmlSchemaComplexType.AnyType;
-				}
-			}
-			XmlSchemaType xmlSchemaType2 = this.elementType as XmlSchemaType;
-			if (xmlSchemaType2 != null)
-			{
-				this.errorCount += xmlSchemaType2.Validate(h, schema);
-				xmlSchemaDatatype = xmlSchemaType2.Datatype;
-			}
-			if (this.SubstitutionGroup != XmlQualifiedName.Empty)
-			{
-				XmlSchemaElement xmlSchemaElement3 = schema.FindElement(this.SubstitutionGroup);
-				if (xmlSchemaElement3 != null)
-				{
-					XmlSchemaType xmlSchemaType3 = xmlSchemaElement3.ElementType as XmlSchemaType;
-					if (xmlSchemaType3 != null)
-					{
-						if ((xmlSchemaElement3.FinalResolved & XmlSchemaDerivationMethod.Substitution) != XmlSchemaDerivationMethod.Empty)
-						{
-							base.error(h, "Substituted element blocks substitution.");
-						}
-						if (xmlSchemaType2 != null && (xmlSchemaElement3.FinalResolved & xmlSchemaType2.DerivedBy) != XmlSchemaDerivationMethod.Empty)
-						{
-							base.error(h, "Invalid derivation was found. Substituted element prohibits this derivation method: " + xmlSchemaType2.DerivedBy + ".");
-						}
-					}
-					XmlSchemaComplexType xmlSchemaComplexType = xmlSchemaType2 as XmlSchemaComplexType;
-					if (xmlSchemaComplexType != null)
-					{
-						xmlSchemaComplexType.ValidateTypeDerivationOK(xmlSchemaElement3.ElementType, h, schema);
-					}
-					else
-					{
-						XmlSchemaSimpleType xmlSchemaSimpleType = xmlSchemaType2 as XmlSchemaSimpleType;
-						if (xmlSchemaSimpleType != null)
-						{
-							xmlSchemaSimpleType.ValidateTypeDerivationOK(xmlSchemaElement3.ElementType, h, schema, true);
-						}
-					}
-				}
-				else if (!schema.IsNamespaceAbsent(this.SubstitutionGroup.Namespace))
-				{
-					base.error(h, "Referenced element type " + this.SubstitutionGroup + " was not found in the corresponding schema.");
-				}
-			}
-			if (this.defaultValue != null || this.fixedValue != null)
-			{
-				this.ValidateElementDefaultValidImmediate(h, schema);
-				if (xmlSchemaDatatype != null && xmlSchemaDatatype.TokenizedType == XmlTokenizedType.ID)
-				{
-					base.error(h, "Element type is ID, which does not allows default or fixed values.");
-				}
-			}
-			foreach (XmlSchemaObject xmlSchemaObject in this.Constraints)
-			{
-				XmlSchemaIdentityConstraint xmlSchemaIdentityConstraint = (XmlSchemaIdentityConstraint)xmlSchemaObject;
-				xmlSchemaIdentityConstraint.Validate(h, schema);
-			}
-			if (this.elementType != null)
-			{
-				this.elementSchemaType = this.elementType as XmlSchemaType;
-				if (this.elementType == XmlSchemaSimpleType.AnySimpleType)
-				{
-					this.elementSchemaType = XmlSchemaSimpleType.XsAnySimpleType;
-				}
-				if (this.elementSchemaType == null)
-				{
-					this.elementSchemaType = XmlSchemaType.GetBuiltInSimpleType(this.SchemaTypeName);
-				}
-			}
-			this.ValidationId = schema.ValidationId;
-			return this.errorCount;
-		}
-
-		internal override bool ParticleEquals(XmlSchemaParticle other)
-		{
-			XmlSchemaElement xmlSchemaElement = other as XmlSchemaElement;
-			if (xmlSchemaElement == null)
-			{
-				return false;
-			}
-			if (base.ValidatedMaxOccurs != xmlSchemaElement.ValidatedMaxOccurs || base.ValidatedMinOccurs != xmlSchemaElement.ValidatedMinOccurs)
-			{
-				return false;
-			}
-			if (this.QualifiedName != xmlSchemaElement.QualifiedName || this.ElementType != xmlSchemaElement.ElementType || this.Constraints.Count != xmlSchemaElement.Constraints.Count)
-			{
-				return false;
-			}
-			for (int i = 0; i < this.Constraints.Count; i++)
-			{
-				XmlSchemaIdentityConstraint xmlSchemaIdentityConstraint = this.Constraints[i] as XmlSchemaIdentityConstraint;
-				XmlSchemaIdentityConstraint xmlSchemaIdentityConstraint2 = xmlSchemaElement.Constraints[i] as XmlSchemaIdentityConstraint;
-				if (xmlSchemaIdentityConstraint.QualifiedName != xmlSchemaIdentityConstraint2.QualifiedName || xmlSchemaIdentityConstraint.Selector.XPath != xmlSchemaIdentityConstraint2.Selector.XPath || xmlSchemaIdentityConstraint.Fields.Count != xmlSchemaIdentityConstraint2.Fields.Count)
-				{
-					return false;
-				}
-				for (int j = 0; j < xmlSchemaIdentityConstraint.Fields.Count; j++)
-				{
-					XmlSchemaXPath xmlSchemaXPath = xmlSchemaIdentityConstraint.Fields[j] as XmlSchemaXPath;
-					XmlSchemaXPath xmlSchemaXPath2 = xmlSchemaIdentityConstraint2.Fields[j] as XmlSchemaXPath;
-					if (xmlSchemaXPath.XPath != xmlSchemaXPath2.XPath)
-					{
-						return false;
-					}
-				}
-			}
-			return this.BlockResolved == xmlSchemaElement.BlockResolved && this.FinalResolved == xmlSchemaElement.FinalResolved && !(this.ValidatedDefaultValue != xmlSchemaElement.ValidatedDefaultValue) && !(this.ValidatedFixedValue != xmlSchemaElement.ValidatedFixedValue);
-		}
-
-		internal override bool ValidateDerivationByRestriction(XmlSchemaParticle baseParticle, ValidationEventHandler h, XmlSchema schema, bool raiseError)
-		{
-			XmlSchemaElement xmlSchemaElement = baseParticle as XmlSchemaElement;
-			if (xmlSchemaElement != null)
-			{
-				return this.ValidateDerivationByRestrictionNameAndTypeOK(xmlSchemaElement, h, schema, raiseError);
-			}
-			XmlSchemaAny xmlSchemaAny = baseParticle as XmlSchemaAny;
-			if (xmlSchemaAny != null)
-			{
-				return xmlSchemaAny.ValidateWildcardAllowsNamespaceName(this.QualifiedName.Namespace, h, schema, raiseError) && this.ValidateOccurenceRangeOK(xmlSchemaAny, h, schema, raiseError);
-			}
-			XmlSchemaGroupBase xmlSchemaGroupBase = null;
-			if (baseParticle is XmlSchemaSequence)
-			{
-				xmlSchemaGroupBase = new XmlSchemaSequence();
-			}
-			else if (baseParticle is XmlSchemaChoice)
-			{
-				xmlSchemaGroupBase = new XmlSchemaChoice();
-			}
-			else if (baseParticle is XmlSchemaAll)
-			{
-				xmlSchemaGroupBase = new XmlSchemaAll();
-			}
-			if (xmlSchemaGroupBase != null)
-			{
-				xmlSchemaGroupBase.Items.Add(this);
-				xmlSchemaGroupBase.Compile(h, schema);
-				xmlSchemaGroupBase.Validate(h, schema);
-				return xmlSchemaGroupBase.ValidateDerivationByRestriction(baseParticle, h, schema, raiseError);
-			}
-			return true;
-		}
-
-		private bool ValidateDerivationByRestrictionNameAndTypeOK(XmlSchemaElement baseElement, ValidationEventHandler h, XmlSchema schema, bool raiseError)
-		{
-			if (this.QualifiedName != baseElement.QualifiedName)
-			{
-				if (raiseError)
-				{
-					base.error(h, "Invalid derivation by restriction of particle was found. Both elements must have the same name.");
-				}
-				return false;
-			}
-			if (this.isNillable && !baseElement.isNillable)
-			{
-				if (raiseError)
-				{
-					base.error(h, "Invalid element derivation by restriction of particle was found. Base element is not nillable and derived type is nillable.");
-				}
-				return false;
-			}
-			if (!this.ValidateOccurenceRangeOK(baseElement, h, schema, raiseError))
-			{
-				return false;
-			}
-			if (baseElement.ValidatedFixedValue != null && baseElement.ValidatedFixedValue != this.ValidatedFixedValue)
-			{
-				if (raiseError)
-				{
-					base.error(h, "Invalid element derivation by restriction of particle was found. Both fixed value must be the same.");
-				}
-				return false;
-			}
-			if ((baseElement.BlockResolved | this.BlockResolved) != this.BlockResolved)
-			{
-				if (raiseError)
-				{
-					base.error(h, "Invalid derivation by restriction of particle was found. Derived element must contain all of the base element's block value.");
-				}
-				return false;
-			}
-			if (baseElement.ElementType != null)
-			{
-				XmlSchemaComplexType xmlSchemaComplexType = this.ElementType as XmlSchemaComplexType;
-				if (xmlSchemaComplexType != null)
-				{
-					xmlSchemaComplexType.ValidateDerivationValidRestriction(baseElement.ElementType as XmlSchemaComplexType, h, schema);
-					xmlSchemaComplexType.ValidateTypeDerivationOK(baseElement.ElementType, h, schema);
-				}
-				else
-				{
-					XmlSchemaSimpleType xmlSchemaSimpleType = this.ElementType as XmlSchemaSimpleType;
-					if (xmlSchemaSimpleType != null)
-					{
-						xmlSchemaSimpleType.ValidateTypeDerivationOK(baseElement.ElementType, h, schema, true);
-					}
-					else if (baseElement.ElementType != XmlSchemaComplexType.AnyType && baseElement.ElementType != this.ElementType)
-					{
-						if (raiseError)
-						{
-							base.error(h, "Invalid element derivation by restriction of particle was found. Both primitive types differ.");
-						}
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
-		internal override void CheckRecursion(int depth, ValidationEventHandler h, XmlSchema schema)
-		{
-			XmlSchemaComplexType xmlSchemaComplexType = this.ElementType as XmlSchemaComplexType;
-			if (xmlSchemaComplexType == null || xmlSchemaComplexType.Particle == null)
-			{
-				return;
-			}
-			xmlSchemaComplexType.Particle.CheckRecursion(depth + 1, h, schema);
-		}
-
-		internal override void ValidateUniqueParticleAttribution(XmlSchemaObjectTable qnames, ArrayList nsNames, ValidationEventHandler h, XmlSchema schema)
-		{
-			if (qnames.Contains(this.QualifiedName))
-			{
-				base.error(h, "Ambiguous element label was detected: " + this.QualifiedName);
-			}
-			else
-			{
-				foreach (object obj in nsNames)
-				{
-					XmlSchemaAny xmlSchemaAny = (XmlSchemaAny)obj;
-					if (!(xmlSchemaAny.ValidatedMaxOccurs == 0m))
-					{
-						if (xmlSchemaAny.HasValueAny || (xmlSchemaAny.HasValueLocal && this.QualifiedName.Namespace == string.Empty) || (xmlSchemaAny.HasValueOther && this.QualifiedName.Namespace != this.QualifiedName.Namespace) || (xmlSchemaAny.HasValueTargetNamespace && this.QualifiedName.Namespace == this.QualifiedName.Namespace))
-						{
-							base.error(h, "Ambiguous element label which is contained by -any- particle was detected: " + this.QualifiedName);
-							break;
-						}
-						if (!xmlSchemaAny.HasValueOther)
-						{
-							bool flag = false;
-							foreach (string text in xmlSchemaAny.ResolvedNamespaces)
-							{
-								if (text == this.QualifiedName.Namespace)
-								{
-									flag = true;
-									break;
-								}
-							}
-							if (flag)
-							{
-								base.error(h, "Ambiguous element label which is contained by -any- particle was detected: " + this.QualifiedName);
-								break;
-							}
-						}
-						else if (xmlSchemaAny.TargetNamespace != this.QualifiedName.Namespace)
-						{
-							base.error(h, string.Format("Ambiguous element label '{0}' which is contained by -any- particle with ##other value than '{1}' was detected: ", this.QualifiedName.Namespace, xmlSchemaAny.TargetNamespace));
-						}
-					}
-				}
-				qnames.Add(this.QualifiedName, this);
-			}
-		}
-
-		internal override void ValidateUniqueTypeAttribution(XmlSchemaObjectTable labels, ValidationEventHandler h, XmlSchema schema)
-		{
-			XmlSchemaElement xmlSchemaElement = labels[this.QualifiedName] as XmlSchemaElement;
-			if (xmlSchemaElement == null)
-			{
-				labels.Add(this.QualifiedName, this);
-			}
-			else if (xmlSchemaElement.ElementType != this.ElementType)
-			{
-				base.error(h, "Different types are specified on the same named elements in the same sequence. Element name is " + this.QualifiedName);
-			}
-		}
-
-		private void ValidateElementDefaultValidImmediate(ValidationEventHandler h, XmlSchema schema)
-		{
-			XmlSchemaDatatype xmlSchemaDatatype = this.elementType as XmlSchemaDatatype;
-			XmlSchemaSimpleType xmlSchemaSimpleType = this.elementType as XmlSchemaSimpleType;
-			if (xmlSchemaSimpleType != null)
-			{
-				xmlSchemaDatatype = xmlSchemaSimpleType.Datatype;
-			}
-			if (xmlSchemaDatatype == null)
-			{
-				XmlSchemaComplexType xmlSchemaComplexType = this.elementType as XmlSchemaComplexType;
-				XmlSchemaContentType contentType = xmlSchemaComplexType.ContentType;
-				if (contentType == XmlSchemaContentType.Empty || contentType == XmlSchemaContentType.ElementOnly)
-				{
-					base.error(h, "Element content type must be simple type or mixed.");
-				}
-				xmlSchemaDatatype = XmlSchemaSimpleType.AnySimpleType;
-			}
-			XmlNamespaceManager xmlNamespaceManager = null;
-			if (xmlSchemaDatatype.TokenizedType == XmlTokenizedType.QName && base.Namespaces != null)
-			{
-				foreach (XmlQualifiedName xmlQualifiedName in base.Namespaces.ToArray())
-				{
-					xmlNamespaceManager.AddNamespace(xmlQualifiedName.Name, xmlQualifiedName.Namespace);
-				}
-			}
-			try
-			{
-				if (this.defaultValue != null)
-				{
-					this.validatedDefaultValue = xmlSchemaDatatype.Normalize(this.defaultValue);
-					xmlSchemaDatatype.ParseValue(this.validatedDefaultValue, null, xmlNamespaceManager);
-				}
-			}
-			catch (Exception ex)
-			{
-				XmlSchemaObject.error(h, "The Element's default value is invalid with respect to its type definition.", ex);
-			}
-			try
-			{
-				if (this.fixedValue != null)
-				{
-					this.validatedFixedValue = xmlSchemaDatatype.Normalize(this.fixedValue);
-					xmlSchemaDatatype.ParseValue(this.validatedFixedValue, null, xmlNamespaceManager);
-				}
-			}
-			catch (Exception ex2)
-			{
-				XmlSchemaObject.error(h, "The Element's fixed value is invalid with its type definition.", ex2);
-			}
-		}
-
-		internal static XmlSchemaElement Read(XmlSchemaReader reader, ValidationEventHandler h)
-		{
-			XmlSchemaElement xmlSchemaElement = new XmlSchemaElement();
-			reader.MoveToElement();
-			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "element")
-			{
-				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaElement.Read, name=" + reader.Name, null);
-				reader.Skip();
-				return null;
-			}
-			xmlSchemaElement.LineNumber = reader.LineNumber;
-			xmlSchemaElement.LinePosition = reader.LinePosition;
-			xmlSchemaElement.SourceUri = reader.BaseURI;
-			while (reader.MoveToNextAttribute())
-			{
-				if (reader.Name == "abstract")
-				{
-					Exception ex;
-					xmlSchemaElement.IsAbstract = XmlSchemaUtil.ReadBoolAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is invalid value for abstract", ex);
-					}
-				}
-				else if (reader.Name == "block")
-				{
-					Exception ex;
-					xmlSchemaElement.block = XmlSchemaUtil.ReadDerivationAttribute(reader, out ex, "block", XmlSchemaUtil.ElementBlockAllowed);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, "some invalid values for block attribute were found", ex);
-					}
-				}
-				else if (reader.Name == "default")
-				{
-					xmlSchemaElement.defaultValue = reader.Value;
-				}
-				else if (reader.Name == "final")
-				{
-					Exception ex;
-					xmlSchemaElement.Final = XmlSchemaUtil.ReadDerivationAttribute(reader, out ex, "final", XmlSchemaUtil.FinalAllowed);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, "some invalid values for final attribute were found", ex);
-					}
-				}
-				else if (reader.Name == "fixed")
-				{
-					xmlSchemaElement.fixedValue = reader.Value;
-				}
-				else if (reader.Name == "form")
-				{
-					Exception ex;
-					xmlSchemaElement.form = XmlSchemaUtil.ReadFormAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is an invalid value for form attribute", ex);
-					}
-				}
-				else if (reader.Name == "id")
-				{
-					xmlSchemaElement.Id = reader.Value;
-				}
-				else if (reader.Name == "maxOccurs")
-				{
-					try
-					{
-						xmlSchemaElement.MaxOccursString = reader.Value;
-					}
-					catch (Exception ex2)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is an invalid value for maxOccurs", ex2);
-					}
-				}
-				else if (reader.Name == "minOccurs")
-				{
-					try
-					{
-						xmlSchemaElement.MinOccursString = reader.Value;
-					}
-					catch (Exception ex3)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is an invalid value for minOccurs", ex3);
-					}
-				}
-				else if (reader.Name == "name")
-				{
-					xmlSchemaElement.Name = reader.Value;
-				}
-				else if (reader.Name == "nillable")
-				{
-					Exception ex;
-					xmlSchemaElement.IsNillable = XmlSchemaUtil.ReadBoolAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + "is not a valid value for nillable", ex);
-					}
-				}
-				else if (reader.Name == "ref")
-				{
-					Exception ex;
-					xmlSchemaElement.refName = XmlSchemaUtil.ReadQNameAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for ref attribute", ex);
-					}
-				}
-				else if (reader.Name == "substitutionGroup")
-				{
-					Exception ex;
-					xmlSchemaElement.substitutionGroup = XmlSchemaUtil.ReadQNameAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for substitutionGroup attribute", ex);
-					}
-				}
-				else if (reader.Name == "type")
-				{
-					Exception ex;
-					xmlSchemaElement.SchemaTypeName = XmlSchemaUtil.ReadQNameAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for type attribute", ex);
-					}
-				}
-				else if ((reader.NamespaceURI == string.Empty && reader.Name != "xmlns") || reader.NamespaceURI == "http://www.w3.org/2001/XMLSchema")
-				{
-					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for element", null);
-				}
-				else
-				{
-					XmlSchemaUtil.ReadUnhandledAttribute(reader, xmlSchemaElement);
-				}
-			}
-			reader.MoveToElement();
-			if (reader.IsEmptyElement)
-			{
-				return xmlSchemaElement;
-			}
-			int num = 1;
-			while (reader.ReadNextElement())
-			{
-				if (reader.NodeType == XmlNodeType.EndElement)
-				{
-					if (reader.LocalName != "element")
-					{
-						XmlSchemaObject.error(h, "Should not happen :2: XmlSchemaElement.Read, name=" + reader.Name, null);
-					}
-					break;
-				}
-				if (num <= 1 && reader.LocalName == "annotation")
-				{
-					num = 2;
-					XmlSchemaAnnotation xmlSchemaAnnotation = XmlSchemaAnnotation.Read(reader, h);
-					if (xmlSchemaAnnotation != null)
-					{
-						xmlSchemaElement.Annotation = xmlSchemaAnnotation;
-					}
-				}
-				else
-				{
-					if (num <= 2)
-					{
-						if (reader.LocalName == "simpleType")
-						{
-							num = 3;
-							XmlSchemaSimpleType xmlSchemaSimpleType = XmlSchemaSimpleType.Read(reader, h);
-							if (xmlSchemaSimpleType != null)
-							{
-								xmlSchemaElement.SchemaType = xmlSchemaSimpleType;
-							}
-							continue;
-						}
-						if (reader.LocalName == "complexType")
-						{
-							num = 3;
-							XmlSchemaComplexType xmlSchemaComplexType = XmlSchemaComplexType.Read(reader, h);
-							if (xmlSchemaComplexType != null)
-							{
-								xmlSchemaElement.SchemaType = xmlSchemaComplexType;
-							}
-							continue;
-						}
-					}
-					if (num <= 3)
-					{
-						if (reader.LocalName == "unique")
-						{
-							num = 3;
-							XmlSchemaUnique xmlSchemaUnique = XmlSchemaUnique.Read(reader, h);
-							if (xmlSchemaUnique != null)
-							{
-								xmlSchemaElement.constraints.Add(xmlSchemaUnique);
-							}
-							continue;
-						}
-						if (reader.LocalName == "key")
-						{
-							num = 3;
-							XmlSchemaKey xmlSchemaKey = XmlSchemaKey.Read(reader, h);
-							if (xmlSchemaKey != null)
-							{
-								xmlSchemaElement.constraints.Add(xmlSchemaKey);
-							}
-							continue;
-						}
-						if (reader.LocalName == "keyref")
-						{
-							num = 3;
-							XmlSchemaKeyref xmlSchemaKeyref = XmlSchemaKeyref.Read(reader, h);
-							if (xmlSchemaKeyref != null)
-							{
-								xmlSchemaElement.constraints.Add(xmlSchemaKeyref);
-							}
-							continue;
-						}
-					}
-					reader.RaiseInvalidElementError();
-				}
-			}
+			xmlSchemaElement.constraints = null;
 			return xmlSchemaElement;
 		}
 
-		private const string xmlname = "element";
-
-		private XmlSchemaDerivationMethod block;
-
-		private XmlSchemaObjectCollection constraints;
-
-		private string defaultValue;
-
-		private object elementType;
-
-		private XmlSchemaType elementSchemaType;
-
-		private XmlSchemaDerivationMethod final;
-
-		private string fixedValue;
-
-		private XmlSchemaForm form;
-
 		private bool isAbstract;
+
+		private bool hasAbstractAttribute;
 
 		private bool isNillable;
 
+		private bool hasNillableAttribute;
+
+		private bool isLocalTypeDerivationChecked;
+
+		private XmlSchemaDerivationMethod block = XmlSchemaDerivationMethod.None;
+
+		private XmlSchemaDerivationMethod final = XmlSchemaDerivationMethod.None;
+
+		private XmlSchemaForm form;
+
+		private string defaultValue;
+
+		private string fixedValue;
+
 		private string name;
 
-		private XmlQualifiedName refName;
+		private XmlQualifiedName refName = XmlQualifiedName.Empty;
 
-		private XmlSchemaType schemaType;
+		private XmlQualifiedName substitutionGroup = XmlQualifiedName.Empty;
 
-		private XmlQualifiedName schemaTypeName;
+		private XmlQualifiedName typeName = XmlQualifiedName.Empty;
 
-		private XmlQualifiedName substitutionGroup;
+		private XmlSchemaType type;
 
-		private XmlSchema schema;
+		private XmlQualifiedName qualifiedName = XmlQualifiedName.Empty;
 
-		internal bool parentIsSchema;
-
-		private XmlQualifiedName qName;
+		private XmlSchemaType elementType;
 
 		private XmlSchemaDerivationMethod blockResolved;
 
 		private XmlSchemaDerivationMethod finalResolved;
 
-		private XmlSchemaElement referencedElement;
+		private XmlSchemaObjectCollection constraints;
 
-		private ArrayList substitutingElements = new ArrayList();
-
-		private XmlSchemaElement substitutionGroupElement;
-
-		private bool actualIsAbstract;
-
-		private bool actualIsNillable;
-
-		private string validatedDefaultValue;
-
-		private string validatedFixedValue;
+		private SchemaElementDecl elementDecl;
 	}
 }

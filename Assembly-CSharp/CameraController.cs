@@ -102,11 +102,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.overlayCamera.renderingPath = RenderingPath.Forward;
 		this.overlayCamera.allowHDR = false;
 		this.overlayCamera.tag = "Untagged";
-		CameraReferenceTexture cameraReferenceTexture = this.overlayCamera.gameObject.AddComponent<CameraReferenceTexture>();
-		cameraReferenceTexture.referenceCamera = this.baseCamera;
+		this.overlayCamera.gameObject.AddComponent<CameraReferenceTexture>().referenceCamera = this.baseCamera;
 		ColorCorrectionLookup component = this.overlayCamera.GetComponent<ColorCorrectionLookup>();
-		component.Convert(this.dayColourCube, string.Empty);
-		component.Convert2(this.nightColourCube, string.Empty);
+		component.Convert(this.dayColourCube, "");
+		component.Convert2(this.nightColourCube, "");
 		this.cameras.Add(this.overlayCamera);
 		this.lightBufferCamera = this.CopyCamera(this.overlayCamera, "Light Buffer");
 		this.lightBufferCamera.clearFlags = CameraClearFlags.Color;
@@ -197,12 +196,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private IEnumerator FadeToBlack(float targetBlackPercent = 1f, float speed = 1f)
 	{
-		float currentAlphaPercentage = Mathf.Max(0f, GameScreenManager.Instance.fadePlane.color.a);
+		float num = Mathf.Max(0f, GameScreenManager.Instance.fadePlane.color.a);
 		float duration = 1f;
 		for (float i = 0f; i <= duration; i += Time.unscaledDeltaTime * speed)
 		{
-			currentAlphaPercentage = Mathf.Max(Mathf.Min(i / duration, targetBlackPercent), GameScreenManager.Instance.fadePlane.color.a);
-			GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, currentAlphaPercentage);
+			num = Mathf.Max(Mathf.Min(i / duration, targetBlackPercent), GameScreenManager.Instance.fadePlane.color.a);
+			GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, num);
 			yield return 0;
 		}
 		GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, targetBlackPercent);
@@ -213,12 +212,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private IEnumerator FadeInFromBlack(float targetBlackPercent = 0f, float speed = 1f)
 	{
-		float alphaPercentage = Mathf.Min(1f, GameScreenManager.Instance.fadePlane.color.a);
+		float num = Mathf.Min(1f, GameScreenManager.Instance.fadePlane.color.a);
 		float duration = 1f;
 		for (float i = 0f; i <= duration; i += Time.unscaledDeltaTime * speed)
 		{
-			alphaPercentage = Mathf.Min(Mathf.Max(1f - i / duration, targetBlackPercent), GameScreenManager.Instance.fadePlane.color.a);
-			GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, alphaPercentage);
+			num = Mathf.Min(Mathf.Max(1f - i / duration, targetBlackPercent), GameScreenManager.Instance.fadePlane.color.a);
+			GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, num);
 			yield return 0;
 		}
 		GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, targetBlackPercent);
@@ -284,7 +283,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		else if (e.TryConsume(global::Action.ZoomOut))
 		{
 			float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
-			this.targetOrthographicSize = Mathf.Min(num2, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
+			this.targetOrthographicSize = Mathf.Min(num2, this.FreeCameraEnabled ? TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug : this.maxOrthographicSize);
 			this.overrideZoomSpeed = 0f;
 			this.isTargetPosSet = false;
 		}
@@ -298,7 +297,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			this.cinemaCamEnabled = !this.cinemaCamEnabled;
 			DebugUtil.LogArgs(new object[] { "Cinema Cam Enabled ", this.cinemaCamEnabled });
-			this.SetInfoText((!this.cinemaCamEnabled) ? "Cinema Cam Disabled" : "Cinema Cam Enabled");
+			this.SetInfoText(this.cinemaCamEnabled ? "Cinema Cam Enabled" : "Cinema Cam Disabled");
 		}
 		else if (this.FreeCameraEnabled && this.cinemaCamEnabled)
 		{
@@ -306,13 +305,13 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			{
 				this.cinemaToggleLock = !this.cinemaToggleLock;
 				DebugUtil.LogArgs(new object[] { "Cinema Toggle Lock ", this.cinemaToggleLock });
-				this.SetInfoText((!this.cinemaToggleLock) ? "Cinema Input Lock OFF" : "Cinema Input Lock ON");
+				this.SetInfoText(this.cinemaToggleLock ? "Cinema Input Lock ON" : "Cinema Input Lock OFF");
 			}
 			else if (e.TryConsume(global::Action.CinemaToggleEasing))
 			{
 				this.cinemaToggleEasing = !this.cinemaToggleEasing;
 				DebugUtil.LogArgs(new object[] { "Cinema Toggle Easing ", this.cinemaToggleEasing });
-				this.SetInfoText((!this.cinemaToggleEasing) ? "Cinema Easing OFF" : "Cinema Easing ON");
+				this.SetInfoText(this.cinemaToggleEasing ? "Cinema Easing ON" : "Cinema Easing OFF");
 			}
 			else if (e.TryConsume(global::Action.CinemaPanLeft))
 			{
@@ -392,53 +391,67 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
 		{
 			this.panning = false;
+			return;
 		}
-		else if (this.FreeCameraEnabled && this.cinemaCamEnabled)
+		if (this.FreeCameraEnabled && this.cinemaCamEnabled)
 		{
 			if (e.TryConsume(global::Action.CinemaPanLeft))
 			{
 				this.cinemaPanLeft = this.cinemaToggleLock && this.cinemaPanLeft;
+				return;
 			}
-			else if (e.TryConsume(global::Action.CinemaPanRight))
+			if (e.TryConsume(global::Action.CinemaPanRight))
 			{
 				this.cinemaPanRight = this.cinemaToggleLock && this.cinemaPanRight;
+				return;
 			}
-			else if (e.TryConsume(global::Action.CinemaPanUp))
+			if (e.TryConsume(global::Action.CinemaPanUp))
 			{
 				this.cinemaPanUp = this.cinemaToggleLock && this.cinemaPanUp;
+				return;
 			}
-			else if (e.TryConsume(global::Action.CinemaPanDown))
+			if (e.TryConsume(global::Action.CinemaPanDown))
 			{
 				this.cinemaPanDown = this.cinemaToggleLock && this.cinemaPanDown;
+				return;
 			}
-			else if (e.TryConsume(global::Action.CinemaZoomIn))
+			if (e.TryConsume(global::Action.CinemaZoomIn))
 			{
 				this.cinemaZoomIn = this.cinemaToggleLock && this.cinemaZoomIn;
+				return;
 			}
-			else if (e.TryConsume(global::Action.CinemaZoomOut))
+			if (e.TryConsume(global::Action.CinemaZoomOut))
 			{
 				this.cinemaZoomOut = this.cinemaToggleLock && this.cinemaZoomOut;
+				return;
 			}
 		}
-		else if (e.TryConsume(global::Action.CameraHome))
+		else
 		{
-			this.CameraGoHome(2f);
-		}
-		else if (e.TryConsume(global::Action.PanLeft))
-		{
-			this.panLeft = false;
-		}
-		else if (e.TryConsume(global::Action.PanRight))
-		{
-			this.panRight = false;
-		}
-		else if (e.TryConsume(global::Action.PanUp))
-		{
-			this.panUp = false;
-		}
-		else if (e.TryConsume(global::Action.PanDown))
-		{
-			this.panDown = false;
+			if (e.TryConsume(global::Action.CameraHome))
+			{
+				this.CameraGoHome(2f);
+				return;
+			}
+			if (e.TryConsume(global::Action.PanLeft))
+			{
+				this.panLeft = false;
+				return;
+			}
+			if (e.TryConsume(global::Action.PanRight))
+			{
+				this.panRight = false;
+				return;
+			}
+			if (e.TryConsume(global::Action.PanUp))
+			{
+				this.panUp = false;
+				return;
+			}
+			if (e.TryConsume(global::Action.PanDown))
+			{
+				this.panDown = false;
+			}
 		}
 	}
 
@@ -684,9 +697,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	{
 		float unscaledDeltaTime = Time.unscaledDeltaTime;
 		Camera main = Camera.main;
-		float num = ((this.overrideZoomSpeed == 0f) ? this.zoomSpeed : this.overrideZoomSpeed);
+		float num = ((this.overrideZoomSpeed != 0f) ? this.overrideZoomSpeed : this.zoomSpeed);
 		Vector3 localPosition = base.transform.GetLocalPosition();
-		Vector3 vector = ((this.overrideZoomSpeed == 0f) ? KInputManager.GetMousePos() : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
+		Vector3 vector = ((this.overrideZoomSpeed != 0f) ? new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f) : KInputManager.GetMousePos());
 		Vector3 vector2 = this.PointUnderCursor(vector, main);
 		Vector3 vector3 = main.ScreenToViewportPoint(vector);
 		float num2 = this.keyPanningSpeed / 20f * main.orthographicSize;
@@ -874,15 +887,13 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			{
 				global::Debug.LogWarning("Resetting Camera Position... camera was saved in an undiscovered area of the map.");
 				this.CameraGoHome(2f);
+				return;
 			}
-			else
-			{
-				base.transform.SetPosition(CameraSaveData.position);
-				base.transform.localScale = CameraSaveData.localScale;
-				base.transform.rotation = CameraSaveData.rotation;
-				this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
-				this.SnapTo(base.transform.GetPosition());
-			}
+			base.transform.SetPosition(CameraSaveData.position);
+			base.transform.localScale = CameraSaveData.localScale;
+			base.transform.rotation = CameraSaveData.rotation;
+			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, this.FreeCameraEnabled ? TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug : this.maxOrthographicSize);
+			this.SnapTo(base.transform.GetPosition());
 		}
 	}
 
@@ -948,9 +959,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		if (this.followTarget != null)
 		{
 			Vector3 followPos = this.GetFollowPos();
-			Vector2 vector = new Vector2(base.transform.GetLocalPosition().x, base.transform.GetLocalPosition().y);
-			Vector2 vector2 = Vector2.Lerp(vector, followPos, Time.unscaledDeltaTime * 25f);
-			this.followTargetPos = new Vector3(vector2.x, vector2.y, base.transform.GetLocalPosition().z);
+			Vector2 vector = Vector2.Lerp(new Vector2(base.transform.GetLocalPosition().x, base.transform.GetLocalPosition().y), followPos, Time.unscaledDeltaTime * 25f);
+			this.followTargetPos = new Vector3(vector.x, vector.y, base.transform.GetLocalPosition().z);
 		}
 	}
 

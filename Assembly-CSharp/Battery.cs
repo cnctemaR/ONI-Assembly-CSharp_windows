@@ -83,8 +83,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.PowerCell, 26];
-			return gameObject != null;
+			return Grid.Objects[this.PowerCell, 26] != null;
 		}
 	}
 
@@ -104,8 +103,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.PowerCell = component.GetPowerInputCell();
 		base.Subscribe<Battery>(-592767678, Battery.OnOperationalChangedDelegate);
 		this.OnOperationalChanged(null);
-		bool flag = base.GetComponent<PowerTransformer>();
-		this.meter = ((!flag) ? new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" }) : null);
+		this.meter = (base.GetComponent<PowerTransformer>() ? null : new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" }));
 		Game.Instance.circuitManager.Connect(this);
 		Game.Instance.energySim.AddBattery(this);
 	}
@@ -116,12 +114,10 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		{
 			Game.Instance.circuitManager.Connect(this);
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.JoulesAvailable, this);
+			return;
 		}
-		else
-		{
-			Game.Instance.circuitManager.Disconnect(this);
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.JoulesAvailable, false);
-		}
+		Game.Instance.circuitManager.Disconnect(this);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.JoulesAvailable, false);
 	}
 
 	protected override void OnCleanUp()
@@ -169,14 +165,12 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	public void SetConnectionStatus(CircuitManager.ConnectionStatus status)
 	{
 		this.connectionStatus = status;
-		if (status != CircuitManager.ConnectionStatus.NotConnected)
-		{
-			this.operational.SetActive(this.operational.IsOperational && this.JoulesAvailable > 0f, false);
-		}
-		else
+		if (status == CircuitManager.ConnectionStatus.NotConnected)
 		{
 			this.operational.SetActive(false, false);
+			return;
 		}
+		this.operational.SetActive(this.operational.IsOperational && this.JoulesAvailable > 0f, false);
 	}
 
 	public void AddEnergy(float joules)
@@ -208,7 +202,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		if (this.powerTransformer == null)
 		{
 			list.Add(new Descriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement, false));
-			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
+			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, "", GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, "", GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
 			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), Descriptor.DescriptorType.Effect, false));
 		}
 		else

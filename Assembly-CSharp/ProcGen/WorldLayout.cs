@@ -16,6 +16,16 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class WorldLayout
 	{
+		[Serialize]
+		public int mapWidth { get; private set; }
+
+		[Serialize]
+		public int mapHeight { get; private set; }
+
+		public bool layoutOK { get; private set; }
+
+		public static LevelLayer levelLayerGradient { get; private set; }
+
 		public WorldLayout(WorldGen worldGen, int seed)
 		{
 			this.worldGen = worldGen;
@@ -30,16 +40,6 @@ namespace ProcGen
 			this.mapWidth = width;
 			this.mapHeight = height;
 		}
-
-		[Serialize]
-		public int mapWidth { get; private set; }
-
-		[Serialize]
-		public int mapHeight { get; private set; }
-
-		public bool layoutOK { get; private set; }
-
-		public static LevelLayer levelLayerGradient { get; private set; }
 
 		public void SetSeed(int seed)
 		{
@@ -123,8 +123,7 @@ namespace ProcGen
 			{
 				ProcGen.Node node3 = this.overworldGraph.AddNode(WorldGenTags.UnassignedNode.Name);
 				node3.SetPosition(randomPoints[i]);
-				global::VoronoiTree.Node node4 = this.voronoiTree.AddSite(new Diagram.Site((uint)node3.node.Id, node3.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
-				node4.tags.Add(WorldGenTags.UnassignedNode);
+				this.voronoiTree.AddSite(new Diagram.Site((uint)node3.node.Id, node3.position, 1f), global::VoronoiTree.Node.NodeType.Internal).tags.Add(WorldGenTags.UnassignedNode);
 				node3.tags.Add(WorldGenTags.UnassignedNode);
 			}
 			if (usePD)
@@ -147,14 +146,14 @@ namespace ProcGen
 			for (int k = 0; k < this.voronoiTree.ChildCount(); k++)
 			{
 				global::VoronoiTree.Node child = this.voronoiTree.GetChild(k);
-				ProcGen.Node node5 = this.overworldGraph.FindNodeByID(child.site.id);
-				node5.tags.Union(child.tags);
-				node5.SetPosition(child.site.position);
+				ProcGen.Node node4 = this.overworldGraph.FindNodeByID(child.site.id);
+				node4.tags.Union(child.tags);
+				node4.SetPosition(child.site.position);
 				List<global::VoronoiTree.Node> neighbors = child.GetNeighbors();
 				for (int l = 0; l < neighbors.Count; l++)
 				{
-					ProcGen.Node node6 = this.overworldGraph.FindNodeByID(neighbors[l].site.id);
-					this.overworldGraph.AddArc(node5, node6, "Neighbor");
+					ProcGen.Node node5 = this.overworldGraph.FindNodeByID(neighbors[l].site.id);
+					this.overworldGraph.AddArc(node4, node5, "Neighbor");
 				}
 			}
 			this.PropagateDistanceTags(this.voronoiTree, WorldGenTags.DistanceTags);
@@ -167,8 +166,7 @@ namespace ProcGen
 				foreach (string text in this.worldGen.Settings.GetOverworldAddTags())
 				{
 					int num2 = this.myRandom.RandomSource().Next(this.voronoiTree.ChildCount());
-					global::VoronoiTree.Node child2 = this.voronoiTree.GetChild(num2);
-					child2.AddTag(new Tag(text));
+					this.voronoiTree.GetChild(num2).AddTag(new Tag(text));
 				}
 			}
 			this.FlattenOverworld();
@@ -224,40 +222,44 @@ namespace ProcGen
 		private HashSet<WeightedSubWorld> GetNameFilterSet(global::VoronoiTree.Node vn, World.AllowedCellsFilter filter, List<WeightedSubWorld> subworlds)
 		{
 			HashSet<WeightedSubWorld> hashSet = new HashSet<WeightedSubWorld>();
-			World.AllowedCellsFilter.TagCommand tagcommand = filter.tagcommand;
-			if (tagcommand != World.AllowedCellsFilter.TagCommand.Default)
+			switch (filter.tagcommand)
 			{
-				if (tagcommand != World.AllowedCellsFilter.TagCommand.AtTag)
+			case World.AllowedCellsFilter.TagCommand.Default:
+			{
+				int num;
+				int j;
+				for (j = 0; j < filter.subworldNames.Count; j = num + 1)
 				{
-					if (tagcommand == World.AllowedCellsFilter.TagCommand.DistanceFromTag)
-					{
-						global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
-						if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
-						{
-							int j;
-							for (j = 0; j < filter.subworldNames.Count; j++)
-							{
-								hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[j]));
-							}
-						}
-					}
+					hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[j]));
+					num = j;
 				}
-				else if (vn.tags.Contains(filter.tag))
+				break;
+			}
+			case World.AllowedCellsFilter.TagCommand.AtTag:
+				if (vn.tags.Contains(filter.tag))
 				{
+					int num;
 					int k;
-					for (k = 0; k < filter.subworldNames.Count; k++)
+					for (k = 0; k < filter.subworldNames.Count; k = num + 1)
 					{
 						hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[k]));
+						num = k;
 					}
 				}
-			}
-			else
-			{
-				int i;
-				for (i = 0; i < filter.subworldNames.Count; i++)
+				break;
+			case World.AllowedCellsFilter.TagCommand.DistanceFromTag:
+				global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
+				if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
 				{
-					hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[i]));
+					int num;
+					int i;
+					for (i = 0; i < filter.subworldNames.Count; i = num + 1)
+					{
+						hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[i]));
+						num = i;
+					}
 				}
+				break;
 			}
 			return hashSet;
 		}
@@ -265,37 +267,35 @@ namespace ProcGen
 		private HashSet<WeightedSubWorld> GetZoneTypeFilterSet(global::VoronoiTree.Node vn, World.AllowedCellsFilter filter, Dictionary<string, List<WeightedSubWorld>> subworldsByZoneType)
 		{
 			HashSet<WeightedSubWorld> hashSet = new HashSet<WeightedSubWorld>();
-			World.AllowedCellsFilter.TagCommand tagcommand = filter.tagcommand;
-			if (tagcommand != World.AllowedCellsFilter.TagCommand.Default)
+			switch (filter.tagcommand)
 			{
-				if (tagcommand != World.AllowedCellsFilter.TagCommand.AtTag)
+			case World.AllowedCellsFilter.TagCommand.Default:
+			{
+				for (int i = 0; i < filter.zoneTypes.Count; i++)
 				{
-					if (tagcommand == World.AllowedCellsFilter.TagCommand.DistanceFromTag)
-					{
-						global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
-						if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
-						{
-							for (int i = 0; i < filter.zoneTypes.Count; i++)
-							{
-								hashSet.UnionWith(subworldsByZoneType[filter.zoneTypes[i].ToString()]);
-							}
-						}
-					}
+					hashSet.UnionWith(subworldsByZoneType[filter.zoneTypes[i].ToString()]);
 				}
-				else if (vn.tags.Contains(filter.tag))
+				break;
+			}
+			case World.AllowedCellsFilter.TagCommand.AtTag:
+				if (vn.tags.Contains(filter.tag))
 				{
 					for (int j = 0; j < filter.zoneTypes.Count; j++)
 					{
 						hashSet.UnionWith(subworldsByZoneType[filter.zoneTypes[j].ToString()]);
 					}
 				}
-			}
-			else
-			{
-				for (int k = 0; k < filter.zoneTypes.Count; k++)
+				break;
+			case World.AllowedCellsFilter.TagCommand.DistanceFromTag:
+				global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
+				if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
 				{
-					hashSet.UnionWith(subworldsByZoneType[filter.zoneTypes[k].ToString()]);
+					for (int k = 0; k < filter.zoneTypes.Count; k++)
+					{
+						hashSet.UnionWith(subworldsByZoneType[filter.zoneTypes[k].ToString()]);
+					}
 				}
+				break;
 			}
 			return hashSet;
 		}
@@ -303,65 +303,62 @@ namespace ProcGen
 		private HashSet<WeightedSubWorld> GetTemperatureFilterSet(global::VoronoiTree.Node vn, World.AllowedCellsFilter filter, Dictionary<string, List<WeightedSubWorld>> subworldsByTemperature)
 		{
 			HashSet<WeightedSubWorld> hashSet = new HashSet<WeightedSubWorld>();
-			World.AllowedCellsFilter.TagCommand tagcommand = filter.tagcommand;
-			if (tagcommand != World.AllowedCellsFilter.TagCommand.Default)
+			switch (filter.tagcommand)
 			{
-				if (tagcommand != World.AllowedCellsFilter.TagCommand.AtTag)
+			case World.AllowedCellsFilter.TagCommand.Default:
+			{
+				for (int i = 0; i < filter.temperatureRanges.Count; i++)
 				{
-					if (tagcommand == World.AllowedCellsFilter.TagCommand.DistanceFromTag)
-					{
-						global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
-						if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
-						{
-							for (int i = 0; i < filter.temperatureRanges.Count; i++)
-							{
-								hashSet.UnionWith(subworldsByTemperature[filter.temperatureRanges[i].ToString()]);
-							}
-						}
-					}
+					hashSet.UnionWith(subworldsByTemperature[filter.temperatureRanges[i].ToString()]);
 				}
-				else if (vn.tags.Contains(filter.tag))
+				break;
+			}
+			case World.AllowedCellsFilter.TagCommand.AtTag:
+				if (vn.tags.Contains(filter.tag))
 				{
 					for (int j = 0; j < filter.temperatureRanges.Count; j++)
 					{
 						hashSet.UnionWith(subworldsByTemperature[filter.temperatureRanges[j].ToString()]);
 					}
 				}
-			}
-			else
-			{
-				for (int k = 0; k < filter.temperatureRanges.Count; k++)
+				break;
+			case World.AllowedCellsFilter.TagCommand.DistanceFromTag:
+				global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
+				if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
 				{
-					hashSet.UnionWith(subworldsByTemperature[filter.temperatureRanges[k].ToString()]);
+					for (int k = 0; k < filter.temperatureRanges.Count; k++)
+					{
+						hashSet.UnionWith(subworldsByTemperature[filter.temperatureRanges[k].ToString()]);
+					}
 				}
+				break;
 			}
 			return hashSet;
 		}
 
 		private void RunFilterClearCommand(global::VoronoiTree.Node vn, World.AllowedCellsFilter filter, HashSet<WeightedSubWorld> allowedSubworldsSet)
 		{
-			World.AllowedCellsFilter.TagCommand tagcommand = filter.tagcommand;
-			if (tagcommand != World.AllowedCellsFilter.TagCommand.Default)
+			switch (filter.tagcommand)
 			{
-				if (tagcommand != World.AllowedCellsFilter.TagCommand.AtTag)
+			case World.AllowedCellsFilter.TagCommand.Default:
+				allowedSubworldsSet.Clear();
+				return;
+			case World.AllowedCellsFilter.TagCommand.AtTag:
+				if (vn.tags.Contains(filter.tag))
 				{
-					if (tagcommand == World.AllowedCellsFilter.TagCommand.DistanceFromTag)
-					{
-						global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
-						if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
-						{
-							allowedSubworldsSet.Clear();
-						}
-					}
+					allowedSubworldsSet.Clear();
+					return;
 				}
-				else if (vn.tags.Contains(filter.tag))
+				break;
+			case World.AllowedCellsFilter.TagCommand.DistanceFromTag:
+				global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
+				if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
 				{
 					allowedSubworldsSet.Clear();
 				}
-			}
-			else
-			{
-				allowedSubworldsSet.Clear();
+				break;
+			default:
+				return;
 			}
 		}
 
@@ -369,13 +366,12 @@ namespace ProcGen
 		{
 			HashSet<WeightedSubWorld> hashSet = new HashSet<WeightedSubWorld>();
 			World world = this.worldGen.Settings.world;
-			string text = string.Empty;
+			string text = "";
 			foreach (KeyValuePair<Tag, int> keyValuePair in vn.minDistanceToTag)
 			{
-				string text2 = text;
 				text = string.Concat(new string[]
 				{
-					text2,
+					text,
 					keyValuePair.Key.Name,
 					":",
 					keyValuePair.Value.ToString(),
@@ -434,8 +430,7 @@ namespace ProcGen
 			list2.RemoveAll((WeightedName s) => s.name == this.worldGen.Settings.world.startSubworldName);
 			List<WeightedSubWorld> subworldsForWorld = this.worldGen.Settings.GetSubworldsForWorld(list2);
 			Dictionary<string, List<WeightedSubWorld>> dictionary = new Dictionary<string, List<WeightedSubWorld>>();
-			IEnumerator enumerator = Enum.GetValues(typeof(Temperature.Range)).GetEnumerator();
-			try
+			using (IEnumerator enumerator = Enum.GetValues(typeof(Temperature.Range)).GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
@@ -443,30 +438,13 @@ namespace ProcGen
 					dictionary.Add(range.ToString(), subworldsForWorld.FindAll((WeightedSubWorld sw) => sw.subWorld.temperatureRange == range));
 				}
 			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
-			}
 			Dictionary<string, List<WeightedSubWorld>> dictionary2 = new Dictionary<string, List<WeightedSubWorld>>();
-			IEnumerator enumerator2 = Enum.GetValues(typeof(SubWorld.ZoneType)).GetEnumerator();
-			try
+			using (IEnumerator enumerator = Enum.GetValues(typeof(SubWorld.ZoneType)).GetEnumerator())
 			{
-				while (enumerator2.MoveNext())
+				while (enumerator.MoveNext())
 				{
-					SubWorld.ZoneType zt = (SubWorld.ZoneType)enumerator2.Current;
+					SubWorld.ZoneType zt = (SubWorld.ZoneType)enumerator.Current;
 					dictionary2.Add(zt.ToString(), subworldsForWorld.FindAll((WeightedSubWorld sw) => sw.subWorld.zoneType == zt));
-				}
-			}
-			finally
-			{
-				IDisposable disposable2;
-				if ((disposable2 = enumerator2 as IDisposable) != null)
-				{
-					disposable2.Dispose();
 				}
 			}
 			foreach (global::VoronoiTree.Node node in list)
@@ -474,9 +452,7 @@ namespace ProcGen
 				ProcGen.Node node2 = this.overworldGraph.FindNodeByID(node.site.id);
 				node.tags.Remove(WorldGenTags.UnassignedNode);
 				node2.tags.Remove(WorldGenTags.UnassignedNode);
-				HashSet<WeightedSubWorld> hashSet = this.Filter(node, subworldsForWorld, dictionary, dictionary2);
-				List<WeightedSubWorld> list3 = new List<WeightedSubWorld>(hashSet);
-				WeightedSubWorld weightedSubWorld = WeightedRandom.Choose<WeightedSubWorld>(list3, this.myRandom);
+				WeightedSubWorld weightedSubWorld = WeightedRandom.Choose<WeightedSubWorld>(new List<WeightedSubWorld>(this.Filter(node, subworldsForWorld, dictionary, dictionary2)), this.myRandom);
 				if (weightedSubWorld != null)
 				{
 					SubWorld subWorld = weightedSubWorld.subWorld;
@@ -484,13 +460,12 @@ namespace ProcGen
 				}
 				else
 				{
-					string text = string.Empty;
+					string text = "";
 					foreach (KeyValuePair<Tag, int> keyValuePair in node.minDistanceToTag)
 					{
-						string text2 = text;
 						text = string.Concat(new string[]
 						{
-							text2,
+							text,
 							keyValuePair.Key.Name,
 							":",
 							keyValuePair.Value.ToString(),
@@ -534,7 +509,7 @@ namespace ProcGen
 						ProcGen.Node node = this.overworldGraph.FindNodeByID(tree.site.id);
 						node.tags.Union(tree.tags);
 						bool flag;
-						Cell cell = this.overworldGraph.GetCell(node.position, node.node, true, out flag);
+						ProcGen.Node cell = this.overworldGraph.GetCell(node.position, node.node, true, out flag);
 						global::Debug.Assert(flag, "Tried creating a new cell but one already exists. Huh? " + child.site.id);
 						cell.tags.Union(tree.tags);
 					}
@@ -544,17 +519,12 @@ namespace ProcGen
 					global::VoronoiTree.Node child2 = this.voronoiTree.GetChild(j);
 					if (child2.type == global::VoronoiTree.Node.NodeType.Internal)
 					{
-						Tree tree2 = child2 as Tree;
-						List<KeyValuePair<global::VoronoiTree.Node, LineSegment>> neighborsByEdge = tree2.GetNeighborsByEdge();
+						List<KeyValuePair<global::VoronoiTree.Node, LineSegment>> neighborsByEdge = (child2 as Tree).GetNeighborsByEdge();
 						for (int k = 0; k < neighborsByEdge.Count; k++)
 						{
 							KeyValuePair<global::VoronoiTree.Node, LineSegment> keyValuePair = neighborsByEdge[k];
-							MapGraph mapGraph = this.overworldGraph;
-							Vector2? p = keyValuePair.Value.p0;
-							mapGraph.GetCorner(p.Value, true);
-							MapGraph mapGraph2 = this.overworldGraph;
-							Vector2? p2 = keyValuePair.Value.p1;
-							mapGraph2.GetCorner(p2.Value, true);
+							this.overworldGraph.GetCorner(keyValuePair.Value.p0.Value, true);
+							this.overworldGraph.GetCorner(keyValuePair.Value.p1.Value, true);
 						}
 					}
 				}
@@ -565,21 +535,17 @@ namespace ProcGen
 					global::VoronoiTree.Node child3 = this.voronoiTree.GetChild(l);
 					if (child3.type == global::VoronoiTree.Node.NodeType.Internal)
 					{
-						Tree tree3 = child3 as Tree;
-						ProcGen.Node node2 = this.overworldGraph.FindNodeByID(tree3.site.id);
+						Tree tree2 = child3 as Tree;
+						ProcGen.Node node2 = this.overworldGraph.FindNodeByID(tree2.site.id);
 						Cell cell2 = this.overworldGraph.GetCell(node2.node);
 						global::Debug.Assert(cell2 != null, "cell is null: " + node2.node);
-						List<KeyValuePair<global::VoronoiTree.Node, LineSegment>> neighborsByEdge2 = tree3.GetNeighborsByEdge();
+						List<KeyValuePair<global::VoronoiTree.Node, LineSegment>> neighborsByEdge2 = tree2.GetNeighborsByEdge();
 						for (int m = 0; m < neighborsByEdge2.Count; m++)
 						{
 							KeyValuePair<global::VoronoiTree.Node, LineSegment> keyValuePair2 = neighborsByEdge2[m];
-							MapGraph mapGraph3 = this.overworldGraph;
-							Vector2? p3 = keyValuePair2.Value.p0;
-							Corner corner = mapGraph3.GetCorner(p3.Value, false);
+							Corner corner = this.overworldGraph.GetCorner(keyValuePair2.Value.p0.Value, false);
 							global::Debug.Assert(corner != null, "corner0 is null: " + keyValuePair2.Value.p0);
-							MapGraph mapGraph4 = this.overworldGraph;
-							Vector2? p4 = keyValuePair2.Value.p1;
-							Corner corner2 = mapGraph4.GetCorner(p4.Value, false);
+							Corner corner2 = this.overworldGraph.GetCorner(keyValuePair2.Value.p1.Value, false);
 							global::Debug.Assert(corner2 != null, "corner1 is null: " + keyValuePair2.Value.p1);
 							global::VoronoiTree.Node key = keyValuePair2.Key;
 							Edge edge;
@@ -684,7 +650,7 @@ namespace ProcGen
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
 			List<string> defaultMoveTags = this.worldGen.Settings.GetDefaultMoveTags();
-			TagSet tagSet2 = ((defaultMoveTags == null) ? null : new TagSet(defaultMoveTags));
+			TagSet tagSet2 = ((defaultMoveTags != null) ? new TagSet(defaultMoveTags) : null);
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
 			splitCommand.dontCopyTags = tagSet;
 			splitCommand.moveTags = tagSet2;
@@ -781,8 +747,7 @@ namespace ProcGen
 								}
 								for (int n = 0; n < tree2.ChildCount(); n++)
 								{
-									global::VoronoiTree.Node child2 = tree2.GetChild(n);
-									child2.Split(splitCommand);
+									tree2.GetChild(n).Split(splitCommand);
 								}
 							}
 						}
@@ -802,9 +767,7 @@ namespace ProcGen
 				if (randomPoints.Count < minPointCount)
 				{
 					density *= 0.8f;
-					if (this.worldGen.isRunningDebugGen)
-					{
-					}
+					bool isRunningDebugGen = this.worldGen.isRunningDebugGen;
 				}
 				num++;
 			}
@@ -816,7 +779,7 @@ namespace ProcGen
 		{
 			SeededRandom seededRandom = new SeededRandom(seed);
 			List<string> defaultMoveTags = this.worldGen.Settings.GetDefaultMoveTags();
-			TagSet tagSet = ((defaultMoveTags == null) ? null : new TagSet(defaultMoveTags));
+			TagSet tagSet = ((defaultMoveTags != null) ? new TagSet(defaultMoveTags) : null);
 			TagSet tagSet2 = new TagSet();
 			if (tagSet != null)
 			{
@@ -841,11 +804,10 @@ namespace ProcGen
 			if (sw.centralFeature != null)
 			{
 				list.Add(node.site.poly.Centroid());
-				global::VoronoiTree.Node node2 = this.CreateTreeNodeWithFeatureAndBiome(this.worldGen.Settings, sw, node, graph, sw.centralFeature, node.site.poly.Centroid(), tagSet3, -1);
-				node2.AddTag(WorldGenTags.CenteralFeature);
+				this.CreateTreeNodeWithFeatureAndBiome(this.worldGen.Settings, sw, node, graph, sw.centralFeature, node.site.poly.Centroid(), tagSet3, -1).AddTag(WorldGenTags.CenteralFeature);
 			}
 			node.dontRelaxChildren = sw.dontRelaxChildren;
-			int num = ((sw.features.Count <= 0) ? 2 : sw.features.Count);
+			int num = ((sw.features.Count > 0) ? sw.features.Count : 2);
 			List<Vector2> points = this.GetPoints(sw.name, node.log, num, node.site.poly, randomValueWithinRange, sw.avoidRadius, list, sw.sampleBehaviour, true, seededRandom, true, sw.doAvoidPoints);
 			for (int k = 0; k < sw.samplers.Count; k++)
 			{
@@ -860,7 +822,7 @@ namespace ProcGen
 			}
 			if (points.Count < num)
 			{
-				string text = string.Empty;
+				string text = "";
 				for (int l = 0; l < node.site.poly.Vertices.Count; l++)
 				{
 					text = text + node.site.poly.Vertices[l] + ", ";
@@ -877,9 +839,8 @@ namespace ProcGen
 				}
 				return;
 			}
-			if (sw.features.Count > points.Count)
-			{
-			}
+			int count = sw.features.Count;
+			int count2 = points.Count;
 			for (int m = 0; m < points.Count; m++)
 			{
 				Feature feature = null;
@@ -895,8 +856,7 @@ namespace ProcGen
 				for (int n = 0; n < tagSet2.Count; n++)
 				{
 					global::Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[n].Name, node.site.id));
-					global::VoronoiTree.Node child = node.GetChild(seededRandom.RandomSource().Next(node.ChildCount()));
-					child.AddTag(tagSet2[n]);
+					node.GetChild(seededRandom.RandomSource().Next(node.ChildCount())).AddTag(tagSet2[n]);
 				}
 			}
 		}
@@ -1038,7 +998,7 @@ namespace ProcGen
 			if (tagSet.Contains(WorldGenTags.Feature))
 			{
 				ProcGen.Node node2 = this.worldGen.WorldLayout.localGraph.AddNode(node.type);
-				node2.SetPosition((!tagSet.Contains(WorldGenTags.CenteralFeature)) ? tree.site.position : tree.site.poly.Centroid());
+				node2.SetPosition(tagSet.Contains(WorldGenTags.CenteralFeature) ? tree.site.poly.Centroid() : tree.site.position);
 				global::VoronoiTree.Node node3 = tree.AddSite(new Diagram.Site((uint)node2.node.Id, node2.position, 1f), global::VoronoiTree.Node.NodeType.Leaf);
 				if (tagSet != null && tagSet.Count != 0)
 				{
@@ -1091,7 +1051,7 @@ namespace ProcGen
 			}
 			for (int j = 0; j < points.Count; j++)
 			{
-				ProcGen.Node node4 = this.worldGen.WorldLayout.localGraph.AddNode((cmd.typeOverride != null) ? cmd.typeOverride(points[j]) : node.type);
+				ProcGen.Node node4 = this.worldGen.WorldLayout.localGraph.AddNode((cmd.typeOverride == null) ? node.type : cmd.typeOverride(points[j]));
 				node4.SetPosition(points[j]);
 				global::VoronoiTree.Node node5 = tree.AddSite(new Diagram.Site((uint)node4.node.Id, node4.position, 1f), global::VoronoiTree.Node.NodeType.Leaf);
 				if (tagSet != null && tagSet.Count != 0)
@@ -1137,13 +1097,11 @@ namespace ProcGen
 			this.voronoiTree.GetIntersectingLeafSites(this.bottomEdge, list2);
 			for (int i = 0; i < list.Count; i++)
 			{
-				global::VoronoiTree.Node nodeForSite = this.voronoiTree.GetNodeForSite(list[i]);
-				nodeForSite.AddTag(topTag);
+				this.voronoiTree.GetNodeForSite(list[i]).AddTag(topTag);
 			}
 			for (int j = 0; j < list2.Count; j++)
 			{
-				global::VoronoiTree.Node nodeForSite2 = this.voronoiTree.GetNodeForSite(list2[j]);
-				nodeForSite2.AddTag(bottomTag);
+				this.voronoiTree.GetNodeForSite(list2[j]).AddTag(bottomTag);
 			}
 		}
 
@@ -1155,25 +1113,17 @@ namespace ProcGen
 			this.voronoiTree.GetIntersectingLeafSites(this.rightEdge, list2);
 			for (int i = 0; i < list.Count; i++)
 			{
-				global::VoronoiTree.Node nodeForSite = this.voronoiTree.GetNodeForSite(list[i]);
-				nodeForSite.AddTag(leftTag);
+				this.voronoiTree.GetNodeForSite(list[i]).AddTag(leftTag);
 			}
 			for (int j = 0; j < list2.Count; j++)
 			{
-				global::VoronoiTree.Node nodeForSite2 = this.voronoiTree.GetNodeForSite(list2[j]);
-				nodeForSite2.AddTag(rightTag);
+				this.voronoiTree.GetNodeForSite(list2[j]).AddTag(rightTag);
 			}
 		}
 
 		private bool StartAreaTooLarge(global::VoronoiTree.Node node)
 		{
-			bool flag = node.tags.Contains(WorldGenTags.AtStart);
-			if (flag)
-			{
-				float num = node.site.poly.Area();
-				return num > 2000f;
-			}
-			return false;
+			return node.tags.Contains(WorldGenTags.AtStart) && node.site.poly.Area() > 2000f;
 		}
 
 		private void SplitLargeStartingSites()
@@ -1181,7 +1131,7 @@ namespace ProcGen
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
 			List<string> defaultMoveTags = this.worldGen.Settings.GetDefaultMoveTags();
-			TagSet tagSet2 = ((defaultMoveTags == null) ? null : new TagSet(defaultMoveTags));
+			TagSet tagSet2 = ((defaultMoveTags != null) ? new TagSet(defaultMoveTags) : null);
 			List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 			this.voronoiTree.GetLeafNodes(list, new Tree.LeafNodeTest(this.StartAreaTooLarge));
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
@@ -1202,8 +1152,7 @@ namespace ProcGen
 
 		private void PropagateStartTag()
 		{
-			List<global::VoronoiTree.Node> startNodes = this.GetStartNodes();
-			foreach (global::VoronoiTree.Node node in startNodes)
+			foreach (global::VoronoiTree.Node node in this.GetStartNodes())
 			{
 				node.AddTagToNeighbors(WorldGenTags.NearStartLocation);
 				node.AddTag(WorldGenTags.IgnoreCaveOverride);
@@ -1225,8 +1174,7 @@ namespace ProcGen
 		public List<ProcGen.Node> GetTerrainNodesForTag(Tag tag)
 		{
 			List<ProcGen.Node> list = new List<ProcGen.Node>();
-			List<global::VoronoiTree.Node> leafNodesWithTag = this.GetLeafNodesWithTag(tag);
-			foreach (global::VoronoiTree.Node node in leafNodesWithTag)
+			foreach (global::VoronoiTree.Node node in this.GetLeafNodesWithTag(tag))
 			{
 				ProcGen.Node node2 = this.localGraph.FindNodeByID(node.site.id);
 				if (node2 != null)
@@ -1283,25 +1231,22 @@ namespace ProcGen
 				global::Satsuma.Node n1 = this.localGraph.baseGraph.V(arc);
 				ProcGen.Node tn0 = this.localGraph.FindNode((ProcGen.Node n) => n.node == n0);
 				ProcGen.Node tn1 = this.localGraph.FindNode((ProcGen.Node n) => n.node == n1);
-				if (tn0 != null && tn1 != null && !(tn0.type != tn1.type) && tn0.type.Contains(WorldGenTags.River.Name))
+				if (tn0 != null && tn1 != null && !(tn0.type != tn1.type) && tn0.type.Contains(WorldGenTags.River.Name) && list.Find((River r) => r.SinkPosition() == tn0.position && r.SourcePosition() == tn1.position) == null)
 				{
-					if (list.Find((River r) => r.SinkPosition() == tn0.position && r.SourcePosition() == tn1.position) == null)
+					River river;
+					if (SettingsCache.rivers.ContainsKey(tn0.type))
 					{
-						River river;
-						if (SettingsCache.rivers.ContainsKey(tn0.type))
-						{
-							river = new River(SettingsCache.rivers[tn0.type], false);
-							river.AddSection(tn0, tn1);
-						}
-						else
-						{
-							river = new River(tn0, tn1, SimHashes.Water.ToString(), "Granite", 373f, 2000f, 1000f, 100f, 1.5f, 1.5f);
-						}
-						river.widthCenter = this.myRandom.RandomRange(1f, river.widthCenter + 0.5f);
-						river.widthBorder = this.myRandom.RandomRange(1f, river.widthBorder + 0.5f);
-						river.Stagger(this.myRandom, (float)this.myRandom.RandomRange(8, 20), (float)this.myRandom.RandomRange(1, 3));
-						list.Add(river);
+						river = new River(SettingsCache.rivers[tn0.type], false);
+						river.AddSection(tn0, tn1);
 					}
+					else
+					{
+						river = new River(tn0, tn1, SimHashes.Water.ToString(), "Granite", 373f, 2000f, 1000f, 100f, 1.5f, 1.5f);
+					}
+					river.widthCenter = this.myRandom.RandomRange(1f, river.widthCenter + 0.5f);
+					river.widthBorder = this.myRandom.RandomRange(1f, river.widthBorder + 0.5f);
+					river.Stagger(this.myRandom, (float)this.myRandom.RandomRange(8, 20), (float)this.myRandom.RandomRange(1, 3));
+					list.Add(river);
 				}
 			}
 			return list;
@@ -1399,15 +1344,13 @@ namespace ProcGen
 				{
 					KeyValuePair<int, int> keyValuePair = this.extra.internalInternalParent[i];
 					Tree tree = this.extra.internals[keyValuePair.Key];
-					Tree tree2 = this.extra.internals[keyValuePair.Value];
-					tree2.AddChild(tree);
+					this.extra.internals[keyValuePair.Value].AddChild(tree);
 				}
 				for (int j = 0; j < this.extra.leafInternalParent.Count; j++)
 				{
 					KeyValuePair<int, int> keyValuePair2 = this.extra.leafInternalParent[j];
 					global::VoronoiTree.Node node = this.extra.leafs[keyValuePair2.Key];
-					Tree tree3 = this.extra.internals[keyValuePair2.Value];
-					tree3.AddChild(node);
+					this.extra.internals[keyValuePair2.Value].AddChild(node);
 				}
 			}
 			catch (Exception ex)

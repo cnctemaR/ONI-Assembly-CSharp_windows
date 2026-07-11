@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
-	public interface IEnumerable<T> : IEnumerable
+	[TypeDependency("System.SZArrayHelper")]
+	public interface IEnumerable<out T> : IEnumerable
 	{
 		IEnumerator<T> GetEnumerator();
 	}

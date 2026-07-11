@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935690}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.TextCore</RootNamespace>
+    <AssemblyName>UnityEngine.TextCoreModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="FaceInfo.cs" />
+    <Compile Include="Glyph.cs" />
+    <Compile Include="GlyphMetrics.cs" />
+    <Compile Include="GlyphRect.cs" />
+    <Compile Include="LowLevel\FontEngine.cs" />
+    <Compile Include="LowLevel\FontEngineError.cs" />
+    <Compile Include="LowLevel\FontEngineUtilities.cs" />
+    <Compile Include="LowLevel\GlyphAdjustmentRecord.cs" />
+    <Compile Include="LowLevel\GlyphLoadFlags.cs" />
+    <Compile Include="LowLevel\GlyphMarshallingStruct.cs" />
+    <Compile Include="LowLevel\GlyphPackingMode.cs" />
+    <Compile Include="LowLevel\GlyphPairAdjustmentRecord.cs" />
+    <Compile Include="LowLevel\GlyphRasterModes.cs" />
+    <Compile Include="LowLevel\GlyphRenderMode.cs" />
+    <Compile Include="LowLevel\GlyphValueRecord.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935673}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935687}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935691}</Project>
+      <Name>UnityEngine.TextRenderingModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

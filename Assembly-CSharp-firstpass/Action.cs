@@ -181,6 +181,7 @@ public enum Action
 	DebugUltraTestMode,
 	DebugSlowTestMode,
 	DebugInstantBuildMode,
+	DebugToggleFastWorkers,
 	DebugExplosion,
 	DebugDiscoverAllElements,
 	DebugTriggerException,

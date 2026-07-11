@@ -47,16 +47,14 @@ public class TilePOIConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
-		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
-		simCellOccupier.doReplaceElement = true;
+		go.AddOrGet<SimCellOccupier>().doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<KAnimGridTileVisualizer>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Bunker, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Bunker, false);
 		go.AddComponent<SimTemperatureTransfer>();
 		go.GetComponent<Deconstructable>().allowDeconstruction = true;
 	}

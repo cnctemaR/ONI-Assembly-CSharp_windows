@@ -12,17 +12,15 @@ namespace NodeEditorFramework
 		public static void GetAllCanvasTypes()
 		{
 			NodeCanvasManager.TypeOfCanvases = new Dictionary<Type, NodeCanvasTypeData>();
-			IEnumerable<Assembly> enumerable = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+			foreach (Assembly assembly2 in from assembly in AppDomain.CurrentDomain.GetAssemblies()
 				where assembly.FullName.Contains("Assembly")
-				select assembly;
-			foreach (Assembly assembly2 in enumerable)
+				select assembly)
 			{
 				foreach (Type type in from T in assembly2.GetTypes()
-					where T.IsClass && !T.IsAbstract && T.GetCustomAttributes(typeof(NodeCanvasTypeAttribute), false).Length > 0
+					where T.IsClass && !T.IsAbstract && T.GetCustomAttributes(typeof(NodeCanvasTypeAttribute), false).Length != 0
 					select T)
 				{
-					object[] customAttributes = type.GetCustomAttributes(typeof(NodeCanvasTypeAttribute), false);
-					NodeCanvasTypeAttribute nodeCanvasTypeAttribute = customAttributes[0] as NodeCanvasTypeAttribute;
+					NodeCanvasTypeAttribute nodeCanvasTypeAttribute = type.GetCustomAttributes(typeof(NodeCanvasTypeAttribute), false)[0] as NodeCanvasTypeAttribute;
 					NodeCanvasManager.TypeOfCanvases.Add(type, new NodeCanvasTypeData
 					{
 						CanvasType = type,

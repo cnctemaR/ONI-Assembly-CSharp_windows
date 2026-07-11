@@ -13,19 +13,16 @@ public class GlomConfig : IEntityConfig
 		string text3 = text;
 		string text4 = global::STRINGS.CREATURES.SPECIES.GLOM.DESC;
 		float num = 25f;
-		KAnimFile anim = Assets.GetAnim("glom_kanim");
-		string text5 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text2, text3, text4, num, anim, text5, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		Trait trait = Db.Get().CreateTrait("GlomBaseTrait", text, text, null, false, null, true, true);
-		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, text, false, false, true));
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text2, text3, text4, num, Assets.GetAnim("glom_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		Db.Get().CreateTrait("GlomBaseTrait", text, text, null, false, null, true, true).Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, text, false, false, true));
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Walker, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, "GlomBaseTrait", "WalkerNavGrid1x1", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 293.15f, 393.15f, 273.15f, 423.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, "GlomBaseTrait", "WalkerNavGrid1x1", NavType.Floor, 32, 2f, "", 0, true, true, 293.15f, 393.15f, 273.15f, 423.15f);
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
@@ -38,13 +35,10 @@ public class GlomConfig : IEntityConfig
 		def.dirtyMassReleaseOnDeath = 3f;
 		def.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
 		def.emitDiseasePerKg = 1000f;
-		OvercrowdingMonitor.Def def2 = gameObject.AddOrGetDef<OvercrowdingMonitor.Def>();
-		def2.spaceRequiredPerCreature = 0;
+		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = 0;
 		gameObject.AddOrGet<LoopingSounds>();
-		LoopingSounds component2 = gameObject.GetComponent<LoopingSounds>();
-		component2.updatePosition = true;
-		DiseaseSourceVisualizer diseaseSourceVisualizer = gameObject.AddOrGet<DiseaseSourceVisualizer>();
-		diseaseSourceVisualizer.alwaysShowDisease = "SlimeLung";
+		gameObject.GetComponent<LoopingSounds>().updatePosition = true;
+		gameObject.AddOrGet<DiseaseSourceVisualizer>().alwaysShowDisease = "SlimeLung";
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_movement_short", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);

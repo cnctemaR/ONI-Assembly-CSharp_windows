@@ -2,42 +2,30 @@
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Describes how to sort objects during rendering.</para>
-	/// </summary>
 	public struct DrawRendererSortSettings
 	{
-		/// <summary>
-		///   <para>Should orthographic sorting be used?</para>
-		/// </summary>
+		[Obsolete("Use sortMode instead")]
 		public bool sortOrthographic
 		{
 			get
 			{
-				return this._sortOrthographic != 0;
+				return this.sortMode == DrawRendererSortMode.Orthographic;
 			}
 			set
 			{
-				this._sortOrthographic = ((!value) ? 0 : 1);
+				this.sortMode = ((!value) ? DrawRendererSortMode.Perspective : DrawRendererSortMode.Orthographic);
 			}
 		}
 
-		/// <summary>
-		///   <para>Camera view matrix, used to determine distances to objects.</para>
-		/// </summary>
 		public Matrix4x4 worldToCameraMatrix;
 
-		/// <summary>
-		///   <para>Camera position, used to determine distances to objects.</para>
-		/// </summary>
 		public Vector3 cameraPosition;
 
-		/// <summary>
-		///   <para>What kind of sorting to do while rendering.</para>
-		/// </summary>
+		public Vector3 cameraCustomSortAxis;
+
 		public SortFlags flags;
 
-		private int _sortOrthographic;
+		public DrawRendererSortMode sortMode;
 
 		private Matrix4x4 _previousVPMatrix;
 

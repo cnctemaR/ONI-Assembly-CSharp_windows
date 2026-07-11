@@ -35,8 +35,7 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			if (this.remainingRotMonsters > 0)
 			{
 				this.remainingRotMonsters--;
-				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), smi.transform.GetPosition(), Grid.SceneLayer.Creatures, null, 0);
-				gameObject.SetActive(true);
+				GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), smi.transform.GetPosition(), Grid.SceneLayer.Creatures, null, 0).SetActive(true);
 			}
 			smi.GoTo(this.rotten.exposed);
 		});
@@ -123,8 +122,9 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			if (Grid.Element[num].id == SimHashes.Water)
 			{
 				SimMessages.ReplaceElement(num, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Mass[num], Grid.Temperature[num], Grid.DiseaseIdx[num], Grid.DiseaseCount[num], -1);
+				return;
 			}
-			else if (Grid.Element[num].id == SimHashes.DirtyWater)
+			if (Grid.Element[num].id == SimHashes.DirtyWater)
 			{
 				int[] array = new int[4];
 				for (int i = 0; i < maxCellRange; i++)
@@ -138,16 +138,10 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 						array.Shuffle<int>();
 						foreach (int num2 in array)
 						{
-							if (Grid.GetCellDistance(num, num2) < maxCellRange - 1)
+							if (Grid.GetCellDistance(num, num2) < maxCellRange - 1 && Grid.IsValidCell(num2) && Grid.Element[num2].id == SimHashes.Water)
 							{
-								if (Grid.IsValidCell(num2))
-								{
-									if (Grid.Element[num2].id == SimHashes.Water)
-									{
-										SimMessages.ReplaceElement(num2, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Mass[num2], Grid.Temperature[num2], Grid.DiseaseIdx[num2], Grid.DiseaseCount[num2], -1);
-										return;
-									}
-								}
+								SimMessages.ReplaceElement(num2, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Mass[num2], Grid.Temperature[num2], Grid.DiseaseIdx[num2], Grid.DiseaseCount[num2], -1);
+								return;
 							}
 						}
 					}

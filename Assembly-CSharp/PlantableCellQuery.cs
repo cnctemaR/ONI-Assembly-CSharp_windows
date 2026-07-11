@@ -94,12 +94,14 @@ public class PlantableCellQuery : PathFinderQuery
 		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.plants, pooledList);
 		int num4 = 0;
-		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
+		using (List<ScenePartitionerEntry>.Enumerator enumerator = pooledList.GetEnumerator())
 		{
-			KPrefabID kprefabID = (KPrefabID)scenePartitionerEntry.obj;
-			if (!kprefabID.GetComponent<TreeBud>())
+			while (enumerator.MoveNext())
 			{
-				num4++;
+				if (!((KPrefabID)enumerator.Current.obj).GetComponent<TreeBud>())
+				{
+					num4++;
+				}
 			}
 		}
 		pooledList.Recycle();

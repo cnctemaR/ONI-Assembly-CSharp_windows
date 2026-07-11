@@ -18,15 +18,16 @@ public class ImageToggleStateThrobber : KMonoBehaviour
 
 	public void OnDisable()
 	{
-		foreach (ImageToggleState imageToggleState in this.targetImageToggleStates)
+		ImageToggleState[] array = this.targetImageToggleStates;
+		for (int i = 0; i < array.Length; i++)
 		{
-			imageToggleState.ResetColor();
+			array[i].ResetColor();
 		}
 	}
 
 	public void Update()
 	{
-		float num = ((!this.useScaledTime) ? Time.unscaledDeltaTime : Time.deltaTime);
+		float num = (this.useScaledTime ? Time.deltaTime : Time.unscaledDeltaTime);
 		this.t = (this.t + num) % this.period;
 		float num2 = Mathf.Cos(this.t / this.period * 2f * 3.1415927f) * 0.5f + 0.5f;
 		foreach (ImageToggleState imageToggleState in this.targetImageToggleStates)

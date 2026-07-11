@@ -2,17 +2,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
-	public KScreen()
-	{
-		this.screenName = base.GetType().ToString();
-		if (this.displayName == null || this.displayName == string.Empty)
-		{
-			this.displayName = this.screenName;
-		}
-	}
-
 	public string handlerName
 	{
 		get
@@ -57,6 +48,15 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 	public virtual void SetHasFocus(bool has_focus)
 	{
 		this.hasFocus = has_focus;
+	}
+
+	public KScreen()
+	{
+		this.screenName = base.GetType().ToString();
+		if (this.displayName == null || this.displayName == "")
+		{
+			this.displayName = this.screenName;
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -105,14 +105,9 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	public virtual void OnKeyDown(KButtonEvent e)
 	{
-		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed)
+		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed && !e.TryConsume(global::Action.ZoomIn))
 		{
-			if (!e.TryConsume(global::Action.ZoomIn))
-			{
-				if (e.TryConsume(global::Action.ZoomOut))
-				{
-				}
-			}
+			e.TryConsume(global::Action.ZoomOut);
 		}
 	}
 
@@ -214,8 +209,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	private void InitWidgetTransition()
 	{
-		WidgetTransition widgetTransition = base.gameObject.FindOrAddUnityComponent<WidgetTransition>();
-		widgetTransition.SetTransitionType(this.transitionType);
+		base.gameObject.FindOrAddUnityComponent<WidgetTransition>().SetTransitionType(this.transitionType);
 	}
 
 	[SerializeField]

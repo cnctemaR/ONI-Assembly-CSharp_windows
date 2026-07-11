@@ -53,7 +53,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.TubeConnectionsChanged(connections);
 		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[34], new Action<object>(this.TubeChanged));
 		base.Subscribe<TravelTubeEntrance>(-592767678, TravelTubeEntrance.OnOperationalChangedDelegate);
-		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
+		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		this.CreateNewWaitReactable();
 		Grid.RegisterTubeEntrance(Grid.PosToCell(this), Mathf.FloorToInt(this.availableJoules / this.joulesPerLaunch));
 		base.smi.StartSM();
@@ -81,29 +81,24 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			this.travelTube = null;
 		}
 		GameObject gameObject = data as GameObject;
-		if (data != null)
-		{
-			TravelTube component = gameObject.GetComponent<TravelTube>();
-			if (component != null)
-			{
-				component.Subscribe(-1041684577, new Action<object>(this.TubeConnectionsChanged));
-				this.travelTube = component;
-			}
-			else
-			{
-				this.TubeConnectionsChanged(0);
-			}
-		}
-		else
+		if (data == null)
 		{
 			this.TubeConnectionsChanged(0);
+			return;
 		}
+		TravelTube component = gameObject.GetComponent<TravelTube>();
+		if (component != null)
+		{
+			component.Subscribe(-1041684577, new Action<object>(this.TubeConnectionsChanged));
+			this.travelTube = component;
+			return;
+		}
+		this.TubeConnectionsChanged(0);
 	}
 
 	private void TubeConnectionsChanged(object data)
 	{
-		UtilityConnections utilityConnections = (UtilityConnections)data;
-		bool flag = utilityConnections == UtilityConnections.Up;
+		bool flag = (UtilityConnections)data == UtilityConnections.Up;
 		this.operational.SetFlag(TravelTubeEntrance.tubeConnected, flag);
 	}
 
@@ -238,8 +233,9 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		if (flag || !isConnected || hasLaunchPower)
 		{
 			this.connectedStatus = this.selectable.RemoveStatusItem(this.connectedStatus, false);
+			return;
 		}
-		else if (this.connectedStatus == Guid.Empty)
+		if (this.connectedStatus == Guid.Empty)
 		{
 			this.connectedStatus = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.NotEnoughPower, null);
 		}
@@ -347,8 +343,9 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			if (this.entrance == null)
 			{
 				base.Cleanup();
+				return;
 			}
-			else if (!this.entrance.ShouldWait(this.reactor))
+			if (!this.entrance.ShouldWait(this.reactor))
 			{
 				base.Cleanup();
 			}

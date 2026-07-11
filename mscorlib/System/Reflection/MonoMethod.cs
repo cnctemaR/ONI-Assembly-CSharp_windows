@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Text;
 using System.Threading;
 
 namespace System.Reflection
 {
 	[Serializable]
-	internal class MonoMethod : MethodInfo, ISerializable
+	[StructLayout(LayoutKind.Sequential)]
+	internal class MonoMethod : RuntimeMethodInfo
 	{
 		internal MonoMethod()
 		{
@@ -25,11 +26,16 @@ namespace System.Reflection
 		internal static extern string get_name(MethodBase method);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern MonoMethod get_base_definition(MonoMethod method);
+		internal static extern MonoMethod get_base_method(MonoMethod method, bool definition);
 
 		public override MethodInfo GetBaseDefinition()
 		{
-			return MonoMethod.get_base_definition(this);
+			return MonoMethod.get_base_method(this, true);
+		}
+
+		internal override MethodInfo GetBaseMethod()
+		{
+			return MonoMethod.get_base_method(this, false);
 		}
 
 		public override ParameterInfo ReturnParameter
@@ -64,46 +70,38 @@ namespace System.Reflection
 		public override ParameterInfo[] GetParameters()
 		{
 			ParameterInfo[] parametersInfo = MonoMethodInfo.GetParametersInfo(this.mhandle, this);
+			if (parametersInfo.Length == 0)
+			{
+				return parametersInfo;
+			}
 			ParameterInfo[] array = new ParameterInfo[parametersInfo.Length];
-			parametersInfo.CopyTo(array, 0);
+			Array.FastCopy(parametersInfo, 0, array, 0, parametersInfo.Length);
 			return array;
+		}
+
+		internal override ParameterInfo[] GetParametersInternal()
+		{
+			return MonoMethodInfo.GetParametersInfo(this.mhandle, this);
+		}
+
+		internal override int GetParametersCount()
+		{
+			return MonoMethodInfo.GetParametersInfo(this.mhandle, this).Length;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern object InternalInvoke(object obj, object[] parameters, out Exception exc);
 
+		[DebuggerStepThrough]
+		[DebuggerHidden]
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
 			if (binder == null)
 			{
-				binder = Binder.DefaultBinder;
+				binder = Type.DefaultBinder;
 			}
-			ParameterInfo[] parametersInfo = MonoMethodInfo.GetParametersInfo(this.mhandle, this);
-			if ((parameters == null && parametersInfo.Length != 0) || (parameters != null && parameters.Length != parametersInfo.Length))
-			{
-				throw new TargetParameterCountException("parameters do not match signature");
-			}
-			if ((invokeAttr & BindingFlags.ExactBinding) == BindingFlags.Default)
-			{
-				if (!Binder.ConvertArgs(binder, parameters, parametersInfo, culture))
-				{
-					throw new ArgumentException("failed to convert parameters");
-				}
-			}
-			else
-			{
-				for (int i = 0; i < parametersInfo.Length; i++)
-				{
-					if (parameters[i].GetType() != parametersInfo[i].ParameterType)
-					{
-						throw new ArgumentException("parameters do not match signature");
-					}
-				}
-			}
-			if (SecurityManager.SecurityEnabled)
-			{
-				SecurityManager.ReflectedLinkDemandInvoke(this);
-			}
+			ParameterInfo[] parametersInternal = this.GetParametersInternal();
+			MonoMethod.ConvertValues(binder, parameters, parametersInternal, culture, invokeAttr);
 			if (this.ContainsGenericParameters)
 			{
 				throw new InvalidOperationException("Late bound operations cannot be performed on types or methods for which ContainsGenericParameters is true.");
@@ -127,6 +125,44 @@ namespace System.Reflection
 				throw ex;
 			}
 			return obj2;
+		}
+
+		internal static void ConvertValues(Binder binder, object[] args, ParameterInfo[] pinfo, CultureInfo culture, BindingFlags invokeAttr)
+		{
+			if (args == null)
+			{
+				if (pinfo.Length == 0)
+				{
+					return;
+				}
+				throw new TargetParameterCountException();
+			}
+			else
+			{
+				if (pinfo.Length != args.Length)
+				{
+					throw new TargetParameterCountException();
+				}
+				for (int i = 0; i < args.Length; i++)
+				{
+					object obj = args[i];
+					ParameterInfo parameterInfo = pinfo[i];
+					if (obj == Type.Missing)
+					{
+						if (parameterInfo.DefaultValue == DBNull.Value)
+						{
+							throw new ArgumentException(Environment.GetResourceString("Missing parameter does not have a default value."), "parameters");
+						}
+						args[i] = parameterInfo.DefaultValue;
+					}
+					else
+					{
+						RuntimeType runtimeType = (RuntimeType)parameterInfo.ParameterType;
+						args[i] = runtimeType.CheckValue(obj, binder, culture, invokeAttr);
+					}
+				}
+				return;
+			}
 		}
 
 		public override RuntimeMethodHandle MethodHandle
@@ -197,7 +233,7 @@ namespace System.Reflection
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern DllImportAttribute GetDllImportAttribute(IntPtr mhandle);
+		internal extern void GetPInvoke(out PInvokeAttributes flags, out string entryPoint, out string dllName);
 
 		internal object[] GetPseudoCustomAttributes()
 		{
@@ -223,106 +259,40 @@ namespace System.Reflection
 			}
 			if ((methodInfo.attrs & MethodAttributes.PinvokeImpl) != MethodAttributes.PrivateScope)
 			{
-				DllImportAttribute dllImportAttribute = MonoMethod.GetDllImportAttribute(this.mhandle);
-				if ((methodInfo.iattrs & MethodImplAttributes.PreserveSig) != MethodImplAttributes.IL)
-				{
-					dllImportAttribute.PreserveSig = true;
-				}
-				array[num++] = dllImportAttribute;
+				array[num++] = DllImportAttribute.GetCustomAttribute(this);
 			}
 			return array;
 		}
 
-		private static bool ShouldPrintFullName(Type type)
-		{
-			return type.IsClass && (!type.IsPointer || (!type.GetElementType().IsPrimitive && !type.GetElementType().IsNested));
-		}
-
-		public override string ToString()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			Type returnType = this.ReturnType;
-			if (MonoMethod.ShouldPrintFullName(returnType))
-			{
-				stringBuilder.Append(returnType.ToString());
-			}
-			else
-			{
-				stringBuilder.Append(returnType.Name);
-			}
-			stringBuilder.Append(" ");
-			stringBuilder.Append(this.Name);
-			if (this.IsGenericMethod)
-			{
-				Type[] genericArguments = this.GetGenericArguments();
-				stringBuilder.Append("[");
-				for (int i = 0; i < genericArguments.Length; i++)
-				{
-					if (i > 0)
-					{
-						stringBuilder.Append(",");
-					}
-					stringBuilder.Append(genericArguments[i].Name);
-				}
-				stringBuilder.Append("]");
-			}
-			stringBuilder.Append("(");
-			ParameterInfo[] parameters = this.GetParameters();
-			for (int j = 0; j < parameters.Length; j++)
-			{
-				if (j > 0)
-				{
-					stringBuilder.Append(", ");
-				}
-				Type type = parameters[j].ParameterType;
-				bool isByRef = type.IsByRef;
-				if (isByRef)
-				{
-					type = type.GetElementType();
-				}
-				if (MonoMethod.ShouldPrintFullName(type))
-				{
-					stringBuilder.Append(type.ToString());
-				}
-				else
-				{
-					stringBuilder.Append(type.Name);
-				}
-				if (isByRef)
-				{
-					stringBuilder.Append(" ByRef");
-				}
-			}
-			if ((this.CallingConvention & CallingConventions.VarArgs) != (CallingConventions)0)
-			{
-				if (parameters.Length > 0)
-				{
-					stringBuilder.Append(", ");
-				}
-				stringBuilder.Append("...");
-			}
-			stringBuilder.Append(")");
-			return stringBuilder.ToString();
-		}
-
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			Type[] array = ((!this.IsGenericMethod || this.IsGenericMethodDefinition) ? null : this.GetGenericArguments());
-			MemberInfoSerializationHolder.Serialize(info, this.Name, this.ReflectedType, this.ToString(), MemberTypes.Method, array);
-		}
-
-		public override MethodInfo MakeGenericMethod(Type[] methodInstantiation)
+		public override MethodInfo MakeGenericMethod(params Type[] methodInstantiation)
 		{
 			if (methodInstantiation == null)
 			{
 				throw new ArgumentNullException("methodInstantiation");
 			}
-			for (int i = 0; i < methodInstantiation.Length; i++)
+			if (!this.IsGenericMethodDefinition)
 			{
-				if (methodInstantiation[i] == null)
+				throw new InvalidOperationException("not a generic method definition");
+			}
+			if (this.GetGenericArguments().Length != methodInstantiation.Length)
+			{
+				throw new ArgumentException("Incorrect length");
+			}
+			bool flag = false;
+			foreach (Type type in methodInstantiation)
+			{
+				if (type == null)
 				{
 					throw new ArgumentNullException();
 				}
+				if (!(type is RuntimeType))
+				{
+					flag = true;
+				}
+			}
+			if (flag)
+			{
+				return new MethodOnTypeBuilderInst(this, methodInstantiation);
 			}
 			MethodInfo methodInfo = this.MakeGenericMethod_impl(methodInstantiation);
 			if (methodInfo == null)
@@ -369,9 +339,10 @@ namespace System.Reflection
 			{
 				if (this.IsGenericMethod)
 				{
-					foreach (Type type in this.GetGenericArguments())
+					Type[] genericArguments = this.GetGenericArguments();
+					for (int i = 0; i < genericArguments.Length; i++)
 					{
-						if (type.ContainsGenericParameters)
+						if (genericArguments[i].ContainsGenericParameters)
 						{
 							return true;
 						}
@@ -384,6 +355,38 @@ namespace System.Reflection
 		public override MethodBody GetMethodBody()
 		{
 			return MethodBase.GetMethodBody(this.mhandle);
+		}
+
+		public override IList<CustomAttributeData> GetCustomAttributesData()
+		{
+			return CustomAttributeData.GetCustomAttributes(this);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int get_core_clr_security_level();
+
+		public override bool IsSecurityTransparent
+		{
+			get
+			{
+				return this.get_core_clr_security_level() == 0;
+			}
+		}
+
+		public override bool IsSecurityCritical
+		{
+			get
+			{
+				return this.get_core_clr_security_level() > 0;
+			}
+		}
+
+		public override bool IsSecuritySafeCritical
+		{
+			get
+			{
+				return this.get_core_clr_security_level() == 1;
+			}
 		}
 
 		internal IntPtr mhandle;

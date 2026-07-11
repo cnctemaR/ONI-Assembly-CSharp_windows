@@ -5,20 +5,6 @@ using UnityEngine;
 
 public class Notification
 {
-	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null)
-	{
-		this.titleText = title;
-		this.Group = group;
-		this.Type = type;
-		this.ToolTip = tooltip;
-		this.tooltipData = tooltip_data;
-		this.expires = expires;
-		this.Delay = delay;
-		this.customClickCallback = custom_click_callback;
-		this.customClickData = custom_click_data;
-		this.clickFocus = click_focus;
-	}
-
 	public NotificationType Type { get; set; }
 
 	public Notifier Notifier { get; set; }
@@ -53,6 +39,20 @@ public class Notification
 			this.notifierName = value;
 			this.titleText = this.ReplaceTags(this.titleText);
 		}
+	}
+
+	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null)
+	{
+		this.titleText = title;
+		this.Group = group;
+		this.Type = type;
+		this.ToolTip = tooltip;
+		this.tooltipData = tooltip_data;
+		this.expires = expires;
+		this.Delay = delay;
+		this.customClickCallback = custom_click_callback;
+		this.customClickData = custom_click_data;
+		this.clickFocus = click_focus;
 	}
 
 	public void Clear()

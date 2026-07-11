@@ -65,6 +65,7 @@ namespace UnityEngine.Timeline
 				if (value && this.m_Playable.GetPlayState<Playable>() != PlayState.Playing)
 				{
 					this.m_Playable.Play<Playable>();
+					this.SetTime(this.m_Clip.clipIn);
 				}
 				else if (!value && this.m_Playable.GetPlayState<Playable>() != PlayState.Paused)
 				{
@@ -113,6 +114,11 @@ namespace UnityEngine.Timeline
 				this.SetTime(num2);
 			}
 			this.SetDuration(this.clip.extrapolatedDuration);
+		}
+
+		public override void Reset()
+		{
+			this.SetTime(this.m_Clip.clipIn);
 		}
 
 		private TimelineClip m_Clip;

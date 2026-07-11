@@ -7,36 +7,63 @@ namespace System.Security.Cryptography.Xml
 	{
 		public CipherReference()
 		{
+			base.ReferenceType = "CipherReference";
 		}
 
 		public CipherReference(string uri)
 			: base(uri)
 		{
+			base.ReferenceType = "CipherReference";
 		}
 
-		public CipherReference(string uri, TransformChain tc)
-			: base(uri, tc)
+		public CipherReference(string uri, TransformChain transformChain)
+			: base(uri, transformChain)
 		{
+			base.ReferenceType = "CipherReference";
+		}
+
+		internal byte[] CipherValue
+		{
+			get
+			{
+				if (!base.CacheValid)
+				{
+					return null;
+				}
+				return this._cipherValue;
+			}
+			set
+			{
+				this._cipherValue = value;
+			}
 		}
 
 		public override XmlElement GetXml()
 		{
-			return this.GetXml(new XmlDocument());
+			if (base.CacheValid)
+			{
+				return this._cachedXml;
+			}
+			return this.GetXml(new XmlDocument
+			{
+				PreserveWhitespace = true
+			});
 		}
 
-		internal override XmlElement GetXml(XmlDocument document)
+		internal new XmlElement GetXml(XmlDocument document)
 		{
-			XmlElement xmlElement = document.CreateElement("CipherReference", "http://www.w3.org/2001/04/xmlenc#");
-			xmlElement.SetAttribute("URI", base.Uri);
-			if (base.TransformChain != null && base.TransformChain.Count > 0)
+			if (base.ReferenceType == null)
 			{
-				XmlElement xmlElement2 = document.CreateElement("Transforms", "http://www.w3.org/2001/04/xmlenc#");
-				foreach (object obj in base.TransformChain)
-				{
-					Transform transform = (Transform)obj;
-					xmlElement2.AppendChild(document.ImportNode(transform.GetXml(), true));
-				}
-				xmlElement.AppendChild(xmlElement2);
+				throw new CryptographicException("The Reference type must be set in an EncryptedReference object.");
+			}
+			XmlElement xmlElement = document.CreateElement(base.ReferenceType, "http://www.w3.org/2001/04/xmlenc#");
+			if (!string.IsNullOrEmpty(base.Uri))
+			{
+				xmlElement.SetAttribute("URI", base.Uri);
+			}
+			if (base.TransformChain.Count > 0)
+			{
+				xmlElement.AppendChild(base.TransformChain.GetXml(document, "http://www.w3.org/2001/04/xmlenc#"));
 			}
 			return xmlElement;
 		}
@@ -47,11 +74,18 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (value.LocalName != "CipherReference" || value.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
+			base.ReferenceType = value.LocalName;
+			base.Uri = Utils.GetAttribute(value, "URI", "http://www.w3.org/2001/04/xmlenc#");
+			XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(value.OwnerDocument.NameTable);
+			xmlNamespaceManager.AddNamespace("enc", "http://www.w3.org/2001/04/xmlenc#");
+			XmlNode xmlNode = value.SelectSingleNode("enc:Transforms", xmlNamespaceManager);
+			if (xmlNode != null)
 			{
-				throw new CryptographicException("Malformed CipherReference element.");
+				base.TransformChain.LoadXml(xmlNode as XmlElement);
 			}
-			base.LoadXml(value);
+			this._cachedXml = value;
 		}
+
+		private byte[] _cipherValue;
 	}
 }

@@ -8,16 +8,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
-	/// <summary>
-	///   <para>Scene management at run-time.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	public class SceneManager
 	{
-		/// <summary>
-		///   <para>The total number of currently loaded Scenes.</para>
-		/// </summary>
 		public static extern int sceneCount
 		{
 			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
@@ -27,23 +21,14 @@ namespace UnityEngine.SceneManagement
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of Scenes in Build Settings.</para>
-		/// </summary>
 		public static extern int sceneCountInBuildSettings
 		{
-			[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 			[NativeMethod("GetNumScenesInBuildSettings")]
+			[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Gets the currently active Scene.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The active Scene.</para>
-		/// </returns>
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetActiveScene()
 		{
@@ -52,27 +37,13 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		/// <summary>
-		///   <para>Set the Scene to be active.</para>
-		/// </summary>
-		/// <param name="scene">The Scene to be set.</param>
-		/// <returns>
-		///   <para>Returns false if the Scene is not loaded yet.</para>
-		/// </returns>
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static bool SetActiveScene(Scene scene)
 		{
 			return SceneManager.SetActiveScene_Injected(ref scene);
 		}
 
-		/// <summary>
-		///   <para>Searches all Scenes loaded for a Scene that has the given asset path.</para>
-		/// </summary>
-		/// <param name="scenePath">Path of the Scene. Should be relative to the project folder. Like: "AssetsMyScenesMyScene.unity".</param>
-		/// <returns>
-		///   <para>A reference to the Scene, if valid. If not, an invalid Scene is returned.</para>
-		/// </returns>
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetSceneByPath(string scenePath)
 		{
@@ -81,13 +52,6 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		/// <summary>
-		///   <para>Searches through the Scenes loaded for a Scene with the given name.</para>
-		/// </summary>
-		/// <param name="name">Name of Scene to find.</param>
-		/// <returns>
-		///   <para>A reference to the Scene, if valid. If not, an invalid Scene is returned.</para>
-		/// </returns>
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetSceneByName(string name)
 		{
@@ -96,13 +60,6 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		/// <summary>
-		///   <para>Get a Scene struct from a build index.</para>
-		/// </summary>
-		/// <param name="buildIndex">Build index as shown in the Build Settings window.</param>
-		/// <returns>
-		///   <para>A reference to the Scene, if valid. If not, an invalid Scene is returned.</para>
-		/// </returns>
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		public static Scene GetSceneByBuildIndex(int buildIndex)
@@ -112,15 +69,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		/// <summary>
-		///   <para>Get the Scene at index in the SceneManager's list of loaded Scenes.</para>
-		/// </summary>
-		/// <param name="index">Index of the Scene to get. Index must be greater than or equal to 0 and less than SceneManager.sceneCount.</param>
-		/// <returns>
-		///   <para>A reference to the Scene at the index specified.</para>
-		/// </returns>
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetSceneAt(int index)
 		{
 			Scene scene;
@@ -128,51 +78,41 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		/// <summary>
-		///   <para>Create an empty new Scene at runtime with the given name.</para>
-		/// </summary>
-		/// <param name="sceneName">The name of the new Scene. It cannot be empty or null, or same as the name of the existing Scenes.</param>
-		/// <returns>
-		///   <para>A reference to the new Scene that was created, or an invalid Scene if creation failed.</para>
-		/// </returns>
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		public static Scene CreateScene([NotNull] string sceneName)
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		public static Scene CreateScene([NotNull] string sceneName, CreateSceneParameters parameters)
 		{
 			Scene scene;
-			SceneManager.CreateScene_Injected(sceneName, out scene);
+			SceneManager.CreateScene_Injected(sceneName, ref parameters, out scene);
 			return scene;
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		private static bool UnloadSceneInternal(Scene scene)
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		private static bool UnloadSceneInternal(Scene scene, UnloadSceneOptions options)
 		{
-			return SceneManager.UnloadSceneInternal_Injected(ref scene);
+			return SceneManager.UnloadSceneInternal_Injected(ref scene, options);
 		}
 
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene)
+		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene, UnloadSceneOptions options)
 		{
-			return SceneManager.UnloadSceneAsyncInternal_Injected(ref scene);
+			return SceneManager.UnloadSceneAsyncInternal_Injected(ref scene, options);
 		}
 
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, bool isAdditive, bool mustCompleteNextFrame);
+		private static AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, LoadSceneParameters parameters, bool mustCompleteNextFrame)
+		{
+			return SceneManager.LoadSceneAsyncNameIndexInternal_Injected(sceneName, sceneBuildIndex, ref parameters, mustCompleteNextFrame);
+		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, out bool outSuccess);
+		private static extern AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, UnloadSceneOptions options, out bool outSuccess);
 
-		/// <summary>
-		///   <para>This will merge the source Scene into the destinationScene.</para>
-		/// </summary>
-		/// <param name="sourceScene">The Scene that will be merged into the destination Scene.</param>
-		/// <param name="destinationScene">Existing Scene to merge the source Scene into.</param>
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		public static void MergeScenes(Scene sourceScene, Scene destinationScene)
@@ -180,11 +120,6 @@ namespace UnityEngine.SceneManagement
 			SceneManager.MergeScenes_Injected(ref sourceScene, ref destinationScene);
 		}
 
-		/// <summary>
-		///   <para>Move a GameObject from its current Scene to a new Scene.</para>
-		/// </summary>
-		/// <param name="go">GameObject to move.</param>
-		/// <param name="scene">Scene to move into.</param>
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		public static void MoveGameObjectToScene([NotNull] GameObject go, Scene scene)
@@ -201,12 +136,6 @@ namespace UnityEngine.SceneManagement
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event UnityAction<Scene, Scene> activeSceneChanged;
 
-		/// <summary>
-		///   <para>Returns an array of all the Scenes currently open in the hierarchy.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Array of Scenes in the Hierarchy.</para>
-		/// </returns>
 		[Obsolete("Use SceneManager.sceneCount and SceneManager.GetSceneAt(int index) to loop the all scenes instead.")]
 		public static Scene[] GetAllScenes()
 		{
@@ -218,175 +147,140 @@ namespace UnityEngine.SceneManagement
 			return array;
 		}
 
-		/// <summary>
-		///   <para>Loads the Scene by its name or index in Build Settings.</para>
-		/// </summary>
-		/// <param name="sceneName">Name or path of the Scene to load.</param>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to load.</param>
-		/// <param name="mode">Allows you to specify whether or not to load the Scene additively. See SceneManagement.LoadSceneMode for more information about the options.</param>
+		public static Scene CreateScene(string sceneName)
+		{
+			CreateSceneParameters createSceneParameters = new CreateSceneParameters(LocalPhysicsMode.None);
+			return SceneManager.CreateScene(sceneName, createSceneParameters);
+		}
+
 		public static void LoadScene(string sceneName, [DefaultValue("LoadSceneMode.Single")] LoadSceneMode mode)
 		{
-			SceneManager.LoadSceneAsyncNameIndexInternal(sceneName, -1, mode == LoadSceneMode.Additive, true);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(mode);
+			SceneManager.LoadScene(sceneName, loadSceneParameters);
 		}
 
 		[ExcludeFromDocs]
 		public static void LoadScene(string sceneName)
 		{
-			LoadSceneMode loadSceneMode = LoadSceneMode.Single;
-			SceneManager.LoadScene(sceneName, loadSceneMode);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single);
+			SceneManager.LoadScene(sceneName, loadSceneParameters);
 		}
 
-		/// <summary>
-		///   <para>Loads the Scene by its name or index in Build Settings.</para>
-		/// </summary>
-		/// <param name="sceneName">Name or path of the Scene to load.</param>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to load.</param>
-		/// <param name="mode">Allows you to specify whether or not to load the Scene additively. See SceneManagement.LoadSceneMode for more information about the options.</param>
+		public static Scene LoadScene(string sceneName, LoadSceneParameters parameters)
+		{
+			SceneManager.LoadSceneAsyncNameIndexInternal(sceneName, -1, parameters, true);
+			return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+		}
+
 		public static void LoadScene(int sceneBuildIndex, [DefaultValue("LoadSceneMode.Single")] LoadSceneMode mode)
 		{
-			SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, mode == LoadSceneMode.Additive, true);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(mode);
+			SceneManager.LoadScene(sceneBuildIndex, loadSceneParameters);
 		}
 
 		[ExcludeFromDocs]
 		public static void LoadScene(int sceneBuildIndex)
 		{
-			LoadSceneMode loadSceneMode = LoadSceneMode.Single;
-			SceneManager.LoadScene(sceneBuildIndex, loadSceneMode);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single);
+			SceneManager.LoadScene(sceneBuildIndex, loadSceneParameters);
 		}
 
-		/// <summary>
-		///   <para>Loads the Scene asynchronously in the background.</para>
-		/// </summary>
-		/// <param name="sceneName">Name or path of the Scene to load.</param>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to load.</param>
-		/// <param name="mode">If LoadSceneMode.Single then all current Scenes will be unloaded before loading.</param>
-		/// <returns>
-		///   <para>Use the AsyncOperation to determine if the operation has completed.</para>
-		/// </returns>
+		public static Scene LoadScene(int sceneBuildIndex, LoadSceneParameters parameters)
+		{
+			SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, parameters, true);
+			return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+		}
+
 		public static AsyncOperation LoadSceneAsync(int sceneBuildIndex, [DefaultValue("LoadSceneMode.Single")] LoadSceneMode mode)
 		{
-			return SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, mode == LoadSceneMode.Additive, false);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(mode);
+			return SceneManager.LoadSceneAsync(sceneBuildIndex, loadSceneParameters);
 		}
 
 		[ExcludeFromDocs]
 		public static AsyncOperation LoadSceneAsync(int sceneBuildIndex)
 		{
-			LoadSceneMode loadSceneMode = LoadSceneMode.Single;
-			return SceneManager.LoadSceneAsync(sceneBuildIndex, loadSceneMode);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single);
+			return SceneManager.LoadSceneAsync(sceneBuildIndex, loadSceneParameters);
 		}
 
-		/// <summary>
-		///   <para>Loads the Scene asynchronously in the background.</para>
-		/// </summary>
-		/// <param name="sceneName">Name or path of the Scene to load.</param>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to load.</param>
-		/// <param name="mode">If LoadSceneMode.Single then all current Scenes will be unloaded before loading.</param>
-		/// <returns>
-		///   <para>Use the AsyncOperation to determine if the operation has completed.</para>
-		/// </returns>
+		public static AsyncOperation LoadSceneAsync(int sceneBuildIndex, LoadSceneParameters parameters)
+		{
+			return SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, parameters, false);
+		}
+
 		public static AsyncOperation LoadSceneAsync(string sceneName, [DefaultValue("LoadSceneMode.Single")] LoadSceneMode mode)
 		{
-			return SceneManager.LoadSceneAsyncNameIndexInternal(sceneName, -1, mode == LoadSceneMode.Additive, false);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(mode);
+			return SceneManager.LoadSceneAsync(sceneName, loadSceneParameters);
 		}
 
 		[ExcludeFromDocs]
 		public static AsyncOperation LoadSceneAsync(string sceneName)
 		{
-			LoadSceneMode loadSceneMode = LoadSceneMode.Single;
-			return SceneManager.LoadSceneAsync(sceneName, loadSceneMode);
+			LoadSceneParameters loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single);
+			return SceneManager.LoadSceneAsync(sceneName, loadSceneParameters);
 		}
 
-		/// <summary>
-		///   <para>Destroys all GameObjects associated with the given Scene and removes the Scene from the SceneManager.</para>
-		/// </summary>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to unload.</param>
-		/// <param name="sceneName">Name or path of the Scene to unload.</param>
-		/// <param name="scene">Scene to unload.</param>
-		/// <returns>
-		///   <para>Returns true if the Scene is unloaded.</para>
-		/// </returns>
+		public static AsyncOperation LoadSceneAsync(string sceneName, LoadSceneParameters parameters)
+		{
+			return SceneManager.LoadSceneAsyncNameIndexInternal(sceneName, -1, parameters, false);
+		}
+
 		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(Scene scene)
 		{
-			return SceneManager.UnloadSceneInternal(scene);
+			return SceneManager.UnloadSceneInternal(scene, UnloadSceneOptions.None);
 		}
 
-		/// <summary>
-		///   <para>Destroys all GameObjects associated with the given Scene and removes the Scene from the SceneManager.</para>
-		/// </summary>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to unload.</param>
-		/// <param name="sceneName">Name or path of the Scene to unload.</param>
-		/// <param name="scene">Scene to unload.</param>
-		/// <returns>
-		///   <para>Returns true if the Scene is unloaded.</para>
-		/// </returns>
 		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(int sceneBuildIndex)
 		{
 			bool flag;
-			SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, true, out flag);
+			SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, true, UnloadSceneOptions.None, out flag);
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Destroys all GameObjects associated with the given Scene and removes the Scene from the SceneManager.</para>
-		/// </summary>
-		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to unload.</param>
-		/// <param name="sceneName">Name or path of the Scene to unload.</param>
-		/// <param name="scene">Scene to unload.</param>
-		/// <returns>
-		///   <para>Returns true if the Scene is unloaded.</para>
-		/// </returns>
 		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(string sceneName)
 		{
 			bool flag;
-			SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, true, out flag);
+			SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, true, UnloadSceneOptions.None, out flag);
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Destroys all GameObjects associated with the given Scene and removes the Scene from the SceneManager.</para>
-		/// </summary>
-		/// <param name="sceneBuildIndex">Index of the Scene in BuildSettings.</param>
-		/// <param name="sceneName">Name or path of the Scene to unload.</param>
-		/// <param name="scene">Scene to unload.</param>
-		/// <returns>
-		///   <para>Use the AsyncOperation to determine if the operation has completed.</para>
-		/// </returns>
 		public static AsyncOperation UnloadSceneAsync(int sceneBuildIndex)
 		{
 			bool flag;
-			return SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, false, out flag);
+			return SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, false, UnloadSceneOptions.None, out flag);
 		}
 
-		/// <summary>
-		///   <para>Destroys all GameObjects associated with the given Scene and removes the Scene from the SceneManager.</para>
-		/// </summary>
-		/// <param name="sceneBuildIndex">Index of the Scene in BuildSettings.</param>
-		/// <param name="sceneName">Name or path of the Scene to unload.</param>
-		/// <param name="scene">Scene to unload.</param>
-		/// <returns>
-		///   <para>Use the AsyncOperation to determine if the operation has completed.</para>
-		/// </returns>
 		public static AsyncOperation UnloadSceneAsync(string sceneName)
 		{
 			bool flag;
-			return SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, false, out flag);
+			return SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, false, UnloadSceneOptions.None, out flag);
 		}
 
-		/// <summary>
-		///   <para>Destroys all GameObjects associated with the given Scene and removes the Scene from the SceneManager.</para>
-		/// </summary>
-		/// <param name="sceneBuildIndex">Index of the Scene in BuildSettings.</param>
-		/// <param name="sceneName">Name or path of the Scene to unload.</param>
-		/// <param name="scene">Scene to unload.</param>
-		/// <returns>
-		///   <para>Use the AsyncOperation to determine if the operation has completed.</para>
-		/// </returns>
 		public static AsyncOperation UnloadSceneAsync(Scene scene)
 		{
-			return SceneManager.UnloadSceneAsyncInternal(scene);
+			return SceneManager.UnloadSceneAsyncInternal(scene, UnloadSceneOptions.None);
+		}
+
+		public static AsyncOperation UnloadSceneAsync(int sceneBuildIndex, UnloadSceneOptions options)
+		{
+			bool flag;
+			return SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, false, options, out flag);
+		}
+
+		public static AsyncOperation UnloadSceneAsync(string sceneName, UnloadSceneOptions options)
+		{
+			bool flag;
+			return SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, false, options, out flag);
+		}
+
+		public static AsyncOperation UnloadSceneAsync(Scene scene, UnloadSceneOptions options)
+		{
+			return SceneManager.UnloadSceneAsyncInternal(scene, options);
 		}
 
 		[RequiredByNativeCode]
@@ -435,13 +329,16 @@ namespace UnityEngine.SceneManagement
 		private static extern void GetSceneAt_Injected(int index, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateScene_Injected(string sceneName, out Scene ret);
+		private static extern void CreateScene_Injected(string sceneName, ref CreateSceneParameters parameters, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool UnloadSceneInternal_Injected(ref Scene scene);
+		private static extern bool UnloadSceneInternal_Injected(ref Scene scene, UnloadSceneOptions options);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation UnloadSceneAsyncInternal_Injected(ref Scene scene);
+		private static extern AsyncOperation UnloadSceneAsyncInternal_Injected(ref Scene scene, UnloadSceneOptions options);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AsyncOperation LoadSceneAsyncNameIndexInternal_Injected(string sceneName, int sceneBuildIndex, ref LoadSceneParameters parameters, bool mustCompleteNextFrame);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void MergeScenes_Injected(ref Scene sourceScene, ref Scene destinationScene);

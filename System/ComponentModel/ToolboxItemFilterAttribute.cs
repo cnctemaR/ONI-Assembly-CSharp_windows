@@ -7,22 +7,25 @@ namespace System.ComponentModel
 	public sealed class ToolboxItemFilterAttribute : Attribute
 	{
 		public ToolboxItemFilterAttribute(string filterString)
+			: this(filterString, ToolboxItemFilterType.Allow)
 		{
-			this.Filter = filterString;
-			this.ItemFilterType = ToolboxItemFilterType.Allow;
 		}
 
 		public ToolboxItemFilterAttribute(string filterString, ToolboxItemFilterType filterType)
 		{
-			this.Filter = filterString;
-			this.ItemFilterType = filterType;
+			if (filterString == null)
+			{
+				filterString = string.Empty;
+			}
+			this.filterString = filterString;
+			this.filterType = filterType;
 		}
 
 		public string FilterString
 		{
 			get
 			{
-				return this.Filter;
+				return this.filterString;
 			}
 		}
 
@@ -30,7 +33,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.ItemFilterType;
+				return this.filterType;
 			}
 		}
 
@@ -38,32 +41,44 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return base.TypeId + this.Filter;
+				if (this.typeId == null)
+				{
+					this.typeId = base.GetType().FullName + this.filterString;
+				}
+				return this.typeId;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is ToolboxItemFilterAttribute && (obj == this || (((ToolboxItemFilterAttribute)obj).FilterString == this.Filter && ((ToolboxItemFilterAttribute)obj).FilterType == this.ItemFilterType));
+			if (obj == this)
+			{
+				return true;
+			}
+			ToolboxItemFilterAttribute toolboxItemFilterAttribute = obj as ToolboxItemFilterAttribute;
+			return toolboxItemFilterAttribute != null && toolboxItemFilterAttribute.FilterType.Equals(this.FilterType) && toolboxItemFilterAttribute.FilterString.Equals(this.FilterString);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.ToString().GetHashCode();
+			return this.filterString.GetHashCode();
 		}
 
 		public override bool Match(object obj)
 		{
-			return obj is ToolboxItemFilterAttribute && ((ToolboxItemFilterAttribute)obj).FilterString == this.Filter;
+			ToolboxItemFilterAttribute toolboxItemFilterAttribute = obj as ToolboxItemFilterAttribute;
+			return toolboxItemFilterAttribute != null && toolboxItemFilterAttribute.FilterString.Equals(this.FilterString);
 		}
 
 		public override string ToString()
 		{
-			return string.Format("{0},{1}", this.Filter, this.ItemFilterType);
+			return this.filterString + "," + Enum.GetName(typeof(ToolboxItemFilterType), this.filterType);
 		}
 
-		private string Filter;
+		private ToolboxItemFilterType filterType;
 
-		private ToolboxItemFilterType ItemFilterType;
+		private string filterString;
+
+		private string typeId;
 	}
 }

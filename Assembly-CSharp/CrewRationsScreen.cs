@@ -35,8 +35,7 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 		for (int i = 0; i < this.ColumnTitlesContainer.childCount; i++)
 		{
 			OverviewColumnIdentity component = this.ColumnTitlesContainer.GetChild(i).GetComponent<OverviewColumnIdentity>();
-			Toggle component2 = this.ColumnTitlesContainer.GetChild(i).GetComponent<Toggle>();
-			if (component2 == this.lastSortToggle)
+			if (this.ColumnTitlesContainer.GetChild(i).GetComponent<Toggle>() == this.lastSortToggle)
 			{
 				if (component.columnID == "name")
 				{
@@ -80,11 +79,9 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 						if (toggle.isOn)
 						{
 							toggleImage.SetActive();
+							return;
 						}
-						else
-						{
-							toggleImage.SetInactive();
-						}
+						toggleImage.SetInactive();
 					});
 				}
 				if (component.columnID == "health")
@@ -98,11 +95,9 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 						if (toggle.isOn)
 						{
 							toggleImage.SetActive();
+							return;
 						}
-						else
-						{
-							toggleImage.SetInactive();
-						}
+						toggleImage.SetInactive();
 					});
 				}
 				if (component.columnID == "stress")
@@ -116,11 +111,9 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 						if (toggle.isOn)
 						{
 							toggleImage.SetActive();
+							return;
 						}
-						else
-						{
-							toggleImage.SetInactive();
-						}
+						toggleImage.SetInactive();
 					});
 				}
 				if (component.columnID == "calories")
@@ -134,11 +127,9 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 						if (toggle.isOn)
 						{
 							toggleImage.SetActive();
+							return;
 						}
-						else
-						{
-							toggleImage.SetInactive();
-						}
+						toggleImage.SetInactive();
 					});
 				}
 			}
@@ -150,8 +141,7 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 		base.SpawnEntries();
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.Prefab_CrewEntry, this.EntriesPanelTransform.gameObject, false);
-			CrewRationsEntry component = gameObject.GetComponent<CrewRationsEntry>();
+			CrewRationsEntry component = Util.KInstantiateUI(this.Prefab_CrewEntry, this.EntriesPanelTransform.gameObject, false).GetComponent<CrewRationsEntry>();
 			component.Populate(minionIdentity);
 			this.EntryObjects.Add(component);
 		}

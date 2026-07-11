@@ -39,7 +39,7 @@ public class GlassForgeConfig : IBuildingConfig
 		glassForge.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
-		ComplexFabricatorWorkable complexFabricatorWorkable = go.AddOrGet<ComplexFabricatorWorkable>();
+		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
 		glassForge.duplicantOperated = true;
 		BuildingTemplates.CreateComplexFabricatorStorage(go, glassForge);
 		glassForge.outStorage.capacityKg = 2000f;
@@ -48,7 +48,7 @@ public class GlassForgeConfig : IBuildingConfig
 		glassForge.buildStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.RefineryStoredItemModifiers);
 		glassForge.outStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.RefineryStoredItemModifiers);
 		glassForge.outputOffset = new Vector3(1f, 0.5f);
-		complexFabricatorWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
+		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
 		glassForge.resultState = ComplexFabricator.ResultState.Melted;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.storage = glassForge.outStorage;

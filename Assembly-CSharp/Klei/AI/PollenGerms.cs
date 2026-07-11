@@ -18,11 +18,11 @@ namespace Klei.AI
 				underPopulationDeathRate = new float?(0.6666667f),
 				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(3000f),
-				maxCountPerKG = new float?(500f),
+				maxCountPerKG = new float?((float)500),
 				overPopulationHalfLife = new float?(10f),
 				minDiffusionCount = new int?(3000),
 				diffusionScale = new float?(0.001f),
-				minDiffusionInfestationTickCount = new byte?(1)
+				minDiffusionInfestationTickCount = new byte?((byte)1)
 			});
 			base.AddGrowthRule(new StateGrowthRule(Element.State.Solid)
 			{
@@ -38,7 +38,7 @@ namespace Klei.AI
 				underPopulationDeathRate = new float?(2.6666667f),
 				populationHalfLife = new float?(10f),
 				overPopulationHalfLife = new float?(10f),
-				maxCountPerKG = new float?(1000000f),
+				maxCountPerKG = new float?((float)1000000),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.015f)
 			});
@@ -52,7 +52,7 @@ namespace Klei.AI
 				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(10f),
 				overPopulationHalfLife = new float?(10f),
-				maxCountPerKG = new float?(100f),
+				maxCountPerKG = new float?((float)100),
 				diffusionScale = new float?(0.01f)
 			});
 			base.InitializeElemExposureArray(ref this.elemExposureInfo, Disease.DEFAULT_EXPOSURE_INFO);

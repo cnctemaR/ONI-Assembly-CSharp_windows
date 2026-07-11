@@ -17,7 +17,7 @@ public class DeathMessage : TargetMessage
 
 	public override string GetSound()
 	{
-		return string.Empty;
+		return "";
 	}
 
 	public override bool PlayNotificationSound()
@@ -37,8 +37,7 @@ public class DeathMessage : TargetMessage
 
 	public override string GetMessageBody()
 	{
-		string description = this.death.Get().description;
-		return description.Replace("{Target}", base.GetTarget().GetName());
+		return this.death.Get().description.Replace("{Target}", base.GetTarget().GetName());
 	}
 
 	[Serialize]

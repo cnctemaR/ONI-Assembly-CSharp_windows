@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System
 {
 	[ComVisible(true)]
-	[MonoTODO("Serialization needs tests")]
 	[Serializable]
 	public struct RuntimeFieldHandle : ISerializable
 	{
@@ -38,6 +39,7 @@ namespace System
 			}
 		}
 
+		[SecurityCritical]
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
@@ -54,7 +56,7 @@ namespace System
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public override bool Equals(object obj)
 		{
-			return obj != null && base.GetType() == obj.GetType() && this.value == ((RuntimeFieldHandle)obj).Value;
+			return obj != null && !(base.GetType() != obj.GetType()) && this.value == ((RuntimeFieldHandle)obj).Value;
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -77,6 +79,22 @@ namespace System
 		{
 			return !left.Equals(right);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetValueInternal(FieldInfo fi, object obj, object value);
+
+		internal static void SetValue(RtFieldInfo field, object obj, object value, RuntimeType fieldType, FieldAttributes fieldAttr, RuntimeType declaringType, ref bool domainInitialized)
+		{
+			RuntimeFieldHandle.SetValueInternal(field, obj, value);
+		}
+
+		internal unsafe static object GetValueDirect(RtFieldInfo field, RuntimeType fieldType, void* pTypedRef, RuntimeType contextType)
+		{
+			throw new NotImplementedException("GetValueDirect");
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern void SetValueDirect(RtFieldInfo field, RuntimeType fieldType, void* pTypedRef, object value, RuntimeType contextType);
 
 		private IntPtr value;
 	}

@@ -14,18 +14,16 @@ namespace System.Security.Cryptography
 			}
 			if (iv != null && iv.Length != algo.BlockSize >> 3)
 			{
-				string text = Locale.GetText("IV length is invalid ({0} bytes), it should be {1} bytes long.", new object[]
+				throw new CryptographicException(Locale.GetText("IV length is invalid ({0} bytes), it should be {1} bytes long.", new object[]
 				{
 					iv.Length,
 					algo.BlockSize >> 3
-				});
-				throw new CryptographicException(text);
+				}));
 			}
 			int num = key.Length;
 			if (num != 16 && num != 24 && num != 32)
 			{
-				string text2 = Locale.GetText("Key is too small ({0} bytes), it should be {1}, {2} or {3} bytes long.", new object[] { num, 16, 24, 32 });
-				throw new CryptographicException(text2);
+				throw new CryptographicException(Locale.GetText("Key is too small ({0} bytes), it should be {1}, {2} or {3} bytes long.", new object[] { num, 16, 24, 32 }));
 			}
 			num <<= 3;
 			this.Nk = num >> 5;
@@ -83,7 +81,7 @@ namespace System.Security.Cryptography
 				}
 				for (int m = 4; m < array.Length - 4; m++)
 				{
-					array[m] = AesTransform.iT0[(int)AesTransform.SBox[(int)((UIntPtr)(array[m] >> 24))]] ^ AesTransform.iT1[(int)AesTransform.SBox[(int)((byte)(array[m] >> 16))]] ^ AesTransform.iT2[(int)AesTransform.SBox[(int)((byte)(array[m] >> 8))]] ^ AesTransform.iT3[(int)AesTransform.SBox[(int)((byte)array[m])]];
+					array[m] = AesTransform.iT0[(int)AesTransform.SBox[(int)(array[m] >> 24)]] ^ AesTransform.iT1[(int)AesTransform.SBox[(int)((byte)(array[m] >> 16))]] ^ AesTransform.iT2[(int)AesTransform.SBox[(int)((byte)(array[m] >> 8))]] ^ AesTransform.iT3[(int)AesTransform.SBox[(int)((byte)array[m])]];
 				}
 			}
 			this.expandedKey = array;
@@ -99,23 +97,21 @@ namespace System.Security.Cryptography
 			if (this.encrypt)
 			{
 				this.Encrypt128(input, output, this.expandedKey);
+				return;
 			}
-			else
-			{
-				this.Decrypt128(input, output, this.expandedKey);
-			}
+			this.Decrypt128(input, output, this.expandedKey);
 		}
 
 		private uint SubByte(uint a)
 		{
 			uint num = 255U & a;
-			uint num2 = (uint)AesTransform.SBox[(int)((UIntPtr)num)];
+			uint num2 = (uint)AesTransform.SBox[(int)num];
 			num = 255U & (a >> 8);
-			num2 |= (uint)((uint)AesTransform.SBox[(int)((UIntPtr)num)] << 8);
+			uint num3 = num2 | (uint)((uint)AesTransform.SBox[(int)num] << 8);
 			num = 255U & (a >> 16);
-			num2 |= (uint)((uint)AesTransform.SBox[(int)((UIntPtr)num)] << 16);
+			uint num4 = num3 | (uint)((uint)AesTransform.SBox[(int)num] << 16);
 			num = 255U & (a >> 24);
-			return num2 | (uint)((uint)AesTransform.SBox[(int)((UIntPtr)num)] << 24);
+			return num4 | (uint)((uint)AesTransform.SBox[(int)num] << 24);
 		}
 
 		private void Encrypt128(byte[] indata, byte[] outdata, uint[] ekey)
@@ -125,79 +121,79 @@ namespace System.Security.Cryptography
 			uint num3 = (uint)((((int)indata[4] << 24) | ((int)indata[5] << 16) | ((int)indata[6] << 8) | (int)indata[7]) ^ (int)ekey[1]);
 			uint num4 = (uint)((((int)indata[8] << 24) | ((int)indata[9] << 16) | ((int)indata[10] << 8) | (int)indata[11]) ^ (int)ekey[2]);
 			uint num5 = (uint)((((int)indata[12] << 24) | ((int)indata[13] << 16) | ((int)indata[14] << 8) | (int)indata[15]) ^ (int)ekey[3]);
-			uint num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[4];
-			uint num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[5];
-			uint num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[6];
-			uint num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[7];
-			num2 = AesTransform.T0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[8];
-			num3 = AesTransform.T0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[9];
-			num4 = AesTransform.T0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[10];
-			num5 = AesTransform.T0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[11];
-			num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[12];
-			num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[13];
-			num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[14];
-			num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[15];
-			num2 = AesTransform.T0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[16];
-			num3 = AesTransform.T0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[17];
-			num4 = AesTransform.T0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[18];
-			num5 = AesTransform.T0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[19];
-			num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[20];
-			num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[21];
-			num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[22];
-			num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[23];
-			num2 = AesTransform.T0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[24];
-			num3 = AesTransform.T0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[25];
-			num4 = AesTransform.T0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[26];
-			num5 = AesTransform.T0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[27];
-			num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[28];
-			num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[29];
-			num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[30];
-			num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[31];
-			num2 = AesTransform.T0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[32];
-			num3 = AesTransform.T0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[33];
-			num4 = AesTransform.T0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[34];
-			num5 = AesTransform.T0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[35];
-			num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[36];
-			num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[37];
-			num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[38];
-			num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[39];
+			uint num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[4];
+			uint num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[5];
+			uint num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[6];
+			uint num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[7];
+			num2 = AesTransform.T0[(int)(num6 >> 24)] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[8];
+			num3 = AesTransform.T0[(int)(num7 >> 24)] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[9];
+			num4 = AesTransform.T0[(int)(num8 >> 24)] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[10];
+			num5 = AesTransform.T0[(int)(num9 >> 24)] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[11];
+			num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[12];
+			num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[13];
+			num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[14];
+			num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[15];
+			num2 = AesTransform.T0[(int)(num6 >> 24)] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[16];
+			num3 = AesTransform.T0[(int)(num7 >> 24)] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[17];
+			num4 = AesTransform.T0[(int)(num8 >> 24)] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[18];
+			num5 = AesTransform.T0[(int)(num9 >> 24)] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[19];
+			num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[20];
+			num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[21];
+			num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[22];
+			num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[23];
+			num2 = AesTransform.T0[(int)(num6 >> 24)] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[24];
+			num3 = AesTransform.T0[(int)(num7 >> 24)] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[25];
+			num4 = AesTransform.T0[(int)(num8 >> 24)] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[26];
+			num5 = AesTransform.T0[(int)(num9 >> 24)] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[27];
+			num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[28];
+			num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[29];
+			num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[30];
+			num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[31];
+			num2 = AesTransform.T0[(int)(num6 >> 24)] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[32];
+			num3 = AesTransform.T0[(int)(num7 >> 24)] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[33];
+			num4 = AesTransform.T0[(int)(num8 >> 24)] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[34];
+			num5 = AesTransform.T0[(int)(num9 >> 24)] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[35];
+			num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[36];
+			num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[37];
+			num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[38];
+			num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[39];
 			if (this.Nr > 10)
 			{
-				num2 = AesTransform.T0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[40];
-				num3 = AesTransform.T0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[41];
-				num4 = AesTransform.T0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[42];
-				num5 = AesTransform.T0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[43];
-				num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[44];
-				num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[45];
-				num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[46];
-				num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[47];
+				num2 = AesTransform.T0[(int)(num6 >> 24)] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[40];
+				num3 = AesTransform.T0[(int)(num7 >> 24)] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[41];
+				num4 = AesTransform.T0[(int)(num8 >> 24)] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[42];
+				num5 = AesTransform.T0[(int)(num9 >> 24)] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[43];
+				num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[44];
+				num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[45];
+				num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[46];
+				num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[47];
 				num = 48;
 				if (this.Nr > 12)
 				{
-					num2 = AesTransform.T0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[48];
-					num3 = AesTransform.T0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[49];
-					num4 = AesTransform.T0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[50];
-					num5 = AesTransform.T0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[51];
-					num6 = AesTransform.T0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[52];
-					num7 = AesTransform.T0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[53];
-					num8 = AesTransform.T0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[54];
-					num9 = AesTransform.T0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[55];
+					num2 = AesTransform.T0[(int)(num6 >> 24)] ^ AesTransform.T1[(int)((byte)(num7 >> 16))] ^ AesTransform.T2[(int)((byte)(num8 >> 8))] ^ AesTransform.T3[(int)((byte)num9)] ^ ekey[48];
+					num3 = AesTransform.T0[(int)(num7 >> 24)] ^ AesTransform.T1[(int)((byte)(num8 >> 16))] ^ AesTransform.T2[(int)((byte)(num9 >> 8))] ^ AesTransform.T3[(int)((byte)num6)] ^ ekey[49];
+					num4 = AesTransform.T0[(int)(num8 >> 24)] ^ AesTransform.T1[(int)((byte)(num9 >> 16))] ^ AesTransform.T2[(int)((byte)(num6 >> 8))] ^ AesTransform.T3[(int)((byte)num7)] ^ ekey[50];
+					num5 = AesTransform.T0[(int)(num9 >> 24)] ^ AesTransform.T1[(int)((byte)(num6 >> 16))] ^ AesTransform.T2[(int)((byte)(num7 >> 8))] ^ AesTransform.T3[(int)((byte)num8)] ^ ekey[51];
+					num6 = AesTransform.T0[(int)(num2 >> 24)] ^ AesTransform.T1[(int)((byte)(num3 >> 16))] ^ AesTransform.T2[(int)((byte)(num4 >> 8))] ^ AesTransform.T3[(int)((byte)num5)] ^ ekey[52];
+					num7 = AesTransform.T0[(int)(num3 >> 24)] ^ AesTransform.T1[(int)((byte)(num4 >> 16))] ^ AesTransform.T2[(int)((byte)(num5 >> 8))] ^ AesTransform.T3[(int)((byte)num2)] ^ ekey[53];
+					num8 = AesTransform.T0[(int)(num4 >> 24)] ^ AesTransform.T1[(int)((byte)(num5 >> 16))] ^ AesTransform.T2[(int)((byte)(num2 >> 8))] ^ AesTransform.T3[(int)((byte)num3)] ^ ekey[54];
+					num9 = AesTransform.T0[(int)(num5 >> 24)] ^ AesTransform.T1[(int)((byte)(num2 >> 16))] ^ AesTransform.T2[(int)((byte)(num3 >> 8))] ^ AesTransform.T3[(int)((byte)num4)] ^ ekey[55];
 					num = 56;
 				}
 			}
-			outdata[0] = AesTransform.SBox[(int)((UIntPtr)(num6 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[0] = AesTransform.SBox[(int)(num6 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[1] = AesTransform.SBox[(int)((byte)(num7 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[2] = AesTransform.SBox[(int)((byte)(num8 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[3] = AesTransform.SBox[(int)((byte)num9)] ^ (byte)ekey[num++];
-			outdata[4] = AesTransform.SBox[(int)((UIntPtr)(num7 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[4] = AesTransform.SBox[(int)(num7 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[5] = AesTransform.SBox[(int)((byte)(num8 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[6] = AesTransform.SBox[(int)((byte)(num9 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[7] = AesTransform.SBox[(int)((byte)num6)] ^ (byte)ekey[num++];
-			outdata[8] = AesTransform.SBox[(int)((UIntPtr)(num8 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[8] = AesTransform.SBox[(int)(num8 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[9] = AesTransform.SBox[(int)((byte)(num9 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[10] = AesTransform.SBox[(int)((byte)(num6 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[11] = AesTransform.SBox[(int)((byte)num7)] ^ (byte)ekey[num++];
-			outdata[12] = AesTransform.SBox[(int)((UIntPtr)(num9 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[12] = AesTransform.SBox[(int)(num9 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[13] = AesTransform.SBox[(int)((byte)(num6 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[14] = AesTransform.SBox[(int)((byte)(num7 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[15] = AesTransform.SBox[(int)((byte)num8)] ^ (byte)ekey[num++];
@@ -210,87 +206,87 @@ namespace System.Security.Cryptography
 			uint num3 = (uint)((((int)indata[4] << 24) | ((int)indata[5] << 16) | ((int)indata[6] << 8) | (int)indata[7]) ^ (int)ekey[1]);
 			uint num4 = (uint)((((int)indata[8] << 24) | ((int)indata[9] << 16) | ((int)indata[10] << 8) | (int)indata[11]) ^ (int)ekey[2]);
 			uint num5 = (uint)((((int)indata[12] << 24) | ((int)indata[13] << 16) | ((int)indata[14] << 8) | (int)indata[15]) ^ (int)ekey[3]);
-			uint num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[4];
-			uint num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[5];
-			uint num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[6];
-			uint num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[7];
-			num2 = AesTransform.iT0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[8];
-			num3 = AesTransform.iT0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[9];
-			num4 = AesTransform.iT0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[10];
-			num5 = AesTransform.iT0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[11];
-			num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[12];
-			num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[13];
-			num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[14];
-			num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[15];
-			num2 = AesTransform.iT0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[16];
-			num3 = AesTransform.iT0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[17];
-			num4 = AesTransform.iT0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[18];
-			num5 = AesTransform.iT0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[19];
-			num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[20];
-			num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[21];
-			num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[22];
-			num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[23];
-			num2 = AesTransform.iT0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[24];
-			num3 = AesTransform.iT0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[25];
-			num4 = AesTransform.iT0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[26];
-			num5 = AesTransform.iT0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[27];
-			num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[28];
-			num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[29];
-			num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[30];
-			num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[31];
-			num2 = AesTransform.iT0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[32];
-			num3 = AesTransform.iT0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[33];
-			num4 = AesTransform.iT0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[34];
-			num5 = AesTransform.iT0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[35];
-			num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[36];
-			num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[37];
-			num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[38];
-			num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[39];
+			uint num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[4];
+			uint num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[5];
+			uint num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[6];
+			uint num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[7];
+			num2 = AesTransform.iT0[(int)(num6 >> 24)] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[8];
+			num3 = AesTransform.iT0[(int)(num7 >> 24)] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[9];
+			num4 = AesTransform.iT0[(int)(num8 >> 24)] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[10];
+			num5 = AesTransform.iT0[(int)(num9 >> 24)] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[11];
+			num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[12];
+			num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[13];
+			num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[14];
+			num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[15];
+			num2 = AesTransform.iT0[(int)(num6 >> 24)] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[16];
+			num3 = AesTransform.iT0[(int)(num7 >> 24)] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[17];
+			num4 = AesTransform.iT0[(int)(num8 >> 24)] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[18];
+			num5 = AesTransform.iT0[(int)(num9 >> 24)] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[19];
+			num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[20];
+			num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[21];
+			num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[22];
+			num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[23];
+			num2 = AesTransform.iT0[(int)(num6 >> 24)] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[24];
+			num3 = AesTransform.iT0[(int)(num7 >> 24)] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[25];
+			num4 = AesTransform.iT0[(int)(num8 >> 24)] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[26];
+			num5 = AesTransform.iT0[(int)(num9 >> 24)] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[27];
+			num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[28];
+			num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[29];
+			num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[30];
+			num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[31];
+			num2 = AesTransform.iT0[(int)(num6 >> 24)] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[32];
+			num3 = AesTransform.iT0[(int)(num7 >> 24)] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[33];
+			num4 = AesTransform.iT0[(int)(num8 >> 24)] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[34];
+			num5 = AesTransform.iT0[(int)(num9 >> 24)] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[35];
+			num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[36];
+			num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[37];
+			num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[38];
+			num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[39];
 			if (this.Nr > 10)
 			{
-				num2 = AesTransform.iT0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[40];
-				num3 = AesTransform.iT0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[41];
-				num4 = AesTransform.iT0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[42];
-				num5 = AesTransform.iT0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[43];
-				num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[44];
-				num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[45];
-				num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[46];
-				num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[47];
+				num2 = AesTransform.iT0[(int)(num6 >> 24)] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[40];
+				num3 = AesTransform.iT0[(int)(num7 >> 24)] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[41];
+				num4 = AesTransform.iT0[(int)(num8 >> 24)] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[42];
+				num5 = AesTransform.iT0[(int)(num9 >> 24)] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[43];
+				num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[44];
+				num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[45];
+				num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[46];
+				num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[47];
 				num = 48;
 				if (this.Nr > 12)
 				{
-					num2 = AesTransform.iT0[(int)((UIntPtr)(num6 >> 24))] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[48];
-					num3 = AesTransform.iT0[(int)((UIntPtr)(num7 >> 24))] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[49];
-					num4 = AesTransform.iT0[(int)((UIntPtr)(num8 >> 24))] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[50];
-					num5 = AesTransform.iT0[(int)((UIntPtr)(num9 >> 24))] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[51];
-					num6 = AesTransform.iT0[(int)((UIntPtr)(num2 >> 24))] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[52];
-					num7 = AesTransform.iT0[(int)((UIntPtr)(num3 >> 24))] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[53];
-					num8 = AesTransform.iT0[(int)((UIntPtr)(num4 >> 24))] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[54];
-					num9 = AesTransform.iT0[(int)((UIntPtr)(num5 >> 24))] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[55];
+					num2 = AesTransform.iT0[(int)(num6 >> 24)] ^ AesTransform.iT1[(int)((byte)(num9 >> 16))] ^ AesTransform.iT2[(int)((byte)(num8 >> 8))] ^ AesTransform.iT3[(int)((byte)num7)] ^ ekey[48];
+					num3 = AesTransform.iT0[(int)(num7 >> 24)] ^ AesTransform.iT1[(int)((byte)(num6 >> 16))] ^ AesTransform.iT2[(int)((byte)(num9 >> 8))] ^ AesTransform.iT3[(int)((byte)num8)] ^ ekey[49];
+					num4 = AesTransform.iT0[(int)(num8 >> 24)] ^ AesTransform.iT1[(int)((byte)(num7 >> 16))] ^ AesTransform.iT2[(int)((byte)(num6 >> 8))] ^ AesTransform.iT3[(int)((byte)num9)] ^ ekey[50];
+					num5 = AesTransform.iT0[(int)(num9 >> 24)] ^ AesTransform.iT1[(int)((byte)(num8 >> 16))] ^ AesTransform.iT2[(int)((byte)(num7 >> 8))] ^ AesTransform.iT3[(int)((byte)num6)] ^ ekey[51];
+					num6 = AesTransform.iT0[(int)(num2 >> 24)] ^ AesTransform.iT1[(int)((byte)(num5 >> 16))] ^ AesTransform.iT2[(int)((byte)(num4 >> 8))] ^ AesTransform.iT3[(int)((byte)num3)] ^ ekey[52];
+					num7 = AesTransform.iT0[(int)(num3 >> 24)] ^ AesTransform.iT1[(int)((byte)(num2 >> 16))] ^ AesTransform.iT2[(int)((byte)(num5 >> 8))] ^ AesTransform.iT3[(int)((byte)num4)] ^ ekey[53];
+					num8 = AesTransform.iT0[(int)(num4 >> 24)] ^ AesTransform.iT1[(int)((byte)(num3 >> 16))] ^ AesTransform.iT2[(int)((byte)(num2 >> 8))] ^ AesTransform.iT3[(int)((byte)num5)] ^ ekey[54];
+					num9 = AesTransform.iT0[(int)(num5 >> 24)] ^ AesTransform.iT1[(int)((byte)(num4 >> 16))] ^ AesTransform.iT2[(int)((byte)(num3 >> 8))] ^ AesTransform.iT3[(int)((byte)num2)] ^ ekey[55];
 					num = 56;
 				}
 			}
-			outdata[0] = AesTransform.iSBox[(int)((UIntPtr)(num6 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[0] = AesTransform.iSBox[(int)(num6 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[1] = AesTransform.iSBox[(int)((byte)(num9 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[2] = AesTransform.iSBox[(int)((byte)(num8 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[3] = AesTransform.iSBox[(int)((byte)num7)] ^ (byte)ekey[num++];
-			outdata[4] = AesTransform.iSBox[(int)((UIntPtr)(num7 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[4] = AesTransform.iSBox[(int)(num7 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[5] = AesTransform.iSBox[(int)((byte)(num6 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[6] = AesTransform.iSBox[(int)((byte)(num9 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[7] = AesTransform.iSBox[(int)((byte)num8)] ^ (byte)ekey[num++];
-			outdata[8] = AesTransform.iSBox[(int)((UIntPtr)(num8 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[8] = AesTransform.iSBox[(int)(num8 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[9] = AesTransform.iSBox[(int)((byte)(num7 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[10] = AesTransform.iSBox[(int)((byte)(num6 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[11] = AesTransform.iSBox[(int)((byte)num9)] ^ (byte)ekey[num++];
-			outdata[12] = AesTransform.iSBox[(int)((UIntPtr)(num9 >> 24))] ^ (byte)(ekey[num] >> 24);
+			outdata[12] = AesTransform.iSBox[(int)(num9 >> 24)] ^ (byte)(ekey[num] >> 24);
 			outdata[13] = AesTransform.iSBox[(int)((byte)(num8 >> 16))] ^ (byte)(ekey[num] >> 16);
 			outdata[14] = AesTransform.iSBox[(int)((byte)(num7 >> 8))] ^ (byte)(ekey[num] >> 8);
 			outdata[15] = AesTransform.iSBox[(int)((byte)num6)] ^ (byte)ekey[num++];
 		}
 
-		private const int Nb = 4;
-
 		private uint[] expandedKey;
+
+		private const int Nb = 4;
 
 		private int Nk;
 

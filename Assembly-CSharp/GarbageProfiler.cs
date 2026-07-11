@@ -179,12 +179,12 @@ public static class GarbageProfiler
 				}
 			}
 		}
-		MemorySnapshot.FieldCount[] array4 = new MemorySnapshot.FieldCount[memorySnapshot.fieldCounts.Count];
-		memorySnapshot.fieldCounts.Values.CopyTo(array4, 0);
-		Array.Sort<MemorySnapshot.FieldCount>(array4, 0, array4.Length, new GarbageProfiler.FieldCountComparer());
+		MemorySnapshot.FieldCount[] array3 = new MemorySnapshot.FieldCount[memorySnapshot.fieldCounts.Count];
+		memorySnapshot.fieldCounts.Values.CopyTo(array3, 0);
+		Array.Sort<MemorySnapshot.FieldCount>(array3, 0, array3.Length, new GarbageProfiler.FieldCountComparer());
 		using (StreamWriter streamWriter3 = new StreamWriter(GarbageProfiler.GetFileName("garbage_fields")))
 		{
-			foreach (MemorySnapshot.FieldCount fieldCount in array4)
+			foreach (MemorySnapshot.FieldCount fieldCount in array3)
 			{
 				int num3 = fieldCount.count;
 				if (GarbageProfiler.previousSnapshot != null)
@@ -239,87 +239,79 @@ public static class GarbageProfiler
 				Assembly.GetAssembly(typeof(Game)),
 				Assembly.GetAssembly(typeof(App))
 			};
-			foreach (Assembly assembly in array3)
+			for (int i = 0; i < array3.Length; i++)
 			{
-				foreach (Type type in assembly.GetTypes())
+				foreach (Type type in array3[i].GetTypes())
 				{
 					if (type == GarbageProfiler.DEBUG_STATIC_TYPE)
 					{
 						Debugger.Break();
 					}
-					if (!type.IsAbstract && !type.IsGenericType)
+					if (!type.IsAbstract && !type.IsGenericType && !type.ToString().StartsWith("STRINGS."))
 					{
-						string text = type.ToString();
-						if (!text.StartsWith("STRINGS."))
+						foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
 						{
-							foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+							if (fieldInfo.IsStatic && !fieldInfo.IsInitOnly && !fieldInfo.IsLiteral && !fieldInfo.Name.Contains("$cache"))
 							{
-								if (fieldInfo.IsStatic && !fieldInfo.IsInitOnly && !fieldInfo.IsLiteral)
+								Type fieldType = fieldInfo.FieldType;
+								if (!fieldType.IsPointer && !Helper.IsPOD(fieldType) && Array.IndexOf<Type>(array, fieldType) < 0)
 								{
-									if (!fieldInfo.Name.Contains("$cache"))
+									if (typeof(Array).IsAssignableFrom(fieldType))
 									{
-										Type fieldType = fieldInfo.FieldType;
-										if (!fieldType.IsPointer && !Helper.IsPOD(fieldType) && Array.IndexOf<Type>(array, fieldType) < 0)
+										Type elementType = fieldType.GetElementType();
+										if (elementType.IsPointer || Helper.IsPOD(elementType) || Array.IndexOf<Type>(array, elementType) >= 0)
 										{
-											if (typeof(Array).IsAssignableFrom(fieldType))
-											{
-												Type elementType = fieldType.GetElementType();
-												if (elementType.IsPointer || Helper.IsPOD(elementType) || Array.IndexOf<Type>(array, elementType) >= 0)
-												{
-													goto IL_03BD;
-												}
-											}
-											if (fieldType.IsGenericType)
-											{
-												Type genericTypeDefinition = fieldType.GetGenericTypeDefinition();
-												Type[] genericArguments = fieldType.GetGenericArguments();
-												bool flag = false;
-												foreach (Type type2 in array2)
-												{
-													if (genericTypeDefinition == type2)
-													{
-														bool flag2 = true;
-														foreach (Type type3 in genericArguments)
-														{
-															if (!Helper.IsPOD(type3) && Array.IndexOf<Type>(array, type3) < 0)
-															{
-																flag2 = false;
-																break;
-															}
-														}
-														if (flag2)
-														{
-															flag = true;
-															break;
-														}
-													}
-												}
-												if (flag)
-												{
-													goto IL_03BD;
-												}
-											}
-											object value = fieldInfo.GetValue(null);
-											if (value != null)
-											{
-												string text2;
-												if (typeof(ICollection).IsAssignableFrom(fieldType))
-												{
-													ICollection collection = value as ICollection;
-													int count = collection.Count;
-													text2 = string.Format("\"{0}.{1}\",\"{2}\",{3}", new object[] { type, fieldInfo.Name, fieldType, count });
-												}
-												else
-												{
-													text2 = string.Format("\"{0}.{1}\",\"{2}\"", type, fieldInfo.Name, fieldType);
-												}
-												streamWriter.WriteLine(text2);
-											}
+											goto IL_035F;
 										}
 									}
+									if (fieldType.IsGenericType)
+									{
+										Type genericTypeDefinition = fieldType.GetGenericTypeDefinition();
+										Type[] genericArguments = fieldType.GetGenericArguments();
+										bool flag = false;
+										foreach (Type type2 in array2)
+										{
+											if (genericTypeDefinition == type2)
+											{
+												bool flag2 = true;
+												foreach (Type type3 in genericArguments)
+												{
+													if (!Helper.IsPOD(type3) && Array.IndexOf<Type>(array, type3) < 0)
+													{
+														flag2 = false;
+														break;
+													}
+												}
+												if (flag2)
+												{
+													flag = true;
+													break;
+												}
+											}
+										}
+										if (flag)
+										{
+											goto IL_035F;
+										}
+									}
+									object value = fieldInfo.GetValue(null);
+									if (value != null)
+									{
+										string text;
+										if (typeof(ICollection).IsAssignableFrom(fieldType))
+										{
+											int count = (value as ICollection).Count;
+											text = string.Format("\"{0}.{1}\",\"{2}\",{3}", new object[] { type, fieldInfo.Name, fieldType, count });
+										}
+										else
+										{
+											text = string.Format("\"{0}.{1}\",\"{2}\"", type, fieldInfo.Name, fieldType);
+										}
+										streamWriter.WriteLine(text);
+									}
 								}
-								IL_03BD:;
 							}
+							IL_035F:;
 						}
 					}
 				}
@@ -332,9 +324,9 @@ public static class GarbageProfiler
 
 	private static string ROOT_MEMORY_DUMP_PATH = "./memory/";
 
-	private static string filename_suffix;
+	private static string filename_suffix = null;
 
-	private static Type DEBUG_STATIC_TYPE;
+	private static Type DEBUG_STATIC_TYPE = null;
 
 	private class InstanceCountComparer : IComparer<MemorySnapshot.TypeData>
 	{

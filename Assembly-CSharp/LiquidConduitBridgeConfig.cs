@@ -40,8 +40,7 @@ public class LiquidConduitBridgeConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
-		ConduitBridge conduitBridge = go.AddOrGet<ConduitBridge>();
-		conduitBridge.type = ConduitType.Liquid;
+		go.AddOrGet<ConduitBridge>().type = ConduitType.Liquid;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

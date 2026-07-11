@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
-using Mono.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
@@ -24,27 +23,20 @@ namespace System.Security.Cryptography.Xml
 
 		public XmlDsigExcC14NTransform(bool includeComments, string inclusiveNamespacesPrefixList)
 		{
-			if (includeComments)
-			{
-				base.Algorithm = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
-			}
-			else
-			{
-				base.Algorithm = "http://www.w3.org/2001/10/xml-exc-c14n#";
-			}
-			this.inclusiveNamespacesPrefixList = inclusiveNamespacesPrefixList;
-			this.canonicalizer = new XmlCanonicalizer(includeComments, true, base.PropagatedNamespaces);
+			this._includeComments = includeComments;
+			this._inclusiveNamespacesPrefixList = inclusiveNamespacesPrefixList;
+			base.Algorithm = (includeComments ? "http://www.w3.org/2001/10/xml-exc-c14n#WithComments" : "http://www.w3.org/2001/10/xml-exc-c14n#");
 		}
 
 		public string InclusiveNamespacesPrefixList
 		{
 			get
 			{
-				return this.inclusiveNamespacesPrefixList;
+				return this._inclusiveNamespacesPrefixList;
 			}
 			set
 			{
-				this.inclusiveNamespacesPrefixList = value;
+				this._inclusiveNamespacesPrefixList = value;
 			}
 		}
 
@@ -52,14 +44,7 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				if (this.input == null)
-				{
-					this.input = new Type[3];
-					this.input[0] = typeof(Stream);
-					this.input[1] = typeof(XmlDocument);
-					this.input[2] = typeof(XmlNodeList);
-				}
-				return this.input;
+				return this._inputTypes;
 			}
 		}
 
@@ -67,79 +52,97 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				if (this.output == null)
-				{
-					this.output = new Type[1];
-					this.output[0] = typeof(Stream);
-				}
-				return this.output;
+				return this._outputTypes;
 			}
-		}
-
-		protected override XmlNodeList GetInnerXml()
-		{
-			return null;
-		}
-
-		public override byte[] GetDigestedOutput(HashAlgorithm hash)
-		{
-			return hash.ComputeHash((Stream)this.GetOutput());
-		}
-
-		public override object GetOutput()
-		{
-			return this.s;
-		}
-
-		public override object GetOutput(Type type)
-		{
-			if (type == typeof(Stream))
-			{
-				return this.GetOutput();
-			}
-			throw new ArgumentException("type");
 		}
 
 		public override void LoadInnerXml(XmlNodeList nodeList)
 		{
+			if (nodeList != null)
+			{
+				foreach (object obj in nodeList)
+				{
+					XmlElement xmlElement = ((XmlNode)obj) as XmlElement;
+					if (xmlElement != null && xmlElement.LocalName.Equals("InclusiveNamespaces") && xmlElement.NamespaceURI.Equals("http://www.w3.org/2001/10/xml-exc-c14n#") && Utils.HasAttribute(xmlElement, "PrefixList", "http://www.w3.org/2000/09/xmldsig#"))
+					{
+						this.InclusiveNamespacesPrefixList = Utils.GetAttribute(xmlElement, "PrefixList", "http://www.w3.org/2000/09/xmldsig#");
+						break;
+					}
+				}
+			}
 		}
 
 		public override void LoadInput(object obj)
 		{
-			this.canonicalizer.InclusiveNamespacesPrefixList = this.InclusiveNamespacesPrefixList;
-			Stream stream = obj as Stream;
-			if (stream != null)
+			XmlResolver xmlResolver = (base.ResolverSet ? this._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), base.BaseURI));
+			if (obj is Stream)
 			{
-				XmlDocument xmlDocument = new XmlDocument();
-				xmlDocument.PreserveWhitespace = true;
-				xmlDocument.XmlResolver = base.GetResolver();
-				xmlDocument.Load(new XmlSignatureStreamReader(new StreamReader(stream)));
-				this.s = this.canonicalizer.Canonicalize(xmlDocument);
+				this._excCanonicalXml = new ExcCanonicalXml((Stream)obj, this._includeComments, this._inclusiveNamespacesPrefixList, xmlResolver, base.BaseURI);
 				return;
 			}
-			XmlDocument xmlDocument2 = obj as XmlDocument;
-			if (xmlDocument2 != null)
+			if (obj is XmlDocument)
 			{
-				this.s = this.canonicalizer.Canonicalize(xmlDocument2);
+				this._excCanonicalXml = new ExcCanonicalXml((XmlDocument)obj, this._includeComments, this._inclusiveNamespacesPrefixList, xmlResolver);
 				return;
 			}
-			XmlNodeList xmlNodeList = obj as XmlNodeList;
-			if (xmlNodeList != null)
+			if (obj is XmlNodeList)
 			{
-				this.s = this.canonicalizer.Canonicalize(xmlNodeList);
+				this._excCanonicalXml = new ExcCanonicalXml((XmlNodeList)obj, this._includeComments, this._inclusiveNamespacesPrefixList, xmlResolver);
 				return;
 			}
-			throw new ArgumentException("obj");
+			throw new ArgumentException("Type of input object is invalid.", "obj");
 		}
 
-		private Type[] input;
+		protected override XmlNodeList GetInnerXml()
+		{
+			if (this.InclusiveNamespacesPrefixList == null)
+			{
+				return null;
+			}
+			XmlDocument xmlDocument = new XmlDocument();
+			XmlElement xmlElement = xmlDocument.CreateElement("Transform", "http://www.w3.org/2000/09/xmldsig#");
+			if (!string.IsNullOrEmpty(base.Algorithm))
+			{
+				xmlElement.SetAttribute("Algorithm", base.Algorithm);
+			}
+			XmlElement xmlElement2 = xmlDocument.CreateElement("InclusiveNamespaces", "http://www.w3.org/2001/10/xml-exc-c14n#");
+			xmlElement2.SetAttribute("PrefixList", this.InclusiveNamespacesPrefixList);
+			xmlElement.AppendChild(xmlElement2);
+			return xmlElement.ChildNodes;
+		}
 
-		private Type[] output;
+		public override object GetOutput()
+		{
+			return new MemoryStream(this._excCanonicalXml.GetBytes());
+		}
 
-		private XmlCanonicalizer canonicalizer;
+		public override object GetOutput(Type type)
+		{
+			if (type != typeof(Stream) && !type.IsSubclassOf(typeof(Stream)))
+			{
+				throw new ArgumentException("The input type was invalid for this transform.", "type");
+			}
+			return new MemoryStream(this._excCanonicalXml.GetBytes());
+		}
 
-		private Stream s;
+		public override byte[] GetDigestedOutput(HashAlgorithm hash)
+		{
+			return this._excCanonicalXml.GetDigestedBytes(hash);
+		}
 
-		private string inclusiveNamespacesPrefixList;
+		private Type[] _inputTypes = new Type[]
+		{
+			typeof(Stream),
+			typeof(XmlDocument),
+			typeof(XmlNodeList)
+		};
+
+		private Type[] _outputTypes = new Type[] { typeof(Stream) };
+
+		private bool _includeComments;
+
+		private string _inclusiveNamespacesPrefixList;
+
+		private ExcCanonicalXml _excCanonicalXml;
 	}
 }

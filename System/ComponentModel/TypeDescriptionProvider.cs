@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class TypeDescriptionProvider
 	{
 		protected TypeDescriptionProvider()
@@ -20,7 +22,11 @@ namespace System.ComponentModel
 			{
 				return this._parent.CreateInstance(provider, objectType, argTypes, args);
 			}
-			return Activator.CreateInstance(objectType, args);
+			if (objectType == null)
+			{
+				throw new ArgumentNullException("objectType");
+			}
+			return SecurityUtils.SecureCreateInstance(objectType, args);
 		}
 
 		public virtual IDictionary GetCache(object instance)
@@ -38,11 +44,24 @@ namespace System.ComponentModel
 			{
 				return this._parent.GetExtendedTypeDescriptor(instance);
 			}
-			if (this._emptyCustomTypeDescriptor == null)
+			if (this._emptyDescriptor == null)
 			{
-				this._emptyCustomTypeDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor();
+				this._emptyDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor();
 			}
-			return this._emptyCustomTypeDescriptor;
+			return this._emptyDescriptor;
+		}
+
+		protected internal virtual IExtenderProvider[] GetExtenderProviders(object instance)
+		{
+			if (this._parent != null)
+			{
+				return this._parent.GetExtenderProviders(instance);
+			}
+			if (instance == null)
+			{
+				throw new ArgumentNullException("instance");
+			}
+			return new IExtenderProvider[0];
 		}
 
 		public virtual string GetFullComponentName(object component)
@@ -54,6 +73,11 @@ namespace System.ComponentModel
 			return this.GetTypeDescriptor(component).GetComponentName();
 		}
 
+		public Type GetReflectionType(Type objectType)
+		{
+			return this.GetReflectionType(objectType, null);
+		}
+
 		public Type GetReflectionType(object instance)
 		{
 			if (instance == null)
@@ -61,11 +85,6 @@ namespace System.ComponentModel
 				throw new ArgumentNullException("instance");
 			}
 			return this.GetReflectionType(instance.GetType(), instance);
-		}
-
-		public Type GetReflectionType(Type objectType)
-		{
-			return this.GetReflectionType(objectType, null);
 		}
 
 		public virtual Type GetReflectionType(Type objectType, object instance)
@@ -77,6 +96,28 @@ namespace System.ComponentModel
 			return objectType;
 		}
 
+		public virtual Type GetRuntimeType(Type reflectionType)
+		{
+			if (this._parent != null)
+			{
+				return this._parent.GetRuntimeType(reflectionType);
+			}
+			if (reflectionType == null)
+			{
+				throw new ArgumentNullException("reflectionType");
+			}
+			if (reflectionType.GetType().Assembly == typeof(object).Assembly)
+			{
+				return reflectionType;
+			}
+			return reflectionType.UnderlyingSystemType;
+		}
+
+		public ICustomTypeDescriptor GetTypeDescriptor(Type objectType)
+		{
+			return this.GetTypeDescriptor(objectType, null);
+		}
+
 		public ICustomTypeDescriptor GetTypeDescriptor(object instance)
 		{
 			if (instance == null)
@@ -86,27 +127,31 @@ namespace System.ComponentModel
 			return this.GetTypeDescriptor(instance.GetType(), instance);
 		}
 
-		public ICustomTypeDescriptor GetTypeDescriptor(Type objectType)
-		{
-			return this.GetTypeDescriptor(objectType, null);
-		}
-
 		public virtual ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
 		{
 			if (this._parent != null)
 			{
 				return this._parent.GetTypeDescriptor(objectType, instance);
 			}
-			if (this._emptyCustomTypeDescriptor == null)
+			if (this._emptyDescriptor == null)
 			{
-				this._emptyCustomTypeDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor();
+				this._emptyDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor();
 			}
-			return this._emptyCustomTypeDescriptor;
+			return this._emptyDescriptor;
 		}
 
-		private TypeDescriptionProvider.EmptyCustomTypeDescriptor _emptyCustomTypeDescriptor;
+		public virtual bool IsSupportedType(Type type)
+		{
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			return this._parent == null || this._parent.IsSupportedType(type);
+		}
 
 		private TypeDescriptionProvider _parent;
+
+		private TypeDescriptionProvider.EmptyCustomTypeDescriptor _emptyDescriptor;
 
 		private sealed class EmptyCustomTypeDescriptor : CustomTypeDescriptor
 		{

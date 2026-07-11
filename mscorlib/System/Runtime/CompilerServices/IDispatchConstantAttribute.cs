@@ -12,7 +12,7 @@ namespace System.Runtime.CompilerServices
 		{
 			get
 			{
-				return null;
+				return new DispatchWrapper(null);
 			}
 		}
 	}

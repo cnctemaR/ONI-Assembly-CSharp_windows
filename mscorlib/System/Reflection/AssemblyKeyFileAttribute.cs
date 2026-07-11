@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class AssemblyKeyFileAttribute : Attribute
 	{
 		public AssemblyKeyFileAttribute(string keyFile)
 		{
-			this.name = keyFile;
+			this.m_keyFile = keyFile;
 		}
 
 		public string KeyFile
 		{
 			get
 			{
-				return this.name;
+				return this.m_keyFile;
 			}
 		}
 
-		private string name;
+		private string m_keyFile;
 	}
 }

@@ -15,7 +15,7 @@ public class DreckoConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -DreckoTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 150f, name, false, false, true));
-		Diet.Info[] array = new Diet.Info[]
+		Diet diet = new Diet(new Diet.Info[]
 		{
 			new Diet.Info(new HashSet<Tag>
 			{
@@ -23,26 +23,23 @@ public class DreckoConfig : IEntityConfig
 				SwampLilyConfig.ID.ToTag(),
 				"BasicSingleHarvestPlant".ToTag()
 			}, DreckoConfig.POOP_ELEMENT, DreckoConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f, false, true)
-		};
-		Diet diet = new Diet(array);
+		});
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
 		def.minPoopSizeInCalories = DreckoConfig.MIN_POOP_SIZE_IN_CALORIES;
-		SolidConsumerMonitor.Def def2 = gameObject.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def2.diet = diet;
-		ScaleGrowthMonitor.Def def3 = gameObject.AddOrGetDef<ScaleGrowthMonitor.Def>();
-		def3.defaultGrowthRate = 1f / DreckoConfig.SCALE_GROWTH_TIME_IN_CYCLES / 600f;
-		def3.dropMass = DreckoConfig.FIBER_PER_CYCLE * DreckoConfig.SCALE_GROWTH_TIME_IN_CYCLES;
-		def3.itemDroppedOnShear = DreckoConfig.EMIT_ELEMENT;
-		def3.levelCount = 6;
-		def3.targetAtmosphere = SimHashes.Hydrogen;
+		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
+		ScaleGrowthMonitor.Def def2 = gameObject.AddOrGetDef<ScaleGrowthMonitor.Def>();
+		def2.defaultGrowthRate = 1f / DreckoConfig.SCALE_GROWTH_TIME_IN_CYCLES / 600f;
+		def2.dropMass = DreckoConfig.FIBER_PER_CYCLE * DreckoConfig.SCALE_GROWTH_TIME_IN_CYCLES;
+		def2.itemDroppedOnShear = DreckoConfig.EMIT_ELEMENT;
+		def2.levelCount = 6;
+		def2.targetAtmosphere = SimHashes.Hydrogen;
 		return gameObject;
 	}
 
 	public virtual GameObject CreatePrefab()
 	{
 		GameObject gameObject = DreckoConfig.CreateDrecko("Drecko", CREATURES.SPECIES.DRECKO.NAME, CREATURES.SPECIES.DRECKO.DESC, "drecko_kanim", false);
-		GameObject gameObject2 = gameObject;
 		string text = "DreckoEgg";
 		string text2 = CREATURES.SPECIES.DRECKO.EGG_NAME;
 		string text3 = CREATURES.SPECIES.DRECKO.DESC;
@@ -52,7 +49,7 @@ public class DreckoConfig : IEntityConfig
 		float num = 90f;
 		float num2 = 30f;
 		int egg_SORT_ORDER = DreckoConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

@@ -2,9 +2,6 @@
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>Specifies which agent type and areas to consider when searching the NavMesh.</para>
-	/// </summary>
 	public struct NavMeshQueryFilter
 	{
 		internal float[] costs
@@ -15,9 +12,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>A bitmask representing the traversable area types.</para>
-		/// </summary>
 		public int areaMask
 		{
 			get
@@ -30,9 +24,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The agent type ID, specifying which navigation meshes to consider for the query functions.</para>
-		/// </summary>
 		public int agentTypeID
 		{
 			get
@@ -45,13 +36,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the area cost multiplier for the given area type for this filter.</para>
-		/// </summary>
-		/// <param name="areaIndex">Index to retreive the cost for.</param>
-		/// <returns>
-		///   <para>The cost multiplier for the supplied area index.</para>
-		/// </returns>
 		public float GetAreaCost(int areaIndex)
 		{
 			float num;
@@ -71,11 +55,6 @@ namespace UnityEngine.AI
 			return num;
 		}
 
-		/// <summary>
-		///   <para>Sets the pathfinding cost multiplier for this filter for a given area type.</para>
-		/// </summary>
-		/// <param name="areaIndex">The area index to set the cost for.</param>
-		/// <param name="cost">The cost for the supplied area index.</param>
 		public void SetAreaCost(int areaIndex, float cost)
 		{
 			if (this.m_AreaCost == null)

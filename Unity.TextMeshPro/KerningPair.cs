@@ -7,29 +7,6 @@ namespace TMPro
 	[Serializable]
 	public class KerningPair
 	{
-		public KerningPair()
-		{
-			this.m_FirstGlyph = 0U;
-			this.m_FirstGlyphAdjustments = default(GlyphValueRecord);
-			this.m_SecondGlyph = 0U;
-			this.m_SecondGlyphAdjustments = default(GlyphValueRecord);
-		}
-
-		public KerningPair(uint left, uint right, float offset)
-		{
-			this.firstGlyph = left;
-			this.m_SecondGlyph = right;
-			this.xOffset = offset;
-		}
-
-		public KerningPair(uint firstGlyph, GlyphValueRecord firstGlyphAdjustments, uint secondGlyph, GlyphValueRecord secondGlyphAdjustments)
-		{
-			this.m_FirstGlyph = firstGlyph;
-			this.m_FirstGlyphAdjustments = firstGlyphAdjustments;
-			this.m_SecondGlyph = secondGlyph;
-			this.m_SecondGlyphAdjustments = secondGlyphAdjustments;
-		}
-
 		public uint firstGlyph
 		{
 			get
@@ -68,6 +45,29 @@ namespace TMPro
 			{
 				return this.m_SecondGlyphAdjustments;
 			}
+		}
+
+		public KerningPair()
+		{
+			this.m_FirstGlyph = 0U;
+			this.m_FirstGlyphAdjustments = default(GlyphValueRecord);
+			this.m_SecondGlyph = 0U;
+			this.m_SecondGlyphAdjustments = default(GlyphValueRecord);
+		}
+
+		public KerningPair(uint left, uint right, float offset)
+		{
+			this.firstGlyph = left;
+			this.m_SecondGlyph = right;
+			this.xOffset = offset;
+		}
+
+		public KerningPair(uint firstGlyph, GlyphValueRecord firstGlyphAdjustments, uint secondGlyph, GlyphValueRecord secondGlyphAdjustments)
+		{
+			this.m_FirstGlyph = firstGlyph;
+			this.m_FirstGlyphAdjustments = firstGlyphAdjustments;
+			this.m_SecondGlyph = secondGlyph;
+			this.m_SecondGlyphAdjustments = secondGlyphAdjustments;
 		}
 
 		internal void ConvertLegacyKerningData()

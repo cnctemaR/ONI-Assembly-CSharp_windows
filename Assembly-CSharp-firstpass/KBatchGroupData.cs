@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class KBatchGroupData
 {
-	public KBatchGroupData(HashedString id)
-	{
-		this.groupID = id;
-		this.maxVisibleSymbols = 1;
-		this.Init();
-	}
-
 	public HashedString groupID { get; private set; }
 
 	public bool isSwap { get; private set; }
@@ -64,6 +57,13 @@ public class KBatchGroupData
 	public Dictionary<KAnimHashedString, int> firstSymbolIndex { get; private set; }
 
 	public List<Texture2D> textures { get; private set; }
+
+	public KBatchGroupData(HashedString id)
+	{
+		this.groupID = id;
+		this.maxVisibleSymbols = 1;
+		this.Init();
+	}
 
 	private void Init()
 	{
@@ -280,7 +280,7 @@ public class KBatchGroupData
 	{
 		List<KAnim.Anim.Frame> animFrames = this.GetAnimFrames();
 		List<KAnim.Anim.FrameElement> animFrameElements = this.GetAnimFrameElements();
-		int num = 1 + ((animFrames.Count != 0) ? animFrames.Count : this.symbolFrameInstances.Count);
+		int num = 1 + ((animFrames.Count == 0) ? this.symbolFrameInstances.Count : animFrames.Count);
 		if (animFrames.Count == 0 && this.symbolFrameInstances.Count == 0 && animFrameElements.Count == 0)
 		{
 			global::Debug.LogError(string.Concat(new object[]
@@ -309,40 +309,38 @@ public class KBatchGroupData
 				this.WriteAnimFrameElement(data, start_index, j, j, Matrix2x3.identity, Color.white, 0);
 				start_index += 16;
 			}
+			return;
 		}
-		else
+		for (int k = 0; k < animFrames.Count; k++)
 		{
-			for (int k = 0; k < animFrames.Count; k++)
+			this.Write(data, start_index, k, animFrames[k]);
+			start_index += 4;
+		}
+		for (int l = 0; l < animFrameElements.Count; l++)
+		{
+			KAnim.Anim.FrameElement frameElement = animFrameElements[l];
+			if (frameElement.symbol == KGlobalAnimParser.MISSING_SYMBOL)
 			{
-				this.Write(data, start_index, k, animFrames[k]);
-				start_index += 4;
+				this.WriteAnimFrameElement(data, start_index, -1, l, Matrix2x3.identity, Color.white, 0);
 			}
-			for (int l = 0; l < animFrameElements.Count; l++)
+			else
 			{
-				KAnim.Anim.FrameElement frameElement = animFrameElements[l];
-				if (frameElement.symbol == KGlobalAnimParser.MISSING_SYMBOL)
+				KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(frameElement.symbolIdx);
+				if (buildSymbol == null)
 				{
-					this.WriteAnimFrameElement(data, start_index, -1, l, Matrix2x3.identity, Color.white, 0);
-				}
-				else
-				{
-					KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(frameElement.symbolIdx);
-					if (buildSymbol == null)
+					global::Debug.LogError(string.Concat(new object[]
 					{
-						global::Debug.LogError(string.Concat(new object[]
-						{
-							"Missing symbol for Anim Frame Element: [",
-							HashCache.Get().Get(frameElement.symbol),
-							": ",
-							frameElement.symbol,
-							"]"
-						}));
-					}
-					int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
-					this.Write(data, start_index, frameIdx, l, frameElement);
+						"Missing symbol for Anim Frame Element: [",
+						HashCache.Get().Get(frameElement.symbol),
+						": ",
+						frameElement.symbol,
+						"]"
+					}));
 				}
-				start_index += 16;
+				int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
+				this.Write(data, start_index, frameIdx, l, frameElement);
 			}
+			start_index += 16;
 		}
 	}
 
@@ -447,26 +445,24 @@ public class KBatchGroupData
 			data[startIndex++] = transform.m11;
 			data[startIndex++] = transform.m12;
 			data[startIndex++] = 3.1664858E+09f;
+			return;
 		}
-		else
-		{
-			data[startIndex++] = (float)symbolFrameIdx;
-			data[startIndex++] = (float)thisFrameIndex;
-			data[startIndex++] = (float)flags;
-			data[startIndex++] = -1f;
-			data[startIndex++] = colour.r;
-			data[startIndex++] = colour.g;
-			data[startIndex++] = colour.b;
-			data[startIndex++] = colour.a;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 2.8801546E+09f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 3.1664858E+09f;
-		}
+		data[startIndex++] = (float)symbolFrameIdx;
+		data[startIndex++] = (float)thisFrameIndex;
+		data[startIndex++] = (float)flags;
+		data[startIndex++] = -1f;
+		data[startIndex++] = colour.r;
+		data[startIndex++] = colour.g;
+		data[startIndex++] = colour.b;
+		data[startIndex++] = colour.a;
+		data[startIndex++] = 0f;
+		data[startIndex++] = 0f;
+		data[startIndex++] = 0f;
+		data[startIndex++] = 2.8801546E+09f;
+		data[startIndex++] = 0f;
+		data[startIndex++] = 0f;
+		data[startIndex++] = 0f;
+		data[startIndex++] = 3.1664858E+09f;
 	}
 
 	private void WriteNullFrameElement(float[] data, int startIndex, int thisFrameIndex)

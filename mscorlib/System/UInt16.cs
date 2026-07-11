@@ -1,114 +1,26 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace System
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
-	public struct UInt16 : IFormattable, IConvertible, IComparable, IComparable<ushort>, IEquatable<ushort>
+	public struct UInt16 : IComparable, IFormattable, IConvertible, IComparable<ushort>, IEquatable<ushort>
 	{
-		bool IConvertible.ToBoolean(IFormatProvider provider)
-		{
-			return Convert.ToBoolean(this);
-		}
-
-		byte IConvertible.ToByte(IFormatProvider provider)
-		{
-			return Convert.ToByte(this);
-		}
-
-		char IConvertible.ToChar(IFormatProvider provider)
-		{
-			return Convert.ToChar(this);
-		}
-
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
-		{
-			return Convert.ToDateTime(this);
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			return Convert.ToDecimal(this);
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			return Convert.ToDouble(this);
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			return Convert.ToInt16(this);
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			return Convert.ToInt32(this);
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return Convert.ToInt64(this);
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			return Convert.ToSByte(this);
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			return Convert.ToSingle(this);
-		}
-
-		object IConvertible.ToType(Type targetType, IFormatProvider provider)
-		{
-			if (targetType == null)
-			{
-				throw new ArgumentNullException("targetType");
-			}
-			return Convert.ToType(this, targetType, provider, false);
-		}
-
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
-		{
-			return this;
-		}
-
-		uint IConvertible.ToUInt32(IFormatProvider provider)
-		{
-			return Convert.ToUInt32(this);
-		}
-
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
-		{
-			return Convert.ToUInt64(this);
-		}
-
 		public int CompareTo(object value)
 		{
 			if (value == null)
 			{
 				return 1;
 			}
-			if (!(value is ushort))
+			if (value is ushort)
 			{
-				throw new ArgumentException(Locale.GetText("Value is not a System.UInt16."));
+				return (int)(this - (ushort)value);
 			}
-			return (int)(this - (ushort)value);
-		}
-
-		public override bool Equals(object obj)
-		{
-			return obj is ushort && (ushort)obj == this;
-		}
-
-		public override int GetHashCode()
-		{
-			return (int)this;
+			throw new ArgumentException(Environment.GetResourceString("Object must be of type UInt16."));
 		}
 
 		public int CompareTo(ushort value)
@@ -116,52 +28,107 @@ namespace System
 			return (int)(this - value);
 		}
 
+		public override bool Equals(object obj)
+		{
+			return obj is ushort && this == (ushort)obj;
+		}
+
 		public bool Equals(ushort obj)
 		{
-			return obj == this;
+			return this == obj;
 		}
 
-		[CLSCompliant(false)]
-		public static ushort Parse(string s, IFormatProvider provider)
+		public override int GetHashCode()
 		{
-			return ushort.Parse(s, NumberStyles.Integer, provider);
+			return (int)this;
 		}
 
-		[CLSCompliant(false)]
-		public static ushort Parse(string s, NumberStyles style)
+		[SecuritySafeCritical]
+		public override string ToString()
 		{
-			return ushort.Parse(s, style, null);
+			return Number.FormatUInt32((uint)this, null, NumberFormatInfo.CurrentInfo);
 		}
 
-		[CLSCompliant(false)]
-		public static ushort Parse(string s, NumberStyles style, IFormatProvider provider)
+		[SecuritySafeCritical]
+		public string ToString(IFormatProvider provider)
 		{
-			uint num = uint.Parse(s, style, provider);
-			if (num > 65535U)
-			{
-				throw new OverflowException(Locale.GetText("Value too large."));
-			}
-			return (ushort)num;
+			return Number.FormatUInt32((uint)this, null, NumberFormatInfo.GetInstance(provider));
+		}
+
+		[SecuritySafeCritical]
+		public string ToString(string format)
+		{
+			return Number.FormatUInt32((uint)this, format, NumberFormatInfo.CurrentInfo);
+		}
+
+		[SecuritySafeCritical]
+		public string ToString(string format, IFormatProvider provider)
+		{
+			return Number.FormatUInt32((uint)this, format, NumberFormatInfo.GetInstance(provider));
 		}
 
 		[CLSCompliant(false)]
 		public static ushort Parse(string s)
 		{
-			return ushort.Parse(s, NumberStyles.Number, null);
+			return ushort.Parse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
+		}
+
+		[CLSCompliant(false)]
+		public static ushort Parse(string s, NumberStyles style)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			return ushort.Parse(s, style, NumberFormatInfo.CurrentInfo);
+		}
+
+		[CLSCompliant(false)]
+		public static ushort Parse(string s, IFormatProvider provider)
+		{
+			return ushort.Parse(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
+		}
+
+		[CLSCompliant(false)]
+		public static ushort Parse(string s, NumberStyles style, IFormatProvider provider)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			return ushort.Parse(s, style, NumberFormatInfo.GetInstance(provider));
+		}
+
+		private static ushort Parse(string s, NumberStyles style, NumberFormatInfo info)
+		{
+			uint num = 0U;
+			try
+			{
+				num = Number.ParseUInt32(s, style, info);
+			}
+			catch (OverflowException ex)
+			{
+				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."), ex);
+			}
+			if (num > 65535U)
+			{
+				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+			}
+			return (ushort)num;
 		}
 
 		[CLSCompliant(false)]
 		public static bool TryParse(string s, out ushort result)
 		{
-			return ushort.TryParse(s, NumberStyles.Integer, null, out result);
+			return ushort.TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
 		}
 
 		[CLSCompliant(false)]
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out ushort result)
 		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			return ushort.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		private static bool TryParse(string s, NumberStyles style, NumberFormatInfo info, out ushort result)
+		{
 			result = 0;
 			uint num;
-			if (!uint.TryParse(s, style, provider, out num))
+			if (!Number.TryParseUInt32(s, style, info, out num))
 			{
 				return false;
 			}
@@ -173,35 +140,90 @@ namespace System
 			return true;
 		}
 
-		public override string ToString()
-		{
-			return NumberFormatter.NumberToString((int)this, null);
-		}
-
-		public string ToString(IFormatProvider provider)
-		{
-			return NumberFormatter.NumberToString((int)this, provider);
-		}
-
-		public string ToString(string format)
-		{
-			return this.ToString(format, null);
-		}
-
-		public string ToString(string format, IFormatProvider provider)
-		{
-			return NumberFormatter.NumberToString(format, this, provider);
-		}
-
 		public TypeCode GetTypeCode()
 		{
 			return TypeCode.UInt16;
 		}
 
+		bool IConvertible.ToBoolean(IFormatProvider provider)
+		{
+			return Convert.ToBoolean(this);
+		}
+
+		char IConvertible.ToChar(IFormatProvider provider)
+		{
+			return Convert.ToChar(this);
+		}
+
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		{
+			return Convert.ToSByte(this);
+		}
+
+		byte IConvertible.ToByte(IFormatProvider provider)
+		{
+			return Convert.ToByte(this);
+		}
+
+		short IConvertible.ToInt16(IFormatProvider provider)
+		{
+			return Convert.ToInt16(this);
+		}
+
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		{
+			return this;
+		}
+
+		int IConvertible.ToInt32(IFormatProvider provider)
+		{
+			return Convert.ToInt32(this);
+		}
+
+		uint IConvertible.ToUInt32(IFormatProvider provider)
+		{
+			return Convert.ToUInt32(this);
+		}
+
+		long IConvertible.ToInt64(IFormatProvider provider)
+		{
+			return Convert.ToInt64(this);
+		}
+
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		{
+			return Convert.ToUInt64(this);
+		}
+
+		float IConvertible.ToSingle(IFormatProvider provider)
+		{
+			return Convert.ToSingle(this);
+		}
+
+		double IConvertible.ToDouble(IFormatProvider provider)
+		{
+			return Convert.ToDouble(this);
+		}
+
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
+		{
+			return Convert.ToDecimal(this);
+		}
+
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
+		{
+			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "UInt16", "DateTime" }));
+		}
+
+		object IConvertible.ToType(Type type, IFormatProvider provider)
+		{
+			return Convert.DefaultToType(this, type, provider);
+		}
+
+		private ushort m_value;
+
 		public const ushort MaxValue = 65535;
 
 		public const ushort MinValue = 0;
-
-		internal ushort m_value;
 	}
 }

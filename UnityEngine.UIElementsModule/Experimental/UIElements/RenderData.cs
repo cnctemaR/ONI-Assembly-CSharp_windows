@@ -6,8 +6,6 @@ namespace UnityEngine.Experimental.UIElements
 	{
 		public RenderTexture pixelCache;
 
-		public Matrix4x4 worldTransForm = Matrix4x4.identity;
-
 		public Rect lastLayout;
 	}
 }

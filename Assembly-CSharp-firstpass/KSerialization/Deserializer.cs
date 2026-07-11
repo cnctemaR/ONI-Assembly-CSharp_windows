@@ -18,8 +18,7 @@ namespace KSerialization
 		{
 			string text = reader.ReadKleiString();
 			Type type = obj.GetType();
-			string ktypeString = type.GetKTypeString();
-			return ktypeString == text && Deserializer.DeserializeTypeless(type, obj, reader);
+			return type.GetKTypeString() == text && Deserializer.DeserializeTypeless(type, obj, reader);
 		}
 
 		public static bool DeserializeTypeless(Type type, object obj, IReader reader)
@@ -41,8 +40,7 @@ namespace KSerialization
 
 		public static bool DeserializeTypeless(object obj, IReader reader)
 		{
-			Type type = obj.GetType();
-			DeserializationMapping deserializationMapping = Manager.GetDeserializationMapping(type);
+			DeserializationMapping deserializationMapping = Manager.GetDeserializationMapping(obj.GetType());
 			bool flag;
 			try
 			{

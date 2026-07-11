@@ -2,14 +2,8 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Represents the separation or overlap of two Collider2D.</para>
-	/// </summary>
 	public struct ColliderDistance2D
 	{
-		/// <summary>
-		///   <para>A point on a Collider2D that is a specific distance away from pointB.</para>
-		/// </summary>
 		public Vector2 pointA
 		{
 			get
@@ -22,9 +16,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>A point on a Collider2D that is a specific distance away from pointA.</para>
-		/// </summary>
 		public Vector2 pointB
 		{
 			get
@@ -37,9 +28,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>A normalized vector that points from pointB to pointA.</para>
-		/// </summary>
 		public Vector2 normal
 		{
 			get
@@ -48,9 +36,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the distance between two colliders.</para>
-		/// </summary>
 		public float distance
 		{
 			get
@@ -63,9 +48,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets whether the distance represents an overlap or not.</para>
-		/// </summary>
 		public bool isOverlapped
 		{
 			get
@@ -74,9 +56,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets whether the distance is valid or not.</para>
-		/// </summary>
 		public bool isValid
 		{
 			get

@@ -12,7 +12,7 @@ namespace STRINGS
 			{
 				public static LocString CONTAINER1 = "An advanced 3D printer developed by the Gravitas Facility.\n\nThe Printing Pod is notable for its ability to print living organic material from biological blueprints.\n\nIt is capable of synthesizing its own organic material for printing, and contains an almost unfathomable amount of stored energy, allowing it to autonomously print every 3 cycles.";
 
-				public static LocString CONTAINER2 = string.Empty;
+				public static LocString CONTAINER2 = "";
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace STRINGS
 
 			public static LocString SUBTITLE = "This database entry is under construction or unavailable";
 
-			public static LocString BODY = string.Empty;
+			public static LocString BODY = "";
 		}
 
 		public class DRECKO
@@ -1215,7 +1215,7 @@ namespace STRINGS
 
 			public static LocString SUBTITLE = "Boot Message";
 
-			public static LocString DIVIDER = string.Empty;
+			public static LocString DIVIDER = "";
 
 			public class BODY
 			{
@@ -1485,7 +1485,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "";
 
 				public static LocString CONTAINER2 = "Brought to you by the Gravitas Facility.\n<smallcaps>Patent Pending</smallcaps>";
 			}
@@ -1537,7 +1537,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "";
 			}
 		}
 
@@ -1575,7 +1575,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "";
 			}
 		}
 
@@ -1587,9 +1587,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "";
 
-				public static LocString CONTAINER2 = string.Empty;
+				public static LocString CONTAINER2 = "";
 			}
 		}
 
@@ -1601,7 +1601,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "";
 			}
 		}
 

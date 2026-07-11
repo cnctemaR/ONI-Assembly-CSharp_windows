@@ -10,19 +10,11 @@ namespace System.Data.Odbc
 		{
 		}
 
-		public int Count
+		object ICollection.SyncRoot
 		{
 			get
 			{
-				throw null;
-			}
-		}
-
-		public OdbcError this[int i]
-		{
-			get
-			{
-				throw null;
+				return this;
 			}
 		}
 
@@ -30,29 +22,54 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				throw null;
+				return false;
 			}
 		}
 
-		object ICollection.SyncRoot
+		public int Count
 		{
 			get
 			{
-				throw null;
+				return this._items.Count;
 			}
+		}
+
+		public OdbcError this[int i]
+		{
+			get
+			{
+				return (OdbcError)this._items[i];
+			}
+		}
+
+		internal void Add(OdbcError error)
+		{
+			this._items.Add(error);
 		}
 
 		public void CopyTo(Array array, int i)
 		{
+			this._items.CopyTo(array, i);
 		}
 
 		public void CopyTo(OdbcError[] array, int i)
 		{
+			this._items.CopyTo(array, i);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			throw null;
+			return this._items.GetEnumerator();
 		}
+
+		internal void SetSource(string Source)
+		{
+			foreach (object obj in this._items)
+			{
+				((OdbcError)obj).SetSource(Source);
+			}
+		}
+
+		private ArrayList _items = new ArrayList();
 	}
 }

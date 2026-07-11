@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class ColonyRationMonitor : GameStateMachine<ColonyRationMonitor, ColonyRationMonitor.Instance>
 {
@@ -30,12 +31,15 @@ public class ColonyRationMonitor : GameStateMachine<ColonyRationMonitor, ColonyR
 		public void UpdateIsOutOfRations()
 		{
 			bool flag = true;
-			foreach (Edible edible in Components.Edibles.Items)
+			using (List<Edible>.Enumerator enumerator = Components.Edibles.Items.GetEnumerator())
 			{
-				if (edible.GetComponent<Pickupable>().UnreservedAmount > 0f)
+				while (enumerator.MoveNext())
 				{
-					flag = false;
-					break;
+					if (enumerator.Current.GetComponent<Pickupable>().UnreservedAmount > 0f)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			base.smi.sm.isOutOfRations.Set(flag, base.smi);

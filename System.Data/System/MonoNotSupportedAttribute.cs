@@ -6,6 +6,7 @@ namespace System
 	internal class MonoNotSupportedAttribute : MonoTODOAttribute
 	{
 		public MonoNotSupportedAttribute(string comment)
+			: base(comment)
 		{
 		}
 	}

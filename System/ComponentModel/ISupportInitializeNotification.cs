@@ -4,8 +4,8 @@ namespace System.ComponentModel
 {
 	public interface ISupportInitializeNotification : ISupportInitialize
 	{
-		event EventHandler Initialized;
-
 		bool IsInitialized { get; }
+
+		event EventHandler Initialized;
 	}
 }

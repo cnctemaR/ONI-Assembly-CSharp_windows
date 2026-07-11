@@ -15,7 +15,7 @@ public class CellSolidFilterEvent : CellEvent
 		{
 			return;
 		}
-		CellEventInstance cellEventInstance = new CellEventInstance(cell, (!solid) ? 0 : 1, 0, this);
+		CellEventInstance cellEventInstance = new CellEventInstance(cell, solid ? 1 : 0, 0, this);
 		CellEventLogger.Instance.Add(cellEventInstance);
 	}
 

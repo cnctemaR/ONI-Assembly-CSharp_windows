@@ -34,11 +34,10 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		Schedulable component = worker.GetComponent<Schedulable>();
-		if (!component.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation))
+		if (!worker.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Recreation))
 		{
-			Effects component2 = worker.GetComponent<Effects>();
-			if (string.IsNullOrEmpty(this.specificEffect) || component2.HasEffect(this.specificEffect))
+			Effects component = worker.GetComponent<Effects>();
+			if (string.IsNullOrEmpty(this.specificEffect) || component.HasEffect(this.specificEffect))
 			{
 				return true;
 			}
@@ -49,8 +48,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		KPrefabID component = worker.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.AlwaysConverse, false);
+		worker.GetComponent<KPrefabID>().AddTag(GameTags.AlwaysConverse, false);
 		worker.Subscribe(-594200555, new Action<object>(this.OnStartedTalking));
 		worker.Subscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}
@@ -58,8 +56,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		KPrefabID component = worker.GetComponent<KPrefabID>();
-		component.RemoveTag(GameTags.AlwaysConverse);
+		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AlwaysConverse);
 		worker.Unsubscribe(-594200555, new Action<object>(this.OnStartedTalking));
 		worker.Unsubscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}
@@ -84,13 +81,10 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 			text += global::UnityEngine.Random.Range(1, 9).ToString();
 			component.Play(text, KAnim.PlayMode.Once, 1f, 0f);
 			component.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
+			return;
 		}
-		else
-		{
-			Facing component2 = base.worker.GetComponent<Facing>();
-			component2.Face(talker.transform.GetPosition());
-			this.lastTalker = talker;
-		}
+		base.worker.GetComponent<Facing>().Face(talker.transform.GetPosition());
+		this.lastTalker = talker;
 	}
 
 	private void OnStoppedTalking(object data)
@@ -100,13 +94,9 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 	public bool GetWorkerPriority(Worker worker, out int priority)
 	{
 		priority = this.basePriority;
-		if (!string.IsNullOrEmpty(this.specificEffect))
+		if (!string.IsNullOrEmpty(this.specificEffect) && worker.GetComponent<Effects>().HasEffect(this.specificEffect))
 		{
-			Effects component = worker.GetComponent<Effects>();
-			if (component.HasEffect(this.specificEffect))
-			{
-				priority = RELAXATION.PRIORITY.RECENTLY_USED;
-			}
+			priority = RELAXATION.PRIORITY.RECENTLY_USED;
 		}
 		return true;
 	}

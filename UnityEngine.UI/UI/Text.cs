@@ -437,46 +437,53 @@ namespace UnityEngine.UI
 				IList<UIVertex> verts = this.cachedTextGenerator.verts;
 				float num = 1f / this.pixelsPerUnit;
 				int num2 = verts.Count - 4;
-				Vector2 vector = new Vector2(verts[0].position.x, verts[0].position.y) * num;
-				vector = base.PixelAdjustPoint(vector) - vector;
-				toFill.Clear();
-				if (vector != Vector2.zero)
+				if (num2 <= 0)
 				{
-					for (int i = 0; i < num2; i++)
-					{
-						int num3 = i & 3;
-						this.m_TempVerts[num3] = verts[i];
-						UIVertex[] tempVerts = this.m_TempVerts;
-						int num4 = num3;
-						tempVerts[num4].position = tempVerts[num4].position * num;
-						UIVertex[] tempVerts2 = this.m_TempVerts;
-						int num5 = num3;
-						tempVerts2[num5].position.x = tempVerts2[num5].position.x + vector.x;
-						UIVertex[] tempVerts3 = this.m_TempVerts;
-						int num6 = num3;
-						tempVerts3[num6].position.y = tempVerts3[num6].position.y + vector.y;
-						if (num3 == 3)
-						{
-							toFill.AddUIVertexQuad(this.m_TempVerts);
-						}
-					}
+					toFill.Clear();
 				}
 				else
 				{
-					for (int j = 0; j < num2; j++)
+					Vector2 vector = new Vector2(verts[0].position.x, verts[0].position.y) * num;
+					vector = base.PixelAdjustPoint(vector) - vector;
+					toFill.Clear();
+					if (vector != Vector2.zero)
 					{
-						int num7 = j & 3;
-						this.m_TempVerts[num7] = verts[j];
-						UIVertex[] tempVerts4 = this.m_TempVerts;
-						int num8 = num7;
-						tempVerts4[num8].position = tempVerts4[num8].position * num;
-						if (num7 == 3)
+						for (int i = 0; i < num2; i++)
 						{
-							toFill.AddUIVertexQuad(this.m_TempVerts);
+							int num3 = i & 3;
+							this.m_TempVerts[num3] = verts[i];
+							UIVertex[] tempVerts = this.m_TempVerts;
+							int num4 = num3;
+							tempVerts[num4].position = tempVerts[num4].position * num;
+							UIVertex[] tempVerts2 = this.m_TempVerts;
+							int num5 = num3;
+							tempVerts2[num5].position.x = tempVerts2[num5].position.x + vector.x;
+							UIVertex[] tempVerts3 = this.m_TempVerts;
+							int num6 = num3;
+							tempVerts3[num6].position.y = tempVerts3[num6].position.y + vector.y;
+							if (num3 == 3)
+							{
+								toFill.AddUIVertexQuad(this.m_TempVerts);
+							}
 						}
 					}
+					else
+					{
+						for (int j = 0; j < num2; j++)
+						{
+							int num7 = j & 3;
+							this.m_TempVerts[num7] = verts[j];
+							UIVertex[] tempVerts4 = this.m_TempVerts;
+							int num8 = num7;
+							tempVerts4[num8].position = tempVerts4[num8].position * num;
+							if (num7 == 3)
+							{
+								toFill.AddUIVertexQuad(this.m_TempVerts);
+							}
+						}
+					}
+					this.m_DisableFontTextureRebuiltCallback = false;
 				}
-				this.m_DisableFontTextureRebuiltCallback = false;
 			}
 		}
 

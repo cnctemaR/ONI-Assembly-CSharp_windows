@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML long attribute.</para>
-	/// </summary>
 	public class UxmlLongAttributeDescription : UxmlAttributeDescription
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public UxmlLongAttributeDescription()
 		{
 			base.type = "long";
@@ -17,14 +11,8 @@ namespace UnityEngine.Experimental.UIElements
 			this.defaultValue = 0L;
 		}
 
-		/// <summary>
-		///   <para>The default value for the attribute.</para>
-		/// </summary>
 		public long defaultValue { get; set; }
 
-		/// <summary>
-		///   <para>The default value for the attribute, as a string.</para>
-		/// </summary>
 		public override string defaultValueAsString
 		{
 			get
@@ -33,16 +21,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieves the value of this attribute from the attribute bag. Returns it if it is found, otherwise return defaultValue.</para>
-		/// </summary>
-		/// <param name="bag">The bag of attributes.</param>
-		/// <returns>
-		///   <para>The value of the attribute.</para>
-		/// </returns>
+		[Obsolete("Pass a creation context to the method.")]
 		public long GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyLong(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public long GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<long>(bag, cc, new Func<string, long, long>(UxmlLongAttributeDescription.ConvertValueToLong), this.defaultValue);
+		}
+
+		private static long ConvertValueToLong(string v, long defaultValue)
+		{
+			long num;
+			long num2;
+			if (v == null || !long.TryParse(v, out num))
+			{
+				num2 = defaultValue;
+			}
+			else
+			{
+				num2 = num;
+			}
+			return num2;
 		}
 	}
 }

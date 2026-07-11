@@ -20,8 +20,8 @@ namespace UnityEngine
 			DrivenPropertyManager.UnregisterPropertyPartial(driver, target, propertyPath);
 		}
 
-		[Conditional("UNITY_EDITOR")]
 		[NativeConditional("UNITY_EDITOR")]
+		[Conditional("UNITY_EDITOR")]
 		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UnregisterProperties([NotNull] Object driver);

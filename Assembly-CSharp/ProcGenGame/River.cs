@@ -24,21 +24,20 @@ namespace ProcGenGame
 			{
 				Segment segment = this.pathElements[i];
 				Vector2 vector = segment.e1 - segment.e0;
-				Vector2 vector2 = new Vector2(-vector.y, vector.x);
-				Vector2 normalized = vector2.normalized;
+				Vector2 normalized = new Vector2(-vector.y, vector.x).normalized;
 				List<Vector2I> line = global::ProcGen.Util.GetLine(segment.e0, segment.e1);
 				for (int j = 0; j < line.Count; j++)
 				{
 					for (float num = 0.5f; num <= base.widthCenter; num += 1f)
 					{
-						Vector2 vector3 = line[j] + normalized * num;
-						int num2 = Grid.XYToCell((int)vector3.x, (int)vector3.y);
+						Vector2 vector2 = line[j] + normalized * num;
+						int num2 = Grid.XYToCell((int)vector2.x, (int)vector2.y);
 						if (Grid.IsValidCell(num2))
 						{
 							SetValues(num2, element2, defaultValues2, invalid);
 						}
-						Vector2 vector4 = line[j] - normalized * num;
-						num2 = Grid.XYToCell((int)vector4.x, (int)vector4.y);
+						Vector2 vector3 = line[j] - normalized * num;
+						num2 = Grid.XYToCell((int)vector3.x, (int)vector3.y);
 						if (Grid.IsValidCell(num2))
 						{
 							SetValues(num2, element2, defaultValues2, invalid);
@@ -46,15 +45,15 @@ namespace ProcGenGame
 					}
 					for (float num3 = 0.5f; num3 <= base.widthBorder; num3 += 1f)
 					{
-						Vector2 vector5 = line[j] + normalized * (base.widthCenter + num3);
-						int num4 = Grid.XYToCell((int)vector5.x, (int)vector5.y);
+						Vector2 vector4 = line[j] + normalized * (base.widthCenter + num3);
+						int num4 = Grid.XYToCell((int)vector4.x, (int)vector4.y);
 						if (Grid.IsValidCell(num4))
 						{
 							defaultValues.temperature = temperatureMin + world.heatOffset[num4] * temperatureRange;
 							SetValues(num4, element, defaultValues, invalid);
 						}
-						Vector2 vector6 = line[j] - normalized * (base.widthCenter + num3);
-						num4 = Grid.XYToCell((int)vector6.x, (int)vector6.y);
+						Vector2 vector5 = line[j] - normalized * (base.widthCenter + num3);
+						num4 = Grid.XYToCell((int)vector5.x, (int)vector5.y);
 						if (Grid.IsValidCell(num4))
 						{
 							defaultValues.temperature = temperatureMin + world.heatOffset[num4] * temperatureRange;
@@ -73,11 +72,9 @@ namespace ProcGenGame
 				{
 					cells[index].SetValues(elem as Element, pd, ElementLoader.elements);
 					dcs[index] = dc;
+					return;
 				}
-				else
-				{
-					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
-				}
+				global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
 			};
 			float num = 265f;
 			float num2 = 30f;

@@ -8,13 +8,9 @@ namespace System.Xml
 		protected internal XmlWhitespace(string strData, XmlDocument doc)
 			: base(strData, doc)
 		{
-		}
-
-		public override string LocalName
-		{
-			get
+			if (!doc.IsLoading && !base.CheckOnData(strData))
 			{
-				return "#whitespace";
+				throw new ArgumentException(Res.GetString("The string for white space contains an invalid character."));
 			}
 		}
 
@@ -22,7 +18,15 @@ namespace System.Xml
 		{
 			get
 			{
-				return "#whitespace";
+				return this.OwnerDocument.strNonSignificantWhitespaceName;
+			}
+		}
+
+		public override string LocalName
+		{
+			get
+			{
+				return this.OwnerDocument.strNonSignificantWhitespaceName;
 			}
 		}
 
@@ -34,11 +38,28 @@ namespace System.Xml
 			}
 		}
 
-		internal override XPathNodeType XPathNodeType
+		public override XmlNode ParentNode
 		{
 			get
 			{
-				return XPathNodeType.Whitespace;
+				XmlNodeType nodeType = this.parentNode.NodeType;
+				if (nodeType - XmlNodeType.Text > 1)
+				{
+					if (nodeType == XmlNodeType.Document)
+					{
+						return base.ParentNode;
+					}
+					if (nodeType - XmlNodeType.Whitespace > 1)
+					{
+						return this.parentNode;
+					}
+				}
+				XmlNode xmlNode = this.parentNode.parentNode;
+				while (xmlNode.IsText)
+				{
+					xmlNode = xmlNode.parentNode;
+				}
+				return xmlNode;
 			}
 		}
 
@@ -50,34 +71,57 @@ namespace System.Xml
 			}
 			set
 			{
-				if (!XmlChar.IsWhitespace(value))
+				if (base.CheckOnData(value))
 				{
-					throw new ArgumentException("Invalid whitespace characters.");
+					this.Data = value;
+					return;
 				}
-				this.Data = value;
-			}
-		}
-
-		public override XmlNode ParentNode
-		{
-			get
-			{
-				return base.ParentNode;
+				throw new ArgumentException(Res.GetString("The string for white space contains an invalid character."));
 			}
 		}
 
 		public override XmlNode CloneNode(bool deep)
 		{
-			return new XmlWhitespace(this.Data, this.OwnerDocument);
+			return this.OwnerDocument.CreateWhitespace(this.Data);
+		}
+
+		public override void WriteTo(XmlWriter w)
+		{
+			w.WriteWhitespace(this.Data);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
-		public override void WriteTo(XmlWriter w)
+		internal override XPathNodeType XPNodeType
 		{
-			w.WriteWhitespace(this.Data);
+			get
+			{
+				XPathNodeType xpathNodeType = XPathNodeType.Whitespace;
+				base.DecideXPNodeTypeForTextNodes(this, ref xpathNodeType);
+				return xpathNodeType;
+			}
+		}
+
+		internal override bool IsText
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public override XmlNode PreviousText
+		{
+			get
+			{
+				if (this.parentNode.IsText)
+				{
+					return this.parentNode;
+				}
+				return null;
+			}
 		}
 	}
 }

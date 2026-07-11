@@ -6,6 +6,8 @@ namespace Rendering.World
 {
 	public class Brush
 	{
+		public int Id { get; private set; }
+
 		public Brush(int id, string name, Material material, Mask mask, List<Brush> active_brushes, List<Brush> dirty_brushes, int width_in_tiles, MaterialPropertyBlock property_block)
 		{
 			this.Id = id;
@@ -18,8 +20,6 @@ namespace Rendering.World
 			this.widthInTiles = width_in_tiles;
 			this.propertyBlock = property_block;
 		}
-
-		public int Id { get; private set; }
 
 		public void Add(int tile_idx)
 		{
@@ -48,7 +48,7 @@ namespace Rendering.World
 
 		public void Refresh()
 		{
-			bool flag = this.mesh.Meshes.Length > 0;
+			bool flag = this.mesh.Meshes.Length != 0;
 			int count = this.tiles.Count;
 			int num = count * 4;
 			int num2 = count * 6;
@@ -89,11 +89,12 @@ namespace Rendering.World
 			}
 			this.dirty = false;
 			this.mesh.Commit();
-			if (this.mesh.Meshes.Length > 0)
+			if (this.mesh.Meshes.Length != 0)
 			{
 				if (!flag)
 				{
 					this.activeBrushes.Add(this);
+					return;
 				}
 			}
 			else if (flag)

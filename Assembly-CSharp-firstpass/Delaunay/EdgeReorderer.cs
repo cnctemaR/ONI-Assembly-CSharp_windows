@@ -7,16 +7,6 @@ namespace Delaunay
 {
 	internal sealed class EdgeReorderer : Delaunay.Utils.IDisposable
 	{
-		public EdgeReorderer(List<Edge> origEdges, VertexOrSite criterion)
-		{
-			this._edges = new List<Edge>();
-			this._edgeOrientations = new List<Side>();
-			if (origEdges.Count > 0)
-			{
-				this._edges = this.ReorderEdges(origEdges, criterion);
-			}
-		}
-
 		public List<Edge> edges
 		{
 			get
@@ -30,6 +20,16 @@ namespace Delaunay
 			get
 			{
 				return this._edgeOrientations;
+			}
+		}
+
+		public EdgeReorderer(List<Edge> origEdges, VertexOrSite criterion)
+		{
+			this._edges = new List<Edge>();
+			this._edgeOrientations = new List<Side>();
+			if (origEdges.Count > 0)
+			{
+				this._edges = this.ReorderEdges(origEdges, criterion);
 			}
 		}
 
@@ -54,25 +54,27 @@ namespace Delaunay
 			list.Add(edge);
 			this._edgeOrientations.Add(Side.LEFT);
 			ICoord coord2;
-			if (criterion == VertexOrSite.VERTEX)
+			if (criterion != VertexOrSite.VERTEX)
 			{
-				ICoord coord = edge.leftVertex;
+				ICoord coord = edge.leftSite;
 				coord2 = coord;
 			}
 			else
 			{
-				coord2 = edge.leftSite;
+				ICoord coord = edge.leftVertex;
+				coord2 = coord;
 			}
 			ICoord coord3 = coord2;
 			ICoord coord4;
-			if (criterion == VertexOrSite.VERTEX)
+			if (criterion != VertexOrSite.VERTEX)
 			{
-				ICoord coord = edge.rightVertex;
+				ICoord coord = edge.rightSite;
 				coord4 = coord;
 			}
 			else
 			{
-				coord4 = edge.rightSite;
+				ICoord coord = edge.rightVertex;
+				coord4 = coord;
 			}
 			ICoord coord5 = coord4;
 			if (coord3 == Vertex.VERTEX_AT_INFINITY || coord5 == Vertex.VERTEX_AT_INFINITY)
@@ -89,25 +91,27 @@ namespace Delaunay
 					{
 						edge = origEdges[k];
 						ICoord coord6;
-						if (criterion == VertexOrSite.VERTEX)
+						if (criterion != VertexOrSite.VERTEX)
 						{
-							ICoord coord = edge.leftVertex;
+							ICoord coord = edge.leftSite;
 							coord6 = coord;
 						}
 						else
 						{
-							coord6 = edge.leftSite;
+							ICoord coord = edge.leftVertex;
+							coord6 = coord;
 						}
 						ICoord coord7 = coord6;
 						ICoord coord8;
-						if (criterion == VertexOrSite.VERTEX)
+						if (criterion != VertexOrSite.VERTEX)
 						{
-							ICoord coord = edge.rightVertex;
+							ICoord coord = edge.rightSite;
 							coord8 = coord;
 						}
 						else
 						{
-							coord8 = edge.rightSite;
+							ICoord coord = edge.rightVertex;
+							coord8 = coord;
 						}
 						ICoord coord9 = coord8;
 						if (coord7 == Vertex.VERTEX_AT_INFINITY || coord9 == Vertex.VERTEX_AT_INFINITY)

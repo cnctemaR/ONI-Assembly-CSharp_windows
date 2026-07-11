@@ -9,18 +9,21 @@ namespace System.IO
 	public class DirectoryNotFoundException : IOException
 	{
 		public DirectoryNotFoundException()
-			: base("Directory not found")
+			: base(Environment.GetResourceString("Attempted to access a path that is not on the disk."))
 		{
+			base.SetErrorCode(-2147024893);
 		}
 
 		public DirectoryNotFoundException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2147024893);
 		}
 
 		public DirectoryNotFoundException(string message, Exception innerException)
 			: base(message, innerException)
 		{
+			base.SetErrorCode(-2147024893);
 		}
 
 		protected DirectoryNotFoundException(SerializationInfo info, StreamingContext context)

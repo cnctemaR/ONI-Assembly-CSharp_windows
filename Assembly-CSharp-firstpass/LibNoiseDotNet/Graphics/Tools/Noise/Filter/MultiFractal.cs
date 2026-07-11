@@ -2,7 +2,7 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Filter
 {
-	public class MultiFractal : FilterModule, IModule3D, IModule2D, IModule
+	public class MultiFractal : FilterModule, IModule3D, IModule, IModule2D
 	{
 		public float GetValue(float x, float y, float z)
 		{

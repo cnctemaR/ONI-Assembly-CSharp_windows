@@ -6,6 +6,16 @@ namespace YamlDotNet.Serialization
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public sealed class YamlMemberAttribute : Attribute
 	{
+		public Type SerializeAs { get; set; }
+
+		public int Order { get; set; }
+
+		public string Alias { get; set; }
+
+		public bool ApplyNamingConventions { get; set; }
+
+		public ScalarStyle ScalarStyle { get; set; }
+
 		public YamlMemberAttribute()
 		{
 			this.ScalarStyle = ScalarStyle.Any;
@@ -17,15 +27,5 @@ namespace YamlDotNet.Serialization
 		{
 			this.SerializeAs = serializeAs;
 		}
-
-		public Type SerializeAs { get; set; }
-
-		public int Order { get; set; }
-
-		public string Alias { get; set; }
-
-		public bool ApplyNamingConventions { get; set; }
-
-		public ScalarStyle ScalarStyle { get; set; }
 	}
 }

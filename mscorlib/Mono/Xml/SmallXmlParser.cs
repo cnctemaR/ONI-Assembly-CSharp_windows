@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -22,17 +23,20 @@ namespace Mono.Xml
 
 		private bool IsNameChar(char c, bool start)
 		{
-			if (c == '-' || c == '.')
+			if (c <= '.')
 			{
-				return !start;
+				if (c == '-' || c == '.')
+				{
+					return !start;
+				}
 			}
-			if (c == ':' || c == '_')
+			else if (c == ':' || c == '_')
 			{
 				return true;
 			}
 			if (c > 'Ā')
 			{
-				if (c == 'ۥ' || c == 'ۦ' || c == 'ՙ')
+				if (c == 'ՙ' || c == 'ۥ' || c == 'ۦ')
 				{
 					return true;
 				}
@@ -62,20 +66,7 @@ namespace Mono.Xml
 
 		private bool IsWhitespace(int c)
 		{
-			switch (c)
-			{
-			case 9:
-			case 10:
-			case 13:
-				break;
-			default:
-				if (c != 32)
-				{
-					return false;
-				}
-				break;
-			}
-			return true;
+			return c - 9 <= 1 || c == 13 || c == 32;
 		}
 
 		public void SkipWhitespaces()
@@ -100,17 +91,8 @@ namespace Mono.Xml
 			for (;;)
 			{
 				int num = this.Peek();
-				switch (num)
+				if (num - 9 > 1 && num != 13 && num != 32)
 				{
-				case 9:
-				case 10:
-				case 13:
-					break;
-				default:
-					if (num != 32)
-					{
-						goto Block_0;
-					}
 					break;
 				}
 				this.Read();
@@ -119,7 +101,6 @@ namespace Mono.Xml
 					expected = false;
 				}
 			}
-			Block_0:
 			if (expected)
 			{
 				throw this.Error("Whitespace is expected.");
@@ -143,11 +124,9 @@ namespace Mono.Xml
 				this.line++;
 				this.resetColumn = false;
 				this.column = 1;
+				return num;
 			}
-			else
-			{
-				this.column++;
-			}
+			this.column++;
 			return num;
 		}
 
@@ -399,14 +378,13 @@ namespace Mono.Xml
 			for (;;)
 			{
 				int num = this.Peek();
-				int num2 = num;
-				if (num2 == -1)
+				if (num == -1)
 				{
 					break;
 				}
-				if (num2 != 38)
+				if (num != 38)
 				{
-					if (num2 == 60)
+					if (num == 60)
 					{
 						return;
 					}
@@ -422,33 +400,39 @@ namespace Mono.Xml
 
 		private void ReadReference()
 		{
-			if (this.Peek() != 35)
+			if (this.Peek() == 35)
 			{
-				string text = this.ReadName();
-				this.Expect(59);
-				string text2 = text;
-				switch (text2)
-				{
-				case "amp":
-					this.buffer.Append('&');
-					return;
-				case "quot":
-					this.buffer.Append('"');
-					return;
-				case "apos":
-					this.buffer.Append('\'');
-					return;
-				case "lt":
-					this.buffer.Append('<');
-					return;
-				case "gt":
-					this.buffer.Append('>');
-					return;
-				}
+				this.Read();
+				this.ReadCharacterReference();
+				return;
+			}
+			string text = this.ReadName();
+			this.Expect(59);
+			if (text == "amp")
+			{
+				this.buffer.Append('&');
+				return;
+			}
+			if (text == "quot")
+			{
+				this.buffer.Append('"');
+				return;
+			}
+			if (text == "apos")
+			{
+				this.buffer.Append('\'');
+				return;
+			}
+			if (text == "lt")
+			{
+				this.buffer.Append('<');
+				return;
+			}
+			if (!(text == "gt"))
+			{
 				throw this.Error("General non-predefined entity reference is not supported in this parser.");
 			}
-			this.Read();
-			this.ReadCharacterReference();
+			this.buffer.Append('>');
 		}
 
 		private int ReadCharacterReference()
@@ -480,14 +464,12 @@ namespace Mono.Xml
 			}
 			else
 			{
-				for (int j = this.Peek(); j >= 0; j = this.Peek())
+				int num2 = this.Peek();
+				while (num2 >= 0 && 48 <= num2 && num2 <= 57)
 				{
-					if (48 > j || j > 57)
-					{
-						break;
-					}
-					num <<= 4 + j - 48;
+					num <<= 4 + num2 - 48;
 					this.Read();
+					num2 = this.Peek();
 				}
 			}
 			return num;
@@ -560,15 +542,8 @@ namespace Mono.Xml
 		{
 			this.Expect(45);
 			this.Expect(45);
-			for (;;)
+			while (this.Read() != 45 || this.Read() != 45)
 			{
-				if (this.Read() == 45)
-				{
-					if (this.Read() == 45)
-					{
-						break;
-					}
-				}
 			}
 			if (this.Read() != 62)
 			{
@@ -654,21 +629,21 @@ namespace Mono.Xml
 
 			public string GetName(int i)
 			{
-				return (string)this.attrNames[i];
+				return this.attrNames[i];
 			}
 
 			public string GetValue(int i)
 			{
-				return (string)this.attrValues[i];
+				return this.attrValues[i];
 			}
 
 			public string GetValue(string name)
 			{
 				for (int i = 0; i < this.attrNames.Count; i++)
 				{
-					if ((string)this.attrNames[i] == name)
+					if (this.attrNames[i] == name)
 					{
-						return (string)this.attrValues[i];
+						return this.attrValues[i];
 					}
 				}
 				return null;
@@ -678,7 +653,7 @@ namespace Mono.Xml
 			{
 				get
 				{
-					return (string[])this.attrNames.ToArray(typeof(string));
+					return this.attrNames.ToArray();
 				}
 			}
 
@@ -686,7 +661,7 @@ namespace Mono.Xml
 			{
 				get
 				{
-					return (string[])this.attrValues.ToArray(typeof(string));
+					return this.attrValues.ToArray();
 				}
 			}
 
@@ -702,9 +677,9 @@ namespace Mono.Xml
 				this.attrValues.Add(value);
 			}
 
-			private ArrayList attrNames = new ArrayList();
+			private List<string> attrNames = new List<string>();
 
-			private ArrayList attrValues = new ArrayList();
+			private List<string> attrValues = new List<string>();
 		}
 	}
 }

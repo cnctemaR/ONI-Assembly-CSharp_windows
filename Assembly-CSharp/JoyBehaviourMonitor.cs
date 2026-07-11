@@ -51,8 +51,7 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 			if (num >= TRAITS.JOY_REACTIONS.MIN_MORALE_EXCESS)
 			{
 				float num2 = MathUtil.ReRange(num, TRAITS.JOY_REACTIONS.MIN_MORALE_EXCESS, TRAITS.JOY_REACTIONS.MAX_MORALE_EXCESS, TRAITS.JOY_REACTIONS.MIN_REACTION_CHANCE, TRAITS.JOY_REACTIONS.MAX_REACTION_CHANCE);
-				float num3 = global::UnityEngine.Random.Range(0f, 100f);
-				return num3 <= num2;
+				return global::UnityEngine.Random.Range(0f, 100f) <= num2;
 			}
 			return false;
 		}
@@ -63,9 +62,9 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 			base.smi.GoTo(base.smi.sm.overjoyed);
 		}
 
-		public string happyLocoAnim = string.Empty;
+		public string happyLocoAnim = "";
 
-		public string happyLocoWalkAnim = string.Empty;
+		public string happyLocoWalkAnim = "";
 
 		public Expression happyExpression;
 

@@ -39,8 +39,7 @@ public class LuxuryBedConfig : IBuildingConfig
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
 		sleepable.workLayer = Grid.SceneLayer.BuildingFront;
-		Ownable ownable = go.AddOrGet<Ownable>();
-		ownable.slotID = Db.Get().AssignableSlots.Bed.Id;
+		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.Bed.Id;
 	}
 
 	public static string ID = "LuxuryBed";

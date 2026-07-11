@@ -9,13 +9,6 @@ namespace Satsuma.IO
 {
 	public sealed class LemonGraphFormat
 	{
-		public LemonGraphFormat()
-		{
-			this.NodeMaps = new Dictionary<string, Dictionary<Node, string>>();
-			this.ArcMaps = new Dictionary<string, Dictionary<Arc, string>>();
-			this.Attributes = new Dictionary<string, string>();
-		}
-
 		public IGraph Graph { get; set; }
 
 		public Dictionary<string, Dictionary<Node, string>> NodeMaps { get; private set; }
@@ -24,11 +17,20 @@ namespace Satsuma.IO
 
 		public Dictionary<string, string> Attributes { get; private set; }
 
+		public LemonGraphFormat()
+		{
+			this.NodeMaps = new Dictionary<string, Dictionary<Node, string>>();
+			this.ArcMaps = new Dictionary<string, Dictionary<Arc, string>>();
+			this.Attributes = new Dictionary<string, string>();
+		}
+
 		private static string Escape(string s)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			foreach (char c in s)
+			int i = 0;
+			while (i < s.Length)
 			{
+				char c = s[i];
 				switch (c)
 				{
 				case '\t':
@@ -37,27 +39,33 @@ namespace Satsuma.IO
 				case '\n':
 					stringBuilder.Append("\\n");
 					break;
+				case '\v':
+				case '\f':
+					goto IL_0086;
+				case '\r':
+					stringBuilder.Append("\\r");
+					break;
 				default:
 					if (c != '"')
 					{
 						if (c != '\\')
 						{
-							stringBuilder.Append(c);
+							goto IL_0086;
 						}
-						else
-						{
-							stringBuilder.Append("\\\\");
-						}
+						stringBuilder.Append("\\\\");
 					}
 					else
 					{
 						stringBuilder.Append("\\\"");
 					}
 					break;
-				case '\r':
-					stringBuilder.Append("\\r");
-					break;
 				}
+				IL_008E:
+				i++;
+				continue;
+				IL_0086:
+				stringBuilder.Append(c);
+				goto IL_008E;
 			}
 			return stringBuilder.ToString();
 		}
@@ -70,24 +78,27 @@ namespace Satsuma.IO
 			{
 				if (flag)
 				{
-					switch (c)
+					if (c != 'n')
 					{
-					case 'r':
-						stringBuilder.Append('\r');
-						break;
-					default:
-						if (c != 'n')
+						if (c != 'r')
 						{
-							stringBuilder.Append(c);
+							if (c != 't')
+							{
+								stringBuilder.Append(c);
+							}
+							else
+							{
+								stringBuilder.Append('\t');
+							}
 						}
 						else
 						{
-							stringBuilder.Append('\n');
+							stringBuilder.Append('\r');
 						}
-						break;
-					case 't':
-						stringBuilder.Append('\t');
-						break;
+					}
+					else
+					{
+						stringBuilder.Append('\n');
 					}
 					flag = false;
 				}
@@ -116,7 +127,7 @@ namespace Satsuma.IO
 			this.ArcMaps.Clear();
 			this.Attributes.Clear();
 			Regex regex = new Regex("\\s*(?:(\"(?:\\\"|.)*\")|(\\S+))\\s*", RegexOptions.None);
-			string text = string.Empty;
+			string text = "";
 			Directedness directedness2 = Directedness.Directed;
 			bool flag = false;
 			List<string> list = null;
@@ -129,12 +140,12 @@ namespace Satsuma.IO
 					break;
 				}
 				text2 = text2.Trim();
-				if (!(text2 == string.Empty) && text2[0] != '#')
+				if (!(text2 == "") && text2[0] != '#')
 				{
 					List<string> list2 = regex.Matches(text2).Cast<Match>().Select<Match, string>(delegate(Match m)
 					{
 						string text6 = m.Value;
-						if (text6 == string.Empty)
+						if (text6 == "")
 						{
 							return text6;
 						}
@@ -149,73 +160,76 @@ namespace Satsuma.IO
 					if (text2[0] == '@')
 					{
 						text = text3.Substring(1);
-						directedness2 = ((directedness == null) ? ((!(text == "arcs")) ? Directedness.Undirected : Directedness.Directed) : directedness.Value);
+						directedness2 = directedness ?? ((text == "arcs") ? Directedness.Directed : Directedness.Undirected);
 						flag = true;
 					}
 					else
 					{
-						if (text != null)
+						if (!(text == "nodes") && !(text == "red_nodes") && !(text == "blue_nodes"))
 						{
-							if (!(text == "nodes") && !(text == "red_nodes") && !(text == "blue_nodes"))
+							if (!(text == "arcs") && !(text == "edges"))
 							{
-								if (!(text == "arcs") && !(text == "edges"))
+								if (text == "attributes")
 								{
-									if (text == "attributes")
-									{
-										this.Attributes[list2[0]] = list2[1];
-									}
-								}
-								else if (flag)
-								{
-									list = list2;
-									foreach (string text4 in list)
-									{
-										if (!this.ArcMaps.ContainsKey(text4))
-										{
-											this.ArcMaps[text4] = new Dictionary<Arc, string>();
-										}
-									}
-								}
-								else
-								{
-									Node node = dictionary[list2[0]];
-									Node node2 = dictionary[list2[1]];
-									Arc arc = buildableGraph.AddArc(node, node2, directedness2);
-									for (int i = 2; i < list2.Count; i++)
-									{
-										this.ArcMaps[list[i - 2]][arc] = list2[i];
-									}
-								}
-							}
-							else if (flag)
-							{
-								list = list2;
-								for (int j = 0; j < list.Count; j++)
-								{
-									string text5 = list[j];
-									if (text5 == "label")
-									{
-										num = j;
-									}
-									if (!this.NodeMaps.ContainsKey(text5))
-									{
-										this.NodeMaps[text5] = new Dictionary<Node, string>();
-									}
+									this.Attributes[list2[0]] = list2[1];
 								}
 							}
 							else
 							{
-								Node node3 = buildableGraph.AddNode();
-								for (int k = 0; k < list2.Count; k++)
+								if (flag)
 								{
-									this.NodeMaps[list[k]][node3] = list2[k];
-									if (k == num)
+									list = list2;
+									using (List<string>.Enumerator enumerator = list.GetEnumerator())
 									{
-										dictionary[list2[k]] = node3;
+										while (enumerator.MoveNext())
+										{
+											string text4 = enumerator.Current;
+											if (!this.ArcMaps.ContainsKey(text4))
+											{
+												this.ArcMaps[text4] = new Dictionary<Arc, string>();
+											}
+										}
+										goto IL_031D;
 									}
+								}
+								Node node = dictionary[list2[0]];
+								Node node2 = dictionary[list2[1]];
+								Arc arc = buildableGraph.AddArc(node, node2, directedness2);
+								for (int i = 2; i < list2.Count; i++)
+								{
+									this.ArcMaps[list[i - 2]][arc] = list2[i];
 								}
 							}
 						}
+						else if (flag)
+						{
+							list = list2;
+							for (int j = 0; j < list.Count; j++)
+							{
+								string text5 = list[j];
+								if (text5 == "label")
+								{
+									num = j;
+								}
+								if (!this.NodeMaps.ContainsKey(text5))
+								{
+									this.NodeMaps[text5] = new Dictionary<Node, string>();
+								}
+							}
+						}
+						else
+						{
+							Node node3 = buildableGraph.AddNode();
+							for (int k = 0; k < list2.Count; k++)
+							{
+								this.NodeMaps[list[k]][node3] = list2[k];
+								if (k == num)
+								{
+									dictionary[list2[k]] = node3;
+								}
+							}
+						}
+						IL_031D:
 						flag = false;
 					}
 				}
@@ -245,7 +259,7 @@ namespace Satsuma.IO
 			{
 				if (keyValuePair.Key != "label")
 				{
-					writer.Write(' ' + keyValuePair.Key);
+					writer.Write(" " + keyValuePair.Key);
 				}
 			}
 			writer.WriteLine();
@@ -256,12 +270,12 @@ namespace Satsuma.IO
 				{
 					if (keyValuePair2.Key != "label")
 					{
-						string empty;
-						if (!keyValuePair2.Value.TryGetValue(node, out empty))
+						string text2;
+						if (!keyValuePair2.Value.TryGetValue(node, out text2))
 						{
-							empty = string.Empty;
+							text2 = "";
 						}
-						writer.Write(" \"" + LemonGraphFormat.Escape(empty) + '"');
+						writer.Write(" \"" + LemonGraphFormat.Escape(text2) + "\"");
 					}
 				}
 				writer.WriteLine();
@@ -269,10 +283,10 @@ namespace Satsuma.IO
 			writer.WriteLine();
 			for (int i = 0; i < 2; i++)
 			{
-				IEnumerable<Arc> enumerable = ((i != 0) ? this.Graph.Arcs(ArcFilter.Edge) : (from arc in this.Graph.Arcs(ArcFilter.All)
+				IEnumerable<Arc> enumerable = ((i == 0) ? (from arc in this.Graph.Arcs(ArcFilter.All)
 					where !this.Graph.IsEdge(arc)
-					select arc));
-				writer.WriteLine((i != 0) ? "@edges" : "@arcs");
+					select arc) : this.Graph.Arcs(ArcFilter.Edge));
+				writer.WriteLine((i == 0) ? "@arcs" : "@edges");
 				if (this.ArcMaps.Count == 0)
 				{
 					writer.WriteLine('-');
@@ -281,7 +295,7 @@ namespace Satsuma.IO
 				{
 					foreach (KeyValuePair<string, Dictionary<Arc, string>> keyValuePair3 in this.ArcMaps)
 					{
-						writer.Write(keyValuePair3.Key + ' ');
+						writer.Write(keyValuePair3.Key + " ");
 					}
 					writer.WriteLine();
 				}
@@ -290,12 +304,12 @@ namespace Satsuma.IO
 					writer.Write(this.Graph.U(arc2).Id + 32L + this.Graph.V(arc2).Id);
 					foreach (KeyValuePair<string, Dictionary<Arc, string>> keyValuePair4 in this.ArcMaps)
 					{
-						string empty2;
-						if (!keyValuePair4.Value.TryGetValue(arc2, out empty2))
+						string text3;
+						if (!keyValuePair4.Value.TryGetValue(arc2, out text3))
 						{
-							empty2 = string.Empty;
+							text3 = "";
 						}
-						writer.Write(" \"" + LemonGraphFormat.Escape(empty2) + '"');
+						writer.Write(" \"" + LemonGraphFormat.Escape(text3) + "\"");
 					}
 					writer.WriteLine();
 				}
@@ -306,13 +320,13 @@ namespace Satsuma.IO
 				writer.WriteLine("@attributes");
 				foreach (KeyValuePair<string, string> keyValuePair5 in this.Attributes)
 				{
-					writer.WriteLine(string.Concat(new object[]
+					writer.WriteLine(string.Concat(new string[]
 					{
-						'"',
+						"\"",
 						LemonGraphFormat.Escape(keyValuePair5.Key),
 						"\" \"",
 						LemonGraphFormat.Escape(keyValuePair5.Value),
-						'"'
+						"\""
 					}));
 				}
 				writer.WriteLine();

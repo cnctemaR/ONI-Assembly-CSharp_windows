@@ -6,16 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Spherical harmonics up to the second order (3 bands, 9 coefficients).</para>
-	/// </summary>
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Export/SphericalHarmonicsL2.bindings.h")]
+	[UsedByNativeCode]
 	public struct SphericalHarmonicsL2 : IEquatable<SphericalHarmonicsL2>
 	{
-		/// <summary>
-		///   <para>Clears SH probe to zero.</para>
-		/// </summary>
 		public void Clear()
 		{
 			this.SetZero();
@@ -26,21 +20,11 @@ namespace UnityEngine.Rendering
 			SphericalHarmonicsL2.SetZero_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Add ambient lighting to probe data.</para>
-		/// </summary>
-		/// <param name="color"></param>
 		public void AddAmbientLight(Color color)
 		{
 			SphericalHarmonicsL2.AddAmbientLight_Injected(ref this, ref color);
 		}
 
-		/// <summary>
-		///   <para>Add directional light to probe data.</para>
-		/// </summary>
-		/// <param name="direction"></param>
-		/// <param name="color"></param>
-		/// <param name="intensity"></param>
 		public void AddDirectionalLight(Vector3 direction, Color color, float intensity)
 		{
 			Color color2 = color * (2f * intensity);
@@ -53,11 +37,6 @@ namespace UnityEngine.Rendering
 			SphericalHarmonicsL2.AddDirectionalLightInternal_Injected(ref sh, ref direction, ref color);
 		}
 
-		/// <summary>
-		///   <para>Evaluates the Spherical Harmonics for each of the given directions. The result from the first direction is written into the first element of results, the result from the second direction is written into the second element of results, and so on. The array size of directions and results must match and directions must be normalized.</para>
-		/// </summary>
-		/// <param name="directions">Normalized directions for which the spherical harmonics are to be evaluated.</param>
-		/// <param name="results">Output array for the evaluated values of the corresponding directions.</param>
 		public void Evaluate(Vector3[] directions, Color[] results)
 		{
 			if (directions == null)

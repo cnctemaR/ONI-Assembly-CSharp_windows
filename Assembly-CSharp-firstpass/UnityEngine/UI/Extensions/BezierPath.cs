@@ -41,32 +41,31 @@ namespace UnityEngine.UI.Extensions
 				if (i == 0)
 				{
 					Vector2 vector = segmentPoints[i];
-					Vector2 vector2 = segmentPoints[i + 1];
-					Vector2 vector3 = vector2 - vector;
-					Vector2 vector4 = vector + scale * vector3;
+					Vector2 vector2 = segmentPoints[i + 1] - vector;
+					Vector2 vector3 = vector + scale * vector2;
 					this.controlPoints.Add(vector);
-					this.controlPoints.Add(vector4);
+					this.controlPoints.Add(vector3);
 				}
 				else if (i == segmentPoints.Count - 1)
 				{
-					Vector2 vector5 = segmentPoints[i - 1];
-					Vector2 vector6 = segmentPoints[i];
-					Vector2 vector7 = vector6 - vector5;
-					Vector2 vector8 = vector6 - scale * vector7;
-					this.controlPoints.Add(vector8);
-					this.controlPoints.Add(vector6);
+					Vector2 vector4 = segmentPoints[i - 1];
+					Vector2 vector5 = segmentPoints[i];
+					Vector2 vector6 = vector5 - vector4;
+					Vector2 vector7 = vector5 - scale * vector6;
+					this.controlPoints.Add(vector7);
+					this.controlPoints.Add(vector5);
 				}
 				else
 				{
-					Vector2 vector9 = segmentPoints[i - 1];
-					Vector2 vector10 = segmentPoints[i];
-					Vector2 vector11 = segmentPoints[i + 1];
-					Vector2 normalized = (vector11 - vector9).normalized;
-					Vector2 vector12 = vector10 - scale * normalized * (vector10 - vector9).magnitude;
-					Vector2 vector13 = vector10 + scale * normalized * (vector11 - vector10).magnitude;
+					Vector2 vector8 = segmentPoints[i - 1];
+					Vector2 vector9 = segmentPoints[i];
+					Vector2 vector10 = segmentPoints[i + 1];
+					Vector2 normalized = (vector10 - vector8).normalized;
+					Vector2 vector11 = vector9 - scale * normalized * (vector9 - vector8).magnitude;
+					Vector2 vector12 = vector9 + scale * normalized * (vector10 - vector9).magnitude;
+					this.controlPoints.Add(vector11);
+					this.controlPoints.Add(vector9);
 					this.controlPoints.Add(vector12);
-					this.controlPoints.Add(vector10);
-					this.controlPoints.Add(vector13);
 				}
 			}
 			this.curveCount = (this.controlPoints.Count - 1) / 3;
@@ -206,10 +205,7 @@ namespace UnityEngine.UI.Extensions
 			float num3 = num * num;
 			float num4 = num3 * num;
 			float num5 = num2 * t;
-			Vector2 vector = num4 * p0;
-			vector += 3f * num3 * t * p1;
-			vector += 3f * num * num2 * p2;
-			return vector + num5 * p3;
+			return num4 * p0 + 3f * num3 * t * p1 + 3f * num * num2 * p2 + num5 * p3;
 		}
 
 		public int SegmentsPerCurve = 10;

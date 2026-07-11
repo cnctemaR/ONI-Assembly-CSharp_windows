@@ -10,21 +10,9 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class SpaceDestination
 {
-	public SpaceDestination(int id, string type, int distance)
+	private static global::Tuple<SimHashes, MathUtil.MinMax> GetRareElement(SimHashes id)
 	{
-		this.id = id;
-		this.type = type;
-		this.distance = distance;
-		SpaceDestinationType destinationType = this.GetDestinationType();
-		this.availableMass = (float)(destinationType.maxiumMass - destinationType.minimumMass);
-		this.GenerateSurfaceElements();
-		this.GenerateMissions();
-		this.GenerateResearchOpportunities();
-	}
-
-	private static Tuple<SimHashes, MathUtil.MinMax> GetRareElement(SimHashes id)
-	{
-		foreach (Tuple<SimHashes, MathUtil.MinMax> tuple in SpaceDestination.RARE_ELEMENTS)
+		foreach (global::Tuple<SimHashes, MathUtil.MinMax> tuple in SpaceDestination.RARE_ELEMENTS)
 		{
 			if (tuple.first == id)
 			{
@@ -58,6 +46,18 @@ public class SpaceDestination
 		}
 	}
 
+	public SpaceDestination(int id, string type, int distance)
+	{
+		this.id = id;
+		this.type = type;
+		this.distance = distance;
+		SpaceDestinationType destinationType = this.GetDestinationType();
+		this.availableMass = (float)(destinationType.maxiumMass - destinationType.minimumMass);
+		this.GenerateSurfaceElements();
+		this.GenerateMissions();
+		this.GenerateResearchOpportunities();
+	}
+
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
@@ -76,8 +76,7 @@ public class SpaceDestination
 	public float GetCurrentOrbitPercentage()
 	{
 		float num = 0.1f * Mathf.Pow((float)this.OneBasedDistance, 2f);
-		float num2 = (float)GameClock.Instance.GetCycle() + GameClock.Instance.GetCurrentCycleAsPercentage();
-		return (num2 + this.startingOrbitPercentage * num) % num / num;
+		return ((float)GameClock.Instance.GetCycle() + GameClock.Instance.GetCurrentCycleAsPercentage() + this.startingOrbitPercentage * num) % num / num;
 	}
 
 	public SpaceDestination.ResearchOpportunity TryCompleteResearchOpportunity()
@@ -113,13 +112,13 @@ public class SpaceDestination
 		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.SURFACE, ROCKETRY.DESTINATION_RESEARCH.BASIC));
 		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.SUBSURFACE, ROCKETRY.DESTINATION_RESEARCH.BASIC));
 		float num = 0f;
-		foreach (Tuple<float, int> tuple in SpaceDestination.RARE_ELEMENT_CHANCES)
+		foreach (global::Tuple<float, int> tuple in SpaceDestination.RARE_ELEMENT_CHANCES)
 		{
 			num += tuple.first;
 		}
 		float num2 = global::UnityEngine.Random.value * num;
 		int num3 = 0;
-		foreach (Tuple<float, int> tuple2 in SpaceDestination.RARE_ELEMENT_CHANCES)
+		foreach (global::Tuple<float, int> tuple2 in SpaceDestination.RARE_ELEMENT_CHANCES)
 		{
 			num2 -= tuple2.first;
 			if (num2 <= 0f)
@@ -134,19 +133,21 @@ public class SpaceDestination
 		if (global::UnityEngine.Random.value < 0.33f)
 		{
 			int num4 = global::UnityEngine.Random.Range(0, this.researchOpportunities.Count);
-			SpaceDestination.ResearchOpportunity researchOpportunity = this.researchOpportunities[num4];
-			researchOpportunity.discoveredRareItem = SpaceDestination.RARE_ITEMS[global::UnityEngine.Random.Range(0, SpaceDestination.RARE_ITEMS.Count)].first;
+			this.researchOpportunities[num4].discoveredRareItem = SpaceDestination.RARE_ITEMS[global::UnityEngine.Random.Range(0, SpaceDestination.RARE_ITEMS.Count)].first;
 		}
 	}
 
 	public void GenerateMissions()
 	{
 		bool flag = true;
-		foreach (SpaceMission spaceMission in this.missions)
+		using (List<SpaceMission>.Enumerator enumerator = this.missions.GetEnumerator())
 		{
-			if (spaceMission.craft == null)
+			while (enumerator.MoveNext())
 			{
-				flag = false;
+				if (enumerator.Current.craft == null)
+				{
+					flag = false;
+				}
 			}
 		}
 		if (flag)
@@ -273,26 +274,26 @@ public class SpaceDestination
 
 	private const int MASS_TO_RECOVER_AMOUNT = 1000;
 
-	private static List<Tuple<float, int>> RARE_ELEMENT_CHANCES = new List<Tuple<float, int>>
+	private static List<global::Tuple<float, int>> RARE_ELEMENT_CHANCES = new List<global::Tuple<float, int>>
 	{
-		new Tuple<float, int>(1f, 0),
-		new Tuple<float, int>(0.33f, 1),
-		new Tuple<float, int>(0.03f, 2)
+		new global::Tuple<float, int>(1f, 0),
+		new global::Tuple<float, int>(0.33f, 1),
+		new global::Tuple<float, int>(0.03f, 2)
 	};
 
-	private static readonly List<Tuple<SimHashes, MathUtil.MinMax>> RARE_ELEMENTS = new List<Tuple<SimHashes, MathUtil.MinMax>>
+	private static readonly List<global::Tuple<SimHashes, MathUtil.MinMax>> RARE_ELEMENTS = new List<global::Tuple<SimHashes, MathUtil.MinMax>>
 	{
-		new Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Katairite, new MathUtil.MinMax(1f, 10f)),
-		new Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Niobium, new MathUtil.MinMax(1f, 10f)),
-		new Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Fullerene, new MathUtil.MinMax(1f, 10f)),
-		new Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Isoresin, new MathUtil.MinMax(1f, 10f))
+		new global::Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Katairite, new MathUtil.MinMax(1f, 10f)),
+		new global::Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Niobium, new MathUtil.MinMax(1f, 10f)),
+		new global::Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Fullerene, new MathUtil.MinMax(1f, 10f)),
+		new global::Tuple<SimHashes, MathUtil.MinMax>(SimHashes.Isoresin, new MathUtil.MinMax(1f, 10f))
 	};
 
 	private const float RARE_ITEM_CHANCE = 0.33f;
 
-	private static readonly List<Tuple<string, MathUtil.MinMax>> RARE_ITEMS = new List<Tuple<string, MathUtil.MinMax>>
+	private static readonly List<global::Tuple<string, MathUtil.MinMax>> RARE_ITEMS = new List<global::Tuple<string, MathUtil.MinMax>>
 	{
-		new Tuple<string, MathUtil.MinMax>("GeneShufflerRecharge", new MathUtil.MinMax(1f, 2f))
+		new global::Tuple<string, MathUtil.MinMax>("GeneShufflerRecharge", new MathUtil.MinMax(1f, 2f))
 	};
 
 	[Serialize]
@@ -329,12 +330,6 @@ public class SpaceDestination
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class ResearchOpportunity
 	{
-		public ResearchOpportunity(string description, int pointValue)
-		{
-			this.description = description;
-			this.dataValue = pointValue;
-		}
-
 		[OnDeserialized]
 		private void OnDeserialized()
 		{
@@ -346,6 +341,12 @@ public class SpaceDestination
 			{
 				this.dataValue = 50;
 			}
+		}
+
+		public ResearchOpportunity(string description, int pointValue)
+		{
+			this.description = description;
+			this.dataValue = pointValue;
 		}
 
 		public bool TryComplete(SpaceDestination destination)

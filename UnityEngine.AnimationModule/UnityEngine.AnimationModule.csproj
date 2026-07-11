@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF60}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC93566B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AnimationModule</AssemblyName>
@@ -33,6 +33,8 @@
     <Compile Include="Animations\AnimationPlayableExtensions.cs" />
     <Compile Include="Animations\AnimationPlayableGraphExtensions.cs" />
     <Compile Include="Animations\AnimationPlayableOutput.cs" />
+    <Compile Include="Animations\AnimationPosePlayable.cs" />
+    <Compile Include="Animations\AnimationRemoveScalePlayable.cs" />
     <Compile Include="Animations\AnimatorControllerPlayable.cs" />
     <Compile Include="Animations\Axis.cs" />
     <Compile Include="Animations\ConstraintSource.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="HumanPose.cs" />
     <Compile Include="HumanPoseHandler.cs" />
     <Compile Include="HumanTrait.cs" />
+    <Compile Include="IAnimationClipSource.cs" />
     <Compile Include="LegDof.cs" />
     <Compile Include="MatchTargetWeightMask.cs" />
     <Compile Include="Motion.cs" />
@@ -105,22 +108,16 @@
     <Compile Include="TransitionType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF54}</Project>
-      <Name>System.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF69}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935673}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF7F}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935687}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="System.Core" />
+  </ItemGroup>
 </Project>

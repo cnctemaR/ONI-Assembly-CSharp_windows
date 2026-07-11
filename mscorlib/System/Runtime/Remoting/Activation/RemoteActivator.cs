@@ -12,13 +12,15 @@ namespace System.Runtime.Remoting.Activation
 			{
 				throw new RemotingException("The type " + msg.ActivationTypeName + " is not allowed to be client activated");
 			}
-			object[] array = new object[]
+			object[] array = null;
+			if (msg.ActivationType.IsContextful)
 			{
-				new RemoteActivationAttribute(msg.ContextProperties)
-			};
-			MarshalByRefObject marshalByRefObject = (MarshalByRefObject)Activator.CreateInstance(msg.ActivationType, msg.Args, array);
-			ObjRef objRef = RemotingServices.Marshal(marshalByRefObject);
-			return new ConstructionResponse(objRef, null, msg);
+				array = new object[]
+				{
+					new RemoteActivationAttribute(msg.ContextProperties)
+				};
+			}
+			return new ConstructionResponse(RemotingServices.Marshal((MarshalByRefObject)Activator.CreateInstance(msg.ActivationType, msg.Args, array)), null, msg);
 		}
 
 		public override object InitializeLifetimeService()

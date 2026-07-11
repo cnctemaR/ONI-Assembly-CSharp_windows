@@ -4,10 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 {
 	public abstract class NoiseMapBuilder
 	{
-		public NoiseMapBuilder()
-		{
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -70,6 +66,10 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 			{
 				this._filter = value;
 			}
+		}
+
+		public NoiseMapBuilder()
+		{
 		}
 
 		public abstract void Build();

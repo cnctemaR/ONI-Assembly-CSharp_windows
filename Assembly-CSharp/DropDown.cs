@@ -43,11 +43,9 @@ public class DropDown : KMonoBehaviour
 		if (!this.open)
 		{
 			this.Open();
+			return;
 		}
-		else
-		{
-			this.Close();
-		}
+		this.Close();
 	}
 
 	public void ChangeContent(IEnumerable<IListableOption> contentKeys)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 
 public class TreeFilterableSideScreenElement : KMonoBehaviour
@@ -17,7 +16,6 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Tag, bool> OnSelectionChanged;
 
 	public KToggle GetCheckboxToggle()
@@ -63,7 +61,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 			if (component != null)
 			{
-				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, string.Empty);
+				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, "");
 			}
 		}
 		return sprite;
@@ -72,7 +70,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 	public void SetSprite(Tag t)
 	{
 		Element element = ElementLoader.GetElement(t);
-		Sprite sprite = ((element == null) ? this.GetStorageObjectSprite(t) : Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, string.Empty));
+		Sprite sprite = ((element != null) ? Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, "") : this.GetStorageObjectSprite(t));
 		this.elementImg.sprite = sprite;
 		this.elementImg.enabled = sprite != null;
 	}

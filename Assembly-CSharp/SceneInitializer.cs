@@ -11,10 +11,10 @@ public class SceneInitializer : MonoBehaviour
 	{
 		Localization.SwapToLocalizedFont();
 		string environmentVariable = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-		string text = Application.dataPath + Path.DirectorySeparatorChar + "Plugins";
+		string text = Application.dataPath + Path.DirectorySeparatorChar.ToString() + "Plugins";
 		if (!environmentVariable.Contains(text))
 		{
-			Environment.SetEnvironmentVariable("PATH", environmentVariable + Path.PathSeparator + text, EnvironmentVariableTarget.Process);
+			Environment.SetEnvironmentVariable("PATH", environmentVariable + Path.PathSeparator.ToString() + text, EnvironmentVariableTarget.Process);
 		}
 		SceneInitializer.Instance = this;
 		this.PreLoadPrefabs();

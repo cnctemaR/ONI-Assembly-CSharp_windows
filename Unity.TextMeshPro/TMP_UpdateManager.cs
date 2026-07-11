@@ -8,12 +8,6 @@ namespace TMPro
 {
 	public class TMP_UpdateManager
 	{
-		protected TMP_UpdateManager()
-		{
-			Camera.onPreCull = (Camera.CameraCallback)Delegate.Combine(Camera.onPreCull, new Camera.CameraCallback(this.OnCameraPreCull));
-			RenderPipeline.beginFrameRendering += this.OnBeginFrameRendering;
-		}
-
 		public static TMP_UpdateManager instance
 		{
 			get
@@ -24,6 +18,12 @@ namespace TMPro
 				}
 				return TMP_UpdateManager.s_Instance;
 			}
+		}
+
+		protected TMP_UpdateManager()
+		{
+			Camera.onPreCull = (Camera.CameraCallback)Delegate.Combine(Camera.onPreCull, new Camera.CameraCallback(this.OnCameraPreCull));
+			RenderPipeline.beginFrameRendering += this.OnBeginFrameRendering;
 		}
 
 		public static void RegisterTextElementForLayoutRebuild(TMP_Text element)

@@ -42,8 +42,7 @@ namespace Klei.AI
 
 			public override void OnCure(GameObject go, object instance_data)
 			{
-				SlimeSickness.SlimeLungComponent.StatesInstance statesInstance = (SlimeSickness.SlimeLungComponent.StatesInstance)instance_data;
-				statesInstance.StopSM("Cured");
+				((SlimeSickness.SlimeLungComponent.StatesInstance)instance_data).StopSM("Cured");
 			}
 
 			public override List<Descriptor> GetSymptoms()

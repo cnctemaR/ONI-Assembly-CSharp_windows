@@ -23,10 +23,8 @@ namespace System.Diagnostics
 		{
 		}
 
-		public static bool IsLogging()
-		{
-			return false;
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsLogging();
 
 		[MonoTODO("Not implemented")]
 		public static bool Launch()
@@ -34,10 +32,18 @@ namespace System.Diagnostics
 			throw new NotImplementedException();
 		}
 
-		public static void Log(int level, string category, string message)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Log(int level, string category, string message);
+
+		public static void NotifyOfCrossThreadDependency()
 		{
 		}
 
-		public static readonly string DefaultCategory = string.Empty;
+		[Obsolete("Call the static methods directly on this type", true)]
+		public Debugger()
+		{
+		}
+
+		public static readonly string DefaultCategory = "";
 	}
 }

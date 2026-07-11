@@ -14,7 +14,7 @@ namespace System.Net.NetworkInformation
 			long num;
 			try
 			{
-				num = long.Parse(NetworkInterface.ReadLine(this.linux.IfacePath + file));
+				num = long.Parse(LinuxNetworkInterface.ReadLine(this.linux.IfacePath + file));
 			}
 			catch
 			{

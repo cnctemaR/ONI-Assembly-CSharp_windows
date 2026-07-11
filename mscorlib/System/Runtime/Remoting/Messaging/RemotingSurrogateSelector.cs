@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
@@ -19,6 +20,7 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		[SecurityCritical]
 		public virtual void ChainSelector(ISurrogateSelector selector)
 		{
 			if (this._next != null)
@@ -28,6 +30,7 @@ namespace System.Runtime.Remoting.Messaging
 			this._next = selector;
 		}
 
+		[SecurityCritical]
 		public virtual ISurrogateSelector GetNextSelector()
 		{
 			return this._next;
@@ -38,6 +41,7 @@ namespace System.Runtime.Remoting.Messaging
 			return this._rootObj;
 		}
 
+		[SecurityCritical]
 		public virtual ISerializationSurrogate GetSurrogate(Type type, StreamingContext context, out ISurrogateSelector ssout)
 		{
 			if (type.IsMarshalByRef)

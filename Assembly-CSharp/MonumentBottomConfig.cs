@@ -40,13 +40,11 @@ public class MonumentBottomConfig : IBuildingConfig
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
-		BuildingAttachPoint buildingAttachPoint = go.AddOrGet<BuildingAttachPoint>();
-		buildingAttachPoint.points = new BuildingAttachPoint.HardPoint[]
+		go.AddOrGet<BuildingAttachPoint>().points = new BuildingAttachPoint.HardPoint[]
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 5), "MonumentMiddle", null)
 		};
-		MonumentPart monumentPart = go.AddOrGet<MonumentPart>();
-		monumentPart.part = MonumentPart.Part.Bottom;
+		go.AddOrGet<MonumentPart>().part = MonumentPart.Part.Bottom;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -64,19 +62,19 @@ public class MonumentBottomConfig : IBuildingConfig
 		{
 			MonumentPart monumentPart = game_object.AddOrGet<MonumentPart>();
 			monumentPart.part = MonumentPart.Part.Bottom;
-			monumentPart.selectableStatesAndSymbols = new List<Tuple<string, string>>();
+			monumentPart.selectableStatesAndSymbols = new List<global::Tuple<string, string>>();
 			monumentPart.stateUISymbol = "base";
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_a", "straight_legs"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_b", "wide_stance"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_c", "hmmm_legs"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_d", "sitting_stool"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_e", "wide_stance2"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_f", "posing1"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_g", "knee_kick"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_h", "step_on_hatches"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_i", "sit_on_tools"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_j", "water_pacu"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_k", "sit_on_eggs"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_a", "straight_legs"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_b", "wide_stance"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_c", "hmmm_legs"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_d", "sitting_stool"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_e", "wide_stance2"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_f", "posing1"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_g", "knee_kick"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_h", "step_on_hatches"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_i", "sit_on_tools"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_j", "water_pacu"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_k", "sit_on_eggs"));
 		};
 	}
 

@@ -11,31 +11,39 @@ namespace System.Security.Cryptography.Xml
 
 		public KeyInfoNode(XmlElement node)
 		{
-			this.LoadXml(node);
+			this._node = node;
 		}
 
 		public XmlElement Value
 		{
 			get
 			{
-				return this.Node;
+				return this._node;
 			}
 			set
 			{
-				this.Node = value;
+				this._node = value;
 			}
 		}
 
 		public override XmlElement GetXml()
 		{
-			return this.Node;
+			return this.GetXml(new XmlDocument
+			{
+				PreserveWhitespace = true
+			});
+		}
+
+		internal override XmlElement GetXml(XmlDocument xmlDocument)
+		{
+			return xmlDocument.ImportNode(this._node, true) as XmlElement;
 		}
 
 		public override void LoadXml(XmlElement value)
 		{
-			this.Node = value;
+			this._node = value;
 		}
 
-		private XmlElement Node;
+		private XmlElement _node;
 	}
 }

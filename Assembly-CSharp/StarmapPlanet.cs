@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -104,8 +103,8 @@ public class StarmapPlanet : KMonoBehaviour
 			RectTransform rectTransform = starmapPlanetVisualizer.rocketIconContainer.rectTransform();
 			if (rectTransform.childCount > 0)
 			{
-				HierarchyReferences component = rectTransform.GetChild(rectTransform.childCount - 1).GetComponent<HierarchyReferences>();
-				component.GetReference<Image>("fg").color = ((!show) ? Color.white : new Color(0.11764706f, 0.8627451f, 0.3137255f));
+				rectTransform.GetChild(rectTransform.childCount - 1).GetComponent<HierarchyReferences>().GetReference<Image>("fg")
+					.color = (show ? new Color(0.11764706f, 0.8627451f, 0.3137255f) : Color.white);
 			}
 		}
 	}
@@ -124,24 +123,10 @@ public class StarmapPlanet : KMonoBehaviour
 				global::UnityEngine.Object.Destroy(rectTransform.GetChild(j - 1).gameObject);
 			}
 			int num = 0;
-			IEnumerator enumerator2 = rectTransform.GetEnumerator();
-			try
+			foreach (object obj in rectTransform)
 			{
-				while (enumerator2.MoveNext())
-				{
-					object obj = enumerator2.Current;
-					RectTransform rectTransform2 = (RectTransform)obj;
-					rectTransform2.anchoredPosition = new Vector2((float)num * -10f, 0f);
-					num++;
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator2 as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				((RectTransform)obj).anchoredPosition = new Vector2((float)num * -10f, 0f);
+				num++;
 			}
 		}
 	}

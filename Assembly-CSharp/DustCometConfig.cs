@@ -27,8 +27,7 @@ public class DustCometConfig : IEntityConfig
 		kbatchedAnimController.initialAnim = "fall_loop";
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
-		KCircleCollider2D kcircleCollider2D = gameObject.AddOrGet<KCircleCollider2D>();
-		kcircleCollider2D.radius = 0.5f;
+		gameObject.AddOrGet<KCircleCollider2D>().radius = 0.5f;
 		gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
 		return gameObject;
 	}

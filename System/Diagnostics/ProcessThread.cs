@@ -3,16 +3,16 @@ using System.ComponentModel;
 
 namespace System.Diagnostics
 {
-	[global::System.ComponentModel.Designer("System.Diagnostics.Design.ProcessThreadDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	public class ProcessThread : global::System.ComponentModel.Component
+	[Designer("System.Diagnostics.Design.ProcessThreadDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	public class ProcessThread : Component
 	{
-		[global::System.MonoTODO("Parse parameters")]
+		[MonoTODO("Parse parameters")]
 		internal ProcessThread()
 		{
 		}
 
-		[global::System.MonoTODO]
 		[MonitoringDescription("The base priority of this thread.")]
+		[MonoTODO]
 		public int BasePriority
 		{
 			get
@@ -21,8 +21,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
 		[MonitoringDescription("The current priority of this thread.")]
+		[MonoTODO]
 		public int CurrentPriority
 		{
 			get
@@ -31,7 +31,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		[MonitoringDescription("The ID of this thread.")]
 		public int Id
 		{
@@ -41,8 +41,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.MonoTODO]
+		[Browsable(false)]
+		[MonoTODO]
 		public int IdealProcessor
 		{
 			set
@@ -50,7 +50,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		[MonitoringDescription("Thread gets a priority boot when interactively used by a user.")]
 		public bool PriorityBoostEnabled
 		{
@@ -63,7 +63,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		[MonitoringDescription("The priority level of this thread.")]
 		public ThreadPriorityLevel PriorityLevel
 		{
@@ -76,7 +76,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		[MonitoringDescription("The amount of CPU time used in privileged mode.")]
 		public TimeSpan PrivilegedProcessorTime
 		{
@@ -86,8 +86,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
-		[global::System.ComponentModel.Browsable(false)]
+		[MonoTODO]
+		[Browsable(false)]
 		public IntPtr ProcessorAffinity
 		{
 			set
@@ -95,8 +95,8 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonoTODO]
 		[MonitoringDescription("The start address in memory of this thread.")]
-		[global::System.MonoTODO]
 		public IntPtr StartAddress
 		{
 			get
@@ -106,7 +106,7 @@ namespace System.Diagnostics
 		}
 
 		[MonitoringDescription("The time this thread was started.")]
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public DateTime StartTime
 		{
 			get
@@ -115,8 +115,8 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonoTODO]
 		[MonitoringDescription("The current state of this thread.")]
-		[global::System.MonoTODO]
 		public ThreadState ThreadState
 		{
 			get
@@ -126,7 +126,7 @@ namespace System.Diagnostics
 		}
 
 		[MonitoringDescription("The total amount of CPU time used.")]
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public TimeSpan TotalProcessorTime
 		{
 			get
@@ -135,8 +135,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
 		[MonitoringDescription("The amount of CPU time used in user mode.")]
+		[MonoTODO]
 		public TimeSpan UserProcessorTime
 		{
 			get
@@ -146,7 +146,7 @@ namespace System.Diagnostics
 		}
 
 		[MonitoringDescription("The reason why this thread is waiting.")]
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public ThreadWaitReason WaitReason
 		{
 			get
@@ -155,7 +155,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public void ResetIdealProcessor()
 		{
 		}

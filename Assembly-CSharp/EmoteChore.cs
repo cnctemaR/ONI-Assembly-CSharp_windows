@@ -25,7 +25,11 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 
 	protected override StatusItem GetStatusItem()
 	{
-		return (this.getStatusItem == null) ? base.GetStatusItem() : this.getStatusItem();
+		if (this.getStatusItem == null)
+		{
+			return base.GetStatusItem();
+		}
+		return this.getStatusItem();
 	}
 
 	public override string ToString()

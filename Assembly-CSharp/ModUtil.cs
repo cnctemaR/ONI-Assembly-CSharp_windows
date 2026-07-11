@@ -14,8 +14,7 @@ public static class ModUtil
 		{
 			return;
 		}
-		IList<string> list = BUILDINGS.PLANORDER[num].data as IList<string>;
-		list.Add(building_id);
+		(BUILDINGS.PLANORDER[num].data as IList<string>).Add(building_id);
 	}
 
 	public static void AddBuildingToHotkeyBuildMenu(HashedString category, string building_id, global::Action hotkey)
@@ -25,8 +24,7 @@ public static class ModUtil
 		{
 			return;
 		}
-		IList<BuildMenu.BuildingInfo> list = info.data as IList<BuildMenu.BuildingInfo>;
-		list.Add(new BuildMenu.BuildingInfo(building_id, hotkey));
+		(info.data as IList<BuildMenu.BuildingInfo>).Add(new BuildMenu.BuildingInfo(building_id, hotkey));
 	}
 
 	public static KAnimFile AddKAnimMod(string name, KAnimFile.Mod anim_mod)
@@ -39,8 +37,7 @@ public static class ModUtil
 		groupFile.groupID = animCommandFile.GetGroupName(kanimFile);
 		groupFile.commandDirectory = "assets/" + name;
 		animCommandFile.AddGroupFile(groupFile);
-		KAnimGroupFile groupFile2 = KAnimGroupFile.GetGroupFile();
-		if (groupFile2.AddAnimMod(groupFile, animCommandFile, kanimFile) == KAnimGroupFile.AddModResult.Added)
+		if (KAnimGroupFile.GetGroupFile().AddAnimMod(groupFile, animCommandFile, kanimFile) == KAnimGroupFile.AddModResult.Added)
 		{
 			Assets.ModLoadedKAnims.Add(kanimFile);
 		}
@@ -57,8 +54,7 @@ public static class ModUtil
 		groupFile.groupID = animCommandFile.GetGroupName(kanimFile);
 		groupFile.commandDirectory = "assets/" + name;
 		animCommandFile.AddGroupFile(groupFile);
-		KAnimGroupFile groupFile2 = KAnimGroupFile.GetGroupFile();
-		groupFile2.AddAnimFile(groupFile, animCommandFile, kanimFile);
+		KAnimGroupFile.GetGroupFile().AddAnimFile(groupFile, animCommandFile, kanimFile);
 		Assets.ModLoadedKAnims.Add(kanimFile);
 		return kanimFile;
 	}

@@ -2,14 +2,8 @@
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>An instance representing a link available for pathfinding.</para>
-	/// </summary>
 	public struct NavMeshLinkInstance
 	{
-		/// <summary>
-		///   <para>True if the NavMesh link is added to the navigation system - otherwise false (Read Only).</para>
-		/// </summary>
 		public bool valid
 		{
 			get
@@ -30,17 +24,11 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Removes this instance from the game.</para>
-		/// </summary>
 		public void Remove()
 		{
 			NavMesh.RemoveLinkInternal(this.id);
 		}
 
-		/// <summary>
-		///   <para>Get or set the owning Object.</para>
-		/// </summary>
 		public Object owner
 		{
 			get

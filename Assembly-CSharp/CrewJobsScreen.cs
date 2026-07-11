@@ -30,8 +30,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 		base.SpawnEntries();
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.Prefab_CrewEntry, this.EntriesPanelTransform.gameObject, false);
-			CrewJobsEntry component = gameObject.GetComponent<CrewJobsEntry>();
+			CrewJobsEntry component = Util.KInstantiateUI(this.Prefab_CrewEntry, this.EntriesPanelTransform.gameObject, false).GetComponent<CrewJobsEntry>();
 			component.Populate(minionIdentity);
 			this.EntryObjects.Add(component);
 		}
@@ -46,11 +45,9 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 			if (this.SortEveryoneToggle.isOn)
 			{
 				toggleImage.SetActive();
+				return;
 			}
-			else
-			{
-				toggleImage.SetInactive();
-			}
+			toggleImage.SetInactive();
 		});
 		this.SortByPreviousSelected();
 		this.dirty = true;
@@ -65,14 +62,10 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 		int childCount = this.ColumnTitlesContainer.childCount;
 		for (int i = 0; i < childCount; i++)
 		{
-			if (i < this.choreGroups.Count)
+			if (i < this.choreGroups.Count && this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>() == this.lastSortToggle)
 			{
-				Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>();
-				if (componentInChildren == this.lastSortToggle)
-				{
-					this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
-					return;
-				}
+				this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
+				return;
 			}
 		}
 		if (this.SortEveryoneToggle == this.lastSortToggle)
@@ -108,11 +101,9 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 					if (sortToggle.isOn)
 					{
 						toggleImage.SetActive();
+						return;
 					}
-					else
-					{
-						toggleImage.SetInactive();
-					}
+					toggleImage.SetInactive();
 				});
 			}
 			ToolTip JobTooltip = this.ColumnTitlesContainer.GetChild(i).GetComponent<ToolTip>();
@@ -153,7 +144,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 			component.AddMultiStringTooltip(UI.TOOLTIPS.JOBSSCREEN_ATTRIBUTES, this.TextStyle_JobTooltip_Description);
 			component.AddMultiStringTooltip("•  " + choreGroup.attribute.Name, this.TextStyle_JobTooltip_RelevantAttributes);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private void ToggleAllTasksEveryone()
@@ -279,24 +270,17 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 					}
 					Button componentInChildren = this.ColumnTitlesContainer.GetChild(i).GetComponentInChildren<Button>();
 					ImageToggleState component = componentInChildren.GetComponentsInChildren<Image>(true)[1].GetComponent<ImageToggleState>();
-					CrewJobsScreen.everyoneToggleState everyoneToggleState = this.EveryoneToggles[componentInChildren];
-					if (everyoneToggleState != CrewJobsScreen.everyoneToggleState.off)
+					switch (this.EveryoneToggles[componentInChildren])
 					{
-						if (everyoneToggleState != CrewJobsScreen.everyoneToggleState.mixed)
-						{
-							if (everyoneToggleState == CrewJobsScreen.everyoneToggleState.on)
-							{
-								component.SetActive();
-							}
-						}
-						else
-						{
-							component.SetInactive();
-						}
-					}
-					else
-					{
+					case CrewJobsScreen.everyoneToggleState.off:
 						component.SetDisabled();
+						break;
+					case CrewJobsScreen.everyoneToggleState.mixed:
+						component.SetInactive();
+						break;
+					case CrewJobsScreen.everyoneToggleState.on:
+						component.SetActive();
+						break;
 					}
 				}
 			}
@@ -313,24 +297,17 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 				this.EveryoneAllTaskToggle = new KeyValuePair<Button, CrewJobsScreen.everyoneToggleState>(this.EveryoneAllTaskToggle.Key, CrewJobsScreen.everyoneToggleState.off);
 			}
 			ImageToggleState component2 = this.EveryoneAllTaskToggle.Key.GetComponentsInChildren<Image>(true)[1].GetComponent<ImageToggleState>();
-			CrewJobsScreen.everyoneToggleState value = this.EveryoneAllTaskToggle.Value;
-			if (value != CrewJobsScreen.everyoneToggleState.off)
+			switch (this.EveryoneAllTaskToggle.Value)
 			{
-				if (value != CrewJobsScreen.everyoneToggleState.mixed)
-				{
-					if (value == CrewJobsScreen.everyoneToggleState.on)
-					{
-						component2.SetActive();
-					}
-				}
-				else
-				{
-					component2.SetInactive();
-				}
-			}
-			else
-			{
+			case CrewJobsScreen.everyoneToggleState.off:
 				component2.SetDisabled();
+				break;
+			case CrewJobsScreen.everyoneToggleState.mixed:
+				component2.SetInactive();
+				break;
+			case CrewJobsScreen.everyoneToggleState.on:
+				component2.SetActive();
+				break;
 			}
 			this.screenWidth = this.EntriesPanelTransform.rectTransform().sizeDelta.x;
 			this.ScrollRectTransform.GetComponent<LayoutElement>().minWidth = this.screenWidth;

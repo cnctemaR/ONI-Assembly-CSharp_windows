@@ -11,17 +11,13 @@ public class DeepProfiler
 	[Conditional("DEEP_PROFILE")]
 	public void BeginSample(string message)
 	{
-		if (this.enableProfiling)
-		{
-		}
+		bool flag = this.enableProfiling;
 	}
 
 	[Conditional("DEEP_PROFILE")]
 	public void EndSample()
 	{
-		if (this.enableProfiling)
-		{
-		}
+		bool flag = this.enableProfiling;
 	}
 
 	private bool enableProfiling;

@@ -5,6 +5,14 @@ namespace YamlDotNet.Core.Tokens
 	[Serializable]
 	public class VersionDirective : Token
 	{
+		public Version Version
+		{
+			get
+			{
+				return this.version;
+			}
+		}
+
 		public VersionDirective(Version version)
 			: this(version, Mark.Empty, Mark.Empty)
 		{
@@ -14,14 +22,6 @@ namespace YamlDotNet.Core.Tokens
 			: base(start, end)
 		{
 			this.version = version;
-		}
-
-		public Version Version
-		{
-			get
-			{
-				return this.version;
-			}
 		}
 
 		public override bool Equals(object obj)

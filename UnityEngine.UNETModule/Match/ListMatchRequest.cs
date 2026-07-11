@@ -42,7 +42,7 @@ namespace UnityEngine.Networking.Match
 			int num = ((this.matchAttributeFilterLessThan != null) ? this.matchAttributeFilterLessThan.Count : 0);
 			num += ((this.matchAttributeFilterEqualTo != null) ? this.matchAttributeFilterEqualTo.Count : 0);
 			num += ((this.matchAttributeFilterGreaterThan != null) ? this.matchAttributeFilterGreaterThan.Count : 0);
-			return base.IsValid() && (this.pageSize >= 1 || this.pageSize <= 1000) && num <= 10;
+			return base.IsValid() && this.pageSize >= 1 && this.pageSize <= 1000 && num <= 10;
 		}
 
 		[Obsolete("This bool is deprecated in favor of filterOutPrivateMatches")]

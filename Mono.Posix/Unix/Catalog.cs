@@ -10,13 +10,13 @@ namespace Mono.Unix
 		{
 		}
 
-		[DllImport("intl")]
+		[DllImport("intl", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr bindtextdomain(IntPtr domainname, IntPtr dirname);
 
-		[DllImport("intl")]
+		[DllImport("intl", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr bind_textdomain_codeset(IntPtr domainname, IntPtr codeset);
 
-		[DllImport("intl")]
+		[DllImport("intl", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr textdomain(IntPtr domainname);
 
 		public static void Init(string package, string localedir)
@@ -73,7 +73,7 @@ namespace Mono.Unix
 			}
 		}
 
-		[DllImport("intl")]
+		[DllImport("intl", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr gettext(IntPtr instring);
 
 		public static string GetString(string s)
@@ -99,7 +99,7 @@ namespace Mono.Unix
 			return text;
 		}
 
-		[DllImport("intl")]
+		[DllImport("intl", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr ngettext(IntPtr singular, IntPtr plural, int n);
 
 		public static string GetPluralString(string s, string p, int n)

@@ -5,6 +5,37 @@ using UnityEngine.UI;
 
 public class CodexImage : CodexWidget<CodexImage>
 {
+	public Sprite sprite { get; set; }
+
+	public Color color { get; set; }
+
+	public string spriteName
+	{
+		get
+		{
+			return "--> " + ((this.sprite == null) ? "NULL" : this.sprite.ToString());
+		}
+		set
+		{
+			this.sprite = Assets.GetSprite(value);
+		}
+	}
+
+	public string batchedAnimPrefabSourceID
+	{
+		get
+		{
+			return "--> " + ((this.sprite == null) ? "NULL" : this.sprite.ToString());
+		}
+		set
+		{
+			GameObject prefab = Assets.GetPrefab(value);
+			KBatchedAnimController kbatchedAnimController = ((prefab != null) ? prefab.GetComponent<KBatchedAnimController>() : null);
+			KAnimFile kanimFile = ((kbatchedAnimController != null) ? kbatchedAnimController.AnimFiles[0] : null);
+			this.sprite = ((kanimFile != null) ? Def.GetUISpriteFromMultiObjectAnim(kanimFile, "ui", false, "") : null);
+		}
+	}
+
 	public CodexImage()
 	{
 		this.color = Color.white;
@@ -22,45 +53,14 @@ public class CodexImage : CodexWidget<CodexImage>
 	{
 	}
 
-	public CodexImage(int preferredWidth, int preferredHeight, Tuple<Sprite, Color> coloredSprite)
+	public CodexImage(int preferredWidth, int preferredHeight, global::Tuple<Sprite, Color> coloredSprite)
 		: this(preferredWidth, preferredHeight, coloredSprite.first, coloredSprite.second)
 	{
 	}
 
-	public CodexImage(Tuple<Sprite, Color> coloredSprite)
+	public CodexImage(global::Tuple<Sprite, Color> coloredSprite)
 		: this(-1, -1, coloredSprite)
 	{
-	}
-
-	public Sprite sprite { get; set; }
-
-	public Color color { get; set; }
-
-	public string spriteName
-	{
-		get
-		{
-			return "--> " + ((!(this.sprite == null)) ? this.sprite.ToString() : "NULL");
-		}
-		set
-		{
-			this.sprite = Assets.GetSprite(value);
-		}
-	}
-
-	public string batchedAnimPrefabSourceID
-	{
-		get
-		{
-			return "--> " + ((!(this.sprite == null)) ? this.sprite.ToString() : "NULL");
-		}
-		set
-		{
-			GameObject prefab = Assets.GetPrefab(value);
-			KBatchedAnimController kbatchedAnimController = ((!(prefab != null)) ? null : prefab.GetComponent<KBatchedAnimController>());
-			KAnimFile kanimFile = ((!(kbatchedAnimController != null)) ? null : kbatchedAnimController.AnimFiles[0]);
-			this.sprite = ((!(kanimFile != null)) ? null : Def.GetUISpriteFromMultiObjectAnim(kanimFile, "ui", false, string.Empty));
-		}
 	}
 
 	public void ConfigureImage(Image image)

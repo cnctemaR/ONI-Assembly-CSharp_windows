@@ -4,6 +4,14 @@ using Klei.AI;
 
 public class Personality : Resource
 {
+	public string description
+	{
+		get
+		{
+			return this.GetDescription();
+		}
+	}
+
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description)
 		: base(name, name)
 	{
@@ -21,14 +29,6 @@ public class Personality : Resource
 		this.eyes = eyes;
 		this.hair = hair;
 		this.body = body;
-	}
-
-	public string description
-	{
-		get
-		{
-			return this.GetDescription();
-		}
 	}
 
 	public string GetDescription()

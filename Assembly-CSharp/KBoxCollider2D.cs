@@ -41,8 +41,7 @@ public class KBoxCollider2D : KCollider2D
 	{
 		get
 		{
-			Vector3 vector = base.transform.GetPosition() + new Vector3(base.offset.x, base.offset.y, 0f);
-			return new Bounds(vector, new Vector3(this._size.x, this._size.y, 0f));
+			return new Bounds(base.transform.GetPosition() + new Vector3(base.offset.x, base.offset.y, 0f), new Vector3(this._size.x, this._size.y, 0f));
 		}
 	}
 

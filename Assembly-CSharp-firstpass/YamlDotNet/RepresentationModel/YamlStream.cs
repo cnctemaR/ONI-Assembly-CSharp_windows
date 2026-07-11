@@ -10,6 +10,14 @@ namespace YamlDotNet.RepresentationModel
 	[Serializable]
 	public class YamlStream : IEnumerable<YamlDocument>, IEnumerable
 	{
+		public IList<YamlDocument> Documents
+		{
+			get
+			{
+				return this.documents;
+			}
+		}
+
 		public YamlStream()
 		{
 		}
@@ -24,14 +32,6 @@ namespace YamlDotNet.RepresentationModel
 			foreach (YamlDocument yamlDocument in documents)
 			{
 				this.documents.Add(yamlDocument);
-			}
-		}
-
-		public IList<YamlDocument> Documents
-		{
-			get
-			{
-				return this.documents;
 			}
 		}
 

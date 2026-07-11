@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Data.Common;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Microsoft.SqlServer.Server
 {
@@ -8,11 +10,43 @@ namespace Microsoft.SqlServer.Server
 	{
 		internal InvalidUdtException()
 		{
+			base.HResult = -2146232009;
 		}
 
-		[MonoTODO]
+		internal InvalidUdtException(string message)
+			: base(message)
+		{
+			base.HResult = -2146232009;
+		}
+
+		internal InvalidUdtException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+			base.HResult = -2146232009;
+		}
+
+		private InvalidUdtException(SerializationInfo si, StreamingContext sc)
+			: base(si, sc)
+		{
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public override void GetObjectData(SerializationInfo si, StreamingContext context)
 		{
+			base.GetObjectData(si, context);
+		}
+
+		internal static InvalidUdtException Create(Type udtType, string resourceReason)
+		{
+			string @string = Res.GetString(resourceReason);
+			InvalidUdtException ex = new InvalidUdtException(Res.GetString("'{0}' is an invalid user defined type, reason: {1}.", new object[] { udtType.FullName, @string }));
+			ADP.TraceExceptionAsReturnValue(ex);
+			return ex;
+		}
+
+		private class HResults
+		{
+			internal const int InvalidUdt = -2146232009;
 		}
 	}
 }

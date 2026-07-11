@@ -19,23 +19,14 @@ public class BuildingTemplates
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.MaterialCategory = construction_materials;
 		buildingDef.BaseMeltingPoint = melting_point;
-		switch (build_location_rule)
+		if (build_location_rule == BuildLocationRule.Anywhere || build_location_rule == BuildLocationRule.Tile || build_location_rule - BuildLocationRule.Conduit <= 2)
 		{
-		case BuildLocationRule.Tile:
-		case BuildLocationRule.Conduit:
-		case BuildLocationRule.LogicBridge:
-		case BuildLocationRule.WireBridge:
-			break;
-		default:
-			if (build_location_rule != BuildLocationRule.Anywhere)
-			{
-				buildingDef.ContinuouslyCheckFoundation = true;
-				goto IL_00A6;
-			}
-			break;
+			buildingDef.ContinuouslyCheckFoundation = false;
 		}
-		buildingDef.ContinuouslyCheckFoundation = false;
-		IL_00A6:
+		else
+		{
+			buildingDef.ContinuouslyCheckFoundation = true;
+		}
 		buildingDef.BuildLocationRule = build_location_rule;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim(anim) };
@@ -101,7 +92,7 @@ public class BuildingTemplates
 
 	public static Storage CreateDefaultStorage(GameObject go, bool forceCreate = false)
 	{
-		Storage storage = ((!forceCreate) ? go.AddOrGet<Storage>() : go.AddComponent<Storage>());
+		Storage storage = (forceCreate ? go.AddComponent<Storage>() : go.AddOrGet<Storage>());
 		storage.capacityKg = 2000f;
 		return storage;
 	}

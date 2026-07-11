@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Hosting;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.Policy;
+using Unity;
 
 namespace System
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AppDomainSetup : IAppDomainSetup
 	{
 		public AppDomainSetup()
@@ -35,8 +39,8 @@ namespace System
 			this.disallow_code_downloads = setup.disallow_code_downloads;
 			this._activationArguments = setup._activationArguments;
 			this.domain_initializer = setup.domain_initializer;
+			this.application_trust = setup.application_trust;
 			this.domain_initializer_args = setup.domain_initializer_args;
-			this.application_trust_xml = setup.application_trust_xml;
 			this.disallow_appbase_probe = setup.disallow_appbase_probe;
 			this.configuration_bytes = setup.configuration_bytes;
 		}
@@ -57,28 +61,39 @@ namespace System
 			{
 				return null;
 			}
-			int length = appBase.Length;
-			if (length >= 8 && appBase.ToLower().StartsWith("file://"))
+			if (appBase.Length >= 8 && appBase.ToLower().StartsWith("file://"))
 			{
 				appBase = appBase.Substring(7);
 				if (Path.DirectorySeparatorChar != '/')
 				{
 					appBase = appBase.Replace('/', Path.DirectorySeparatorChar);
 				}
-				if (Environment.IsRunningOnWindows)
+			}
+			appBase = Path.GetFullPath(appBase);
+			if (Path.DirectorySeparatorChar != '/')
+			{
+				bool flag = appBase.StartsWith("\\\\?\\", StringComparison.Ordinal);
+				if (appBase.IndexOf(':', flag ? 6 : 2) != -1)
 				{
-					appBase = "//" + appBase;
+					throw new NotSupportedException("The given path's format is not supported.");
 				}
 			}
-			else
+			string directoryName = Path.GetDirectoryName(appBase);
+			if (directoryName != null && directoryName.LastIndexOfAny(Path.GetInvalidPathChars()) >= 0)
 			{
-				appBase = Path.GetFullPath(appBase);
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid path characters in path: '{0}'"), appBase), "appBase");
+			}
+			string fileName = Path.GetFileName(appBase);
+			if (fileName != null && fileName.LastIndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+			{
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid filename characters in path: '{0}'"), appBase), "appBase");
 			}
 			return appBase;
 		}
 
 		public string ApplicationBase
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return AppDomainSetup.GetAppBase(this.application_base);
@@ -103,6 +118,7 @@ namespace System
 
 		public string CachePath
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.cache_path;
@@ -115,6 +131,7 @@ namespace System
 
 		public string ConfigurationFile
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				if (this.configuration_file == null)
@@ -151,6 +168,7 @@ namespace System
 
 		public string DynamicBase
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				if (this.dynamic_base == null)
@@ -167,6 +185,7 @@ namespace System
 				}
 				return Path.Combine(this.ApplicationBase, this.dynamic_base);
 			}
+			[SecuritySafeCritical]
 			set
 			{
 				if (this.application_name == null)
@@ -179,6 +198,7 @@ namespace System
 
 		public string LicenseFile
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.license_file;
@@ -204,6 +224,7 @@ namespace System
 
 		public string PrivateBinPath
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.private_bin_path;
@@ -230,6 +251,7 @@ namespace System
 
 		public string ShadowCopyDirectories
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.shadow_copy_directories;
@@ -276,10 +298,17 @@ namespace System
 			}
 		}
 
+		public string TargetFrameworkName { get; set; }
+
 		public ActivationArguments ActivationArguments
 		{
 			get
 			{
+				if (this._activationArguments != null)
+				{
+					return this._activationArguments;
+				}
+				this.DeserializeNonPrimitives();
 				return this._activationArguments;
 			}
 			set
@@ -293,6 +322,11 @@ namespace System
 		{
 			get
 			{
+				if (this.domain_initializer != null)
+				{
+					return this.domain_initializer;
+				}
+				this.DeserializeNonPrimitives();
 				return this.domain_initializer;
 			}
 			set
@@ -319,10 +353,11 @@ namespace System
 		{
 			get
 			{
-				if (this.application_trust_xml == null)
+				if (this.application_trust != null)
 				{
-					return null;
+					return this.application_trust;
 				}
+				this.DeserializeNonPrimitives();
 				if (this.application_trust == null)
 				{
 					this.application_trust = new ApplicationTrust();
@@ -332,15 +367,6 @@ namespace System
 			set
 			{
 				this.application_trust = value;
-				if (value != null)
-				{
-					this.application_trust_xml = value.ToXml();
-					this.application_trust.FromXml(this.application_trust_xml);
-				}
-				else
-				{
-					this.application_trust_xml = null;
-				}
 			}
 		}
 
@@ -360,13 +386,106 @@ namespace System
 		[MonoNotSupported("This method exists but not considered.")]
 		public byte[] GetConfigurationBytes()
 		{
-			return (this.configuration_bytes == null) ? null : (this.configuration_bytes.Clone() as byte[]);
+			if (this.configuration_bytes == null)
+			{
+				return null;
+			}
+			return this.configuration_bytes.Clone() as byte[];
 		}
 
 		[MonoNotSupported("This method exists but not considered.")]
 		public void SetConfigurationBytes(byte[] value)
 		{
 			this.configuration_bytes = value;
+		}
+
+		private void DeserializeNonPrimitives()
+		{
+			lock (this)
+			{
+				if (this.serialized_non_primitives != null)
+				{
+					BinaryFormatter binaryFormatter = new BinaryFormatter();
+					MemoryStream memoryStream = new MemoryStream(this.serialized_non_primitives);
+					object[] array = (object[])binaryFormatter.Deserialize(memoryStream);
+					this._activationArguments = (ActivationArguments)array[0];
+					this.domain_initializer = (AppDomainInitializer)array[1];
+					this.application_trust = (ApplicationTrust)array[2];
+					this.serialized_non_primitives = null;
+				}
+			}
+		}
+
+		internal void SerializeNonPrimitives()
+		{
+			object[] array = new object[] { this._activationArguments, this.domain_initializer, this.application_trust };
+			BinaryFormatter binaryFormatter = new BinaryFormatter();
+			MemoryStream memoryStream = new MemoryStream();
+			binaryFormatter.Serialize(memoryStream, array);
+			this.serialized_non_primitives = memoryStream.ToArray();
+		}
+
+		[MonoTODO("not implemented, does not throw because it's used in testing moonlight")]
+		public void SetCompatibilitySwitches(IEnumerable<string> switches)
+		{
+		}
+
+		public string AppDomainManagerAssembly
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+			set
+			{
+				ThrowStub.ThrowNotSupportedException();
+			}
+		}
+
+		public string AppDomainManagerType
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+			set
+			{
+				ThrowStub.ThrowNotSupportedException();
+			}
+		}
+
+		public string[] PartialTrustVisibleAssemblies
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+			set
+			{
+				ThrowStub.ThrowNotSupportedException();
+			}
+		}
+
+		public bool SandboxInterop
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return default(bool);
+			}
+			set
+			{
+				ThrowStub.ThrowNotSupportedException();
+			}
+		}
+
+		[SecurityCritical]
+		public void SetNativeFunction(string functionName, int functionVersion, IntPtr functionPointer)
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private string application_base;
@@ -408,10 +527,10 @@ namespace System
 
 		private string[] domain_initializer_args;
 
-		private SecurityElement application_trust_xml;
-
 		private bool disallow_appbase_probe;
 
 		private byte[] configuration_bytes;
+
+		private byte[] serialized_non_primitives;
 	}
 }

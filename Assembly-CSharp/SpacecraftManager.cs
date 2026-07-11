@@ -239,21 +239,27 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		foreach (KeyValuePair<int, int> keyValuePair in this.savedSpacecraftDestinations)
 		{
 			bool flag = false;
-			foreach (Spacecraft spacecraft in this.spacecraft)
+			using (List<Spacecraft>.Enumerator enumerator2 = this.spacecraft.GetEnumerator())
 			{
-				if (spacecraft.id == keyValuePair.Key)
+				while (enumerator2.MoveNext())
 				{
-					flag = true;
-					break;
+					if (enumerator2.Current.id == keyValuePair.Key)
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
 			bool flag2 = false;
-			foreach (SpaceDestination spaceDestination in this.destinations)
+			using (List<SpaceDestination>.Enumerator enumerator3 = this.destinations.GetEnumerator())
 			{
-				if (spaceDestination.id == keyValuePair.Value)
+				while (enumerator3.MoveNext())
 				{
-					flag2 = true;
-					break;
+					if (enumerator3.Current.id == keyValuePair.Value)
+					{
+						flag2 = true;
+						break;
+					}
 				}
 			}
 			if (!flag || !flag2)
@@ -350,8 +356,16 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	public void PushReadyToLandNotification(Spacecraft spacecraft)
 	{
-		Notification notification = new Notification(BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), spacecraft.launchConditions.GetProperName(), false, 0f, null, null, null);
-		base.gameObject.AddOrGet<Notifier>().Add(notification, string.Empty);
+		Notification notification = new Notification(BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION, NotificationType.Good, HashedString.Invalid, delegate(List<Notification> notificationList, object data)
+		{
+			string text = BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION_TOOLTIP;
+			foreach (Notification notification2 in notificationList)
+			{
+				text = text + "\n" + (string)notification2.tooltipData;
+			}
+			return text;
+		}, "• " + spacecraft.rocketName, true, 0f, null, null, null);
+		spacecraft.launchConditions.gameObject.AddOrGet<Notifier>().Add(notification, "");
 	}
 
 	private void SpawnMissionResults(Dictionary<SimHashes, float> results)
@@ -384,8 +398,8 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		}
 		SpaceDestination destination = this.GetDestination(destinationID);
 		SpacecraftManager.DestinationAnalysisState destinationAnalysisState = this.GetDestinationAnalysisState(destination);
-		Dictionary<int, float> dictionary;
-		(dictionary = this.destinationAnalysisScores)[destinationID] = dictionary[destinationID] + points;
+		Dictionary<int, float> dictionary = this.destinationAnalysisScores;
+		dictionary[destinationID] += points;
 		SpacecraftManager.DestinationAnalysisState destinationAnalysisState2 = this.GetDestinationAnalysisState(destination);
 		if (destinationAnalysisState != destinationAnalysisState2)
 		{
@@ -476,6 +490,9 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	[Serialize]
 	private int analyzeDestinationID = -1;
+
+	[Serialize]
+	public bool hasVisitedWormHole;
 
 	[Serialize]
 	public Dictionary<int, float> destinationAnalysisScores = new Dictionary<int, float>();

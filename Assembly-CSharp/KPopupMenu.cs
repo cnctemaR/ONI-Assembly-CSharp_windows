@@ -26,13 +26,11 @@ public class KPopupMenu : KScreen
 			if (base.gameObject.activeSelf)
 			{
 				base.gameObject.SetActive(false);
+				return;
 			}
-			else
-			{
-				this.buttonMenu.SetButtons(this.Buttons);
-				this.buttonMenu.RefreshButtons();
-				base.gameObject.SetActive(true);
-			}
+			this.buttonMenu.SetButtons(this.Buttons);
+			this.buttonMenu.RefreshButtons();
+			base.gameObject.SetActive(true);
 		}
 	}
 

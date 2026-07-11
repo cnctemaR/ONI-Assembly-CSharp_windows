@@ -7,6 +7,11 @@ namespace ProcGen
 	[Serializable]
 	public class ElementChoiceGroup<T>
 	{
+		[StringEnumConverter]
+		public Room.Selection selectionMethod { get; private set; }
+
+		public List<T> choices { get; private set; }
+
 		public ElementChoiceGroup()
 		{
 			this.choices = new List<T>();
@@ -17,10 +22,5 @@ namespace ProcGen
 			this.choices = choices;
 			this.selectionMethod = selectionMethod;
 		}
-
-		[StringEnumConverter]
-		public Room.Selection selectionMethod { get; private set; }
-
-		public List<T> choices { get; private set; }
 	}
 }

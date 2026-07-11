@@ -42,15 +42,13 @@ public class FarmTileConfig : IBuildingConfig
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		BuildingTemplates.CreateDefaultStorage(go, false).SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.occupyingObjectRelativePosition = new Vector3(0f, 1f, 0f);
 		plantablePlot.AddDepositTag(GameTags.CropSeed);
 		plantablePlot.AddDepositTag(GameTags.WaterSeed);
 		plantablePlot.SetFertilizationFlags(true, false);
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.Farm;
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Farm;
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);
 	}
@@ -64,25 +62,28 @@ public class FarmTileConfig : IBuildingConfig
 
 	public static void SetUpFarmPlotTags(GameObject go)
 	{
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.prefabSpawnFn += delegate(GameObject inst)
+		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject inst)
 		{
-			Rotatable component2 = inst.GetComponent<Rotatable>();
-			PlantablePlot component3 = inst.GetComponent<PlantablePlot>();
-			switch (component2.GetOrientation())
+			Rotatable component = inst.GetComponent<Rotatable>();
+			PlantablePlot component2 = inst.GetComponent<PlantablePlot>();
+			switch (component.GetOrientation())
 			{
 			case Orientation.Neutral:
 			case Orientation.FlipH:
-				component3.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Top);
-				break;
+				component2.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Top);
+				return;
 			case Orientation.R90:
 			case Orientation.R270:
-				component3.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Side);
+				component2.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Side);
 				break;
 			case Orientation.R180:
 			case Orientation.FlipV:
-				component3.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Bottom);
+				component2.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Bottom);
+				return;
+			case Orientation.NumRotations:
 				break;
+			default:
+				return;
 			}
 		};
 	}

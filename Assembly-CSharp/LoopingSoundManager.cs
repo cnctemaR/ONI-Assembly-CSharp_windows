@@ -33,13 +33,15 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			if (!type.IsAbstract)
 			{
 				bool flag = false;
-				for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
+				Type type2 = type.BaseType;
+				while (type2 != null)
 				{
 					if (type2 == typeof(LoopingSoundParameterUpdater))
 					{
 						flag = true;
 						break;
 					}
+					type2 = type2.BaseType;
 				}
 				if (flag)
 				{
@@ -131,7 +133,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 				pooledList.Add(sound);
 				if (!isPlaying)
 				{
-					sound.ev = KFMOD.CreateInstance(this.GetSoundDescription(sound.path).path);
+					SoundDescription soundDescription = this.GetSoundDescription(sound.path);
+					sound.ev = KFMOD.CreateInstance(soundDescription.path);
 					dataList[i] = sound;
 					pooledList2.Add(i);
 				}
@@ -144,7 +147,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		foreach (int num in pooledList2)
 		{
 			LoopingSoundManager.Sound sound2 = dataList[num];
-			SoundDescription soundDescription = this.GetSoundDescription(sound2.path);
+			SoundDescription soundDescription2 = this.GetSoundDescription(sound2.path);
 			sound2.ev.setPaused(flag && sound2.ShouldPauseOnGamePaused);
 			sound2.pos.z = 0f;
 			Vector3 pos = sound2.pos;
@@ -163,21 +166,21 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			sound2.flags |= LoopingSoundManager.Sound.Flags.PLAYING;
 			if (sound2.firstParameter != HashedString.Invalid)
 			{
-				sound2.ev.setParameterValueByIndex(soundDescription.GetParameterIdx(sound2.firstParameter), sound2.firstParameterValue);
+				sound2.ev.setParameterValueByIndex(soundDescription2.GetParameterIdx(sound2.firstParameter), sound2.firstParameterValue);
 			}
 			if (sound2.secondParameter != HashedString.Invalid)
 			{
-				sound2.ev.setParameterValueByIndex(soundDescription.GetParameterIdx(sound2.secondParameter), sound2.secondParameterValue);
+				sound2.ev.setParameterValueByIndex(soundDescription2.GetParameterIdx(sound2.secondParameter), sound2.secondParameterValue);
 			}
 			LoopingSoundParameterUpdater.Sound sound3 = new LoopingSoundParameterUpdater.Sound
 			{
 				ev = sound2.ev,
 				path = sound2.path,
-				description = soundDescription,
+				description = soundDescription2,
 				transform = sound2.transform,
 				objectIsSelectedAndVisible = false
 			};
-			foreach (SoundDescription.Parameter parameter in soundDescription.parameters)
+			foreach (SoundDescription.Parameter parameter in soundDescription2.parameters)
 			{
 				LoopingSoundParameterUpdater loopingSoundParameterUpdater = null;
 				if (this.parameterUpdaters.TryGetValue(parameter.name, out loopingSoundParameterUpdater))
@@ -191,16 +194,16 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		foreach (int num2 in pooledList3)
 		{
 			LoopingSoundManager.Sound sound4 = dataList[num2];
-			SoundDescription soundDescription2 = this.GetSoundDescription(sound4.path);
+			SoundDescription soundDescription3 = this.GetSoundDescription(sound4.path);
 			LoopingSoundParameterUpdater.Sound sound5 = new LoopingSoundParameterUpdater.Sound
 			{
 				ev = sound4.ev,
 				path = sound4.path,
-				description = soundDescription2,
+				description = soundDescription3,
 				transform = sound4.transform,
 				objectIsSelectedAndVisible = false
 			};
-			foreach (SoundDescription.Parameter parameter2 in soundDescription2.parameters)
+			foreach (SoundDescription.Parameter parameter2 in soundDescription3.parameters)
 			{
 				LoopingSoundParameterUpdater loopingSoundParameterUpdater2 = null;
 				if (this.parameterUpdaters.TryGetValue(parameter2.name, out loopingSoundParameterUpdater2))
@@ -226,7 +229,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			ATTRIBUTES_3D attributes_3D = SoundEvent.GetCameraScaledPosition(sound6.pos, sound6.objectIsSelectedAndVisible).To3DAttributes();
 			attributes_3D.velocity = (sound6.velocity * velocityScale).ToFMODVector();
-			sound6.ev.set3DAttributes(attributes_3D);
+			EventInstance ev = sound6.ev;
+			ev.set3DAttributes(attributes_3D);
 		}
 		foreach (KeyValuePair<HashedString, LoopingSoundParameterUpdater> keyValuePair in this.parameterUpdaters)
 		{
@@ -246,8 +250,10 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			if (sound.IsPlaying)
 			{
-				sound.ev.stop(STOP_MODE.IMMEDIATE);
-				sound.ev.release();
+				EventInstance eventInstance = sound.ev;
+				eventInstance.stop(STOP_MODE.IMMEDIATE);
+				eventInstance = sound.ev;
+				eventInstance.release();
 			}
 		}
 	}
@@ -343,7 +349,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			if (sound.IsPlaying)
 			{
-				sound.ev.setPaused(flag && sound.ShouldPauseOnGamePaused);
+				EventInstance ev = sound.ev;
+				ev.setPaused(flag && sound.ShouldPauseOnGamePaused);
 			}
 		}
 	}
@@ -365,7 +372,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			get
 			{
-				return (this.flags & LoopingSoundManager.Sound.Flags.PLAYING) != (LoopingSoundManager.Sound.Flags)0;
+				return (this.flags & LoopingSoundManager.Sound.Flags.PLAYING) > (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 
@@ -373,7 +380,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			get
 			{
-				return (this.flags & LoopingSoundManager.Sound.Flags.PAUSE_ON_GAME_PAUSED) != (LoopingSoundManager.Sound.Flags)0;
+				return (this.flags & LoopingSoundManager.Sound.Flags.PAUSE_ON_GAME_PAUSED) > (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 
@@ -381,7 +388,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			get
 			{
-				return (this.flags & LoopingSoundManager.Sound.Flags.ENABLE_CULLING) != (LoopingSoundManager.Sound.Flags)0;
+				return (this.flags & LoopingSoundManager.Sound.Flags.ENABLE_CULLING) > (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 
@@ -389,7 +396,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			get
 			{
-				return (this.flags & LoopingSoundManager.Sound.Flags.ENABLE_CAMERA_SCALED_POSITION) != (LoopingSoundManager.Sound.Flags)0;
+				return (this.flags & LoopingSoundManager.Sound.Flags.ENABLE_CAMERA_SCALED_POSITION) > (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 

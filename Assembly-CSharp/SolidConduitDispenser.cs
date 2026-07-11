@@ -85,7 +85,11 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 		this.round_robin_index %= items.Count;
 		GameObject gameObject = items[this.round_robin_index];
 		this.round_robin_index++;
-		return (!gameObject) ? null : gameObject.GetComponent<Pickupable>();
+		if (!gameObject)
+		{
+			return null;
+		}
+		return gameObject.GetComponent<Pickupable>();
 	}
 
 	public bool IsConnected
@@ -100,9 +104,13 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 	private int GetConnectedNetworkID()
 	{
 		GameObject gameObject = Grid.Objects[this.utilityCell, 20];
-		SolidConduit solidConduit = ((!(gameObject != null)) ? null : gameObject.GetComponent<SolidConduit>());
-		UtilityNetwork utilityNetwork = ((!(solidConduit != null)) ? null : solidConduit.GetNetwork());
-		return (utilityNetwork == null) ? (-1) : utilityNetwork.id;
+		SolidConduit solidConduit = ((gameObject != null) ? gameObject.GetComponent<SolidConduit>() : null);
+		UtilityNetwork utilityNetwork = ((solidConduit != null) ? solidConduit.GetNetwork() : null);
+		if (utilityNetwork == null)
+		{
+			return -1;
+		}
+		return utilityNetwork.id;
 	}
 
 	[SerializeField]

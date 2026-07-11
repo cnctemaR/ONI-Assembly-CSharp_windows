@@ -151,8 +151,7 @@ public class ReportScreen : KScreen
 			this.lineItems[reportGroup.stringKey] = gameObject;
 		}
 		gameObject.SetActive(true);
-		ReportScreenHeader component = gameObject.GetComponent<ReportScreenHeader>();
-		component.SetMainEntry(reportGroup);
+		gameObject.GetComponent<ReportScreenHeader>().SetMainEntry(reportGroup);
 		return gameObject;
 	}
 
@@ -176,8 +175,7 @@ public class ReportScreen : KScreen
 				this.lineItems[reportGroup.stringKey] = gameObject;
 			}
 			gameObject.SetActive(true);
-			ReportScreenEntry component = gameObject.GetComponent<ReportScreenEntry>();
-			component.SetMainEntry(entry, reportGroup);
+			gameObject.GetComponent<ReportScreenEntry>().SetMainEntry(entry, reportGroup);
 		}
 		return gameObject;
 	}

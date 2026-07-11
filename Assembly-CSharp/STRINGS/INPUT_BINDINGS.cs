@@ -284,6 +284,8 @@ namespace STRINGS
 
 			public static LocString DEBUGTOGGLESELECTINEDITOR = "Debug Toggle Select In Editor";
 
+			public static LocString DEBUGTOGGLEFASTWORKERS = "Debug Toggle Fast Workers";
+
 			public static LocString DEBUGPATHFINDING = "Debug Path Finding";
 
 			public static LocString DEBUGSUPERSPEED = "Debug Super Speed";

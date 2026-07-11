@@ -1,85 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
-using System.Security.Permissions;
+using System.Security;
 
 namespace System.Runtime.Serialization.Formatters.Binary
 {
 	[ComVisible(true)]
 	public sealed class BinaryFormatter : IRemotingFormatter, IFormatter
 	{
-		public BinaryFormatter()
+		public FormatterTypeStyle TypeFormat
 		{
-			this.surrogate_selector = BinaryFormatter.DefaultSurrogateSelector;
-			this.context = new StreamingContext(StreamingContextStates.All);
+			get
+			{
+				return this.m_typeFormat;
+			}
+			set
+			{
+				this.m_typeFormat = value;
+			}
 		}
-
-		public BinaryFormatter(ISurrogateSelector selector, StreamingContext context)
-		{
-			this.surrogate_selector = selector;
-			this.context = context;
-		}
-
-		public static ISurrogateSelector DefaultSurrogateSelector { get; set; }
 
 		public FormatterAssemblyStyle AssemblyFormat
 		{
 			get
 			{
-				return this.assembly_format;
+				return this.m_assemblyFormat;
 			}
 			set
 			{
-				this.assembly_format = value;
-			}
-		}
-
-		public SerializationBinder Binder
-		{
-			get
-			{
-				return this.binder;
-			}
-			set
-			{
-				this.binder = value;
-			}
-		}
-
-		public StreamingContext Context
-		{
-			get
-			{
-				return this.context;
-			}
-			set
-			{
-				this.context = value;
-			}
-		}
-
-		public ISurrogateSelector SurrogateSelector
-		{
-			get
-			{
-				return this.surrogate_selector;
-			}
-			set
-			{
-				this.surrogate_selector = value;
-			}
-		}
-
-		public FormatterTypeStyle TypeFormat
-		{
-			get
-			{
-				return this.type_format;
-			}
-			set
-			{
-				this.type_format = value;
+				this.m_assemblyFormat = value;
 			}
 		}
 
@@ -87,79 +38,124 @@ namespace System.Runtime.Serialization.Formatters.Binary
 		{
 			get
 			{
-				return this.filter_level;
+				return this.m_securityLevel;
 			}
 			set
 			{
-				this.filter_level = value;
+				this.m_securityLevel = value;
 			}
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		public ISurrogateSelector SurrogateSelector
+		{
+			get
+			{
+				return this.m_surrogates;
+			}
+			set
+			{
+				this.m_surrogates = value;
+			}
+		}
+
+		public SerializationBinder Binder
+		{
+			get
+			{
+				return this.m_binder;
+			}
+			set
+			{
+				this.m_binder = value;
+			}
+		}
+
+		public StreamingContext Context
+		{
+			get
+			{
+				return this.m_context;
+			}
+			set
+			{
+				this.m_context = value;
+			}
+		}
+
+		public BinaryFormatter()
+		{
+			this.m_surrogates = null;
+			this.m_context = new StreamingContext(StreamingContextStates.All);
+		}
+
+		public BinaryFormatter(ISurrogateSelector selector, StreamingContext context)
+		{
+			this.m_surrogates = selector;
+			this.m_context = context;
+		}
+
 		public object Deserialize(Stream serializationStream)
 		{
-			return this.NoCheckDeserialize(serializationStream, null);
+			return this.Deserialize(serializationStream, null);
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecurityCritical]
+		internal object Deserialize(Stream serializationStream, HeaderHandler handler, bool fCheck)
+		{
+			return this.Deserialize(serializationStream, handler, fCheck, null);
+		}
+
+		[SecuritySafeCritical]
 		public object Deserialize(Stream serializationStream, HeaderHandler handler)
 		{
-			return this.NoCheckDeserialize(serializationStream, handler);
+			return this.Deserialize(serializationStream, handler, true);
 		}
 
-		private object NoCheckDeserialize(Stream serializationStream, HeaderHandler handler)
-		{
-			if (serializationStream == null)
-			{
-				throw new ArgumentNullException("serializationStream");
-			}
-			if (serializationStream.CanSeek && serializationStream.Length == 0L)
-			{
-				throw new SerializationException("serializationStream supports seeking, but its length is 0");
-			}
-			BinaryReader binaryReader = new BinaryReader(serializationStream);
-			bool flag;
-			this.ReadBinaryHeader(binaryReader, out flag);
-			BinaryElement binaryElement = (BinaryElement)binaryReader.Read();
-			if (binaryElement == BinaryElement.MethodCall)
-			{
-				return MessageFormatter.ReadMethodCall(binaryElement, binaryReader, flag, handler, this);
-			}
-			if (binaryElement == BinaryElement.MethodResponse)
-			{
-				return MessageFormatter.ReadMethodResponse(binaryElement, binaryReader, flag, handler, null, this);
-			}
-			ObjectReader objectReader = new ObjectReader(this);
-			object obj;
-			Header[] array;
-			objectReader.ReadObjectGraph(binaryElement, binaryReader, flag, out obj, out array);
-			if (handler != null)
-			{
-				handler(array);
-			}
-			return obj;
-		}
-
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecuritySafeCritical]
 		public object DeserializeMethodResponse(Stream serializationStream, HeaderHandler handler, IMethodCallMessage methodCallMessage)
 		{
-			return this.NoCheckDeserializeMethodResponse(serializationStream, handler, methodCallMessage);
+			return this.Deserialize(serializationStream, handler, true, methodCallMessage);
 		}
 
-		private object NoCheckDeserializeMethodResponse(Stream serializationStream, HeaderHandler handler, IMethodCallMessage methodCallMessage)
+		[ComVisible(false)]
+		[SecurityCritical]
+		public object UnsafeDeserialize(Stream serializationStream, HeaderHandler handler)
+		{
+			return this.Deserialize(serializationStream, handler, false);
+		}
+
+		[SecurityCritical]
+		[ComVisible(false)]
+		public object UnsafeDeserializeMethodResponse(Stream serializationStream, HeaderHandler handler, IMethodCallMessage methodCallMessage)
+		{
+			return this.Deserialize(serializationStream, handler, false, methodCallMessage);
+		}
+
+		[SecurityCritical]
+		internal object Deserialize(Stream serializationStream, HeaderHandler handler, bool fCheck, IMethodCallMessage methodCallMessage)
+		{
+			return this.Deserialize(serializationStream, handler, fCheck, false, methodCallMessage);
+		}
+
+		[SecurityCritical]
+		internal object Deserialize(Stream serializationStream, HeaderHandler handler, bool fCheck, bool isCrossAppDomain, IMethodCallMessage methodCallMessage)
 		{
 			if (serializationStream == null)
 			{
-				throw new ArgumentNullException("serializationStream");
+				throw new ArgumentNullException("serializationStream", Environment.GetResourceString("Parameter '{0}' cannot be null.", new object[] { serializationStream }));
 			}
 			if (serializationStream.CanSeek && serializationStream.Length == 0L)
 			{
-				throw new SerializationException("serializationStream supports seeking, but its length is 0");
+				throw new SerializationException(Environment.GetResourceString("Attempting to deserialize an empty stream."));
 			}
-			BinaryReader binaryReader = new BinaryReader(serializationStream);
-			bool flag;
-			this.ReadBinaryHeader(binaryReader, out flag);
-			return MessageFormatter.ReadMethodResponse(binaryReader, flag, handler, methodCallMessage, this);
+			InternalFE internalFE = new InternalFE();
+			internalFE.FEtypeFormat = this.m_typeFormat;
+			internalFE.FEserializerTypeEnum = InternalSerializerTypeE.Binary;
+			internalFE.FEassemblyFormat = this.m_assemblyFormat;
+			internalFE.FEsecurityLevel = this.m_securityLevel;
+			ObjectReader objectReader = new ObjectReader(serializationStream, this.m_surrogates, this.m_context, internalFE, this.m_binder);
+			objectReader.crossAppDomainArray = this.m_crossAppDomainArray;
+			return objectReader.Deserialize(handler, new __BinaryParser(serializationStream, objectReader), fCheck, isCrossAppDomain, methodCallMessage);
 		}
 
 		public void Serialize(Stream serializationStream, object graph)
@@ -167,81 +163,62 @@ namespace System.Runtime.Serialization.Formatters.Binary
 			this.Serialize(serializationStream, graph, null);
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecuritySafeCritical]
 		public void Serialize(Stream serializationStream, object graph, Header[] headers)
+		{
+			this.Serialize(serializationStream, graph, headers, true);
+		}
+
+		[SecurityCritical]
+		internal void Serialize(Stream serializationStream, object graph, Header[] headers, bool fCheck)
 		{
 			if (serializationStream == null)
 			{
-				throw new ArgumentNullException("serializationStream");
+				throw new ArgumentNullException("serializationStream", Environment.GetResourceString("Parameter '{0}' cannot be null.", new object[] { serializationStream }));
 			}
-			BinaryWriter binaryWriter = new BinaryWriter(serializationStream);
-			this.WriteBinaryHeader(binaryWriter, headers != null);
-			if (graph is IMethodCallMessage)
-			{
-				MessageFormatter.WriteMethodCall(binaryWriter, graph, headers, this.surrogate_selector, this.context, this.assembly_format, this.type_format);
-			}
-			else if (graph is IMethodReturnMessage)
-			{
-				MessageFormatter.WriteMethodResponse(binaryWriter, graph, headers, this.surrogate_selector, this.context, this.assembly_format, this.type_format);
-			}
-			else
-			{
-				ObjectWriter objectWriter = new ObjectWriter(this.surrogate_selector, this.context, this.assembly_format, this.type_format);
-				objectWriter.WriteObjectGraph(binaryWriter, graph, headers);
-			}
-			binaryWriter.Flush();
+			InternalFE internalFE = new InternalFE();
+			internalFE.FEtypeFormat = this.m_typeFormat;
+			internalFE.FEserializerTypeEnum = InternalSerializerTypeE.Binary;
+			internalFE.FEassemblyFormat = this.m_assemblyFormat;
+			ObjectWriter objectWriter = new ObjectWriter(this.m_surrogates, this.m_context, internalFE, this.m_binder);
+			__BinaryWriter _BinaryWriter = new __BinaryWriter(serializationStream, objectWriter, this.m_typeFormat);
+			objectWriter.Serialize(graph, headers, _BinaryWriter, fCheck);
+			this.m_crossAppDomainArray = objectWriter.crossAppDomainArray;
 		}
 
-		[ComVisible(false)]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-		public object UnsafeDeserialize(Stream serializationStream, HeaderHandler handler)
+		internal static TypeInformation GetTypeInformation(Type type)
 		{
-			return this.NoCheckDeserialize(serializationStream, handler);
-		}
-
-		[ComVisible(false)]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-		public object UnsafeDeserializeMethodResponse(Stream serializationStream, HeaderHandler handler, IMethodCallMessage methodCallMessage)
-		{
-			return this.NoCheckDeserializeMethodResponse(serializationStream, handler, methodCallMessage);
-		}
-
-		private void WriteBinaryHeader(BinaryWriter writer, bool hasHeaders)
-		{
-			writer.Write(0);
-			writer.Write(1);
-			if (hasHeaders)
+			Dictionary<Type, TypeInformation> dictionary = BinaryFormatter.typeNameCache;
+			TypeInformation typeInformation2;
+			lock (dictionary)
 			{
-				writer.Write(2);
+				TypeInformation typeInformation = null;
+				if (!BinaryFormatter.typeNameCache.TryGetValue(type, out typeInformation))
+				{
+					bool flag2;
+					string clrAssemblyName = FormatterServices.GetClrAssemblyName(type, out flag2);
+					typeInformation = new TypeInformation(FormatterServices.GetClrTypeFullName(type), clrAssemblyName, flag2);
+					BinaryFormatter.typeNameCache.Add(type, typeInformation);
+				}
+				typeInformation2 = typeInformation;
 			}
-			else
-			{
-				writer.Write(-1);
-			}
-			writer.Write(1);
-			writer.Write(0);
+			return typeInformation2;
 		}
 
-		private void ReadBinaryHeader(BinaryReader reader, out bool hasHeaders)
-		{
-			reader.ReadByte();
-			reader.ReadInt32();
-			int num = reader.ReadInt32();
-			hasHeaders = num == 2;
-			reader.ReadInt32();
-			reader.ReadInt32();
-		}
+		internal ISurrogateSelector m_surrogates;
 
-		private FormatterAssemblyStyle assembly_format;
+		internal StreamingContext m_context;
 
-		private SerializationBinder binder;
+		internal SerializationBinder m_binder;
 
-		private StreamingContext context;
+		internal FormatterTypeStyle m_typeFormat = FormatterTypeStyle.TypesAlways;
 
-		private ISurrogateSelector surrogate_selector;
+		internal FormatterAssemblyStyle m_assemblyFormat;
 
-		private FormatterTypeStyle type_format = FormatterTypeStyle.TypesAlways;
+		internal TypeFilterLevel m_securityLevel = TypeFilterLevel.Full;
 
-		private TypeFilterLevel filter_level = TypeFilterLevel.Full;
+		internal object[] m_crossAppDomainArray;
+
+		private static Dictionary<Type, TypeInformation> typeNameCache = new Dictionary<Type, TypeInformation>();
 	}
 }

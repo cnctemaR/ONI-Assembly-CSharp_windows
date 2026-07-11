@@ -87,12 +87,20 @@ namespace NodeEditorFramework
 
 		public object GetValue()
 		{
-			return (!(this.connection != null)) ? null : this.connection.GetValue();
+			if (!(this.connection != null))
+			{
+				return null;
+			}
+			return this.connection.GetValue();
 		}
 
 		public object GetValue(Type type)
 		{
-			return (!(this.connection != null)) ? null : this.connection.GetValue(type);
+			if (!(this.connection != null))
+			{
+				return null;
+			}
+			return this.connection.GetValue(type);
 		}
 
 		public void SetValue(object value)
@@ -105,7 +113,11 @@ namespace NodeEditorFramework
 
 		public T GetValue<T>()
 		{
-			return (!(this.connection != null)) ? NodeOutput.GetDefault<T>() : this.connection.GetValue<T>();
+			if (!(this.connection != null))
+			{
+				return NodeOutput.GetDefault<T>();
+			}
+			return this.connection.GetValue<T>();
 		}
 
 		public void SetValue<T>(T value)
@@ -180,7 +192,11 @@ namespace NodeEditorFramework
 
 		public override Node GetNodeAcrossConnection()
 		{
-			return (!(this.connection != null)) ? null : this.connection.body;
+			if (!(this.connection != null))
+			{
+				return null;
+			}
+			return this.connection.body;
 		}
 
 		public NodeOutput connection;

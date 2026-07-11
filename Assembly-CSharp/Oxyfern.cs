@@ -55,11 +55,9 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 		if (this.receptacleMonitor.Replanted)
 		{
 			this.elementConsumer.consumptionRate = 0.00062500004f;
+			return;
 		}
-		else
-		{
-			this.elementConsumer.consumptionRate = 0.00015625001f;
-		}
+		this.elementConsumer.consumptionRate = 0.00015625001f;
 	}
 
 	[MyCmpReq]
@@ -98,11 +96,7 @@ public class Oxyfern : StateMachineComponent<Oxyfern.StatesInstance>
 		{
 			base.serializable = true;
 			default_state = this.grow;
-			GameStateMachine<Oxyfern.States, Oxyfern.StatesInstance, Oxyfern, object>.State state = this.dead;
-			string text = CREATURES.STATUSITEMS.DEAD.NAME;
-			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
-			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main).Enter(delegate(Oxyfern.StatesInstance smi)
+			this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(Oxyfern.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				smi.master.Trigger(1623392196, null);

@@ -5,9 +5,10 @@ public class SceneInitializerLoader : MonoBehaviour
 {
 	private void Awake()
 	{
-		foreach (Camera camera in global::UnityEngine.Object.FindObjectsOfType<Camera>())
+		Camera[] array = global::UnityEngine.Object.FindObjectsOfType<Camera>();
+		for (int i = 0; i < array.Length; i++)
 		{
-			camera.enabled = false;
+			array[i].enabled = false;
 		}
 		KMonoBehaviour.isLoadingScene = false;
 		Singleton<StateMachineManager>.Instance.Clear();

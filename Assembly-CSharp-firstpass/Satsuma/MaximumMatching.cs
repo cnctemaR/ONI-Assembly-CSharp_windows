@@ -5,15 +5,6 @@ namespace Satsuma
 {
 	public sealed class MaximumMatching : IClearable
 	{
-		public MaximumMatching(IGraph graph, Func<Node, bool> isRed)
-		{
-			this.Graph = graph;
-			this.IsRed = isRed;
-			this.matching = new Matching(this.Graph);
-			this.unmatchedRedNodes = new HashSet<Node>();
-			this.Clear();
-		}
-
 		public IGraph Graph { get; private set; }
 
 		public Func<Node, bool> IsRed { get; private set; }
@@ -24,6 +15,15 @@ namespace Satsuma
 			{
 				return this.matching;
 			}
+		}
+
+		public MaximumMatching(IGraph graph, Func<Node, bool> isRed)
+		{
+			this.Graph = graph;
+			this.IsRed = isRed;
+			this.matching = new Matching(this.Graph);
+			this.unmatchedRedNodes = new HashSet<Node>();
+			this.Clear();
 		}
 
 		public void Clear()
@@ -55,13 +55,13 @@ namespace Satsuma
 						num++;
 						if (num >= maxImprovements)
 						{
-							goto IL_00CE;
+							goto IL_00AE;
 						}
 						break;
 					}
 				}
 			}
-			IL_00CE:
+			IL_00AE:
 			foreach (Node node3 in list)
 			{
 				this.unmatchedRedNodes.Remove(node3);
@@ -77,7 +77,7 @@ namespace Satsuma
 			}
 			this.matching.Enable(arc, true);
 			Node node = this.Graph.U(arc);
-			this.unmatchedRedNodes.Remove((!this.IsRed(node)) ? this.Graph.V(arc) : node);
+			this.unmatchedRedNodes.Remove(this.IsRed(node) ? node : this.Graph.V(arc));
 		}
 
 		private Node Traverse(Node node)
@@ -85,40 +85,43 @@ namespace Satsuma
 			Arc arc = this.matching.MatchedArc(node);
 			if (this.IsRed(node))
 			{
-				foreach (Arc arc2 in this.Graph.Arcs(node, ArcFilter.All))
+				using (IEnumerator<Arc> enumerator = this.Graph.Arcs(node, ArcFilter.All).GetEnumerator())
 				{
-					if (arc2 != arc)
+					while (enumerator.MoveNext())
 					{
-						Node node2 = this.Graph.Other(arc2, node);
-						if (!this.parentArc.ContainsKey(node2))
+						Arc arc2 = enumerator.Current;
+						if (arc2 != arc)
 						{
-							this.parentArc[node2] = arc2;
-							if (!this.matching.HasNode(node2))
+							Node node2 = this.Graph.Other(arc2, node);
+							if (!this.parentArc.ContainsKey(node2))
 							{
-								return node2;
-							}
-							Node node3 = this.Traverse(node2);
-							if (node3 != Node.Invalid)
-							{
-								return node3;
+								this.parentArc[node2] = arc2;
+								if (!this.matching.HasNode(node2))
+								{
+									return node2;
+								}
+								Node node3 = this.Traverse(node2);
+								if (node3 != Node.Invalid)
+								{
+									return node3;
+								}
 							}
 						}
 					}
+					goto IL_00F7;
 				}
 			}
-			else
+			Node node4 = this.Graph.Other(arc, node);
+			if (!this.parentArc.ContainsKey(node4))
 			{
-				Node node4 = this.Graph.Other(arc, node);
-				if (!this.parentArc.ContainsKey(node4))
+				this.parentArc[node4] = arc;
+				Node node5 = this.Traverse(node4);
+				if (node5 != Node.Invalid)
 				{
-					this.parentArc[node4] = arc;
-					Node node5 = this.Traverse(node4);
-					if (node5 != Node.Invalid)
-					{
-						return node5;
-					}
+					return node5;
 				}
 			}
+			IL_00F7:
 			return Node.Invalid;
 		}
 
@@ -137,7 +140,7 @@ namespace Satsuma
 					{
 						Arc arc = this.parentArc[node2];
 						Node node3 = this.Graph.Other(arc, node2);
-						Arc arc2 = ((!(node3 == node)) ? this.parentArc[node3] : Arc.Invalid);
+						Arc arc2 = ((node3 == node) ? Arc.Invalid : this.parentArc[node3]);
 						if (arc2 != Arc.Invalid)
 						{
 							this.matching.Enable(arc2, false);

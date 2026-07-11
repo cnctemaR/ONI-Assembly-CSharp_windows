@@ -6,14 +6,17 @@ namespace Rendering
 {
 	public class BlockTileRenderer : MonoBehaviour
 	{
-		public BlockTileRenderer()
-		{
-			this.forceRebuild = false;
-		}
-
 		public static BlockTileRenderer.RenderInfoLayer GetRenderInfoLayer(bool isReplacement, SimHashes element)
 		{
-			return (!isReplacement) ? ((element == SimHashes.Void) ? BlockTileRenderer.RenderInfoLayer.UnderConstruction : BlockTileRenderer.RenderInfoLayer.Built) : BlockTileRenderer.RenderInfoLayer.Replacement;
+			if (isReplacement)
+			{
+				return BlockTileRenderer.RenderInfoLayer.Replacement;
+			}
+			if (element == SimHashes.Void)
+			{
+				return BlockTileRenderer.RenderInfoLayer.UnderConstruction;
+			}
+			return BlockTileRenderer.RenderInfoLayer.Built;
 		}
 
 		public bool ForceRebuild
@@ -22,6 +25,11 @@ namespace Rendering
 			{
 				return this.forceRebuild;
 			}
+		}
+
+		public BlockTileRenderer()
+		{
+			this.forceRebuild = false;
 		}
 
 		public void FreeResources()
@@ -45,7 +53,7 @@ namespace Rendering
 		{
 			BlockTileRenderer.Bits bits = (BlockTileRenderer.Bits)0;
 			GameObject gameObject = Grid.Objects[y * Grid.WidthInCells + x, query_layer];
-			BuildingDef buildingDef = ((!(gameObject != null)) ? null : gameObject.GetComponent<Building>().Def);
+			BuildingDef buildingDef = ((gameObject != null) ? gameObject.GetComponent<Building>().Def : null);
 			if (y > 0)
 			{
 				int num = (y - 1) * Grid.WidthInCells + x;
@@ -220,7 +228,7 @@ namespace Rendering
 			BlockTileRenderer.RenderInfo renderInfo;
 			if (!this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
-				int num = (int)((!isReplacement) ? def.TileLayer : def.ReplacementLayer);
+				int num = (int)(isReplacement ? def.ReplacementLayer : def.TileLayer);
 				renderInfo = new BlockTileRenderer.RenderInfo(this, num, renderLayer, def, element);
 				this.renderInfo[keyValuePair] = renderInfo;
 			}
@@ -267,23 +275,29 @@ namespace Rendering
 		{
 			if (enabled)
 			{
-				if (cell != cell_status)
+				if (cell == cell_status)
 				{
-					if (cell_status != -1)
+					return;
+				}
+				if (cell_status != -1)
+				{
+					foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 					{
-						foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
-						{
-							keyValuePair.Value.MarkDirtyIfOccupied(cell_status);
-						}
-					}
-					cell_status = cell;
-					foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair2 in this.renderInfo)
-					{
-						keyValuePair2.Value.MarkDirtyIfOccupied(cell_status);
+						keyValuePair.Value.MarkDirtyIfOccupied(cell_status);
 					}
 				}
+				cell_status = cell;
+				using (Dictionary<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo>.Enumerator enumerator = this.renderInfo.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair2 = enumerator.Current;
+						keyValuePair2.Value.MarkDirtyIfOccupied(cell_status);
+					}
+					return;
+				}
 			}
-			else if (cell_status == cell)
+			if (cell_status == cell)
 			{
 				foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair3 in this.renderInfo)
 				{
@@ -384,27 +398,23 @@ namespace Rendering
 						this.dirtyChunks[j, i] = true;
 					}
 				}
-				BlockTileDecorInfo blockTileDecorInfo = ((element != SimHashes.Void) ? def.DecorBlockTileInfo : def.DecorPlaceBlockTileInfo);
+				BlockTileDecorInfo blockTileDecorInfo = ((element == SimHashes.Void) ? def.DecorPlaceBlockTileInfo : def.DecorBlockTileInfo);
 				if (blockTileDecorInfo)
 				{
 					this.decorRenderInfo = new BlockTileRenderer.DecorRenderInfo(num, num2, queryLayer, def, blockTileDecorInfo);
 				}
-				string name = def.BlockTileAtlas.items[0].name;
-				int length = name.Length;
-				int num3 = length - 4;
-				int num4 = num3 - 8;
-				int num5 = num4 - 1;
-				int num6 = num5 - 8;
+				int num3 = def.BlockTileAtlas.items[0].name.Length - 4 - 8;
+				int num4 = num3 - 1 - 8;
 				this.atlasInfo = new BlockTileRenderer.RenderInfo.AtlasInfo[def.BlockTileAtlas.items.Length];
 				for (int k = 0; k < this.atlasInfo.Length; k++)
 				{
 					TextureAtlas.Item item = def.BlockTileAtlas.items[k];
-					string text = item.name.Substring(num6, 8);
-					string text2 = item.name.Substring(num4, 8);
-					int num7 = Convert.ToInt32(text, 2);
-					int num8 = Convert.ToInt32(text2, 2);
-					this.atlasInfo[k].requiredConnections = (BlockTileRenderer.Bits)num7;
-					this.atlasInfo[k].forbiddenConnections = (BlockTileRenderer.Bits)num8;
+					string text = item.name.Substring(num4, 8);
+					string text2 = item.name.Substring(num3, 8);
+					int num5 = Convert.ToInt32(text, 2);
+					int num6 = Convert.ToInt32(text2, 2);
+					this.atlasInfo[k].requiredConnections = (BlockTileRenderer.Bits)num5;
+					this.atlasInfo[k].forbiddenConnections = (BlockTileRenderer.Bits)num6;
 					this.atlasInfo[k].uvBox = item.uvBox;
 					this.atlasInfo[k].name = item.name;
 				}
@@ -503,7 +513,7 @@ namespace Rendering
 							for (int k = 0; k < this.atlasInfo.Length; k++)
 							{
 								bool flag = (this.atlasInfo[k].requiredConnections & connectionBits) == this.atlasInfo[k].requiredConnections;
-								bool flag2 = (this.atlasInfo[k].forbiddenConnections & connectionBits) != (BlockTileRenderer.Bits)0;
+								bool flag2 = (this.atlasInfo[k].forbiddenConnections & connectionBits) > (BlockTileRenderer.Bits)0;
 								if (flag && !flag2)
 								{
 									Color cellColour = renderer.GetCellColour(num, this.element);
@@ -741,11 +751,9 @@ namespace Rendering
 					mesh.SetUVs(0, uvs);
 					mesh.SetColors(colours);
 					mesh.SetTriangles(indices, 0);
+					return;
 				}
-				else
-				{
-					this.meshChunks[chunk_x, chunk_y] = null;
-				}
+				this.meshChunks[chunk_x, chunk_y] = null;
 			}
 
 			private void AddDecor(int x, int y, float z_offset, BlockTileRenderer.Bits connection_bits, Color colour, List<Vector3> vertices, List<Vector2> uvs, List<BlockTileRenderer.DecorRenderInfo.TriangleInfo> triangles, List<Color> colours)
@@ -756,7 +764,7 @@ namespace Rendering
 					if (decor.variants != null && decor.variants.Length != 0)
 					{
 						bool flag = (connection_bits & decor.requiredConnections) == decor.requiredConnections;
-						bool flag2 = (connection_bits & decor.forbiddenConnections) != (BlockTileRenderer.Bits)0;
+						bool flag2 = (connection_bits & decor.forbiddenConnections) > (BlockTileRenderer.Bits)0;
 						if (flag && !flag2)
 						{
 							float num = PerlinSimplexNoise.noise((float)(i + x + connection_bits) * BlockTileRenderer.DecorRenderInfo.simplex_scale.x, (float)(i + y + connection_bits) * BlockTileRenderer.DecorRenderInfo.simplex_scale.y);

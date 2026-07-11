@@ -59,6 +59,7 @@ public class HealthBar : ProgressBar
 			{
 				base.enabled = true;
 				base.gameObject.SetActive(true);
+				return;
 			}
 		}
 		else if (base.gameObject.activeSelf)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -6,9 +7,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A UnityGUI event.</para>
-	/// </summary>
 	[NativeHeader("Modules/IMGUI/Event.bindings.h")]
 	[StaticAccessor("GUIEvent", StaticAccessorType.DoubleColon)]
 	[StructLayout(LayoutKind.Sequential)]
@@ -40,9 +38,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The mouse position.</para>
-		/// </summary>
 		[NativeProperty("mousePosition", false, TargetType.Field)]
 		public Vector2 mousePosition
 		{
@@ -58,9 +53,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The relative movement of the mouse compared to last event.</para>
-		/// </summary>
 		[NativeProperty("delta", false, TargetType.Field)]
 		public Vector2 delta
 		{
@@ -76,9 +68,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Which mouse button was pressed.</para>
-		/// </summary>
 		[NativeProperty("button", false, TargetType.Field)]
 		public extern int button
 		{
@@ -88,9 +77,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Which modifier keys are held down.</para>
-		/// </summary>
 		[NativeProperty("modifiers", false, TargetType.Field)]
 		public extern EventModifiers modifiers
 		{
@@ -109,9 +95,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>How many consecutive mouse clicks have we received.</para>
-		/// </summary>
 		[NativeProperty("clickCount", false, TargetType.Field)]
 		public extern int clickCount
 		{
@@ -121,9 +104,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The character typed.</para>
-		/// </summary>
 		[NativeProperty("character", false, TargetType.Field)]
 		public extern char character
 		{
@@ -133,9 +113,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The raw key code for keyboard events.</para>
-		/// </summary>
 		[NativeProperty("keycode", false, TargetType.Field)]
 		public extern KeyCode keyCode
 		{
@@ -145,9 +122,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Index of display that the event belongs to.</para>
-		/// </summary>
 		[NativeProperty("displayIndex", false, TargetType.Field)]
 		public extern int displayIndex
 		{
@@ -157,9 +131,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The type of event.</para>
-		/// </summary>
 		public extern EventType type
 		{
 			[FreeFunction("GUIEvent::GetType", HasExplicitThis = true)]
@@ -170,9 +141,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The name of an ExecuteCommand or ValidateCommand Event.</para>
-		/// </summary>
 		public extern string commandName
 		{
 			[FreeFunction("GUIEvent::GetCommandName", HasExplicitThis = true)]
@@ -199,32 +167,18 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Internal_Copy(IntPtr otherPtr);
 
-		/// <summary>
-		///   <para>Get a filtered event type for a given control ID.</para>
-		/// </summary>
-		/// <param name="controlID">The ID of the control you are querying from.</param>
 		[FreeFunction("GUIEvent::GetTypeForControl", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern EventType GetTypeForControl(int controlID);
 
-		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[FreeFunction("GUIEvent::CopyFromPtr", IsThreadSafe = true, HasExplicitThis = true)]
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void CopyFromPtr(IntPtr ptr);
 
-		/// <summary>
-		///   <para>Get the next queued [Event] from the event system.</para>
-		/// </summary>
-		/// <param name="outEvent">Next Event.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool PopEvent(Event outEvent);
 
-		/// <summary>
-		///   <para>Returns the current number of events that are stored in the event queue.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Current number of events currently in the event queue.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetEventCount();
 
@@ -258,6 +212,16 @@ namespace UnityEngine
 			Event.s_MasterEvent = null;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		internal void CopyFrom(Event e)
+		{
+			if (e.m_Ptr != this.m_Ptr)
+			{
+				this.CopyFromPtr(e.m_Ptr);
+			}
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);", true)]
 		public Ray mouseRay
 		{
@@ -270,9 +234,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is Shift held down? (Read Only)</para>
-		/// </summary>
 		public bool shift
 		{
 			get
@@ -292,9 +253,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is Control key held down? (Read Only)</para>
-		/// </summary>
 		public bool control
 		{
 			get
@@ -314,9 +272,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is Alt/Option key held down? (Read Only)</para>
-		/// </summary>
 		public bool alt
 		{
 			get
@@ -336,9 +291,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is Command/Windows key held down? (Read Only)</para>
-		/// </summary>
 		public bool command
 		{
 			get
@@ -358,9 +310,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is Caps Lock on? (Read Only)</para>
-		/// </summary>
 		public bool capsLock
 		{
 			get
@@ -380,9 +329,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the current keypress on the numeric keyboard? (Read Only)</para>
-		/// </summary>
 		public bool numeric
 		{
 			get
@@ -402,9 +348,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the current keypress a function key? (Read Only)</para>
-		/// </summary>
 		public bool functionKey
 		{
 			[CompilerGenerated]
@@ -414,9 +357,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The current event that's being processed right now.</para>
-		/// </summary>
 		public static Event current
 		{
 			get
@@ -430,9 +370,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is this event a keyboard event? (Read Only)</para>
-		/// </summary>
 		public bool isKey
 		{
 			get
@@ -442,9 +379,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is this event a mouse event? (Read Only)</para>
-		/// </summary>
 		public bool isMouse
 		{
 			get
@@ -463,10 +397,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Create a keyboard event.</para>
-		/// </summary>
-		/// <param name="key"></param>
 		public static Event KeyboardEvent(string key)
 		{
 			Event @event = new Event(0)
@@ -518,7 +448,7 @@ namespace UnityEngine
 					}
 				}
 				while (flag);
-				string text = key.Substring(num, key.Length - num).ToLower();
+				string text = key.Substring(num, key.Length - num).ToLowerInvariant();
 				switch (text)
 				{
 				case "[0]":
@@ -831,9 +761,6 @@ namespace UnityEngine
 			return text;
 		}
 
-		/// <summary>
-		///   <para>Use this event.</para>
-		/// </summary>
 		public void Use()
 		{
 			if (this.type == EventType.Repaint || this.type == EventType.Layout)

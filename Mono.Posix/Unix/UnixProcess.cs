@@ -22,8 +22,7 @@ namespace Mono.Unix
 		{
 			get
 			{
-				int processStatus = this.GetProcessStatus();
-				return Syscall.WIFEXITED(processStatus);
+				return Syscall.WIFEXITED(this.GetProcessStatus());
 			}
 		}
 
@@ -43,8 +42,7 @@ namespace Mono.Unix
 				{
 					throw new InvalidOperationException(Locale.GetText("Process hasn't exited"));
 				}
-				int processStatus = this.GetProcessStatus();
-				return Syscall.WEXITSTATUS(processStatus);
+				return Syscall.WEXITSTATUS(this.GetProcessStatus());
 			}
 		}
 
@@ -52,8 +50,7 @@ namespace Mono.Unix
 		{
 			get
 			{
-				int processStatus = this.GetProcessStatus();
-				return Syscall.WIFSIGNALED(processStatus);
+				return Syscall.WIFSIGNALED(this.GetProcessStatus());
 			}
 		}
 
@@ -65,8 +62,7 @@ namespace Mono.Unix
 				{
 					throw new InvalidOperationException(Locale.GetText("Process wasn't terminated by a signal"));
 				}
-				int processStatus = this.GetProcessStatus();
-				return Syscall.WTERMSIG(processStatus);
+				return Syscall.WTERMSIG(this.GetProcessStatus());
 			}
 		}
 
@@ -74,8 +70,7 @@ namespace Mono.Unix
 		{
 			get
 			{
-				int processStatus = this.GetProcessStatus();
-				return Syscall.WIFSTOPPED(processStatus);
+				return Syscall.WIFSTOPPED(this.GetProcessStatus());
 			}
 		}
 
@@ -87,8 +82,7 @@ namespace Mono.Unix
 				{
 					throw new InvalidOperationException(Locale.GetText("Process isn't stopped"));
 				}
-				int processStatus = this.GetProcessStatus();
-				return Syscall.WSTOPSIG(processStatus);
+				return Syscall.WSTOPSIG(this.GetProcessStatus());
 			}
 		}
 
@@ -100,8 +94,7 @@ namespace Mono.Unix
 			}
 			set
 			{
-				int num = Syscall.setpgid(this.pid, value);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num);
+				UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.setpgid(this.pid, value));
 			}
 		}
 
@@ -133,8 +126,7 @@ namespace Mono.Unix
 		[CLSCompliant(false)]
 		public void Signal(Signum signal)
 		{
-			int num = Syscall.kill(this.pid, signal);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.kill(this.pid, signal));
 		}
 
 		public void WaitForExit()

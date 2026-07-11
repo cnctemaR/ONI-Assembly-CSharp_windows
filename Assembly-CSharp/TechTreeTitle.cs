@@ -3,12 +3,6 @@ using UnityEngine;
 
 public class TechTreeTitle : Resource
 {
-	public TechTreeTitle(string id, ResourceSet parent, string name, ResourceTreeNode node)
-		: base(id, parent, name)
-	{
-		this.node = node;
-	}
-
 	public Vector2 center
 	{
 		get
@@ -31,6 +25,12 @@ public class TechTreeTitle : Resource
 		{
 			return this.node.height;
 		}
+	}
+
+	public TechTreeTitle(string id, ResourceSet parent, string name, ResourceTreeNode node)
+		: base(id, parent, name)
+	{
+		this.node = node;
 	}
 
 	public string desc;

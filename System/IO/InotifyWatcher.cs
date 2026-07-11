@@ -42,8 +42,9 @@ namespace System.IO
 
 		public void StartDispatching(FileSystemWatcher fsw)
 		{
+			InotifyWatcher inotifyWatcher = this;
 			ParentInotifyData parentInotifyData;
-			lock (this)
+			lock (inotifyWatcher)
 			{
 				if ((long)InotifyWatcher.FD == -1L)
 				{
@@ -71,7 +72,8 @@ namespace System.IO
 				try
 				{
 					InotifyWatcher.StartMonitoringDirectory(inotifyData, false);
-					lock (this)
+					inotifyWatcher = this;
+					lock (inotifyWatcher)
 					{
 						InotifyWatcher.AppendRequestData(inotifyData);
 						InotifyWatcher.stop = false;
@@ -90,19 +92,19 @@ namespace System.IO
 			if (obj == null)
 			{
 				InotifyWatcher.requests[data.Watch] = data;
+				return;
 			}
-			else if (obj is InotifyData)
+			ArrayList arrayList;
+			if (obj is InotifyData)
 			{
-				ArrayList arrayList = new ArrayList();
+				arrayList = new ArrayList();
 				arrayList.Add(obj);
 				arrayList.Add(data);
 				InotifyWatcher.requests[data.Watch] = arrayList;
+				return;
 			}
-			else
-			{
-				ArrayList arrayList = (ArrayList)obj;
-				arrayList.Add(data);
-			}
+			arrayList = (ArrayList)obj;
+			arrayList.Add(data);
 		}
 
 		private static bool RemoveRequestData(InotifyData data)
@@ -223,8 +225,8 @@ namespace System.IO
 				{
 					foreach (string text2 in Directory.GetFiles(data.Directory))
 					{
-						FileSystemWatcher fileSystemWatcher2 = fsw;
-						lock (fileSystemWatcher2)
+						FileSystemWatcher fileSystemWatcher = fsw;
+						lock (fileSystemWatcher)
 						{
 							RenamedEventArgs e2 = null;
 							if (fsw.Pattern.IsMatch(text2))
@@ -257,9 +259,9 @@ namespace System.IO
 				{
 				}
 				string text4 = string.Format("The per-user inotify watches limit of {0} has been reached. If you're experiencing problems with your application, increase that limit in /proc/sys/fs/inotify/max_user_watches.", text3);
-				throw new global::System.ComponentModel.Win32Exception(lastWin32Error, text4);
+				throw new Win32Exception(lastWin32Error, text4);
 			}
-			throw new global::System.ComponentModel.Win32Exception(lastWin32Error);
+			throw new Win32Exception(lastWin32Error);
 		}
 
 		public void StopDispatching(FileSystemWatcher fsw)
@@ -304,18 +306,21 @@ namespace System.IO
 		private void Monitor()
 		{
 			byte[] array = new byte[4096];
+			InotifyWatcher inotifyWatcher;
 			while (!InotifyWatcher.stop)
 			{
 				int num = InotifyWatcher.ReadFromFD(InotifyWatcher.FD, array, (IntPtr)array.Length);
 				if (num != -1)
 				{
-					lock (this)
+					inotifyWatcher = this;
+					lock (inotifyWatcher)
 					{
 						this.ProcessEvents(array, num);
 					}
 				}
 			}
-			lock (this)
+			inotifyWatcher = this;
+			lock (inotifyWatcher)
 			{
 				InotifyWatcher.thread = null;
 				InotifyWatcher.stop = false;
@@ -371,10 +376,13 @@ namespace System.IO
 			if (source is ArrayList)
 			{
 				ArrayList list = (ArrayList)source;
-				for (int i = 0; i < list.Count; i++)
+				int num;
+				for (int i = 0; i < list.Count; i = num + 1)
 				{
 					yield return list[i];
+					num = i;
 				}
+				list = null;
 			}
 			yield break;
 		}
@@ -394,7 +402,7 @@ namespace System.IO
 				}
 				num += num2;
 				InotifyMask inotifyMask = inotifyEvent.Mask;
-				bool flag = (inotifyMask & InotifyMask.Directory) != (InotifyMask)0U;
+				bool flag = (inotifyMask & InotifyMask.Directory) > (InotifyMask)0U;
 				inotifyMask &= InotifyWatcher.Interesting;
 				if (inotifyMask != (InotifyMask)0U)
 				{

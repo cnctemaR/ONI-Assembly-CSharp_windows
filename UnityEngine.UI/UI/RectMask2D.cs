@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Rect Mask 2D", 13)]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
 	public class RectMask2D : UIBehaviour, IClipper, ICanvasRaycastFilter

@@ -1,66 +1,82 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
-	internal sealed class HostTopologyInternal : IDisposable
+	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
+	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
+	internal class HostTopologyInternal : IDisposable
 	{
 		public HostTopologyInternal(HostTopology topology)
 		{
 			ConnectionConfigInternal connectionConfigInternal = new ConnectionConfigInternal(topology.DefaultConfig);
-			this.InitWrapper(connectionConfigInternal, topology.MaxDefaultConnections);
+			this.m_Ptr = HostTopologyInternal.InternalCreate(connectionConfigInternal, topology.MaxDefaultConnections);
 			for (int i = 1; i <= topology.SpecialConnectionConfigsCount; i++)
 			{
 				ConnectionConfig specialConnectionConfig = topology.GetSpecialConnectionConfig(i);
 				ConnectionConfigInternal connectionConfigInternal2 = new ConnectionConfigInternal(specialConnectionConfig);
 				this.AddSpecialConnectionConfig(connectionConfigInternal2);
 			}
-			this.InitOtherParameters(topology);
+			this.ReceivedMessagePoolSize = topology.ReceivedMessagePoolSize;
+			this.SentMessagePoolSize = topology.SentMessagePoolSize;
+			this.MessagePoolSizeGrowthFactor = topology.MessagePoolSizeGrowthFactor;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void InitWrapper(ConnectionConfigInternal config, int maxDefaultConnections);
-
-		private int AddSpecialConnectionConfig(ConnectionConfigInternal config)
+		protected virtual void Dispose(bool disposing)
 		{
-			return this.AddSpecialConnectionConfigWrapper(config);
+			if (this.m_Ptr != IntPtr.Zero)
+			{
+				HostTopologyInternal.InternalDestroy(this.m_Ptr);
+				this.m_Ptr = IntPtr.Zero;
+			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int AddSpecialConnectionConfigWrapper(ConnectionConfigInternal config);
-
-		private void InitOtherParameters(HostTopology topology)
-		{
-			this.InitReceivedPoolSize(topology.ReceivedMessagePoolSize);
-			this.InitSentMessagePoolSize(topology.SentMessagePoolSize);
-			this.InitMessagePoolSizeGrowthFactor(topology.MessagePoolSizeGrowthFactor);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void InitReceivedPoolSize(ushort pool);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void InitSentMessagePoolSize(ushort pool);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void InitMessagePoolSizeGrowthFactor(float factor);
-
-		[GeneratedByOldBindingsGenerator]
-		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Dispose();
 
 		~HostTopologyInternal()
 		{
-			this.Dispose();
+			this.Dispose(false);
 		}
 
-		internal IntPtr m_Ptr;
+		public void Dispose()
+		{
+			if (this.m_Ptr != IntPtr.Zero)
+			{
+				HostTopologyInternal.InternalDestroy(this.m_Ptr);
+				this.m_Ptr = IntPtr.Zero;
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr InternalCreate(ConnectionConfigInternal config, int maxDefaultConnections);
+
+		[NativeMethod(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalDestroy(IntPtr ptr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern ushort AddSpecialConnectionConfig(ConnectionConfigInternal config);
+
+		[NativeProperty("m_ReceivedMessagePoolSize", TargetType.Field)]
+		private extern ushort ReceivedMessagePoolSize
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeProperty("m_SentMessagePoolSize", TargetType.Field)]
+		private extern ushort SentMessagePoolSize
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeProperty("m_MessagePoolSizeGrowthFactor", TargetType.Field)]
+		private extern float MessagePoolSizeGrowthFactor
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public IntPtr m_Ptr;
 	}
 }

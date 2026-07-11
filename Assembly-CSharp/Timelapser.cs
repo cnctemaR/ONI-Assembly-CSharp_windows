@@ -45,8 +45,9 @@ public class Timelapser : KMonoBehaviour
 		if (this.previewScreenshot)
 		{
 			this.bufferRenderTexture = new RenderTexture(this.previewScreenshotResolution.x, this.previewScreenshotResolution.y, 32, RenderTextureFormat.ARGB32);
+			return;
 		}
-		else if (this.timelapseUserEnabled)
+		if (this.timelapseUserEnabled)
 		{
 			this.bufferRenderTexture = new RenderTexture(SaveGame.Instance.TimelapseResolution.x, SaveGame.Instance.TimelapseResolution.y, 32, RenderTextureFormat.ARGB32);
 		}
@@ -68,6 +69,7 @@ public class Timelapser : KMonoBehaviour
 			if (cycle % 10 == 0)
 			{
 				this.screenshotToday = true;
+				return;
 			}
 		}
 		else
@@ -89,8 +91,9 @@ public class Timelapser : KMonoBehaviour
 			if (!this.timelapseUserEnabled)
 			{
 				this.screenshotToday = false;
+				return;
 			}
-			else if (!PlayerController.Instance.IsDragging())
+			if (!PlayerController.Instance.IsDragging())
 			{
 				CameraController.Instance.ForcePanningState(false);
 				this.screenshotToday = false;
@@ -134,7 +137,7 @@ public class Timelapser : KMonoBehaviour
 					this.previewScreenshot = false;
 					this.screenshotActive = false;
 					this.debugScreenShot = false;
-					this.previewSaveGamePath = string.Empty;
+					this.previewSaveGamePath = "";
 					OverlayScreen.Instance.ToggleOverlay(this.activeOverlay, false);
 				}
 			}
@@ -234,10 +237,9 @@ public class Timelapser : KMonoBehaviour
 			text4 = text4 + "_cycle_" + GameClock.Instance.GetCycle().ToString(text5);
 			if (this.debugScreenShot)
 			{
-				string text6 = text4;
 				text4 = string.Concat(new object[]
 				{
-					text6,
+					text4,
 					"_",
 					global::System.DateTime.Now.Day,
 					"-",
@@ -251,14 +253,12 @@ public class Timelapser : KMonoBehaviour
 				});
 			}
 			File.WriteAllBytes(text4 + ".png", array);
+			return;
 		}
-		else
-		{
-			string text7 = this.previewSaveGamePath;
-			text7 = Path.ChangeExtension(text7, ".png");
-			DebugUtil.LogArgs(new object[] { "Saving screenshot to", text7 });
-			File.WriteAllBytes(text7, array);
-		}
+		string text6 = this.previewSaveGamePath;
+		text6 = Path.ChangeExtension(text6, ".png");
+		DebugUtil.LogArgs(new object[] { "Saving screenshot to", text6 });
+		File.WriteAllBytes(text6, array);
 	}
 
 	private bool screenshotActive;
@@ -267,7 +267,7 @@ public class Timelapser : KMonoBehaviour
 
 	private bool previewScreenshot;
 
-	private string previewSaveGamePath = string.Empty;
+	private string previewSaveGamePath = "";
 
 	private bool screenshotToday;
 

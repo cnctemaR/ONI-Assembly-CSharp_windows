@@ -90,7 +90,7 @@ public class EntitySplitter : KMonoBehaviour
 		pickupable.TotalAmount -= amount;
 		component.Trigger(1335436905, pickupable);
 		pickupable.PrimaryElement.KeepZeroMassObject = keepZeroMassObject;
-		pickupable.TotalAmount = pickupable.TotalAmount;
+		pickupable.TotalAmount += 0f;
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, pickupable.gameObject);
@@ -123,9 +123,11 @@ public class EntitySplitter : KMonoBehaviour
 				if (CameraController.Instance != null)
 				{
 					string sound = GlobalAssets.GetSound("Ore_absorb", false);
-					if (sound != null && CameraController.Instance.IsAudibleSound(pickupable.transform.GetPosition(), sound))
+					Vector3 position = pickupable.transform.GetPosition();
+					position.z = 0f;
+					if (sound != null && CameraController.Instance.IsAudibleSound(position, sound))
 					{
-						base.PlaySound3D(sound);
+						KFMOD.PlayOneShot(sound, position, 1f);
 					}
 				}
 			}

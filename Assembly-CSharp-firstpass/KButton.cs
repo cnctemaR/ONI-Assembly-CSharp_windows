@@ -1,30 +1,22 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IEventSystemHandler
+public class KButton : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerClickHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDoubleClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<KKeyCode> onBtnClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerEnter;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerExit;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerDown;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerUp;
 
 	public bool isInteractable
@@ -125,30 +117,24 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		if (this.interactable)
 		{
 			KKeyCode kkeyCode = KKeyCode.None;
-			PointerEventData.InputButton button = eventData.button;
-			if (button != PointerEventData.InputButton.Left)
+			switch (eventData.button)
 			{
-				if (button != PointerEventData.InputButton.Right)
-				{
-					if (button == PointerEventData.InputButton.Middle)
-					{
-						kkeyCode = KKeyCode.Mouse2;
-					}
-				}
-				else
-				{
-					kkeyCode = KKeyCode.Mouse1;
-				}
-			}
-			else
-			{
+			case PointerEventData.InputButton.Left:
 				kkeyCode = KKeyCode.Mouse0;
+				break;
+			case PointerEventData.InputButton.Right:
+				kkeyCode = KKeyCode.Mouse1;
+				break;
+			case PointerEventData.InputButton.Middle:
+				kkeyCode = KKeyCode.Mouse2;
+				break;
 			}
 			if ((eventData.clickCount == 1 || this.onDoubleClick == null) && (this.onClick != null || this.onBtnClick != null))
 			{
 				this.SignalClick(kkeyCode);
+				return;
 			}
-			else if (eventData.clickCount == 2 && this.onDoubleClick != null)
+			if (eventData.clickCount == 2 && this.onDoubleClick != null)
 			{
 				this.SignalDoubleClick(kkeyCode);
 			}
@@ -163,11 +149,12 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		}
 		KInputManager.SetUserActive();
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.OnHoverIn();
+				array[i].OnHoverIn();
 			}
 		}
 		this.UpdateColor(this.interactable, true, false);
@@ -184,11 +171,12 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		}
 		KInputManager.SetUserActive();
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.OnHoverOut();
+				array[i].OnHoverOut();
 			}
 		}
 		this.UpdateColor(this.interactable, false, false);
@@ -201,17 +189,15 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		if (this.bgImage == null)
 		{
 			this.bgImage = base.GetComponent<KImage>();
-			string text = string.Empty;
+			string text = "";
 			Transform transform = base.transform;
-			for (int i = 0; i < 5; i++)
+			int num = 0;
+			while (num < 5 && transform.parent != null)
 			{
-				if (!(transform.parent != null))
-				{
-					break;
-				}
 				transform = transform.parent;
 				string name = transform.name;
 				text = string.Format("{0}/{1}", name, text);
+				num++;
 			}
 			if (this.bgImage == null)
 			{
@@ -219,9 +205,9 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 			}
 		}
 		this.UpdateKImageColor(this.bgImage, interactable, hover, press);
-		for (int j = 0; j < this.additionalKImages.Length; j++)
+		for (int i = 0; i < this.additionalKImages.Length; i++)
 		{
-			this.UpdateKImageColor(this.additionalKImages[j], interactable, hover, press);
+			this.UpdateKImageColor(this.additionalKImages[i], interactable, hover, press);
 		}
 	}
 
@@ -234,15 +220,14 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 				if (press)
 				{
 					image.ColorState = KImage.ColorSelector.Active;
+					return;
 				}
-				else
-				{
-					image.ColorState = ((!hover) ? KImage.ColorSelector.Inactive : KImage.ColorSelector.Hover);
-				}
+				image.ColorState = (hover ? KImage.ColorSelector.Hover : KImage.ColorSelector.Inactive);
+				return;
 			}
 			else
 			{
-				image.ColorState = ((!hover) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Disabled);
+				image.ColorState = (hover ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Disabled);
 			}
 		}
 	}
@@ -252,11 +237,9 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		if (!this.interactable || (this.soundPlayer.AcceptClickCondition != null && !this.soundPlayer.AcceptClickCondition()))
 		{
 			this.soundPlayer.Play(2);
+			return;
 		}
-		else
-		{
-			this.soundPlayer.Play(0);
-		}
+		this.soundPlayer.Play(0);
 	}
 
 	[SerializeField]

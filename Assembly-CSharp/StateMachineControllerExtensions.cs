@@ -19,7 +19,7 @@ public static class StateMachineControllerExtensions
 		StateMachineController component = go.GetComponent<StateMachineController>();
 		if (component == null)
 		{
-			return (DefType)((object)null);
+			return default(DefType);
 		}
 		return component.GetDef<DefType>();
 	}
@@ -36,7 +36,7 @@ public static class StateMachineControllerExtensions
 		{
 			return component.GetSMI<StateMachineInstanceType>();
 		}
-		return (StateMachineInstanceType)((object)null);
+		return default(StateMachineInstanceType);
 	}
 
 	public static List<StateMachineInstanceType> GetAllSMI<StateMachineInstanceType>(this Component cmp) where StateMachineInstanceType : class

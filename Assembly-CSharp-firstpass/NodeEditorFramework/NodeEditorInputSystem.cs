@@ -15,22 +15,23 @@ namespace NodeEditorFramework
 			NodeEditorInputSystem.hotkeyHandlers = new List<KeyValuePair<HotkeyAttribute, Delegate>>();
 			NodeEditorInputSystem.contextEntries = new List<KeyValuePair<ContextEntryAttribute, PopupMenu.MenuFunctionData>>();
 			NodeEditorInputSystem.contextFillers = new List<KeyValuePair<ContextFillerAttribute, Delegate>>();
-			IEnumerable<Assembly> enumerable = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+			foreach (Assembly assembly2 in from assembly in AppDomain.CurrentDomain.GetAssemblies()
 				where assembly.FullName.Contains("Assembly")
-				select assembly;
-			foreach (Assembly assembly2 in enumerable)
+				select assembly)
 			{
-				foreach (Type type in assembly2.GetTypes())
+				Type[] types = assembly2.GetTypes();
+				for (int i = 0; i < types.Length; i++)
 				{
-					MethodInfo[] methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+					MethodInfo[] methods = types[i].GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 					for (int j = 0; j < methods.Length; j++)
 					{
 						MethodInfo methodInfo = methods[j];
 						Delegate actionDelegate = null;
+						PopupMenu.MenuFunctionData <>9__3;
 						foreach (object obj in methodInfo.GetCustomAttributes(true))
 						{
-							Type type2 = obj.GetType();
-							if (type2 == typeof(EventHandlerAttribute))
+							Type type = obj.GetType();
+							if (type == typeof(EventHandlerAttribute))
 							{
 								if (EventHandlerAttribute.AssureValidity(methodInfo, obj as EventHandlerAttribute))
 								{
@@ -41,7 +42,7 @@ namespace NodeEditorFramework
 									NodeEditorInputSystem.eventHandlers.Add(new KeyValuePair<EventHandlerAttribute, Delegate>(obj as EventHandlerAttribute, actionDelegate));
 								}
 							}
-							else if (type2 == typeof(HotkeyAttribute))
+							else if (type == typeof(HotkeyAttribute))
 							{
 								if (HotkeyAttribute.AssureValidity(methodInfo, obj as HotkeyAttribute))
 								{
@@ -52,7 +53,7 @@ namespace NodeEditorFramework
 									NodeEditorInputSystem.hotkeyHandlers.Add(new KeyValuePair<HotkeyAttribute, Delegate>(obj as HotkeyAttribute, actionDelegate));
 								}
 							}
-							else if (type2 == typeof(ContextEntryAttribute))
+							else if (type == typeof(ContextEntryAttribute))
 							{
 								if (ContextEntryAttribute.AssureValidity(methodInfo, obj as ContextEntryAttribute))
 								{
@@ -60,18 +61,23 @@ namespace NodeEditorFramework
 									{
 										actionDelegate = Delegate.CreateDelegate(typeof(Action<NodeEditorInputInfo>), methodInfo);
 									}
-									PopupMenu.MenuFunctionData menuFunctionData = delegate(object callbackObj)
+									PopupMenu.MenuFunctionData menuFunctionData;
+									if ((menuFunctionData = <>9__3) == null)
 									{
-										if (!(callbackObj is NodeEditorInputInfo))
+										menuFunctionData = (<>9__3 = delegate(object callbackObj)
 										{
-											throw new UnityException("Callback Object passed by context is not of type NodeEditorMenuCallback!");
-										}
-										actionDelegate.DynamicInvoke(new object[] { callbackObj as NodeEditorInputInfo });
-									};
-									NodeEditorInputSystem.contextEntries.Add(new KeyValuePair<ContextEntryAttribute, PopupMenu.MenuFunctionData>(obj as ContextEntryAttribute, menuFunctionData));
+											if (!(callbackObj is NodeEditorInputInfo))
+											{
+												throw new UnityException("Callback Object passed by context is not of type NodeEditorMenuCallback!");
+											}
+											actionDelegate.DynamicInvoke(new object[] { callbackObj as NodeEditorInputInfo });
+										});
+									}
+									PopupMenu.MenuFunctionData menuFunctionData2 = menuFunctionData;
+									NodeEditorInputSystem.contextEntries.Add(new KeyValuePair<ContextEntryAttribute, PopupMenu.MenuFunctionData>(obj as ContextEntryAttribute, menuFunctionData2));
 								}
 							}
-							else if (type2 == typeof(ContextFillerAttribute) && ContextFillerAttribute.AssureValidity(methodInfo, obj as ContextFillerAttribute))
+							else if (type == typeof(ContextFillerAttribute) && ContextFillerAttribute.AssureValidity(methodInfo, obj as ContextFillerAttribute))
 							{
 								Delegate @delegate = Delegate.CreateDelegate(typeof(Action<NodeEditorInputInfo, GenericMenu>), methodInfo);
 								NodeEditorInputSystem.contextFillers.Add(new KeyValuePair<ContextFillerAttribute, Delegate>(obj as ContextFillerAttribute, @delegate));
@@ -89,7 +95,16 @@ namespace NodeEditorFramework
 			object[] array = new object[] { inputInfo };
 			foreach (KeyValuePair<EventHandlerAttribute, Delegate> keyValuePair in NodeEditorInputSystem.eventHandlers)
 			{
-				if ((keyValuePair.Key.handledEvent == null || keyValuePair.Key.handledEvent == inputInfo.inputEvent.type) && ((!late) ? (keyValuePair.Key.priority < 100) : (keyValuePair.Key.priority >= 100)))
+				if (keyValuePair.Key.handledEvent != null)
+				{
+					EventType? handledEvent = keyValuePair.Key.handledEvent;
+					EventType type = inputInfo.inputEvent.type;
+					if (!((handledEvent.GetValueOrDefault() == type) & (handledEvent != null)))
+					{
+						continue;
+					}
+				}
+				if (late ? (keyValuePair.Key.priority >= 100) : (keyValuePair.Key.priority < 100))
 				{
 					keyValuePair.Value.DynamicInvoke(array);
 					if (inputInfo.inputEvent.type == EventType.Used)
@@ -105,8 +120,25 @@ namespace NodeEditorFramework
 			object[] array = new object[] { inputInfo };
 			foreach (KeyValuePair<HotkeyAttribute, Delegate> keyValuePair in NodeEditorInputSystem.hotkeyHandlers)
 			{
-				if (keyValuePair.Key.handledHotKey == keyCode && (keyValuePair.Key.modifiers == null || keyValuePair.Key.modifiers == mods) && (keyValuePair.Key.limitingEventType == null || keyValuePair.Key.limitingEventType == inputInfo.inputEvent.type))
+				if (keyValuePair.Key.handledHotKey == keyCode)
 				{
+					if (keyValuePair.Key.modifiers != null)
+					{
+						EventModifiers? modifiers = keyValuePair.Key.modifiers;
+						if (!((modifiers.GetValueOrDefault() == mods) & (modifiers != null)))
+						{
+							continue;
+						}
+					}
+					if (keyValuePair.Key.limitingEventType != null)
+					{
+						EventType? limitingEventType = keyValuePair.Key.limitingEventType;
+						EventType type = inputInfo.inputEvent.type;
+						if (!((limitingEventType.GetValueOrDefault() == type) & (limitingEventType != null)))
+						{
+							continue;
+						}
+					}
 					keyValuePair.Value.DynamicInvoke(array);
 					if (inputInfo.inputEvent.type == EventType.Used)
 					{
@@ -152,8 +184,7 @@ namespace NodeEditorFramework
 			{
 				return;
 			}
-			NodeEditorInputInfo nodeEditorInputInfo = new NodeEditorInputInfo(state);
-			NodeEditorInputSystem.CallEventHandlers(nodeEditorInputInfo, true);
+			NodeEditorInputSystem.CallEventHandlers(new NodeEditorInputInfo(state), true);
 		}
 
 		internal static bool shouldIgnoreInput(NodeEditorState state)

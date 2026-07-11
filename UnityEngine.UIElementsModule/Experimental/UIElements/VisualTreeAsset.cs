@@ -65,6 +65,13 @@ namespace UnityEngine.Experimental.UIElements
 			return templateContainer;
 		}
 
+		public VisualElement CloneTree(Dictionary<string, VisualElement> slotInsertionPoints, string bindingPath)
+		{
+			TemplateContainer templateContainer = this.CloneTree(slotInsertionPoints) as TemplateContainer;
+			templateContainer.bindingPath = bindingPath;
+			return templateContainer;
+		}
+
 		public void CloneTree(VisualElement target, Dictionary<string, VisualElement> slotInsertionPoints)
 		{
 			if (target == null)

@@ -5,6 +5,14 @@ namespace YamlDotNet.Core.Tokens
 	[Serializable]
 	public class AnchorAlias : Token
 	{
+		public string Value
+		{
+			get
+			{
+				return this.value;
+			}
+		}
+
 		public AnchorAlias(string value)
 			: this(value, Mark.Empty, Mark.Empty)
 		{
@@ -14,14 +22,6 @@ namespace YamlDotNet.Core.Tokens
 			: base(start, end)
 		{
 			this.value = value;
-		}
-
-		public string Value
-		{
-			get
-			{
-				return this.value;
-			}
 		}
 
 		private readonly string value;

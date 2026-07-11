@@ -21,15 +21,14 @@ public class InfoDialogScreen : KModalScreen
 		if (e.TryConsume(global::Action.Escape))
 		{
 			this.OnSelect_OK();
+			return;
 		}
-		else if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			this.OnSelect_OK();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public void AddOption(string text, Action<InfoDialogScreen> action)
@@ -50,8 +49,7 @@ public class InfoDialogScreen : KModalScreen
 
 	public InfoDialogScreen AddPlainText(string text)
 	{
-		InfoScreenPlainText component = Util.KInstantiateUI(this.plainTextTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenPlainText>();
-		component.SetText(text);
+		Util.KInstantiateUI(this.plainTextTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenPlainText>().SetText(text);
 		return this;
 	}
 
@@ -65,8 +63,7 @@ public class InfoDialogScreen : KModalScreen
 
 	public InfoDialogScreen AddSubHeader(string text)
 	{
-		InfoScreenPlainText component = Util.KInstantiateUI(this.subHeaderTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenPlainText>();
-		component.SetText(text);
+		Util.KInstantiateUI(this.subHeaderTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenPlainText>().SetText(text);
 		return this;
 	}
 

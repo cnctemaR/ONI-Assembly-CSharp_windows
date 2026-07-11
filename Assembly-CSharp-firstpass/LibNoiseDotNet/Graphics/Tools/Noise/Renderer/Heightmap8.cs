@@ -26,7 +26,7 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 		public void MinMax(out byte min, out byte max)
 		{
 			min = (max = 0);
-			if (this._data != null && this._data.Length > 0)
+			if (this._data != null && this._data.Length != 0)
 			{
 				min = (max = this._data[0]);
 				for (int i = 0; i < this._data.Length; i++)
@@ -56,56 +56,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 		protected override byte MinvalofT()
 		{
 			return 0;
-		}
-
-		int IMap2D<byte>.get_Width()
-		{
-			return base.Width;
-		}
-
-		int IMap2D<byte>.get_Height()
-		{
-			return base.Height;
-		}
-
-		byte IMap2D<byte>.get_BorderValue()
-		{
-			return base.BorderValue;
-		}
-
-		void IMap2D<byte>.set_BorderValue(byte value)
-		{
-			base.BorderValue = value;
-		}
-
-		byte IMap2D<byte>.GetValue(int x, int y)
-		{
-			return base.GetValue(x, y);
-		}
-
-		void IMap2D<byte>.SetValue(int x, int y, byte value)
-		{
-			base.SetValue(x, y, value);
-		}
-
-		void IMap2D<byte>.SetSize(int width, int height)
-		{
-			base.SetSize(width, height);
-		}
-
-		void IMap2D<byte>.Reset()
-		{
-			base.Reset();
-		}
-
-		void IMap2D<byte>.Clear(byte value)
-		{
-			base.Clear(value);
-		}
-
-		void IMap2D<byte>.Clear()
-		{
-			base.Clear();
 		}
 	}
 }

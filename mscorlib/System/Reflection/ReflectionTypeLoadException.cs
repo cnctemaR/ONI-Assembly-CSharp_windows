@@ -1,39 +1,54 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Reflection
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ReflectionTypeLoadException : SystemException
+	public sealed class ReflectionTypeLoadException : SystemException, ISerializable
 	{
-		public ReflectionTypeLoadException(Type[] classes, Exception[] exceptions)
-			: base(Locale.GetText("The classes in the module cannot be loaded."))
+		private ReflectionTypeLoadException()
+			: base(Environment.GetResourceString("Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information."))
 		{
-			this.loaderExceptions = exceptions;
-			this.types = classes;
+			base.SetErrorCode(-2146232830);
+		}
+
+		private ReflectionTypeLoadException(string message)
+			: base(message)
+		{
+			base.SetErrorCode(-2146232830);
+		}
+
+		public ReflectionTypeLoadException(Type[] classes, Exception[] exceptions)
+			: base(null)
+		{
+			this._classes = classes;
+			this._exceptions = exceptions;
+			base.SetErrorCode(-2146232830);
 		}
 
 		public ReflectionTypeLoadException(Type[] classes, Exception[] exceptions, string message)
 			: base(message)
 		{
-			this.loaderExceptions = exceptions;
-			this.types = classes;
+			this._classes = classes;
+			this._exceptions = exceptions;
+			base.SetErrorCode(-2146232830);
 		}
 
-		private ReflectionTypeLoadException(SerializationInfo info, StreamingContext sc)
-			: base(info, sc)
+		internal ReflectionTypeLoadException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
-			this.types = (Type[])info.GetValue("Types", typeof(Type[]));
-			this.loaderExceptions = (Exception[])info.GetValue("Exceptions", typeof(Exception[]));
+			this._classes = (Type[])info.GetValue("Types", typeof(Type[]));
+			this._exceptions = (Exception[])info.GetValue("Exceptions", typeof(Exception[]));
 		}
 
 		public Type[] Types
 		{
 			get
 			{
-				return this.types;
+				return this._classes;
 			}
 		}
 
@@ -41,19 +56,24 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.loaderExceptions;
+				return this._exceptions;
 			}
 		}
 
+		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
 			base.GetObjectData(info, context);
-			info.AddValue("Types", this.types);
-			info.AddValue("Exceptions", this.loaderExceptions);
+			info.AddValue("Types", this._classes, typeof(Type[]));
+			info.AddValue("Exceptions", this._exceptions, typeof(Exception[]));
 		}
 
-		private Exception[] loaderExceptions;
+		private Type[] _classes;
 
-		private Type[] types;
+		private Exception[] _exceptions;
 	}
 }

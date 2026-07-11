@@ -8,19 +8,20 @@ namespace UnityEngine.Experimental.UIElements
 	public class Scroller : VisualElement
 	{
 		public Scroller()
-			: this(0f, 0f, null, Slider.Direction.Vertical)
+			: this(0f, 0f, null, SliderDirection.Vertical)
 		{
 		}
 
-		public Scroller(float lowValue, float highValue, Action<float> valueChanged, Slider.Direction direction = Slider.Direction.Vertical)
+		public Scroller(float lowValue, float highValue, Action<float> valueChanged, SliderDirection direction = SliderDirection.Vertical)
 		{
 			this.direction = direction;
 			this.valueChanged = valueChanged;
-			this.slider = new Slider(lowValue, highValue, new Action<float>(this.OnSliderValueChange), direction, 10f)
+			this.slider = new Slider(lowValue, highValue, direction, 20f)
 			{
 				name = "Slider",
 				persistenceKey = "Slider"
 			};
+			this.slider.OnValueChanged(new EventCallback<ChangeEvent<float>>(this.OnSliderValueChange));
 			base.Add(this.slider);
 			this.lowButton = new ScrollerButton(new Action(this.ScrollPageUp), 250L, 30L)
 			{
@@ -79,15 +80,15 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		public Slider.Direction direction
+		public SliderDirection direction
 		{
 			get
 			{
-				return (base.style.flexDirection != FlexDirection.Row) ? Slider.Direction.Vertical : Slider.Direction.Horizontal;
+				return (base.style.flexDirection != FlexDirection.Row) ? SliderDirection.Vertical : SliderDirection.Horizontal;
 			}
 			set
 			{
-				if (value == Slider.Direction.Horizontal)
+				if (value == SliderDirection.Horizontal)
 				{
 					base.style.flexDirection = FlexDirection.Row;
 					base.AddToClassList("horizontal");
@@ -106,84 +107,44 @@ namespace UnityEngine.Experimental.UIElements
 			this.slider.AdjustDragElement(factor);
 		}
 
-		private void OnSliderValueChange(float newValue)
+		private void OnSliderValueChange(ChangeEvent<float> evt)
 		{
-			this.value = newValue;
+			this.value = evt.newValue;
 			if (this.valueChanged != null)
 			{
 				this.valueChanged(this.slider.value);
 			}
-			base.Dirty(ChangeType.Repaint);
+			base.IncrementVersion(VersionChangeType.Repaint);
 		}
 
 		public void ScrollPageUp()
 		{
-			this.value -= this.slider.pageSize * ((this.slider.lowValue >= this.slider.highValue) ? (-1f) : 1f);
+			this.ScrollPageUp(1f);
 		}
 
 		public void ScrollPageDown()
 		{
-			this.value += this.slider.pageSize * ((this.slider.lowValue >= this.slider.highValue) ? (-1f) : 1f);
+			this.ScrollPageDown(1f);
 		}
 
-		/// <summary>
-		///   <para>Instantiates a Scroller using the data read from a UXML file.</para>
-		/// </summary>
-		public class ScrollerFactory : UxmlFactory<Scroller, Scroller.ScrollerUxmlTraits>
+		public void ScrollPageUp(float factor)
+		{
+			this.value -= factor * (this.slider.pageSize * ((this.slider.lowValue >= this.slider.highValue) ? (-1f) : 1f));
+		}
+
+		public void ScrollPageDown(float factor)
+		{
+			this.value += factor * (this.slider.pageSize * ((this.slider.lowValue >= this.slider.highValue) ? (-1f) : 1f));
+		}
+
+		internal const float kDefaultPageSize = 20f;
+
+		public new class UxmlFactory : UxmlFactory<Scroller, Scroller.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the Scroller.</para>
-		/// </summary>
-		public class ScrollerUxmlTraits : VisualElement.VisualElementUxmlTraits
+		public new class UxmlTraits : VisualElement.UxmlTraits
 		{
-			/// <summary>
-			///   <para>Constructor.</para>
-			/// </summary>
-			public ScrollerUxmlTraits()
-			{
-				this.m_LowValue = new UxmlFloatAttributeDescription
-				{
-					name = "lowValue"
-				};
-				this.m_HighValue = new UxmlFloatAttributeDescription
-				{
-					name = "highValue"
-				};
-				this.m_Direction = new UxmlEnumAttributeDescription<Slider.Direction>
-				{
-					name = "direction",
-					defaultValue = Slider.Direction.Vertical
-				};
-				this.m_Value = new UxmlFloatAttributeDescription
-				{
-					name = "value"
-				};
-			}
-
-			/// <summary>
-			///   <para>Returns an enumerable containing attribute descriptions for Scroller properties that should be available in UXML.</para>
-			/// </summary>
-			public override IEnumerable<UxmlAttributeDescription> uxmlAttributesDescription
-			{
-				get
-				{
-					foreach (UxmlAttributeDescription attr in this.<get_uxmlAttributesDescription>__BaseCallProxy0())
-					{
-						yield return attr;
-					}
-					yield return this.m_LowValue;
-					yield return this.m_HighValue;
-					yield return this.m_Direction;
-					yield return this.m_Value;
-					yield break;
-				}
-			}
-
-			/// <summary>
-			///   <para>Returns an empty enumerable, as scrollers do not have children.</para>
-			/// </summary>
 			public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
 			{
 				get
@@ -192,29 +153,38 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Initialize Scroller properties using values from the attribute bag.</para>
-			/// </summary>
-			/// <param name="ve">The object to initialize.</param>
-			/// <param name="bag">The attribute bag.</param>
-			/// <param name="cc">The creation context; unused.</param>
 			public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
 			{
 				base.Init(ve, bag, cc);
 				Scroller scroller = (Scroller)ve;
-				scroller.slider.lowValue = this.m_LowValue.GetValueFromBag(bag);
-				scroller.slider.highValue = this.m_HighValue.GetValueFromBag(bag);
-				scroller.direction = this.m_Direction.GetValueFromBag(bag);
-				scroller.value = this.m_Value.GetValueFromBag(bag);
+				scroller.slider.lowValue = this.m_LowValue.GetValueFromBag(bag, cc);
+				scroller.slider.highValue = this.m_HighValue.GetValueFromBag(bag, cc);
+				scroller.direction = this.m_Direction.GetValueFromBag(bag, cc);
+				scroller.value = this.m_Value.GetValueFromBag(bag, cc);
 			}
 
-			private UxmlFloatAttributeDescription m_LowValue;
+			private UxmlFloatAttributeDescription m_LowValue = new UxmlFloatAttributeDescription
+			{
+				name = "low-value",
+				obsoleteNames = new string[] { "lowValue" }
+			};
 
-			private UxmlFloatAttributeDescription m_HighValue;
+			private UxmlFloatAttributeDescription m_HighValue = new UxmlFloatAttributeDescription
+			{
+				name = "high-value",
+				obsoleteNames = new string[] { "highValue" }
+			};
 
-			private UxmlEnumAttributeDescription<Slider.Direction> m_Direction;
+			private UxmlEnumAttributeDescription<SliderDirection> m_Direction = new UxmlEnumAttributeDescription<SliderDirection>
+			{
+				name = "direction",
+				defaultValue = SliderDirection.Vertical
+			};
 
-			private UxmlFloatAttributeDescription m_Value;
+			private UxmlFloatAttributeDescription m_Value = new UxmlFloatAttributeDescription
+			{
+				name = "value"
+			};
 		}
 	}
 }

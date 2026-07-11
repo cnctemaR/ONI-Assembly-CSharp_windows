@@ -47,8 +47,7 @@ public class MessageTarget : ISaveLoadable
 		{
 			this.prefabId.Get().Unsubscribe(-1940207677, new Action<object>(this.OnAbsorbedBy));
 		}
-		GameObject gameObject = (GameObject)data;
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		KPrefabID component = ((GameObject)data).GetComponent<KPrefabID>();
 		component.Subscribe(-1940207677, new Action<object>(this.OnAbsorbedBy));
 		this.prefabId.Set(component);
 	}

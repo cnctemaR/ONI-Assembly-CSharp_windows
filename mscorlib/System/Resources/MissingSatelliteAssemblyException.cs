@@ -9,19 +9,28 @@ namespace System.Resources
 	public class MissingSatelliteAssemblyException : SystemException
 	{
 		public MissingSatelliteAssemblyException()
-			: base(Locale.GetText("The satellite assembly was not found for the required culture."))
+			: base(Environment.GetResourceString("Resource lookup fell back to the ultimate fallback resources in a satellite assembly, but that satellite either was not found or could not be loaded. Please consider reinstalling or repairing the application."))
 		{
+			base.SetErrorCode(-2146233034);
 		}
 
 		public MissingSatelliteAssemblyException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146233034);
 		}
 
 		public MissingSatelliteAssemblyException(string message, string cultureName)
 			: base(message)
 		{
-			this.culture = cultureName;
+			base.SetErrorCode(-2146233034);
+			this._cultureName = cultureName;
+		}
+
+		public MissingSatelliteAssemblyException(string message, Exception inner)
+			: base(message, inner)
+		{
+			base.SetErrorCode(-2146233034);
 		}
 
 		protected MissingSatelliteAssemblyException(SerializationInfo info, StreamingContext context)
@@ -29,19 +38,14 @@ namespace System.Resources
 		{
 		}
 
-		public MissingSatelliteAssemblyException(string message, Exception inner)
-			: base(message, inner)
-		{
-		}
-
 		public string CultureName
 		{
 			get
 			{
-				return this.culture;
+				return this._cultureName;
 			}
 		}
 
-		private string culture;
+		private string _cultureName;
 	}
 }

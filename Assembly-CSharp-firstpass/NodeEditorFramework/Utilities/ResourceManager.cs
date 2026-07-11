@@ -49,7 +49,7 @@ namespace NodeEditorFramework.Utilities
 				ResourceManager.loadedTextures.RemoveAt(num);
 			}
 			Texture2D texture2D = ResourceManager.LoadResource<Texture2D>(texPath);
-			ResourceManager.AddTextureToMemory(texPath, texture2D, new string[0]);
+			ResourceManager.AddTextureToMemory(texPath, texture2D, Array.Empty<string>());
 			return texture2D;
 		}
 
@@ -60,7 +60,7 @@ namespace NodeEditorFramework.Utilities
 			if (texture2D == null)
 			{
 				texture2D = ResourceManager.LoadTexture(texPath);
-				ResourceManager.AddTextureToMemory(texPath, texture2D, new string[0]);
+				ResourceManager.AddTextureToMemory(texPath, texture2D, Array.Empty<string>());
 				texture2D = RTEditorGUI.Tint(texture2D, col);
 				ResourceManager.AddTextureToMemory(texPath, texture2D, new string[] { text });
 			}
@@ -79,7 +79,11 @@ namespace NodeEditorFramework.Utilities
 		public static ResourceManager.MemoryTexture FindInMemory(Texture2D tex)
 		{
 			int num = ResourceManager.loadedTextures.FindIndex((ResourceManager.MemoryTexture memTex) => memTex.texture == tex);
-			return (num == -1) ? null : ResourceManager.loadedTextures[num];
+			if (num == -1)
+			{
+				return null;
+			}
+			return ResourceManager.loadedTextures[num];
 		}
 
 		public static bool HasInMemory(string texturePath, params string[] modifications)
@@ -108,7 +112,11 @@ namespace NodeEditorFramework.Utilities
 		public static Texture2D GetTexture(string texturePath, params string[] modifications)
 		{
 			ResourceManager.MemoryTexture memoryTexture = ResourceManager.GetMemoryTexture(texturePath, modifications);
-			return (memoryTexture != null) ? memoryTexture.texture : null;
+			if (memoryTexture != null)
+			{
+				return memoryTexture.texture;
+			}
+			return null;
 		}
 
 		private static bool EqualModifications(string[] modsA, string[] modsB)

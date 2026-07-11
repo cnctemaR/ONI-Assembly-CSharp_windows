@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeMethodReferenceExpression : CodeExpression
 	{
@@ -14,69 +11,49 @@ namespace System.CodeDom
 
 		public CodeMethodReferenceExpression(CodeExpression targetObject, string methodName)
 		{
-			this.targetObject = targetObject;
-			this.methodName = methodName;
+			this.TargetObject = targetObject;
+			this.MethodName = methodName;
 		}
 
 		public CodeMethodReferenceExpression(CodeExpression targetObject, string methodName, params CodeTypeReference[] typeParameters)
-			: this(targetObject, methodName)
 		{
-			if (typeParameters != null && typeParameters.Length > 0)
+			this.TargetObject = targetObject;
+			this.MethodName = methodName;
+			if (typeParameters != null && typeParameters.Length != 0)
 			{
 				this.TypeArguments.AddRange(typeParameters);
 			}
 		}
 
+		public CodeExpression TargetObject { get; set; }
+
 		public string MethodName
 		{
 			get
 			{
-				if (this.methodName == null)
-				{
-					return string.Empty;
-				}
-				return this.methodName;
+				return this._methodName ?? string.Empty;
 			}
 			set
 			{
-				this.methodName = value;
+				this._methodName = value;
 			}
 		}
 
-		public CodeExpression TargetObject
-		{
-			get
-			{
-				return this.targetObject;
-			}
-			set
-			{
-				this.targetObject = value;
-			}
-		}
-
-		[ComVisible(false)]
 		public CodeTypeReferenceCollection TypeArguments
 		{
 			get
 			{
-				if (this.typeArguments == null)
+				CodeTypeReferenceCollection codeTypeReferenceCollection;
+				if ((codeTypeReferenceCollection = this._typeArguments) == null)
 				{
-					this.typeArguments = new CodeTypeReferenceCollection();
+					codeTypeReferenceCollection = (this._typeArguments = new CodeTypeReferenceCollection());
 				}
-				return this.typeArguments;
+				return codeTypeReferenceCollection;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
+		private string _methodName;
 
-		private string methodName;
-
-		private CodeExpression targetObject;
-
-		private CodeTypeReferenceCollection typeArguments;
+		private CodeTypeReferenceCollection _typeArguments;
 	}
 }

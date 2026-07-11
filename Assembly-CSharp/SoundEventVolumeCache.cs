@@ -17,11 +17,9 @@ public class SoundEventVolumeCache : Singleton<SoundEventVolumeCache>
 		if (!this.volumeCache.ContainsKey(hashedString))
 		{
 			this.volumeCache.Add(hashedString, vals);
+			return;
 		}
-		else
-		{
-			this.volumeCache[hashedString] = vals;
-		}
+		this.volumeCache[hashedString] = vals;
 	}
 
 	public EffectorValues GetVolume(string animFile, string eventName)

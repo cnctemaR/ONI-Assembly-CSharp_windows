@@ -7,11 +7,7 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.flop_pre;
-		GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.State root = this.root;
-		string text = CREATURES.STATUSITEMS.FLOPPING.NAME;
-		string text2 = CREATURES.STATUSITEMS.FLOPPING.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.FLOPPING.NAME, CREATURES.STATUSITEMS.FLOPPING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.flop_pre.Enter(new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.State.Callback(FlopStates.ChooseDirection)).Transition(this.flop_cycle, new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Transition.ConditionCallback(FlopStates.ShouldFlop), UpdateRate.SIM_200ms).Transition(this.pst, GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Not(new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Transition.ConditionCallback(FlopStates.ShouldFlop)), UpdateRate.SIM_200ms);
 		this.flop_cycle.PlayAnim("flop_loop", KAnim.PlayMode.Once).Transition(this.pst, new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Transition.ConditionCallback(FlopStates.IsSubstantialLiquid), UpdateRate.SIM_200ms).Update("Flop", new Action<FlopStates.Instance, float>(FlopStates.FlopForward), UpdateRate.SIM_33ms, false)
 			.OnAnimQueueComplete(this.flop_pre);
@@ -20,9 +16,8 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 
 	public static bool ShouldFlop(FlopStates.Instance smi)
 	{
-		int num = Grid.PosToCell(smi.transform.GetPosition());
-		int num2 = Grid.CellBelow(num);
-		return Grid.IsValidCell(num2) && Grid.Solid[num2];
+		int num = Grid.CellBelow(Grid.PosToCell(smi.transform.GetPosition()));
+		return Grid.IsValidCell(num) && Grid.Solid[num];
 	}
 
 	public static void ChooseDirection(FlopStates.Instance smi)
@@ -31,19 +26,19 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 		if (FlopStates.SearchForLiquid(num, 1))
 		{
 			smi.currentDir = 1f;
+			return;
 		}
-		else if (FlopStates.SearchForLiquid(num, -1))
+		if (FlopStates.SearchForLiquid(num, -1))
 		{
 			smi.currentDir = -1f;
+			return;
 		}
-		else if (global::UnityEngine.Random.value > 0.5f)
+		if (global::UnityEngine.Random.value > 0.5f)
 		{
 			smi.currentDir = 1f;
+			return;
 		}
-		else
-		{
-			smi.currentDir = -1f;
-		}
+		smi.currentDir = -1f;
 	}
 
 	private static bool SearchForLiquid(int cell, int delta_x)
@@ -89,11 +84,9 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 		if (Grid.IsValidCell(num) && !Grid.Solid[num] && !Grid.CritterImpassable[num])
 		{
 			smi.transform.SetPosition(vector);
+			return;
 		}
-		else
-		{
-			smi.currentDir = -smi.currentDir;
-		}
+		smi.currentDir = -smi.currentDir;
 	}
 
 	public static bool IsSubstantialLiquid(FlopStates.Instance smi)

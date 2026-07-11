@@ -7,15 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Networking.PlayerConnection
 {
-	/// <summary>
-	///   <para>Used for handling the network connection from the Player to the Editor.</para>
-	/// </summary>
 	[Serializable]
 	public class PlayerConnection : ScriptableObject, IEditorPlayerConnection
 	{
-		/// <summary>
-		///   <para>Singleton instance.</para>
-		/// </summary>
 		public static PlayerConnection instance
 		{
 			get
@@ -33,9 +27,6 @@ namespace UnityEngine.Networking.PlayerConnection
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true when Editor is connected to the player.</para>
-		/// </summary>
 		public bool isConnected
 		{
 			get
@@ -101,11 +92,6 @@ namespace UnityEngine.Networking.PlayerConnection
 			this.m_PlayerEditorConnectionEvents.disconnectionEvent.AddListener(callback);
 		}
 
-		/// <summary>
-		///   <para>Sends data to the Editor.</para>
-		/// </summary>
-		/// <param name="messageId">The type ID of the message that is sent to the Editor.</param>
-		/// <param name="data"></param>
 		public void Send(Guid messageId, byte[] data)
 		{
 			if (messageId == Guid.Empty)
@@ -115,14 +101,15 @@ namespace UnityEngine.Networking.PlayerConnection
 			this.GetConnectionNativeApi().SendMessage(messageId, data, 0);
 		}
 
-		/// <summary>
-		///   <para>Blocks the calling thread until either a message with the specified messageId is received or the specified time-out elapses.</para>
-		/// </summary>
-		/// <param name="messageId">The type ID of the message that is sent to the Editor.</param>
-		/// <param name="timeout">The time-out specified in milliseconds.</param>
-		/// <returns>
-		///   <para>Returns true when the message is received and false if the call timed out.</para>
-		/// </returns>
+		public bool TrySend(Guid messageId, byte[] data)
+		{
+			if (messageId == Guid.Empty)
+			{
+				throw new ArgumentException("Cant be Guid.Empty", "messageId");
+			}
+			return this.GetConnectionNativeApi().TrySendMessage(messageId, data, 0);
+		}
+
 		public bool BlockUntilRecvMsg(Guid messageId, int timeout)
 		{
 			bool msgReceived = false;
@@ -140,9 +127,6 @@ namespace UnityEngine.Networking.PlayerConnection
 			return msgReceived;
 		}
 
-		/// <summary>
-		///   <para>This disconnects all of the active connections.</para>
-		/// </summary>
 		public void DisconnectAll()
 		{
 			this.GetConnectionNativeApi().DisconnectAll();

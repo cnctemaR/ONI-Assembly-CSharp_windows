@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -42,11 +43,57 @@ namespace UnityEngine
 			}
 		}
 
-		public virtual RectOffset margin
+		public virtual int marginLeft
 		{
+			[CompilerGenerated]
 			get
 			{
-				return this.style.margin;
+				return this.style.margin.left;
+			}
+		}
+
+		public virtual int marginRight
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.style.margin.right;
+			}
+		}
+
+		public virtual int marginTop
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.style.margin.top;
+			}
+		}
+
+		public virtual int marginBottom
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.style.margin.bottom;
+			}
+		}
+
+		public int marginHorizontal
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.marginLeft + this.marginRight;
+			}
+		}
+
+		public int marginVertical
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.marginBottom + this.marginTop;
 			}
 		}
 
@@ -187,6 +234,8 @@ namespace UnityEngine
 		public int stretchWidth;
 
 		public int stretchHeight;
+
+		public bool consideredForMargin = true;
 
 		private GUIStyle m_Style = GUIStyle.none;
 

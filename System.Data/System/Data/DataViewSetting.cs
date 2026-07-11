@@ -14,10 +14,14 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this._applyDefaultSort;
 			}
 			set
 			{
+				if (this._applyDefaultSort != value)
+				{
+					this._applyDefaultSort = value;
+				}
 			}
 		}
 
@@ -26,40 +30,15 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this._dataViewManager;
 			}
 		}
 
-		public string RowFilter
+		internal void SetDataViewManager(DataViewManager dataViewManager)
 		{
-			get
+			if (this._dataViewManager != dataViewManager)
 			{
-				throw null;
-			}
-			set
-			{
-			}
-		}
-
-		public DataViewRowState RowStateFilter
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
-		}
-
-		public string Sort
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
+				this._dataViewManager = dataViewManager;
 			}
 		}
 
@@ -68,8 +47,81 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this._table;
 			}
 		}
+
+		internal void SetDataTable(DataTable table)
+		{
+			if (this._table != table)
+			{
+				this._table = table;
+			}
+		}
+
+		public string RowFilter
+		{
+			get
+			{
+				return this._rowFilter;
+			}
+			set
+			{
+				if (value == null)
+				{
+					value = string.Empty;
+				}
+				if (this._rowFilter != value)
+				{
+					this._rowFilter = value;
+				}
+			}
+		}
+
+		public DataViewRowState RowStateFilter
+		{
+			get
+			{
+				return this._rowStateFilter;
+			}
+			set
+			{
+				if (this._rowStateFilter != value)
+				{
+					this._rowStateFilter = value;
+				}
+			}
+		}
+
+		public string Sort
+		{
+			get
+			{
+				return this._sort;
+			}
+			set
+			{
+				if (value == null)
+				{
+					value = string.Empty;
+				}
+				if (this._sort != value)
+				{
+					this._sort = value;
+				}
+			}
+		}
+
+		private DataViewManager _dataViewManager;
+
+		private DataTable _table;
+
+		private string _sort = string.Empty;
+
+		private string _rowFilter = string.Empty;
+
+		private DataViewRowState _rowStateFilter = DataViewRowState.CurrentRows;
+
+		private bool _applyDefaultSort;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -54,7 +53,7 @@ namespace Mono.Security.Authenticode
 			{
 				if (this.hash == null)
 				{
-					this.hash = "MD5";
+					this.hash = "SHA1";
 				}
 				return this.hash;
 			}
@@ -65,26 +64,10 @@ namespace Mono.Security.Authenticode
 					throw new ArgumentNullException("Hash");
 				}
 				string text = value.ToUpper(CultureInfo.InvariantCulture);
-				string text2 = text;
-				if (text2 != null)
+				if (text == "MD5" || text == "SHA1")
 				{
-					if (AuthenticodeFormatter.<>f__switch$map4 == null)
-					{
-						AuthenticodeFormatter.<>f__switch$map4 = new Dictionary<string, int>(2)
-						{
-							{ "MD5", 0 },
-							{ "SHA1", 0 }
-						};
-					}
-					int num;
-					if (AuthenticodeFormatter.<>f__switch$map4.TryGetValue(text2, out num))
-					{
-						if (num == 0)
-						{
-							this.hash = text;
-							return;
-						}
-					}
+					this.hash = text;
+					return;
 				}
 				throw new ArgumentException("Invalid Authenticode hash algorithm");
 			}
@@ -150,8 +133,7 @@ namespace Mono.Security.Authenticode
 		{
 			ASN1 asn = new ASN1(48);
 			asn.Add(ASN1Convert.FromOid(oid));
-			ASN1 asn2 = asn.Add(new ASN1(49));
-			asn2.Add(value);
+			asn.Add(new ASN1(49)).Add(value);
 			return asn;
 		}
 
@@ -160,13 +142,11 @@ namespace Mono.Security.Authenticode
 			ASN1 asn = new ASN1(48);
 			if (description != null)
 			{
-				ASN1 asn2 = asn.Add(new ASN1(160));
-				asn2.Add(new ASN1(128, Encoding.BigEndianUnicode.GetBytes(description)));
+				asn.Add(new ASN1(160)).Add(new ASN1(128, Encoding.BigEndianUnicode.GetBytes(description)));
 			}
 			if (url != null)
 			{
-				ASN1 asn3 = asn.Add(new ASN1(161));
-				asn3.Add(new ASN1(128, Encoding.ASCII.GetBytes(url)));
+				asn.Add(new ASN1(161)).Add(new ASN1(128, Encoding.ASCII.GetBytes(url)));
 			}
 			return asn;
 		}
@@ -318,8 +298,7 @@ namespace Mono.Security.Authenticode
 		{
 			try
 			{
-				AuthenticodeDeformatter authenticodeDeformatter = new AuthenticodeDeformatter(fileName);
-				byte[] signature = authenticodeDeformatter.Signature;
+				byte[] signature = new AuthenticodeDeformatter(fileName).Signature;
 				if (signature != null)
 				{
 					base.Open(fileName);
@@ -348,15 +327,14 @@ namespace Mono.Security.Authenticode
 					{
 						asn5.Add(asn[1][0][3][i]);
 					}
-					ASN1 asn6 = asn4[asn4.Count - 1];
-					ASN1 asn7 = asn6[0];
-					ASN1 asn8 = asn7[asn7.Count - 1];
-					if (asn8.Tag != 161)
+					ASN1 asn6 = asn4[asn4.Count - 1][0];
+					ASN1 asn7 = asn6[asn6.Count - 1];
+					if (asn7.Tag != 161)
 					{
-						asn8 = new ASN1(161);
-						asn7.Add(asn8);
+						asn7 = new ASN1(161);
+						asn6.Add(asn7);
 					}
-					asn8.Add(this.Attribute("1.2.840.113549.1.9.6", asn[1][0][4][0]));
+					asn7.Add(this.Attribute("1.2.840.113549.1.9.6", asn[1][0][4][0]));
 					return this.Save(fileName, asn2.GetBytes());
 				}
 			}
@@ -366,20 +344,6 @@ namespace Mono.Security.Authenticode
 			}
 			return false;
 		}
-
-		private const string signedData = "1.2.840.113549.1.7.2";
-
-		private const string countersignature = "1.2.840.113549.1.9.6";
-
-		private const string spcStatementType = "1.3.6.1.4.1.311.2.1.11";
-
-		private const string spcSpOpusInfo = "1.3.6.1.4.1.311.2.1.12";
-
-		private const string spcPelmageData = "1.3.6.1.4.1.311.2.1.15";
-
-		private const string commercialCodeSigning = "1.3.6.1.4.1.311.2.1.22";
-
-		private const string timestampCountersignature = "1.3.6.1.4.1.311.3.2.1";
 
 		private Authority authority;
 
@@ -400,6 +364,20 @@ namespace Mono.Security.Authenticode
 		private string description;
 
 		private Uri url;
+
+		private const string signedData = "1.2.840.113549.1.7.2";
+
+		private const string countersignature = "1.2.840.113549.1.9.6";
+
+		private const string spcStatementType = "1.3.6.1.4.1.311.2.1.11";
+
+		private const string spcSpOpusInfo = "1.3.6.1.4.1.311.2.1.12";
+
+		private const string spcPelmageData = "1.3.6.1.4.1.311.2.1.15";
+
+		private const string commercialCodeSigning = "1.3.6.1.4.1.311.2.1.22";
+
+		private const string timestampCountersignature = "1.3.6.1.4.1.311.3.2.1";
 
 		private static byte[] obsolete = new byte[]
 		{

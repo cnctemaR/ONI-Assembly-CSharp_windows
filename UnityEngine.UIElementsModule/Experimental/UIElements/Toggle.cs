@@ -1,166 +1,138 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	public class Toggle : BaseControl<bool>
+	public class Toggle : BaseField<bool>
 	{
 		public Toggle()
-			: this(null)
 		{
-		}
-
-		public Toggle(Action clickEvent)
-		{
-			this.clickEvent = clickEvent;
-			this.m_Label = new Label();
-			base.Add(this.m_Label);
+			VisualElement visualElement = new VisualElement
+			{
+				name = "Checkmark",
+				pickingMode = PickingMode.Ignore
+			};
+			base.Add(visualElement);
+			this.text = null;
 			this.AddManipulator(new Clickable(new Action(this.OnClick)));
 		}
 
-		[Obsolete("Use value instead", false)]
-		public bool on
+		[Obsolete("Use Toggle() with OnValueChanged() instead.", false)]
+		public Toggle(Action clickEvent)
+			: this()
 		{
-			get
-			{
-				return this.value;
-			}
-			set
-			{
-				this.value = value;
-			}
+			this.OnToggle(clickEvent);
 		}
 
-		/// <summary>
-		///   <para>Optional text after the toggle.</para>
-		/// </summary>
 		public string text
 		{
 			get
 			{
-				return this.m_Label.text;
+				return (this.m_Label != null) ? this.m_Label.text : null;
 			}
 			set
 			{
-				this.m_Label.text = value;
+				if (!string.IsNullOrEmpty(value))
+				{
+					if (this.m_Label == null)
+					{
+						this.m_Label = new Label();
+						this.m_Label.pickingMode = PickingMode.Ignore;
+						base.Add(this.m_Label);
+					}
+					this.m_Label.text = value;
+				}
+				else if (this.m_Label != null)
+				{
+					base.Remove(this.m_Label);
+					this.m_Label = null;
+				}
 			}
 		}
 
-		/// <summary>
-		///   <para>Return whether the toggle is on or not.</para>
-		/// </summary>
-		public override bool value
+		public override void SetValueWithoutNotify(bool newValue)
 		{
-			get
+			if (newValue)
 			{
-				return (base.pseudoStates & PseudoStates.Checked) == PseudoStates.Checked;
+				base.pseudoStates |= PseudoStates.Checked;
 			}
-			set
+			else
 			{
-				if (value)
-				{
-					base.pseudoStates |= PseudoStates.Checked;
-				}
-				else
-				{
-					base.pseudoStates &= ~PseudoStates.Checked;
-				}
+				base.pseudoStates &= ~PseudoStates.Checked;
 			}
+			base.SetValueWithoutNotify(newValue);
 		}
 
-		/// <summary>
-		///   <para>Sets the event callback for this toggle button.</para>
-		/// </summary>
-		/// <param name="clickEvent">The action to be called when this Toggle is clicked.</param>
+		[Obsolete("Use OnValueChanged() instead.", false)]
 		public void OnToggle(Action clickEvent)
 		{
-			this.clickEvent = clickEvent;
+			if (clickEvent != null && this.m_ClickEvent == null)
+			{
+				base.OnValueChanged(new EventCallback<ChangeEvent<bool>>(this.InternalOnValueChanged));
+			}
+			else if (clickEvent == null && this.m_ClickEvent != null)
+			{
+				base.UnregisterCallback<ChangeEvent<bool>>(new EventCallback<ChangeEvent<bool>>(this.InternalOnValueChanged), TrickleDown.NoTrickleDown);
+			}
+			this.m_ClickEvent = clickEvent;
+		}
+
+		private void InternalOnValueChanged(ChangeEvent<bool> evt)
+		{
+			if (this.m_ClickEvent != null)
+			{
+				this.m_ClickEvent();
+			}
 		}
 
 		private void OnClick()
 		{
 			this.value = !this.value;
-			if (this.clickEvent != null)
-			{
-				this.clickEvent();
-			}
 		}
 
-		protected internal override void ExecuteDefaultAction(EventBase evt)
+		protected internal override void ExecuteDefaultActionAtTarget(EventBase evt)
 		{
-			base.ExecuteDefaultAction(evt);
+			base.ExecuteDefaultActionAtTarget(evt);
 			KeyDownEvent keyDownEvent = evt as KeyDownEvent;
 			char? c = ((keyDownEvent != null) ? new char?(keyDownEvent.character) : null);
-			if (((c == null) ? null : new int?((int)c.Value)) == 10)
+			if (!(((c == null) ? null : new int?((int)c.Value)) == 10))
 			{
-				this.OnClick();
+				KeyDownEvent keyDownEvent2 = evt as KeyDownEvent;
+				char? c2 = ((keyDownEvent2 != null) ? new char?(keyDownEvent2.character) : null);
+				if (!(((c2 == null) ? null : new int?((int)c2.Value)) == 32))
+				{
+					return;
+				}
 			}
+			this.OnClick();
+			evt.StopPropagation();
 		}
 
-		private Action clickEvent;
+		private Action m_ClickEvent;
 
 		private Label m_Label;
 
-		/// <summary>
-		///   <para>Instantiates a Toggle using the data read from a UXML file.</para>
-		/// </summary>
-		public class ToggleFactory : UxmlFactory<Toggle, Toggle.ToggleUxmlTraits>
+		public new class UxmlFactory : UxmlFactory<Toggle, Toggle.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the Toggle.</para>
-		/// </summary>
-		public class ToggleUxmlTraits : BaseControl<bool>.BaseControlUxmlTraits
+		public new class UxmlTraits : BaseField<bool>.UxmlTraits
 		{
-			/// <summary>
-			///   <para>Constructor.</para>
-			/// </summary>
-			public ToggleUxmlTraits()
-			{
-				this.m_Value = new UxmlBoolAttributeDescription
-				{
-					name = "value"
-				};
-				this.m_Label = new UxmlStringAttributeDescription
-				{
-					name = "label"
-				};
-			}
-
-			/// <summary>
-			///   <para>Returns an enumerable containing attribute descriptions for Toggle properties that should be available in UXML.</para>
-			/// </summary>
-			public override IEnumerable<UxmlAttributeDescription> uxmlAttributesDescription
-			{
-				get
-				{
-					foreach (UxmlAttributeDescription attr in this.<get_uxmlAttributesDescription>__BaseCallProxy0())
-					{
-						yield return attr;
-					}
-					yield return this.m_Label;
-					yield return this.m_Value;
-					yield break;
-				}
-			}
-
-			/// <summary>
-			///   <para>Initialize Toggle properties using values from the attribute bag.</para>
-			/// </summary>
-			/// <param name="ve">The object to initialize.</param>
-			/// <param name="bag">The attribute bag.</param>
-			/// <param name="cc">The creation context; unused.</param>
 			public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
 			{
 				base.Init(ve, bag, cc);
-				((Toggle)ve).m_Label.text = this.m_Label.GetValueFromBag(bag);
-				((Toggle)ve).value = this.m_Value.GetValueFromBag(bag);
+				((Toggle)ve).text = this.m_Label.GetValueFromBag(bag, cc);
+				((Toggle)ve).SetValueWithoutNotify(this.m_Value.GetValueFromBag(bag, cc));
 			}
 
-			private UxmlStringAttributeDescription m_Label;
+			private UxmlStringAttributeDescription m_Label = new UxmlStringAttributeDescription
+			{
+				name = "label"
+			};
 
-			private UxmlBoolAttributeDescription m_Value;
+			private UxmlBoolAttributeDescription m_Value = new UxmlBoolAttributeDescription
+			{
+				name = "value"
+			};
 		}
 	}
 }

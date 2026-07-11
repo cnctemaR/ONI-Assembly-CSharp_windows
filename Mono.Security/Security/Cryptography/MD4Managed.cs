@@ -44,7 +44,7 @@ namespace Mono.Security.Cryptography
 				num3 = num2;
 				while (num3 + 63 < cbSize)
 				{
-					this.MD4Transform(this.state, array, num3);
+					this.MD4Transform(this.state, array, ibStart + num3);
 					num3 += 64;
 				}
 				num = 0;
@@ -57,7 +57,7 @@ namespace Mono.Security.Cryptography
 			byte[] array = new byte[8];
 			this.Encode(array, this.count);
 			uint num = (this.count[0] >> 3) & 63U;
-			int num2 = (int)((num >= 56U) ? (120U - num) : (56U - num));
+			int num2 = (int)((num < 56U) ? (56U - num) : (120U - num));
 			this.HashCore(this.Padding(num2), 0, num2);
 			this.HashCore(array, 0, 8);
 			this.Encode(this.digest, this.state);
@@ -200,6 +200,14 @@ namespace Mono.Security.Cryptography
 			state[3] += num4;
 		}
 
+		private uint[] state;
+
+		private byte[] buffer;
+
+		private uint[] count;
+
+		private uint[] x;
+
 		private const int S11 = 3;
 
 		private const int S12 = 7;
@@ -223,14 +231,6 @@ namespace Mono.Security.Cryptography
 		private const int S33 = 11;
 
 		private const int S34 = 15;
-
-		private uint[] state;
-
-		private byte[] buffer;
-
-		private uint[] count;
-
-		private uint[] x;
 
 		private byte[] digest;
 	}

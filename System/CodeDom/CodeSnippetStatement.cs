@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeSnippetStatement : CodeStatement
 	{
@@ -14,25 +11,21 @@ namespace System.CodeDom
 
 		public CodeSnippetStatement(string value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public string Value
 		{
 			get
 			{
-				if (this.value == null)
-				{
-					return string.Empty;
-				}
-				return this.value;
+				return this._value ?? string.Empty;
 			}
 			set
 			{
-				this.value = value;
+				this._value = value;
 			}
 		}
 
-		private string value;
+		private string _value;
 	}
 }

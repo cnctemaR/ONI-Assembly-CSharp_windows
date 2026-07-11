@@ -17,25 +17,9 @@ public class MingleCellTracker : KMonoBehaviour, ISim1000ms
 					for (int j = room.cavity.minX; j <= room.cavity.maxX; j++)
 					{
 						int num = Grid.XYToCell(j, i);
-						CavityInfo cavityForCell = roomProber.GetCavityForCell(num);
-						if (cavityForCell == room.cavity)
+						if (roomProber.GetCavityForCell(num) == room.cavity && minionGroupProber.IsReachable(num) && !Grid.HasLadder[num] && !Grid.HasTube[num] && !Grid.IsLiquid(num) && Grid.Element[num].id == SimHashes.Oxygen)
 						{
-							if (minionGroupProber.IsReachable(num))
-							{
-								if (!Grid.HasLadder[num])
-								{
-									if (!Grid.HasTube[num])
-									{
-										if (!Grid.IsLiquid(num))
-										{
-											if (Grid.Element[num].id == SimHashes.Oxygen)
-											{
-												this.mingleCells.Add(num);
-											}
-										}
-									}
-								}
-							}
+							this.mingleCells.Add(num);
 						}
 					}
 				}

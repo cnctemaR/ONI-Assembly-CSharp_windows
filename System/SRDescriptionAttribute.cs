@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace System
 {
 	[AttributeUsage(AttributeTargets.All)]
-	internal class SRDescriptionAttribute : global::System.ComponentModel.DescriptionAttribute
+	internal class SRDescriptionAttribute : DescriptionAttribute
 	{
 		public SRDescriptionAttribute(string description)
 			: base(description)

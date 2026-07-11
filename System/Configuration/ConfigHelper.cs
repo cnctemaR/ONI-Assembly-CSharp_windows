@@ -16,8 +16,7 @@ namespace System.Configuration
 			}
 			else
 			{
-				Hashtable hashtable2 = (Hashtable)prev;
-				hashtable = (Hashtable)hashtable2.Clone();
+				hashtable = (Hashtable)((Hashtable)prev).Clone();
 			}
 			ConfigHelper.CollectionWrapper collectionWrapper = new ConfigHelper.CollectionWrapper(hashtable);
 			collectionWrapper = ConfigHelper.GoGetThem(collectionWrapper, region, nameAtt, valueAtt);
@@ -28,7 +27,7 @@ namespace System.Configuration
 			return collectionWrapper.UnWrap() as IDictionary;
 		}
 
-		internal static ConfigNameValueCollection GetNameValueCollection(global::System.Collections.Specialized.NameValueCollection prev, XmlNode region, string nameAtt, string valueAtt)
+		internal static ConfigNameValueCollection GetNameValueCollection(NameValueCollection prev, XmlNode region, string nameAtt, string valueAtt)
 		{
 			ConfigNameValueCollection configNameValueCollection = new ConfigNameValueCollection(CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
 			if (prev != null)
@@ -50,8 +49,7 @@ namespace System.Configuration
 			{
 				throw new ConfigurationException("Unknown attribute", region);
 			}
-			XmlNodeList childNodes = region.ChildNodes;
-			foreach (object obj in childNodes)
+			foreach (object obj in region.ChildNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;
@@ -134,7 +132,7 @@ namespace System.Configuration
 				this.isDict = true;
 			}
 
-			public CollectionWrapper(global::System.Collections.Specialized.NameValueCollection collection)
+			public CollectionWrapper(NameValueCollection collection)
 			{
 				this.collection = collection;
 				this.isDict = false;
@@ -145,11 +143,9 @@ namespace System.Configuration
 				if (this.isDict)
 				{
 					this.dict.Remove(s);
+					return;
 				}
-				else
-				{
-					this.collection.Remove(s);
-				}
+				this.collection.Remove(s);
 			}
 
 			public void Clear()
@@ -157,11 +153,9 @@ namespace System.Configuration
 				if (this.isDict)
 				{
 					this.dict.Clear();
+					return;
 				}
-				else
-				{
-					this.collection.Clear();
-				}
+				this.collection.Clear();
 			}
 
 			public string this[string key]
@@ -171,11 +165,9 @@ namespace System.Configuration
 					if (this.isDict)
 					{
 						this.dict[key] = value;
+						return;
 					}
-					else
-					{
-						this.collection[key] = value;
-					}
+					this.collection[key] = value;
 				}
 			}
 
@@ -190,7 +182,7 @@ namespace System.Configuration
 
 			private IDictionary dict;
 
-			private global::System.Collections.Specialized.NameValueCollection collection;
+			private NameValueCollection collection;
 
 			private bool isDict;
 		}

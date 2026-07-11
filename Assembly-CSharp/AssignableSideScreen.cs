@@ -109,7 +109,7 @@ public class AssignableSideScreen : SideScreenContent
 	private void Refresh(List<MinionAssignablesProxy> identities)
 	{
 		this.ClearContent();
-		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
+		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, Array.Empty<object>());
 		if (this.targetAssignable == null)
 		{
 			return;
@@ -151,7 +151,7 @@ public class AssignableSideScreen : SideScreenContent
 	private void SortByName(bool reselect)
 	{
 		this.SelectSortToggle(this.dupeSortingToggle, reselect);
-		this.ExecuteSort((IAssignableIdentity i1, IAssignableIdentity i2) => i1.GetProperName().CompareTo(i2.GetProperName()) * ((!this.sortReversed) ? 1 : (-1)));
+		this.ExecuteSort((IAssignableIdentity i1, IAssignableIdentity i2) => i1.GetProperName().CompareTo(i2.GetProperName()) * (this.sortReversed ? (-1) : 1));
 	}
 
 	private void SortByAssignment(bool reselect)
@@ -167,7 +167,7 @@ public class AssignableSideScreen : SideScreenContent
 			num = this.identityRowMap[i1].currentState.CompareTo(this.identityRowMap[i2].currentState);
 			if (num != 0)
 			{
-				return num * ((!this.sortReversed) ? 1 : (-1));
+				return num * (this.sortReversed ? (-1) : 1);
 			}
 			return i1.GetProperName().CompareTo(i2.GetProperName());
 		};
@@ -186,7 +186,7 @@ public class AssignableSideScreen : SideScreenContent
 			}
 			this.activeSortToggle = toggle;
 		}
-		this.activeSortToggle.ChangeState((!this.sortReversed) ? 1 : 2);
+		this.activeSortToggle.ChangeState(this.sortReversed ? 2 : 1);
 	}
 
 	private void ExecuteSort(Comparison<IAssignableIdentity> sortFunction)
@@ -221,8 +221,9 @@ public class AssignableSideScreen : SideScreenContent
 		if (hide)
 		{
 			base.transform.localScale = Vector3.zero;
+			return;
 		}
-		else if (base.transform.localScale != Vector3.one)
+		if (base.transform.localScale != Vector3.one)
 		{
 			base.transform.localScale = Vector3.one;
 		}
@@ -233,8 +234,9 @@ public class AssignableSideScreen : SideScreenContent
 		if (this.targetAssignable.assignee != identity)
 		{
 			this.ChangeAssignment(identity);
+			return;
 		}
-		else if (this.CanDeselect(identity))
+		if (this.CanDeselect(identity))
 		{
 			this.ChangeAssignment(null);
 		}

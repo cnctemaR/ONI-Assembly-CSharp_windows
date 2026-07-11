@@ -46,7 +46,7 @@ namespace Geometry
 			for (int j = 0; j < verticalEvents.Count; j++)
 			{
 				int num3 = num;
-				num += ((!verticalEvents[j].isStart) ? (-1) : 1) * ((!verticalEvents[j].subtract) ? 1 : (-1));
+				num += (verticalEvents[j].isStart ? 1 : (-1)) * (verticalEvents[j].subtract ? (-1) : 1);
 				if (num == 1 && num3 == 0)
 				{
 					num2 = verticalEvents[j].y;

@@ -41,7 +41,7 @@ public class RecentThingConversation : ConversationType
 
 	public override Sprite GetSprite(string topic)
 	{
-		Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
+		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
 		if (uisprite != null)
 		{
 			return uisprite.first;

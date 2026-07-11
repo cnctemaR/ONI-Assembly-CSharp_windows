@@ -45,11 +45,9 @@ public class PatchNotesScreen : KModalScreen
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.MarkAsReadAndClose();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	[SerializeField]

@@ -4,8 +4,20 @@ using System.Runtime.InteropServices;
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	public interface IDesignerHost : IServiceProvider, IServiceContainer
+	public interface IDesignerHost : IServiceContainer, IServiceProvider
 	{
+		bool Loading { get; }
+
+		bool InTransaction { get; }
+
+		IContainer Container { get; }
+
+		IComponent RootComponent { get; }
+
+		string RootComponentClassName { get; }
+
+		string TransactionDescription { get; }
+
 		event EventHandler Activated;
 
 		event EventHandler Deactivated;
@@ -19,18 +31,6 @@ namespace System.ComponentModel.Design
 		event EventHandler TransactionOpened;
 
 		event EventHandler TransactionOpening;
-
-		IContainer Container { get; }
-
-		bool InTransaction { get; }
-
-		bool Loading { get; }
-
-		IComponent RootComponent { get; }
-
-		string RootComponentClassName { get; }
-
-		string TransactionDescription { get; }
 
 		void Activate();
 

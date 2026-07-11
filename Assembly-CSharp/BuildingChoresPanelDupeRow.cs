@@ -14,10 +14,9 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 	public void Init(BuildingChoresPanel.DupeEntryData data)
 	{
 		this.choreConsumer = data.consumer;
-		bool flag = data.context.IsPotentialSuccess();
-		if (flag)
+		if (data.context.IsPotentialSuccess())
 		{
-			string text = ((!(data.context.chore.driver == data.consumer.choreDriver)) ? string.Format(DUPLICANTS.CHORES.PRECONDITIONS.RANK_FORMAT.text, data.rank) : DUPLICANTS.CHORES.PRECONDITIONS.CURRENT_ERRAND.text);
+			string text = ((data.context.chore.driver == data.consumer.choreDriver) ? DUPLICANTS.CHORES.PRECONDITIONS.CURRENT_ERRAND.text : string.Format(DUPLICANTS.CHORES.PRECONDITIONS.RANK_FORMAT.text, data.rank));
 			this.label.text = DUPLICANTS.CHORES.PRECONDITIONS.SUCCESS_ROW.Replace("{Duplicant}", data.consumer.name).Replace("{Rank}", text);
 		}
 		else
@@ -44,7 +43,7 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 	private static string TooltipForDupe(Chore.Precondition.Context context, ChoreConsumer choreConsumer, int rank)
 	{
 		bool flag = context.IsPotentialSuccess();
-		string text = ((!flag) ? UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_FAILED : UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_SUCCEEDED);
+		string text = (flag ? UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_SUCCEEDED : UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_FAILED);
 		float num = 0f;
 		int personalPriority = choreConsumer.GetPersonalPriority(context.chore.choreType);
 		num += (float)(personalPriority * 10);
@@ -52,10 +51,10 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 		num += (float)priority_value;
 		float num2 = (float)context.priority / 10000f;
 		num += num2;
-		text = text.Replace("{Description}", (!(context.chore.driver == choreConsumer.choreDriver)) ? UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_DESC_INACTIVE : UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_DESC_ACTIVE);
+		text = text.Replace("{Description}", (context.chore.driver == choreConsumer.choreDriver) ? UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_DESC_ACTIVE : UI.DETAILTABS.BUILDING_CHORES.DUPE_TOOLTIP_DESC_INACTIVE);
 		string text2 = GameUtil.ChoreGroupsForChoreType(context.chore.choreType);
 		string text3 = UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_NA.text;
-		if (flag && context.chore.choreType.groups.Length > 0)
+		if (flag && context.chore.choreType.groups.Length != 0)
 		{
 			ChoreGroup choreGroup = context.chore.choreType.groups[0];
 			for (int i = 1; i < context.chore.choreType.groups.Length; i++)

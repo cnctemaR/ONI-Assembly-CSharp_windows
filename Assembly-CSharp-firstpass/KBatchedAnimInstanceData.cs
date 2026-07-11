@@ -20,7 +20,7 @@ public class KBatchedAnimInstanceData
 
 	public void SetClipRadius(float x, float y, float dist_sq, bool do_clip)
 	{
-		this.converter.animInstanceData[0].clipParameters = new Vector4(x, y, dist_sq, (float)((!do_clip) ? 0 : 1));
+		this.converter.animInstanceData[0].clipParameters = new Vector4(x, y, dist_sq, (float)(do_clip ? 1 : 0));
 	}
 
 	public void SetBlend(float amt)
@@ -78,7 +78,7 @@ public class KBatchedAnimInstanceData
 		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
 		animInstanceData.curAnimFrameIndex = (float)this.target.GetCurrentFrameIndex();
 		animInstanceData.thisIndex = (float)this_index;
-		animInstanceData.currentAnimNumFrames = (float)((!this.target.IsVisible()) ? 0 : this.target.GetCurrentNumFrames());
+		animInstanceData.currentAnimNumFrames = (float)(this.target.IsVisible() ? this.target.GetCurrentNumFrames() : 0);
 		animInstanceData.currentAnimFirstFrameIdx = (float)this.target.GetFirstFrameIndex();
 		if (!this.isTransformOverriden)
 		{

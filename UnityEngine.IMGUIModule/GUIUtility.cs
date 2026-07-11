@@ -6,19 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Utility class for making new GUI controls.</para>
-	/// </summary>
-	[NativeHeader("Modules/IMGUI/GUIUtility.h")]
-	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Modules/IMGUI/GUIManager.h")]
-	[NativeHeader("Runtime/Camera/RenderLayers/GUITexture.h")]
 	[NativeHeader("Runtime/Utilities/CopyPaste.h")]
+	[NativeHeader("Runtime/Input/InputManager.h")]
+	[NativeHeader("Runtime/Camera/RenderLayers/GUITexture.h")]
+	[NativeHeader("Modules/IMGUI/GUIManager.h")]
+	[NativeHeader("Modules/IMGUI/GUIUtility.h")]
 	public class GUIUtility
 	{
-		/// <summary>
-		///   <para>A global property, which is true if a ModalWindow is being displayed, false otherwise.</para>
-		/// </summary>
 		public static extern bool hasModalWindow
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -78,16 +72,15 @@ namespace UnityEngine
 		internal static extern bool manualTex2SRGBEnabled
 		{
 			[FreeFunction("GUITexture::IsManualTex2SRGBEnabled")]
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			[FreeFunction("GUITexture::SetManualTex2SRGBEnabled")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		/// <summary>
-		///   <para>Get access to the system-wide clipboard.</para>
-		/// </summary>
 		public static extern string systemCopyBuffer
 		{
 			[FreeFunction("GetCopyBuffer")]
@@ -98,13 +91,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Get a unique ID for a control, using an integer as a hint to help ensure correct matching of IDs to controls.</para>
-		/// </summary>
-		/// <param name="hint"></param>
-		/// <param name="focus"></param>
-		/// <param name="focusType"></param>
-		/// <param name="rect"></param>
 		[StaticAccessor("GetGUIState()", StaticAccessorType.Dot)]
 		public static int GetControlID(int hint, FocusType focusType, Rect rect)
 		{
@@ -202,75 +188,45 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Get a unique ID for a control.</para>
-		/// </summary>
-		/// <param name="focus"></param>
-		/// <param name="position"></param>
+		[RequiredByNativeCode]
+		private static void MarkGUIChanged()
+		{
+			if (GUIUtility.enabledStateChanged != null)
+			{
+				GUIUtility.enabledStateChanged();
+			}
+		}
+
 		public static int GetControlID(FocusType focus)
 		{
 			return GUIUtility.GetControlID(0, focus);
 		}
 
-		/// <summary>
-		///   <para>Get a unique ID for a control, using a the label content as a hint to help ensure correct matching of IDs to controls.</para>
-		/// </summary>
-		/// <param name="contents"></param>
-		/// <param name="focus"></param>
-		/// <param name="position"></param>
 		public static int GetControlID(GUIContent contents, FocusType focus)
 		{
 			return GUIUtility.GetControlID(contents.hash, focus);
 		}
 
-		/// <summary>
-		///   <para>Get a unique ID for a control.</para>
-		/// </summary>
-		/// <param name="focus"></param>
-		/// <param name="position"></param>
 		public static int GetControlID(FocusType focus, Rect position)
 		{
 			return GUIUtility.GetControlID(0, focus, position);
 		}
 
-		/// <summary>
-		///   <para>Get a unique ID for a control, using a the label content as a hint to help ensure correct matching of IDs to controls.</para>
-		/// </summary>
-		/// <param name="contents"></param>
-		/// <param name="focus"></param>
-		/// <param name="position"></param>
 		public static int GetControlID(GUIContent contents, FocusType focus, Rect position)
 		{
 			return GUIUtility.GetControlID(contents.hash, focus, position);
 		}
 
-		/// <summary>
-		///   <para>Get a unique ID for a control, using an integer as a hint to help ensure correct matching of IDs to controls.</para>
-		/// </summary>
-		/// <param name="hint"></param>
-		/// <param name="focus"></param>
-		/// <param name="focusType"></param>
-		/// <param name="rect"></param>
 		public static int GetControlID(int hint, FocusType focus)
 		{
 			return GUIUtility.GetControlID(hint, focus, Rect.zero);
 		}
 
-		/// <summary>
-		///   <para>Get a state object from a controlID.</para>
-		/// </summary>
-		/// <param name="t"></param>
-		/// <param name="controlID"></param>
 		public static object GetStateObject(Type t, int controlID)
 		{
 			return GUIStateObjects.GetStateObject(t, controlID);
 		}
 
-		/// <summary>
-		///   <para>Get an existing state object from a controlID.</para>
-		/// </summary>
-		/// <param name="t"></param>
-		/// <param name="controlID"></param>
 		public static object QueryStateObject(Type t, int controlID)
 		{
 			return GUIStateObjects.QueryStateObject(t, controlID);
@@ -278,9 +234,6 @@ namespace UnityEngine
 
 		internal static bool guiIsExiting { get; set; }
 
-		/// <summary>
-		///   <para>The controlID of the current hot control.</para>
-		/// </summary>
 		public static int hotControl
 		{
 			get
@@ -311,9 +264,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The controlID of the control that has keyboard focus.</para>
-		/// </summary>
 		public static int keyboardControl
 		{
 			get
@@ -326,9 +276,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Puts the GUI in a state that will prevent all subsequent immediate mode GUI functions from evaluating for the remainder of the GUI loop by throwing an ExitGUIException.</para>
-		/// </summary>
 		public static void ExitGUI()
 		{
 			GUIUtility.guiIsExiting = true;
@@ -459,10 +406,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Convert a point from GUI position to screen space.</para>
-		/// </summary>
-		/// <param name="guiPoint"></param>
 		public static Vector2 GUIToScreenPoint(Vector2 guiPoint)
 		{
 			return GUIUtility.InternalWindowToScreenPoint(GUIClip.UnclipToWindow(guiPoint));
@@ -476,10 +419,6 @@ namespace UnityEngine
 			return guiRect;
 		}
 
-		/// <summary>
-		///   <para>Convert a point from screen space to GUI position.</para>
-		/// </summary>
-		/// <param name="screenPoint"></param>
 		public static Vector2 ScreenToGUIPoint(Vector2 screenPoint)
 		{
 			return GUIClip.ClipToWindow(GUIUtility.InternalScreenToWindowPoint(screenPoint));
@@ -493,11 +432,6 @@ namespace UnityEngine
 			return screenRect;
 		}
 
-		/// <summary>
-		///   <para>Helper function to rotate the GUI around a point.</para>
-		/// </summary>
-		/// <param name="angle"></param>
-		/// <param name="pivotPoint"></param>
 		public static void RotateAroundPivot(float angle, Vector2 pivotPoint)
 		{
 			Matrix4x4 matrix = GUI.matrix;
@@ -507,11 +441,6 @@ namespace UnityEngine
 			GUI.matrix = matrix4x * matrix;
 		}
 
-		/// <summary>
-		///   <para>Helper function to scale the GUI around a point.</para>
-		/// </summary>
-		/// <param name="scale"></param>
-		/// <param name="pivotPoint"></param>
 		public static void ScaleAroundPivot(Vector2 scale, Vector2 pivotPoint)
 		{
 			Matrix4x4 matrix = GUI.matrix;
@@ -520,16 +449,6 @@ namespace UnityEngine
 			GUI.matrix = matrix4x * matrix;
 		}
 
-		/// <summary>
-		///   <para>Align a local space rectangle to the pixel grid.</para>
-		/// </summary>
-		/// <param name="local">The local space rectangle that needs to be processed.</param>
-		/// <param name="widthInPixels">Width, in pixel units, of the axis-aligned bounding box that encompasses the aligned points.</param>
-		/// <param name="heightInPixels">Height, in pixel units, of the axis-aligned bounding box that encompasses the aligned points.</param>
-		/// <param name="rect"></param>
-		/// <returns>
-		///   <para>The aligned rectangle in local space.</para>
-		/// </returns>
 		public static Rect AlignRectToDevice(Rect rect)
 		{
 			int num;
@@ -580,27 +499,6 @@ namespace UnityEngine
 		internal static Func<Exception, bool> endContainerGUIFromException;
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
-		internal struct ManualTex2SRGBScope : IDisposable
-		{
-			public ManualTex2SRGBScope(bool enabled)
-			{
-				this.m_Disposed = false;
-				this.m_WasEnabled = GUIUtility.manualTex2SRGBEnabled;
-				GUIUtility.manualTex2SRGBEnabled = enabled;
-			}
-
-			public void Dispose()
-			{
-				if (!this.m_Disposed)
-				{
-					this.m_Disposed = true;
-					GUIUtility.manualTex2SRGBEnabled = this.m_WasEnabled;
-				}
-			}
-
-			private bool m_Disposed;
-
-			private readonly bool m_WasEnabled;
-		}
+		internal static Action enabledStateChanged;
 	}
 }

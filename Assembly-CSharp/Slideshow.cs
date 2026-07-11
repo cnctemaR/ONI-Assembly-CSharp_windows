@@ -23,17 +23,16 @@ public class Slideshow : KMonoBehaviour
 					this.onBeforePlay();
 				}
 				SlideshowUpdateType slideshowUpdateType = this.updateType;
-				if (slideshowUpdateType != SlideshowUpdateType.preloadedSprites)
-				{
-					if (slideshowUpdateType == SlideshowUpdateType.loadOnDemand)
-					{
-						VideoScreen.Instance.PlaySlideShow(this.files);
-					}
-				}
-				else
+				if (slideshowUpdateType == SlideshowUpdateType.preloadedSprites)
 				{
 					VideoScreen.Instance.PlaySlideShow(this.sprites);
+					return;
 				}
+				if (slideshowUpdateType != SlideshowUpdateType.loadOnDemand)
+				{
+					return;
+				}
+				VideoScreen.Instance.PlaySlideShow(this.files);
 			};
 		}
 		if (this.nextButton != null)
@@ -98,8 +97,9 @@ public class Slideshow : KMonoBehaviour
 		if (enable)
 		{
 			this.imageTarget.color = Color.white;
+			return;
 		}
-		else if (this.transparentIfEmpty)
+		if (this.transparentIfEmpty)
 		{
 			this.imageTarget.color = Color.clear;
 		}
@@ -121,11 +121,11 @@ public class Slideshow : KMonoBehaviour
 			return;
 		}
 		this.files = files;
-		bool flag = files.Length > 0 && files[0] != null;
+		bool flag = files.Length != 0 && files[0] != null;
 		this.resetSlide(flag);
 		if (flag)
 		{
-			int num = ((loadFrame == -1) ? (files.Length - 1) : loadFrame);
+			int num = ((loadFrame != -1) ? loadFrame : (files.Length - 1));
 			string text = files[num];
 			Sprite sprite = this.loadSlide(text);
 			this.setSlide(sprite);
@@ -136,8 +136,7 @@ public class Slideshow : KMonoBehaviour
 	public void updateSize(Sprite sprite)
 	{
 		Vector2 fittedSize = this.GetFittedSize(sprite, 960f, 960f);
-		RectTransform component = base.GetComponent<RectTransform>();
-		component.sizeDelta = fittedSize;
+		base.GetComponent<RectTransform>().sizeDelta = fittedSize;
 	}
 
 	public void SetSprites(Sprite[] sprites)
@@ -147,8 +146,8 @@ public class Slideshow : KMonoBehaviour
 			return;
 		}
 		this.sprites = sprites;
-		this.resetSlide(sprites.Length > 0 && sprites[0] != null);
-		if (sprites.Length > 0 && sprites[0] != null)
+		this.resetSlide(sprites.Length != 0 && sprites[0] != null);
+		if (sprites.Length != 0 && sprites[0] != null)
 		{
 			this.setSlide(sprites[0]);
 		}
@@ -197,28 +196,29 @@ public class Slideshow : KMonoBehaviour
 		SlideshowUpdateType slideshowUpdateType = this.updateType;
 		if (slideshowUpdateType != SlideshowUpdateType.preloadedSprites)
 		{
-			if (slideshowUpdateType == SlideshowUpdateType.loadOnDemand)
+			if (slideshowUpdateType != SlideshowUpdateType.loadOnDemand)
 			{
-				if (slideIndex < 0)
+				return;
+			}
+			if (slideIndex < 0)
+			{
+				slideIndex = this.files.Length + slideIndex;
+			}
+			this.currentSlide = slideIndex % this.files.Length;
+			if (this.currentSlide == this.files.Length - 1)
+			{
+				this.timeUntilNextSlide *= this.timeFactorForLastSlide;
+			}
+			if (this.playInThumbnail)
+			{
+				if (this.currentSlideImage != null)
 				{
-					slideIndex = this.files.Length + slideIndex;
+					global::UnityEngine.Object.Destroy(this.currentSlideImage.texture);
+					global::UnityEngine.Object.Destroy(this.currentSlideImage);
+					GC.Collect();
 				}
-				this.currentSlide = slideIndex % this.files.Length;
-				if (this.currentSlide == this.files.Length - 1)
-				{
-					this.timeUntilNextSlide *= this.timeFactorForLastSlide;
-				}
-				if (this.playInThumbnail)
-				{
-					if (this.currentSlideImage != null)
-					{
-						global::UnityEngine.Object.Destroy(this.currentSlideImage.texture);
-						global::UnityEngine.Object.Destroy(this.currentSlideImage);
-						GC.Collect();
-					}
-					this.currentSlideImage = this.loadSlide(this.files[this.currentSlide]);
-					this.setSlide(this.currentSlideImage);
-				}
+				this.currentSlideImage = this.loadSlide(this.files[this.currentSlide]);
+				this.setSlide(this.currentSlideImage);
 			}
 		}
 		else
@@ -235,17 +235,18 @@ public class Slideshow : KMonoBehaviour
 			if (this.playInThumbnail)
 			{
 				this.setSlide(this.sprites[this.currentSlide]);
+				return;
 			}
 		}
 	}
 
 	private void Update()
 	{
-		if (this.updateType == SlideshowUpdateType.preloadedSprites && (this.sprites == null || this.sprites.Length <= 0))
+		if (this.updateType == SlideshowUpdateType.preloadedSprites && (this.sprites == null || this.sprites.Length == 0))
 		{
 			return;
 		}
-		if (this.updateType == SlideshowUpdateType.loadOnDemand && (this.files == null || this.files.Length <= 0))
+		if (this.updateType == SlideshowUpdateType.loadOnDemand && (this.files == null || this.files.Length == 0))
 		{
 			return;
 		}

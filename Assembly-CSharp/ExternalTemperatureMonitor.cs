@@ -93,18 +93,6 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 	public new class Instance : GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
-		{
-			this.health = base.GetComponent<Health>();
-			this.occupyArea = base.GetComponent<OccupyArea>();
-			this.internalTemperatureMonitor = base.gameObject.GetSMI<TemperatureMonitor.Instance>();
-			this.internalTemperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
-			this.temperatureTransferer = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
-			this.primaryElement = base.gameObject.GetComponent<PrimaryElement>();
-			this.attributes = base.gameObject.GetAttributes();
-		}
-
 		public float GetCurrentExternalTemperature
 		{
 			get
@@ -158,6 +146,18 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			{
 				return this.HotThreshold;
 			}
+		}
+
+		public Instance(IStateMachineTarget master)
+			: base(master)
+		{
+			this.health = base.GetComponent<Health>();
+			this.occupyArea = base.GetComponent<OccupyArea>();
+			this.internalTemperatureMonitor = base.gameObject.GetSMI<TemperatureMonitor.Instance>();
+			this.internalTemperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
+			this.temperatureTransferer = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+			this.primaryElement = base.gameObject.GetComponent<PrimaryElement>();
+			this.attributes = base.gameObject.GetAttributes();
 		}
 
 		public bool IsTooHot()

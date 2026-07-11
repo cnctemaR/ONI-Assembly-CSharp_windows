@@ -9,18 +9,21 @@ namespace System.Collections.Generic
 	public class KeyNotFoundException : SystemException, ISerializable
 	{
 		public KeyNotFoundException()
-			: base("The given key was not present in the dictionary.")
+			: base(Environment.GetResourceString("The given key was not present in the dictionary."))
 		{
+			base.SetErrorCode(-2146232969);
 		}
 
 		public KeyNotFoundException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146232969);
 		}
 
 		public KeyNotFoundException(string message, Exception innerException)
 			: base(message, innerException)
 		{
+			base.SetErrorCode(-2146232969);
 		}
 
 		protected KeyNotFoundException(SerializationInfo info, StreamingContext context)

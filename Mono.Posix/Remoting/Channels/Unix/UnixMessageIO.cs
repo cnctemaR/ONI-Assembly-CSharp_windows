@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
@@ -102,13 +101,11 @@ namespace Mono.Remoting.Channels.Unix
 			{
 				MemoryStream memoryStream = (MemoryStream)data;
 				networkStream.Write(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+				return;
 			}
-			else
+			for (int i = data.Read(buffer, 0, buffer.Length); i > 0; i = data.Read(buffer, 0, buffer.Length))
 			{
-				for (int i = data.Read(buffer, 0, buffer.Length); i > 0; i = data.Read(buffer, 0, buffer.Length))
-				{
-					networkStream.Write(buffer, 0, i);
-				}
+				networkStream.Write(buffer, 0, i);
 			}
 		}
 
@@ -120,43 +117,24 @@ namespace Mono.Remoting.Channels.Unix
 				{
 					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
 					string text = dictionaryEntry.Key.ToString();
-					if (text == null)
+					if (!(text == "__RequestUri"))
 					{
-						goto IL_00AA;
-					}
-					if (UnixMessageIO.<>f__switch$map1 == null)
-					{
-						UnixMessageIO.<>f__switch$map1 = new Dictionary<string, int>(2)
+						if (!(text == "Content-Type"))
 						{
-							{ "__RequestUri", 0 },
-							{ "Content-Type", 1 }
-						};
-					}
-					int num;
-					if (!UnixMessageIO.<>f__switch$map1.TryGetValue(text, out num))
-					{
-						goto IL_00AA;
-					}
-					if (num != 0)
-					{
-						if (num != 1)
-						{
-							goto IL_00AA;
+							networkStream.Write(UnixMessageIO.msgDefaultTransportKey, 0, 3);
+							UnixMessageIO.SendString(networkStream, dictionaryEntry.Key.ToString(), buffer);
+							networkStream.WriteByte(1);
 						}
-						networkStream.Write(UnixMessageIO.msgContentTypeTransportKey, 0, 4);
+						else
+						{
+							networkStream.Write(UnixMessageIO.msgContentTypeTransportKey, 0, 4);
+						}
 					}
 					else
 					{
 						networkStream.Write(UnixMessageIO.msgUriTransportKey, 0, 4);
 					}
-					IL_00D6:
 					UnixMessageIO.SendString(networkStream, dictionaryEntry.Value.ToString(), buffer);
-					continue;
-					IL_00AA:
-					networkStream.Write(UnixMessageIO.msgDefaultTransportKey, 0, 3);
-					UnixMessageIO.SendString(networkStream, dictionaryEntry.Key.ToString(), buffer);
-					networkStream.WriteByte(1);
-					goto IL_00D6;
 				}
 			}
 			networkStream.Write(UnixMessageIO.msgHeaderTerminator, 0, 2);
@@ -171,31 +149,29 @@ namespace Mono.Remoting.Channels.Unix
 			{
 				UnixMessageIO.StreamRead(networkStream, buffer, 1);
 				string text;
-				switch (b)
+				if (b != 1)
 				{
-				case 1:
+					if (b != 4)
+					{
+						if (b != 6)
+						{
+							throw new NotSupportedException("Unknown header code: " + b);
+						}
+						text = "Content-Type";
+					}
+					else
+					{
+						text = "__RequestUri";
+					}
+				}
+				else
+				{
 					text = UnixMessageIO.ReceiveString(networkStream, buffer);
-					break;
-				case 2:
-				case 3:
-				case 5:
-					goto IL_006B;
-				case 4:
-					text = "__RequestUri";
-					break;
-				case 6:
-					text = "Content-Type";
-					break;
-				default:
-					goto IL_006B;
 				}
 				UnixMessageIO.StreamRead(networkStream, buffer, 1);
 				transportHeaders[text] = UnixMessageIO.ReceiveString(networkStream, buffer);
 				UnixMessageIO.StreamRead(networkStream, buffer, 2);
 				b = buffer[0];
-				continue;
-				IL_006B:
-				throw new NotSupportedException("Unknown header code: " + b);
 			}
 			return transportHeaders;
 		}
@@ -243,8 +219,7 @@ namespace Mono.Remoting.Channels.Unix
 				buffer = new byte[num];
 			}
 			UnixMessageIO.StreamRead(networkStream, buffer, num);
-			char[] chars = Encoding.UTF8.GetChars(buffer, 0, num);
-			return new string(chars);
+			return new string(Encoding.UTF8.GetChars(buffer, 0, num));
 		}
 
 		private static byte[][] _msgHeaders = new byte[][]

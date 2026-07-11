@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
@@ -37,10 +36,7 @@ public class KSelectable : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.statusItemGroup = new StatusItemGroup(base.gameObject);
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		if (component != null)
-		{
-		}
+		base.GetComponent<KPrefabID>() != null;
 		if (this.entityName == null || this.entityName.Length <= 0)
 		{
 			this.SetName(base.name);
@@ -53,7 +49,7 @@ public class KSelectable : KMonoBehaviour
 
 	public virtual string GetName()
 	{
-		if (this.entityName == null || this.entityName == string.Empty || this.entityName.Length <= 0)
+		if (this.entityName == null || this.entityName == "" || this.entityName.Length <= 0)
 		{
 			global::Debug.Log("Warning Item has blank name!", base.gameObject);
 			return base.name;
@@ -88,7 +84,6 @@ public class KSelectable : KMonoBehaviour
 
 	public Vector3 GetPortraitLocation()
 	{
-		Vector3 vector = default(Vector3);
 		return Util.GetBounds(base.gameObject).center;
 	}
 
@@ -158,25 +153,12 @@ public class KSelectable : KMonoBehaviour
 		{
 			base.transform.GetComponentInParent<LoopingSounds>().UpdateObjectSelection(this.selected);
 		}
-		IEnumerator enumerator = base.transform.GetEnumerator();
-		try
+		foreach (object obj in base.transform)
 		{
-			while (enumerator.MoveNext())
+			Transform transform = (Transform)obj;
+			if (transform.GetComponent<LoopingSounds>() != null)
 			{
-				object obj = enumerator.Current;
-				Transform transform = (Transform)obj;
-				if (transform.GetComponent<LoopingSounds>() != null)
-				{
-					transform.GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				transform.GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
 			}
 		}
 		this.UpdateWorkerSelection(this.selected);
@@ -311,7 +293,7 @@ public class KSelectable : KMonoBehaviour
 	public void UpdateWorkerSelection(bool selected)
 	{
 		Workable[] components = base.GetComponents<Workable>();
-		if (components.Length > 0)
+		if (components.Length != 0)
 		{
 			for (int i = 0; i < components.Length; i++)
 			{

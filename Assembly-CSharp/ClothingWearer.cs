@@ -30,11 +30,9 @@ public class ClothingWearer : KMonoBehaviour
 		if (this.currentClothing == null)
 		{
 			this.ChangeToDefaultClothes();
+			return;
 		}
-		else
-		{
-			this.ChangeClothes(this.currentClothing);
-		}
+		this.ChangeClothes(this.currentClothing);
 	}
 
 	public void ChangeClothes(ClothingWearer.ClothingInfo clothingInfo)
@@ -71,7 +69,7 @@ public class ClothingWearer : KMonoBehaviour
 		}
 
 		[Serialize]
-		public string name = string.Empty;
+		public string name = "";
 
 		[Serialize]
 		public int decorMod;

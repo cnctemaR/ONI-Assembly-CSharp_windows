@@ -2,21 +2,21 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
+	[ComVisible(true)]
 	public sealed class PrimaryInteropAssemblyAttribute : Attribute
 	{
 		public PrimaryInteropAssemblyAttribute(int major, int minor)
 		{
-			this.major = major;
-			this.minor = minor;
+			this._major = major;
+			this._minor = minor;
 		}
 
 		public int MajorVersion
 		{
 			get
 			{
-				return this.major;
+				return this._major;
 			}
 		}
 
@@ -24,12 +24,12 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this.minor;
+				return this._minor;
 			}
 		}
 
-		private int major;
+		internal int _major;
 
-		private int minor;
+		internal int _minor;
 	}
 }

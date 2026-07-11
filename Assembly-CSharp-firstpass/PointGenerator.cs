@@ -29,7 +29,7 @@ public static class PointGenerator
 					list.Add(boundingArea.Centroid() + new Vector2(num10, num9));
 				}
 			}
-			goto IL_03BF;
+			goto IL_0379;
 		}
 		case PointGenerator.SampleBehaviour.UniformHex:
 		{
@@ -40,7 +40,7 @@ public static class PointGenerator
 					list.Add(boundingArea.Centroid() + new Vector2(-num3 + (0.5f + num11) / num6 * num, -num4 + (0.25f + 0.5f * (num11 % 2U) + num12) / num6 * num2));
 				}
 			}
-			goto IL_03BF;
+			goto IL_0379;
 		}
 		case PointGenerator.SampleBehaviour.UniformSpiral:
 		{
@@ -53,34 +53,33 @@ public static class PointGenerator
 				double num18 = Math.Cos(num15) * num16;
 				list.Add(boundingArea.bounds.center + new Vector2((float)num17 * boundingArea.bounds.width, (float)num18 * boundingArea.bounds.height));
 			}
-			goto IL_03BF;
+			goto IL_0379;
 		}
 		case PointGenerator.SampleBehaviour.UniformCircle:
 		{
-			float num19 = 6.2831855f * avoidRadius;
-			float num20 = num19 / density;
-			float num21 = rnd.RandomValue();
-			for (uint num22 = 1U; num22 < num20; num22 += 1U)
+			float num19 = 6.2831855f * avoidRadius / density;
+			float num20 = rnd.RandomValue();
+			for (uint num21 = 1U; num21 < num19; num21 += 1U)
 			{
-				float num23 = num21 + num22 / num20 * 3.1415927f * 2f;
-				double num24 = Math.Cos((double)num23) * (double)avoidRadius;
-				double num25 = Math.Sin((double)num23) * (double)avoidRadius;
-				list.Add(boundingArea.bounds.center + new Vector2((float)num24, (float)num25));
+				float num22 = num20 + num21 / num19 * 3.1415927f * 2f;
+				double num23 = Math.Cos((double)num22) * (double)avoidRadius;
+				double num24 = Math.Sin((double)num22) * (double)avoidRadius;
+				list.Add(boundingArea.bounds.center + new Vector2((float)num23, (float)num24));
 			}
-			goto IL_03BF;
+			goto IL_0379;
 		}
 		case PointGenerator.SampleBehaviour.PoissonDisk:
 			list = new UniformPoissonDiskSampler(rnd).SampleRectangle(min, max, density, num7);
-			goto IL_03BF;
+			goto IL_0379;
 		}
-		for (float num26 = -num4 + avoidRadius * 0.3f + rnd.RandomValue() * 2f; num26 < num4 - (avoidRadius * 0.3f + rnd.RandomValue() * 2f); num26 += density + rnd.RandomValue())
+		for (float num25 = -num4 + avoidRadius * 0.3f + rnd.RandomValue() * 2f; num25 < num4 - (avoidRadius * 0.3f + rnd.RandomValue() * 2f); num25 += density + rnd.RandomValue())
 		{
-			for (float num27 = -num3 + avoidRadius * 0.3f + rnd.RandomValue() * 2f + rnd.RandomValue() * 2f; num27 < num3 - (avoidRadius * 0.3f + rnd.RandomValue() * 2f); num27 += density + rnd.RandomValue())
+			for (float num26 = -num3 + avoidRadius * 0.3f + rnd.RandomValue() * 2f + rnd.RandomValue() * 2f; num26 < num3 - (avoidRadius * 0.3f + rnd.RandomValue() * 2f); num26 += density + rnd.RandomValue())
 			{
-				list.Add(boundingArea.Centroid() + new Vector2(num27, num26 + rnd.RandomValue() - 0.5f));
+				list.Add(boundingArea.Centroid() + new Vector2(num26, num25 + rnd.RandomValue() - 0.5f));
 			}
 		}
-		IL_03BF:
+		IL_0379:
 		List<Vector2> list2 = new List<Vector2>();
 		for (int i = 0; i < list.Count; i++)
 		{
@@ -146,14 +145,14 @@ public static class PointGenerator
 	private static Vector2I PointOnRightHandSpiralOut(int index)
 	{
 		int num = (int)Mathf.Ceil(Mathf.Sqrt((float)(4 * index + 1)) * 0.5f - 1f + 0.5f);
-		int num2 = (((num & 1) != 0) ? 0 : 1);
+		int num2 = (((num & 1) == 0) ? 1 : 0);
 		int num3 = num * (num + 1);
 		bool flag = num3 - index < num;
-		int num4 = 2 * (num2 ^ ((!flag) ? 0 : 1)) - 1;
+		int num4 = 2 * (num2 ^ (flag ? 1 : 0)) - 1;
 		Vector2I vector2I = new Vector2I(-num4, 2 * num2 - 1);
-		Vector2I vector2I2 = new Vector2I(-((num2 != 0 || !flag) ? 0 : 1), 0) + vector2I * (num / 2);
-		Vector2I vector2I3 = new Vector2I((!flag) ? 1 : 0, (!flag) ? 0 : 1) * num4;
-		int num5 = index - num3 + 2 * num - ((!flag) ? 0 : 1) * num;
+		Vector2I vector2I2 = new Vector2I(0 - ((num2 == 0 && flag) ? 1 : 0), 0) + vector2I * (num / 2);
+		Vector2I vector2I3 = new Vector2I(flag ? 0 : 1, flag ? 1 : 0) * num4;
+		int num5 = index - num3 + 2 * num - (flag ? 1 : 0) * num;
 		return vector2I2 + vector2I3 * num5;
 	}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using KSerialization;
 using STRINGS;
@@ -14,11 +15,14 @@ namespace Database
 
 		public override bool Success()
 		{
-			foreach (Room room in Game.Instance.roomProber.rooms)
+			using (List<Room>.Enumerator enumerator = Game.Instance.roomProber.rooms.GetEnumerator())
 			{
-				if (room.roomType == this.roomType)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current.roomType == this.roomType)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

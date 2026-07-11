@@ -16,7 +16,7 @@ namespace System.Runtime.Remoting.Services
 			object syncRoot = TrackingServices._handlers.SyncRoot;
 			lock (syncRoot)
 			{
-				if (TrackingServices._handlers.IndexOf(handler) != -1)
+				if (-1 != TrackingServices._handlers.IndexOf(handler))
 				{
 					throw new RemotingException("handler already registered");
 				}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.Net
 {
@@ -15,16 +16,18 @@ namespace System.Net
 		{
 		}
 
-		protected ProtocolViolationException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		protected ProtocolViolationException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
 		{
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter, SerializationFormatter = true)]
+		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			base.GetObjectData(info, context);
+			base.GetObjectData(serializationInfo, streamingContext);
 		}
 
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 			base.GetObjectData(serializationInfo, streamingContext);

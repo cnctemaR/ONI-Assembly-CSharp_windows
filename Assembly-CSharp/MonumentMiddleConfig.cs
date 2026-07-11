@@ -41,13 +41,11 @@ public class MonumentMiddleConfig : IBuildingConfig
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
-		BuildingAttachPoint buildingAttachPoint = go.AddOrGet<BuildingAttachPoint>();
-		buildingAttachPoint.points = new BuildingAttachPoint.HardPoint[]
+		go.AddOrGet<BuildingAttachPoint>().points = new BuildingAttachPoint.HardPoint[]
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 5), "MonumentTop", null)
 		};
-		MonumentPart monumentPart = go.AddOrGet<MonumentPart>();
-		monumentPart.part = MonumentPart.Part.Middle;
+		go.AddOrGet<MonumentPart>().part = MonumentPart.Part.Middle;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -65,20 +63,20 @@ public class MonumentMiddleConfig : IBuildingConfig
 		{
 			MonumentPart monumentPart = game_object.AddOrGet<MonumentPart>();
 			monumentPart.part = MonumentPart.Part.Middle;
-			monumentPart.selectableStatesAndSymbols = new List<Tuple<string, string>>();
+			monumentPart.selectableStatesAndSymbols = new List<global::Tuple<string, string>>();
 			monumentPart.stateUISymbol = "mid";
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_a", "thumbs_up"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_b", "wrench"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_c", "hmmm"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_d", "hips_hands"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_e", "hold_face"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_f", "finger_gun"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_g", "model_pose"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_h", "punch"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_i", "holding_hatch"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_j", "model_pose2"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_k", "balancing"));
-			monumentPart.selectableStatesAndSymbols.Add(new Tuple<string, string>("option_l", "holding_babies"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_a", "thumbs_up"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_b", "wrench"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_c", "hmmm"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_d", "hips_hands"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_e", "hold_face"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_f", "finger_gun"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_g", "model_pose"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_h", "punch"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_i", "holding_hatch"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_j", "model_pose2"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_k", "balancing"));
+			monumentPart.selectableStatesAndSymbols.Add(new global::Tuple<string, string>("option_l", "holding_babies"));
 		};
 	}
 

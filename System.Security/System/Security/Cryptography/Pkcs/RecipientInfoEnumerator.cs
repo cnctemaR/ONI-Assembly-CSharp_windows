@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Security.Cryptography.Pkcs
 {
@@ -10,19 +11,19 @@ namespace System.Security.Cryptography.Pkcs
 			this.enumerator = enumerable.GetEnumerator();
 		}
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.enumerator.Current;
-			}
-		}
-
 		public RecipientInfo Current
 		{
 			get
 			{
 				return (RecipientInfo)this.enumerator.Current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.enumerator.Current;
 			}
 		}
 
@@ -34,6 +35,11 @@ namespace System.Security.Cryptography.Pkcs
 		public void Reset()
 		{
 			this.enumerator.Reset();
+		}
+
+		internal RecipientInfoEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private IEnumerator enumerator;

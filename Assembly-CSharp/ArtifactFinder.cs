@@ -25,7 +25,7 @@ public class ArtifactFinder : KMonoBehaviour
 				num -= artifactDropTable.GetTierWeight(DECOR.SPACEARTIFACT.TIER_NONE);
 			}
 			float num2 = global::UnityEngine.Random.value * num;
-			foreach (Tuple<ArtifactTier, float> tuple in artifactDropTable.rates)
+			foreach (global::Tuple<ArtifactTier, float> tuple in artifactDropTable.rates)
 			{
 				if (!flag || (flag && tuple.first != DECOR.SPACEARTIFACT.TIER_NONE))
 				{
@@ -45,9 +45,7 @@ public class ArtifactFinder : KMonoBehaviour
 		List<string> list = new List<string>();
 		foreach (string text in ArtifactConfig.artifactItems)
 		{
-			GameObject prefab = Assets.GetPrefab(text.ToTag());
-			ArtifactTier artifactTier = prefab.GetComponent<SpaceArtifact>().GetArtifactTier();
-			if (artifactTier == tier)
+			if (Assets.GetPrefab(text.ToTag()).GetComponent<SpaceArtifact>().GetArtifactTier() == tier)
 			{
 				list.Add(text);
 			}
@@ -75,9 +73,7 @@ public class ArtifactFinder : KMonoBehaviour
 			string text = this.SearchForArtifact(storedMinionIdentity, spacecraftDestination);
 			if (text != null)
 			{
-				GameObject prefab = Assets.GetPrefab(text.ToTag());
-				GameObject gameObject = GameUtil.KInstantiate(prefab, base.gameObject.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
-				gameObject.SetActive(true);
+				GameUtil.KInstantiate(Assets.GetPrefab(text.ToTag()), base.gameObject.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0).SetActive(true);
 			}
 		}
 	}

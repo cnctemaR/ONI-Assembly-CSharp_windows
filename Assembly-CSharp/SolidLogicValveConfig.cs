@@ -55,10 +55,8 @@ public class SolidLogicValveConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, SolidLogicValveConfig.INPUT_PORTS);
-		LogicOperationalController logicOperationalController = go.AddOrGet<LogicOperationalController>();
-		logicOperationalController.unNetworkedValue = 0;
-		RequireOutputs requireOutputs = go.AddOrGet<RequireOutputs>();
-		requireOutputs.ignoreFullPipe = true;
+		go.AddOrGet<LogicOperationalController>().unNetworkedValue = 0;
+		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
 		go.AddOrGet<SolidConduitBridge>();
 		go.AddOrGet<SolidLogicValve>();
 	}

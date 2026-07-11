@@ -5,6 +5,7 @@ namespace System.Security.Authentication
 	public enum CipherAlgorithmType
 	{
 		None,
+		Null = 24576,
 		Aes = 26129,
 		Aes128 = 26126,
 		Aes192,

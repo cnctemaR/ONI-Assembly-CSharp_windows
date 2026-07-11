@@ -7,7 +7,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
 	public sealed class ObjectNodeDeserializer : INodeDeserializer
 	{
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, Action<string> unmatchedLogFn)
+		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, Action<string> unmatchedLogFn = null)
 		{
 			this._objectFactory = objectFactory;
 			this._typeDescriptor = typeDescriptor;
@@ -31,7 +31,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				{
 					if (this._unmatchedLogFn != null)
 					{
-						this._unmatchedLogFn(string.Format("{2} Found a property '{0}' on a type '{1}', but that type doesn't have that property!", scalar.Value, expectedType.FullName, parser.Current.Start));
+						this._unmatchedLogFn(string.Format("Found a property '{0}' on a type '{1}', but that type doesn't have that property!", scalar.Value, expectedType.FullName));
 					}
 					parser.SkipThisAndNestedEvents();
 				}

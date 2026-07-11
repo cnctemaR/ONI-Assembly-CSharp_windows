@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class SymbolInstanceGpuData
 {
+	private SymbolInstanceGpuData.SymbolInstance[] symbolInstances
+	{
+		get
+		{
+			return this.symbolInstancesConverter.symbolInstances;
+		}
+	}
+
+	public int version { get; private set; }
+
 	public SymbolInstanceGpuData(int symbol_count)
 	{
 		this.symbolCount = symbol_count;
@@ -22,19 +32,10 @@ public class SymbolInstanceGpuData
 		this.MarkDirty();
 	}
 
-	private SymbolInstanceGpuData.SymbolInstance[] symbolInstances
-	{
-		get
-		{
-			return this.symbolInstancesConverter.symbolInstances;
-		}
-	}
-
-	public int version { get; private set; }
-
 	private void MarkDirty()
 	{
-		this.version++;
+		int num = this.version + 1;
+		this.version = num;
 	}
 
 	public void SetVisible(int symbol_idx, bool is_visible)

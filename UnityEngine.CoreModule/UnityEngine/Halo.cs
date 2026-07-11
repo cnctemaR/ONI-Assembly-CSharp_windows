@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Camera/HaloManager.h")]
+	[RequireComponent(typeof(Transform))]
 	internal sealed class Halo : Behaviour
 	{
 	}

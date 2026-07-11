@@ -27,7 +27,8 @@ internal class UpdateConsumedMassParameter : LoopingSoundParameterUpdater
 			if (!entry.creatureCalorieMonitor.IsNullOrStopped())
 			{
 				float fullness = entry.creatureCalorieMonitor.stomach.GetFullness();
-				entry.ev.setParameterValueByIndex(entry.parameterIdx, fullness);
+				EventInstance ev = entry.ev;
+				ev.setParameterValueByIndex(entry.parameterIdx, fullness);
 			}
 		}
 	}
@@ -39,7 +40,7 @@ internal class UpdateConsumedMassParameter : LoopingSoundParameterUpdater
 			if (this.entries[i].ev.handle == sound.ev.handle)
 			{
 				this.entries.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}

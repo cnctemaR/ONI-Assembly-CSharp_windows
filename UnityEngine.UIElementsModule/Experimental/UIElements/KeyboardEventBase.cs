@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Base class for keyboard events.</para>
-	/// </summary>
 	public abstract class KeyboardEventBase<T> : EventBase<T>, IKeyboardEvent where T : KeyboardEventBase<T>, new()
 	{
 		protected KeyboardEventBase()
@@ -50,10 +47,27 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		public bool actionKey
+		{
+			get
+			{
+				bool flag;
+				if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
+				{
+					flag = this.commandKey;
+				}
+				else
+				{
+					flag = this.ctrlKey;
+				}
+				return flag;
+			}
+		}
+
 		protected override void Init()
 		{
 			base.Init();
-			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.Capturable | EventBase.EventFlags.Cancellable;
+			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.TricklesDown | EventBase.EventFlags.Cancellable;
 			this.modifiers = EventModifiers.None;
 			this.character = '\0';
 			this.keyCode = KeyCode.None;

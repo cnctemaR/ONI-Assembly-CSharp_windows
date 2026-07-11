@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine.Rendering;
 
 namespace UnityEngine.UI
 {
 	public static class StencilMaterial
 	{
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Material.Add instead.", true)]
 		public static Material Add(Material baseMat, int stencilID)
 		{

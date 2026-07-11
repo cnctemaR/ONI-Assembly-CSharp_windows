@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Jobs
 {
-	/// <summary>
-	///   <para>Position, rotation and scale of an object.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Transform/ScriptBindings/TransformAccess.bindings.h")]
 	public struct TransformAccess
 	{
-		/// <summary>
-		///   <para>The position of the transform in world space.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of the transform in world space stored as a Quaternion.</para>
-		/// </summary>
 		public Quaternion rotation
 		{
 			get
@@ -44,9 +35,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>The position of the transform relative to the parent.</para>
-		/// </summary>
 		public Vector3 localPosition
 		{
 			get
@@ -61,9 +49,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of the transform relative to the parent transform's rotation.</para>
-		/// </summary>
 		public Quaternion localRotation
 		{
 			get
@@ -78,9 +63,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>The scale of the transform relative to the parent.</para>
-		/// </summary>
 		public Vector3 localScale
 		{
 			get

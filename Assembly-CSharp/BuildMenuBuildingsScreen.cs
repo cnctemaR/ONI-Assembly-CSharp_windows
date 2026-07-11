@@ -27,7 +27,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		this.SetHasFocus(true);
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
 		string text = HashCache.Get().Get(category).ToUpper();
-		text = text.Replace(" ", string.Empty);
+		text = text.Replace(" ", "");
 		this.titleLabel.text = Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".BUILDMENUTITLE");
 		foreach (BuildMenu.BuildingInfo buildingInfo in building_infos)
 		{
@@ -44,25 +44,14 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			this.RefreshToggle(this.toggleInfo[i]);
 		}
 		int num = 0;
-		IEnumerator enumerator2 = this.gridSizer.transform.GetEnumerator();
-		try
+		using (IEnumerator enumerator2 = this.gridSizer.transform.GetEnumerator())
 		{
 			while (enumerator2.MoveNext())
 			{
-				object obj = enumerator2.Current;
-				Transform transform = (Transform)obj;
-				if (transform.gameObject.activeSelf)
+				if (((Transform)enumerator2.Current).gameObject.activeSelf)
 				{
 					num++;
 				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator2 as IDisposable) != null)
-			{
-				disposable.Dispose();
 			}
 		}
 		this.gridSizer.constraintCount = Mathf.Min(num, 3);
@@ -104,8 +93,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		{
 			return;
 		}
-		BuildMenuBuildingsScreen.UserData userData = info.userData as BuildMenuBuildingsScreen.UserData;
-		BuildingDef def = userData.def;
+		BuildingDef def = (info.userData as BuildMenuBuildingsScreen.UserData).def;
 		TechItem techItem = Db.Get().TechItems.TryGet(def.PrefabID);
 		bool flag = DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete();
 		bool flag2 = flag || techItem == null || techItem.parentTech.ArePrerequisitesComplete();
@@ -139,7 +127,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			componentInChildren.text = def.Name;
 		}
 		PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
-		int num = ((requirementsState != PlanScreen.RequirementsState.Complete) ? 0 : 1);
+		int num = ((requirementsState == PlanScreen.RequirementsState.Complete) ? 1 : 0);
 		ImageToggleState.State state;
 		if (def == this.selectedBuilding && (requirementsState == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
 		{
@@ -147,7 +135,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		}
 		else
 		{
-			state = ((requirementsState != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+			state = ((requirementsState == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode) ? ImageToggleState.State.Inactive : ImageToggleState.State.Disabled);
 		}
 		if (def == this.selectedBuilding && state == ImageToggleState.State.Disabled)
 		{
@@ -168,18 +156,19 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		else
 		{
 			material = this.desaturatedUIMaterial;
-			Color color2;
-			if (flag)
+			Color color3;
+			if (!flag)
 			{
-				color2 = new Color(1f, 1f, 1f, 0.6f);
+				Graphic graphic = image;
+				Color color2 = new Color(1f, 1f, 1f, 0.15f);
+				graphic.color = color2;
+				color3 = color2;
 			}
 			else
 			{
-				Color color3 = new Color(1f, 1f, 1f, 0.15f);
-				image.color = color3;
-				color2 = color3;
+				color3 = new Color(1f, 1f, 1f, 0.6f);
 			}
-			color = color2;
+			color = color3;
 		}
 		if (image.material != material)
 		{
@@ -195,8 +184,9 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			string text2 = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
 			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
 			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
+			return;
 		}
-		else if (requirementsState != PlanScreen.RequirementsState.Complete)
+		if (requirementsState != PlanScreen.RequirementsState.Complete)
 		{
 			fgImage.gameObject.SetActive(false);
 			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
@@ -207,7 +197,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 				string text4 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				component.AddMultiStringTooltip(text4, this.buildingToolTipSettings.ResearchRequirement);
 			}
-			component.AddMultiStringTooltip(string.Empty, this.buildingToolTipSettings.ResearchRequirement);
+			component.AddMultiStringTooltip("", this.buildingToolTipSettings.ResearchRequirement);
 		}
 	}
 
@@ -244,24 +234,27 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 	private void OnSelectBuilding(BuildingDef def)
 	{
 		PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
-		if (requirementsState != PlanScreen.RequirementsState.Complete && requirementsState != PlanScreen.RequirementsState.Materials)
+		if (requirementsState - PlanScreen.RequirementsState.Materials <= 1)
 		{
-			this.selectedBuilding = null;
-			this.ClearSelection();
-			this.CloseRecipe(true);
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
-		}
-		else if (def != this.selectedBuilding)
-		{
-			this.selectedBuilding = def;
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+			if (def != this.selectedBuilding)
+			{
+				this.selectedBuilding = def;
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+			}
+			else
+			{
+				this.selectedBuilding = null;
+				this.ClearSelection();
+				this.CloseRecipe(true);
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
+			}
 		}
 		else
 		{
 			this.selectedBuilding = null;
 			this.ClearSelection();
 			this.CloseRecipe(true);
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 		}
 		this.onBuildingSelected(this.selectedBuilding);
 	}
@@ -318,8 +311,9 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!this.mouseOver || !this.ConsumeMouseScroll || e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
+		if (this.mouseOver && this.ConsumeMouseScroll && !e.TryConsume(global::Action.ZoomIn))
 		{
+			e.TryConsume(global::Action.ZoomOut);
 		}
 		if (!this.HasFocus)
 		{
@@ -383,7 +377,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		base.SetHasFocus(has_focus);
 		if (this.focusIndicator != null)
 		{
-			this.focusIndicator.color = ((!has_focus) ? this.unfocusedColour : this.focusedColour);
+			this.focusIndicator.color = (has_focus ? this.focusedColour : this.unfocusedColour);
 		}
 	}
 

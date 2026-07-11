@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.Net.Mail
 {
@@ -15,14 +16,14 @@ namespace System.Net.Mail
 		{
 		}
 
-		protected SmtpFailedRecipientException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-			: base(serializationInfo, streamingContext)
+		protected SmtpFailedRecipientException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
-			if (serializationInfo == null)
+			if (info == null)
 			{
-				throw new ArgumentNullException("serializationInfo");
+				throw new ArgumentNullException("info");
 			}
-			this.failedRecipient = serializationInfo.GetString("failedRecipient");
+			this.failedRecipient = info.GetString("failedRecipient");
 		}
 
 		public SmtpFailedRecipientException(SmtpStatusCode statusCode, string failedRecipient)
@@ -48,11 +49,6 @@ namespace System.Net.Mail
 			this.failedRecipient = failedRecipient;
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-			this.GetObjectData(serializationInfo, streamingContext);
-		}
-
 		public string FailedRecipient
 		{
 			get
@@ -61,6 +57,7 @@ namespace System.Net.Mail
 			}
 		}
 
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 			if (serializationInfo == null)
@@ -69,6 +66,11 @@ namespace System.Net.Mail
 			}
 			base.GetObjectData(serializationInfo, streamingContext);
 			serializationInfo.AddValue("failedRecipient", this.failedRecipient);
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			this.GetObjectData(serializationInfo, streamingContext);
 		}
 
 		private string failedRecipient;

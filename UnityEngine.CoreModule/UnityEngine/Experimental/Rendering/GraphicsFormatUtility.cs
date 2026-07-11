@@ -4,6 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Rendering
 {
+	[NativeHeader("Runtime/Graphics/TextureFormat.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
 	public class GraphicsFormatUtility
 	{
@@ -52,6 +53,10 @@ namespace UnityEngine.Experimental.Rendering
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsCompressedFormat(GraphicsFormat format);
+
+		[FreeFunction("IsAnyCompressedTextureFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsCompressedTextureFormat(TextureFormat format);
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]

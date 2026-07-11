@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Tween : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class Tween : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	private void Awake()
 	{

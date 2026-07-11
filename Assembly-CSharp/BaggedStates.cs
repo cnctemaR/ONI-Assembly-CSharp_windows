@@ -9,11 +9,7 @@ public class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instance
 	{
 		default_state = this.bagged;
 		base.serializable = true;
-		GameStateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State root = this.root;
-		string text = CREATURES.STATUSITEMS.BAGGED.NAME;
-		string text2 = CREATURES.STATUSITEMS.BAGGED.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.BAGGED.NAME, CREATURES.STATUSITEMS.BAGGED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.bagged.Enter(new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.BagStart)).ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trussed", KAnim.PlayMode.Loop)
 			.TagTransition(GameTags.Creatures.Bagged, null, true)
 			.Transition(this.escape, new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.Transition.ConditionCallback(BaggedStates.ShouldEscape), UpdateRate.SIM_4000ms)
@@ -53,12 +49,7 @@ public class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instance
 
 	private static bool ShouldEscape(BaggedStates.Instance smi)
 	{
-		if (smi.gameObject.HasTag(GameTags.Stored))
-		{
-			return false;
-		}
-		float num = GameClock.Instance.GetTime() - smi.baggedTime;
-		return num >= smi.def.escapeTime;
+		return !smi.gameObject.HasTag(GameTags.Stored) && GameClock.Instance.GetTime() - smi.baggedTime >= smi.def.escapeTime;
 	}
 
 	public GameStateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State bagged;
@@ -87,11 +78,9 @@ public class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instance
 				if (flag)
 				{
 					GameComps.Fallers.Add(base.gameObject, Vector2.zero);
+					return;
 				}
-				else
-				{
-					GameComps.Fallers.Remove(base.gameObject);
-				}
+				GameComps.Fallers.Remove(base.gameObject);
 			}
 		}
 

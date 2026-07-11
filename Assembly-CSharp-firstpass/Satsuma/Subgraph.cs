@@ -27,28 +27,22 @@ namespace Satsuma
 
 		public void Enable(Node node, bool enabled)
 		{
-			bool flag = this.defaultNodeEnabled != enabled;
-			if (flag)
+			if (this.defaultNodeEnabled != enabled)
 			{
 				this.nodeExceptions.Add(node);
+				return;
 			}
-			else
-			{
-				this.nodeExceptions.Remove(node);
-			}
+			this.nodeExceptions.Remove(node);
 		}
 
 		public void Enable(Arc arc, bool enabled)
 		{
-			bool flag = this.defaultArcEnabled != enabled;
-			if (flag)
+			if (this.defaultArcEnabled != enabled)
 			{
 				this.arcExceptions.Add(arc);
+				return;
 			}
-			else
-			{
-				this.arcExceptions.Remove(arc);
-			}
+			this.arcExceptions.Remove(arc);
 		}
 
 		public bool IsEnabled(Node node)
@@ -85,6 +79,8 @@ namespace Satsuma
 					yield return node;
 				}
 			}
+			IEnumerator<Node> enumerator = null;
+			yield break;
 			yield break;
 		}
 
@@ -110,6 +106,8 @@ namespace Satsuma
 					yield return arc;
 				}
 			}
+			IEnumerator<Arc> enumerator = null;
+			yield break;
 			yield break;
 		}
 
@@ -126,6 +124,8 @@ namespace Satsuma
 					yield return arc;
 				}
 			}
+			IEnumerator<Arc> enumerator = null;
+			yield break;
 			yield break;
 		}
 
@@ -142,21 +142,35 @@ namespace Satsuma
 					yield return arc;
 				}
 			}
+			IEnumerator<Arc> enumerator = null;
+			yield break;
 			yield break;
 		}
 
 		public int NodeCount()
 		{
-			return (!this.defaultNodeEnabled) ? this.nodeExceptions.Count : (this.graph.NodeCount() - this.nodeExceptions.Count);
+			if (!this.defaultNodeEnabled)
+			{
+				return this.nodeExceptions.Count;
+			}
+			return this.graph.NodeCount() - this.nodeExceptions.Count;
 		}
 
 		public int ArcCount(ArcFilter filter = ArcFilter.All)
 		{
-			if (this.nodeExceptions.Count == 0 && filter == ArcFilter.All)
+			if (this.nodeExceptions.Count != 0 || filter != ArcFilter.All)
 			{
-				return (!this.defaultNodeEnabled) ? 0 : ((!this.defaultArcEnabled) ? this.arcExceptions.Count : (this.graph.ArcCount(ArcFilter.All) - this.arcExceptions.Count));
+				return this.Arcs(filter).Count<Arc>();
 			}
-			return this.Arcs(filter).Count<Arc>();
+			if (!this.defaultNodeEnabled)
+			{
+				return 0;
+			}
+			if (!this.defaultArcEnabled)
+			{
+				return this.arcExceptions.Count;
+			}
+			return this.graph.ArcCount(ArcFilter.All) - this.arcExceptions.Count;
 		}
 
 		public int ArcCount(Node u, ArcFilter filter = ArcFilter.All)

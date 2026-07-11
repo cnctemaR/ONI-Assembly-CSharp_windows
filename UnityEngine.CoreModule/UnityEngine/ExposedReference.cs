@@ -3,9 +3,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Creates a type whos value is resolvable at runtime.</para>
-	/// </summary>
 	[UsedByNativeCode(Name = "ExposedReference")]
 	[Serializable]
 	public struct ExposedReference<T> where T : Object

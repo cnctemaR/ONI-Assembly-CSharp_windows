@@ -5,17 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A mesh collider allows you to do between meshes and primitives.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Graphics/Mesh/Mesh.h")]
-	[NativeHeader("Runtime/Dynamics/MeshCollider.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Dynamics/MeshCollider.h")]
+	[NativeHeader("Runtime/Graphics/Mesh/Mesh.h")]
 	public class MeshCollider : Collider
 	{
-		/// <summary>
-		///   <para>The mesh object used for collision detection.</para>
-		/// </summary>
 		public extern Mesh sharedMesh
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -24,9 +18,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Use a convex collider from the mesh.</para>
-		/// </summary>
 		public extern bool convex
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -35,29 +26,18 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Allow the physics engine to increase the volume of the input mesh in attempt to generate a valid convex mesh.</para>
-		/// </summary>
+		[Obsolete("MeshCollider.inflateMesh is no longer supported. The new cooking algorithm doesn't need inflation to be used.")]
 		public bool inflateMesh
 		{
 			get
 			{
-				return (this.cookingOptions & MeshColliderCookingOptions.InflateConvexMesh) != MeshColliderCookingOptions.None;
+				return false;
 			}
 			set
 			{
-				MeshColliderCookingOptions meshColliderCookingOptions = this.cookingOptions & ~MeshColliderCookingOptions.InflateConvexMesh;
-				if (value)
-				{
-					meshColliderCookingOptions |= MeshColliderCookingOptions.InflateConvexMesh;
-				}
-				this.cookingOptions = meshColliderCookingOptions;
 			}
 		}
 
-		/// <summary>
-		///   <para>Options used to enable or disable certain features in mesh cooking.</para>
-		/// </summary>
 		public extern MeshColliderCookingOptions cookingOptions
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -66,20 +46,18 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Used when set to inflateMesh to determine how much inflation is acceptable.</para>
-		/// </summary>
-		public extern float skinWidth
+		[Obsolete("MeshCollider.skinWidth is no longer used.")]
+		public float skinWidth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return 0f;
+			}
+			set
+			{
+			}
 		}
 
-		/// <summary>
-		///   <para>Uses interpolated normals for sphere collisions instead of flat polygonal normals.</para>
-		/// </summary>
 		[Obsolete("Configuring smooth sphere collisions is no longer needed.")]
 		public bool smoothSphereCollisions
 		{

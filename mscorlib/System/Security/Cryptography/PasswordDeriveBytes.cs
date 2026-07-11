@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -8,112 +9,63 @@ namespace System.Security.Cryptography
 	public class PasswordDeriveBytes : DeriveBytes
 	{
 		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt)
+			: this(strPassword, rgbSalt, new CspParameters())
 		{
-			this.Prepare(strPassword, rgbSalt, "SHA1", 100);
-		}
-
-		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt, CspParameters cspParams)
-		{
-			this.Prepare(strPassword, rgbSalt, "SHA1", 100);
-			if (cspParams != null)
-			{
-				throw new NotSupportedException(Locale.GetText("CspParameters not supported by Mono for PasswordDeriveBytes."));
-			}
-		}
-
-		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt, string strHashName, int iterations)
-		{
-			this.Prepare(strPassword, rgbSalt, strHashName, iterations);
-		}
-
-		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt, string strHashName, int iterations, CspParameters cspParams)
-		{
-			this.Prepare(strPassword, rgbSalt, strHashName, iterations);
-			if (cspParams != null)
-			{
-				throw new NotSupportedException(Locale.GetText("CspParameters not supported by Mono for PasswordDeriveBytes."));
-			}
 		}
 
 		public PasswordDeriveBytes(byte[] password, byte[] salt)
+			: this(password, salt, new CspParameters())
 		{
-			this.Prepare(password, salt, "SHA1", 100);
 		}
 
-		public PasswordDeriveBytes(byte[] password, byte[] salt, CspParameters cspParams)
+		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt, string strHashName, int iterations)
+			: this(strPassword, rgbSalt, strHashName, iterations, new CspParameters())
 		{
-			this.Prepare(password, salt, "SHA1", 100);
-			if (cspParams != null)
-			{
-				throw new NotSupportedException(Locale.GetText("CspParameters not supported by Mono for PasswordDeriveBytes."));
-			}
 		}
 
 		public PasswordDeriveBytes(byte[] password, byte[] salt, string hashName, int iterations)
+			: this(password, salt, hashName, iterations, new CspParameters())
 		{
-			this.Prepare(password, salt, hashName, iterations);
 		}
 
+		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt, CspParameters cspParams)
+			: this(strPassword, rgbSalt, "SHA1", 100, cspParams)
+		{
+		}
+
+		public PasswordDeriveBytes(byte[] password, byte[] salt, CspParameters cspParams)
+			: this(password, salt, "SHA1", 100, cspParams)
+		{
+		}
+
+		public PasswordDeriveBytes(string strPassword, byte[] rgbSalt, string strHashName, int iterations, CspParameters cspParams)
+			: this(new UTF8Encoding(false).GetBytes(strPassword), rgbSalt, strHashName, iterations, cspParams)
+		{
+		}
+
+		[SecuritySafeCritical]
 		public PasswordDeriveBytes(byte[] password, byte[] salt, string hashName, int iterations, CspParameters cspParams)
 		{
-			this.Prepare(password, salt, hashName, iterations);
-			if (cspParams != null)
-			{
-				throw new NotSupportedException(Locale.GetText("CspParameters not supported by Mono for PasswordDeriveBytes."));
-			}
-		}
-
-		~PasswordDeriveBytes()
-		{
-			if (this.initial != null)
-			{
-				Array.Clear(this.initial, 0, this.initial.Length);
-				this.initial = null;
-			}
-			Array.Clear(this.password, 0, this.password.Length);
-		}
-
-		private void Prepare(string strPassword, byte[] rgbSalt, string strHashName, int iterations)
-		{
-			if (strPassword == null)
-			{
-				throw new ArgumentNullException("strPassword");
-			}
-			byte[] bytes = Encoding.UTF8.GetBytes(strPassword);
-			this.Prepare(bytes, rgbSalt, strHashName, iterations);
-			Array.Clear(bytes, 0, bytes.Length);
-		}
-
-		private void Prepare(byte[] password, byte[] rgbSalt, string strHashName, int iterations)
-		{
-			if (password == null)
-			{
-				throw new ArgumentNullException("password");
-			}
-			this.password = (byte[])password.Clone();
-			this.Salt = rgbSalt;
-			this.HashName = strHashName;
 			this.IterationCount = iterations;
-			this.state = 0;
+			this.Salt = salt;
+			this.HashName = hashName;
+			this._password = password;
 		}
 
 		public string HashName
 		{
 			get
 			{
-				return this.HashNameValue;
+				return this._hashName;
 			}
 			set
 			{
-				if (value == null)
+				if (this._baseValue != null)
 				{
-					throw new ArgumentNullException("HashName");
+					throw new CryptographicException(Environment.GetResourceString("Value of '{0}' cannot be changed after the bytes have been retrieved.", new object[] { "HashName" }));
 				}
-				if (this.state != 0)
-				{
-					throw new CryptographicException(Locale.GetText("Can't change this property at this stage"));
-				}
-				this.HashNameValue = value;
+				this._hashName = value;
+				this._hash = (HashAlgorithm)CryptoConfig.CreateFromName(this._hashName);
 			}
 		}
 
@@ -121,19 +73,19 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.IterationsValue;
+				return this._iterations;
 			}
 			set
 			{
-				if (value < 1)
+				if (value <= 0)
 				{
-					throw new ArgumentOutOfRangeException("> 0", "IterationCount");
+					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Positive number required."));
 				}
-				if (this.state != 0)
+				if (this._baseValue != null)
 				{
-					throw new CryptographicException(Locale.GetText("Can't change this property at this stage"));
+					throw new CryptographicException(Environment.GetResourceString("Value of '{0}' cannot be changed after the bytes have been retrieved.", new object[] { "IterationCount" }));
 				}
-				this.IterationsValue = value;
+				this._iterations = value;
 			}
 		}
 
@@ -141,133 +93,213 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				if (this.SaltValue == null)
+				if (this._salt == null)
 				{
 					return null;
 				}
-				return (byte[])this.SaltValue.Clone();
+				return (byte[])this._salt.Clone();
 			}
 			set
 			{
-				if (this.state != 0)
+				if (this._baseValue != null)
 				{
-					throw new CryptographicException(Locale.GetText("Can't change this property at this stage"));
+					throw new CryptographicException(Environment.GetResourceString("Value of '{0}' cannot be changed after the bytes have been retrieved.", new object[] { "Salt" }));
 				}
-				if (value != null)
+				if (value == null)
 				{
-					this.SaltValue = (byte[])value.Clone();
+					this._salt = null;
+					return;
 				}
-				else
-				{
-					this.SaltValue = null;
-				}
+				this._salt = (byte[])value.Clone();
 			}
 		}
 
-		public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
-		{
-			if (keySize > 128)
-			{
-				throw new CryptographicException(Locale.GetText("Key Size can't be greater than 128 bits"));
-			}
-			throw new NotSupportedException(Locale.GetText("CspParameters not supported by Mono"));
-		}
-
-		[Obsolete("see Rfc2898DeriveBytes for PKCS#5 v2 support")]
+		[SecuritySafeCritical]
+		[Obsolete("Rfc2898DeriveBytes replaces PasswordDeriveBytes for deriving key material from a password and is preferred in new applications.")]
 		public override byte[] GetBytes(int cb)
 		{
 			if (cb < 1)
 			{
 				throw new IndexOutOfRangeException("cb");
 			}
-			if (this.state == 0)
-			{
-				this.Reset();
-				this.state = 1;
-			}
+			int num = 0;
 			byte[] array = new byte[cb];
-			int i = 0;
-			int num = Math.Max(1, this.IterationsValue - 1);
-			if (this.output == null)
+			if (this._baseValue == null)
 			{
-				this.output = this.initial;
-				for (int j = 0; j < num - 1; j++)
-				{
-					this.output = this.hash.ComputeHash(this.output);
-				}
+				this.ComputeBaseValue();
 			}
-			while (i < cb)
+			else if (this._extra != null)
 			{
-				byte[] array2;
-				if (this.hashnumber == 0)
+				num = this._extra.Length - this._extraCount;
+				if (num >= cb)
 				{
-					array2 = this.hash.ComputeHash(this.output);
-				}
-				else
-				{
-					if (this.hashnumber >= 1000)
+					Buffer.InternalBlockCopy(this._extra, this._extraCount, array, 0, cb);
+					if (num > cb)
 					{
-						throw new CryptographicException(Locale.GetText("too long"));
+						this._extraCount += cb;
 					}
-					string text = Convert.ToString(this.hashnumber);
-					array2 = new byte[this.output.Length + text.Length];
-					for (int k = 0; k < text.Length; k++)
+					else
 					{
-						array2[k] = (byte)text[k];
+						this._extra = null;
 					}
-					Buffer.BlockCopy(this.output, 0, array2, text.Length, this.output.Length);
-					array2 = this.hash.ComputeHash(array2);
+					return array;
 				}
-				int num2 = array2.Length - this.position;
-				int num3 = Math.Min(cb - i, num2);
-				Buffer.BlockCopy(array2, this.position, array, i, num3);
-				i += num3;
-				this.position += num3;
-				while (this.position >= array2.Length)
-				{
-					this.position -= array2.Length;
-					this.hashnumber++;
-				}
+				Buffer.InternalBlockCopy(this._extra, num, array, 0, num);
+				this._extra = null;
+			}
+			byte[] array2 = this.ComputeBytes(cb - num);
+			Buffer.InternalBlockCopy(array2, 0, array, num, cb - num);
+			if (array2.Length + num > cb)
+			{
+				this._extra = array2;
+				this._extraCount = cb - num;
 			}
 			return array;
 		}
 
 		public override void Reset()
 		{
-			this.state = 0;
-			this.position = 0;
-			this.hashnumber = 0;
-			this.hash = HashAlgorithm.Create(this.HashNameValue);
-			if (this.SaltValue != null)
+			this._prefix = 0;
+			this._extra = null;
+			this._baseValue = null;
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+			if (disposing)
 			{
-				this.hash.TransformBlock(this.password, 0, this.password.Length, this.password, 0);
-				this.hash.TransformFinalBlock(this.SaltValue, 0, this.SaltValue.Length);
-				this.initial = this.hash.Hash;
-			}
-			else
-			{
-				this.initial = this.hash.ComputeHash(this.password);
+				if (this._hash != null)
+				{
+					this._hash.Dispose();
+				}
+				if (this._baseValue != null)
+				{
+					Array.Clear(this._baseValue, 0, this._baseValue.Length);
+				}
+				if (this._extra != null)
+				{
+					Array.Clear(this._extra, 0, this._extra.Length);
+				}
+				if (this._password != null)
+				{
+					Array.Clear(this._password, 0, this._password.Length);
+				}
+				if (this._salt != null)
+				{
+					Array.Clear(this._salt, 0, this._salt.Length);
+				}
 			}
 		}
 
-		private string HashNameValue;
+		[SecuritySafeCritical]
+		public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
+		{
+			if (keySize < 0)
+			{
+				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+			}
+			throw new NotSupportedException("CspParameters are not supported by Mono");
+		}
 
-		private byte[] SaltValue;
+		private byte[] ComputeBaseValue()
+		{
+			this._hash.Initialize();
+			this._hash.TransformBlock(this._password, 0, this._password.Length, this._password, 0);
+			if (this._salt != null)
+			{
+				this._hash.TransformBlock(this._salt, 0, this._salt.Length, this._salt, 0);
+			}
+			this._hash.TransformFinalBlock(EmptyArray<byte>.Value, 0, 0);
+			this._baseValue = this._hash.Hash;
+			this._hash.Initialize();
+			for (int i = 1; i < this._iterations - 1; i++)
+			{
+				this._hash.ComputeHash(this._baseValue);
+				this._baseValue = this._hash.Hash;
+			}
+			return this._baseValue;
+		}
 
-		private int IterationsValue;
+		[SecurityCritical]
+		private byte[] ComputeBytes(int cb)
+		{
+			int num = 0;
+			this._hash.Initialize();
+			int num2 = this._hash.HashSize / 8;
+			byte[] array = new byte[(cb + num2 - 1) / num2 * num2];
+			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, this._hash, CryptoStreamMode.Write))
+			{
+				this.HashPrefix(cryptoStream);
+				cryptoStream.Write(this._baseValue, 0, this._baseValue.Length);
+				cryptoStream.Close();
+			}
+			Buffer.InternalBlockCopy(this._hash.Hash, 0, array, num, num2);
+			num += num2;
+			while (cb > num)
+			{
+				this._hash.Initialize();
+				using (CryptoStream cryptoStream2 = new CryptoStream(Stream.Null, this._hash, CryptoStreamMode.Write))
+				{
+					this.HashPrefix(cryptoStream2);
+					cryptoStream2.Write(this._baseValue, 0, this._baseValue.Length);
+					cryptoStream2.Close();
+				}
+				Buffer.InternalBlockCopy(this._hash.Hash, 0, array, num, num2);
+				num += num2;
+			}
+			return array;
+		}
 
-		private HashAlgorithm hash;
+		private void HashPrefix(CryptoStream cs)
+		{
+			int num = 0;
+			byte[] array = new byte[] { 48, 48, 48 };
+			if (this._prefix > 999)
+			{
+				throw new CryptographicException(Environment.GetResourceString("Requested number of bytes exceeds the maximum."));
+			}
+			if (this._prefix >= 100)
+			{
+				byte[] array2 = array;
+				int num2 = 0;
+				array2[num2] += (byte)(this._prefix / 100);
+				num++;
+			}
+			if (this._prefix >= 10)
+			{
+				byte[] array3 = array;
+				int num3 = num;
+				array3[num3] += (byte)(this._prefix % 100 / 10);
+				num++;
+			}
+			if (this._prefix > 0)
+			{
+				byte[] array4 = array;
+				int num4 = num;
+				array4[num4] += (byte)(this._prefix % 10);
+				num++;
+				cs.Write(array, 0, num);
+			}
+			this._prefix++;
+		}
 
-		private int state;
+		private int _extraCount;
 
-		private byte[] password;
+		private int _prefix;
 
-		private byte[] initial;
+		private int _iterations;
 
-		private byte[] output;
+		private byte[] _baseValue;
 
-		private int position;
+		private byte[] _extra;
 
-		private int hashnumber;
+		private byte[] _salt;
+
+		private string _hashName;
+
+		private byte[] _password;
+
+		private HashAlgorithm _hash;
 	}
 }

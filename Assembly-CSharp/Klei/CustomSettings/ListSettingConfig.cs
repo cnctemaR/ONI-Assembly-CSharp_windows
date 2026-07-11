@@ -6,13 +6,13 @@ namespace Klei.CustomSettings
 {
 	public class ListSettingConfig : SettingConfig
 	{
+		public List<SettingLevel> levels { get; private set; }
+
 		public ListSettingConfig(string id, string label, string tooltip, List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id, int coordinate_dimension = -1, int coordinate_dimension_width = -1, bool debug_only = false, bool triggers_custom_game = true)
 			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, coordinate_dimension, coordinate_dimension_width, debug_only, triggers_custom_game)
 		{
 			this.levels = levels;
 		}
-
-		public List<SettingLevel> levels { get; private set; }
 
 		public void StompLevels(List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id)
 		{
@@ -48,8 +48,8 @@ namespace Klei.CustomSettings
 
 		public string CycleSettingLevelID(string current_id, int direction)
 		{
-			string text = string.Empty;
-			if (current_id == string.Empty)
+			string text = "";
+			if (current_id == "")
 			{
 				current_id = this.levels[0].id;
 			}

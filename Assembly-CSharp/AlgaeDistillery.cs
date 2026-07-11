@@ -39,14 +39,9 @@ public class AlgaeDistillery : StateMachineComponent<AlgaeDistillery.StatesInsta
 		{
 			Storage storage = base.smi.master.storage;
 			GameObject gameObject = storage.FindFirst(base.smi.master.emitTag);
-			if (gameObject != null)
+			if (gameObject != null && gameObject.GetComponent<PrimaryElement>().Mass >= base.master.emitMass)
 			{
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (component.Mass >= base.master.emitMass)
-				{
-					GameObject gameObject2 = storage.Drop(gameObject, true);
-					gameObject2.transform.SetPosition(base.transform.GetPosition() + base.master.emitOffset);
-				}
+				storage.Drop(gameObject, true).transform.SetPosition(base.transform.GetPosition() + base.master.emitOffset);
 			}
 		}
 	}

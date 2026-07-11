@@ -7,22 +7,16 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Position, rotation and scale of an object.</para>
-	/// </summary>
-	[NativeHeader("Configuration/UnityConfigure.h")]
-	[NativeHeader("Runtime/Transform/Transform.h")]
-	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Transform/Transform.h")]
+	[NativeHeader("Configuration/UnityConfigure.h")]
+	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
 	public class Transform : Component, IEnumerable
 	{
 		protected Transform()
 		{
 		}
 
-		/// <summary>
-		///   <para>The world space position of the Transform.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			get
@@ -37,9 +31,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Position of the transform relative to the parent transform.</para>
-		/// </summary>
 		public Vector3 localPosition
 		{
 			get
@@ -72,9 +63,6 @@ namespace UnityEngine
 			this.SetLocalEulerHint_Injected(ref euler);
 		}
 
-		/// <summary>
-		///   <para>The rotation as Euler angles in degrees.</para>
-		/// </summary>
 		public Vector3 eulerAngles
 		{
 			get
@@ -87,9 +75,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation as Euler angles in degrees relative to the parent transform's rotation.</para>
-		/// </summary>
 		public Vector3 localEulerAngles
 		{
 			get
@@ -102,9 +87,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The red axis of the transform in world space.</para>
-		/// </summary>
 		public Vector3 right
 		{
 			get
@@ -117,9 +99,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The green axis of the transform in world space.</para>
-		/// </summary>
 		public Vector3 up
 		{
 			get
@@ -132,9 +111,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The blue axis of the transform in world space.</para>
-		/// </summary>
 		public Vector3 forward
 		{
 			get
@@ -147,9 +123,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of the transform in world space stored as a Quaternion.</para>
-		/// </summary>
 		public Quaternion rotation
 		{
 			get
@@ -164,9 +137,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of the transform relative to the transform rotation of the parent.</para>
-		/// </summary>
 		public Quaternion localRotation
 		{
 			get
@@ -194,19 +164,16 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeConditional("UNITY_EDITOR")]
 		[NativeMethod("GetRotationOrder")]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int GetRotationOrderInternal();
 
-		[NativeConditional("UNITY_EDITOR")]
 		[NativeMethod("SetRotationOrder")]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetRotationOrderInternal(RotationOrder rotationOrder);
 
-		/// <summary>
-		///   <para>The scale of the transform relative to the parent.</para>
-		/// </summary>
 		public Vector3 localScale
 		{
 			get
@@ -221,9 +188,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The parent of the transform.</para>
-		/// </summary>
 		public Transform parent
 		{
 			get
@@ -255,34 +219,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Transform GetParent();
 
-		/// <summary>
-		///   <para>Set the parent of the transform.</para>
-		/// </summary>
-		/// <param name="parent">The parent Transform to use.</param>
-		/// <param name="worldPositionStays">If true, the parent-relative position, scale and
-		///   rotation are modified such that the object keeps the same world space position,
-		///   rotation and scale as before.</param>
-		/// <param name="p"></param>
 		public void SetParent(Transform p)
 		{
 			this.SetParent(p, true);
 		}
 
-		/// <summary>
-		///   <para>Set the parent of the transform.</para>
-		/// </summary>
-		/// <param name="parent">The parent Transform to use.</param>
-		/// <param name="worldPositionStays">If true, the parent-relative position, scale and
-		///   rotation are modified such that the object keeps the same world space position,
-		///   rotation and scale as before.</param>
-		/// <param name="p"></param>
 		[FreeFunction("SetParent", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetParent(Transform parent, bool worldPositionStays);
 
-		/// <summary>
-		///   <para>Matrix that transforms a point from world space into local space (Read Only).</para>
-		/// </summary>
 		public Matrix4x4 worldToLocalMatrix
 		{
 			get
@@ -293,9 +238,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Matrix that transforms a point from local space into world space (Read Only).</para>
-		/// </summary>
 		public Matrix4x4 localToWorldMatrix
 		{
 			get
@@ -306,21 +248,11 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the world space position and rotation of the Transform component.</para>
-		/// </summary>
-		/// <param name="position"></param>
-		/// <param name="rotation"></param>
 		public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
 		{
 			this.SetPositionAndRotation_Injected(ref position, ref rotation);
 		}
 
-		/// <summary>
-		///   <para>Moves the transform in the direction and distance of translation.</para>
-		/// </summary>
-		/// <param name="translation"></param>
-		/// <param name="relativeTo"></param>
 		public void Translate(Vector3 translation, [DefaultValue("Space.Self")] Space relativeTo)
 		{
 			if (relativeTo == Space.World)
@@ -333,45 +265,21 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Moves the transform in the direction and distance of translation.</para>
-		/// </summary>
-		/// <param name="translation"></param>
-		/// <param name="relativeTo"></param>
 		public void Translate(Vector3 translation)
 		{
 			this.Translate(translation, Space.Self);
 		}
 
-		/// <summary>
-		///   <para>Moves the transform by x along the x axis, y along the y axis, and z along the z axis.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="relativeTo"></param>
 		public void Translate(float x, float y, float z, [DefaultValue("Space.Self")] Space relativeTo)
 		{
 			this.Translate(new Vector3(x, y, z), relativeTo);
 		}
 
-		/// <summary>
-		///   <para>Moves the transform by x along the x axis, y along the y axis, and z along the z axis.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="relativeTo"></param>
 		public void Translate(float x, float y, float z)
 		{
 			this.Translate(new Vector3(x, y, z), Space.Self);
 		}
 
-		/// <summary>
-		///   <para>Moves the transform in the direction and distance of translation.</para>
-		/// </summary>
-		/// <param name="translation"></param>
-		/// <param name="relativeTo"></param>
 		public void Translate(Vector3 translation, Transform relativeTo)
 		{
 			if (relativeTo)
@@ -384,23 +292,11 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Moves the transform by x along the x axis, y along the y axis, and z along the z axis.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="relativeTo"></param>
 		public void Translate(float x, float y, float z, Transform relativeTo)
 		{
 			this.Translate(new Vector3(x, y, z), relativeTo);
 		}
 
-		/// <summary>
-		///   <para>Applies a rotation of eulerAngles.z degrees around the z axis, eulerAngles.x degrees around the x axis, and eulerAngles.y degrees around the y axis (in that order).</para>
-		/// </summary>
-		/// <param name="relativeTo">Rotation is local to object or World.</param>
-		/// <param name="eulers">Rotation to apply.</param>
 		public void Rotate(Vector3 eulers, [DefaultValue("Space.Self")] Space relativeTo)
 		{
 			Quaternion quaternion = Quaternion.Euler(eulers.x, eulers.y, eulers.z);
@@ -419,13 +315,6 @@ namespace UnityEngine
 			this.Rotate(eulers, Space.Self);
 		}
 
-		/// <summary>
-		///   <para>Applies a rotation of zAngle degrees around the z axis, xAngle degrees around the x axis, and yAngle degrees around the y axis (in that order).</para>
-		/// </summary>
-		/// <param name="xAngle">Degrees to rotate around the X axis.</param>
-		/// <param name="yAngle">Degrees to rotate around the Y axis.</param>
-		/// <param name="zAngle">Degrees to rotate around the Z axis.</param>
-		/// <param name="relativeTo">Rotation is local to object or World.</param>
 		public void Rotate(float xAngle, float yAngle, float zAngle, [DefaultValue("Space.Self")] Space relativeTo)
 		{
 			this.Rotate(new Vector3(xAngle, yAngle, zAngle), relativeTo);
@@ -442,12 +331,6 @@ namespace UnityEngine
 			this.RotateAroundInternal_Injected(ref axis, angle);
 		}
 
-		/// <summary>
-		///   <para>Rotates the object around axis by angle degrees.</para>
-		/// </summary>
-		/// <param name="axis">Axis to apply rotation to.</param>
-		/// <param name="angle">Degrees to rotation to apply.</param>
-		/// <param name="relativeTo">Rotation is local to object or World.</param>
 		public void Rotate(Vector3 axis, float angle, [DefaultValue("Space.Self")] Space relativeTo)
 		{
 			if (relativeTo == Space.Self)
@@ -465,12 +348,6 @@ namespace UnityEngine
 			this.Rotate(axis, angle, Space.Self);
 		}
 
-		/// <summary>
-		///   <para>Rotates the transform about axis passing through point in world coordinates by angle degrees.</para>
-		/// </summary>
-		/// <param name="point"></param>
-		/// <param name="axis"></param>
-		/// <param name="angle"></param>
 		public void RotateAround(Vector3 point, Vector3 axis, float angle)
 		{
 			Vector3 vector = this.position;
@@ -482,11 +359,6 @@ namespace UnityEngine
 			this.RotateAroundInternal(axis, angle * 0.017453292f);
 		}
 
-		/// <summary>
-		///   <para>Rotates the transform so the forward vector points at target's current position.</para>
-		/// </summary>
-		/// <param name="target">Object to point towards.</param>
-		/// <param name="worldUp">Vector specifying the upward direction.</param>
 		public void LookAt(Transform target, [DefaultValue("Vector3.up")] Vector3 worldUp)
 		{
 			if (target)
@@ -495,11 +367,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Rotates the transform so the forward vector points at target's current position.</para>
-		/// </summary>
-		/// <param name="target">Object to point towards.</param>
-		/// <param name="worldUp">Vector specifying the upward direction.</param>
 		public void LookAt(Transform target)
 		{
 			if (target)
@@ -508,21 +375,11 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Rotates the transform so the forward vector points at worldPosition.</para>
-		/// </summary>
-		/// <param name="worldPosition">Point to look at.</param>
-		/// <param name="worldUp">Vector specifying the upward direction.</param>
 		public void LookAt(Vector3 worldPosition, [DefaultValue("Vector3.up")] Vector3 worldUp)
 		{
 			this.Internal_LookAt(worldPosition, worldUp);
 		}
 
-		/// <summary>
-		///   <para>Rotates the transform so the forward vector points at worldPosition.</para>
-		/// </summary>
-		/// <param name="worldPosition">Point to look at.</param>
-		/// <param name="worldUp">Vector specifying the upward direction.</param>
 		public void LookAt(Vector3 worldPosition)
 		{
 			this.Internal_LookAt(worldPosition, Vector3.up);
@@ -534,10 +391,6 @@ namespace UnityEngine
 			this.Internal_LookAt_Injected(ref worldPosition, ref worldUp);
 		}
 
-		/// <summary>
-		///   <para>Transforms direction from local space to world space.</para>
-		/// </summary>
-		/// <param name="direction"></param>
 		public Vector3 TransformDirection(Vector3 direction)
 		{
 			Vector3 vector;
@@ -545,21 +398,11 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Transforms direction x, y, z from local space to world space.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public Vector3 TransformDirection(float x, float y, float z)
 		{
 			return this.TransformDirection(new Vector3(x, y, z));
 		}
 
-		/// <summary>
-		///   <para>Transforms a direction from world space to local space. The opposite of Transform.TransformDirection.</para>
-		/// </summary>
-		/// <param name="direction"></param>
 		public Vector3 InverseTransformDirection(Vector3 direction)
 		{
 			Vector3 vector;
@@ -567,21 +410,11 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Transforms the direction x, y, z from world space to local space. The opposite of Transform.TransformDirection.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public Vector3 InverseTransformDirection(float x, float y, float z)
 		{
 			return this.InverseTransformDirection(new Vector3(x, y, z));
 		}
 
-		/// <summary>
-		///   <para>Transforms vector from local space to world space.</para>
-		/// </summary>
-		/// <param name="vector"></param>
 		public Vector3 TransformVector(Vector3 vector)
 		{
 			Vector3 vector2;
@@ -589,21 +422,11 @@ namespace UnityEngine
 			return vector2;
 		}
 
-		/// <summary>
-		///   <para>Transforms vector x, y, z from local space to world space.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public Vector3 TransformVector(float x, float y, float z)
 		{
 			return this.TransformVector(new Vector3(x, y, z));
 		}
 
-		/// <summary>
-		///   <para>Transforms a vector from world space to local space. The opposite of Transform.TransformVector.</para>
-		/// </summary>
-		/// <param name="vector"></param>
 		public Vector3 InverseTransformVector(Vector3 vector)
 		{
 			Vector3 vector2;
@@ -611,21 +434,11 @@ namespace UnityEngine
 			return vector2;
 		}
 
-		/// <summary>
-		///   <para>Transforms the vector x, y, z from world space to local space. The opposite of Transform.TransformVector.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public Vector3 InverseTransformVector(float x, float y, float z)
 		{
 			return this.InverseTransformVector(new Vector3(x, y, z));
 		}
 
-		/// <summary>
-		///   <para>Transforms position from local space to world space.</para>
-		/// </summary>
-		/// <param name="position"></param>
 		public Vector3 TransformPoint(Vector3 position)
 		{
 			Vector3 vector;
@@ -633,21 +446,11 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Transforms the position x, y, z from local space to world space.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public Vector3 TransformPoint(float x, float y, float z)
 		{
 			return this.TransformPoint(new Vector3(x, y, z));
 		}
 
-		/// <summary>
-		///   <para>Transforms position from world space to local space.</para>
-		/// </summary>
-		/// <param name="position"></param>
 		public Vector3 InverseTransformPoint(Vector3 position)
 		{
 			Vector3 vector;
@@ -655,20 +458,11 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Transforms the position x, y, z from world space to local space. The opposite of Transform.TransformPoint.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public Vector3 InverseTransformPoint(float x, float y, float z)
 		{
 			return this.InverseTransformPoint(new Vector3(x, y, z));
 		}
 
-		/// <summary>
-		///   <para>Returns the topmost transform in the hierarchy.</para>
-		/// </summary>
 		public Transform root
 		{
 			get
@@ -680,9 +474,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Transform GetRoot();
 
-		/// <summary>
-		///   <para>The number of children the parent Transform has.</para>
-		/// </summary>
 		public extern int childCount
 		{
 			[NativeMethod("GetChildrenCount")]
@@ -690,35 +481,19 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Unparents all children.</para>
-		/// </summary>
 		[FreeFunction("DetachChildren", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void DetachChildren();
 
-		/// <summary>
-		///   <para>Move the transform to the start of the local transform list.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAsFirstSibling();
 
-		/// <summary>
-		///   <para>Move the transform to the end of the local transform list.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAsLastSibling();
 
-		/// <summary>
-		///   <para>Sets the sibling index.</para>
-		/// </summary>
-		/// <param name="index">Index to set.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetSiblingIndex(int index);
 
-		/// <summary>
-		///   <para>Gets the sibling index.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetSiblingIndex();
 
@@ -726,13 +501,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Transform FindRelativeTransformWithPath(Transform transform, string path, [DefaultValue("false")] bool isActiveOnly);
 
-		/// <summary>
-		///   <para>Finds a child by n and returns it.</para>
-		/// </summary>
-		/// <param name="n">Name of child to be found.</param>
-		/// <returns>
-		///   <para>The returned child transform or null if no child is found.</para>
-		/// </returns>
 		public Transform Find(string n)
 		{
 			if (n == null)
@@ -746,9 +514,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SendTransformChangedScale();
 
-		/// <summary>
-		///   <para>The global scale of the object (Read Only).</para>
-		/// </summary>
 		public Vector3 lossyScale
 		{
 			[NativeMethod("GetWorldScaleLossy")]
@@ -760,17 +525,10 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is this transform a child of parent?</para>
-		/// </summary>
-		/// <param name="parent"></param>
 		[FreeFunction("Internal_IsChildOrSameTransform", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsChildOf([NotNull] Transform parent);
 
-		/// <summary>
-		///   <para>Has the transform changed since the last time the flag was set to 'false'?</para>
-		/// </summary>
 		[NativeProperty("HasChangedDeprecated")]
 		public extern bool hasChanged
 		{
@@ -791,11 +549,6 @@ namespace UnityEngine
 			return new Transform.Enumerator(this);
 		}
 
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="axis"></param>
-		/// <param name="angle"></param>
 		[Obsolete("warning use Transform.Rotate instead.")]
 		public void RotateAround(Vector3 axis, float angle)
 		{
@@ -808,15 +561,8 @@ namespace UnityEngine
 			this.RotateAroundLocal_Injected(ref axis, angle);
 		}
 
-		/// <summary>
-		///   <para>Returns a transform child by index.</para>
-		/// </summary>
-		/// <param name="index">Index of the child transform to return. Must be smaller than Transform.childCount.</param>
-		/// <returns>
-		///   <para>Transform child by index.</para>
-		/// </returns>
-		[NativeThrows]
 		[FreeFunction("GetChild", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform GetChild(int index);
 
@@ -825,9 +571,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetChildCount();
 
-		/// <summary>
-		///   <para>The transform capacity of the transform's hierarchy data structure.</para>
-		/// </summary>
 		public int hierarchyCapacity
 		{
 			get
@@ -848,9 +591,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void internal_setHierarchyCapacity(int value);
 
-		/// <summary>
-		///   <para>The number of transforms in the transform's hierarchy data structure.</para>
-		/// </summary>
 		public int hierarchyCount
 		{
 			get

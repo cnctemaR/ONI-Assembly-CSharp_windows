@@ -13,8 +13,7 @@ namespace TMPro
 			TMP_CharacterInfo tmp_CharacterInfo = textComponent.textInfo.characterInfo[num];
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
-			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
-			if (num2 < 0.5f)
+			if ((position.x - vector.x) / (vector2.x - vector.x) < 0.5f)
 			{
 				return num;
 			}
@@ -35,8 +34,7 @@ namespace TMPro
 			TMP_CharacterInfo tmp_CharacterInfo = textComponent.textInfo.characterInfo[num2];
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
-			float num3 = (position.x - vector.x) / (vector2.x - vector.x);
-			if (num3 < 0.5f)
+			if ((position.x - vector.x) / (vector2.x - vector.x) < 0.5f)
 			{
 				cursor = CaretPosition.Left;
 				return num2;
@@ -98,9 +96,9 @@ namespace TMPro
 					float num4 = TMP_TextUtilities.DistanceToLine(vector2, vector3, position);
 					float num5 = TMP_TextUtilities.DistanceToLine(vector3, vector4, position);
 					float num6 = TMP_TextUtilities.DistanceToLine(vector4, vector, position);
-					float num7 = ((num3 >= num4) ? num4 : num3);
-					num7 = ((num7 >= num5) ? num5 : num7);
-					num7 = ((num7 >= num6) ? num6 : num7);
+					float num7 = ((num3 < num4) ? num3 : num4);
+					num7 = ((num7 < num5) ? num7 : num5);
+					num7 = ((num7 < num6) ? num7 : num6);
 					if (num > num7)
 					{
 						num = num7;
@@ -163,9 +161,9 @@ namespace TMPro
 					float num4 = TMP_TextUtilities.DistanceToLine(vector2, vector3, position);
 					float num5 = TMP_TextUtilities.DistanceToLine(vector3, vector4, position);
 					float num6 = TMP_TextUtilities.DistanceToLine(vector4, vector, position);
-					float num7 = ((num3 >= num4) ? num4 : num3);
-					num7 = ((num7 >= num5) ? num5 : num7);
-					num7 = ((num7 >= num6) ? num6 : num7);
+					float num7 = ((num3 < num4) ? num3 : num4);
+					num7 = ((num7 < num5) ? num7 : num5);
+					num7 = ((num7 < num6) ? num7 : num6);
 					if (num > num7)
 					{
 						num = num7;
@@ -291,9 +289,9 @@ namespace TMPro
 							float num5 = TMP_TextUtilities.DistanceToLine(vector2, vector4, position);
 							float num6 = TMP_TextUtilities.DistanceToLine(vector4, vector3, position);
 							float num7 = TMP_TextUtilities.DistanceToLine(vector3, vector, position);
-							float num8 = ((num4 >= num5) ? num5 : num4);
-							num8 = ((num8 >= num6) ? num6 : num8);
-							num8 = ((num8 >= num7) ? num7 : num8);
+							float num8 = ((num4 < num5) ? num4 : num5);
+							num8 = ((num8 < num6) ? num8 : num6);
+							num8 = ((num8 < num7) ? num8 : num7);
 							if (num > num8)
 							{
 								num = num8;
@@ -314,9 +312,9 @@ namespace TMPro
 						float num10 = TMP_TextUtilities.DistanceToLine(vector2, vector4, position);
 						float num11 = TMP_TextUtilities.DistanceToLine(vector4, vector3, position);
 						float num12 = TMP_TextUtilities.DistanceToLine(vector3, vector, position);
-						float num13 = ((num9 >= num10) ? num10 : num9);
-						num13 = ((num13 >= num11) ? num11 : num13);
-						num13 = ((num13 >= num12) ? num12 : num13);
+						float num13 = ((num9 < num10) ? num9 : num10);
+						num13 = ((num13 < num11) ? num13 : num11);
+						num13 = ((num13 < num12) ? num13 : num12);
 						if (num > num13)
 						{
 							num = num13;
@@ -336,9 +334,9 @@ namespace TMPro
 						float num15 = TMP_TextUtilities.DistanceToLine(vector2, vector4, position);
 						float num16 = TMP_TextUtilities.DistanceToLine(vector4, vector3, position);
 						float num17 = TMP_TextUtilities.DistanceToLine(vector3, vector, position);
-						float num18 = ((num14 >= num15) ? num15 : num14);
-						num18 = ((num18 >= num16) ? num16 : num18);
-						num18 = ((num18 >= num17) ? num17 : num18);
+						float num18 = ((num14 < num15) ? num14 : num15);
+						num18 = ((num18 < num16) ? num18 : num16);
+						num18 = ((num18 < num17) ? num18 : num17);
 						if (num > num18)
 						{
 							num = num18;
@@ -468,9 +466,9 @@ namespace TMPro
 								float num5 = TMP_TextUtilities.DistanceToLine(vector2, vector4, position);
 								float num6 = TMP_TextUtilities.DistanceToLine(vector4, vector3, position);
 								float num7 = TMP_TextUtilities.DistanceToLine(vector3, vector, position);
-								float num8 = ((num4 >= num5) ? num5 : num4);
-								num8 = ((num8 >= num6) ? num6 : num8);
-								num8 = ((num8 >= num7) ? num7 : num8);
+								float num8 = ((num4 < num5) ? num4 : num5);
+								num8 = ((num8 < num6) ? num8 : num6);
+								num8 = ((num8 < num7) ? num8 : num7);
 								if (num > num8)
 								{
 									num = num8;
@@ -491,9 +489,9 @@ namespace TMPro
 							float num10 = TMP_TextUtilities.DistanceToLine(vector2, vector4, position);
 							float num11 = TMP_TextUtilities.DistanceToLine(vector4, vector3, position);
 							float num12 = TMP_TextUtilities.DistanceToLine(vector3, vector, position);
-							float num13 = ((num9 >= num10) ? num10 : num9);
-							num13 = ((num13 >= num11) ? num11 : num13);
-							num13 = ((num13 >= num12) ? num12 : num13);
+							float num13 = ((num9 < num10) ? num9 : num10);
+							num13 = ((num13 < num11) ? num13 : num11);
+							num13 = ((num13 < num12) ? num13 : num12);
 							if (num > num13)
 							{
 								num = num13;
@@ -513,9 +511,9 @@ namespace TMPro
 							float num15 = TMP_TextUtilities.DistanceToLine(vector2, vector4, position);
 							float num16 = TMP_TextUtilities.DistanceToLine(vector4, vector3, position);
 							float num17 = TMP_TextUtilities.DistanceToLine(vector3, vector, position);
-							float num18 = ((num14 >= num15) ? num15 : num14);
-							num18 = ((num18 >= num16) ? num16 : num18);
-							num18 = ((num18 >= num17) ? num17 : num18);
+							float num18 = ((num14 < num15) ? num14 : num15);
+							num18 = ((num18 < num16) ? num18 : num16);
+							num18 = ((num18 < num17) ? num18 : num17);
 							if (num > num18)
 							{
 								num = num18;
@@ -543,9 +541,8 @@ namespace TMPro
 		{
 			worldPoint = Vector2.zero;
 			Ray ray = RectTransformUtility.ScreenPointToRay(cam, screenPoint);
-			Plane plane = new Plane(transform.rotation * Vector3.back, transform.position);
 			float num;
-			if (!plane.Raycast(ray, out num))
+			if (!new Plane(transform.rotation * Vector3.back, transform.position).Raycast(ray, out num))
 			{
 				return false;
 			}
@@ -653,6 +650,26 @@ namespace TMPro
 				return 8;
 			case '9':
 				return 9;
+			case ':':
+			case ';':
+			case '<':
+			case '=':
+			case '>':
+			case '?':
+			case '@':
+				break;
+			case 'A':
+				return 10;
+			case 'B':
+				return 11;
+			case 'C':
+				return 12;
+			case 'D':
+				return 13;
+			case 'E':
+				return 14;
+			case 'F':
+				return 15;
 			default:
 				switch (hex)
 				{
@@ -668,23 +685,10 @@ namespace TMPro
 					return 14;
 				case 'f':
 					return 15;
-				default:
-					return 15;
 				}
 				break;
-			case 'A':
-				return 10;
-			case 'B':
-				return 11;
-			case 'C':
-				return 12;
-			case 'D':
-				return 13;
-			case 'E':
-				return 14;
-			case 'F':
-				return 15;
 			}
+			return 15;
 		}
 
 		public static int StringToInt(string s)

@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class FetchList2 : IFetchList
 {
-	public FetchList2(Storage destination, ChoreType chore_type)
-	{
-		this.Destination = destination;
-		this.choreType = chore_type;
-	}
-
 	public bool ShowStatusItem
 	{
 		get
@@ -39,12 +33,15 @@ public class FetchList2 : IFetchList
 				return false;
 			}
 			bool flag = false;
-			foreach (FetchOrder2 fetchOrder in this.FetchOrders)
+			using (List<FetchOrder2>.Enumerator enumerator = this.FetchOrders.GetEnumerator())
 			{
-				if (fetchOrder.InProgress)
+				while (enumerator.MoveNext())
 				{
-					flag = true;
-					break;
+					if (enumerator.Current.InProgress)
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
 			return flag;
@@ -54,6 +51,12 @@ public class FetchList2 : IFetchList
 	public Storage Destination { get; private set; }
 
 	public int PriorityMod { get; private set; }
+
+	public FetchList2(Storage destination, ChoreType chore_type)
+	{
+		this.Destination = destination;
+		this.choreType = chore_type;
+	}
 
 	public void SetPriorityMod(int priorityMod)
 	{
@@ -151,8 +154,7 @@ public class FetchList2 : IFetchList
 				Pickupable component = gameObject.GetComponent<Pickupable>();
 				if (component != null)
 				{
-					KPrefabID component2 = component.GetComponent<KPrefabID>();
-					foreach (Tag tag2 in component2.Tags)
+					foreach (Tag tag2 in component.GetComponent<KPrefabID>().Tags)
 					{
 						if (dictionary.ContainsKey(tag2))
 						{
@@ -184,8 +186,7 @@ public class FetchList2 : IFetchList
 	public void Submit(global::System.Action on_complete, bool check_storage_contents)
 	{
 		this.OnComplete = on_complete;
-		List<FetchOrder2> range = this.FetchOrders.GetRange(0, this.FetchOrders.Count);
-		foreach (FetchOrder2 fetchOrder in range)
+		foreach (FetchOrder2 fetchOrder in this.FetchOrders.GetRange(0, this.FetchOrders.Count))
 		{
 			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchOrderComplete), check_storage_contents, null);
 		}
@@ -224,6 +225,7 @@ public class FetchList2 : IFetchList
 					{
 						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Digging, true);
 					}, null, null);
+					return;
 				}
 			}
 			else

@@ -12,8 +12,7 @@ public static class Hash
 		uint num = 0U;
 		for (int i = 0; i < s.Length; i++)
 		{
-			char c = char.ToLower(s[i]);
-			num = (uint)c + (num << 6) + (num << 16) - num;
+			num = (uint)char.ToLower(s[i]) + (num << 6) + (num << 16) - num;
 		}
 		return (int)num;
 	}

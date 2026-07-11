@@ -1,0 +1,101 @@
+﻿using System;
+using System.Runtime.CompilerServices;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+using UnityEngine;
+using UnityEngine.Bindings;
+
+namespace Unity.IO.LowLevel.Unsafe
+{
+	public struct ReadHandle : IDisposable
+	{
+		public bool IsValid()
+		{
+			return ReadHandle.IsReadHandleValid(this);
+		}
+
+		public void Dispose()
+		{
+			if (!ReadHandle.IsReadHandleValid(this))
+			{
+				throw new InvalidOperationException("ReadHandle.Dispose cannot be called twice on the same ReadHandle");
+			}
+			if (this.Status == ReadStatus.InProgress)
+			{
+				throw new InvalidOperationException("ReadHandle.Dispose cannot be called until the read operation completes");
+			}
+			ReadHandle.ReleaseReadHandle(this);
+		}
+
+		public JobHandle JobHandle
+		{
+			get
+			{
+				if (!ReadHandle.IsReadHandleValid(this))
+				{
+					throw new InvalidOperationException("ReadHandle.JobHandle cannot be called after the ReadHandle has been disposed");
+				}
+				return ReadHandle.GetJobHandle(this);
+			}
+		}
+
+		public ReadStatus Status
+		{
+			get
+			{
+				if (!ReadHandle.IsReadHandleValid(this))
+				{
+					throw new InvalidOperationException("ReadHandle.Status cannot be called after the ReadHandle has been disposed");
+				}
+				return ReadHandle.GetReadStatus(this);
+			}
+		}
+
+		[FreeFunction("AsyncReadManagerManaged::GetReadStatus", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
+		private static ReadStatus GetReadStatus(ReadHandle handle)
+		{
+			return ReadHandle.GetReadStatus_Injected(ref handle);
+		}
+
+		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
+		private static void ReleaseReadHandle(ReadHandle handle)
+		{
+			ReadHandle.ReleaseReadHandle_Injected(ref handle);
+		}
+
+		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::IsReadHandleValid", IsThreadSafe = true)]
+		private static bool IsReadHandleValid(ReadHandle handle)
+		{
+			return ReadHandle.IsReadHandleValid_Injected(ref handle);
+		}
+
+		[FreeFunction("AsyncReadManagerManaged::GetJobHandle", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
+		private static JobHandle GetJobHandle(ReadHandle handle)
+		{
+			JobHandle jobHandle;
+			ReadHandle.GetJobHandle_Injected(ref handle, out jobHandle);
+			return jobHandle;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReadStatus GetReadStatus_Injected(ref ReadHandle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseReadHandle_Injected(ref ReadHandle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsReadHandleValid_Injected(ref ReadHandle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetJobHandle_Injected(ref ReadHandle handle, out JobHandle ret);
+
+		[NativeDisableUnsafePtrRestriction]
+		internal IntPtr ptr;
+
+		internal int version;
+	}
+}

@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Base class for focus related events.</para>
-	/// </summary>
 	public abstract class FocusEventBase<T> : EventBase<T>, IFocusEvent, IPropagatableEvent where T : FocusEventBase<T>, new()
 	{
 		protected FocusEventBase()
@@ -19,18 +16,22 @@ namespace UnityEngine.Experimental.UIElements
 		protected override void Init()
 		{
 			base.Init();
-			base.flags = EventBase.EventFlags.Capturable;
+			base.flags = EventBase.EventFlags.TricklesDown;
 			this.relatedTarget = null;
 			this.direction = FocusChangeDirection.unspecified;
+			this.m_FocusController = null;
 		}
 
-		public static T GetPooled(IEventHandler target, Focusable relatedTarget, FocusChangeDirection direction)
+		public static T GetPooled(IEventHandler target, Focusable relatedTarget, FocusChangeDirection direction, FocusController focusController)
 		{
 			T pooled = EventBase<T>.GetPooled();
 			pooled.target = target;
 			pooled.relatedTarget = relatedTarget;
 			pooled.direction = direction;
+			pooled.m_FocusController = focusController;
 			return pooled;
 		}
+
+		protected FocusController m_FocusController;
 	}
 }

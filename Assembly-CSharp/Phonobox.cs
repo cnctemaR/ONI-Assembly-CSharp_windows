@@ -20,8 +20,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectD
 		this.chores = new Chore[this.choreOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
-			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
+			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]), Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("PhonoboxWorkable", vector);
 			KSelectable kselectable = gameObject.AddOrGet<KSelectable>();
 			kselectable.SetName(this.GetProperName());
@@ -50,11 +49,15 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectD
 	{
 		Workable workable = this.workables[i];
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
-		Workable workable2 = workable;
+		IStateMachineTarget stateMachineTarget = workable;
+		ChoreProvider choreProvider = null;
+		bool flag = true;
+		Action<Chore> action = null;
+		Action<Chore> action2 = null;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<PhonoboxWorkable>(relax, workable2, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
-		return chore;
+		WorkChore<PhonoboxWorkable> workChore = new WorkChore<PhonoboxWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
+		return workChore;
 	}
 
 	private void OnSocialChoreEnd(Chore chore)

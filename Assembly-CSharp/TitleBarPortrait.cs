@@ -6,7 +6,7 @@ public class TitleBarPortrait : KMonoBehaviour
 {
 	public void SetSaturation(bool saturated)
 	{
-		this.ImageObject.GetComponent<Image>().material = ((!saturated) ? this.DesatMaterial : this.DefaultMaterial);
+		this.ImageObject.GetComponent<Image>().material = (saturated ? this.DefaultMaterial : this.DesatMaterial);
 	}
 
 	public void SetPortrait(GameObject selectedTarget)
@@ -74,8 +74,9 @@ public class TitleBarPortrait : KMonoBehaviour
 		if (component != null)
 		{
 			component.SetIdentityObject(identity, true);
+			return;
 		}
-		else if (this.AnimControllerObject)
+		if (this.AnimControllerObject)
 		{
 			this.AnimControllerObject.SetActive(true);
 			CrewPortrait.SetPortraitData(identity, this.AnimControllerObject.GetComponent<KBatchedAnimController>(), true);

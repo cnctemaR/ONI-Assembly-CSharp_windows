@@ -13,11 +13,10 @@ namespace Mono.Unix
 
 		public static UnixPipes CreatePipes()
 		{
+			int num;
 			int num2;
-			int num3;
-			int num = Syscall.pipe(out num2, out num3);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
-			return new UnixPipes(new UnixStream(num2), new UnixStream(num3));
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.pipe(out num, out num2));
+			return new UnixPipes(new UnixStream(num), new UnixStream(num2));
 		}
 
 		public override bool Equals(object value)

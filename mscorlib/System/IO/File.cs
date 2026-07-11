@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -88,9 +89,20 @@ namespace System.IO
 			}
 			if (!MonoIO.CopyFile(sourceFileName, destFileName, overwrite, out monoIOError))
 			{
-				string text = Locale.GetText("{0}\" or \"{1}", new object[] { sourceFileName, destFileName });
-				throw MonoIO.GetException(text, monoIOError);
+				throw MonoIO.GetException(Locale.GetText("{0}\" or \"{1}", new object[] { sourceFileName, destFileName }), monoIOError);
 			}
+		}
+
+		internal static string InternalCopy(string sourceFileName, string destFileName, bool overwrite, bool checkHost)
+		{
+			string fullPathInternal = Path.GetFullPathInternal(sourceFileName);
+			string fullPathInternal2 = Path.GetFullPathInternal(destFileName);
+			MonoIOError monoIOError;
+			if (!MonoIO.CopyFile(fullPathInternal, fullPathInternal2, overwrite, out monoIOError))
+			{
+				throw MonoIO.GetException(Locale.GetText("{0}\" or \"{1}", new object[] { sourceFileName, destFileName }), monoIOError);
+			}
+			return fullPathInternal2;
 		}
 
 		public static FileStream Create(string path)
@@ -103,13 +115,13 @@ namespace System.IO
 			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize);
 		}
 
-		[MonoTODO("options not implemented")]
+		[MonoLimitation("FileOptions are ignored")]
 		public static FileStream Create(string path, int bufferSize, FileOptions options)
 		{
-			return File.Create(path, bufferSize, options, null);
+			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, options);
 		}
 
-		[MonoTODO("options and fileSecurity not implemented")]
+		[MonoLimitation("FileOptions and FileSecurity are ignored")]
 		public static FileStream Create(string path, int bufferSize, FileOptions options, FileSecurity fileSecurity)
 		{
 			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, options);
@@ -122,14 +134,7 @@ namespace System.IO
 
 		public static void Delete(string path)
 		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
-			if (path.Trim().Length == 0 || path.IndexOfAny(Path.InvalidPathChars) >= 0)
-			{
-				throw new ArgumentException("path");
-			}
+			Path.Validate(path);
 			if (Directory.Exists(path))
 			{
 				throw new UnauthorizedAccessException(Locale.GetText("{0} is a directory", new object[] { path }));
@@ -149,33 +154,22 @@ namespace System.IO
 		public static bool Exists(string path)
 		{
 			MonoIOError monoIOError;
-			return path != null && path.Trim().Length != 0 && path.IndexOfAny(Path.InvalidPathChars) < 0 && MonoIO.ExistsFile(path, out monoIOError);
+			return !string.IsNullOrWhiteSpace(path) && path.IndexOfAny(Path.InvalidPathChars) < 0 && SecurityManager.CheckElevatedPermissions() && MonoIO.ExistsFile(path, out monoIOError);
 		}
 
 		public static FileSecurity GetAccessControl(string path)
 		{
-			throw new NotImplementedException();
+			return File.GetAccessControl(path, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
 		}
 
 		public static FileSecurity GetAccessControl(string path, AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			return new FileSecurity(path, includeSections);
 		}
 
 		public static FileAttributes GetAttributes(string path)
 		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
-			if (path.Trim().Length == 0)
-			{
-				throw new ArgumentException(Locale.GetText("Path is empty"));
-			}
-			if (path.IndexOfAny(Path.InvalidPathChars) >= 0)
-			{
-				throw new ArgumentException(Locale.GetText("Path contains invalid chars"));
-			}
+			Path.Validate(path);
 			MonoIOError monoIOError;
 			FileAttributes fileAttributes = MonoIO.GetFileAttributes(path, out monoIOError);
 			if (monoIOError != MonoIOError.ERROR_SUCCESS)
@@ -187,7 +181,7 @@ namespace System.IO
 
 		public static DateTime GetCreationTime(string path)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOStat monoIOStat;
 			MonoIOError monoIOError;
 			if (MonoIO.GetFileStat(path, out monoIOStat, out monoIOError))
@@ -208,7 +202,7 @@ namespace System.IO
 
 		public static DateTime GetLastAccessTime(string path)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOStat monoIOStat;
 			MonoIOError monoIOError;
 			if (MonoIO.GetFileStat(path, out monoIOStat, out monoIOError))
@@ -229,7 +223,7 @@ namespace System.IO
 
 		public static DateTime GetLastWriteTime(string path)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOStat monoIOStat;
 			MonoIOError monoIOError;
 			if (MonoIO.GetFileStat(path, out monoIOStat, out monoIOError))
@@ -301,7 +295,7 @@ namespace System.IO
 
 		public static FileStream Open(string path, FileMode mode)
 		{
-			return new FileStream(path, mode, (mode != FileMode.Append) ? FileAccess.ReadWrite : FileAccess.Write, FileShare.None);
+			return new FileStream(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, FileShare.None);
 		}
 
 		public static FileStream Open(string path, FileMode mode, FileAccess access)
@@ -396,6 +390,10 @@ namespace System.IO
 					throw new IOException(Locale.GetText("Destination and backup arguments are the same file."));
 				}
 			}
+			if ((File.GetAttributes(fullPath2) & FileAttributes.ReadOnly) != (FileAttributes)0)
+			{
+				throw MonoIO.GetException(MonoIOError.ERROR_ACCESS_DENIED);
+			}
 			if (!MonoIO.ReplaceFile(fullPath, fullPath2, text, ignoreMetadataErrors, out monoIOError))
 			{
 				throw MonoIO.GetException(monoIOError);
@@ -404,12 +402,16 @@ namespace System.IO
 
 		public static void SetAccessControl(string path, FileSecurity fileSecurity)
 		{
-			throw new NotImplementedException();
+			if (fileSecurity == null)
+			{
+				throw new ArgumentNullException("fileSecurity");
+			}
+			fileSecurity.PersistModifications(path);
 		}
 
 		public static void SetAttributes(string path, FileAttributes fileAttributes)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOError monoIOError;
 			if (!MonoIO.SetFileAttributes(path, fileAttributes, out monoIOError))
 			{
@@ -419,7 +421,7 @@ namespace System.IO
 
 		public static void SetCreationTime(string path, DateTime creationTime)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOError monoIOError;
 			if (!MonoIO.Exists(path, out monoIOError))
 			{
@@ -438,7 +440,7 @@ namespace System.IO
 
 		public static void SetLastAccessTime(string path, DateTime lastAccessTime)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOError monoIOError;
 			if (!MonoIO.Exists(path, out monoIOError))
 			{
@@ -457,7 +459,7 @@ namespace System.IO
 
 		public static void SetLastWriteTime(string path, DateTime lastWriteTime)
 		{
-			File.CheckPathExceptions(path);
+			Path.Validate(path);
 			MonoIOError monoIOError;
 			if (!MonoIO.Exists(path, out monoIOError))
 			{
@@ -472,26 +474,6 @@ namespace System.IO
 		public static void SetLastWriteTimeUtc(string path, DateTime lastWriteTimeUtc)
 		{
 			File.SetLastWriteTime(path, lastWriteTimeUtc.ToLocalTime());
-		}
-
-		private static void CheckPathExceptions(string path)
-		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
-			if (path.Length == 0)
-			{
-				throw new ArgumentException(Locale.GetText("Path is empty"));
-			}
-			if (path.Trim().Length == 0)
-			{
-				throw new ArgumentException(Locale.GetText("Path is empty"));
-			}
-			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException(Locale.GetText("Path contains invalid chars"));
-			}
 		}
 
 		public static byte[] ReadAllBytes(string path)
@@ -554,7 +536,12 @@ namespace System.IO
 
 		public static string ReadAllText(string path)
 		{
-			return File.ReadAllText(path, Encoding.UTF8Unmarked);
+			string text;
+			using (StreamReader streamReader = new StreamReader(path))
+			{
+				text = streamReader.ReadToEnd();
+			}
+			return text;
 		}
 
 		public static string ReadAllText(string path, Encoding encoding)
@@ -601,7 +588,7 @@ namespace System.IO
 
 		public static void WriteAllText(string path, string contents)
 		{
-			File.WriteAllText(path, contents, Encoding.UTF8Unmarked);
+			File.WriteAllText(path, contents, EncodingHelper.UTF8Unmarked);
 		}
 
 		public static void WriteAllText(string path, string contents, Encoding encoding)
@@ -616,11 +603,9 @@ namespace System.IO
 		{
 			get
 			{
-				DateTime? dateTime = File.defaultLocalFileTime;
-				if (dateTime == null)
+				if (File.defaultLocalFileTime == null)
 				{
-					DateTime dateTime2 = new DateTime(1601, 1, 1);
-					File.defaultLocalFileTime = new DateTime?(dateTime2.ToLocalTime());
+					File.defaultLocalFileTime = new DateTime?(new DateTime(1601, 1, 1).ToLocalTime());
 				}
 				return File.defaultLocalFileTime.Value;
 			}
@@ -636,6 +621,113 @@ namespace System.IO
 		public static void Decrypt(string path)
 		{
 			throw new NotSupportedException(Locale.GetText("File encryption isn't supported on any file system."));
+		}
+
+		public static IEnumerable<string> ReadLines(string path)
+		{
+			return File.ReadLines(File.OpenText(path));
+		}
+
+		public static IEnumerable<string> ReadLines(string path, Encoding encoding)
+		{
+			return File.ReadLines(new StreamReader(path, encoding));
+		}
+
+		private static IEnumerable<string> ReadLines(StreamReader reader)
+		{
+			using (reader)
+			{
+				string s;
+				while ((s = reader.ReadLine()) != null)
+				{
+					yield return s;
+				}
+				s = null;
+			}
+			StreamReader streamReader = null;
+			yield break;
+			yield break;
+		}
+
+		public static void AppendAllLines(string path, IEnumerable<string> contents)
+		{
+			Path.Validate(path);
+			if (contents == null)
+			{
+				return;
+			}
+			using (TextWriter textWriter = new StreamWriter(path, true))
+			{
+				foreach (string text in contents)
+				{
+					textWriter.WriteLine(text);
+				}
+			}
+		}
+
+		public static void AppendAllLines(string path, IEnumerable<string> contents, Encoding encoding)
+		{
+			Path.Validate(path);
+			if (contents == null)
+			{
+				return;
+			}
+			using (TextWriter textWriter = new StreamWriter(path, true, encoding))
+			{
+				foreach (string text in contents)
+				{
+					textWriter.WriteLine(text);
+				}
+			}
+		}
+
+		public static void WriteAllLines(string path, IEnumerable<string> contents)
+		{
+			Path.Validate(path);
+			if (contents == null)
+			{
+				return;
+			}
+			using (TextWriter textWriter = new StreamWriter(path, false))
+			{
+				foreach (string text in contents)
+				{
+					textWriter.WriteLine(text);
+				}
+			}
+		}
+
+		public static void WriteAllLines(string path, IEnumerable<string> contents, Encoding encoding)
+		{
+			Path.Validate(path);
+			if (contents == null)
+			{
+				return;
+			}
+			using (TextWriter textWriter = new StreamWriter(path, false, encoding))
+			{
+				foreach (string text in contents)
+				{
+					textWriter.WriteLine(text);
+				}
+			}
+		}
+
+		internal static int FillAttributeInfo(string path, ref MonoIOStat data, bool tryagain, bool returnErrorOnNotFound)
+		{
+			if (tryagain)
+			{
+				throw new NotImplementedException();
+			}
+			MonoIOError monoIOError;
+			MonoIO.GetFileStat(path, out data, out monoIOError);
+			if (!returnErrorOnNotFound && (monoIOError == MonoIOError.ERROR_FILE_NOT_FOUND || monoIOError == MonoIOError.ERROR_PATH_NOT_FOUND || monoIOError == MonoIOError.ERROR_NOT_READY))
+			{
+				data = default(MonoIOStat);
+				data.fileAttributes = (FileAttributes)(-1);
+				return 0;
+			}
+			return (int)monoIOError;
 		}
 
 		private static DateTime? defaultLocalFileTime;

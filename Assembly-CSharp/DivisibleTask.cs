@@ -2,14 +2,14 @@
 
 internal abstract class DivisibleTask<SharedData> : IWorkItem<SharedData>
 {
-	protected DivisibleTask(string name)
-	{
-		this.name = name;
-	}
-
 	public void Run(SharedData sharedData)
 	{
 		this.RunDivision(sharedData);
+	}
+
+	protected DivisibleTask(string name)
+	{
+		this.name = name;
 	}
 
 	protected abstract void RunDivision(SharedData sharedData);

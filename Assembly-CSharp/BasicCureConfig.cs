@@ -19,8 +19,7 @@ public class BasicCureConfig : IEntityConfig
 		{
 			new ComplexRecipe.RecipeElement("BasicCure", 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2);
-		BasicCureConfig.recipe = new ComplexRecipe(text, array, array2)
+		BasicCureConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 50f,
 			description = ITEMS.PILLS.BASICCURE.RECIPEDESC,

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[AttributeUsage(AttributeTargets.Enum, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Enum, Inherited = false)]
 	[Serializable]
 	public class FlagsAttribute : Attribute
 	{

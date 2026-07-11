@@ -29,12 +29,10 @@ public class LogicGateBufferConfig : LogicGateBaseConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		LogicGateBuffer logicGateBuffer = go.AddComponent<LogicGateBuffer>();
-		logicGateBuffer.op = this.GetLogicOp();
+		go.AddComponent<LogicGateBuffer>().op = this.GetLogicOp();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
-			LogicGateBuffer component = game_object.GetComponent<LogicGateBuffer>();
-			component.SetPortDescriptions(this.GetDescriptions());
+			game_object.GetComponent<LogicGateBuffer>().SetPortDescriptions(this.GetDescriptions());
 		};
 	}
 

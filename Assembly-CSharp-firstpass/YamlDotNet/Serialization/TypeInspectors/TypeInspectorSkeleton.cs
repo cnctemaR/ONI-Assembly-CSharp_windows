@@ -22,7 +22,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 				{
 					if (!ignoreUnmatched)
 					{
-						throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Property '{0}' not found on type '{1}'.", new object[] { name, type.FullName }));
+						throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Property '{0}' not found on type '{1}'.", name, type.FullName));
 					}
 					propertyDescriptor = null;
 				}
@@ -31,13 +31,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 					IPropertyDescriptor propertyDescriptor2 = enumerator.Current;
 					if (enumerator.MoveNext())
 					{
-						IFormatProvider invariantCulture = CultureInfo.InvariantCulture;
-						string text = "Multiple properties with the name/alias '{0}' already exists on type '{1}', maybe you're misusing YamlAlias or maybe you are using the wrong naming convention? The matching properties are: {2}";
-						object[] array = new object[3];
-						array[0] = name;
-						array[1] = type.FullName;
-						array[2] = string.Join(", ", enumerable.Select<IPropertyDescriptor, string>((IPropertyDescriptor p) => p.Name).ToArray<string>());
-						throw new SerializationException(string.Format(invariantCulture, text, array));
+						throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Multiple properties with the name/alias '{0}' already exists on type '{1}', maybe you're misusing YamlAlias or maybe you are using the wrong naming convention? The matching properties are: {2}", name, type.FullName, string.Join(", ", enumerable.Select<IPropertyDescriptor, string>((IPropertyDescriptor p) => p.Name).ToArray<string>())));
 					}
 					propertyDescriptor = propertyDescriptor2;
 				}

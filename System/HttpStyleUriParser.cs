@@ -2,7 +2,11 @@
 
 namespace System
 {
-	public class HttpStyleUriParser : global::System.UriParser
+	public class HttpStyleUriParser : UriParser
 	{
+		public HttpStyleUriParser()
+			: base(UriParser.HttpUri.Flags)
+		{
+		}
 	}
 }

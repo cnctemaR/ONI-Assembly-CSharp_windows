@@ -3,7 +3,7 @@
 namespace System.Threading
 {
 	[MonoTODO("Useless until the runtime supports it")]
-	public class HostExecutionContext
+	public class HostExecutionContext : IDisposable
 	{
 		public HostExecutionContext()
 		{
@@ -30,6 +30,16 @@ namespace System.Threading
 			{
 				this._state = value;
 			}
+		}
+
+		public void Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public virtual void Dispose(bool disposing)
+		{
 		}
 
 		private object _state;

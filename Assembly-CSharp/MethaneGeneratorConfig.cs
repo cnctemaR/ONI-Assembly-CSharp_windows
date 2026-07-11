@@ -48,8 +48,7 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 50f;
+		go.AddOrGet<Storage>().capacityKg = 50f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 0.90000004f;

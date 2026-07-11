@@ -7,13 +7,6 @@ using System.Threading;
 
 public class ProfilerBase
 {
-	public ProfilerBase(string file_prefix)
-	{
-		this.filePrefix = file_prefix;
-		this.threadInfos = new Dictionary<int, ProfilerBase.ThreadInfo>();
-		this.sw = new Stopwatch();
-	}
-
 	public static void StartLine(StringBuilder sb, string category, string region_name, int tid, Stopwatch sw, string ph)
 	{
 		sb.Append("{\"cat\":\"").Append(category).Append("\"");
@@ -36,6 +29,13 @@ public class ProfilerBase
 	protected bool IsRecording()
 	{
 		return this.proFile != null;
+	}
+
+	public ProfilerBase(string file_prefix)
+	{
+		this.filePrefix = file_prefix;
+		this.threadInfos = new Dictionary<int, ProfilerBase.ThreadInfo>();
+		this.sw = new Stopwatch();
 	}
 
 	public void Init()
@@ -62,11 +62,9 @@ public class ProfilerBase
 		if (this.IsRecording())
 		{
 			this.StopRecording();
+			return;
 		}
-		else
-		{
-			this.StartRecording();
-		}
+		this.StartRecording();
 	}
 
 	public virtual void StartRecording()
@@ -116,8 +114,8 @@ public class ProfilerBase
 		{
 			this.proFile.Write(this.ManifestThreadInfo(null).sb.ToString());
 		}
-		object obj = this.threadInfos;
-		lock (obj)
+		Dictionary<int, ProfilerBase.ThreadInfo> dictionary = this.threadInfos;
+		lock (dictionary)
 		{
 			this.threadInfos.Remove(Thread.CurrentThread.ManagedThreadId);
 		}
@@ -138,8 +136,8 @@ public class ProfilerBase
 				name,
 				Thread.CurrentThread.ManagedThreadId
 			});
-			object obj = this.threadInfos;
-			lock (obj)
+			Dictionary<int, ProfilerBase.ThreadInfo> dictionary = this.threadInfos;
+			lock (dictionary)
 			{
 				this.threadInfos.Add(Thread.CurrentThread.ManagedThreadId, threadInfo);
 			}
@@ -153,8 +151,8 @@ public class ProfilerBase
 				Thread.CurrentThread.ManagedThreadId
 			});
 			threadInfo.name = name;
-			object obj2 = this.threadInfos;
-			lock (obj2)
+			Dictionary<int, ProfilerBase.ThreadInfo> dictionary = this.threadInfos;
+			lock (dictionary)
 			{
 				this.threadInfos[threadInfo.id] = threadInfo;
 			}

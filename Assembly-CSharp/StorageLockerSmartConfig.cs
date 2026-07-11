@@ -51,8 +51,7 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.StorageLocker;
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.StorageLocker;
 		go.AddOrGet<StorageLockerSmart>();
 		go.AddOrGetDef<StorageController.Def>();
 	}

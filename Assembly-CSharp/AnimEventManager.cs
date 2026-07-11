@@ -52,7 +52,7 @@ public class AnimEventManager
 			return;
 		}
 		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
-		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector = ((!data.isUIData) ? this.eventData : this.uiEventData);
+		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector = (data.isUIData ? this.uiEventData : this.eventData);
 		AnimEventManager.EventPlayerData data2 = kcompactedVector.GetData(data.eventDataHandle);
 		data2.mode = mode;
 		kcompactedVector.SetData(data.eventDataHandle, data2);
@@ -65,8 +65,8 @@ public class AnimEventManager
 			return;
 		}
 		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
-		KCompactedVector<AnimEventManager.AnimData> kcompactedVector = ((!data.isUIData) ? this.animData : this.uiAnimData);
-		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector2 = ((!data.isUIData) ? this.eventData : this.uiEventData);
+		KCompactedVector<AnimEventManager.AnimData> kcompactedVector = (data.isUIData ? this.uiAnimData : this.animData);
+		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector2 = (data.isUIData ? this.uiEventData : this.eventData);
 		AnimEventManager.EventPlayerData data2 = kcompactedVector2.GetData(data.eventDataHandle);
 		this.StopEvents(data2);
 		data.animDataHandle = kcompactedVector.Free(data.animDataHandle);
@@ -77,14 +77,13 @@ public class AnimEventManager
 	public float GetElapsedTime(HandleVector<int>.Handle handle)
 	{
 		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
-		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector = ((!data.isUIData) ? this.eventData : this.uiEventData);
-		return kcompactedVector.GetData(data.eventDataHandle).elapsedTime;
+		return (data.isUIData ? this.uiEventData : this.eventData).GetData(data.eventDataHandle).elapsedTime;
 	}
 
 	public void SetElapsedTime(HandleVector<int>.Handle handle, float elapsed_time)
 	{
 		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
-		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector = ((!data.isUIData) ? this.eventData : this.uiEventData);
+		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector = (data.isUIData ? this.uiEventData : this.eventData);
 		AnimEventManager.EventPlayerData data2 = kcompactedVector.GetData(data.eventDataHandle);
 		data2.elapsedTime = elapsed_time;
 		kcompactedVector.SetData(data.eventDataHandle, data2);
@@ -126,8 +125,7 @@ public class AnimEventManager
 					{
 						for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
 						{
-							AnimEvent animEvent = eventPlayerData.updatingEvents[j];
-							animEvent.OnUpdate(eventPlayerData);
+							eventPlayerData.updatingEvents[j].OnUpdate(eventPlayerData);
 						}
 					}
 					event_data[i] = eventPlayerData;
@@ -145,8 +143,7 @@ public class AnimEventManager
 	{
 		for (int i = 0; i < data.events.Count; i++)
 		{
-			AnimEvent animEvent = data.events[i];
-			animEvent.Play(data);
+			data.events[i].Play(data);
 		}
 	}
 
@@ -154,8 +151,7 @@ public class AnimEventManager
 	{
 		for (int i = 0; i < data.events.Count; i++)
 		{
-			AnimEvent animEvent = data.events[i];
-			animEvent.Stop(data);
+			data.events[i].Stop(data);
 		}
 		if (data.updatingEvents != null)
 		{

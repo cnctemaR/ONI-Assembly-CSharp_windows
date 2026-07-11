@@ -22,8 +22,9 @@ public class ResetSkillsStation : Workable
 		if (obj != null)
 		{
 			this.CreateChore();
+			return;
 		}
-		else if (this.chore != null)
+		if (this.chore != null)
 		{
 			this.chore.Cancel("Unassigned");
 			this.chore = null;
@@ -52,7 +53,7 @@ public class ResetSkillsStation : Workable
 			component.SetHats(component.CurrentHat, null);
 			component.ApplyTargetHat();
 			this.notification = new Notification(MISC.NOTIFICATIONS.RESETSKILL.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.RESETSKILL.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
-			worker.GetComponent<Notifier>().Add(this.notification, string.Empty);
+			worker.GetComponent<Notifier>().Add(this.notification, "");
 		}
 	}
 

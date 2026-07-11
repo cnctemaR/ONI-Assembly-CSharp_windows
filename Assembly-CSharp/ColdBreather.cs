@@ -31,11 +31,9 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		if (component.Replanted)
 		{
 			component2.consumptionRate = this.consumptionRate;
+			return;
 		}
-		else
-		{
-			component2.consumptionRate = this.consumptionRate * 0.25f;
-		}
+		component2.consumptionRate = this.consumptionRate * 0.25f;
 	}
 
 	protected override void OnCleanUp()
@@ -77,17 +75,19 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		}
 		while (this.nextGasEmitIndex < this.gases.Count)
 		{
-			int num = this.nextGasEmitIndex++;
-			PrimaryElement component = this.gases[num].GetComponent<PrimaryElement>();
+			int num = this.nextGasEmitIndex;
+			this.nextGasEmitIndex = num + 1;
+			int num2 = num;
+			PrimaryElement component = this.gases[num2].GetComponent<PrimaryElement>();
 			if (component != null && component.Mass > 0f && this.simEmitCBHandle.IsValid())
 			{
-				float num2 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
-				int num3 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
+				float num3 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
+				int num4 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
 				byte idx = component.Element.idx;
 				Game.Instance.massEmitCallbackManager.GetItem(this.simEmitCBHandle);
-				SimMessages.EmitMass(num3, idx, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
+				SimMessages.EmitMass(num4, idx, component.Mass, num3, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
 				this.lastEmitTag = component.Element.tag;
-				break;
+				return;
 			}
 		}
 	}
@@ -156,12 +156,8 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			base.serializable = true;
 			default_state = this.grow;
-			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
-			GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.State state = this.dead;
-			string text = CREATURES.STATUSITEMS.DEAD.NAME;
-			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
-			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main).Enter(delegate(ColdBreather.StatesInstance smi)
+			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(ColdBreather.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				smi.master.Trigger(1623392196, null);

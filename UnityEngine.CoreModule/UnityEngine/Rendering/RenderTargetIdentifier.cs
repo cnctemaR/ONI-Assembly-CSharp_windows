@@ -2,23 +2,8 @@
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Identifies a RenderTexture for a Rendering.CommandBuffer.</para>
-	/// </summary>
 	public struct RenderTargetIdentifier : IEquatable<RenderTargetIdentifier>
 	{
-		/// <summary>
-		///   <para>Creates a render target identifier.</para>
-		/// </summary>
-		/// <param name="type">Built-in temporary render texture type.</param>
-		/// <param name="name">Temporary render texture name.</param>
-		/// <param name="nameID">Temporary render texture name (as integer, see Shader.PropertyToID).</param>
-		/// <param name="tex">RenderTexture or Texture object to use.</param>
-		/// <param name="mipLevel">MipLevel of the RenderTexture to use.</param>
-		/// <param name="cubemapFace">Cubemap face of the Cubemap RenderTexture to use.</param>
-		/// <param name="depthSlice">Depth slice of the Array RenderTexture to use.</param>
-		/// <param name="renderTargetIdentifier">An existing render target identifier.</param>
-		/// <param name="cubeFace"></param>
 		public RenderTargetIdentifier(BuiltinRenderTextureType type)
 		{
 			this.m_Type = type;
@@ -30,18 +15,6 @@ namespace UnityEngine.Rendering
 			this.m_DepthSlice = 0;
 		}
 
-		/// <summary>
-		///   <para>Creates a render target identifier.</para>
-		/// </summary>
-		/// <param name="type">Built-in temporary render texture type.</param>
-		/// <param name="name">Temporary render texture name.</param>
-		/// <param name="nameID">Temporary render texture name (as integer, see Shader.PropertyToID).</param>
-		/// <param name="tex">RenderTexture or Texture object to use.</param>
-		/// <param name="mipLevel">MipLevel of the RenderTexture to use.</param>
-		/// <param name="cubemapFace">Cubemap face of the Cubemap RenderTexture to use.</param>
-		/// <param name="depthSlice">Depth slice of the Array RenderTexture to use.</param>
-		/// <param name="renderTargetIdentifier">An existing render target identifier.</param>
-		/// <param name="cubeFace"></param>
 		public RenderTargetIdentifier(string name)
 		{
 			this.m_Type = BuiltinRenderTextureType.PropertyName;
@@ -64,18 +37,6 @@ namespace UnityEngine.Rendering
 			this.m_DepthSlice = depthSlice;
 		}
 
-		/// <summary>
-		///   <para>Creates a render target identifier.</para>
-		/// </summary>
-		/// <param name="type">Built-in temporary render texture type.</param>
-		/// <param name="name">Temporary render texture name.</param>
-		/// <param name="nameID">Temporary render texture name (as integer, see Shader.PropertyToID).</param>
-		/// <param name="tex">RenderTexture or Texture object to use.</param>
-		/// <param name="mipLevel">MipLevel of the RenderTexture to use.</param>
-		/// <param name="cubemapFace">Cubemap face of the Cubemap RenderTexture to use.</param>
-		/// <param name="depthSlice">Depth slice of the Array RenderTexture to use.</param>
-		/// <param name="renderTargetIdentifier">An existing render target identifier.</param>
-		/// <param name="cubeFace"></param>
 		public RenderTargetIdentifier(int nameID)
 		{
 			this.m_Type = BuiltinRenderTextureType.PropertyName;
@@ -98,18 +59,6 @@ namespace UnityEngine.Rendering
 			this.m_DepthSlice = depthSlice;
 		}
 
-		/// <summary>
-		///   <para>Creates a render target identifier.</para>
-		/// </summary>
-		/// <param name="type">Built-in temporary render texture type.</param>
-		/// <param name="name">Temporary render texture name.</param>
-		/// <param name="nameID">Temporary render texture name (as integer, see Shader.PropertyToID).</param>
-		/// <param name="tex">RenderTexture or Texture object to use.</param>
-		/// <param name="mipLevel">MipLevel of the RenderTexture to use.</param>
-		/// <param name="cubemapFace">Cubemap face of the Cubemap RenderTexture to use.</param>
-		/// <param name="depthSlice">Depth slice of the Array RenderTexture to use.</param>
-		/// <param name="renderTargetIdentifier">An existing render target identifier.</param>
-		/// <param name="cubeFace"></param>
 		public RenderTargetIdentifier(RenderTargetIdentifier renderTargetIdentifier, int mipLevel, CubemapFace cubeFace = CubemapFace.Unknown, int depthSlice = 0)
 		{
 			this.m_Type = renderTargetIdentifier.m_Type;
@@ -121,18 +70,6 @@ namespace UnityEngine.Rendering
 			this.m_DepthSlice = depthSlice;
 		}
 
-		/// <summary>
-		///   <para>Creates a render target identifier.</para>
-		/// </summary>
-		/// <param name="type">Built-in temporary render texture type.</param>
-		/// <param name="name">Temporary render texture name.</param>
-		/// <param name="nameID">Temporary render texture name (as integer, see Shader.PropertyToID).</param>
-		/// <param name="tex">RenderTexture or Texture object to use.</param>
-		/// <param name="mipLevel">MipLevel of the RenderTexture to use.</param>
-		/// <param name="cubemapFace">Cubemap face of the Cubemap RenderTexture to use.</param>
-		/// <param name="depthSlice">Depth slice of the Array RenderTexture to use.</param>
-		/// <param name="renderTargetIdentifier">An existing render target identifier.</param>
-		/// <param name="cubeFace"></param>
 		public RenderTargetIdentifier(Texture tex)
 		{
 			if (tex == null)

@@ -37,12 +37,10 @@ public class TreeBud : KMonoBehaviour, IWiltCause
 		{
 			this.SubscribeToTrunk();
 			this.UpdateAnimationSet();
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("TreeBud loaded with missing trunk reference. Destroying...");
-			Util.KDestroyGameObject(base.gameObject);
-		}
+		global::Debug.LogWarning("TreeBud loaded with missing trunk reference. Destroying...");
+		Util.KDestroyGameObject(base.gameObject);
 	}
 
 	protected override void OnCleanUp()
@@ -63,8 +61,9 @@ public class TreeBud : KMonoBehaviour, IWiltCause
 				global::Debug.LogWarningFormat(base.gameObject, "TreeBud.SetOccupyGridSpace already occupied by {0}", new object[] { gameObject });
 			}
 			Grid.Objects[num, 5] = base.gameObject;
+			return;
 		}
-		else if (Grid.Objects[num, 5] == base.gameObject)
+		if (Grid.Objects[num, 5] == base.gameObject)
 		{
 			Grid.Objects[num, 5] = null;
 		}
@@ -83,8 +82,7 @@ public class TreeBud : KMonoBehaviour, IWiltCause
 		this.trunkWiltRecoverHandle = buddingTrunk.Subscribe(712767498, new Action<object>(this.OnTrunkRecover));
 		base.Trigger(912965142, !buddingTrunk.GetComponent<WiltCondition>().IsWilting());
 		ReceptacleMonitor component = base.GetComponent<ReceptacleMonitor>();
-		ReceptacleMonitor component2 = buddingTrunk.GetComponent<ReceptacleMonitor>();
-		PlantablePlot receptacle = component2.GetReceptacle();
+		PlantablePlot receptacle = buddingTrunk.GetComponent<ReceptacleMonitor>().GetReceptacle();
 		component.SetReceptacle(receptacle);
 		Vector3 position = base.gameObject.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront) - 0.1f * (float)this.trunkPosition;

@@ -99,8 +99,8 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			base_mass -= num3;
 			int num5 = (int)(num4 * (float)base_disease_count);
 			int num6 = global::UnityEngine.Random.Range(0, this.numFrames);
-			Vector2 vector = ((!disable_randomness) ? new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f)) : Vector2.zero);
-			Vector2 vector2 = ((!disable_randomness) ? new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y)) : Vector2.zero);
+			Vector2 vector = (disable_randomness ? Vector2.zero : new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f)));
+			Vector2 vector2 = (disable_randomness ? Vector2.zero : new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y)));
 			Element element = ElementLoader.elements[(int)elementIdx];
 			Vector2 vector3 = root_pos;
 			bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(num), false, element);
@@ -129,9 +129,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				vector3.x += 0.5f;
 			}
 			int num7 = Grid.PosToCell(vector3);
-			Element element2 = Grid.Element[num7];
-			Element.State state = element2.state & Element.State.Solid;
-			if (state == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
+			if ((Grid.Element[num7].state & Element.State.Solid) == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
 			{
 				vector3.y = Mathf.Floor(vector3.y + 1f);
 			}
@@ -154,7 +152,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 					mistInfo = default(FallingWater.MistInfo);
 					mistInfo.fx = this.SpawnMist();
 					mistInfo.fx.TintColour = element.substance.colour;
-					Vector3 vector2 = vector + ((!flip) ? Vector3.right : (-Vector3.right)) * 0.5f;
+					Vector3 vector2 = vector + (flip ? (-Vector3.right) : Vector3.right) * 0.5f;
 					mistInfo.fx.transform.SetPosition(vector2);
 					mistInfo.fx.FlipX = flip;
 				}
@@ -205,39 +203,27 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			int num3;
 			int num4;
 			Grid.PosToXY(particlePhysics.position, out num3, out num4);
-			int num5 = ((num2 <= num4) ? num4 : num2);
-			int num6 = ((num2 <= num4) ? num2 : num4);
-			for (int j = num5; j >= num6; j--)
+			int num5 = ((num2 > num4) ? num2 : num4);
+			int num6 = ((num2 > num4) ? num4 : num2);
+			int j = num5;
+			while (j >= num6)
 			{
 				int num7 = j * Grid.WidthInCells + num;
 				int num8 = (j + 1) * Grid.WidthInCells + num;
-				if (!Grid.IsValidCell(num7))
+				if (Grid.IsValidCell(num7))
 				{
-					if (Grid.IsValidCell(num8))
+					Element element = Grid.Element[num7];
+					Element.State state = element.state & Element.State.Solid;
+					bool flag = false;
+					if (state == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
 					{
-						FallingWater.ParticleProperties particleProperties = this.particleProperties[i];
-						this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
 						this.AddToSim(num8, i, ref count);
 					}
 					else
 					{
-						this.RemoveParticle(i, ref count);
-					}
-					break;
-				}
-				Element element = Grid.Element[num7];
-				Element.State state = element.state & Element.State.Solid;
-				bool flag = false;
-				if (state == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
-				{
-					this.AddToSim(num8, i, ref count);
-				}
-				else if (state != Element.State.Gas)
-				{
-					if (state != Element.State.Liquid)
-					{
-						if (state == Element.State.Vacuum)
+						switch (state)
 						{
+						case Element.State.Vacuum:
 							if (element.id == SimHashes.Vacuum)
 							{
 								flag = true;
@@ -246,41 +232,55 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 							{
 								this.RemoveParticle(i, ref count);
 							}
-						}
-					}
-					else
-					{
-						FallingWater.ParticleProperties particleProperties2 = this.particleProperties[i];
-						Element element2 = ElementLoader.elements[(int)particleProperties2.elementIdx];
-						if (element2.id == element.id)
+							break;
+						case Element.State.Gas:
+							flag = true;
+							break;
+						case Element.State.Liquid:
 						{
-							if (Grid.Mass[num7] <= element.defaultValues.mass)
+							FallingWater.ParticleProperties particleProperties = this.particleProperties[i];
+							Element element2 = ElementLoader.elements[(int)particleProperties.elementIdx];
+							if (element2.id == element.id)
+							{
+								if (Grid.Mass[num7] <= element.defaultValues.mass)
+								{
+									flag = true;
+								}
+								else
+								{
+									this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
+									this.AddToSim(num7, i, ref count);
+								}
+							}
+							else if (element2.molarMass > element.molarMass)
 							{
 								flag = true;
 							}
 							else
 							{
-								this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
-								this.AddToSim(num7, i, ref count);
+								this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
+								this.AddToSim(num8, i, ref count);
 							}
+							break;
 						}
-						else if (element2.molarMass > element.molarMass)
-						{
-							flag = true;
-						}
-						else
-						{
-							this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
-							this.AddToSim(num8, i, ref count);
 						}
 					}
+					if (!flag)
+					{
+						break;
+					}
+					j--;
 				}
 				else
 				{
-					flag = true;
-				}
-				if (!flag)
-				{
+					if (Grid.IsValidCell(num8))
+					{
+						FallingWater.ParticleProperties particleProperties2 = this.particleProperties[i];
+						this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
+						this.AddToSim(num8, i, ref count);
+						break;
+					}
+					this.RemoveParticle(i, ref count);
 					break;
 				}
 			}
@@ -314,8 +314,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		foreach (KeyValuePair<int, FallingWater.SoundInfo> keyValuePair in this.topSounds)
 		{
 			FallingWater.SoundInfo value = keyValuePair.Value;
-			float num = t - value.startTime;
-			if (num >= this.stopTopLoopDelay)
+			if (t - value.startTime >= this.stopTopLoopDelay)
 			{
 				if (value.handle != HandleVector<int>.InvalidHandle)
 				{
@@ -324,16 +323,15 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				this.clearList.Add(keyValuePair.Key);
 			}
 		}
-		foreach (int num2 in this.clearList)
+		foreach (int num in this.clearList)
 		{
-			this.topSounds.Remove(num2);
+			this.topSounds.Remove(num);
 		}
 		this.clearList.Clear();
 		foreach (KeyValuePair<int, FallingWater.SoundInfo> keyValuePair2 in this.splashSounds)
 		{
 			FallingWater.SoundInfo value2 = keyValuePair2.Value;
-			float num3 = t - value2.startTime;
-			if (num3 >= this.stopSplashLoopDelay)
+			if (t - value2.startTime >= this.stopSplashLoopDelay)
 			{
 				if (value2.handle != HandleVector<int>.InvalidHandle)
 				{
@@ -342,9 +340,9 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				this.clearList.Add(keyValuePair2.Key);
 			}
 		}
-		foreach (int num4 in this.clearList)
+		foreach (int num2 in this.clearList)
 		{
-			this.splashSounds.Remove(num4);
+			this.splashSounds.Remove(num2);
 		}
 		this.clearList.Clear();
 	}
@@ -355,14 +353,13 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		int count = this.physics.Count;
 		for (int i = 0; i < count; i++)
 		{
-			int num = Grid.PosToCell(this.physics[i].position);
-			if (num == cell)
+			if (Grid.PosToCell(this.physics[i].position) == cell)
 			{
 				FallingWater.ParticleProperties particleProperties = this.particleProperties[i];
-				float num2 = 0f;
-				dictionary.TryGetValue((int)particleProperties.elementIdx, out num2);
-				num2 += particleProperties.mass;
-				dictionary[(int)particleProperties.elementIdx] = num2;
+				float num = 0f;
+				dictionary.TryGetValue((int)particleProperties.elementIdx, out num);
+				num += particleProperties.mass;
+				dictionary[(int)particleProperties.elementIdx] = num;
 			}
 		}
 		return dictionary;
@@ -378,9 +375,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		bool flag = false;
 		for (;;)
 		{
-			Element element = Grid.Element[cell];
-			Element.State state = element.state & Element.State.Solid;
-			if (state == Element.State.Solid || (Grid.Properties[cell] & 2) != 0)
+			if ((Grid.Element[cell].state & Element.State.Solid) == Element.State.Solid || (Grid.Properties[cell] & 2) != 0)
 			{
 				cell += Grid.WidthInCells;
 				if (!Grid.IsValidCell(cell))
@@ -408,6 +403,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		{
 			this.lastSpawnTime[cell] = time;
 			Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
+			vector.z = 0f;
 			if (CameraController.Instance.IsAudibleSound(vector))
 			{
 				bool flag2 = true;
@@ -531,8 +527,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 	{
 		GameObject gameObject = GameUtil.KInstantiate(this.mistEffect, Grid.SceneLayer.BuildingBack, null, 0);
 		gameObject.SetActive(false);
-		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-		component.onDestroySelf = new Action<GameObject>(this.ReleaseMist);
+		gameObject.GetComponent<KBatchedAnimController>().onDestroySelf = new Action<GameObject>(this.ReleaseMist);
 		return gameObject;
 	}
 
@@ -547,11 +542,9 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		if (this.simUpdateDelay >= 0)
 		{
 			this.simUpdateDelay--;
+			return;
 		}
-		else
-		{
-			SimAndRenderScheduler.instance.Remove(this);
-		}
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	[OnSerializing]
@@ -564,7 +557,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		{
 			FallingWater.SerializedParticleProperties serializedParticleProperties = default(FallingWater.SerializedParticleProperties);
 			serializedParticleProperties.elementID = elements[(int)particleProperties.elementIdx].id;
-			serializedParticleProperties.diseaseID = ((particleProperties.diseaseIdx == byte.MaxValue) ? HashedString.Invalid : diseases[(int)particleProperties.diseaseIdx].IdHash);
+			serializedParticleProperties.diseaseID = ((particleProperties.diseaseIdx != byte.MaxValue) ? diseases[(int)particleProperties.diseaseIdx].IdHash : HashedString.Invalid);
 			serializedParticleProperties.mass = particleProperties.mass;
 			serializedParticleProperties.temperature = particleProperties.temperature;
 			serializedParticleProperties.diseaseCount = particleProperties.diseaseCount;
@@ -585,21 +578,24 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		{
 			Diseases diseases = Db.Get().Diseases;
 			this.particleProperties.Clear();
-			foreach (FallingWater.SerializedParticleProperties serializedParticleProperties in this.serializedParticleProperties)
+			using (List<FallingWater.SerializedParticleProperties>.Enumerator enumerator = this.serializedParticleProperties.GetEnumerator())
 			{
-				FallingWater.ParticleProperties particleProperties = default(FallingWater.ParticleProperties);
-				particleProperties.elementIdx = (byte)ElementLoader.GetElementIndex(serializedParticleProperties.elementID);
-				particleProperties.diseaseIdx = ((!(serializedParticleProperties.diseaseID != HashedString.Invalid)) ? byte.MaxValue : diseases.GetIndex(serializedParticleProperties.diseaseID));
-				particleProperties.mass = serializedParticleProperties.mass;
-				particleProperties.temperature = serializedParticleProperties.temperature;
-				particleProperties.diseaseCount = serializedParticleProperties.diseaseCount;
-				this.particleProperties.Add(particleProperties);
+				while (enumerator.MoveNext())
+				{
+					FallingWater.SerializedParticleProperties serializedParticleProperties = enumerator.Current;
+					FallingWater.ParticleProperties particleProperties = default(FallingWater.ParticleProperties);
+					particleProperties.elementIdx = (byte)ElementLoader.GetElementIndex(serializedParticleProperties.elementID);
+					particleProperties.diseaseIdx = ((serializedParticleProperties.diseaseID != HashedString.Invalid) ? diseases.GetIndex(serializedParticleProperties.diseaseID) : byte.MaxValue);
+					particleProperties.mass = serializedParticleProperties.mass;
+					particleProperties.temperature = serializedParticleProperties.temperature;
+					particleProperties.diseaseCount = serializedParticleProperties.diseaseCount;
+					this.particleProperties.Add(particleProperties);
+				}
+				goto IL_00DC;
 			}
 		}
-		else
-		{
-			this.particleProperties = this.properties;
-		}
+		this.particleProperties = this.properties;
+		IL_00DC:
 		this.properties = null;
 	}
 

@@ -76,7 +76,7 @@ namespace TMPro
 			float float4 = mat.GetFloat(ShaderUtilities.ID_OutlineSoftness);
 			float num = Mathf.Max(mat.GetFloat(ShaderUtilities.ID_WeightNormal), mat.GetFloat(ShaderUtilities.ID_WeightBold)) / 4f;
 			float num2 = Mathf.Max(1f, num + float2 + float3 + float4);
-			float num3 = ((!flag) ? 1f : ((@float - ShaderUtilities.m_clamp) / (@float * num2)));
+			float num3 = (flag ? ((@float - ShaderUtilities.m_clamp) / (@float * num2)) : 1f);
 			mat.SetFloat(ShaderUtilities.ID_ScaleRatio_A, num3);
 			if (mat.HasProperty(ShaderUtilities.ID_GlowOffset))
 			{
@@ -84,7 +84,7 @@ namespace TMPro
 				float float6 = mat.GetFloat(ShaderUtilities.ID_GlowOuter);
 				float num4 = (num + float2) * (@float - ShaderUtilities.m_clamp);
 				num2 = Mathf.Max(1f, float5 + float6);
-				float num5 = ((!flag) ? 1f : (Mathf.Max(0f, @float - ShaderUtilities.m_clamp - num4) / (@float * num2)));
+				float num5 = (flag ? (Mathf.Max(0f, @float - ShaderUtilities.m_clamp - num4) / (@float * num2)) : 1f);
 				mat.SetFloat(ShaderUtilities.ID_ScaleRatio_B, num5);
 			}
 			if (mat.HasProperty(ShaderUtilities.ID_UnderlayOffsetX))
@@ -95,7 +95,7 @@ namespace TMPro
 				float float10 = mat.GetFloat(ShaderUtilities.ID_UnderlaySoftness);
 				float num6 = (num + float2) * (@float - ShaderUtilities.m_clamp);
 				num2 = Mathf.Max(1f, Mathf.Max(Mathf.Abs(float7), Mathf.Abs(float8)) + float9 + float10);
-				float num7 = ((!flag) ? 1f : (Mathf.Max(0f, @float - ShaderUtilities.m_clamp - num6) / (@float * num2)));
+				float num7 = (flag ? (Mathf.Max(0f, @float - ShaderUtilities.m_clamp - num6) / (@float * num2)) : 1f);
 				mat.SetFloat(ShaderUtilities.ID_ScaleRatio_C, num7);
 			}
 		}
@@ -120,7 +120,7 @@ namespace TMPro
 			{
 				return 0f;
 			}
-			int num = ((!enableExtraPadding) ? 0 : 4);
+			int num = (enableExtraPadding ? 4 : 0);
 			if (!material.HasProperty(ShaderUtilities.ID_GradientScale))
 			{
 				if (material.HasProperty(ShaderUtilities.ID_Padding))
@@ -195,10 +195,10 @@ namespace TMPro
 			vector.y = Mathf.Min(vector.y, 1f);
 			vector.z = Mathf.Min(vector.z, 1f);
 			vector.w = Mathf.Min(vector.w, 1f);
-			zero.x = ((zero.x >= vector.x) ? zero.x : vector.x);
-			zero.y = ((zero.y >= vector.y) ? zero.y : vector.y);
-			zero.z = ((zero.z >= vector.z) ? zero.z : vector.z);
-			zero.w = ((zero.w >= vector.w) ? zero.w : vector.w);
+			zero.x = ((zero.x < vector.x) ? vector.x : zero.x);
+			zero.y = ((zero.y < vector.y) ? vector.y : zero.y);
+			zero.z = ((zero.z < vector.z) ? vector.z : zero.z);
+			zero.w = ((zero.w < vector.w) ? vector.w : zero.w);
 			float @float = material.GetFloat(ShaderUtilities.ID_GradientScale);
 			vector *= @float;
 			num10 = Mathf.Max(vector.x, vector.y);
@@ -217,7 +217,7 @@ namespace TMPro
 			{
 				return 0f;
 			}
-			int num = ((!enableExtraPadding) ? 0 : 4);
+			int num = (enableExtraPadding ? 4 : 0);
 			if (materials[0].HasProperty(ShaderUtilities.ID_Padding))
 			{
 				return (float)num + materials[0].GetFloat(ShaderUtilities.ID_Padding);
@@ -291,10 +291,10 @@ namespace TMPro
 				vector.y = Mathf.Min(vector.y, 1f);
 				vector.z = Mathf.Min(vector.z, 1f);
 				vector.w = Mathf.Min(vector.w, 1f);
-				zero.x = ((zero.x >= vector.x) ? zero.x : vector.x);
-				zero.y = ((zero.y >= vector.y) ? zero.y : vector.y);
-				zero.z = ((zero.z >= vector.z) ? zero.z : vector.z);
-				zero.w = ((zero.w >= vector.w) ? zero.w : vector.w);
+				zero.x = ((zero.x < vector.x) ? vector.x : zero.x);
+				zero.y = ((zero.y < vector.y) ? vector.y : zero.y);
+				zero.z = ((zero.z < vector.z) ? vector.z : zero.z);
+				zero.w = ((zero.w < vector.w) ? vector.w : zero.w);
 			}
 			float @float = materials[0].GetFloat(ShaderUtilities.ID_GradientScale);
 			vector *= @float;
@@ -422,6 +422,6 @@ namespace TMPro
 
 		private static float m_clamp = 1f;
 
-		public static bool isInitialized;
+		public static bool isInitialized = false;
 	}
 }

@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A collection of common color functions.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Export/ColorUtility.bindings.h")]
 	public class ColorUtility
 	{
@@ -22,26 +19,12 @@ namespace UnityEngine
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Returns the color as a hexadecimal string in the format "RRGGBB".</para>
-		/// </summary>
-		/// <param name="color">The color to be converted.</param>
-		/// <returns>
-		///   <para>Hexadecimal string representing the color.</para>
-		/// </returns>
 		public static string ToHtmlStringRGB(Color color)
 		{
 			Color32 color2 = new Color32((byte)Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.g * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.b * 255f), 0, 255), 1);
 			return string.Format("{0:X2}{1:X2}{2:X2}", color2.r, color2.g, color2.b);
 		}
 
-		/// <summary>
-		///   <para>Returns the color as a hexadecimal string in the format "RRGGBBAA".</para>
-		/// </summary>
-		/// <param name="color">The color to be converted.</param>
-		/// <returns>
-		///   <para>Hexadecimal string representing the color.</para>
-		/// </returns>
 		public static string ToHtmlStringRGBA(Color color)
 		{
 			Color32 color2 = new Color32((byte)Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.g * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.b * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.a * 255f), 0, 255));

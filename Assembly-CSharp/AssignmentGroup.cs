@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 public class AssignmentGroup : IAssignableIdentity
 {
+	public string id { get; private set; }
+
+	public string name { get; private set; }
+
 	public AssignmentGroup(string id, IAssignableIdentity[] members, string name)
 	{
 		this.id = id;
@@ -12,10 +16,6 @@ public class AssignmentGroup : IAssignableIdentity
 			this.members.Add(assignableIdentity);
 		}
 	}
-
-	public string id { get; private set; }
-
-	public string name { get; private set; }
 
 	public void AddMember(IAssignableIdentity member)
 	{

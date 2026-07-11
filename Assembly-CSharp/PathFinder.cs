@@ -96,11 +96,9 @@ public class PathFinder
 		if (query.GetResultCell() != PathFinder.InvalidCell)
 		{
 			PathFinder.BuildResultPath(query.GetResultCell(), query.GetResultNavType(), ref path);
+			return;
 		}
-		else
-		{
-			path.Clear();
-		}
+		path.Clear();
 	}
 
 	private static void BuildResultPath(int path_cell, NavType path_nav_type, ref PathFinder.Path path)
@@ -152,8 +150,7 @@ public class PathFinder
 			cell = PathFinder.PathGrid.GetCell(keyValuePair.Value, out flag);
 			if (cell.cost == keyValuePair.Key)
 			{
-				bool flag2 = cell.navType != NavType.Tube && query.IsMatch(keyValuePair.Value.cell, cell.parent, cell.cost) && cell.cost < num;
-				if (flag2)
+				if (cell.navType != NavType.Tube && query.IsMatch(keyValuePair.Value.cell, cell.parent, cell.cost) && cell.cost < num)
 				{
 					result_cell = keyValuePair.Value.cell;
 					num = cell.cost;
@@ -239,26 +236,25 @@ public class PathFinder
 		for (int j = 0; j < num4; j++)
 		{
 			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData = linksInCellRange[j];
-			NavGrid.Link link4 = pathGridCellData.link;
-			int link5 = link4.link;
-			pathGridCellData.isSubmerged = PathFinder.IsSubmerged(link5);
+			int link4 = pathGridCellData.link.link;
+			pathGridCellData.isSubmerged = PathFinder.IsSubmerged(link4);
 			linksInCellRange[j] = pathGridCellData;
 		}
 		for (int k = 0; k < num4; k++)
 		{
 			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData2 = linksInCellRange[k];
-			NavGrid.Link link6 = pathGridCellData2.link;
-			int link7 = link6.link;
+			NavGrid.Link link5 = pathGridCellData2.link;
+			int link6 = link5.link;
 			PathFinder.Cell pathGridCell = pathGridCellData2.pathGridCell;
-			int num6 = cost + (int)link6.cost;
+			int num6 = cost + (int)link5.cost;
 			PathFinder.PotentialPath potentialPath = potential;
-			potentialPath.cell = link7;
-			potentialPath.navType = link6.endNavType;
+			potentialPath.cell = link6;
+			potentialPath.navType = link5.endNavType;
 			int num7;
 			if (pathGridCellData2.isSubmerged)
 			{
 				num7 = underwater_cost + 1;
-				int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potentialPath, link6);
+				int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potentialPath, link5);
 				num6 += submergedPathCostPenalty;
 			}
 			else
@@ -266,13 +262,11 @@ public class PathFinder
 				num7 = 0;
 			}
 			PathFinder.PotentialPath.Flags flags = potentialPath.flags;
-			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link6.transitionId, num7);
-			if (potentialPath.flags != flags)
-			{
-			}
+			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link5.transitionId, num7);
+			PathFinder.PotentialPath.Flags flags2 = potentialPath.flags;
 			if (flag4)
 			{
-				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, num7, (int)link6.transitionId, potentials, path_grid, ref pathGridCell);
+				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, num7, (int)link5.transitionId, potentials, path_grid, ref pathGridCell);
 			}
 		}
 	}
@@ -342,7 +336,7 @@ public class PathFinder
 
 		public bool HasAnyFlag(PathFinder.PotentialPath.Flags mask)
 		{
-			return (byte)(this.flags & mask) != 0;
+			return (this.flags & mask) > PathFinder.PotentialPath.Flags.None;
 		}
 
 		public PathFinder.PotentialPath.Flags flags { get; private set; }

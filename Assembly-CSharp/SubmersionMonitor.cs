@@ -66,6 +66,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 			{
 				this.dry = true;
 				base.Trigger(-2057657673, null);
+				return;
 			}
 		}
 		else if (this.dry)
@@ -102,7 +103,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 			{
 				return Db.Get().CreatureStatusItems.DryingOut.resolveStringCallback(CREATURES.STATUSITEMS.DRYINGOUT.NAME, this);
 			}
-			return string.Empty;
+			return "";
 		}
 	}
 

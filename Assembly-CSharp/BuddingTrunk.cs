@@ -19,7 +19,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 	{
 		base.OnPrefabInit();
 		this.simRenderLoadBalance = true;
-		this.growingBranchesStatusItem = new StatusItem("GROWINGBRANCHES", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		this.growingBranchesStatusItem = new StatusItem("GROWINGBRANCHES", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
 		base.Subscribe<BuddingTrunk>(1119167081, BuddingTrunk.OnNewGameSpawnDelegate);
 	}
 
@@ -56,12 +56,13 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 
 	private IEnumerator NewGameSproutBudRoutine()
 	{
-		for (int i = 0; i < this.buds.Length; i++)
+		int num2;
+		for (int i = 0; i < this.buds.Length; i = num2 + 1)
 		{
 			yield return new WaitForEndOfFrame();
-			float growth_percentage = global::UnityEngine.Random.Range(0f, 1f);
-			float num = growth_percentage;
+			float num = global::UnityEngine.Random.Range(0f, 1f);
 			this.TrySpawnRandomBud(null, num);
+			num2 = i;
 		}
 		this.newGameSpawnRoutine = null;
 		yield return 0;
@@ -74,11 +75,9 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 		{
 			this.TrySpawnRandomBud(null, 0f);
 			base.GetComponent<KSelectable>().AddStatusItem(this.growingBranchesStatusItem, null);
+			return;
 		}
-		else
-		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.growingBranchesStatusItem, false);
-		}
+		base.GetComponent<KSelectable>().RemoveStatusItem(this.growingBranchesStatusItem, false);
 	}
 
 	private void OnUprooted(object data = null)
@@ -90,7 +89,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 	{
 		foreach (Ref<HarvestDesignatable> @ref in this.buds)
 		{
-			HarvestDesignatable harvestDesignatable = ((@ref == null) ? null : @ref.Get());
+			HarvestDesignatable harvestDesignatable = ((@ref != null) ? @ref.Get() : null);
 			if (harvestDesignatable != null)
 			{
 				harvestDesignatable.Trigger(-216549700, null);
@@ -125,7 +124,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 		HarvestDesignatable harvestDesignatable = null;
 		foreach (Ref<HarvestDesignatable> @ref in this.buds)
 		{
-			HarvestDesignatable harvestDesignatable2 = ((@ref == null) ? null : @ref.Get());
+			HarvestDesignatable harvestDesignatable2 = ((@ref != null) ? @ref.Get() : null);
 			if (harvestDesignatable2 != null)
 			{
 				AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(harvestDesignatable2);
@@ -153,8 +152,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 		int num = 0;
 		for (int i = 0; i < this.buds.Length; i++)
 		{
-			Vector3 budPosition = this.GetBudPosition(i);
-			int num2 = Grid.PosToCell(budPosition);
+			int num2 = Grid.PosToCell(this.GetBudPosition(i));
 			if ((this.buds[i] == null || this.buds[i].Get() == null) && this.CanGrowInto(num2))
 			{
 				BuddingTrunk.spawn_choices.Add(i);
@@ -172,8 +170,8 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 		if (BuddingTrunk.spawn_choices.Count > 0)
 		{
 			int num3 = BuddingTrunk.spawn_choices[0];
-			Vector3 budPosition2 = this.GetBudPosition(num3);
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(this.budPrefabID), budPosition2);
+			Vector3 budPosition = this.GetBudPosition(num3);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(this.budPrefabID), budPosition);
 			gameObject.SetActive(true);
 			gameObject.GetComponent<Growing>().OverrideMaturityLevel(growth_percentage);
 			gameObject.GetComponent<TreeBud>().SetTrunkPosition(this, num3);
@@ -194,12 +192,16 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 
 	public TreeBud GetBranchAtPosition(int idx)
 	{
-		if (this.buds[idx] != null)
+		if (this.buds[idx] == null)
 		{
-			HarvestDesignatable harvestDesignatable = this.buds[idx].Get();
-			return (!(harvestDesignatable != null)) ? null : harvestDesignatable.GetComponent<TreeBud>();
+			return null;
 		}
-		return null;
+		HarvestDesignatable harvestDesignatable = this.buds[idx].Get();
+		if (!(harvestDesignatable != null))
+		{
+			return null;
+		}
+		return harvestDesignatable.GetComponent<TreeBud>();
 	}
 
 	public void ExtractExtraSeed()
@@ -211,8 +213,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 		this.hasExtraSeedAvailable = false;
 		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("ForestTreeSeed"), position);
-		gameObject.SetActive(true);
+		Util.KInstantiate(Assets.GetPrefab("ForestTreeSeed"), position).SetActive(true);
 	}
 
 	private void UpdateBudHarvestState(HarvestDesignatable bud)
@@ -228,7 +229,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 			global::Debug.Assert(false, "invalid branch index " + idx);
 		}
 		HarvestDesignatable component = treeBud.GetComponent<HarvestDesignatable>();
-		HarvestDesignatable harvestDesignatable = ((this.buds[idx] == null) ? null : this.buds[idx].Get());
+		HarvestDesignatable harvestDesignatable = ((this.buds[idx] != null) ? this.buds[idx].Get() : null);
 		if (component != harvestDesignatable)
 		{
 			global::Debug.LogWarningFormat(base.gameObject, "OnBranchRemoved branch {0} does not match known branch {1}", new object[] { component, harvestDesignatable });

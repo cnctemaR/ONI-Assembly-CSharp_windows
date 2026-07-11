@@ -24,8 +24,7 @@ namespace System.Runtime.Remoting.Lifetime
 
 		private void RenewLease(IMessage msg)
 		{
-			ServerIdentity serverIdentity = (ServerIdentity)RemotingServices.GetMessageTargetIdentity(msg);
-			ILease lease = serverIdentity.Lease;
+			ILease lease = ((ServerIdentity)RemotingServices.GetMessageTargetIdentity(msg)).Lease;
 			if (lease != null && lease.CurrentLeaseTime < lease.RenewOnCallTime)
 			{
 				lease.Renew(lease.RenewOnCallTime);

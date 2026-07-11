@@ -63,8 +63,7 @@ public class JuicerConfig : IBuildingConfig
 		manualDeliveryKG3.refillMass = 5f;
 		manualDeliveryKG3.minimumMass = 1f;
 		manualDeliveryKG3.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		JuicerWorkable juicerWorkable = go.AddOrGet<JuicerWorkable>();
-		juicerWorkable.basePriority = RELAXATION.PRIORITY.TIER5;
+		go.AddOrGet<JuicerWorkable>().basePriority = RELAXATION.PRIORITY.TIER5;
 		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(MushroomConfig.ID);
 		EdiblesManager.FoodInfo foodInfo2 = EdiblesManager.GetFoodInfo(PrickleFruitConfig.ID);
 		EdiblesManager.FoodInfo foodInfo3 = EdiblesManager.GetFoodInfo("BasicPlantFood");

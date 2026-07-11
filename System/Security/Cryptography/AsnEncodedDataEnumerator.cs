@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Security.Cryptography
 {
@@ -9,18 +10,6 @@ namespace System.Security.Cryptography
 		{
 			this._collection = collection;
 			this._position = -1;
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				if (this._position < 0)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				return this._collection[this._position];
-			}
 		}
 
 		public AsnEncodedData Current
@@ -35,9 +24,23 @@ namespace System.Security.Cryptography
 			}
 		}
 
+		object IEnumerator.Current
+		{
+			get
+			{
+				if (this._position < 0)
+				{
+					throw new ArgumentOutOfRangeException();
+				}
+				return this._collection[this._position];
+			}
+		}
+
 		public bool MoveNext()
 		{
-			if (++this._position < this._collection.Count)
+			int num = this._position + 1;
+			this._position = num;
+			if (num < this._collection.Count)
 			{
 				return true;
 			}
@@ -48,6 +51,11 @@ namespace System.Security.Cryptography
 		public void Reset()
 		{
 			this._position = -1;
+		}
+
+		internal AsnEncodedDataEnumerator()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private AsnEncodedDataCollection _collection;

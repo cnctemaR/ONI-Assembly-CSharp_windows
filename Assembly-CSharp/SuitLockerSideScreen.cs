@@ -32,15 +32,12 @@ public class SuitLockerSideScreen : SideScreenContent
 		this.regularConfigRequestSuitButton.ClearOnClick();
 		this.regularConfigRequestSuitButton.onClick += delegate
 		{
-			bool flag = this.suitLocker.smi.sm.isWaitingForSuit.Get(this.suitLocker.smi);
-			if (flag)
+			if (this.suitLocker.smi.sm.isWaitingForSuit.Get(this.suitLocker.smi))
 			{
 				this.suitLocker.ConfigNoSuit();
+				return;
 			}
-			else
-			{
-				this.suitLocker.ConfigRequestSuit();
-			}
+			this.suitLocker.ConfigRequestSuit();
 		};
 		this.regularConfigDropSuitButton.ClearOnClick();
 		this.regularConfigDropSuitButton.onClick += delegate

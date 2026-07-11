@@ -17,7 +17,7 @@ public class SizePulse : MonoBehaviour
 
 	private void Update()
 	{
-		float num = ((!this.updateWhenPaused) ? Time.deltaTime : Time.unscaledDeltaTime);
+		float num = (this.updateWhenPaused ? Time.unscaledDeltaTime : Time.deltaTime);
 		num *= this.speed;
 		SizePulse.State state = this.state;
 		if (state != SizePulse.State.Up)
@@ -45,8 +45,7 @@ public class SizePulse : MonoBehaviour
 				this.state = SizePulse.State.Down;
 			}
 		}
-		RectTransform rectTransform = (RectTransform)base.transform;
-		rectTransform.localScale = new Vector3(this.cur.x, this.cur.y, 1f);
+		((RectTransform)base.transform).localScale = new Vector3(this.cur.x, this.cur.y, 1f);
 	}
 
 	public global::System.Action onComplete;

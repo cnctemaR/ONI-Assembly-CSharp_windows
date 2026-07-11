@@ -9,6 +9,6 @@ namespace System.Xml
 
 		string LookupNamespace(string prefix);
 
-		string LookupPrefix(string ns);
+		string LookupPrefix(string namespaceName);
 	}
 }

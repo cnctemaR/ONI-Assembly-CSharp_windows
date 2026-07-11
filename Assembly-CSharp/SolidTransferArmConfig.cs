@@ -34,16 +34,14 @@ public class SolidTransferArmConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		SolidTransferArmConfig.AddVisualizer(go, false);
-		Constructable component = go.GetComponent<Constructable>();
-		component.requiredSkillPerk = Db.Get().SkillPerks.ConveyorBuild.Id;
+		go.GetComponent<Constructable>().requiredSkillPerk = Db.Get().SkillPerks.ConveyorBuild.Id;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		go.AddOrGet<LogicOperationalController>();
-		SolidTransferArm solidTransferArm = go.AddOrGet<SolidTransferArm>();
-		solidTransferArm.pickupRange = 4;
+		go.AddOrGet<SolidTransferArm>().pickupRange = 4;
 		SolidTransferArmConfig.AddVisualizer(go, false);
 	}
 

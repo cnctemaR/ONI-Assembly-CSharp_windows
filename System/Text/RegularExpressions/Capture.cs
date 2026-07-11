@@ -1,27 +1,23 @@
 ﻿using System;
+using Unity;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class Capture
 	{
-		internal Capture(string text)
-			: this(text, 0, 0)
+		internal Capture(string text, int i, int l)
 		{
-		}
-
-		internal Capture(string text, int index, int length)
-		{
-			this.text = text;
-			this.index = index;
-			this.length = length;
+			this._text = text;
+			this._index = i;
+			this._length = l;
 		}
 
 		public int Index
 		{
 			get
 			{
-				return this.index;
+				return this._index;
 			}
 		}
 
@@ -29,7 +25,7 @@ namespace System.Text.RegularExpressions
 		{
 			get
 			{
-				return this.length;
+				return this._length;
 			}
 		}
 
@@ -37,7 +33,7 @@ namespace System.Text.RegularExpressions
 		{
 			get
 			{
-				return (this.text != null) ? this.text.Substring(this.index, this.length) : string.Empty;
+				return this._text.Substring(this._index, this._length);
 			}
 		}
 
@@ -46,18 +42,30 @@ namespace System.Text.RegularExpressions
 			return this.Value;
 		}
 
-		internal string Text
+		internal string GetOriginalString()
 		{
-			get
-			{
-				return this.text;
-			}
+			return this._text;
 		}
 
-		internal int index;
+		internal string GetLeftSubstring()
+		{
+			return this._text.Substring(0, this._index);
+		}
 
-		internal int length;
+		internal string GetRightSubstring()
+		{
+			return this._text.Substring(this._index + this._length, this._text.Length - this._index - this._length);
+		}
 
-		internal string text;
+		internal Capture()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		internal string _text;
+
+		internal int _index;
+
+		internal int _length;
 	}
 }

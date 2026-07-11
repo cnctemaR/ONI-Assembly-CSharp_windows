@@ -40,7 +40,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		{
 			return;
 		}
-		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		this.operatingEnergyStatusItem.resolveStringCallback = delegate(string str, object ev_data)
 		{
 			int num = (int)ev_data;
@@ -50,24 +50,22 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 			{
 				try
 				{
-					str = string.Format(str, GameUtil.GetFormattedHeatEnergy(payload.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
+					return string.Format(str, GameUtil.GetFormattedHeatEnergy(payload.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				}
 				catch (Exception ex)
 				{
 					global::Debug.LogWarning(ex);
 					global::Debug.LogWarning(BUILDING.STATUSITEMS.OPERATINGENERGY.TOOLTIP);
 					global::Debug.LogWarning(str);
+					return str;
 				}
 			}
-			else
+			string text = "";
+			foreach (StructureTemperaturePayload.EnergySource energySource in payload.energySourcesKW)
 			{
-				string text = string.Empty;
-				foreach (StructureTemperaturePayload.EnergySource energySource in payload.energySourcesKW)
-				{
-					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedHeatEnergy(energySource.value * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S));
-				}
-				str = string.Format(str, GameUtil.GetFormattedHeatEnergy(payload.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S), text);
+				text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedHeatEnergy(energySource.value * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S));
 			}
+			str = string.Format(str, GameUtil.GetFormattedHeatEnergy(payload.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S), text);
 			return str;
 		};
 	}
@@ -84,7 +82,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 				StructureTemperatureComponents.OnActiveChanged(handle);
 			});
 		}
-		structureTemperaturePayload.maxTemperature = ((!(structureTemperaturePayload.overheatable != null)) ? 10000f : structureTemperaturePayload.overheatable.OverheatTemperature);
+		structureTemperaturePayload.maxTemperature = ((structureTemperaturePayload.overheatable != null) ? structureTemperaturePayload.overheatable.OverheatTemperature : 10000f);
 		if (structureTemperaturePayload.maxTemperature <= 0f)
 		{
 			global::Debug.LogError("invalid max temperature");
@@ -182,10 +180,9 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 						{
 							int num11 = extents.x + j;
 							int num12 = num10 * Grid.WidthInCells + num11;
-							float num13 = Grid.Mass[num12];
-							float num14 = Mathf.Min(num13, 1.5f) / 1.5f;
-							float num15 = num9 * num14;
-							SimMessages.ModifyEnergy(num12, num15, structureTemperaturePayload3.maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
+							float num13 = Mathf.Min(Grid.Mass[num12], 1.5f) / 1.5f;
+							float num14 = num9 * num13;
+							SimMessages.ModifyEnergy(num12, num14, structureTemperaturePayload3.maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
 						}
 					}
 					structureTemperaturePayload3.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperaturePayload3.energySourcesKW, structureTemperaturePayload3.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
@@ -211,7 +208,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		BuildingDef def = payload.building.Def;
 		float num = def.MassForTemperatureModification;
 		float operatingKilowatts = payload.OperatingKilowatts;
-		float num2 = ((!(payload.overheatable != null)) ? 10000f : payload.overheatable.OverheatTemperature);
+		float num2 = ((payload.overheatable != null) ? payload.overheatable.OverheatTemperature : 10000f);
 		if (!payload.enabled || payload.bypass)
 		{
 			num = 0f;
@@ -322,8 +319,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		Element element = primary_element.Element;
 		if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 		{
-			int num = Grid.PosToCell(primary_element.transform.GetPosition());
-			SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, primary_element.Mass, primary_element.Element.highTemp, primary_element.DiseaseIdx, primary_element.DiseaseCount, true, -1);
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(primary_element.transform.GetPosition()), element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, primary_element.Mass, primary_element.Element.highTemp, primary_element.DiseaseIdx, primary_element.DiseaseCount, true, -1);
 			Util.KDestroyGameObject(primary_element.gameObject);
 		}
 	}
@@ -407,8 +403,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		{
 			return;
 		}
-		Element element = primaryElement.Element;
-		if (element.IsTemperatureInsulated)
+		if (primaryElement.Element.IsTemperatureInsulated)
 		{
 			return;
 		}
@@ -449,11 +444,9 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 			structureTemperaturePayload.simHandleCopy = sim_handle;
 			GameComps.StructureTemperatures.SetData(handle, structureTemperatureHeader, ref structureTemperaturePayload);
 			structureTemperaturePayload.primaryElement.Trigger(-1555603773, null);
+			return;
 		}
-		else
-		{
-			SimMessages.RemoveBuildingHeatExchange(sim_handle, -1);
-		}
+		SimMessages.RemoveBuildingHeatExchange(sim_handle, -1);
 	}
 
 	protected unsafe void SimUnregister(HandleVector<int>.Handle handle)

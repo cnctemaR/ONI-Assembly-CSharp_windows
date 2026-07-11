@@ -13,8 +13,8 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		{
 			smi.Update(dt);
 		}, UpdateRate.SIM_1000ms, false).EventTransition(GameHashes.OperationalChanged, this.inoperational, (DetectorNetwork.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
-		this.operational.self_poor.InitializeStates(this).ToggleStatusItem(BUILDING.STATUSITEMS.DETECTORQUALITY.NAME, BUILDING.STATUSITEMS.DETECTORQUALITY.TOOLTIP, "status_item_interference", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 0, (string str, DetectorNetwork.Instance smi) => str.Replace("{Quality}", GameUtil.GetFormattedPercent(smi.GetDishQuality() * 100f, GameUtil.TimeSlice.None)), null, null).ParamTransition<float>(this.selfQuality, this.operational.self_good, (DetectorNetwork.Instance smi, float p) => (double)p >= 0.8);
-		this.operational.self_good.InitializeStates(this).ToggleStatusItem(BUILDING.STATUSITEMS.DETECTORQUALITY.NAME, BUILDING.STATUSITEMS.DETECTORQUALITY.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 0, (string str, DetectorNetwork.Instance smi) => str.Replace("{Quality}", GameUtil.GetFormattedPercent(smi.GetDishQuality() * 100f, GameUtil.TimeSlice.None)), null, null).ParamTransition<float>(this.selfQuality, this.operational.self_poor, (DetectorNetwork.Instance smi, float p) => (double)p < 0.8);
+		this.operational.self_poor.InitializeStates(this).ToggleStatusItem(BUILDING.STATUSITEMS.DETECTORQUALITY.NAME, BUILDING.STATUSITEMS.DETECTORQUALITY.TOOLTIP, "status_item_interference", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 129022, (string str, DetectorNetwork.Instance smi) => str.Replace("{Quality}", GameUtil.GetFormattedPercent(smi.GetDishQuality() * 100f, GameUtil.TimeSlice.None)), null, null).ParamTransition<float>(this.selfQuality, this.operational.self_good, (DetectorNetwork.Instance smi, float p) => (double)p >= 0.8);
+		this.operational.self_good.InitializeStates(this).ToggleStatusItem(BUILDING.STATUSITEMS.DETECTORQUALITY.NAME, BUILDING.STATUSITEMS.DETECTORQUALITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, (string str, DetectorNetwork.Instance smi) => str.Replace("{Quality}", GameUtil.GetFormattedPercent(smi.GetDishQuality() * 100f, GameUtil.TimeSlice.None)), null, null).ParamTransition<float>(this.selfQuality, this.operational.self_poor, (DetectorNetwork.Instance smi, float p) => (double)p < 0.8);
 	}
 
 	public StateMachine<DetectorNetwork, DetectorNetwork.Instance, IStateMachineTarget, DetectorNetwork.Def>.FloatParameter selfQuality;
@@ -48,8 +48,8 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		public DetectorNetwork.NetworkStates InitializeStates(DetectorNetwork parent)
 		{
 			base.DefaultState(this.poor);
-			this.poor.ToggleStatusItem(BUILDING.STATUSITEMS.NETWORKQUALITY.NAME, BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, default(HashedString), 0, new Func<string, DetectorNetwork.Instance, string>(this.StringCallback), null, null).ParamTransition<float>(parent.networkQuality, this.good, (DetectorNetwork.Instance smi, float p) => (double)p >= 0.8);
-			this.good.ToggleStatusItem(BUILDING.STATUSITEMS.NETWORKQUALITY.NAME, BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 0, new Func<string, DetectorNetwork.Instance, string>(this.StringCallback), null, null).ParamTransition<float>(parent.networkQuality, this.good, (DetectorNetwork.Instance smi, float p) => (double)p < 0.8);
+			this.poor.ToggleStatusItem(BUILDING.STATUSITEMS.NETWORKQUALITY.NAME, BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, default(HashedString), 129022, new Func<string, DetectorNetwork.Instance, string>(this.StringCallback), null, null).ParamTransition<float>(parent.networkQuality, this.good, (DetectorNetwork.Instance smi, float p) => (double)p >= 0.8);
+			this.good.ToggleStatusItem(BUILDING.STATUSITEMS.NETWORKQUALITY.NAME, BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, new Func<string, DetectorNetwork.Instance, string>(this.StringCallback), null, null).ParamTransition<float>(parent.networkQuality, this.good, (DetectorNetwork.Instance smi, float p) => (double)p < 0.8);
 			return this;
 		}
 
@@ -160,8 +160,7 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		public MathUtil.MinMax GetDetectTimeRange()
 		{
 			float num = this.ComputeTotalDishQuality();
-			float num2 = Mathf.Lerp(base.def.worstWarningTime, base.def.bestWarningTime, num);
-			return new MathUtil.MinMax(num2, base.def.bestWarningTime);
+			return new MathUtil.MinMax(Mathf.Lerp(base.def.worstWarningTime, base.def.bestWarningTime, num), base.def.bestWarningTime);
 		}
 
 		private float closestMachinery = float.MaxValue;

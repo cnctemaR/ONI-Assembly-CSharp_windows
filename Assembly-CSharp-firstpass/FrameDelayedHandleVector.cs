@@ -16,9 +16,10 @@ public class FrameDelayedHandleVector<T> : HandleVector<T>
 	{
 		this.freeHandles.Clear();
 		this.items.Clear();
-		foreach (List<HandleVector<T>.Handle> list in this.frameDelayedFreeHandles)
+		List<HandleVector<T>.Handle>[] array = this.frameDelayedFreeHandles;
+		for (int i = 0; i < array.Length; i++)
 		{
-			list.Clear();
+			array[i].Clear();
 		}
 	}
 

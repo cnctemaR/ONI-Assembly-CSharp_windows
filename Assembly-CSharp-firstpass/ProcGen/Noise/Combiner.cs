@@ -6,17 +6,17 @@ namespace ProcGen.Noise
 {
 	public class Combiner : NoiseBase
 	{
-		public Combiner()
-		{
-			this.combineType = Combiner.CombinerType.Add;
-		}
-
 		public override Type GetObjectType()
 		{
 			return typeof(Combiner);
 		}
 
 		public Combiner.CombinerType combineType { get; set; }
+
+		public Combiner()
+		{
+			this.combineType = Combiner.CombinerType.Add;
+		}
 
 		public IModule3D CreateModule()
 		{

@@ -79,8 +79,7 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		base.OnSpawn();
 		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-		NavGrid navGrid2 = navGrid;
-		navGrid2.OnNavGridUpdateComplete = (Action<HashSet<int>>)Delegate.Combine(navGrid2.OnNavGridUpdateComplete, new Action<HashSet<int>>(this.OnNavGridUpdateComplete));
+		navGrid.OnNavGridUpdateComplete = (Action<HashSet<int>>)Delegate.Combine(navGrid.OnNavGridUpdateComplete, new Action<HashSet<int>>(this.OnNavGridUpdateComplete));
 		NavTable navTable = navGrid.NavTable;
 		navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Combine(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
 	}
@@ -203,8 +202,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		{
 			return;
 		}
-		ScenePartitionerEntry data = this.scenePartitionerEntries.GetData(handle);
-		data.UpdatePosition(x, y);
+		this.scenePartitionerEntries.GetData(handle).UpdatePosition(x, y);
 	}
 
 	public void Free(ref HandleVector<int>.Handle handle)
@@ -213,8 +211,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		{
 			return;
 		}
-		ScenePartitionerEntry data = this.scenePartitionerEntries.GetData(handle);
-		data.Release();
+		this.scenePartitionerEntries.GetData(handle).Release();
 		this.scenePartitionerEntries.Free(handle);
 		handle.Clear();
 	}

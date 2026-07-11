@@ -112,14 +112,13 @@ public class RocketModule : KMonoBehaviour
 		if (this.conditionManager != null && !App.IsExiting && !KMonoBehaviour.isLoadingScene)
 		{
 			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.conditionManager);
-			this.conditionManager.DEBUG_TraceModuleDestruction(base.name, (spacecraftFromLaunchConditionManager != null) ? spacecraftFromLaunchConditionManager.state.ToString() : "null spacecraft", new StackTrace(true).ToString());
+			this.conditionManager.DEBUG_TraceModuleDestruction(base.name, (spacecraftFromLaunchConditionManager == null) ? "null spacecraft" : spacecraftFromLaunchConditionManager.state.ToString(), new StackTrace(true).ToString());
 		}
 	}
 
 	public void OnConditionManagerTagsChanged(object data)
 	{
-		KPrefabID component = this.conditionManager.GetComponent<KPrefabID>();
-		if (component.HasTag(GameTags.RocketNotOnGround))
+		if (this.conditionManager.GetComponent<KPrefabID>().HasTag(GameTags.RocketNotOnGround))
 		{
 			this.OnLaunch(null);
 		}
@@ -137,7 +136,7 @@ public class RocketModule : KMonoBehaviour
 		if (component2)
 		{
 			ConduitType conduitType = component2.conduitType;
-			if (conduitType == ConduitType.Gas || conduitType == ConduitType.Liquid)
+			if (conduitType - ConduitType.Gas <= 1)
 			{
 				component2.consumptionRate = 0f;
 			}
@@ -153,9 +152,9 @@ public class RocketModule : KMonoBehaviour
 			GameComps.StructureTemperatures.Disable(handle);
 		}
 		ManualDeliveryKG[] components = base.GetComponents<ManualDeliveryKG>();
-		foreach (ManualDeliveryKG manualDeliveryKG in components)
+		for (int i = 0; i < components.Length; i++)
 		{
-			manualDeliveryKG.Pause(true, "Rocket in space");
+			components[i].Pause(true, "Rocket in space");
 		}
 		this.ToggleComponent(typeof(ElementConsumer), false);
 		this.ToggleComponent(typeof(ElementConverter), false);
@@ -194,9 +193,9 @@ public class RocketModule : KMonoBehaviour
 			GameComps.StructureTemperatures.Enable(handle);
 		}
 		ManualDeliveryKG[] components = base.GetComponents<ManualDeliveryKG>();
-		foreach (ManualDeliveryKG manualDeliveryKG in components)
+		for (int i = 0; i < components.Length; i++)
 		{
-			manualDeliveryKG.Pause(false, "landed");
+			components[i].Pause(false, "landed");
 		}
 		this.ToggleComponent(typeof(ElementConsumer), true);
 		this.ToggleComponent(typeof(ElementConverter), true);
@@ -219,11 +218,9 @@ public class RocketModule : KMonoBehaviour
 		if (this.conditionManager != null)
 		{
 			this.conditionManager.RegisterRocketModule(this);
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("Module conditionManager is null");
-		}
+		global::Debug.LogWarning("Module conditionManager is null");
 	}
 
 	protected override void OnCleanUp()
@@ -247,8 +244,7 @@ public class RocketModule : KMonoBehaviour
 
 	public LaunchConditionManager FindLaunchConditionManager()
 	{
-		List<GameObject> attachedNetwork = AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>());
-		foreach (GameObject gameObject in attachedNetwork)
+		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
 		{
 			LaunchConditionManager component = gameObject.GetComponent<LaunchConditionManager>();
 			if (component != null)

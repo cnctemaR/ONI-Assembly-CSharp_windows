@@ -5,20 +5,20 @@ using UnityEngine;
 
 public class ComplexRecipe
 {
-	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results)
-	{
-		this.id = id;
-		this.ingredients = ingredients;
-		this.results = results;
-		ComplexRecipeManager.Get().Add(this);
-	}
-
 	public Tag FirstResult
 	{
 		get
 		{
 			return this.results[0].material;
 		}
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results)
+	{
+		this.id = id;
+		this.ingredients = ingredients;
+		this.results = results;
+		ComplexRecipeManager.Get().Add(this);
 	}
 
 	public float TotalResultUnits()
@@ -38,23 +38,16 @@ public class ComplexRecipe
 
 	public bool IsRequiredTechUnlocked()
 	{
-		if (string.IsNullOrEmpty(this.requiredTech))
-		{
-			return true;
-		}
-		Tech tech = Db.Get().Techs.Get(this.requiredTech);
-		return tech.IsComplete();
+		return string.IsNullOrEmpty(this.requiredTech) || Db.Get().Techs.Get(this.requiredTech).IsComplete();
 	}
 
 	public Sprite GetUIIcon()
 	{
 		Sprite sprite = null;
-		Tag tag = ((this.nameDisplay != ComplexRecipe.RecipeNameDisplay.Ingredient) ? this.results[0].material : this.ingredients[0].material);
-		GameObject prefab = Assets.GetPrefab(tag);
-		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController component = Assets.GetPrefab((this.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? this.ingredients[0].material : this.results[0].material).GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
-			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, string.Empty);
+			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, "");
 		}
 		return sprite;
 	}

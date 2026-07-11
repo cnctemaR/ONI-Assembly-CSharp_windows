@@ -1,0 +1,120 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935664}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System</RootNamespace>
+    <AssemblyName>System.ServiceModel.Internals</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AssemblyRef.cs" />
+    <Compile Include="Consts.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\ActionItem.cs" />
+    <Compile Include="Runtime\AssertHelper.cs" />
+    <Compile Include="Runtime\AsyncCompletionResult.cs" />
+    <Compile Include="Runtime\AsyncEventArgs.2.cs" />
+    <Compile Include="Runtime\AsyncEventArgs.3.cs" />
+    <Compile Include="Runtime\AsyncEventArgs.cs" />
+    <Compile Include="Runtime\AsyncEventArgsCallback.cs" />
+    <Compile Include="Runtime\AsyncResult.cs" />
+    <Compile Include="Runtime\AsyncWaitHandle.cs" />
+    <Compile Include="Runtime\BackoffTimeoutHelper.cs" />
+    <Compile Include="Runtime\BufferedOutputStream.cs" />
+    <Compile Include="Runtime\CallbackException.cs" />
+    <Compile Include="Runtime\Collections\HopperCache.cs" />
+    <Compile Include="Runtime\Collections\NullableKeyDictionary.cs" />
+    <Compile Include="Runtime\Collections\ObjectCache.cs" />
+    <Compile Include="Runtime\Collections\ObjectCacheItem.cs" />
+    <Compile Include="Runtime\Collections\ObjectCacheSettings.cs" />
+    <Compile Include="Runtime\Collections\OrderedDictionary.cs" />
+    <Compile Include="Runtime\Collections\ValidatingCollection.cs" />
+    <Compile Include="Runtime\CompilerServices\FriendAccessAllowedAttribute.cs" />
+    <Compile Include="Runtime\CompletedAsyncResult.2.cs" />
+    <Compile Include="Runtime\CompletedAsyncResult.3.cs" />
+    <Compile Include="Runtime\CompletedAsyncResult.cs" />
+    <Compile Include="Runtime\ComputerNameFormat.cs" />
+    <Compile Include="Runtime\DiagnosticStrings.cs" />
+    <Compile Include="Runtime\Diagnostics\ActivityControl.cs" />
+    <Compile Include="Runtime\Diagnostics\DiagnosticsEventProvider.cs" />
+    <Compile Include="Runtime\Diagnostics\DiagnosticTraceBase.cs" />
+    <Compile Include="Runtime\Diagnostics\DiagnosticTraceSource.cs" />
+    <Compile Include="Runtime\Diagnostics\DictionaryTraceRecord.cs" />
+    <Compile Include="Runtime\Diagnostics\EtwDiagnosticTrace.cs" />
+    <Compile Include="Runtime\Diagnostics\EtwProvider.cs" />
+    <Compile Include="Runtime\Diagnostics\EventDescriptor.cs" />
+    <Compile Include="Runtime\Diagnostics\EventFacility.cs" />
+    <Compile Include="Runtime\Diagnostics\EventLogCategory.cs" />
+    <Compile Include="Runtime\Diagnostics\EventLogEventId.cs" />
+    <Compile Include="Runtime\Diagnostics\EventLogger.cs" />
+    <Compile Include="Runtime\Diagnostics\EventSeverity.cs" />
+    <Compile Include="Runtime\Diagnostics\EventTraceActivity.cs" />
+    <Compile Include="Runtime\Diagnostics\ITraceSourceStringProvider.cs" />
+    <Compile Include="Runtime\Diagnostics\PerformanceCounterNameAttribute.cs" />
+    <Compile Include="Runtime\Diagnostics\StringTraceRecord.cs" />
+    <Compile Include="Runtime\Diagnostics\TraceRecord.cs" />
+    <Compile Include="Runtime\DuplicateDetector.cs" />
+    <Compile Include="Runtime\ExceptionTrace.cs" />
+    <Compile Include="Runtime\FastAsyncCallback.cs" />
+    <Compile Include="Runtime\FatalException.cs" />
+    <Compile Include="Runtime\Fx.cs" />
+    <Compile Include="Runtime\FxCop.cs" />
+    <Compile Include="Runtime\HashHelper.cs" />
+    <Compile Include="Runtime\IAsyncEventArgs.cs" />
+    <Compile Include="Runtime\InputQueue.cs" />
+    <Compile Include="Runtime\InternalBufferManager.cs" />
+    <Compile Include="Runtime\InternalSR.cs" />
+    <Compile Include="Runtime\Interop\SafeEventLogWriteHandle.cs" />
+    <Compile Include="Runtime\Interop\UnsafeNativeMethods.cs" />
+    <Compile Include="Runtime\IOThreadCancellationTokenSource.cs" />
+    <Compile Include="Runtime\IOThreadScheduler.cs" />
+    <Compile Include="Runtime\IOThreadTimer.cs" />
+    <Compile Include="Runtime\MruCache.cs" />
+    <Compile Include="Runtime\NameGenerator.cs" />
+    <Compile Include="Runtime\PartialTrustHelpers.cs" />
+    <Compile Include="Runtime\ReadOnlyDictionaryInternal.cs" />
+    <Compile Include="Runtime\ReadOnlyKeyedCollection.cs" />
+    <Compile Include="Runtime\ScheduleActionItemAsyncResult.cs" />
+    <Compile Include="Runtime\SignalGate.2.cs" />
+    <Compile Include="Runtime\SignalGate.cs" />
+    <Compile Include="Runtime\SynchronizedPool.cs" />
+    <Compile Include="Runtime\TaskExtensions.cs" />
+    <Compile Include="Runtime\ThreadNeutralSemaphore.cs" />
+    <Compile Include="Runtime\Ticks.cs" />
+    <Compile Include="Runtime\TimeoutHelper.cs" />
+    <Compile Include="Runtime\TraceChannel.cs" />
+    <Compile Include="Runtime\TraceCore.cs" />
+    <Compile Include="Runtime\TraceEventLevel.cs" />
+    <Compile Include="Runtime\TraceEventOpcode.cs" />
+    <Compile Include="Runtime\TraceLevelHelper.cs" />
+    <Compile Include="Runtime\TracePayload.cs" />
+    <Compile Include="Runtime\TypedAsyncResult.cs" />
+    <Compile Include="Runtime\TypeHelper.cs" />
+    <Compile Include="Runtime\UrlUtility.cs" />
+    <Compile Include="Runtime\WaitCallbackActionItem.cs" />
+    <Compile Include="ServiceModel\Internals\LocalAppContextSwitches.cs" />
+    <Compile Include="SR.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC93565A}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml\System.Xml.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935666}</Project>
+      <Name>System.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC93565F}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

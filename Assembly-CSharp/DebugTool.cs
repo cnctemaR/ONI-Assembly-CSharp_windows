@@ -40,16 +40,16 @@ public class DebugTool : DragTool
 			{
 			case DebugTool.Type.Dig:
 				SimMessages.Dig(cell, -1);
-				break;
+				return;
 			case DebugTool.Type.Heat:
 				SimMessages.ModifyEnergy(cell, 10000f, 10000f, SimMessages.EnergySourceID.DebugHeat);
-				break;
+				return;
 			case DebugTool.Type.Cool:
 				SimMessages.ModifyEnergy(cell, -10000f, 10000f, SimMessages.EnergySourceID.DebugCool);
-				break;
+				return;
 			case DebugTool.Type.ReplaceSubstance:
 				this.DoReplaceSubstance(cell);
-				break;
+				return;
 			case DebugTool.Type.FillReplaceSubstance:
 			{
 				GameUtil.FloodFillNext.Clear();
@@ -65,35 +65,39 @@ public class DebugTool : DragTool
 					}
 					return flag;
 				}, GameUtil.FloodFillVisited, null);
-				break;
+				return;
 			}
 			case DebugTool.Type.AddPressure:
 				SimMessages.ModifyMass(cell, 10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 293f, SimHashes.Oxygen);
-				break;
+				return;
 			case DebugTool.Type.RemovePressure:
 				SimMessages.ModifyMass(cell, -10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 0f, SimHashes.Oxygen);
+				return;
+			case DebugTool.Type.PaintPlant:
 				break;
 			case DebugTool.Type.Clear:
 				this.ClearCell(cell);
-				break;
+				return;
 			case DebugTool.Type.AddSelection:
 				DebugBaseTemplateButton.Instance.AddToSelection(cell);
-				break;
+				return;
 			case DebugTool.Type.RemoveSelection:
 				DebugBaseTemplateButton.Instance.RemoveFromSelection(cell);
-				break;
+				return;
 			case DebugTool.Type.Deconstruct:
 				this.DeconstructCell(cell);
-				break;
+				return;
 			case DebugTool.Type.Destroy:
 				this.DestroyCell(cell);
-				break;
+				return;
 			case DebugTool.Type.Sample:
 				DebugPaintElementScreen.Instance.SampleCell(cell);
-				break;
+				return;
 			case DebugTool.Type.StoreSubstance:
 				this.DoStoreSubstance(cell);
 				break;
+			default:
+				return;
 			}
 		}
 	}
@@ -104,15 +108,15 @@ public class DebugTool : DragTool
 		{
 			return;
 		}
-		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.ElementIdx[cell]] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
+		Element element = (DebugPaintElementScreen.Instance.paintElement.isOn ? ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element) : ElementLoader.elements[(int)Grid.ElementIdx[cell]]);
 		if (element == null)
 		{
 			element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
 		}
-		byte b = ((!DebugPaintElementScreen.Instance.paintDisease.isOn) ? Grid.DiseaseIdx[cell] : DebugPaintElementScreen.Instance.diseaseIdx);
-		float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? Grid.Temperature[cell] : DebugPaintElementScreen.Instance.temperature);
-		float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? Grid.Mass[cell] : DebugPaintElementScreen.Instance.mass);
-		int num3 = ((!DebugPaintElementScreen.Instance.paintDiseaseCount.isOn) ? Grid.DiseaseCount[cell] : DebugPaintElementScreen.Instance.diseaseCount);
+		byte b = (DebugPaintElementScreen.Instance.paintDisease.isOn ? DebugPaintElementScreen.Instance.diseaseIdx : Grid.DiseaseIdx[cell]);
+		float num = (DebugPaintElementScreen.Instance.paintTemperature.isOn ? DebugPaintElementScreen.Instance.temperature : Grid.Temperature[cell]);
+		float num2 = (DebugPaintElementScreen.Instance.paintMass.isOn ? DebugPaintElementScreen.Instance.mass : Grid.Mass[cell]);
+		int num3 = (DebugPaintElementScreen.Instance.paintDiseaseCount.isOn ? DebugPaintElementScreen.Instance.diseaseCount : Grid.DiseaseCount[cell]);
 		if (num == -1f)
 		{
 			num = element.defaultValues.temperature;
@@ -196,11 +200,9 @@ public class DebugTool : DragTool
 		if (ElementLoader.elements[(int)Grid.ElementIdx[cell]].id == SimHashes.Void)
 		{
 			SimMessages.ReplaceElement(cell, SimHashes.Void, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
+			return;
 		}
-		else
-		{
-			SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
-		}
+		SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
 	}
 
 	public void ClearCell(int cell)
@@ -210,8 +212,7 @@ public class DebugTool : DragTool
 		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
 		for (int i = 0; i < pooledList.Count; i++)
 		{
-			ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
-			Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
+			Pickupable pickupable = pooledList[i].obj as Pickupable;
 			if (pickupable != null && pickupable.GetComponent<MinionBrain>() == null)
 			{
 				Util.KDestroyGameObject(pickupable.gameObject);
@@ -236,14 +237,14 @@ public class DebugTool : DragTool
 		{
 			return;
 		}
-		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.ElementIdx[cell]] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
+		Element element = (DebugPaintElementScreen.Instance.paintElement.isOn ? ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element) : ElementLoader.elements[(int)Grid.ElementIdx[cell]]);
 		if (element == null)
 		{
 			element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
 		}
-		byte b = ((!DebugPaintElementScreen.Instance.paintDisease.isOn) ? Grid.DiseaseIdx[cell] : DebugPaintElementScreen.Instance.diseaseIdx);
-		float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? element.defaultValues.temperature : DebugPaintElementScreen.Instance.temperature);
-		float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? element.defaultValues.mass : DebugPaintElementScreen.Instance.mass);
+		byte b = (DebugPaintElementScreen.Instance.paintDisease.isOn ? DebugPaintElementScreen.Instance.diseaseIdx : Grid.DiseaseIdx[cell]);
+		float num = (DebugPaintElementScreen.Instance.paintTemperature.isOn ? DebugPaintElementScreen.Instance.temperature : element.defaultValues.temperature);
+		float num2 = (DebugPaintElementScreen.Instance.paintMass.isOn ? DebugPaintElementScreen.Instance.mass : element.defaultValues.mass);
 		if (num == -1f)
 		{
 			num = element.defaultValues.temperature;
@@ -252,16 +253,18 @@ public class DebugTool : DragTool
 		{
 			num2 = element.defaultValues.mass;
 		}
-		int num3 = ((!DebugPaintElementScreen.Instance.paintDiseaseCount.isOn) ? 0 : DebugPaintElementScreen.Instance.diseaseCount);
+		int num3 = (DebugPaintElementScreen.Instance.paintDiseaseCount.isOn ? DebugPaintElementScreen.Instance.diseaseCount : 0);
 		if (element.IsGas)
 		{
 			component.AddGasChunk(element.id, num2, num, b, num3, false, true);
+			return;
 		}
-		else if (element.IsLiquid)
+		if (element.IsLiquid)
 		{
 			component.AddLiquid(element.id, num2, num, b, num3, false, true);
+			return;
 		}
-		else if (element.IsSolid)
+		if (element.IsSolid)
 		{
 			component.AddOre(element.id, num2, num, b, num3, false, true);
 		}

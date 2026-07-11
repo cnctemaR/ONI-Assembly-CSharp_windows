@@ -141,6 +141,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.S, Modifier.Ctrl, global::Action.DebugSelectMaterial, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.M, Modifier.Ctrl, global::Action.DebugToggleMusic, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.None, global::Action.DebugToggle, true, false),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Backspace, Modifier.Ctrl, global::Action.DebugToggleFastWorkers, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Q, Modifier.Alt, global::Action.DebugTeleport, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F2, Modifier.Ctrl, global::Action.DebugSpawnMinion, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F3, Modifier.Ctrl, global::Action.DebugPlace, true, false),
@@ -228,17 +229,20 @@ public class Global : MonoBehaviour
 			Type type = display_info.data.GetType();
 			if (typeof(IList<BuildMenu.DisplayInfo>).IsAssignableFrom(type))
 			{
-				IList<BuildMenu.DisplayInfo> list = (IList<BuildMenu.DisplayInfo>)display_info.data;
-				foreach (BuildMenu.DisplayInfo displayInfo in list)
+				using (IEnumerator<BuildMenu.DisplayInfo> enumerator = ((IList<BuildMenu.DisplayInfo>)display_info.data).GetEnumerator())
 				{
-					Global.AddBindings(display_info.category, displayInfo, bindings);
+					while (enumerator.MoveNext())
+					{
+						BuildMenu.DisplayInfo displayInfo = enumerator.Current;
+						Global.AddBindings(display_info.category, displayInfo, bindings);
+					}
+					return;
 				}
 			}
-			else if (typeof(IList<BuildMenu.BuildingInfo>).IsAssignableFrom(type))
+			if (typeof(IList<BuildMenu.BuildingInfo>).IsAssignableFrom(type))
 			{
 				string text = HashCache.Get().Get(parent_category);
-				TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-				string text2 = textInfo.ToTitleCase(text) + " Menu";
+				string text2 = new CultureInfo("en-US", false).TextInfo.ToTitleCase(text) + " Menu";
 				BindingEntry bindingEntry = new BindingEntry(text2, GamepadButton.NumButtons, display_info.keyCode, Modifier.None, display_info.hotkey, true, true);
 				bindings.Add(bindingEntry);
 			}
@@ -266,12 +270,12 @@ public class Global : MonoBehaviour
 		{
 			foreach (SpriteAtlas spriteAtlas in this.forcedAtlasInitializationList)
 			{
-				int spriteCount = spriteAtlas.spriteCount;
-				Sprite[] array2 = new Sprite[spriteCount];
+				Sprite[] array2 = new Sprite[spriteAtlas.spriteCount];
 				spriteAtlas.GetSprites(array2);
-				foreach (Sprite sprite in array2)
+				Sprite[] array3 = array2;
+				for (int j = 0; j < array3.Length; j++)
 				{
-					Texture2D texture = sprite.texture;
+					Texture2D texture = array3[j].texture;
 					if (texture != null)
 					{
 						texture.filterMode = FilterMode.Bilinear;
@@ -342,132 +346,127 @@ public class Global : MonoBehaviour
 
 	private void TestDataLocations()
 	{
-		if (Application.platform != RuntimePlatform.WindowsPlayer)
+		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
 		{
-			if (Application.platform != RuntimePlatform.WindowsEditor)
+			try
 			{
-				return;
-			}
-		}
-		try
-		{
-			string text = Util.RootFolder();
-			string text2 = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-			text2 = Path.Combine(text2, "Klei");
-			text2 = Path.Combine(text2, Util.GetTitleFolderName());
-			global::Debug.Log("Test Data Location / docs / " + text);
-			global::Debug.Log("Test Data Location / local / " + text2);
-			if (!global::System.IO.Directory.Exists(text2))
-			{
-				global::System.IO.Directory.CreateDirectory(text2);
-			}
-			if (!global::System.IO.Directory.Exists(text))
-			{
-				global::System.IO.Directory.CreateDirectory(text);
-			}
-			string text3 = Path.Combine(text, "test");
-			string text4 = Path.Combine(text2, "test");
-			string[] array = new string[] { text3, text4 };
-			bool[] array2 = new bool[2];
-			bool[] array3 = new bool[2];
-			bool[] array4 = new bool[2];
-			for (int i = 0; i < array.Length; i++)
-			{
-				try
+				string text = Util.RootFolder();
+				string text2 = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+				text2 = Path.Combine(text2, "Klei");
+				text2 = Path.Combine(text2, Util.GetTitleFolderName());
+				global::Debug.Log("Test Data Location / docs / " + text);
+				global::Debug.Log("Test Data Location / local / " + text2);
+				if (!global::System.IO.Directory.Exists(text2))
 				{
-					using (FileStream fileStream = File.Open(array[i], FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-					{
-						Encoding utf = Encoding.UTF8;
-						byte[] bytes = utf.GetBytes("test");
-						fileStream.Write(bytes, 0, bytes.Length);
-						array2[i] = true;
-					}
+					global::System.IO.Directory.CreateDirectory(text2);
 				}
-				catch (Exception ex)
+				if (!global::System.IO.Directory.Exists(text))
 				{
-					array2[i] = false;
-					KCrashReporter.Assert(false, "Test Data Locations / failed to write " + array[i] + ": " + ex.Message);
+					global::System.IO.Directory.CreateDirectory(text);
 				}
-				try
+				string text3 = Path.Combine(text, "test");
+				string text4 = Path.Combine(text2, "test");
+				string[] array = new string[] { text3, text4 };
+				bool[] array2 = new bool[2];
+				bool[] array3 = new bool[2];
+				bool[] array4 = new bool[2];
+				for (int i = 0; i < array.Length; i++)
 				{
-					using (FileStream fileStream2 = File.Open(array[i], FileMode.Open, FileAccess.Read))
+					try
 					{
-						Encoding utf2 = Encoding.UTF8;
-						byte[] array5 = new byte[fileStream2.Length];
-						if ((long)fileStream2.Read(array5, 0, array5.Length) == fileStream2.Length)
+						using (FileStream fileStream = File.Open(array[i], FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
 						{
-							string @string = utf2.GetString(array5);
-							if (@string == "test")
+							byte[] bytes = Encoding.UTF8.GetBytes("test");
+							fileStream.Write(bytes, 0, bytes.Length);
+							array2[i] = true;
+						}
+					}
+					catch (Exception ex)
+					{
+						array2[i] = false;
+						KCrashReporter.Assert(false, "Test Data Locations / failed to write " + array[i] + ": " + ex.Message);
+					}
+					try
+					{
+						using (FileStream fileStream2 = File.Open(array[i], FileMode.Open, FileAccess.Read))
+						{
+							Encoding utf = Encoding.UTF8;
+							byte[] array5 = new byte[fileStream2.Length];
+							if ((long)fileStream2.Read(array5, 0, array5.Length) == fileStream2.Length)
 							{
-								array3[i] = true;
-							}
-							else
-							{
-								array3[i] = false;
-								KCrashReporter.Assert(false, string.Concat(new string[]
+								string @string = utf.GetString(array5);
+								if (@string == "test")
 								{
-									"Test Data Locations / failed to validate contents ",
-									array[i],
-									", got: `",
-									@string,
-									"`"
-								}));
+									array3[i] = true;
+								}
+								else
+								{
+									array3[i] = false;
+									KCrashReporter.Assert(false, string.Concat(new string[]
+									{
+										"Test Data Locations / failed to validate contents ",
+										array[i],
+										", got: `",
+										@string,
+										"`"
+									}));
+								}
 							}
 						}
 					}
+					catch (Exception ex2)
+					{
+						array3[i] = false;
+						KCrashReporter.Assert(false, "Test Data Locations / failed to read " + array[i] + ": " + ex2.Message);
+					}
+					try
+					{
+						File.Delete(array[i]);
+						array4[i] = true;
+					}
+					catch (Exception ex3)
+					{
+						array4[i] = false;
+						KCrashReporter.Assert(false, "Test Data Locations / failed to remove " + array[i] + ": " + ex3.Message);
+					}
 				}
-				catch (Exception ex2)
+				for (int j = 0; j < array.Length; j++)
 				{
-					array3[i] = false;
-					KCrashReporter.Assert(false, "Test Data Locations / failed to read " + array[i] + ": " + ex2.Message);
+					global::Debug.Log(string.Concat(new string[]
+					{
+						"Test Data Locations / ",
+						array[j],
+						" / write ",
+						array2[j].ToString(),
+						" / read ",
+						array3[j].ToString(),
+						" / removed ",
+						array4[j].ToString()
+					}));
 				}
-				try
+				bool flag = array2[0] && array3[0];
+				bool flag2 = array2[1] && array3[1];
+				if (flag && flag2)
 				{
-					File.Delete(array[i]);
-					array4[i] = true;
+					Global.saveFolderTestResult = "both";
 				}
-				catch (Exception ex3)
+				else if (flag && !flag2)
 				{
-					array4[i] = false;
-					KCrashReporter.Assert(false, "Test Data Locations / failed to remove " + array[i] + ": " + ex3.Message);
+					Global.saveFolderTestResult = "docs_only";
+				}
+				else if (!flag && flag2)
+				{
+					Global.saveFolderTestResult = "local_only";
+				}
+				else
+				{
+					Global.saveFolderTestResult = "neither";
 				}
 			}
-			for (int j = 0; j < array.Length; j++)
+			catch (Exception ex4)
 			{
-				global::Debug.Log(string.Concat(new object[]
-				{
-					"Test Data Locations / ",
-					array[j],
-					" / write ",
-					array2[j],
-					" / read ",
-					array3[j],
-					" / removed ",
-					array4[j]
-				}));
+				KCrashReporter.Assert(false, "Test Data Locations / failed: " + ex4.Message);
 			}
-			bool flag = array2[0] && array3[0];
-			bool flag2 = array2[1] && array3[1];
-			if (flag && flag2)
-			{
-				Global.saveFolderTestResult = "both";
-			}
-			else if (flag && !flag2)
-			{
-				Global.saveFolderTestResult = "docs_only";
-			}
-			else if (!flag && flag2)
-			{
-				Global.saveFolderTestResult = "local_only";
-			}
-			else
-			{
-				Global.saveFolderTestResult = "neither";
-			}
-		}
-		catch (Exception ex4)
-		{
-			KCrashReporter.Assert(false, "Test Data Locations / failed: " + ex4.Message);
 		}
 	}
 
@@ -527,7 +526,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 383949U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 393231U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -590,8 +589,7 @@ public class Global : MonoBehaviour
 		try
 		{
 			Console.WriteLine("SYSTEM INFO:");
-			Dictionary<string, object> hardwareStats = KleiMetrics.GetHardwareStats();
-			foreach (KeyValuePair<string, object> keyValuePair in hardwareStats)
+			foreach (KeyValuePair<string, object> keyValuePair in KleiMetrics.GetHardwareStats())
 			{
 				try
 				{

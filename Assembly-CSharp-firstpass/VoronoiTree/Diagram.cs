@@ -15,6 +15,8 @@ namespace VoronoiTree
 			this.diagram = null;
 		}
 
+		public Voronoi diagram { get; private set; }
+
 		public Diagram(Rect bounds, IEnumerable<Diagram.Site> sites)
 		{
 			this.bounds = bounds;
@@ -32,8 +34,6 @@ namespace VoronoiTree
 			}
 			this.MakeVD();
 		}
-
-		public Voronoi diagram { get; private set; }
 
 		private void AddSite(Diagram.Site site)
 		{
@@ -103,25 +103,26 @@ namespace VoronoiTree
 				num = -num;
 				for (int k = 0; k < sites.Count; k++)
 				{
-					Diagram.Site site3 = sites[k];
-					site3.currentWeight += num + 1f;
+					sites[k].currentWeight += num + 1f;
 				}
 			}
 			float num9 = 1f;
 			for (int l = 0; l < sites.Count; l++)
 			{
-				Diagram.<UpdateWeights>c__AnonStorey0 <UpdateWeights>c__AnonStorey = new Diagram.<UpdateWeights>c__AnonStorey0();
-				Diagram.Site site4 = sites[l];
-				<UpdateWeights>c__AnonStorey.neighbours = this.diagram.ListNeighborSitesIDsForSite(this.points[l]);
+				Diagram.<>c__DisplayClass17_0 CS$<>8__locals1 = new Diagram.<>c__DisplayClass17_0();
+				Diagram.Site site3 = sites[l];
+				CS$<>8__locals1.neighbours = this.diagram.ListNeighborSitesIDsForSite(this.points[l]);
+				int nIndex2;
 				int nIndex;
-				for (nIndex = 0; nIndex < <UpdateWeights>c__AnonStorey.neighbours.Count; nIndex++)
+				for (nIndex = 0; nIndex < CS$<>8__locals1.neighbours.Count; nIndex = nIndex2 + 1)
 				{
-					Diagram.Site site5 = sites.Find((Diagram.Site s) => s.id == <UpdateWeights>c__AnonStorey.neighbours[nIndex]);
-					float num10 = (site4.position - site5.position).sqrMagnitude / (Mathf.Abs(site4.currentWeight - site5.currentWeight) + 1f);
+					Diagram.Site site4 = sites.Find((Diagram.Site s) => s.id == CS$<>8__locals1.neighbours[nIndex]);
+					float num10 = (site3.position - site4.position).sqrMagnitude / (Mathf.Abs(site3.currentWeight - site4.currentWeight) + 1f);
 					if (num10 < num9)
 					{
 						num9 = num10;
 					}
+					nIndex2 = nIndex;
 				}
 			}
 			for (int m = 0; m < sites.Count; m++)

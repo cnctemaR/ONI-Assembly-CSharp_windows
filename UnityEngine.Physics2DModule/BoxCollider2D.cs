@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Collider for 2D physics representing an axis-aligned rectangle.</para>
-	/// </summary>
 	[NativeHeader("Modules/Physics2D/Public/BoxCollider2D.h")]
 	public sealed class BoxCollider2D : Collider2D
 	{
-		/// <summary>
-		///   <para>The width and height of the rectangle.</para>
-		/// </summary>
 		public Vector2 size
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the radius of all edges created by the collider.</para>
-		/// </summary>
 		public extern float edgeRadius
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -38,9 +29,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Determines whether the BoxCollider2D's shape is automatically updated based on a SpriteRenderer's tiling properties.</para>
-		/// </summary>
 		public extern bool autoTiling
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

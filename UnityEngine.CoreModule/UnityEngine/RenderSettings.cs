@@ -5,12 +5,10 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The Render Settings contain values for a range of visual elements in your scene, like fog and ambient light.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
+	[NativeHeader("Runtime/Camera/RenderSettings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Camera/RenderSettings.h")]
 	public sealed class RenderSettings : Object
 	{
 		private RenderSettings()
@@ -30,9 +28,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is fog enabled?</para>
-		/// </summary>
 		[NativeProperty("UseFog")]
 		public static extern bool fog
 		{
@@ -42,9 +37,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The starting distance of linear fog.</para>
-		/// </summary>
 		[NativeProperty("LinearFogStart")]
 		public static extern float fogStartDistance
 		{
@@ -54,9 +46,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The ending distance of linear fog.</para>
-		/// </summary>
 		[NativeProperty("LinearFogEnd")]
 		public static extern float fogEndDistance
 		{
@@ -66,9 +55,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Fog mode to use.</para>
-		/// </summary>
 		public static extern FogMode fogMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -77,9 +63,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The color of the fog.</para>
-		/// </summary>
 		public static Color fogColor
 		{
 			get
@@ -94,9 +77,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The density of the exponential fog.</para>
-		/// </summary>
 		public static extern float fogDensity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -105,9 +85,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Ambient lighting mode.</para>
-		/// </summary>
 		public static extern AmbientMode ambientMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -116,9 +93,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Ambient lighting coming from above.</para>
-		/// </summary>
 		public static Color ambientSkyColor
 		{
 			get
@@ -133,9 +107,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Ambient lighting coming from the sides.</para>
-		/// </summary>
 		public static Color ambientEquatorColor
 		{
 			get
@@ -150,9 +121,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Ambient lighting coming from below.</para>
-		/// </summary>
 		public static Color ambientGroundColor
 		{
 			get
@@ -167,9 +135,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>How much the light from the Ambient Source affects the scene.</para>
-		/// </summary>
 		public static extern float ambientIntensity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -178,9 +143,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Flat ambient lighting color.</para>
-		/// </summary>
 		[NativeProperty("AmbientSkyColor")]
 		public static Color ambientLight
 		{
@@ -196,9 +158,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The color used for the sun shadows in the Subtractive lightmode.</para>
-		/// </summary>
 		public static Color subtractiveShadowColor
 		{
 			get
@@ -213,9 +172,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The global skybox to use.</para>
-		/// </summary>
 		[NativeProperty("SkyboxMaterial")]
 		public static extern Material skybox
 		{
@@ -225,9 +181,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The light used by the procedural skybox.</para>
-		/// </summary>
 		public static extern Light sun
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -236,9 +189,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Custom or skybox ambient lighting data.</para>
-		/// </summary>
 		public static SphericalHarmonicsL2 ambientProbe
 		{
 			get
@@ -253,9 +203,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Custom specular reflection cubemap.</para>
-		/// </summary>
 		public static extern Cubemap customReflection
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -264,9 +211,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>How much the skybox / custom cubemap reflection affects the scene.</para>
-		/// </summary>
 		public static extern float reflectionIntensity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -275,9 +219,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of times a reflection includes other reflections.</para>
-		/// </summary>
 		public static extern int reflectionBounces
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -286,9 +227,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Default reflection mode.</para>
-		/// </summary>
 		public static extern DefaultReflectionMode defaultReflectionMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -297,9 +235,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Cubemap resolution for default reflection.</para>
-		/// </summary>
 		public static extern int defaultReflectionResolution
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -308,9 +243,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Size of the Light halos.</para>
-		/// </summary>
 		public static extern float haloStrength
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -319,9 +251,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The intensity of all flares in the scene.</para>
-		/// </summary>
 		public static extern float flareStrength
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -330,9 +259,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The fade speed of all flares in the scene.</para>
-		/// </summary>
 		public static extern float flareFadeSpeed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

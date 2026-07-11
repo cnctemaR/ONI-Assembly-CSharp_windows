@@ -7,11 +7,14 @@ public class LoopingSounds : KMonoBehaviour
 {
 	public bool IsSoundPlaying(string path)
 	{
-		foreach (LoopingSounds.LoopingSoundEvent loopingSoundEvent in this.loopingSounds)
+		using (List<LoopingSounds.LoopingSoundEvent>.Enumerator enumerator = this.loopingSounds.GetEnumerator())
 		{
-			if (loopingSoundEvent.asset == path)
+			while (enumerator.MoveNext())
 			{
-				return true;
+				if (enumerator.Current.asset == path)
+				{
+					return true;
+				}
 			}
 		}
 		return false;
@@ -19,7 +22,7 @@ public class LoopingSounds : KMonoBehaviour
 
 	public bool StartSound(string asset, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, bool ignore_pause = false, bool enable_camera_scaled_position = true)
 	{
-		if (asset == null || asset == string.Empty)
+		if (asset == null || asset == "")
 		{
 			global::Debug.LogWarning("Missing sound");
 			return false;
@@ -50,7 +53,7 @@ public class LoopingSounds : KMonoBehaviour
 
 	public bool StartSound(string asset)
 	{
-		if (asset == null || asset == string.Empty)
+		if (asset == null || asset == "")
 		{
 			global::Debug.LogWarning("Missing sound");
 			return false;
@@ -81,7 +84,7 @@ public class LoopingSounds : KMonoBehaviour
 
 	public bool StartSound(string asset, bool pause_on_game_pause = true, bool enable_culling = true, bool enable_camera_scaled_position = true)
 	{
-		if (asset == null || asset == string.Empty)
+		if (asset == null || asset == "")
 		{
 			global::Debug.LogWarning("Missing sound");
 			return false;
@@ -159,7 +162,7 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				this.StopSoundAtIndex(i);
 				this.loopingSounds.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}
@@ -205,8 +208,7 @@ public class LoopingSounds : KMonoBehaviour
 		Vector2 vector = base.transform.GetPosition();
 		for (int i = 0; i < events.Count; i++)
 		{
-			AnimEvent animEvent = events[i];
-			SoundEvent soundEvent = animEvent as SoundEvent;
+			SoundEvent soundEvent = events[i] as SoundEvent;
 			if (soundEvent == null || soundEvent.sound == null)
 			{
 				return;

@@ -20,11 +20,9 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 		if (cavityForCell != null && cavityForCell.room != null)
 		{
 			this.OnUpdateRoom(cavityForCell.room);
+			return;
 		}
-		else
-		{
-			this.OnUpdateRoom(null);
-		}
+		this.OnUpdateRoom(null);
 	}
 
 	public bool IsInCorrectRoom()
@@ -41,7 +39,7 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 		if (this.requirement == RoomTracker.Requirement.Required || this.requirement == RoomTracker.Requirement.CustomRequired)
 		{
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(cell);
-			if (((cavityForCell == null) ? null : cavityForCell.room) == null)
+			if (((cavityForCell != null) ? cavityForCell.room : null) == null)
 			{
 				return false;
 			}
@@ -52,28 +50,28 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 	private void OnUpdateRoom(object data)
 	{
 		this.room = (Room)data;
-		if (this.room == null || this.room.roomType.Id != this.requiredRoomType)
-		{
-			switch (this.requirement)
-			{
-			case RoomTracker.Requirement.TrackingOnly:
-				this.statusItemGuid = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusItemGuid, false);
-				break;
-			case RoomTracker.Requirement.Recommended:
-				this.statusItemGuid = base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.RequiredRoom, Db.Get().BuildingStatusItems.NotInRecommendedRoom, this.requiredRoomType);
-				break;
-			case RoomTracker.Requirement.Required:
-				this.statusItemGuid = base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.RequiredRoom, Db.Get().BuildingStatusItems.NotInRequiredRoom, this.requiredRoomType);
-				break;
-			case RoomTracker.Requirement.CustomRecommended:
-			case RoomTracker.Requirement.CustomRequired:
-				this.statusItemGuid = base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.RequiredRoom, Db.Get().BuildingStatusItems.Get(this.customStatusItemID), this.requiredRoomType);
-				break;
-			}
-		}
-		else
+		if (this.room != null && !(this.room.roomType.Id != this.requiredRoomType))
 		{
 			this.statusItemGuid = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusItemGuid, false);
+			return;
+		}
+		switch (this.requirement)
+		{
+		case RoomTracker.Requirement.TrackingOnly:
+			this.statusItemGuid = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusItemGuid, false);
+			return;
+		case RoomTracker.Requirement.Recommended:
+			this.statusItemGuid = base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.RequiredRoom, Db.Get().BuildingStatusItems.NotInRecommendedRoom, this.requiredRoomType);
+			return;
+		case RoomTracker.Requirement.Required:
+			this.statusItemGuid = base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.RequiredRoom, Db.Get().BuildingStatusItems.NotInRequiredRoom, this.requiredRoomType);
+			return;
+		case RoomTracker.Requirement.CustomRecommended:
+		case RoomTracker.Requirement.CustomRequired:
+			this.statusItemGuid = base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.RequiredRoom, Db.Get().BuildingStatusItems.Get(this.customStatusItemID), this.requiredRoomType);
+			return;
+		default:
+			return;
 		}
 	}
 

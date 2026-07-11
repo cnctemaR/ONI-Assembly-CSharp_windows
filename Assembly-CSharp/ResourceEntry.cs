@@ -7,7 +7,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	protected override void OnPrefabInit()
 	{
@@ -67,8 +67,8 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 	public void GetAmounts(EdiblesManager.FoodInfo food_info, bool doExtras, out float available, out float total, out float reserved)
 	{
 		available = WorldInventory.Instance.GetAmount(this.Resource);
-		total = ((!doExtras) ? 0f : WorldInventory.Instance.GetTotalAmount(this.Resource));
-		reserved = ((!doExtras) ? 0f : MaterialNeeds.Instance.GetAmount(this.Resource));
+		total = (doExtras ? WorldInventory.Instance.GetTotalAmount(this.Resource) : 0f);
+		reserved = (doExtras ? MaterialNeeds.Instance.GetAmount(this.Resource) : 0f);
 		if (food_info != null)
 		{
 			available *= food_info.CaloriesPerUnit;
@@ -79,7 +79,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 
 	private void GetAmounts(bool doExtras, out float available, out float total, out float reserved)
 	{
-		EdiblesManager.FoodInfo foodInfo = ((this.Measure != GameUtil.MeasureUnit.kcal) ? null : EdiblesManager.GetFoodInfo(this.Resource.Name));
+		EdiblesManager.FoodInfo foodInfo = ((this.Measure == GameUtil.MeasureUnit.kcal) ? EdiblesManager.GetFoodInfo(this.Resource.Name) : null);
 		this.GetAmounts(foodInfo, doExtras, out available, out total, out reserved);
 	}
 
@@ -121,8 +121,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		float num2;
 		float num3;
 		this.GetAmounts(true, out num, out num2, out num3);
-		string text = this.NameLabel.text + "\n";
-		return text + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
+		return this.NameLabel.text + "\n" + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
 	}
 
 	public void SetName(string name)
@@ -190,7 +189,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		Element element = ElementLoader.FindElementByName(this.Resource.Name);
 		if (element != null)
 		{
-			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, string.Empty);
+			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, "");
 			if (uispriteFromMultiObjectAnim != null)
 			{
 				this.image.sprite = uispriteFromMultiObjectAnim;

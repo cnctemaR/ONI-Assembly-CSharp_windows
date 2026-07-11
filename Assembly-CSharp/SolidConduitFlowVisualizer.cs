@@ -77,12 +77,11 @@ public class SolidConduitFlowVisualizer
 			{
 				num = 1f;
 			}
-			int num2 = (int)(this.animTime / (1.0 / (double)this.tuning.framesPerSecond)) % (int)this.tuning.spriteCount;
-			float num3 = (float)num2 * (1f / this.tuning.spriteCount);
+			float num2 = (float)((int)(this.animTime / (1.0 / (double)this.tuning.framesPerSecond)) % (int)this.tuning.spriteCount) * (1f / this.tuning.spriteCount);
 			this.movingBallMesh.Begin();
 			this.movingBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
 			this.movingBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
-			this.movingBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, num3));
+			this.movingBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, num2));
 			this.movingBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
 			this.staticBallMesh.Begin();
 			this.staticBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
@@ -91,34 +90,33 @@ public class SolidConduitFlowVisualizer
 			this.staticBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
 			for (int j = 0; j < this.flowManager.GetSOAInfo().NumEntries; j++)
 			{
-				int cell = this.flowManager.GetSOAInfo().GetCell(j);
-				Vector2I vector2I3 = Grid.CellToXY(cell);
+				Vector2I vector2I3 = Grid.CellToXY(this.flowManager.GetSOAInfo().GetCell(j));
 				if (!(vector2I3 < vector2I) && !(vector2I3 > vector2I2))
 				{
 					SolidConduitFlow.Conduit conduit = this.flowManager.GetSOAInfo().GetConduit(j);
 					SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this.flowManager);
 					SolidConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(this.flowManager);
-					bool flag = lastFlowInfo.direction != SolidConduitFlow.FlowDirection.None;
+					bool flag = lastFlowInfo.direction > SolidConduitFlow.FlowDirection.None;
 					if (flag)
 					{
-						int cell2 = conduit.GetCell(this.flowManager);
-						int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
-						Vector2I vector2I4 = Grid.CellToXY(cell2);
+						int cell = conduit.GetCell(this.flowManager);
+						int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
+						Vector2I vector2I4 = Grid.CellToXY(cell);
 						Vector2I vector2I5 = Grid.CellToXY(cellFromDirection);
 						Vector2 vector = vector2I4;
-						if (cell2 != -1)
+						if (cell != -1)
 						{
 							vector = Vector2.Lerp(new Vector2((float)vector2I4.x, (float)vector2I4.y), new Vector2((float)vector2I5.x, (float)vector2I5.y), lerp_percent);
 						}
-						float num4 = ((!this.insulatedCells.Contains(cell2)) ? 0f : 1f);
-						float num5 = ((!this.insulatedCells.Contains(cellFromDirection)) ? 0f : 1f);
-						float num6 = Mathf.Lerp(num4, num5, lerp_percent);
-						Color color = this.GetBackgroundColor(num6);
+						float num3 = (this.insulatedCells.Contains(cell) ? 1f : 0f);
+						float num4 = (this.insulatedCells.Contains(cellFromDirection) ? 1f : 0f);
+						float num5 = Mathf.Lerp(num3, num4, lerp_percent);
+						Color color = this.GetBackgroundColor(num5);
 						Vector2I vector2I6 = new Vector2I(0, 0);
 						Vector2I vector2I7 = new Vector2I(0, 1);
 						Vector2I vector2I8 = new Vector2I(1, 0);
 						Vector2I vector2I9 = new Vector2I(1, 1);
-						float num7 = 0f;
+						float num6 = 0f;
 						if (this.showContents)
 						{
 							if (flag != initialContents.pickupableHandle.IsValid())
@@ -129,15 +127,14 @@ public class SolidConduitFlowVisualizer
 						else
 						{
 							element = null;
-							int num8 = Grid.PosToCell(new Vector3(vector.x + SolidConduitFlowVisualizer.GRID_OFFSET.x, vector.y + SolidConduitFlowVisualizer.GRID_OFFSET.y, 0f));
-							if (num8 == this.highlightedCell)
+							if (Grid.PosToCell(new Vector3(vector.x + SolidConduitFlowVisualizer.GRID_OFFSET.x, vector.y + SolidConduitFlowVisualizer.GRID_OFFSET.y, 0f)) == this.highlightedCell)
 							{
-								num7 = 1f;
+								num6 = 1f;
 							}
 						}
 						Color32 contentsColor = this.GetContentsColor(element, color);
-						float num9 = 1f;
-						this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num9, 1f, num7, vector2I6, vector2I7, vector2I8, vector2I9);
+						float num7 = 1f;
+						this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num7, 1f, num6, vector2I6, vector2I7, vector2I8, vector2I9);
 						if (trigger_audio)
 						{
 							this.AddAudioSource(conduit, position);
@@ -145,31 +142,30 @@ public class SolidConduitFlowVisualizer
 					}
 					if (initialContents.pickupableHandle.IsValid() && !flag)
 					{
-						int cell3 = conduit.GetCell(this.flowManager);
-						Vector2I vector2I10 = Grid.CellToXY(cell3);
-						Vector2 vector2 = vector2I10;
-						float num10 = ((!this.insulatedCells.Contains(cell3)) ? 0f : 1f);
-						Vector2I vector2I11 = new Vector2I(0, 0);
-						Vector2I vector2I12 = new Vector2I(0, 1);
-						Vector2I vector2I13 = new Vector2I(1, 0);
-						Vector2I vector2I14 = new Vector2I(1, 1);
-						float num11 = 0f;
-						Color color2 = this.GetBackgroundColor(num10);
-						float num12 = 1f;
+						int cell2 = conduit.GetCell(this.flowManager);
+						Vector2 vector2 = Grid.CellToXY(cell2);
+						float num8 = (this.insulatedCells.Contains(cell2) ? 1f : 0f);
+						Vector2I vector2I10 = new Vector2I(0, 0);
+						Vector2I vector2I11 = new Vector2I(0, 1);
+						Vector2I vector2I12 = new Vector2I(1, 0);
+						Vector2I vector2I13 = new Vector2I(1, 1);
+						float num9 = 0f;
+						Color color2 = this.GetBackgroundColor(num8);
+						float num10 = 1f;
 						if (this.showContents)
 						{
-							this.staticBallMesh.AddQuad(vector2, color2, this.tuning.size * num12, 0f, 0f, vector2I11, vector2I12, vector2I13, vector2I14);
+							this.staticBallMesh.AddQuad(vector2, color2, this.tuning.size * num10, 0f, 0f, vector2I10, vector2I11, vector2I12, vector2I13);
 						}
 						else
 						{
 							element = null;
-							if (cell3 == this.highlightedCell)
+							if (cell2 == this.highlightedCell)
 							{
-								num11 = 1f;
+								num9 = 1f;
 							}
 						}
 						Color32 contentsColor2 = this.GetContentsColor(element, color2);
-						this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num12, 1f, num11, vector2I11, vector2I12, vector2I13, vector2I14);
+						this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num10, 1f, num9, vector2I10, vector2I11, vector2I12, vector2I13);
 					}
 				}
 			}
@@ -185,7 +181,7 @@ public class SolidConduitFlowVisualizer
 	public void ColourizePipeContents(bool show_contents, bool move_to_overlay_layer)
 	{
 		this.showContents = show_contents;
-		this.layer = ((!show_contents || !move_to_overlay_layer) ? 0 : LayerMask.NameToLayer("MaskedOverlay"));
+		this.layer = ((show_contents && move_to_overlay_layer) ? LayerMask.NameToLayer("MaskedOverlay") : 0);
 	}
 
 	private void AddAudioSource(SolidConduitFlow.Conduit conduit, Vector3 camera_pos)
@@ -248,7 +244,9 @@ public class SolidConduitFlowVisualizer
 			SolidConduitFlowVisualizer.AudioInfo audioInfo = list[j];
 			if (audioInfo.distance != float.PositiveInfinity)
 			{
-				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, audioInfo.position, 1f, false);
+				Vector3 position = audioInfo.position;
+				position.z = 0f;
+				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, position, 1f, false);
 				eventInstance.setParameterValue("blobCount", (float)audioInfo.blobCount);
 				eventInstance.setParameterValue("networkCount", (float)num);
 				SoundEvent.EndOneShot(eventInstance);
@@ -261,11 +259,9 @@ public class SolidConduitFlowVisualizer
 		if (insulated)
 		{
 			this.insulatedCells.Add(cell);
+			return;
 		}
-		else
-		{
-			this.insulatedCells.Remove(cell);
-		}
+		this.insulatedCells.Remove(cell);
 	}
 
 	public void SetHighlightedCell(int cell)

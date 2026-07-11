@@ -46,13 +46,10 @@ public class SicknessTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			string text2 = trigger.sourceCallback(base.gameObject, target);
 			SicknessExposureInfo sicknessExposureInfo = new SicknessExposureInfo(sickness.Id, text2);
-			Klei.AI.Sicknesses sicknesses2 = target.GetComponent<MinionModifiers>().sicknesses;
-			sicknesses2.Infect(sicknessExposureInfo);
+			target.GetComponent<MinionModifiers>().sicknesses.Infect(sicknessExposureInfo);
+			return;
 		}
-		else
-		{
-			DebugUtil.DevLogErrorFormat(base.gameObject, "Couldn't find sickness with id [{0}]", new object[] { text });
-		}
+		DebugUtil.DevLogErrorFormat(base.gameObject, "Couldn't find sickness with id [{0}]", new object[] { text });
 	}
 
 	public List<Descriptor> EffectDescriptors(GameObject go)

@@ -1,24 +1,26 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[ComVisible(false)]
+	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class LinkedList<T> : IEnumerable<T>, ICollection, IEnumerable, IDeserializationCallback, ICollection<T>, ISerializable
+	public class LinkedList<T> : ICollection<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
 		public LinkedList()
 		{
-			this.syncRoot = new object();
-			this.first = null;
-			this.count = (this.version = 0U);
 		}
 
 		public LinkedList(IEnumerable<T> collection)
-			: this()
 		{
+			if (collection == null)
+			{
+				throw new ArgumentNullException("collection");
+			}
 			foreach (T t in collection)
 			{
 				this.AddLast(t);
@@ -26,35 +28,36 @@ namespace System.Collections.Generic
 		}
 
 		protected LinkedList(SerializationInfo info, StreamingContext context)
-			: this()
 		{
-			this.si = info;
-			this.syncRoot = new object();
+			this._siInfo = info;
 		}
 
-		void ICollection<T>.Add(T value)
+		public int Count
 		{
-			this.AddLast(value);
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			T[] array2 = array as T[];
-			if (array2 == null)
+			get
 			{
-				throw new ArgumentException("array");
+				return this.count;
 			}
-			this.CopyTo(array2, index);
 		}
 
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		public LinkedListNode<T> First
 		{
-			return this.GetEnumerator();
+			get
+			{
+				return this.head;
+			}
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
+		public LinkedListNode<T> Last
 		{
-			return this.GetEnumerator();
+			get
+			{
+				if (this.head != null)
+				{
+					return this.head.prev;
+				}
+				return null;
+			}
 		}
 
 		bool ICollection<T>.IsReadOnly
@@ -62,6 +65,379 @@ namespace System.Collections.Generic
 			get
 			{
 				return false;
+			}
+		}
+
+		void ICollection<T>.Add(T value)
+		{
+			this.AddLast(value);
+		}
+
+		public LinkedListNode<T> AddAfter(LinkedListNode<T> node, T value)
+		{
+			this.ValidateNode(node);
+			LinkedListNode<T> linkedListNode = new LinkedListNode<T>(node.list, value);
+			this.InternalInsertNodeBefore(node.next, linkedListNode);
+			return linkedListNode;
+		}
+
+		public void AddAfter(LinkedListNode<T> node, LinkedListNode<T> newNode)
+		{
+			this.ValidateNode(node);
+			this.ValidateNewNode(newNode);
+			this.InternalInsertNodeBefore(node.next, newNode);
+			newNode.list = this;
+		}
+
+		public LinkedListNode<T> AddBefore(LinkedListNode<T> node, T value)
+		{
+			this.ValidateNode(node);
+			LinkedListNode<T> linkedListNode = new LinkedListNode<T>(node.list, value);
+			this.InternalInsertNodeBefore(node, linkedListNode);
+			if (node == this.head)
+			{
+				this.head = linkedListNode;
+			}
+			return linkedListNode;
+		}
+
+		public void AddBefore(LinkedListNode<T> node, LinkedListNode<T> newNode)
+		{
+			this.ValidateNode(node);
+			this.ValidateNewNode(newNode);
+			this.InternalInsertNodeBefore(node, newNode);
+			newNode.list = this;
+			if (node == this.head)
+			{
+				this.head = newNode;
+			}
+		}
+
+		public LinkedListNode<T> AddFirst(T value)
+		{
+			LinkedListNode<T> linkedListNode = new LinkedListNode<T>(this, value);
+			if (this.head == null)
+			{
+				this.InternalInsertNodeToEmptyList(linkedListNode);
+			}
+			else
+			{
+				this.InternalInsertNodeBefore(this.head, linkedListNode);
+				this.head = linkedListNode;
+			}
+			return linkedListNode;
+		}
+
+		public void AddFirst(LinkedListNode<T> node)
+		{
+			this.ValidateNewNode(node);
+			if (this.head == null)
+			{
+				this.InternalInsertNodeToEmptyList(node);
+			}
+			else
+			{
+				this.InternalInsertNodeBefore(this.head, node);
+				this.head = node;
+			}
+			node.list = this;
+		}
+
+		public LinkedListNode<T> AddLast(T value)
+		{
+			LinkedListNode<T> linkedListNode = new LinkedListNode<T>(this, value);
+			if (this.head == null)
+			{
+				this.InternalInsertNodeToEmptyList(linkedListNode);
+			}
+			else
+			{
+				this.InternalInsertNodeBefore(this.head, linkedListNode);
+			}
+			return linkedListNode;
+		}
+
+		public void AddLast(LinkedListNode<T> node)
+		{
+			this.ValidateNewNode(node);
+			if (this.head == null)
+			{
+				this.InternalInsertNodeToEmptyList(node);
+			}
+			else
+			{
+				this.InternalInsertNodeBefore(this.head, node);
+			}
+			node.list = this;
+		}
+
+		public void Clear()
+		{
+			LinkedListNode<T> next = this.head;
+			while (next != null)
+			{
+				LinkedListNode<T> linkedListNode = next;
+				next = next.Next;
+				linkedListNode.Invalidate();
+			}
+			this.head = null;
+			this.count = 0;
+			this.version++;
+		}
+
+		public bool Contains(T value)
+		{
+			return this.Find(value) != null;
+		}
+
+		public void CopyTo(T[] array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
+			}
+			if (index > array.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", index, "Must be less than or equal to the size of the collection.");
+			}
+			if (array.Length - index < this.Count)
+			{
+				throw new ArgumentException("Insufficient space in the target location to copy the information.");
+			}
+			LinkedListNode<T> next = this.head;
+			if (next != null)
+			{
+				do
+				{
+					array[index++] = next.item;
+					next = next.next;
+				}
+				while (next != this.head);
+			}
+		}
+
+		public LinkedListNode<T> Find(T value)
+		{
+			LinkedListNode<T> linkedListNode = this.head;
+			EqualityComparer<T> @default = EqualityComparer<T>.Default;
+			if (linkedListNode != null)
+			{
+				if (value != null)
+				{
+					while (!@default.Equals(linkedListNode.item, value))
+					{
+						linkedListNode = linkedListNode.next;
+						if (linkedListNode == this.head)
+						{
+							goto IL_005A;
+						}
+					}
+					return linkedListNode;
+				}
+				while (linkedListNode.item != null)
+				{
+					linkedListNode = linkedListNode.next;
+					if (linkedListNode == this.head)
+					{
+						goto IL_005A;
+					}
+				}
+				return linkedListNode;
+			}
+			IL_005A:
+			return null;
+		}
+
+		public LinkedListNode<T> FindLast(T value)
+		{
+			if (this.head == null)
+			{
+				return null;
+			}
+			LinkedListNode<T> prev = this.head.prev;
+			LinkedListNode<T> linkedListNode = prev;
+			EqualityComparer<T> @default = EqualityComparer<T>.Default;
+			if (linkedListNode != null)
+			{
+				if (value != null)
+				{
+					while (!@default.Equals(linkedListNode.item, value))
+					{
+						linkedListNode = linkedListNode.prev;
+						if (linkedListNode == prev)
+						{
+							goto IL_0061;
+						}
+					}
+					return linkedListNode;
+				}
+				while (linkedListNode.item != null)
+				{
+					linkedListNode = linkedListNode.prev;
+					if (linkedListNode == prev)
+					{
+						goto IL_0061;
+					}
+				}
+				return linkedListNode;
+			}
+			IL_0061:
+			return null;
+		}
+
+		public LinkedList<T>.Enumerator GetEnumerator()
+		{
+			return new LinkedList<T>.Enumerator(this);
+		}
+
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
+		public bool Remove(T value)
+		{
+			LinkedListNode<T> linkedListNode = this.Find(value);
+			if (linkedListNode != null)
+			{
+				this.InternalRemoveNode(linkedListNode);
+				return true;
+			}
+			return false;
+		}
+
+		public void Remove(LinkedListNode<T> node)
+		{
+			this.ValidateNode(node);
+			this.InternalRemoveNode(node);
+		}
+
+		public void RemoveFirst()
+		{
+			if (this.head == null)
+			{
+				throw new InvalidOperationException("The LinkedList is empty.");
+			}
+			this.InternalRemoveNode(this.head);
+		}
+
+		public void RemoveLast()
+		{
+			if (this.head == null)
+			{
+				throw new InvalidOperationException("The LinkedList is empty.");
+			}
+			this.InternalRemoveNode(this.head.prev);
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			info.AddValue("Version", this.version);
+			info.AddValue("Count", this.count);
+			if (this.count != 0)
+			{
+				T[] array = new T[this.count];
+				this.CopyTo(array, 0);
+				info.AddValue("Data", array, typeof(T[]));
+			}
+		}
+
+		public virtual void OnDeserialization(object sender)
+		{
+			if (this._siInfo == null)
+			{
+				return;
+			}
+			int @int = this._siInfo.GetInt32("Version");
+			if (this._siInfo.GetInt32("Count") != 0)
+			{
+				T[] array = (T[])this._siInfo.GetValue("Data", typeof(T[]));
+				if (array == null)
+				{
+					throw new SerializationException("The values for this dictionary are missing.");
+				}
+				for (int i = 0; i < array.Length; i++)
+				{
+					this.AddLast(array[i]);
+				}
+			}
+			else
+			{
+				this.head = null;
+			}
+			this.version = @int;
+			this._siInfo = null;
+		}
+
+		private void InternalInsertNodeBefore(LinkedListNode<T> node, LinkedListNode<T> newNode)
+		{
+			newNode.next = node;
+			newNode.prev = node.prev;
+			node.prev.next = newNode;
+			node.prev = newNode;
+			this.version++;
+			this.count++;
+		}
+
+		private void InternalInsertNodeToEmptyList(LinkedListNode<T> newNode)
+		{
+			newNode.next = newNode;
+			newNode.prev = newNode;
+			this.head = newNode;
+			this.version++;
+			this.count++;
+		}
+
+		internal void InternalRemoveNode(LinkedListNode<T> node)
+		{
+			if (node.next == node)
+			{
+				this.head = null;
+			}
+			else
+			{
+				node.next.prev = node.prev;
+				node.prev.next = node.next;
+				if (this.head == node)
+				{
+					this.head = node.next;
+				}
+			}
+			node.Invalidate();
+			this.count--;
+			this.version++;
+		}
+
+		internal void ValidateNewNode(LinkedListNode<T> node)
+		{
+			if (node == null)
+			{
+				throw new ArgumentNullException("node");
+			}
+			if (node.list != null)
+			{
+				throw new InvalidOperationException("The LinkedList node already belongs to a LinkedList.");
+			}
+		}
+
+		internal void ValidateNode(LinkedListNode<T> node)
+		{
+			if (node == null)
+			{
+				throw new ArgumentNullException("node");
+			}
+			if (node.list != this)
+			{
+				throw new InvalidOperationException("The LinkedList node does not belong to current LinkedList.");
 			}
 		}
 
@@ -77,504 +453,187 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				return this.syncRoot;
-			}
-		}
-
-		private void VerifyReferencedNode(LinkedListNode<T> node)
-		{
-			if (node == null)
-			{
-				throw new ArgumentNullException("node");
-			}
-			if (node.List != this)
-			{
-				throw new InvalidOperationException();
-			}
-		}
-
-		private static void VerifyBlankNode(LinkedListNode<T> newNode)
-		{
-			if (newNode == null)
-			{
-				throw new ArgumentNullException("newNode");
-			}
-			if (newNode.List != null)
-			{
-				throw new InvalidOperationException();
-			}
-		}
-
-		public LinkedListNode<T> AddAfter(LinkedListNode<T> node, T value)
-		{
-			this.VerifyReferencedNode(node);
-			LinkedListNode<T> linkedListNode = new LinkedListNode<T>(this, value, node, node.forward);
-			this.count += 1U;
-			this.version += 1U;
-			return linkedListNode;
-		}
-
-		public void AddAfter(LinkedListNode<T> node, LinkedListNode<T> newNode)
-		{
-			this.VerifyReferencedNode(node);
-			LinkedList<T>.VerifyBlankNode(newNode);
-			newNode.InsertBetween(node, node.forward, this);
-			this.count += 1U;
-			this.version += 1U;
-		}
-
-		public LinkedListNode<T> AddBefore(LinkedListNode<T> node, T value)
-		{
-			this.VerifyReferencedNode(node);
-			LinkedListNode<T> linkedListNode = new LinkedListNode<T>(this, value, node.back, node);
-			this.count += 1U;
-			this.version += 1U;
-			if (node == this.first)
-			{
-				this.first = linkedListNode;
-			}
-			return linkedListNode;
-		}
-
-		public void AddBefore(LinkedListNode<T> node, LinkedListNode<T> newNode)
-		{
-			this.VerifyReferencedNode(node);
-			LinkedList<T>.VerifyBlankNode(newNode);
-			newNode.InsertBetween(node.back, node, this);
-			this.count += 1U;
-			this.version += 1U;
-			if (node == this.first)
-			{
-				this.first = newNode;
-			}
-		}
-
-		public void AddFirst(LinkedListNode<T> node)
-		{
-			LinkedList<T>.VerifyBlankNode(node);
-			if (this.first == null)
-			{
-				node.SelfReference(this);
-			}
-			else
-			{
-				node.InsertBetween(this.first.back, this.first, this);
-			}
-			this.count += 1U;
-			this.version += 1U;
-			this.first = node;
-		}
-
-		public LinkedListNode<T> AddFirst(T value)
-		{
-			LinkedListNode<T> linkedListNode;
-			if (this.first == null)
-			{
-				linkedListNode = new LinkedListNode<T>(this, value);
-			}
-			else
-			{
-				linkedListNode = new LinkedListNode<T>(this, value, this.first.back, this.first);
-			}
-			this.count += 1U;
-			this.version += 1U;
-			this.first = linkedListNode;
-			return linkedListNode;
-		}
-
-		public LinkedListNode<T> AddLast(T value)
-		{
-			LinkedListNode<T> linkedListNode;
-			if (this.first == null)
-			{
-				linkedListNode = new LinkedListNode<T>(this, value);
-				this.first = linkedListNode;
-			}
-			else
-			{
-				linkedListNode = new LinkedListNode<T>(this, value, this.first.back, this.first);
-			}
-			this.count += 1U;
-			this.version += 1U;
-			return linkedListNode;
-		}
-
-		public void AddLast(LinkedListNode<T> node)
-		{
-			LinkedList<T>.VerifyBlankNode(node);
-			if (this.first == null)
-			{
-				node.SelfReference(this);
-				this.first = node;
-			}
-			else
-			{
-				node.InsertBetween(this.first.back, this.first, this);
-			}
-			this.count += 1U;
-			this.version += 1U;
-		}
-
-		public void Clear()
-		{
-			while (this.first != null)
-			{
-				this.RemoveLast();
-			}
-		}
-
-		public bool Contains(T value)
-		{
-			LinkedListNode<T> forward = this.first;
-			if (forward == null)
-			{
-				return false;
-			}
-			while (!value.Equals(forward.Value))
-			{
-				forward = forward.forward;
-				if (forward == this.first)
+				if (this._syncRoot == null)
 				{
-					return false;
+					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
 				}
+				return this._syncRoot;
 			}
-			return true;
 		}
 
-		public void CopyTo(T[] array, int index)
+		void ICollection.CopyTo(Array array, int index)
 		{
 			if (array == null)
 			{
 				throw new ArgumentNullException("array");
 			}
-			if (index < array.GetLowerBound(0))
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException("array", "Array is multidimensional");
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
-			if ((long)(array.Length - index + array.GetLowerBound(0)) < (long)((ulong)this.count))
+			if (array.GetLowerBound(0) != 0)
 			{
-				throw new ArgumentException("number of items exceeds capacity");
+				throw new ArgumentException("The lower bound of target array must be zero.", "array");
 			}
-			LinkedListNode<T> forward = this.first;
-			if (this.first == null)
+			if (index < 0)
 			{
+				throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
+			}
+			if (array.Length - index < this.Count)
+			{
+				throw new ArgumentException("Insufficient space in the target location to copy the information.");
+			}
+			T[] array2 = array as T[];
+			if (array2 != null)
+			{
+				this.CopyTo(array2, index);
 				return;
 			}
-			do
+			object[] array3 = array as object[];
+			if (array3 == null)
 			{
-				array[index] = forward.Value;
-				index++;
-				forward = forward.forward;
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
 			}
-			while (forward != this.first);
-		}
-
-		public LinkedListNode<T> Find(T value)
-		{
-			LinkedListNode<T> forward = this.first;
-			if (forward == null)
+			LinkedListNode<T> next = this.head;
+			try
 			{
-				return null;
-			}
-			while ((value != null || forward.Value != null) && (value == null || !value.Equals(forward.Value)))
-			{
-				forward = forward.forward;
-				if (forward == this.first)
+				if (next != null)
 				{
-					return null;
-				}
-			}
-			return forward;
-		}
-
-		public LinkedListNode<T> FindLast(T value)
-		{
-			LinkedListNode<T> back = this.first;
-			if (back == null)
-			{
-				return null;
-			}
-			for (;;)
-			{
-				back = back.back;
-				if (value.Equals(back.Value))
-				{
-					break;
-				}
-				if (back == this.first)
-				{
-					goto Block_3;
-				}
-			}
-			return back;
-			Block_3:
-			return null;
-		}
-
-		public LinkedList<T>.Enumerator GetEnumerator()
-		{
-			return new LinkedList<T>.Enumerator(this);
-		}
-
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			T[] array = new T[this.count];
-			this.CopyTo(array, 0);
-			info.AddValue("DataArray", array, typeof(T[]));
-			info.AddValue("version", this.version);
-		}
-
-		public virtual void OnDeserialization(object sender)
-		{
-			if (this.si != null)
-			{
-				T[] array = (T[])this.si.GetValue("DataArray", typeof(T[]));
-				if (array != null)
-				{
-					foreach (T t in array)
+					do
 					{
-						this.AddLast(t);
+						array3[index++] = next.item;
+						next = next.next;
 					}
+					while (next != this.head);
 				}
-				this.version = this.si.GetUInt32("version");
-				this.si = null;
+			}
+			catch (ArrayTypeMismatchException)
+			{
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
 			}
 		}
 
-		public bool Remove(T value)
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			LinkedListNode<T> linkedListNode = this.Find(value);
-			if (linkedListNode == null)
-			{
-				return false;
-			}
-			this.Remove(linkedListNode);
-			return true;
+			return this.GetEnumerator();
 		}
 
-		public void Remove(LinkedListNode<T> node)
-		{
-			this.VerifyReferencedNode(node);
-			this.count -= 1U;
-			if (this.count == 0U)
-			{
-				this.first = null;
-			}
-			if (node == this.first)
-			{
-				this.first = this.first.forward;
-			}
-			this.version += 1U;
-			node.Detach();
-		}
+		internal LinkedListNode<T> head;
 
-		public void RemoveFirst()
-		{
-			if (this.first != null)
-			{
-				this.Remove(this.first);
-			}
-		}
+		internal int count;
 
-		public void RemoveLast()
-		{
-			if (this.first != null)
-			{
-				this.Remove(this.first.back);
-			}
-		}
+		internal int version;
 
-		public int Count
-		{
-			get
-			{
-				return (int)this.count;
-			}
-		}
+		private object _syncRoot;
 
-		public LinkedListNode<T> First
-		{
-			get
-			{
-				return this.first;
-			}
-		}
+		private SerializationInfo _siInfo;
 
-		public LinkedListNode<T> Last
-		{
-			get
-			{
-				return (this.first == null) ? null : this.first.back;
-			}
-		}
+		private const string VersionName = "Version";
 
-		private const string DataArrayKey = "DataArray";
+		private const string CountName = "Count";
 
-		private const string VersionKey = "version";
-
-		private uint count;
-
-		private uint version;
-
-		private object syncRoot;
-
-		internal LinkedListNode<T> first;
-
-		internal SerializationInfo si;
+		private const string ValuesName = "Data";
 
 		[Serializable]
-		public struct Enumerator : IEnumerator, IDisposable, IEnumerator<T>, IDeserializationCallback, ISerializable
+		public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator, ISerializable, IDeserializationCallback
 		{
-			internal Enumerator(SerializationInfo info, StreamingContext context)
+			internal Enumerator(LinkedList<T> list)
 			{
-				this.si = info;
-				this.list = (LinkedList<T>)this.si.GetValue("list", typeof(LinkedList<T>));
-				this.index = this.si.GetInt32("index");
-				this.version = this.si.GetUInt32("version");
-				this.current = null;
+				this._list = list;
+				this._version = list.version;
+				this._node = list.head;
+				this._current = default(T);
+				this._index = 0;
 			}
 
-			internal Enumerator(LinkedList<T> parent)
+			private Enumerator(SerializationInfo info, StreamingContext context)
 			{
-				this.si = null;
-				this.list = parent;
-				this.current = null;
-				this.index = -1;
-				this.version = parent.version;
-			}
-
-			object IEnumerator.Current
-			{
-				get
-				{
-					return this.Current;
-				}
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (this.list == null)
-				{
-					throw new ObjectDisposedException(null);
-				}
-				if (this.version != this.list.version)
-				{
-					throw new InvalidOperationException("list modified");
-				}
-				this.current = null;
-				this.index = -1;
-			}
-
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-			void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-			{
-				if (this.list == null)
-				{
-					throw new ObjectDisposedException(null);
-				}
-				info.AddValue("version", this.version);
-				info.AddValue("index", this.index);
-			}
-
-			void IDeserializationCallback.OnDeserialization(object sender)
-			{
-				if (this.si == null)
-				{
-					return;
-				}
-				if (this.list.si != null)
-				{
-					((IDeserializationCallback)this.list).OnDeserialization(this);
-				}
-				this.si = null;
-				if (this.version == this.list.version && this.index != -1)
-				{
-					LinkedListNode<T> linkedListNode = this.list.First;
-					for (int i = 0; i < this.index; i++)
-					{
-						linkedListNode = linkedListNode.forward;
-					}
-					this.current = linkedListNode;
-				}
+				throw new PlatformNotSupportedException();
 			}
 
 			public T Current
 			{
 				get
 				{
-					if (this.list == null)
+					return this._current;
+				}
+			}
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					if (this._index == 0 || this._index == this._list.Count + 1)
 					{
-						throw new ObjectDisposedException(null);
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					if (this.current == null)
-					{
-						throw new InvalidOperationException();
-					}
-					return this.current.Value;
+					return this._current;
 				}
 			}
 
 			public bool MoveNext()
 			{
-				if (this.list == null)
+				if (this._version != this._list.version)
 				{
-					throw new ObjectDisposedException(null);
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				if (this.version != this.list.version)
+				if (this._node == null)
 				{
-					throw new InvalidOperationException("list modified");
-				}
-				if (this.current == null)
-				{
-					this.current = this.list.first;
-				}
-				else
-				{
-					this.current = this.current.forward;
-					if (this.current == this.list.first)
-					{
-						this.current = null;
-					}
-				}
-				if (this.current == null)
-				{
-					this.index = -1;
+					this._index = this._list.Count + 1;
 					return false;
 				}
-				this.index++;
+				this._index++;
+				this._current = this._node.item;
+				this._node = this._node.next;
+				if (this._node == this._list.head)
+				{
+					this._node = null;
+				}
 				return true;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (this._version != this._list.version)
+				{
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+				}
+				this._current = default(T);
+				this._node = this._list.head;
+				this._index = 0;
 			}
 
 			public void Dispose()
 			{
-				if (this.list == null)
-				{
-					throw new ObjectDisposedException(null);
-				}
-				this.current = null;
-				this.list = null;
 			}
 
-			private const string VersionKey = "version";
+			void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+			{
+				throw new PlatformNotSupportedException();
+			}
 
-			private const string IndexKey = "index";
+			void IDeserializationCallback.OnDeserialization(object sender)
+			{
+				throw new PlatformNotSupportedException();
+			}
 
-			private const string ListKey = "list";
+			private LinkedList<T> _list;
 
-			private LinkedList<T> list;
+			private LinkedListNode<T> _node;
 
-			private LinkedListNode<T> current;
+			private int _version;
 
-			private int index;
+			private T _current;
 
-			private uint version;
+			private int _index;
 
-			private SerializationInfo si;
+			private const string LinkedListName = "LinkedList";
+
+			private const string CurrentValueName = "Current";
+
+			private const string VersionName = "Version";
+
+			private const string IndexName = "Index";
 		}
 	}
 }

@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The joint attempts to move a Rigidbody2D to a specific target position.</para>
-	/// </summary>
 	[NativeHeader("Modules/Physics2D/TargetJoint2D.h")]
 	public sealed class TargetJoint2D : Joint2D
 	{
-		/// <summary>
-		///   <para>The local-space anchor on the rigid-body the joint is attached to.</para>
-		/// </summary>
 		public Vector2 anchor
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The world-space position that the joint will attempt to move the body to.</para>
-		/// </summary>
 		public Vector2 target
 		{
 			get
@@ -44,9 +35,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Should the target be calculated automatically?</para>
-		/// </summary>
 		public extern bool autoConfigureTarget
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -55,9 +43,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The maximum force that can be generated when trying to maintain the target joint constraint.</para>
-		/// </summary>
 		public extern float maxForce
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -66,9 +51,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The amount by which the target spring force is reduced in proportion to the movement speed.</para>
-		/// </summary>
 		public extern float dampingRatio
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -77,9 +59,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The frequency at which the target spring oscillates around the target position.</para>
-		/// </summary>
 		public extern float frequency
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

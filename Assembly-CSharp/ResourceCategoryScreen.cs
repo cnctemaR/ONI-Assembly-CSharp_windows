@@ -17,6 +17,7 @@ public class ResourceCategoryScreen : KScreen
 		this.ConsumeMouseScroll = true;
 		MultiToggle hiderButton = this.HiderButton;
 		hiderButton.onClick = (global::System.Action)Delegate.Combine(hiderButton.onClick, new global::System.Action(this.OnHiderClick));
+		this.OnHiderClick();
 		this.CreateTagSetHeaders(GameTags.MaterialCategories, GameUtil.MeasureUnit.mass);
 		this.CreateTagSetHeaders(GameTags.CalorieCategories, GameUtil.MeasureUnit.kcal);
 		this.CreateTagSetHeaders(GameTags.UnitCategories, GameUtil.MeasureUnit.quantity);
@@ -43,11 +44,9 @@ public class ResourceCategoryScreen : KScreen
 		if (this.HiderButton.CurrentState == 0)
 		{
 			this.targetContentHideHeight = 0f;
+			return;
 		}
-		else
-		{
-			this.targetContentHideHeight = Mathf.Min(((float)Screen.height - this.maxHeightPadding) / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetCanvasScale(), this.CategoryContainer.rectTransform().rect.height);
-		}
+		this.targetContentHideHeight = Mathf.Min(((float)Screen.height - this.maxHeightPadding) / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetCanvasScale(), this.CategoryContainer.rectTransform().rect.height);
 	}
 
 	private void Update()

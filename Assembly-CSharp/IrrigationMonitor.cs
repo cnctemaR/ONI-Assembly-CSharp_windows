@@ -20,9 +20,10 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 		});
 		this.replanted.Enter(delegate(IrrigationMonitor.Instance smi)
 		{
-			foreach (ManualDeliveryKG manualDeliveryKG in smi.gameObject.GetComponents<ManualDeliveryKG>())
+			ManualDeliveryKG[] components = smi.gameObject.GetComponents<ManualDeliveryKG>();
+			for (int i = 0; i < components.Length; i++)
 			{
-				manualDeliveryKG.Pause(false, "replanted");
+				components[i].Pause(false, "replanted");
 			}
 			smi.UpdateIrrigation(0.033333335f);
 		}).Target(this.resourceStorage).EventHandler(GameHashes.OnStorageChange, delegate(IrrigationMonitor.Instance smi)
@@ -74,7 +75,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 	{
 		public List<Descriptor> GetDescriptors(GameObject obj)
 		{
-			if (this.consumedElements.Length > 0)
+			if (this.consumedElements.Length != 0)
 			{
 				List<Descriptor> list = new List<Descriptor>();
 				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
@@ -112,20 +113,20 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 	public new class Instance : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.GameInstance, IWiltCause
 	{
-		public Instance(IStateMachineTarget master, IrrigationMonitor.Def def)
-			: base(master, def)
-		{
-			this.AddAmounts(base.gameObject);
-			this.MakeModifiers();
-			master.Subscribe(1309017699, new Action<object>(this.SetStorage));
-		}
-
 		public float total_fertilizer_available
 		{
 			get
 			{
 				return this.total_available_mass;
 			}
+		}
+
+		public Instance(IStateMachineTarget master, IrrigationMonitor.Def def)
+			: base(master, def)
+		{
+			this.AddAmounts(base.gameObject);
+			this.MakeModifiers();
+			master.Subscribe(1309017699, new Action<object>(this.SetStorage));
 		}
 
 		public virtual StatusItem GetStarvedStatusItem()
@@ -193,42 +194,39 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				if (!(gameObject == null))
 				{
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					if (!(component == null))
+					if (!(component == null) && !(gameObject.GetComponent<ElementChunk>() == null))
 					{
-						if (!(gameObject.GetComponent<ElementChunk>() == null))
+						if (validate_solids)
 						{
-							if (validate_solids)
+							if (!component.Element.IsSolid)
 							{
-								if (!component.Element.IsSolid)
+								goto IL_00C1;
+							}
+						}
+						else if (!component.Element.IsLiquid)
+						{
+							goto IL_00C1;
+						}
+						bool flag = false;
+						KPrefabID component2 = component.GetComponent<KPrefabID>();
+						if (consumed_infos != null)
+						{
+							foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in consumed_infos)
+							{
+								if (component2.HasTag(consumeInfo.tag))
 								{
-									goto IL_0106;
+									flag = true;
+									break;
 								}
 							}
-							else if (!component.Element.IsLiquid)
-							{
-								goto IL_0106;
-							}
-							bool flag = false;
-							KPrefabID component2 = component.GetComponent<KPrefabID>();
-							if (consumed_infos != null)
-							{
-								foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in consumed_infos)
-								{
-									if (component2.HasTag(consumeInfo.tag))
-									{
-										flag = true;
-										break;
-									}
-								}
-							}
-							if (!flag)
-							{
-								storage.Drop(gameObject, true);
-							}
+						}
+						if (!flag)
+						{
+							storage.Drop(gameObject, true);
 						}
 					}
 				}
-				IL_0106:;
+				IL_00C1:;
 			}
 		}
 
@@ -268,7 +266,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 		{
 			get
 			{
-				string text = string.Empty;
+				string text = "";
 				if (base.smi.IsInsideState(base.smi.sm.replanted.irrigated.absorbing.wrongLiquid))
 				{
 					text = this.GetIncorrectLiquidStatusItem().resolveStringCallback(CREATURES.STATUSITEMS.WRONGIRRIGATION.NAME, this);
@@ -361,6 +359,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 						return;
 					}
 					this.absorberHandle = Game.Instance.plantElementAbsorbers.Add(this.storage, base.def.consumedElements);
+					return;
 				}
 				else
 				{

@@ -79,23 +79,19 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 					}
 				}
 				int num6 = num2;
-				if (num6 != -1)
-				{
-					smi.sm.fleeToTarget.Set(smi.master.CreateLocator(Grid.CellToPos(num6)), smi);
-					smi.sm.fleeToTarget.Get(smi).name = "FleeLocator";
-					if (num6 == num)
-					{
-						smi.GoTo(this.cower);
-					}
-					else
-					{
-						smi.GoTo(this.flee);
-					}
-				}
-				else
+				if (num6 == -1)
 				{
 					smi.GoTo(this.cower);
+					return;
 				}
+				smi.sm.fleeToTarget.Set(smi.master.CreateLocator(Grid.CellToPos(num6)), smi);
+				smi.sm.fleeToTarget.Get(smi).name = "FleeLocator";
+				if (num6 == num)
+				{
+					smi.GoTo(this.cower);
+					return;
+				}
+				smi.GoTo(this.flee);
 			});
 			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane_kanim", 2f);
 			this.cower.ToggleAnims("anim_cringe_kanim", 4f).PlayAnim("cringe_pre").QueueAnim("cringe_loop", false, null)

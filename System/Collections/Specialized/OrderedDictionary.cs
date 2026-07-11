@@ -1,88 +1,57 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
+using System.Threading;
 
 namespace System.Collections.Specialized
 {
 	[Serializable]
-	public class OrderedDictionary : IDictionary, ICollection, IEnumerable, IDeserializationCallback, IOrderedDictionary, ISerializable
+	public class OrderedDictionary : IOrderedDictionary, IDictionary, ICollection, IEnumerable, ISerializable, IDeserializationCallback
 	{
 		public OrderedDictionary()
+			: this(0)
 		{
-			this.list = new ArrayList();
-			this.hash = new Hashtable();
 		}
 
 		public OrderedDictionary(int capacity)
+			: this(capacity, null)
 		{
-			this.initialCapacity = ((capacity >= 0) ? capacity : 0);
-			this.list = new ArrayList(this.initialCapacity);
-			this.hash = new Hashtable(this.initialCapacity);
 		}
 
-		public OrderedDictionary(IEqualityComparer equalityComparer)
+		public OrderedDictionary(IEqualityComparer comparer)
+			: this(0, comparer)
 		{
-			this.list = new ArrayList();
-			this.hash = new Hashtable(equalityComparer);
-			this.comparer = equalityComparer;
 		}
 
-		public OrderedDictionary(int capacity, IEqualityComparer equalityComparer)
+		public OrderedDictionary(int capacity, IEqualityComparer comparer)
 		{
-			this.initialCapacity = ((capacity >= 0) ? capacity : 0);
-			this.list = new ArrayList(this.initialCapacity);
-			this.hash = new Hashtable(this.initialCapacity, equalityComparer);
-			this.comparer = equalityComparer;
+			this._initialCapacity = capacity;
+			this._comparer = comparer;
+		}
+
+		private OrderedDictionary(OrderedDictionary dictionary)
+		{
+			if (dictionary == null)
+			{
+				throw new ArgumentNullException("dictionary");
+			}
+			this._readOnly = true;
+			this._objectsArray = dictionary._objectsArray;
+			this._objectsTable = dictionary._objectsTable;
+			this._comparer = dictionary._comparer;
+			this._initialCapacity = dictionary._initialCapacity;
 		}
 
 		protected OrderedDictionary(SerializationInfo info, StreamingContext context)
 		{
-			this.serializationInfo = info;
+			this._siInfo = info;
 		}
 
-		void IDeserializationCallback.OnDeserialization(object sender)
-		{
-			if (this.serializationInfo == null)
-			{
-				return;
-			}
-			this.comparer = (IEqualityComparer)this.serializationInfo.GetValue("KeyComparer", typeof(IEqualityComparer));
-			this.readOnly = this.serializationInfo.GetBoolean("ReadOnly");
-			this.initialCapacity = this.serializationInfo.GetInt32("InitialCapacity");
-			if (this.list == null)
-			{
-				this.list = new ArrayList();
-			}
-			else
-			{
-				this.list.Clear();
-			}
-			this.hash = new Hashtable(this.comparer);
-			object[] array = (object[])this.serializationInfo.GetValue("ArrayList", typeof(object[]));
-			foreach (DictionaryEntry dictionaryEntry in array)
-			{
-				this.hash.Add(dictionaryEntry.Key, dictionaryEntry.Value);
-				this.list.Add(dictionaryEntry);
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.list.GetEnumerator();
-		}
-
-		bool ICollection.IsSynchronized
+		public int Count
 		{
 			get
 			{
-				return this.list.IsSynchronized;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.list.SyncRoot;
+				return this.objectsArray.Count;
 			}
 		}
 
@@ -90,85 +59,23 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return false;
+				return this._readOnly;
 			}
-		}
-
-		protected virtual void OnDeserialization(object sender)
-		{
-			((IDeserializationCallback)this).OnDeserialization(sender);
-		}
-
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("KeyComparer", this.comparer, typeof(IEqualityComparer));
-			info.AddValue("ReadOnly", this.readOnly);
-			info.AddValue("InitialCapacity", this.initialCapacity);
-			object[] array = new object[this.hash.Count];
-			this.hash.CopyTo(array, 0);
-			info.AddValue("ArrayList", array);
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.list.Count;
-			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.list.CopyTo(array, index);
 		}
 
 		public bool IsReadOnly
 		{
 			get
 			{
-				return this.readOnly;
+				return this._readOnly;
 			}
 		}
 
-		public object this[object key]
+		bool ICollection.IsSynchronized
 		{
 			get
 			{
-				return this.hash[key];
-			}
-			set
-			{
-				this.WriteCheck();
-				if (this.hash.Contains(key))
-				{
-					int num = this.FindListEntry(key);
-					this.list[num] = new DictionaryEntry(key, value);
-				}
-				else
-				{
-					this.list.Add(new DictionaryEntry(key, value));
-				}
-				this.hash[key] = value;
-			}
-		}
-
-		public object this[int index]
-		{
-			get
-			{
-				return ((DictionaryEntry)this.list[index]).Value;
-			}
-			set
-			{
-				this.WriteCheck();
-				DictionaryEntry dictionaryEntry = (DictionaryEntry)this.list[index];
-				dictionaryEntry.Value = value;
-				this.list[index] = dictionaryEntry;
-				this.hash[dictionaryEntry.Key] = value;
+				return false;
 			}
 		}
 
@@ -176,7 +83,87 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return new OrderedDictionary.OrderedCollection(this.list, true);
+				return new OrderedDictionary.OrderedDictionaryKeyValueCollection(this.objectsArray, true);
+			}
+		}
+
+		private ArrayList objectsArray
+		{
+			get
+			{
+				if (this._objectsArray == null)
+				{
+					this._objectsArray = new ArrayList(this._initialCapacity);
+				}
+				return this._objectsArray;
+			}
+		}
+
+		private Hashtable objectsTable
+		{
+			get
+			{
+				if (this._objectsTable == null)
+				{
+					this._objectsTable = new Hashtable(this._initialCapacity, this._comparer);
+				}
+				return this._objectsTable;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				if (this._syncRoot == null)
+				{
+					Interlocked.CompareExchange(ref this._syncRoot, new object(), null);
+				}
+				return this._syncRoot;
+			}
+		}
+
+		public object this[int index]
+		{
+			get
+			{
+				return ((DictionaryEntry)this.objectsArray[index]).Value;
+			}
+			set
+			{
+				if (this._readOnly)
+				{
+					throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				}
+				if (index < 0 || index >= this.objectsArray.Count)
+				{
+					throw new ArgumentOutOfRangeException("index");
+				}
+				object key = ((DictionaryEntry)this.objectsArray[index]).Key;
+				this.objectsArray[index] = new DictionaryEntry(key, value);
+				this.objectsTable[key] = value;
+			}
+		}
+
+		public object this[object key]
+		{
+			get
+			{
+				return this.objectsTable[key];
+			}
+			set
+			{
+				if (this._readOnly)
+				{
+					throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				}
+				if (this.objectsTable.Contains(key))
+				{
+					this.objectsTable[key] = value;
+					this.objectsArray[this.IndexOfKey(key)] = new DictionaryEntry(key, value);
+					return;
+				}
+				this.Add(key, value);
 			}
 		}
 
@@ -184,51 +171,58 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return new OrderedDictionary.OrderedCollection(this.list, false);
+				return new OrderedDictionary.OrderedDictionaryKeyValueCollection(this.objectsArray, false);
 			}
 		}
 
 		public void Add(object key, object value)
 		{
-			this.WriteCheck();
-			this.hash.Add(key, value);
-			this.list.Add(new DictionaryEntry(key, value));
+			if (this._readOnly)
+			{
+				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+			}
+			this.objectsTable.Add(key, value);
+			this.objectsArray.Add(new DictionaryEntry(key, value));
 		}
 
 		public void Clear()
 		{
-			this.WriteCheck();
-			this.hash.Clear();
-			this.list.Clear();
+			if (this._readOnly)
+			{
+				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+			}
+			this.objectsTable.Clear();
+			this.objectsArray.Clear();
+		}
+
+		public OrderedDictionary AsReadOnly()
+		{
+			return new OrderedDictionary(this);
 		}
 
 		public bool Contains(object key)
 		{
-			return this.hash.Contains(key);
+			return this.objectsTable.Contains(key);
 		}
 
-		public virtual IDictionaryEnumerator GetEnumerator()
+		public void CopyTo(Array array, int index)
 		{
-			return new OrderedDictionary.OrderedEntryCollectionEnumerator(this.list.GetEnumerator());
+			this.objectsTable.CopyTo(array, index);
 		}
 
-		public void Remove(object key)
+		private int IndexOfKey(object key)
 		{
-			this.WriteCheck();
-			if (this.hash.Contains(key))
+			for (int i = 0; i < this.objectsArray.Count; i++)
 			{
-				this.hash.Remove(key);
-				int num = this.FindListEntry(key);
-				this.list.RemoveAt(num);
-			}
-		}
-
-		private int FindListEntry(object key)
-		{
-			for (int i = 0; i < this.list.Count; i++)
-			{
-				DictionaryEntry dictionaryEntry = (DictionaryEntry)this.list[i];
-				if ((this.comparer == null) ? dictionaryEntry.Key.Equals(key) : this.comparer.Equals(dictionaryEntry.Key, key))
+				object key2 = ((DictionaryEntry)this.objectsArray[i]).Key;
+				if (this._comparer != null)
+				{
+					if (this._comparer.Equals(key2, key))
+					{
+						return i;
+					}
+				}
+				else if (key2.Equals(key))
 				{
 					return i;
 				}
@@ -236,74 +230,158 @@ namespace System.Collections.Specialized
 			return -1;
 		}
 
-		private void WriteCheck()
-		{
-			if (this.readOnly)
-			{
-				throw new NotSupportedException("Collection is read only");
-			}
-		}
-
-		public OrderedDictionary AsReadOnly()
-		{
-			return new OrderedDictionary
-			{
-				list = this.list,
-				hash = this.hash,
-				comparer = this.comparer,
-				readOnly = true
-			};
-		}
-
 		public void Insert(int index, object key, object value)
 		{
-			this.WriteCheck();
-			this.hash.Add(key, value);
-			this.list.Insert(index, new DictionaryEntry(key, value));
+			if (this._readOnly)
+			{
+				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+			}
+			if (index > this.Count || index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			this.objectsTable.Add(key, value);
+			this.objectsArray.Insert(index, new DictionaryEntry(key, value));
+		}
+
+		protected virtual void OnDeserialization(object sender)
+		{
+			if (this._siInfo == null)
+			{
+				throw new SerializationException(global::SR.GetString("OnDeserialization method was called while the object was not being deserialized."));
+			}
+			this._comparer = (IEqualityComparer)this._siInfo.GetValue("KeyComparer", typeof(IEqualityComparer));
+			this._readOnly = this._siInfo.GetBoolean("ReadOnly");
+			this._initialCapacity = this._siInfo.GetInt32("InitialCapacity");
+			object[] array = (object[])this._siInfo.GetValue("ArrayList", typeof(object[]));
+			if (array != null)
+			{
+				foreach (object obj in array)
+				{
+					DictionaryEntry dictionaryEntry;
+					try
+					{
+						dictionaryEntry = (DictionaryEntry)obj;
+					}
+					catch
+					{
+						throw new SerializationException(global::SR.GetString("There was an error deserializing the OrderedDictionary.  The ArrayList does not contain DictionaryEntries."));
+					}
+					this.objectsArray.Add(dictionaryEntry);
+					this.objectsTable.Add(dictionaryEntry.Key, dictionaryEntry.Value);
+				}
+			}
 		}
 
 		public void RemoveAt(int index)
 		{
-			this.WriteCheck();
-			DictionaryEntry dictionaryEntry = (DictionaryEntry)this.list[index];
-			this.list.RemoveAt(index);
-			this.hash.Remove(dictionaryEntry.Key);
+			if (this._readOnly)
+			{
+				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+			}
+			if (index >= this.Count || index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			object key = ((DictionaryEntry)this.objectsArray[index]).Key;
+			this.objectsArray.RemoveAt(index);
+			this.objectsTable.Remove(key);
 		}
 
-		private ArrayList list;
-
-		private Hashtable hash;
-
-		private bool readOnly;
-
-		private int initialCapacity;
-
-		private SerializationInfo serializationInfo;
-
-		private IEqualityComparer comparer;
-
-		private class OrderedEntryCollectionEnumerator : IEnumerator, IDictionaryEnumerator
+		public void Remove(object key)
 		{
-			public OrderedEntryCollectionEnumerator(IEnumerator listEnumerator)
+			if (this._readOnly)
 			{
-				this.listEnumerator = listEnumerator;
+				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
 			}
-
-			public bool MoveNext()
+			if (key == null)
 			{
-				return this.listEnumerator.MoveNext();
+				throw new ArgumentNullException("key");
 			}
-
-			public void Reset()
+			int num = this.IndexOfKey(key);
+			if (num < 0)
 			{
-				this.listEnumerator.Reset();
+				return;
+			}
+			this.objectsTable.Remove(key);
+			this.objectsArray.RemoveAt(num);
+		}
+
+		public virtual IDictionaryEnumerator GetEnumerator()
+		{
+			return new OrderedDictionary.OrderedDictionaryEnumerator(this.objectsArray, 3);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new OrderedDictionary.OrderedDictionaryEnumerator(this.objectsArray, 3);
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			info.AddValue("KeyComparer", this._comparer, typeof(IEqualityComparer));
+			info.AddValue("ReadOnly", this._readOnly);
+			info.AddValue("InitialCapacity", this._initialCapacity);
+			object[] array = new object[this.Count];
+			this._objectsArray.CopyTo(array);
+			info.AddValue("ArrayList", array);
+		}
+
+		void IDeserializationCallback.OnDeserialization(object sender)
+		{
+			this.OnDeserialization(sender);
+		}
+
+		private ArrayList _objectsArray;
+
+		private Hashtable _objectsTable;
+
+		private int _initialCapacity;
+
+		private IEqualityComparer _comparer;
+
+		private bool _readOnly;
+
+		private object _syncRoot;
+
+		private SerializationInfo _siInfo;
+
+		private const string KeyComparerName = "KeyComparer";
+
+		private const string ArrayListName = "ArrayList";
+
+		private const string ReadOnlyName = "ReadOnly";
+
+		private const string InitCapacityName = "InitialCapacity";
+
+		private class OrderedDictionaryEnumerator : IDictionaryEnumerator, IEnumerator
+		{
+			internal OrderedDictionaryEnumerator(ArrayList array, int objectReturnType)
+			{
+				this.arrayEnumerator = array.GetEnumerator();
+				this._objectReturnType = objectReturnType;
 			}
 
 			public object Current
 			{
 				get
 				{
-					return this.listEnumerator.Current;
+					if (this._objectReturnType == 1)
+					{
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+						return dictionaryEntry.Key;
+					}
+					if (this._objectReturnType == 2)
+					{
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+						return dictionaryEntry.Value;
+					}
+					return this.Entry;
 				}
 			}
 
@@ -311,7 +389,10 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return (DictionaryEntry)this.listEnumerator.Current;
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					object key = dictionaryEntry.Key;
+					dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					return new DictionaryEntry(key, dictionaryEntry.Value);
 				}
 			}
 
@@ -319,7 +400,8 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return this.Entry.Key;
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					return dictionaryEntry.Key;
 				}
 			}
 
@@ -327,30 +409,66 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return this.Entry.Value;
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					return dictionaryEntry.Value;
 				}
 			}
 
-			private IEnumerator listEnumerator;
-		}
-
-		private class OrderedCollection : ICollection, IEnumerable
-		{
-			public OrderedCollection(ArrayList list, bool isKeyList)
+			public bool MoveNext()
 			{
-				this.list = list;
-				this.isKeyList = isKeyList;
+				return this.arrayEnumerator.MoveNext();
 			}
 
-			public int Count
+			public void Reset()
+			{
+				this.arrayEnumerator.Reset();
+			}
+
+			private int _objectReturnType;
+
+			internal const int Keys = 1;
+
+			internal const int Values = 2;
+
+			internal const int DictionaryEntry = 3;
+
+			private IEnumerator arrayEnumerator;
+		}
+
+		private class OrderedDictionaryKeyValueCollection : ICollection, IEnumerable
+		{
+			public OrderedDictionaryKeyValueCollection(ArrayList array, bool isKeys)
+			{
+				this._objects = array;
+				this.isKeys = isKeys;
+			}
+
+			void ICollection.CopyTo(Array array, int index)
+			{
+				if (array == null)
+				{
+					throw new ArgumentNullException("array");
+				}
+				if (index < 0)
+				{
+					throw new ArgumentOutOfRangeException("index");
+				}
+				foreach (object obj in this._objects)
+				{
+					array.SetValue(this.isKeys ? ((DictionaryEntry)obj).Key : ((DictionaryEntry)obj).Value, index);
+					index++;
+				}
+			}
+
+			int ICollection.Count
 			{
 				get
 				{
-					return this.list.Count;
+					return this._objects.Count;
 				}
 			}
 
-			public bool IsSynchronized
+			bool ICollection.IsSynchronized
 			{
 				get
 				{
@@ -358,70 +476,22 @@ namespace System.Collections.Specialized
 				}
 			}
 
-			public object SyncRoot
+			object ICollection.SyncRoot
 			{
 				get
 				{
-					return this.list.SyncRoot;
+					return this._objects.SyncRoot;
 				}
 			}
 
-			public void CopyTo(Array array, int index)
+			IEnumerator IEnumerable.GetEnumerator()
 			{
-				for (int i = 0; i < this.list.Count; i++)
-				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.list[i];
-					if (this.isKeyList)
-					{
-						array.SetValue(dictionaryEntry.Key, index + i);
-					}
-					else
-					{
-						array.SetValue(dictionaryEntry.Value, index + i);
-					}
-				}
+				return new OrderedDictionary.OrderedDictionaryEnumerator(this._objects, this.isKeys ? 1 : 2);
 			}
 
-			public IEnumerator GetEnumerator()
-			{
-				return new OrderedDictionary.OrderedCollection.OrderedCollectionEnumerator(this.list.GetEnumerator(), this.isKeyList);
-			}
+			private ArrayList _objects;
 
-			private ArrayList list;
-
-			private bool isKeyList;
-
-			private class OrderedCollectionEnumerator : IEnumerator
-			{
-				public OrderedCollectionEnumerator(IEnumerator listEnumerator, bool isKeyList)
-				{
-					this.listEnumerator = listEnumerator;
-					this.isKeyList = isKeyList;
-				}
-
-				public object Current
-				{
-					get
-					{
-						DictionaryEntry dictionaryEntry = (DictionaryEntry)this.listEnumerator.Current;
-						return (!this.isKeyList) ? dictionaryEntry.Value : dictionaryEntry.Key;
-					}
-				}
-
-				public bool MoveNext()
-				{
-					return this.listEnumerator.MoveNext();
-				}
-
-				public void Reset()
-				{
-					this.listEnumerator.Reset();
-				}
-
-				private bool isKeyList;
-
-				private IEnumerator listEnumerator;
-			}
+			private bool isKeys;
 		}
 	}
 }

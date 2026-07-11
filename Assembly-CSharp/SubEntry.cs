@@ -27,11 +27,9 @@ public class SubEntry
 			if (!string.IsNullOrEmpty(this.title))
 			{
 				this.sortString = UI.StripLinkFormatting(this.title);
+				return;
 			}
-			else
-			{
-				this.sortString = UI.StripLinkFormatting(name);
-			}
+			this.sortString = UI.StripLinkFormatting(name);
 		}
 	}
 

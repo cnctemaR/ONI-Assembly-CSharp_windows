@@ -6,21 +6,16 @@ namespace System.Data
 	{
 		public DataTableClearEventArgs(DataTable dataTable)
 		{
+			this.Table = dataTable;
 		}
 
-		public DataTable Table
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public DataTable Table { get; }
 
 		public string TableName
 		{
 			get
 			{
-				throw null;
+				return this.Table.TableName;
 			}
 		}
 
@@ -28,7 +23,7 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this.Table.Namespace;
 			}
 		}
 	}

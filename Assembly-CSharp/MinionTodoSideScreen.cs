@@ -36,7 +36,7 @@ public class MinionTodoSideScreen : SideScreenContent
 			{
 				for (int i = 5; i >= 0; i--)
 				{
-					Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple = new Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>(priority, i, Util.KInstantiateUI<HierarchyReferences>(this.priorityGroupPrefab, this.taskEntryContainer, false));
+					global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple = new global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>(priority, i, Util.KInstantiateUI<HierarchyReferences>(this.priorityGroupPrefab, this.taskEntryContainer, false));
 					tuple.third.name = string.Concat(new object[] { "PriorityGroup_", priorityInfo.name, "_", i });
 					tuple.third.gameObject.SetActive(true);
 					JobsTableScreen.PriorityInfo priorityInfo2 = JobsTableScreen.priorityInfo[i];
@@ -47,7 +47,7 @@ public class MinionTodoSideScreen : SideScreenContent
 			}
 			else
 			{
-				Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple2 = new Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>(priority, 3, Util.KInstantiateUI<HierarchyReferences>(this.priorityGroupPrefab, this.taskEntryContainer, false));
+				global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple2 = new global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>(priority, 3, Util.KInstantiateUI<HierarchyReferences>(this.priorityGroupPrefab, this.taskEntryContainer, false));
 				tuple2.third.name = "PriorityGroup_" + priorityInfo.name;
 				tuple2.third.gameObject.SetActive(true);
 				tuple2.third.GetReference<LocText>("Title").text = priorityInfo.name.text.ToUpper();
@@ -120,12 +120,11 @@ public class MinionTodoSideScreen : SideScreenContent
 		MinionTodoChoreEntry minionTodoChoreEntry = null;
 		int num = 0;
 		Schedulable component = DetailsScreen.Instance.target.GetComponent<Schedulable>();
-		string text = string.Empty;
+		string text = "";
 		Schedule schedule = component.GetSchedule();
 		if (schedule != null)
 		{
-			ScheduleBlock block = schedule.GetBlock(Schedule.GetBlockIdx());
-			text = block.name;
+			text = schedule.GetBlock(Schedule.GetBlockIdx()).name;
 		}
 		this.currentScheduleBlockLabel.SetText(string.Format(UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CURRENT_SCHEDULE_BLOCK, text));
 		this.choreTargets.Clear();
@@ -133,33 +132,30 @@ public class MinionTodoSideScreen : SideScreenContent
 		this.activeChoreEntries = 0;
 		for (int i = pooledList.Count - 1; i >= 0; i--)
 		{
-			if (pooledList[i].chore != null && !pooledList[i].chore.target.isNull && !(pooledList[i].chore.target.gameObject == null))
+			if (pooledList[i].chore != null && !pooledList[i].chore.target.isNull && !(pooledList[i].chore.target.gameObject == null) && pooledList[i].IsPotentialSuccess())
 			{
-				if (pooledList[i].IsPotentialSuccess())
+				if (pooledList[i].chore.driver == this.choreConsumer.choreDriver)
 				{
-					if (pooledList[i].chore.driver == this.choreConsumer.choreDriver)
-					{
-						this.currentTask.Apply(pooledList[i]);
-						minionTodoChoreEntry = this.currentTask;
-						context = pooledList[i];
-						num = 0;
-						flag = true;
-					}
-					else if (!flag && this.activeChoreEntries != 0 && GameUtil.AreChoresUIMergeable(pooledList[i], context))
-					{
-						num++;
-						minionTodoChoreEntry.SetMoreAmount(num);
-					}
-					else
-					{
-						HierarchyReferences hierarchyReferences = this.PriorityGroupForPriority(this.choreConsumer, pooledList[i].chore);
-						MinionTodoChoreEntry choreEntry = this.GetChoreEntry(hierarchyReferences.GetReference<RectTransform>("EntriesContainer"));
-						choreEntry.Apply(pooledList[i]);
-						minionTodoChoreEntry = choreEntry;
-						context = pooledList[i];
-						num = 0;
-						flag = false;
-					}
+					this.currentTask.Apply(pooledList[i]);
+					minionTodoChoreEntry = this.currentTask;
+					context = pooledList[i];
+					num = 0;
+					flag = true;
+				}
+				else if (!flag && this.activeChoreEntries != 0 && GameUtil.AreChoresUIMergeable(pooledList[i], context))
+				{
+					num++;
+					minionTodoChoreEntry.SetMoreAmount(num);
+				}
+				else
+				{
+					HierarchyReferences hierarchyReferences = this.PriorityGroupForPriority(this.choreConsumer, pooledList[i].chore);
+					MinionTodoChoreEntry choreEntry = this.GetChoreEntry(hierarchyReferences.GetReference<RectTransform>("EntriesContainer"));
+					choreEntry.Apply(pooledList[i]);
+					minionTodoChoreEntry = choreEntry;
+					context = pooledList[i];
+					num = 0;
+					flag = false;
 				}
 			}
 		}
@@ -168,7 +164,7 @@ public class MinionTodoSideScreen : SideScreenContent
 		{
 			this.choreEntries[j].gameObject.SetActive(false);
 		}
-		foreach (Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple in this.priorityGroups)
+		foreach (global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple in this.priorityGroups)
 		{
 			RectTransform reference = tuple.third.GetReference<RectTransform>("EntriesContainer");
 			tuple.third.gameObject.SetActive(reference.childCount > 0);
@@ -196,7 +192,7 @@ public class MinionTodoSideScreen : SideScreenContent
 
 	private HierarchyReferences PriorityGroupForPriority(ChoreConsumer choreConsumer, Chore chore)
 	{
-		foreach (Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple in this.priorityGroups)
+		foreach (global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences> tuple in this.priorityGroups)
 		{
 			if (tuple.first == chore.masterPriority.priority_class)
 			{
@@ -230,7 +226,7 @@ public class MinionTodoSideScreen : SideScreenContent
 
 	public LocText currentScheduleBlockLabel;
 
-	private List<Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>> priorityGroups = new List<Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>>();
+	private List<global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>> priorityGroups = new List<global::Tuple<PriorityScreen.PriorityClass, int, HierarchyReferences>>();
 
 	private List<MinionTodoChoreEntry> choreEntries = new List<MinionTodoChoreEntry>();
 

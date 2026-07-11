@@ -4,18 +4,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.U2D
 {
-	/// <summary>
-	///   <para>A struct that holds a rich set of information that describes the bind pose of this Sprite.</para>
-	/// </summary>
-	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
 	[RequiredByNativeCode]
 	[Serializable]
 	public struct SpriteBone
 	{
-		/// <summary>
-		///   <para>The name of the bone. This is useful when recreating bone hierarchy at editor or runtime. You can also use this as a way of resolving the bone path when a Sprite is bound to a more complex or richer hierarchy.</para>
-		/// </summary>
 		public string name
 		{
 			get
@@ -28,9 +22,6 @@ namespace UnityEngine.Experimental.U2D
 			}
 		}
 
-		/// <summary>
-		///   <para>The position in local space of this bone.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			get
@@ -43,9 +34,6 @@ namespace UnityEngine.Experimental.U2D
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of this bone in local space.</para>
-		/// </summary>
 		public Quaternion rotation
 		{
 			get
@@ -58,9 +46,6 @@ namespace UnityEngine.Experimental.U2D
 			}
 		}
 
-		/// <summary>
-		///   <para>The length of the bone. This is important for the leaf bones to describe their length without needing another bone as the terminal bone.</para>
-		/// </summary>
 		public float length
 		{
 			get
@@ -73,9 +58,6 @@ namespace UnityEngine.Experimental.U2D
 			}
 		}
 
-		/// <summary>
-		///   <para>The ID of the parent of this bone.</para>
-		/// </summary>
 		public int parentId
 		{
 			get
@@ -88,16 +70,16 @@ namespace UnityEngine.Experimental.U2D
 			}
 		}
 
-		[SerializeField]
 		[NativeName("name")]
+		[SerializeField]
 		private string m_Name;
 
 		[SerializeField]
 		[NativeName("position")]
 		private Vector3 m_Position;
 
-		[SerializeField]
 		[NativeName("rotation")]
+		[SerializeField]
 		private Quaternion m_Rotation;
 
 		[SerializeField]

@@ -54,17 +54,17 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 
 	public new class Instance : GameStateMachine<TubeTraveller, TubeTraveller.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
-		{
-		}
-
 		public int prefabInstanceID
 		{
 			get
 			{
 				return base.GetComponent<Navigator>().gameObject.GetComponent<KPrefabID>().InstanceID;
 			}
+		}
+
+		public Instance(IStateMachineTarget master)
+			: base(master)
+		{
 		}
 
 		public void OnPathAdvanced(object data)
@@ -132,26 +132,29 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 					{
 						component.AddImmunity(effect);
 					}
-					foreach (AttributeModifier attributeModifier in base.sm.modifiers)
+					using (List<AttributeModifier>.Enumerator enumerator2 = base.sm.modifiers.GetEnumerator())
 					{
-						attributes.Add(attributeModifier);
+						while (enumerator2.MoveNext())
+						{
+							AttributeModifier attributeModifier = enumerator2.Current;
+							attributes.Add(attributeModifier);
+						}
+						goto IL_0162;
 					}
 				}
-				else
+				if (!this.hadSuitTank)
 				{
-					if (!this.hadSuitTank)
-					{
-						base.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
-					}
-					foreach (Effect effect2 in base.sm.immunities)
-					{
-						component.RemoveImmunity(effect2);
-					}
-					foreach (AttributeModifier attributeModifier2 in base.sm.modifiers)
-					{
-						attributes.Remove(attributeModifier2);
-					}
+					base.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
 				}
+				foreach (Effect effect2 in base.sm.immunities)
+				{
+					component.RemoveImmunity(effect2);
+				}
+				foreach (AttributeModifier attributeModifier2 in base.sm.modifiers)
+				{
+					attributes.Remove(attributeModifier2);
+				}
+				IL_0162:
 				CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
 				if (component2 != null)
 				{
@@ -162,14 +165,8 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 
 		private bool HasSuitTank()
 		{
-			Equipment equipment = base.GetComponent<MinionIdentity>().GetEquipment();
-			AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
-			if (slot != null && slot.assignable != null)
-			{
-				SuitTank component = slot.assignable.GetComponent<SuitTank>();
-				return component != null;
-			}
-			return false;
+			AssignableSlotInstance slot = base.GetComponent<MinionIdentity>().GetEquipment().GetSlot(Db.Get().AssignableSlots.Suit);
+			return slot != null && slot.assignable != null && slot.assignable.GetComponent<SuitTank>() != null;
 		}
 
 		private List<TravelTubeEntrance> reservations = new List<TravelTubeEntrance>();

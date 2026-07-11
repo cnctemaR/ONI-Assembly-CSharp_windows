@@ -15,8 +15,7 @@ public class GlobalAssets : MonoBehaviour
 			Bank[] array = null;
 			try
 			{
-				RESULT bankList = RuntimeManager.StudioSystem.getBankList(out array);
-				if (bankList != RESULT.OK)
+				if (RuntimeManager.StudioSystem.getBankList(out array) != RESULT.OK)
 				{
 					array = null;
 				}

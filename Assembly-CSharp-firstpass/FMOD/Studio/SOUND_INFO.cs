@@ -11,7 +11,7 @@ namespace FMOD.Studio
 				string text;
 				using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 				{
-					text = (((this.mode & (MODE.OPENMEMORY | MODE.OPENMEMORY_POINT)) != MODE.DEFAULT) ? string.Empty : freeHelper.stringFromNative(this.name_or_data));
+					text = (((this.mode & (MODE.OPENMEMORY | MODE.OPENMEMORY_POINT)) == MODE.DEFAULT) ? freeHelper.stringFromNative(this.name_or_data) : string.Empty);
 				}
 				return text;
 			}

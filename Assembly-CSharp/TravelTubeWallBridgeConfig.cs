@@ -40,8 +40,7 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_3;
-		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
-		buildingHP.destroyOnDamaged = true;
+		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<TravelTubeBridge>();
 	}
@@ -49,23 +48,20 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink = this.AddNetworkLink(go);
-		travelTubeUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink = this.AddNetworkLink(go);
-		travelTubeUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink = this.AddNetworkLink(go);
-		travelTubeUtilityNetworkLink.visualizeOnly = false;
+		this.AddNetworkLink(go).visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
 		go.AddOrGet<KPrefabID>().AddTag(GameTags.TravelTubeBridges, false);
 	}

@@ -34,12 +34,10 @@ namespace Mono.Remoting.Channels.Unix
 					clientChannelSinkProvider = clientChannelSinkProvider.Next;
 				}
 				clientChannelSinkProvider.Next = new UnixClientTransportSinkProvider();
+				return;
 			}
-			else
-			{
-				this._sinkProvider = new UnixBinaryClientFormatterSinkProvider();
-				this._sinkProvider.Next = new UnixClientTransportSinkProvider();
-			}
+			this._sinkProvider = new UnixBinaryClientFormatterSinkProvider();
+			this._sinkProvider.Next = new UnixClientTransportSinkProvider();
 		}
 
 		public UnixClientChannel(string name, IClientChannelSinkProvider sinkProvider)
@@ -79,7 +77,7 @@ namespace Mono.Remoting.Channels.Unix
 			if (remoteChannelData != null)
 			{
 				IChannelDataStore channelDataStore = remoteChannelData as IChannelDataStore;
-				if (channelDataStore == null || channelDataStore.ChannelUris.Length <= 0)
+				if (channelDataStore == null || channelDataStore.ChannelUris.Length == 0)
 				{
 					objectURI = null;
 					return null;

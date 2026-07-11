@@ -16,9 +16,9 @@ namespace System.Data
 
 		IDbTransaction BeginTransaction(IsolationLevel il);
 
-		void ChangeDatabase(string databaseName);
-
 		void Close();
+
+		void ChangeDatabase(string databaseName);
 
 		IDbCommand CreateCommand();
 

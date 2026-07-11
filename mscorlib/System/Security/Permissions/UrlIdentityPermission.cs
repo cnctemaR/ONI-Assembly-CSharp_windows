@@ -23,11 +23,6 @@ namespace System.Security.Permissions
 			this.url = site;
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 13;
-		}
-
 		public string Url
 		{
 			get
@@ -36,7 +31,7 @@ namespace System.Security.Permissions
 			}
 			set
 			{
-				this.url = ((value != null) ? value : string.Empty);
+				this.url = ((value == null) ? string.Empty : value);
 			}
 		}
 
@@ -56,11 +51,9 @@ namespace System.Security.Permissions
 			if (text == null)
 			{
 				this.url = string.Empty;
+				return;
 			}
-			else
-			{
-				this.Url = text;
-			}
+			this.Url = text;
 		}
 
 		public override IPermission Intersect(IPermission target)
@@ -142,6 +135,11 @@ namespace System.Security.Permissions
 				return this.Copy();
 			}
 			return urlIdentityPermission.Copy();
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 13;
 		}
 
 		private bool IsEmpty()

@@ -47,14 +47,13 @@ namespace UnityStandardAssets.ImageEffects
 			int num = 10833;
 			int num2 = totalWidth * totalHeight;
 			Quads.currentQuads = num2;
-			int num3 = Mathf.CeilToInt(1f * (float)num2 / (1f * (float)num));
-			Quads.meshes = new Mesh[num3];
-			int num4 = 0;
+			Quads.meshes = new Mesh[Mathf.CeilToInt(1f * (float)num2 / (1f * (float)num))];
+			int num3 = 0;
 			for (int i = 0; i < num2; i += num)
 			{
-				int num5 = Mathf.FloorToInt((float)Mathf.Clamp(num2 - i, 0, num));
-				Quads.meshes[num4] = Quads.GetMesh(num5, i, totalWidth, totalHeight);
-				num4++;
+				int num4 = Mathf.FloorToInt((float)Mathf.Clamp(num2 - i, 0, num));
+				Quads.meshes[num3] = Quads.GetMesh(num4, i, totalWidth, totalHeight);
+				num3++;
 			}
 			return Quads.meshes;
 		}

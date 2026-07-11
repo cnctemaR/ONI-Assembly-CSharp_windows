@@ -38,9 +38,10 @@ namespace Satsuma
 			{
 				arc2 = Arc.Invalid;
 			}
-			for (int i = 0; i < 2; i++)
+			int num;
+			for (int i = 0; i < 2; i = num + 1)
 			{
-				Arc arc3 = ((i != 0) ? arc2 : arc);
+				Arc arc3 = ((i == 0) ? arc : arc2);
 				if (!(arc3 == Arc.Invalid))
 				{
 					switch (filter)
@@ -68,6 +69,7 @@ namespace Satsuma
 						break;
 					}
 				}
+				num = i;
 			}
 			yield break;
 		}

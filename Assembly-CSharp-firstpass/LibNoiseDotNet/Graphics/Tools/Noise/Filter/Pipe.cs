@@ -2,7 +2,7 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Filter
 {
-	public class Pipe : FilterModule, IModule4D, IModule3D, IModule2D, IModule1D, IModule
+	public class Pipe : FilterModule, IModule4D, IModule, IModule3D, IModule2D, IModule1D
 	{
 		public float GetValue(float x, float y, float z, float t)
 		{

@@ -4,9 +4,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>Playables are customizable runtime objects that can be connected together and are contained in a PlayableGraph to create complex behaviours.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	public struct Playable : IPlayable, IEquatable<Playable>
 	{
@@ -16,9 +13,6 @@ namespace UnityEngine.Playables
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Returns an invalid Playable.</para>
-		/// </summary>
 		public static Playable Null
 		{
 			get

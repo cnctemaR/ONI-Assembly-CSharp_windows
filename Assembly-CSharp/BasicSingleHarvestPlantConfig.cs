@@ -12,31 +12,18 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 		string text2 = global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.NAME;
 		string text3 = global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.DESC;
 		float num = 1f;
-		KAnimFile kanimFile = Assets.GetAnim("meallice_kanim");
-		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.PENALTY.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingBack, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		GameObject gameObject2 = gameObject;
-		SimHashes[] array = new SimHashes[]
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("meallice_kanim"), "idle_empty", Grid.SceneLayer.BuildingBack, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 283.15f, 303.15f, 398.15f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		};
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 218.15f, 283.15f, 303.15f, 398.15f, array, true, 0f, 0.15f, "BasicPlantFood", true, false, true, true, 2400f);
+		}, true, 0f, 0.15f, "BasicPlantFood", true, false, true, true, 2400f);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<KAnimControllerBase>().randomiseLoopedOffset = true;
 		gameObject.AddOrGet<LoopingSounds>();
-		gameObject2 = gameObject;
-		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
-		text4 = "BasicSingleHarvestPlantSeed";
-		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.BASICSINGLEHARVESTPLANT.NAME;
-		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.BASICSINGLEHARVESTPLANT.DESC;
-		kanimFile = Assets.GetAnim("seed_meallice_kanim");
-		int num2 = 0;
-		List<Tag> list = new List<Tag> { GameTags.CropSeed };
-		text = global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.DOMESTICATEDDESC;
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", num2, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, text, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty, false);
+		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "BasicSingleHarvestPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BASICSINGLEHARVESTPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BASICSINGLEHARVESTPLANT.DESC, Assets.GetAnim("seed_meallice_kanim"), "object", 0, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -45,7 +32,7 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 				massConsumptionRate = 0.016666668f
 			}
 		});
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "BasicSingleHarvestPlant_preview", Assets.GetAnim("meallice_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "BasicSingleHarvestPlant_preview", Assets.GetAnim("meallice_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;

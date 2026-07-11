@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Util;
 using System.Text;
 
 namespace System.Security.Cryptography
@@ -17,39 +19,183 @@ namespace System.Security.Cryptography
 			return (RSA)CryptoConfig.CreateFromName(algName);
 		}
 
-		public abstract byte[] EncryptValue(byte[] rgb);
-
-		public abstract byte[] DecryptValue(byte[] rgb);
-
-		public abstract RSAParameters ExportParameters(bool includePrivateParameters);
-
-		public abstract void ImportParameters(RSAParameters parameters);
-
-		internal void ZeroizePrivateKey(RSAParameters parameters)
+		public virtual byte[] Encrypt(byte[] data, RSAEncryptionPadding padding)
 		{
-			if (parameters.P != null)
+			throw RSA.DerivedClassMustOverride();
+		}
+
+		public virtual byte[] Decrypt(byte[] data, RSAEncryptionPadding padding)
+		{
+			throw RSA.DerivedClassMustOverride();
+		}
+
+		public virtual byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			throw RSA.DerivedClassMustOverride();
+		}
+
+		public virtual bool VerifyHash(byte[] hash, byte[] signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			throw RSA.DerivedClassMustOverride();
+		}
+
+		protected virtual byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
+		{
+			throw RSA.DerivedClassMustOverride();
+		}
+
+		protected virtual byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
+		{
+			throw RSA.DerivedClassMustOverride();
+		}
+
+		public byte[] SignData(byte[] data, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (data == null)
 			{
-				Array.Clear(parameters.P, 0, parameters.P.Length);
+				throw new ArgumentNullException("data");
 			}
-			if (parameters.Q != null)
+			return this.SignData(data, 0, data.Length, hashAlgorithm, padding);
+		}
+
+		public virtual byte[] SignData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (data == null)
 			{
-				Array.Clear(parameters.Q, 0, parameters.Q.Length);
+				throw new ArgumentNullException("data");
 			}
-			if (parameters.DP != null)
+			if (offset < 0 || offset > data.Length)
 			{
-				Array.Clear(parameters.DP, 0, parameters.DP.Length);
+				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (parameters.DQ != null)
+			if (count < 0 || count > data.Length - offset)
 			{
-				Array.Clear(parameters.DQ, 0, parameters.DQ.Length);
+				throw new ArgumentOutOfRangeException("count");
 			}
-			if (parameters.InverseQ != null)
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
 			{
-				Array.Clear(parameters.InverseQ, 0, parameters.InverseQ.Length);
+				throw RSA.HashAlgorithmNameNullOrEmpty();
 			}
-			if (parameters.D != null)
+			if (padding == null)
 			{
-				Array.Clear(parameters.D, 0, parameters.D.Length);
+				throw new ArgumentNullException("padding");
+			}
+			byte[] array = this.HashData(data, offset, count, hashAlgorithm);
+			return this.SignHash(array, hashAlgorithm, padding);
+		}
+
+		public virtual byte[] SignData(Stream data, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw RSA.HashAlgorithmNameNullOrEmpty();
+			}
+			if (padding == null)
+			{
+				throw new ArgumentNullException("padding");
+			}
+			byte[] array = this.HashData(data, hashAlgorithm);
+			return this.SignHash(array, hashAlgorithm, padding);
+		}
+
+		public bool VerifyData(byte[] data, byte[] signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			return this.VerifyData(data, 0, data.Length, signature, hashAlgorithm, padding);
+		}
+
+		public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (offset < 0 || offset > data.Length)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if (count < 0 || count > data.Length - offset)
+			{
+				throw new ArgumentOutOfRangeException("count");
+			}
+			if (signature == null)
+			{
+				throw new ArgumentNullException("signature");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw RSA.HashAlgorithmNameNullOrEmpty();
+			}
+			if (padding == null)
+			{
+				throw new ArgumentNullException("padding");
+			}
+			byte[] array = this.HashData(data, offset, count, hashAlgorithm);
+			return this.VerifyHash(array, signature, hashAlgorithm, padding);
+		}
+
+		public bool VerifyData(Stream data, byte[] signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (signature == null)
+			{
+				throw new ArgumentNullException("signature");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw RSA.HashAlgorithmNameNullOrEmpty();
+			}
+			if (padding == null)
+			{
+				throw new ArgumentNullException("padding");
+			}
+			byte[] array = this.HashData(data, hashAlgorithm);
+			return this.VerifyHash(array, signature, hashAlgorithm, padding);
+		}
+
+		private static Exception DerivedClassMustOverride()
+		{
+			return new NotImplementedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		internal static Exception HashAlgorithmNameNullOrEmpty()
+		{
+			return new ArgumentException(Environment.GetResourceString("The hash algorithm name cannot be null or empty."), "hashAlgorithm");
+		}
+
+		public virtual byte[] DecryptValue(byte[] rgb)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Method is not supported."));
+		}
+
+		public virtual byte[] EncryptValue(byte[] rgb)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Method is not supported."));
+		}
+
+		public override string KeyExchangeAlgorithm
+		{
+			get
+			{
+				return "RSA";
+			}
+		}
+
+		public override string SignatureAlgorithm
+		{
+			get
+			{
+				return "RSA";
 			}
 		}
 
@@ -60,81 +206,74 @@ namespace System.Security.Cryptography
 				throw new ArgumentNullException("xmlString");
 			}
 			RSAParameters rsaparameters = default(RSAParameters);
-			try
+			SecurityElement topElement = new Parser(xmlString).GetTopElement();
+			string text = topElement.SearchForTextOfLocalName("Modulus");
+			if (text == null)
 			{
-				rsaparameters.P = AsymmetricAlgorithm.GetNamedParam(xmlString, "P");
-				rsaparameters.Q = AsymmetricAlgorithm.GetNamedParam(xmlString, "Q");
-				rsaparameters.D = AsymmetricAlgorithm.GetNamedParam(xmlString, "D");
-				rsaparameters.DP = AsymmetricAlgorithm.GetNamedParam(xmlString, "DP");
-				rsaparameters.DQ = AsymmetricAlgorithm.GetNamedParam(xmlString, "DQ");
-				rsaparameters.InverseQ = AsymmetricAlgorithm.GetNamedParam(xmlString, "InverseQ");
-				rsaparameters.Exponent = AsymmetricAlgorithm.GetNamedParam(xmlString, "Exponent");
-				rsaparameters.Modulus = AsymmetricAlgorithm.GetNamedParam(xmlString, "Modulus");
-				this.ImportParameters(rsaparameters);
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "RSA", "Modulus" }));
 			}
-			catch (Exception ex)
+			rsaparameters.Modulus = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text));
+			string text2 = topElement.SearchForTextOfLocalName("Exponent");
+			if (text2 == null)
 			{
-				this.ZeroizePrivateKey(rsaparameters);
-				throw new CryptographicException(Locale.GetText("Couldn't decode XML"), ex);
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "RSA", "Exponent" }));
 			}
-			finally
+			rsaparameters.Exponent = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text2));
+			string text3 = topElement.SearchForTextOfLocalName("P");
+			if (text3 != null)
 			{
-				this.ZeroizePrivateKey(rsaparameters);
+				rsaparameters.P = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text3));
 			}
+			string text4 = topElement.SearchForTextOfLocalName("Q");
+			if (text4 != null)
+			{
+				rsaparameters.Q = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text4));
+			}
+			string text5 = topElement.SearchForTextOfLocalName("DP");
+			if (text5 != null)
+			{
+				rsaparameters.DP = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text5));
+			}
+			string text6 = topElement.SearchForTextOfLocalName("DQ");
+			if (text6 != null)
+			{
+				rsaparameters.DQ = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text6));
+			}
+			string text7 = topElement.SearchForTextOfLocalName("InverseQ");
+			if (text7 != null)
+			{
+				rsaparameters.InverseQ = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text7));
+			}
+			string text8 = topElement.SearchForTextOfLocalName("D");
+			if (text8 != null)
+			{
+				rsaparameters.D = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text8));
+			}
+			this.ImportParameters(rsaparameters);
 		}
 
 		public override string ToXmlString(bool includePrivateParameters)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
 			RSAParameters rsaparameters = this.ExportParameters(includePrivateParameters);
-			try
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append("<RSAKeyValue>");
+			stringBuilder.Append("<Modulus>" + Convert.ToBase64String(rsaparameters.Modulus) + "</Modulus>");
+			stringBuilder.Append("<Exponent>" + Convert.ToBase64String(rsaparameters.Exponent) + "</Exponent>");
+			if (includePrivateParameters)
 			{
-				stringBuilder.Append("<RSAKeyValue>");
-				stringBuilder.Append("<Modulus>");
-				stringBuilder.Append(Convert.ToBase64String(rsaparameters.Modulus));
-				stringBuilder.Append("</Modulus>");
-				stringBuilder.Append("<Exponent>");
-				stringBuilder.Append(Convert.ToBase64String(rsaparameters.Exponent));
-				stringBuilder.Append("</Exponent>");
-				if (includePrivateParameters)
-				{
-					if (rsaparameters.D == null)
-					{
-						string text = Locale.GetText("Missing D parameter for the private key.");
-						throw new ArgumentNullException(text);
-					}
-					if (rsaparameters.P == null || rsaparameters.Q == null || rsaparameters.DP == null || rsaparameters.DQ == null || rsaparameters.InverseQ == null)
-					{
-						string text2 = Locale.GetText("Missing some CRT parameters for the private key.");
-						throw new CryptographicException(text2);
-					}
-					stringBuilder.Append("<P>");
-					stringBuilder.Append(Convert.ToBase64String(rsaparameters.P));
-					stringBuilder.Append("</P>");
-					stringBuilder.Append("<Q>");
-					stringBuilder.Append(Convert.ToBase64String(rsaparameters.Q));
-					stringBuilder.Append("</Q>");
-					stringBuilder.Append("<DP>");
-					stringBuilder.Append(Convert.ToBase64String(rsaparameters.DP));
-					stringBuilder.Append("</DP>");
-					stringBuilder.Append("<DQ>");
-					stringBuilder.Append(Convert.ToBase64String(rsaparameters.DQ));
-					stringBuilder.Append("</DQ>");
-					stringBuilder.Append("<InverseQ>");
-					stringBuilder.Append(Convert.ToBase64String(rsaparameters.InverseQ));
-					stringBuilder.Append("</InverseQ>");
-					stringBuilder.Append("<D>");
-					stringBuilder.Append(Convert.ToBase64String(rsaparameters.D));
-					stringBuilder.Append("</D>");
-				}
-				stringBuilder.Append("</RSAKeyValue>");
+				stringBuilder.Append("<P>" + Convert.ToBase64String(rsaparameters.P) + "</P>");
+				stringBuilder.Append("<Q>" + Convert.ToBase64String(rsaparameters.Q) + "</Q>");
+				stringBuilder.Append("<DP>" + Convert.ToBase64String(rsaparameters.DP) + "</DP>");
+				stringBuilder.Append("<DQ>" + Convert.ToBase64String(rsaparameters.DQ) + "</DQ>");
+				stringBuilder.Append("<InverseQ>" + Convert.ToBase64String(rsaparameters.InverseQ) + "</InverseQ>");
+				stringBuilder.Append("<D>" + Convert.ToBase64String(rsaparameters.D) + "</D>");
 			}
-			catch
-			{
-				this.ZeroizePrivateKey(rsaparameters);
-				throw;
-			}
+			stringBuilder.Append("</RSAKeyValue>");
 			return stringBuilder.ToString();
 		}
+
+		public abstract RSAParameters ExportParameters(bool includePrivateParameters);
+
+		public abstract void ImportParameters(RSAParameters parameters);
 	}
 }

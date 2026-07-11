@@ -22,7 +22,7 @@ namespace TMPro
 			TMP_TextInfo textInfo = this.textComponent.textInfo;
 			for (int i = this.linkTextfirstCharacterIndex; i < this.linkTextfirstCharacterIndex + this.linkTextLength; i++)
 			{
-				text += textInfo.characterInfo[i].character;
+				text += textInfo.characterInfo[i].character.ToString();
 			}
 			return text;
 		}

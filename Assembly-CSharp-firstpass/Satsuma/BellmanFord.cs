@@ -5,6 +5,12 @@ namespace Satsuma
 {
 	public sealed class BellmanFord
 	{
+		public IGraph Graph { get; private set; }
+
+		public Func<Arc, double> Cost { get; private set; }
+
+		public IPath NegativeCycle { get; private set; }
+
 		public BellmanFord(IGraph graph, Func<Arc, double> cost, IEnumerable<Node> sources)
 		{
 			this.Graph = graph;
@@ -18,12 +24,6 @@ namespace Satsuma
 			}
 			this.Run();
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public Func<Arc, double> Cost { get; private set; }
-
-		public IPath NegativeCycle { get; private set; }
 
 		private void Run()
 		{
@@ -106,7 +106,11 @@ namespace Satsuma
 				throw new InvalidOperationException("A negative cycle was found.");
 			}
 			double num;
-			return (!this.distance.TryGetValue(node, out num)) ? double.PositiveInfinity : num;
+			if (!this.distance.TryGetValue(node, out num))
+			{
+				return double.PositiveInfinity;
+			}
+			return num;
 		}
 
 		public Arc GetParentArc(Node node)
@@ -116,7 +120,11 @@ namespace Satsuma
 				throw new InvalidOperationException("A negative cycle was found.");
 			}
 			Arc arc;
-			return (!this.parentArc.TryGetValue(node, out arc)) ? Arc.Invalid : arc;
+			if (!this.parentArc.TryGetValue(node, out arc))
+			{
+				return Arc.Invalid;
+			}
+			return arc;
 		}
 
 		public IPath GetPath(Node node)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -19,17 +20,45 @@ namespace UnityEngine
 			{
 				this.ApplyOptions(options);
 			}
-			this.m_Margin.left = _style.margin.left;
-			this.m_Margin.right = _style.margin.right;
-			this.m_Margin.top = _style.margin.top;
-			this.m_Margin.bottom = _style.margin.bottom;
+			this.m_MarginLeft = _style.margin.left;
+			this.m_MarginRight = _style.margin.right;
+			this.m_MarginTop = _style.margin.top;
+			this.m_MarginBottom = _style.margin.bottom;
 		}
 
-		public override RectOffset margin
+		public override int marginLeft
 		{
+			[CompilerGenerated]
 			get
 			{
-				return this.m_Margin;
+				return this.m_MarginLeft;
+			}
+		}
+
+		public override int marginRight
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.m_MarginRight;
+			}
+		}
+
+		public override int marginTop
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.m_MarginTop;
+			}
+		}
+
+		public override int marginBottom
+		{
+			[CompilerGenerated]
+			get
+			{
+				return this.m_MarginBottom;
 			}
 		}
 
@@ -64,10 +93,10 @@ namespace UnityEngine
 		{
 			base.ApplyStyleSettings(style);
 			RectOffset margin = style.margin;
-			this.m_Margin.left = margin.left;
-			this.m_Margin.right = margin.right;
-			this.m_Margin.top = margin.top;
-			this.m_Margin.bottom = margin.bottom;
+			this.m_MarginLeft = margin.left;
+			this.m_MarginRight = margin.right;
+			this.m_MarginTop = margin.top;
+			this.m_MarginBottom = margin.bottom;
 		}
 
 		public void ResetCursor()
@@ -167,22 +196,21 @@ namespace UnityEngine
 					foreach (GUILayoutEntry guilayoutEntry in this.entries)
 					{
 						guilayoutEntry.CalcWidth();
-						RectOffset margin = guilayoutEntry.margin;
-						if (guilayoutEntry.style != GUILayoutUtility.spaceStyle)
+						if (guilayoutEntry.consideredForMargin)
 						{
 							if (!flag)
 							{
-								num = Mathf.Min(margin.left, num);
-								num2 = Mathf.Min(margin.right, num2);
+								num = Mathf.Min(guilayoutEntry.marginLeft, num);
+								num2 = Mathf.Min(guilayoutEntry.marginRight, num2);
 							}
 							else
 							{
-								num = margin.left;
-								num2 = margin.right;
+								num = guilayoutEntry.marginLeft;
+								num2 = guilayoutEntry.marginRight;
 								flag = false;
 							}
-							this.m_ChildMinWidth = Mathf.Max(guilayoutEntry.minWidth + (float)margin.horizontal, this.m_ChildMinWidth);
-							this.m_ChildMaxWidth = Mathf.Max(guilayoutEntry.maxWidth + (float)margin.horizontal, this.m_ChildMaxWidth);
+							this.m_ChildMinWidth = Mathf.Max(guilayoutEntry.minWidth + (float)guilayoutEntry.marginHorizontal, this.m_ChildMinWidth);
+							this.m_ChildMaxWidth = Mathf.Max(guilayoutEntry.maxWidth + (float)guilayoutEntry.marginHorizontal, this.m_ChildMaxWidth);
 						}
 						this.m_StretchableCountX += guilayoutEntry.stretchWidth;
 					}
@@ -195,13 +223,12 @@ namespace UnityEngine
 					foreach (GUILayoutEntry guilayoutEntry2 in this.entries)
 					{
 						guilayoutEntry2.CalcWidth();
-						RectOffset margin2 = guilayoutEntry2.margin;
-						if (guilayoutEntry2.style != GUILayoutUtility.spaceStyle)
+						if (guilayoutEntry2.consideredForMargin)
 						{
 							int num4;
 							if (!flag)
 							{
-								num4 = ((num3 <= margin2.left) ? margin2.left : num3);
+								num4 = ((num3 <= guilayoutEntry2.marginLeft) ? guilayoutEntry2.marginLeft : num3);
 							}
 							else
 							{
@@ -210,7 +237,7 @@ namespace UnityEngine
 							}
 							this.m_ChildMinWidth += guilayoutEntry2.minWidth + this.spacing + (float)num4;
 							this.m_ChildMaxWidth += guilayoutEntry2.maxWidth + this.spacing + (float)num4;
-							num3 = margin2.right;
+							num3 = guilayoutEntry2.marginRight;
 							this.m_StretchableCountX += guilayoutEntry2.stretchWidth;
 						}
 						else
@@ -224,7 +251,7 @@ namespace UnityEngine
 					this.m_ChildMaxWidth -= this.spacing;
 					if (this.entries.Count != 0)
 					{
-						num = this.entries[0].margin.left;
+						num = this.entries[0].marginLeft;
 						num2 = num3;
 					}
 					else
@@ -241,8 +268,8 @@ namespace UnityEngine
 				}
 				else
 				{
-					this.m_Margin.left = num;
-					this.m_Margin.right = num2;
+					this.m_MarginLeft = num;
+					this.m_MarginRight = num2;
 					num6 = (num5 = 0f);
 				}
 				this.minWidth = Mathf.Max(this.minWidth, this.m_ChildMinWidth + num5 + num6);
@@ -278,9 +305,9 @@ namespace UnityEngine
 				{
 					foreach (GUILayoutEntry guilayoutEntry in this.entries)
 					{
-						float num = (float)Mathf.Max(guilayoutEntry.margin.left, padding.left);
+						float num = (float)Mathf.Max(guilayoutEntry.marginLeft, padding.left);
 						float num2 = x + num;
-						float num3 = width - (float)Mathf.Max(guilayoutEntry.margin.right, padding.right) - num;
+						float num3 = width - (float)Mathf.Max(guilayoutEntry.marginRight, padding.right) - num;
 						if (guilayoutEntry.stretchWidth != 0)
 						{
 							guilayoutEntry.SetHorizontal(num2, num3);
@@ -293,17 +320,17 @@ namespace UnityEngine
 				}
 				else
 				{
-					float num4 = x - (float)this.margin.left;
-					float num5 = width + (float)this.margin.horizontal;
+					float num4 = x - (float)this.marginLeft;
+					float num5 = width + (float)base.marginHorizontal;
 					foreach (GUILayoutEntry guilayoutEntry2 in this.entries)
 					{
 						if (guilayoutEntry2.stretchWidth != 0)
 						{
-							guilayoutEntry2.SetHorizontal(num4 + (float)guilayoutEntry2.margin.left, num5 - (float)guilayoutEntry2.margin.horizontal);
+							guilayoutEntry2.SetHorizontal(num4 + (float)guilayoutEntry2.marginLeft, num5 - (float)guilayoutEntry2.marginHorizontal);
 						}
 						else
 						{
-							guilayoutEntry2.SetHorizontal(num4 + (float)guilayoutEntry2.margin.left, Mathf.Clamp(num5 - (float)guilayoutEntry2.margin.horizontal, guilayoutEntry2.minWidth, guilayoutEntry2.maxWidth));
+							guilayoutEntry2.SetHorizontal(num4 + (float)guilayoutEntry2.marginLeft, Mathf.Clamp(num5 - (float)guilayoutEntry2.marginHorizontal, guilayoutEntry2.minWidth, guilayoutEntry2.maxWidth));
 						}
 					}
 				}
@@ -316,8 +343,8 @@ namespace UnityEngine
 					float num7 = (float)padding.right;
 					if (this.entries.Count != 0)
 					{
-						num6 = Mathf.Max(num6, (float)this.entries[0].margin.left);
-						num7 = Mathf.Max(num7, (float)this.entries[this.entries.Count - 1].margin.right);
+						num6 = Mathf.Max(num6, (float)this.entries[0].marginLeft);
+						num7 = Mathf.Max(num7, (float)this.entries[this.entries.Count - 1].marginRight);
 					}
 					x += num6;
 					width -= num7 + num6;
@@ -342,9 +369,9 @@ namespace UnityEngine
 				{
 					float num12 = Mathf.Lerp(guilayoutEntry3.minWidth, guilayoutEntry3.maxWidth, num9);
 					num12 += num10 * (float)guilayoutEntry3.stretchWidth;
-					if (guilayoutEntry3.style != GUILayoutUtility.spaceStyle)
+					if (guilayoutEntry3.consideredForMargin)
 					{
-						int num13 = guilayoutEntry3.margin.left;
+						int num13 = guilayoutEntry3.marginLeft;
 						if (flag)
 						{
 							num13 = 0;
@@ -352,7 +379,7 @@ namespace UnityEngine
 						}
 						int num14 = ((num11 <= num13) ? num13 : num11);
 						x += (float)num14;
-						num11 = guilayoutEntry3.margin.right;
+						num11 = guilayoutEntry3.marginRight;
 					}
 					guilayoutEntry3.SetHorizontal(Mathf.Round(x), Mathf.Round(num12));
 					x += num12 + this.spacing;
@@ -380,13 +407,12 @@ namespace UnityEngine
 					foreach (GUILayoutEntry guilayoutEntry in this.entries)
 					{
 						guilayoutEntry.CalcHeight();
-						RectOffset margin = guilayoutEntry.margin;
-						if (guilayoutEntry.style != GUILayoutUtility.spaceStyle)
+						if (guilayoutEntry.consideredForMargin)
 						{
 							int num4;
 							if (!flag)
 							{
-								num4 = Mathf.Max(num3, margin.top);
+								num4 = Mathf.Max(num3, guilayoutEntry.marginTop);
 							}
 							else
 							{
@@ -395,7 +421,7 @@ namespace UnityEngine
 							}
 							this.m_ChildMinHeight += guilayoutEntry.minHeight + this.spacing + (float)num4;
 							this.m_ChildMaxHeight += guilayoutEntry.maxHeight + this.spacing + (float)num4;
-							num3 = margin.bottom;
+							num3 = guilayoutEntry.marginBottom;
 							this.m_StretchableCountY += guilayoutEntry.stretchHeight;
 						}
 						else
@@ -409,7 +435,7 @@ namespace UnityEngine
 					this.m_ChildMaxHeight -= this.spacing;
 					if (this.entries.Count != 0)
 					{
-						num = this.entries[0].margin.top;
+						num = this.entries[0].marginTop;
 						num2 = num3;
 					}
 					else
@@ -423,18 +449,17 @@ namespace UnityEngine
 					foreach (GUILayoutEntry guilayoutEntry2 in this.entries)
 					{
 						guilayoutEntry2.CalcHeight();
-						RectOffset margin2 = guilayoutEntry2.margin;
-						if (guilayoutEntry2.style != GUILayoutUtility.spaceStyle)
+						if (guilayoutEntry2.consideredForMargin)
 						{
 							if (!flag2)
 							{
-								num = Mathf.Min(margin2.top, num);
-								num2 = Mathf.Min(margin2.bottom, num2);
+								num = Mathf.Min(guilayoutEntry2.marginTop, num);
+								num2 = Mathf.Min(guilayoutEntry2.marginBottom, num2);
 							}
 							else
 							{
-								num = margin2.top;
-								num2 = margin2.bottom;
+								num = guilayoutEntry2.marginTop;
+								num2 = guilayoutEntry2.marginBottom;
 								flag2 = false;
 							}
 							this.m_ChildMinHeight = Mathf.Max(guilayoutEntry2.minHeight, this.m_ChildMinHeight);
@@ -452,8 +477,8 @@ namespace UnityEngine
 				}
 				else
 				{
-					this.m_Margin.top = num;
-					this.m_Margin.bottom = num2;
+					this.m_MarginTop = num;
+					this.m_MarginBottom = num2;
 					num6 = (num5 = 0f);
 				}
 				this.minHeight = Mathf.Max(this.minHeight, this.m_ChildMinHeight + num5 + num6);
@@ -493,8 +518,8 @@ namespace UnityEngine
 						float num2 = (float)padding.bottom;
 						if (this.entries.Count != 0)
 						{
-							num = Mathf.Max(num, (float)this.entries[0].margin.top);
-							num2 = Mathf.Max(num2, (float)this.entries[this.entries.Count - 1].margin.bottom);
+							num = Mathf.Max(num, (float)this.entries[0].marginTop);
+							num2 = Mathf.Max(num2, (float)this.entries[this.entries.Count - 1].marginBottom);
 						}
 						y += num;
 						height -= num2 + num;
@@ -519,9 +544,9 @@ namespace UnityEngine
 					{
 						float num7 = Mathf.Lerp(guilayoutEntry.minHeight, guilayoutEntry.maxHeight, num4);
 						num7 += num5 * (float)guilayoutEntry.stretchHeight;
-						if (guilayoutEntry.style != GUILayoutUtility.spaceStyle)
+						if (guilayoutEntry.consideredForMargin)
 						{
-							int num8 = guilayoutEntry.margin.top;
+							int num8 = guilayoutEntry.marginTop;
 							if (flag)
 							{
 								num8 = 0;
@@ -529,7 +554,7 @@ namespace UnityEngine
 							}
 							int num9 = ((num6 <= num8) ? num8 : num6);
 							y += (float)num9;
-							num6 = guilayoutEntry.margin.bottom;
+							num6 = guilayoutEntry.marginBottom;
 						}
 						guilayoutEntry.SetVertical(Mathf.Round(y), Mathf.Round(num7));
 						y += num7 + this.spacing;
@@ -539,9 +564,9 @@ namespace UnityEngine
 				{
 					foreach (GUILayoutEntry guilayoutEntry2 in this.entries)
 					{
-						float num10 = (float)Mathf.Max(guilayoutEntry2.margin.top, padding.top);
+						float num10 = (float)Mathf.Max(guilayoutEntry2.marginTop, padding.top);
 						float num11 = y + num10;
-						float num12 = height - (float)Mathf.Max(guilayoutEntry2.margin.bottom, padding.bottom) - num10;
+						float num12 = height - (float)Mathf.Max(guilayoutEntry2.marginBottom, padding.bottom) - num10;
 						if (guilayoutEntry2.stretchHeight != 0)
 						{
 							guilayoutEntry2.SetVertical(num11, num12);
@@ -554,17 +579,17 @@ namespace UnityEngine
 				}
 				else
 				{
-					float num13 = y - (float)this.margin.top;
-					float num14 = height + (float)this.margin.vertical;
+					float num13 = y - (float)this.marginTop;
+					float num14 = height + (float)base.marginVertical;
 					foreach (GUILayoutEntry guilayoutEntry3 in this.entries)
 					{
 						if (guilayoutEntry3.stretchHeight != 0)
 						{
-							guilayoutEntry3.SetVertical(num13 + (float)guilayoutEntry3.margin.top, num14 - (float)guilayoutEntry3.margin.vertical);
+							guilayoutEntry3.SetVertical(num13 + (float)guilayoutEntry3.marginTop, num14 - (float)guilayoutEntry3.marginVertical);
 						}
 						else
 						{
-							guilayoutEntry3.SetVertical(num13 + (float)guilayoutEntry3.margin.top, Mathf.Clamp(num14 - (float)guilayoutEntry3.margin.vertical, guilayoutEntry3.minHeight, guilayoutEntry3.maxHeight));
+							guilayoutEntry3.SetVertical(num13 + (float)guilayoutEntry3.marginTop, Mathf.Clamp(num14 - (float)guilayoutEntry3.marginVertical, guilayoutEntry3.minHeight, guilayoutEntry3.maxHeight));
 						}
 					}
 				}
@@ -630,6 +655,12 @@ namespace UnityEngine
 
 		protected float m_ChildMaxHeight = 100f;
 
-		private readonly RectOffset m_Margin = new RectOffset();
+		protected int m_MarginLeft;
+
+		protected int m_MarginRight;
+
+		protected int m_MarginTop;
+
+		protected int m_MarginBottom;
 	}
 }

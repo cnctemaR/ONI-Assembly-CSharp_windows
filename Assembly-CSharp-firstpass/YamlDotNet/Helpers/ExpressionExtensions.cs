@@ -20,7 +20,7 @@ namespace YamlDotNet.Helpers
 		{
 			if (lambdaExpression.Parameters.Count != 1)
 			{
-				return (TMemberInfo)((object)null);
+				return default(TMemberInfo);
 			}
 			Expression expression = lambdaExpression.Body;
 			UnaryExpression unaryExpression = expression as UnaryExpression;
@@ -28,18 +28,18 @@ namespace YamlDotNet.Helpers
 			{
 				if (unaryExpression.NodeType != ExpressionType.Convert)
 				{
-					return (TMemberInfo)((object)null);
+					return default(TMemberInfo);
 				}
 				expression = unaryExpression.Operand;
 			}
 			MemberExpression memberExpression = expression as MemberExpression;
 			if (memberExpression == null)
 			{
-				return (TMemberInfo)((object)null);
+				return default(TMemberInfo);
 			}
 			if (memberExpression.Expression != lambdaExpression.Parameters[0])
 			{
-				return (TMemberInfo)((object)null);
+				return default(TMemberInfo);
 			}
 			return memberExpression.Member as TMemberInfo;
 		}

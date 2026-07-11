@@ -33,7 +33,7 @@ public class ItemPedestal : KMonoBehaviour
 		if (data != null)
 		{
 			GameObject gameObject = (GameObject)data;
-			DecorProvider component = gameObject.GetComponent<DecorProvider>();
+			global::UnityEngine.Object component = gameObject.GetComponent<DecorProvider>();
 			float num = 5f;
 			float num2 = 3f;
 			if (component != null)

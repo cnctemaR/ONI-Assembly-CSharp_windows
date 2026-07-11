@@ -146,7 +146,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 				GameObject gameObject = Util.KInstantiateUI(this.contentBody, this.contentBody.transform.parent.gameObject, false);
 				gameObject.SetActive(true);
 				Image component = gameObject.GetComponent<Image>();
-				Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
+				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
 				component.sprite = uisprite.first;
 				component.color = uisprite.second;
 				this.entryIcons.Add(gameObject);
@@ -159,7 +159,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 					{
 						num2 = Mathf.CeilToInt((float)(num / 2));
 						num3 = num2 - i;
-						num4 = ((num3 <= 0) ? (-1) : 1);
+						num4 = ((num3 > 0) ? 1 : (-1));
 						num3 = Mathf.Abs(num3);
 					}
 					else
@@ -179,7 +179,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 					int num5 = 0;
 					if (num % 2 == 0)
 					{
-						num5 = ((i > num2) ? 6 : (-6));
+						num5 = ((i <= num2) ? (-6) : 6);
 						gameObject.transform.SetPosition(gameObject.transform.position += new Vector3((float)num5, 0f, 0f));
 					}
 					gameObject.transform.localScale = new Vector3(1f - (float)num3 * 0.1f, 1f - (float)num3 * 0.1f, 1f);
@@ -188,16 +188,14 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 					gameObject.GetComponent<Canvas>().sortingOrder = num - num3;
 				}
 			}
+			return;
 		}
-		else
-		{
-			GameObject gameObject2 = Util.KInstantiateUI(this.contentBody, this.contentBody.transform.parent.gameObject, false);
-			gameObject2.SetActive(true);
-			Image component2 = gameObject2.GetComponent<Image>();
-			component2.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(this.info.id.ToTag()).substance.anim, "ui", false, string.Empty);
-			component2.color = ElementLoader.GetElement(this.info.id.ToTag()).substance.uiColour;
-			this.entryIcons.Add(gameObject2);
-		}
+		GameObject gameObject2 = Util.KInstantiateUI(this.contentBody, this.contentBody.transform.parent.gameObject, false);
+		gameObject2.SetActive(true);
+		Image component2 = gameObject2.GetComponent<Image>();
+		component2.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(this.info.id.ToTag()).substance.anim, "ui", false, "");
+		component2.color = ElementLoader.GetElement(this.info.id.ToTag()).substance.uiColour;
+		this.entryIcons.Add(gameObject2);
 	}
 
 	private string GetSpawnableName()
@@ -212,7 +210,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			return element.substance.name;
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private string GetSpawnableQuantityOnly()
@@ -267,7 +265,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		GameObject prefab = Assets.GetPrefab(this.info.id);
 		if (prefab == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		InfoDescription component = prefab.GetComponent<InfoDescription>();
 		if (component != null)
@@ -316,8 +314,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			this.controller.RemoveDeliverable(this.info);
 		}
-		ImageToggleState component = this.selectButton.GetComponent<ImageToggleState>();
-		component.SetInactive();
+		this.selectButton.GetComponent<ImageToggleState>().SetInactive();
 		this.selectButton.Deselect();
 		this.selectButton.ClearOnClick();
 		this.selectButton.onClick += delegate
@@ -346,11 +343,9 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		if (this.controller.AllowsReplacing)
 		{
 			this.selectButton.onClick += this.ReplaceCharacterSelection;
+			return;
 		}
-		else
-		{
-			this.selectButton.onClick += this.CantSelectCharacter;
-		}
+		this.selectButton.onClick += this.CantSelectCharacter;
 	}
 
 	private void CantSelectCharacter()
@@ -424,7 +419,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	{
 		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in CarePackageContainer.containers)
 		{
-			if (!object.ReferenceEquals(telepadDeliverableContainer, this))
+			if (telepadDeliverableContainer != this)
 			{
 				CarePackageContainer carePackageContainer = telepadDeliverableContainer as CarePackageContainer;
 				if (carePackageContainer != null && carePackageContainer.info == this.info)
@@ -438,7 +433,11 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 
 	public string GetValueColor(bool isPositive)
 	{
-		return (!isPositive) ? "<color=#ff2222ff>" : "<color=green>";
+		if (!isPositive)
+		{
+			return "<color=#ff2222ff>";
+		}
+		return "<color=green>";
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

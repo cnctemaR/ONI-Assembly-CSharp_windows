@@ -69,8 +69,7 @@ public class SandboxBrushTool : BrushTool
 		{
 			for (int j = 0; j < this.brushRadius * 2; j++)
 			{
-				float num = Vector2.Distance(new Vector2((float)i, (float)j), new Vector2((float)this.brushRadius, (float)this.brushRadius));
-				if (num < (float)this.brushRadius - 0.8f)
+				if (Vector2.Distance(new Vector2((float)i, (float)j), new Vector2((float)this.brushRadius, (float)this.brushRadius)) < (float)this.brushRadius - 0.8f)
 				{
 					this.brushOffsets.Add(new Vector2((float)(i - this.brushRadius), (float)(j - this.brushRadius)));
 				}

@@ -23,6 +23,12 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		set
 		{
+			if (float.IsInfinity(value) || float.IsNaN(value))
+			{
+				DebugUtil.DevLogError("Invalid units value for element, setting Units to 0");
+				this._units = 0f;
+				return;
+			}
 			this._units = value;
 		}
 	}
@@ -65,6 +71,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			{
 				this.diseaseID = Db.Get().Diseases[(int)Grid.DiseaseIdx[num]].id;
 				this.diseaseCount = Grid.DiseaseCount[num];
+				return;
 			}
 		}
 		else if (this.diseaseHandle.IsValid())
@@ -104,6 +111,12 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			Util.KDestroyGameObject(base.gameObject);
 			return;
 		}
+		if (this.Mass == 0f && !this.KeepZeroMassObject)
+		{
+			DebugUtil.DevLogError(base.gameObject, "deserialized element with 0 mass. Destroying");
+			Util.KDestroyGameObject(base.gameObject);
+			return;
+		}
 		if (this.onDataChanged != null)
 		{
 			this.onDataChanged(this);
@@ -115,17 +128,19 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			{
 				GameComps.DiseaseContainers.Remove(base.gameObject);
 				this.diseaseHandle.Clear();
+				return;
 			}
-		}
-		else if (this.diseaseHandle.IsValid())
-		{
-			DiseaseHeader header = GameComps.DiseaseContainers.GetHeader(this.diseaseHandle);
-			header.diseaseIdx = index;
-			header.diseaseCount = this.diseaseCount;
-			GameComps.DiseaseContainers.SetHeader(this.diseaseHandle, header);
 		}
 		else
 		{
+			if (this.diseaseHandle.IsValid())
+			{
+				DiseaseHeader header = GameComps.DiseaseContainers.GetHeader(this.diseaseHandle);
+				header.diseaseIdx = index;
+				header.diseaseCount = this.diseaseCount;
+				GameComps.DiseaseContainers.SetHeader(this.diseaseHandle, header);
+				return;
+			}
 			this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, index, this.diseaseCount);
 		}
 	}
@@ -184,10 +199,6 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		if (this.Units <= 0f && !this.KeepZeroMassObject)
 		{
 			Util.KDestroyGameObject(base.gameObject);
-		}
-		else if (!this.KeepZeroMassObject && this.Units <= 0f)
-		{
-			throw new ArgumentException("Invalid mass");
 		}
 	}
 
@@ -280,8 +291,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		Attributes attributes = this.GetAttributes();
 		if (attributes != null)
 		{
-			Element element = this.Element;
-			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+			foreach (AttributeModifier attributeModifier in this.Element.attributeModifiers)
 			{
 				attributes.Add(attributeModifier);
 			}
@@ -359,18 +369,14 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (this.useSimDiseaseInfo)
 		{
-			int num = Grid.PosToCell(this);
-			SimMessages.ModifyDiseaseOnCell(num, byte.MaxValue, delta);
+			SimMessages.ModifyDiseaseOnCell(Grid.PosToCell(this), byte.MaxValue, delta);
+			return;
 		}
-		else if (delta != 0 && this.diseaseHandle.IsValid())
+		if (delta != 0 && this.diseaseHandle.IsValid() && GameComps.DiseaseContainers.ModifyDiseaseCount(this.diseaseHandle, delta) <= 0 && !this.forcePermanentDiseaseContainer)
 		{
-			int num2 = GameComps.DiseaseContainers.ModifyDiseaseCount(this.diseaseHandle, delta);
-			if (num2 <= 0 && !this.forcePermanentDiseaseContainer)
-			{
-				base.Trigger(-1689370368, false);
-				GameComps.DiseaseContainers.Remove(base.gameObject);
-				this.diseaseHandle.Clear();
-			}
+			base.Trigger(-1689370368, false);
+			GameComps.DiseaseContainers.Remove(base.gameObject);
+			this.diseaseHandle.Clear();
 		}
 	}
 
@@ -387,16 +393,16 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (this.useSimDiseaseInfo)
 		{
-			int num = Grid.PosToCell(this);
-			SimMessages.ModifyDiseaseOnCell(num, disease_idx, delta);
+			SimMessages.ModifyDiseaseOnCell(Grid.PosToCell(this), disease_idx, delta);
+			return;
 		}
-		else if (this.diseaseHandle.IsValid())
+		if (this.diseaseHandle.IsValid())
 		{
-			int num2 = GameComps.DiseaseContainers.AddDisease(this.diseaseHandle, disease_idx, delta);
-			if (num2 <= 0)
+			if (GameComps.DiseaseContainers.AddDisease(this.diseaseHandle, disease_idx, delta) <= 0)
 			{
 				GameComps.DiseaseContainers.Remove(base.gameObject);
 				this.diseaseHandle.Clear();
+				return;
 			}
 		}
 		else if (delta > 0)
@@ -459,7 +465,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	public void RedirectDisease(GameObject target)
 	{
 		this.SetDiseaseVisualProvider(target);
-		this.diseaseRedirectTarget = ((!target) ? null : target.GetComponent<PrimaryElement>());
+		this.diseaseRedirectTarget = (target ? target.GetComponent<PrimaryElement>() : null);
 		global::Debug.Assert(this.diseaseRedirectTarget != this, "Disease redirect target set to myself");
 	}
 

@@ -26,14 +26,10 @@ public class CargoBay : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		string text = "action_empty_contents";
-		string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME;
-		global::System.Action action = delegate
+		KIconButtonMenu.ButtonInfo buttonInfo = new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, delegate
 		{
 			this.storage.DropAll(false, false, default(Vector3), true);
-		};
-		string text3 = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-		KIconButtonMenu.ButtonInfo buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP, true);
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
@@ -106,8 +102,7 @@ public class CargoBay : KMonoBehaviour
 	private void ReserveResources()
 	{
 		int spacecraftID = SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>());
-		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(spacecraftID);
-		spacecraftDestination.UpdateRemainingResources(this);
+		SpacecraftManager.instance.GetSpacecraftDestination(spacecraftID).UpdateRemainingResources(this);
 	}
 
 	public void OnLand(object data)
@@ -117,21 +112,17 @@ public class CargoBay : KMonoBehaviour
 		if (component != null)
 		{
 			CargoBay.CargoType cargoType = this.storageType;
-			if (cargoType != CargoBay.CargoType.gasses)
+			if (cargoType == CargoBay.CargoType.liquids)
 			{
-				if (cargoType != CargoBay.CargoType.liquids)
-				{
-					component.conduitType = ConduitType.None;
-				}
-				else
-				{
-					component.conduitType = ConduitType.Liquid;
-				}
+				component.conduitType = ConduitType.Liquid;
+				return;
 			}
-			else
+			if (cargoType == CargoBay.CargoType.gasses)
 			{
 				component.conduitType = ConduitType.Gas;
+				return;
 			}
+			component.conduitType = ConduitType.None;
 		}
 	}
 

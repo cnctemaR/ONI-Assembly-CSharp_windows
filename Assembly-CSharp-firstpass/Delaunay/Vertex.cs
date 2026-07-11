@@ -7,11 +7,6 @@ namespace Delaunay
 {
 	public sealed class Vertex : ICoord
 	{
-		public Vertex(float x, float y)
-		{
-			this.Init(x, y);
-		}
-
 		private static Vertex Create(float x, float y)
 		{
 			if (float.IsNaN(x) || float.IsNaN(y))
@@ -39,6 +34,11 @@ namespace Delaunay
 			{
 				return this._vertexIndex;
 			}
+		}
+
+		public Vertex(float x, float y)
+		{
+			this.Init(x, y);
 		}
 
 		private Vertex Init(float x, float y)
@@ -94,11 +94,27 @@ namespace Delaunay
 				edge3 = edge2;
 			}
 			bool flag = num2 >= edge3.rightSite.x;
-			if ((flag && halfedge2.leftRight == Side.LEFT) || (!flag && halfedge2.leftRight == Side.RIGHT))
+			if (flag)
 			{
-				return null;
+				Side? side = halfedge2.leftRight;
+				Side side2 = Side.LEFT;
+				if ((side.GetValueOrDefault() == side2) & (side != null))
+				{
+					goto IL_011B;
+				}
+			}
+			if (!flag)
+			{
+				Side? side = halfedge2.leftRight;
+				Side side2 = Side.RIGHT;
+				if ((side.GetValueOrDefault() == side2) & (side != null))
+				{
+					goto IL_011B;
+				}
 			}
 			return Vertex.Create(num2, num3);
+			IL_011B:
+			return null;
 		}
 
 		public float x

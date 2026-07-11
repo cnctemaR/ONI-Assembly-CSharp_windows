@@ -65,7 +65,7 @@ public class ScheduleScreen : KScreen
 
 	private void OnAddScheduleClick()
 	{
-		ScheduleManager.Instance.AddSchedule(Db.Get().ScheduleGroups.allGroups, null, false);
+		ScheduleManager.Instance.AddDefaultSchedule(false);
 	}
 
 	private void OnPaintButtonClick(SchedulePaintButton clicked)
@@ -77,12 +77,10 @@ public class ScheduleScreen : KScreen
 				schedulePaintButton.SetToggle(schedulePaintButton == clicked);
 			}
 			this.selectedPaint = clicked;
+			return;
 		}
-		else
-		{
-			clicked.SetToggle(false);
-			this.selectedPaint = null;
-		}
+		clicked.SetToggle(false);
+		this.selectedPaint = null;
 	}
 
 	private void OnPaintDragged(ScheduleScreenEntry entry, float ratio)
@@ -122,6 +120,7 @@ public class ScheduleScreen : KScreen
 			if (!e.Consumed)
 			{
 				e.Consumed = true;
+				return;
 			}
 		}
 		else

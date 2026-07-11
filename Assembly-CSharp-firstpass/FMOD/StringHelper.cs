@@ -9,9 +9,9 @@ namespace FMOD
 	{
 		public static StringHelper.ThreadSafeEncoding GetFreeHelper()
 		{
-			object obj = StringHelper.encoders;
+			List<StringHelper.ThreadSafeEncoding> list = StringHelper.encoders;
 			StringHelper.ThreadSafeEncoding threadSafeEncoding2;
-			lock (obj)
+			lock (list)
 			{
 				StringHelper.ThreadSafeEncoding threadSafeEncoding = null;
 				for (int i = 0; i < StringHelper.encoders.Count; i++)
@@ -62,13 +62,12 @@ namespace FMOD
 				{
 					return null;
 				}
-				int num = this.encoding.GetMaxByteCount(s.Length) + 1;
-				if (num > this.encodedBuffer.Length)
+				if (this.encoding.GetMaxByteCount(s.Length) + 1 > this.encodedBuffer.Length)
 				{
-					int num2 = this.encoding.GetByteCount(s) + 1;
-					if (num2 > this.encodedBuffer.Length)
+					int num = this.encoding.GetByteCount(s) + 1;
+					if (num > this.encodedBuffer.Length)
 					{
-						this.encodedBuffer = new byte[this.roundUpPowerTwo(num2)];
+						this.encodedBuffer = new byte[this.roundUpPowerTwo(num)];
 					}
 				}
 				int bytes = this.encoding.GetBytes(s, 0, s.Length, this.encodedBuffer, 0);
@@ -80,7 +79,7 @@ namespace FMOD
 			{
 				if (nativePtr == IntPtr.Zero)
 				{
-					return string.Empty;
+					return "";
 				}
 				int num = 0;
 				while (Marshal.ReadByte(nativePtr, num) != 0)
@@ -89,15 +88,14 @@ namespace FMOD
 				}
 				if (num == 0)
 				{
-					return string.Empty;
+					return "";
 				}
 				if (num > this.encodedBuffer.Length)
 				{
 					this.encodedBuffer = new byte[this.roundUpPowerTwo(num)];
 				}
 				Marshal.Copy(nativePtr, this.encodedBuffer, 0, num);
-				int maxCharCount = this.encoding.GetMaxCharCount(num);
-				if (maxCharCount > this.decodedBuffer.Length)
+				if (this.encoding.GetMaxCharCount(num) > this.decodedBuffer.Length)
 				{
 					int charCount = this.encoding.GetCharCount(this.encodedBuffer, 0, num);
 					if (charCount > this.decodedBuffer.Length)
@@ -111,7 +109,7 @@ namespace FMOD
 
 			public void Dispose()
 			{
-				object encoders = StringHelper.encoders;
+				List<StringHelper.ThreadSafeEncoding> encoders = StringHelper.encoders;
 				lock (encoders)
 				{
 					this.inUse = false;

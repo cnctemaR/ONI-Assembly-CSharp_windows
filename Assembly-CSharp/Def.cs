@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using UnityEngine;
 
 [Serializable]
@@ -19,7 +18,7 @@ public class Def : ScriptableObject
 		}
 	}
 
-	public static Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui", bool centered = false)
+	public static global::Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui", bool centered = false)
 	{
 		if (item is Substance)
 		{
@@ -29,17 +28,17 @@ public class Def : ScriptableObject
 		{
 			if ((item as Element).IsSolid)
 			{
-				return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered, string.Empty), Color.white);
+				return new global::Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered, ""), Color.white);
 			}
 			if ((item as Element).IsLiquid)
 			{
-				return new Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.uiColour);
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.uiColour);
 			}
 			if ((item as Element).IsGas)
 			{
-				return new Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.uiColour);
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.uiColour);
 			}
-			return new Tuple<Sprite, Color>(null, Color.clear);
+			return new global::Tuple<Sprite, Color>(null, Color.clear);
 		}
 		else if (item is GameObject)
 		{
@@ -77,13 +76,13 @@ public class Def : ScriptableObject
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 			if (component2)
 			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered, string.Empty);
-				return new Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered, "");
+				return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (uispriteFromMultiObjectAnim != null) ? Color.white : Color.clear);
 			}
 			if (gameObject.GetComponent<Building>() != null)
 			{
 				Sprite uisprite = gameObject.GetComponent<Building>().Def.GetUISprite(animName, centered);
-				return new Tuple<Sprite, Color>(uisprite, (!(uisprite != null)) ? Color.clear : Color.white);
+				return new global::Tuple<Sprite, Color>(uisprite, (uisprite != null) ? Color.white : Color.clear);
 			}
 			global::Debug.LogWarningFormat("Can't get sprite for type {0} (no KBatchedAnimController)", new object[] { item.ToString() });
 			return null;
@@ -104,7 +103,7 @@ public class Def : ScriptableObject
 					}
 					if (Assets.GetSprite(((Tag)item).Name) != null)
 					{
-						return new Tuple<Sprite, Color>(Assets.GetSprite(((Tag)item).Name), Color.white);
+						return new global::Tuple<Sprite, Color>(Assets.GetSprite(((Tag)item).Name), Color.white);
 					}
 				}
 				DebugUtil.DevAssertArgs(false, new object[]
@@ -116,13 +115,11 @@ public class Def : ScriptableObject
 			}
 			if (Db.Get().Amounts.Exists(item as string))
 			{
-				Amount amount = Db.Get().Amounts.Get(item as string);
-				return new Tuple<Sprite, Color>(Assets.GetSprite(amount.uiSprite), Color.white);
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite(Db.Get().Amounts.Get(item as string).uiSprite), Color.white);
 			}
 			if (Db.Get().Attributes.Exists(item as string))
 			{
-				Klei.AI.Attribute attribute = Db.Get().Attributes.Get(item as string);
-				return new Tuple<Sprite, Color>(Assets.GetSprite(attribute.uiSprite), Color.white);
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite(Db.Get().Attributes.Get(item as string).uiSprite), Color.white);
 			}
 			return Def.GetUISprite((item as string).ToTag(), animName, centered);
 		}
@@ -130,7 +127,7 @@ public class Def : ScriptableObject
 
 	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false, string symbolName = "")
 	{
-		Tuple<KAnimFile, string, bool> tuple = new Tuple<KAnimFile, string, bool>(animFile, animName, centered);
+		global::Tuple<KAnimFile, string, bool> tuple = new global::Tuple<KAnimFile, string, bool>(animFile, animName, centered);
 		if (Def.knownUISprites.ContainsKey(tuple))
 		{
 			return Def.knownUISprites[tuple];
@@ -205,7 +202,7 @@ public class Def : ScriptableObject
 		{
 			num4 = 100f / (num3 / (float)num);
 		}
-		Sprite sprite = Sprite.Create(texture, rect, (!centered) ? Vector2.zero : new Vector2(0.5f, 0.5f), num4, 0U, SpriteMeshType.FullRect);
+		Sprite sprite = Sprite.Create(texture, rect, centered ? new Vector2(0.5f, 0.5f) : Vector2.zero, num4, 0U, SpriteMeshType.FullRect);
 		sprite.name = string.Format("{0}:{1}:{2}:{3}", new object[]
 		{
 			texture.name,
@@ -221,5 +218,5 @@ public class Def : ScriptableObject
 
 	public Tag Tag;
 
-	private static Dictionary<Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<Tuple<KAnimFile, string, bool>, Sprite>();
+	private static Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite>();
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Security.Permissions
 {
@@ -13,19 +14,19 @@ namespace System.Security.Permissions
 			this.e = list.GetEnumerator();
 		}
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.e.Current;
-			}
-		}
-
 		public KeyContainerPermissionAccessEntry Current
 		{
 			get
 			{
 				return (KeyContainerPermissionAccessEntry)this.e.Current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.e.Current;
 			}
 		}
 
@@ -37,6 +38,11 @@ namespace System.Security.Permissions
 		public void Reset()
 		{
 			this.e.Reset();
+		}
+
+		internal KeyContainerPermissionAccessEntryEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private IEnumerator e;

@@ -7,11 +7,21 @@ namespace Klei.AI
 	[DebuggerDisplay("{AttributeId}")]
 	public class AttributeModifier
 	{
+		public string AttributeId { get; private set; }
+
+		public float Value { get; private set; }
+
+		public bool IsMultiplier { get; private set; }
+
+		public bool UIOnly { get; private set; }
+
+		public bool IsReadonly { get; private set; }
+
 		public AttributeModifier(string attribute_id, float value, string description = null, bool is_multiplier = false, bool uiOnly = false, bool is_readonly = true)
 		{
 			this.AttributeId = attribute_id;
 			this.Value = value;
-			this.Description = ((description != null) ? description : attribute_id);
+			this.Description = ((description == null) ? attribute_id : description);
 			this.DescriptionCB = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
@@ -32,16 +42,6 @@ namespace Klei.AI
 			}
 		}
 
-		public string AttributeId { get; private set; }
-
-		public float Value { get; private set; }
-
-		public bool IsMultiplier { get; private set; }
-
-		public bool UIOnly { get; private set; }
-
-		public bool IsReadonly { get; private set; }
-
 		public void SetValue(float value)
 		{
 			this.Value = value;
@@ -49,7 +49,11 @@ namespace Klei.AI
 
 		public string GetDescription()
 		{
-			return (this.DescriptionCB == null) ? this.Description : this.DescriptionCB();
+			if (this.DescriptionCB == null)
+			{
+				return this.Description;
+			}
+			return this.DescriptionCB();
 		}
 
 		public string GetFormattedString(GameObject parent_instance)
@@ -71,7 +75,7 @@ namespace Klei.AI
 					}
 				}
 			}
-			string text = string.Empty;
+			string text = "";
 			if (attributeFormatter != null)
 			{
 				text = attributeFormatter.GetFormattedModifier(this, parent_instance);

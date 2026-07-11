@@ -20,8 +20,7 @@ namespace MIConvexHull
 			{
 				throw new ArgumentNullException("data");
 			}
-			DelaunayTriangulation<TVertex, TCell> delaunayTriangulation = DelaunayTriangulation<TVertex, TCell>.Create(data);
-			List<TCell> list = delaunayTriangulation.Cells.ToList<TCell>();
+			List<TCell> list = DelaunayTriangulation<TVertex, TCell>.Create(data).Cells.ToList<TCell>();
 			HashSet<TEdge> hashSet = new HashSet<TEdge>(new VoronoiMesh<TVertex, TCell, TEdge>.EdgeComparer());
 			foreach (TCell tcell in list)
 			{
@@ -54,10 +53,7 @@ namespace MIConvexHull
 
 			public int GetHashCode(TEdge obj)
 			{
-				TCell source = obj.Source;
-				int hashCode = source.GetHashCode();
-				TCell target = obj.Target;
-				return hashCode ^ target.GetHashCode();
+				return obj.Source.GetHashCode() ^ obj.Target.GetHashCode();
 			}
 		}
 	}

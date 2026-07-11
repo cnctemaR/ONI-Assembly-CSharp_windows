@@ -8,16 +8,6 @@ namespace ProcGen
 	[Serializable]
 	public class World
 	{
-		public World()
-		{
-			this.subworldFiles = new List<WeightedName>();
-			this.unknownCellsAllowedSubworlds = new List<World.AllowedCellsFilter>();
-			this.startingBasePositionHorizontal = new MinMax(0.5f, 0.5f);
-			this.startingBasePositionVertical = new MinMax(0.5f, 0.5f);
-			this.globalFeatureTemplates = new Dictionary<string, int>();
-			this.globalFeatures = new Dictionary<string, int>();
-		}
-
 		public string name { get; private set; }
 
 		public string description { get; private set; }
@@ -36,7 +26,7 @@ namespace ProcGen
 		{
 			if (string.IsNullOrEmpty(this.coordinatePrefix))
 			{
-				string text = string.Empty;
+				string text = "";
 				string[] array = Strings.Get(this.name).String.Split(new char[] { ' ' });
 				int num = 5 - array.Length;
 				bool flag = true;
@@ -46,7 +36,7 @@ namespace ProcGen
 					{
 						text += "-";
 					}
-					string text3 = Regex.Replace(text2, "(a|e|i|o|u)", string.Empty);
+					string text3 = Regex.Replace(text2, "(a|e|i|o|u)", "");
 					text += text3.Substring(0, Mathf.Min(num, text3.Length)).ToUpper();
 					flag = false;
 				}
@@ -80,6 +70,16 @@ namespace ProcGen
 		public Dictionary<string, int> globalFeatureTemplates { get; private set; }
 
 		public Dictionary<string, int> globalFeatures { get; private set; }
+
+		public World()
+		{
+			this.subworldFiles = new List<WeightedName>();
+			this.unknownCellsAllowedSubworlds = new List<World.AllowedCellsFilter>();
+			this.startingBasePositionHorizontal = new MinMax(0.5f, 0.5f);
+			this.startingBasePositionVertical = new MinMax(0.5f, 0.5f);
+			this.globalFeatureTemplates = new Dictionary<string, int>();
+			this.globalFeatures = new Dictionary<string, int>();
+		}
 
 		public void ModStartLocation(MinMax hMod, MinMax vMod)
 		{

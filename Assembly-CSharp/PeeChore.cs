@@ -39,11 +39,9 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 				if (equippable != null)
 				{
 					equippable.GetComponent<Storage>().AddLiquid(SimHashes.DirtyWater, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), false, true);
+					return;
 				}
-				else
-				{
-					SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), true, -1);
-				}
+				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), true, -1);
 			}
 		}
 

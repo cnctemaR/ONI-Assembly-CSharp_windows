@@ -3,12 +3,6 @@ using UnityEngine;
 
 public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 {
-	public BeIncapacitatedChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
-	{
-		base.smi = new BeIncapacitatedChore.StatesInstance(this);
-	}
-
 	public void FindAvailableMedicalBed(Navigator navigator)
 	{
 		Clinic clinic = null;
@@ -37,6 +31,12 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 	public GameObject GetChosenClinic()
 	{
 		return base.smi.sm.clinic.Get(base.smi);
+	}
+
+	public BeIncapacitatedChore(IStateMachineTarget master)
+		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
+	{
+		base.smi = new BeIncapacitatedChore.StatesInstance(this);
 	}
 
 	private static string IncapacitatedDuplicantAnim_pre = "incapacitate_pre";

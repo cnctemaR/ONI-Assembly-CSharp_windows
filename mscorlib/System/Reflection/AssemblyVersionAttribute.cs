@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyVersionAttribute(string version)
 		{
-			this.name = version;
+			this.m_version = version;
 		}
 
 		public string Version
 		{
 			get
 			{
-				return this.name;
+				return this.m_version;
 			}
 		}
 
-		private string name;
+		private string m_version;
 	}
 }

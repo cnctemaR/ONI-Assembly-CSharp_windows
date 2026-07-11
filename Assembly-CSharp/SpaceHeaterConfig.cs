@@ -31,8 +31,7 @@ public class SpaceHeaterConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		SpaceHeater spaceHeater = go.AddOrGet<SpaceHeater>();
-		spaceHeater.targetTemperature = 343.15f;
+		go.AddOrGet<SpaceHeater>().targetTemperature = 343.15f;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

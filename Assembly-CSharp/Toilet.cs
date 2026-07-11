@@ -26,8 +26,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		Components.Toilets.Add(this);
 		Components.BasicBuildings.Add(this);
 		base.smi.StartSM();
-		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
-		component.trackUses = true;
+		base.GetComponent<ToiletWorkableUse>().trackUses = true;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
 		this.FlushesUsed = this._flushesUsed;
@@ -52,8 +51,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
 		GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), base.smi.MassPerFlush(), this.solidWasteTemperature, index, this.diseasePerFlush, true, false, false);
 		this.storage.Store(gameObject, false, false, true, false);
-		PrimaryElement component = worker.GetComponent<PrimaryElement>();
-		component.AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
+		worker.GetComponent<PrimaryElement>().AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, this.diseasePerFlush + this.diseaseOnDupePerFlush), base.transform, Vector3.up, 1.5f, false, false);
 		this.FlushesUsed++;
 		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
@@ -66,29 +64,21 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		{
 			return;
 		}
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "status_item_toilet_needs_emptying";
-		string text2 = UI.USERMENUACTIONS.CLEANTOILET.NAME;
-		global::System.Action action = delegate
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("status_item_toilet_needs_emptying", UI.USERMENUACTIONS.CLEANTOILET.NAME, delegate
 		{
 			base.smi.GoTo(base.smi.sm.earlyclean);
-		};
-		string text3 = UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP, true), 1f);
 	}
 
 	private void SpawnMonster()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), base.smi.transform.GetPosition(), Grid.SceneLayer.Creatures, null, 0);
-		gameObject.SetActive(true);
+		GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), base.smi.transform.GetPosition(), Grid.SceneLayer.Creatures, null, 0).SetActive(true);
 	}
 
 	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
-		string text = component.requestedItemTag.ProperName();
+		string text = base.GetComponent<ManualDeliveryKG>().requestedItemTag.ProperName();
 		Descriptor descriptor = default(Descriptor);
 		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
@@ -98,8 +88,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
-		string text = element.tag.ProperName();
+		string text = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).tag.ProperName();
 		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect, false));
 		Disease disease = Db.Get().Diseases.Get(this.diseaseId);
 		int num = this.diseasePerFlush + this.diseaseOnDupePerFlush;
@@ -127,16 +116,6 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			list.Add(descriptor2);
 		}
 		return list;
-	}
-
-	Transform IUsable.get_transform()
-	{
-		return base.transform;
-	}
-
-	Transform IBasicBuilding.get_transform()
-	{
-		return base.transform;
 	}
 
 	[SerializeField]

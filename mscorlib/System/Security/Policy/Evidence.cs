@@ -7,13 +7,14 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using Mono.Security.Authenticode;
+using Unity;
 
 namespace System.Security.Policy
 {
-	[MonoTODO("Serialization format not compatible with .NET")]
 	[ComVisible(true)]
+	[MonoTODO("Serialization format not compatible with .NET")]
 	[Serializable]
-	public sealed class Evidence : IEnumerable, ICollection
+	public sealed class Evidence : ICollection, IEnumerable
 	{
 		public Evidence()
 		{
@@ -27,6 +28,7 @@ namespace System.Security.Policy
 			}
 		}
 
+		[Obsolete]
 		public Evidence(object[] hostEvidence, object[] assemblyEvidence)
 		{
 			if (hostEvidence != null)
@@ -39,6 +41,7 @@ namespace System.Security.Policy
 			}
 		}
 
+		[Obsolete]
 		public int Count
 		{
 			get
@@ -78,7 +81,7 @@ namespace System.Security.Policy
 			{
 				return this._locked;
 			}
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true)]
 			set
 			{
 				this._locked = value;
@@ -117,12 +120,13 @@ namespace System.Security.Policy
 			}
 		}
 
+		[Obsolete]
 		public void AddAssembly(object id)
 		{
 			this.AssemblyEvidenceList.Add(id);
-			this._hashCode = 0;
 		}
 
+		[Obsolete]
 		public void AddHost(object id)
 		{
 			if (this._locked && SecurityManager.SecurityEnabled)
@@ -130,7 +134,6 @@ namespace System.Security.Policy
 				new SecurityPermission(SecurityPermissionFlag.ControlEvidence).Demand();
 			}
 			this.HostEvidenceList.Add(id);
-			this._hashCode = 0;
 		}
 
 		[ComVisible(false)]
@@ -144,9 +147,15 @@ namespace System.Security.Policy
 			{
 				this.assemblyEvidenceList.Clear();
 			}
-			this._hashCode = 0;
 		}
 
+		[ComVisible(false)]
+		public Evidence Clone()
+		{
+			return new Evidence(this);
+		}
+
+		[Obsolete]
 		public void CopyTo(Array array, int index)
 		{
 			int num = 0;
@@ -164,65 +173,7 @@ namespace System.Security.Policy
 			}
 		}
 
-		[ComVisible(false)]
-		public override bool Equals(object obj)
-		{
-			if (obj == null)
-			{
-				return false;
-			}
-			Evidence evidence = obj as Evidence;
-			if (evidence == null)
-			{
-				return false;
-			}
-			if (this.HostEvidenceList.Count != evidence.HostEvidenceList.Count)
-			{
-				return false;
-			}
-			if (this.AssemblyEvidenceList.Count != evidence.AssemblyEvidenceList.Count)
-			{
-				return false;
-			}
-			for (int i = 0; i < this.hostEvidenceList.Count; i++)
-			{
-				bool flag = false;
-				int j = 0;
-				while (j < evidence.hostEvidenceList.Count)
-				{
-					if (this.hostEvidenceList[i].Equals(evidence.hostEvidenceList[j]))
-					{
-						flag = true;
-						break;
-					}
-					i++;
-				}
-				if (!flag)
-				{
-					return false;
-				}
-			}
-			for (int k = 0; k < this.assemblyEvidenceList.Count; k++)
-			{
-				bool flag2 = false;
-				int l = 0;
-				while (l < evidence.assemblyEvidenceList.Count)
-				{
-					if (this.assemblyEvidenceList[k].Equals(evidence.assemblyEvidenceList[l]))
-					{
-						flag2 = true;
-						break;
-					}
-					k++;
-				}
-				if (!flag2)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
+		[Obsolete]
 		public IEnumerator GetEnumerator()
 		{
 			IEnumerator enumerator = null;
@@ -241,29 +192,6 @@ namespace System.Security.Policy
 		public IEnumerator GetAssemblyEnumerator()
 		{
 			return this.AssemblyEvidenceList.GetEnumerator();
-		}
-
-		[ComVisible(false)]
-		public override int GetHashCode()
-		{
-			if (this._hashCode == 0)
-			{
-				if (this.hostEvidenceList != null)
-				{
-					for (int i = 0; i < this.hostEvidenceList.Count; i++)
-					{
-						this._hashCode ^= this.hostEvidenceList[i].GetHashCode();
-					}
-				}
-				if (this.assemblyEvidenceList != null)
-				{
-					for (int j = 0; j < this.assemblyEvidenceList.Count; j++)
-					{
-						this._hashCode ^= this.assemblyEvidenceList[j].GetHashCode();
-					}
-				}
-			}
-			return this._hashCode;
 		}
 
 		public IEnumerator GetHostEnumerator()
@@ -289,7 +217,6 @@ namespace System.Security.Policy
 						this.AddAssembly(obj2);
 					}
 				}
-				this._hashCode = 0;
 			}
 		}
 
@@ -301,7 +228,6 @@ namespace System.Security.Policy
 				if (this.hostEvidenceList.GetType() == t)
 				{
 					this.hostEvidenceList.RemoveAt(i);
-					this._hashCode = 0;
 				}
 			}
 			for (int j = this.assemblyEvidenceList.Count; j >= 0; j--)
@@ -309,7 +235,6 @@ namespace System.Security.Policy
 				if (this.assemblyEvidenceList.GetType() == t)
 				{
 					this.assemblyEvidenceList.RemoveAt(j);
-					this._hashCode = 0;
 				}
 			}
 		}
@@ -317,7 +242,7 @@ namespace System.Security.Policy
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool IsAuthenticodePresent(Assembly a);
 
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
+		[FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
 		internal static Evidence GetDefaultHostEvidence(Assembly a)
 		{
 			Evidence evidence = new Evidence();
@@ -329,12 +254,12 @@ namespace System.Security.Policy
 			{
 				evidence.AddHost(Site.CreateFromUrl(escapedCodeBase));
 			}
-			AssemblyName assemblyName = a.UnprotectedGetName();
-			byte[] publicKey = assemblyName.GetPublicKey();
-			if (publicKey != null && publicKey.Length > 0)
+			AssemblyName name = a.GetName();
+			byte[] publicKey = name.GetPublicKey();
+			if (publicKey != null && publicKey.Length != 0)
 			{
 				StrongNamePublicKeyBlob strongNamePublicKeyBlob = new StrongNamePublicKeyBlob(publicKey);
-				evidence.AddHost(new StrongName(strongNamePublicKeyBlob, assemblyName.Name, assemblyName.Version));
+				evidence.AddHost(new StrongName(strongNamePublicKeyBlob, name.Name, name.Version));
 			}
 			if (Evidence.IsAuthenticodePresent(a))
 			{
@@ -360,13 +285,42 @@ namespace System.Security.Policy
 			return evidence;
 		}
 
+		public Evidence(EvidenceBase[] hostEvidence, EvidenceBase[] assemblyEvidence)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		[ComVisible(false)]
+		public void AddAssemblyEvidence<T>(T evidence)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		[ComVisible(false)]
+		public void AddHostEvidence<T>(T evidence)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		[ComVisible(false)]
+		public T GetAssemblyEvidence<T>()
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return default(T);
+		}
+
+		[ComVisible(false)]
+		public T GetHostEvidence<T>()
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return default(T);
+		}
+
 		private bool _locked;
 
 		private ArrayList hostEvidenceList;
 
 		private ArrayList assemblyEvidenceList;
-
-		private int _hashCode;
 
 		private class EvidenceEnumerator : IEnumerator
 		{

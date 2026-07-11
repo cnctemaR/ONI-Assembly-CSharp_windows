@@ -2,17 +2,17 @@
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public class ReturnMessage : IInternalMessage, IMessage, IMethodMessage, IMethodReturnMessage
+	public class ReturnMessage : IMethodReturnMessage, IMethodMessage, IMessage, IInternalMessage
 	{
 		public ReturnMessage(object ret, object[] outArgs, int outArgsCount, LogicalCallContext callCtx, IMethodCallMessage mcm)
 		{
 			this._returnValue = ret;
 			this._args = outArgs;
-			this._outArgsCount = outArgsCount;
 			this._callCtx = callCtx;
 			if (mcm != null)
 			{
@@ -36,32 +36,9 @@ namespace System.Runtime.Remoting.Messaging
 			this._args = new object[0];
 		}
 
-		string IInternalMessage.Uri
-		{
-			get
-			{
-				return this.Uri;
-			}
-			set
-			{
-				this.Uri = value;
-			}
-		}
-
-		Identity IInternalMessage.TargetIdentity
-		{
-			get
-			{
-				return this._targetIdentity;
-			}
-			set
-			{
-				this._targetIdentity = value;
-			}
-		}
-
 		public int ArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args.Length;
@@ -70,6 +47,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] Args
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args;
@@ -78,14 +56,16 @@ namespace System.Runtime.Remoting.Messaging
 
 		public bool HasVarArgs
 		{
+			[SecurityCritical]
 			get
 			{
-				return this._methodBase != null && (this._methodBase.CallingConvention | CallingConventions.VarArgs) != (CallingConventions)0;
+				return !(this._methodBase == null) && (this._methodBase.CallingConvention | CallingConventions.VarArgs) > (CallingConventions)0;
 			}
 		}
 
 		public LogicalCallContext LogicalCallContext
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._callCtx == null)
@@ -98,6 +78,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public MethodBase MethodBase
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._methodBase;
@@ -106,6 +87,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string MethodName
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodBase != null && this._methodName == null)
@@ -118,6 +100,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object MethodSignature
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodBase != null && this._methodSignature == null)
@@ -135,6 +118,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual IDictionary Properties
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._properties == null)
@@ -147,6 +131,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string TypeName
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodBase != null && this._typeName == null)
@@ -159,6 +144,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string Uri
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._uri;
@@ -169,11 +155,25 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		string IInternalMessage.Uri
+		{
+			get
+			{
+				return this.Uri;
+			}
+			set
+			{
+				this.Uri = value;
+			}
+		}
+
+		[SecurityCritical]
 		public object GetArg(int argNum)
 		{
 			return this._args[argNum];
 		}
 
+		[SecurityCritical]
 		public string GetArgName(int index)
 		{
 			return this._methodBase.GetParameters()[index].Name;
@@ -181,6 +181,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public Exception Exception
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._exception;
@@ -189,6 +190,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public int OutArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._args == null || this._args.Length == 0)
@@ -205,6 +207,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] OutArgs
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._outArgs == null && this._args != null)
@@ -221,12 +224,14 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual object ReturnValue
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._returnValue;
 			}
 		}
 
+		[SecurityCritical]
 		public object GetOutArg(int argNum)
 		{
 			if (this._inArgInfo == null)
@@ -236,6 +241,7 @@ namespace System.Runtime.Remoting.Messaging
 			return this._args[this._inArgInfo.GetInOutArgIndex(argNum)];
 		}
 
+		[SecurityCritical]
 		public string GetOutArgName(int index)
 		{
 			if (this._inArgInfo == null)
@@ -245,11 +251,31 @@ namespace System.Runtime.Remoting.Messaging
 			return this._inArgInfo.GetInOutArgName(index);
 		}
 
+		Identity IInternalMessage.TargetIdentity
+		{
+			get
+			{
+				return this._targetIdentity;
+			}
+			set
+			{
+				this._targetIdentity = value;
+			}
+		}
+
+		bool IInternalMessage.HasProperties()
+		{
+			return this._properties != null;
+		}
+
+		internal bool HasProperties()
+		{
+			return this._properties != null;
+		}
+
 		private object[] _outArgs;
 
 		private object[] _args;
-
-		private int _outArgsCount;
 
 		private LogicalCallContext _callCtx;
 

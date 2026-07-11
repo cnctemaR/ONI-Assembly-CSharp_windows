@@ -62,7 +62,7 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		}
 		Grid.SuitMarker.Flags flags = (Grid.SuitMarker.Flags)0;
 		PathFinder.PotentialPath.Flags flags2 = PathFinder.PotentialPath.Flags.None;
-		bool flag = path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks) && Grid.TryGetSuitMarkerFlags(from_cell, out flags, out flags2) && (byte)(flags & Grid.SuitMarker.Flags.Operational) != 0;
+		bool flag = path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks) && Grid.TryGetSuitMarkerFlags(from_cell, out flags, out flags2) && (flags & Grid.SuitMarker.Flags.Operational) > (Grid.SuitMarker.Flags)0;
 		bool flag2 = SuitMarker.DoesTraversalDirectionRequireSuit(from_cell, path.cell, flags);
 		bool flag3 = path.HasAnyFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit | PathFinder.PotentialPath.Flags.HasJetPack);
 		if (flag)
@@ -75,7 +75,7 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 					return false;
 				}
 			}
-			else if (flag3 && (byte)(flags & Grid.SuitMarker.Flags.OnlyTraverseIfUnequipAvailable) != 0 && (!flag4 || !Grid.HasEmptyLocker(from_cell, this.prefabInstanceID)))
+			else if (flag3 && (flags & Grid.SuitMarker.Flags.OnlyTraverseIfUnequipAvailable) != (Grid.SuitMarker.Flags)0 && (!flag4 || !Grid.HasEmptyLocker(from_cell, this.prefabInstanceID)))
 			{
 				return false;
 			}

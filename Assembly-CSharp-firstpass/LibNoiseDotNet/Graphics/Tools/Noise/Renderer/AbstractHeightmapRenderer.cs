@@ -4,11 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 {
 	public abstract class AbstractHeightmapRenderer : AbstractRenderer
 	{
-		public AbstractHeightmapRenderer()
-		{
-			this._WrapEnabled = false;
-		}
-
 		public float LowerHeightBound
 		{
 			get
@@ -35,6 +30,11 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 			{
 				this._WrapEnabled = value;
 			}
+		}
+
+		public AbstractHeightmapRenderer()
+		{
+			this._WrapEnabled = false;
 		}
 
 		public void SetBounds(float lowerBound, float upperBound)

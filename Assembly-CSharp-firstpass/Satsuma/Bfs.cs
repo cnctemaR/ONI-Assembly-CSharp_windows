@@ -6,6 +6,8 @@ namespace Satsuma
 {
 	public sealed class Bfs
 	{
+		public IGraph Graph { get; private set; }
+
 		public Bfs(IGraph graph)
 		{
 			this.Graph = graph;
@@ -13,8 +15,6 @@ namespace Satsuma
 			this.level = new Dictionary<Node, int>();
 			this.queue = new Queue<Node>();
 		}
-
-		public IGraph Graph { get; private set; }
 
 		public void AddSource(Node node)
 		{
@@ -104,13 +104,21 @@ namespace Satsuma
 		public int GetLevel(Node node)
 		{
 			int num;
-			return (!this.level.TryGetValue(node, out num)) ? (-1) : num;
+			if (!this.level.TryGetValue(node, out num))
+			{
+				return -1;
+			}
+			return num;
 		}
 
 		public Arc GetParentArc(Node node)
 		{
 			Arc arc;
-			return (!this.parentArc.TryGetValue(node, out arc)) ? Arc.Invalid : arc;
+			if (!this.parentArc.TryGetValue(node, out arc))
+			{
+				return Arc.Invalid;
+			}
+			return arc;
 		}
 
 		public IPath GetPath(Node node)

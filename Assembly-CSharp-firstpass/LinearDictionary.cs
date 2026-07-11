@@ -37,12 +37,10 @@ public class LinearDictionary<Key, Val> where Key : IEquatable<Key>
 			if (idx != -1)
 			{
 				this.values[idx] = value;
+				return;
 			}
-			else
-			{
-				this.keys.Add(key);
-				this.values.Add(value);
-			}
+			this.keys.Add(key);
+			this.values.Add(value);
 		}
 	}
 

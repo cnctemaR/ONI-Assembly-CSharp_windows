@@ -134,6 +134,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 			{
 				this.fetchList.Cancel("Operational requirements");
 				this.fetchList = null;
+				return;
 			}
 		}
 		else if (this.fetchList == null)
@@ -147,10 +148,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 				this.fetchList = new FetchList2(this.storage, byHash);
 				this.fetchList.ShowStatusItem = this.ShowStatusItem;
 				this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.minimumMass);
-				FetchList2 fetchList = this.fetchList;
-				Tag[] array = new Tag[] { this.requestedItemTag };
-				float num2 = num;
-				fetchList.Add(array, null, null, num2, FetchOrder2.OperationalRequirement.None);
+				this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, null, num, FetchOrder2.OperationalRequirement.None);
 				this.fetchList.Submit(null, false);
 			}
 		}
@@ -208,25 +206,8 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (!this.paused)
-		{
-			string text = "action_move_to_storage";
-			string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME;
-			global::System.Action action = new global::System.Action(this.OnPause);
-			string text3 = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_move_to_storage";
-			string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.OnResume);
-			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = ((!this.paused) ? new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME, new global::System.Action(this.OnPause), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF, new global::System.Action(this.OnResume), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	private void OnOperationalChanged(object data)

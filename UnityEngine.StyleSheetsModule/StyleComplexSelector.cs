@@ -57,5 +57,13 @@ namespace UnityEngine.StyleSheets
 		[SerializeField]
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal int ruleIndex;
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[NonSerialized]
+		internal StyleComplexSelector nextInTable;
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[NonSerialized]
+		internal int orderInStyleSheet;
 	}
 }

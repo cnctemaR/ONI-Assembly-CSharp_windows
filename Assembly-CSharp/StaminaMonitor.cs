@@ -15,7 +15,10 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 		}, UpdateRate.SIM_1000ms, false).DefaultState(this.sleepy.needssleep);
 		this.sleepy.needssleep.Transition(this.sleepy.sleeping, (StaminaMonitor.Instance smi) => smi.IsSleeping(), UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Tired, null).ToggleStatusItem(Db.Get().DuplicantStatusItems.Tired, null)
 			.ToggleThought(Db.Get().Thoughts.Sleepy, null);
-		this.sleepy.sleeping.Transition(this.satisfied, (StaminaMonitor.Instance smi) => !smi.IsSleeping(), UpdateRate.SIM_200ms);
+		this.sleepy.sleeping.Enter(delegate(StaminaMonitor.Instance smi)
+		{
+			smi.CheckDebugFastWorkMode();
+		}).Transition(this.satisfied, (StaminaMonitor.Instance smi) => !smi.IsSleeping(), UpdateRate.SIM_200ms);
 	}
 
 	public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State satisfied;
@@ -62,16 +65,19 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 		public bool IsSleeping()
 		{
 			bool flag = false;
-			if (this.WantsToSleep())
+			if (this.WantsToSleep() && this.choreDriver.GetComponent<Worker>().workable != null)
 			{
-				Worker component = this.choreDriver.GetComponent<Worker>();
-				Workable workable = component.workable;
-				if (workable != null)
-				{
-					flag = true;
-				}
+				flag = true;
 			}
 			return flag;
+		}
+
+		public void CheckDebugFastWorkMode()
+		{
+			if (Game.Instance.FastWorkersModeActive)
+			{
+				this.stamina.value = this.stamina.GetMax();
+			}
 		}
 
 		public bool ShouldExitSleep()

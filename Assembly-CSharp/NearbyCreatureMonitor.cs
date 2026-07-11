@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 public class NearbyCreatureMonitor : GameStateMachine<NearbyCreatureMonitor, NearbyCreatureMonitor.Instance, IStateMachineTarget>
 {
@@ -15,13 +14,12 @@ public class NearbyCreatureMonitor : GameStateMachine<NearbyCreatureMonitor, Nea
 
 	public new class Instance : GameStateMachine<NearbyCreatureMonitor, NearbyCreatureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
+		public event Action<float, List<KPrefabID>> OnUpdateNearbyCreatures;
+
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
 		}
-
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public event Action<float, List<KPrefabID>> OnUpdateNearbyCreatures;
 
 		public void UpdateNearbyCreatures(float dt)
 		{

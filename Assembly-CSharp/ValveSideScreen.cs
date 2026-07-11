@@ -98,11 +98,9 @@ public class ValveSideScreen : SideScreenContent
 		if (this.isEditing)
 		{
 			e.Consumed = true;
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	private Valve targetValve;

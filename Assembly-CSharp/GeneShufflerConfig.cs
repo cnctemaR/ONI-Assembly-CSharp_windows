@@ -7,7 +7,13 @@ public class GeneShufflerConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("GeneShuffler", global::STRINGS.BUILDINGS.PREFABS.GENESHUFFLER.NAME, global::STRINGS.BUILDINGS.PREFABS.GENESHUFFLER.DESC, 2000f, Assets.GetAnim("geneshuffler_kanim"), "on", Grid.SceneLayer.Building, 4, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		string text = "GeneShuffler";
+		string text2 = global::STRINGS.BUILDINGS.PREFABS.GENESHUFFLER.NAME;
+		string text3 = global::STRINGS.BUILDINGS.PREFABS.GENESHUFFLER.DESC;
+		float num = 2000f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("geneshuffler_kanim"), "on", Grid.SceneLayer.Building, 4, 3, tier, tier2, SimHashes.Creature, null, 293f);
 		gameObject.AddTag(GameTags.NotRoomAssignable);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
@@ -36,12 +42,9 @@ public class GeneShufflerConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject inst)
 	{
-		GeneShuffler component = inst.GetComponent<GeneShuffler>();
-		component.workLayer = Grid.SceneLayer.Building;
-		Ownable component2 = inst.GetComponent<Ownable>();
-		component2.slotID = Db.Get().AssignableSlots.GeneShuffler.Id;
-		OccupyArea component3 = inst.GetComponent<OccupyArea>();
-		component3.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		inst.GetComponent<GeneShuffler>().workLayer = Grid.SceneLayer.Building;
+		inst.GetComponent<Ownable>().slotID = Db.Get().AssignableSlots.GeneShuffler.Id;
+		inst.GetComponent<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		inst.GetComponent<Deconstructable>();
 	}
 

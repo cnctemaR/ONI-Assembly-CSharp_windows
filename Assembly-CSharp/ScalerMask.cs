@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	private RectTransform ThisTransform
 	{
@@ -72,11 +72,9 @@ public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			if (this.SourceTransform != null && this.SourceTransform.rect.height > this.ThisTransform.rect.height)
 			{
 				this.hoverIndicator.SetActive(true);
+				return;
 			}
-			else
-			{
-				this.hoverIndicator.SetActive(false);
-			}
+			this.hoverIndicator.SetActive(false);
 		}
 	}
 

@@ -59,12 +59,10 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 			Orientation orientation = component.Orientation;
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.GetCells(num, orientation, out linked_cell1, out linked_cell2);
+			return;
 		}
-		else
-		{
-			linked_cell1 = -1;
-			linked_cell2 = -1;
-		}
+		linked_cell1 = -1;
+		linked_cell2 = -1;
 	}
 
 	public void GetCells(int cell, Orientation orientation, out int linked_cell1, out int linked_cell2)

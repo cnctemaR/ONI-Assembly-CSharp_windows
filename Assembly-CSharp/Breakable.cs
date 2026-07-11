@@ -32,7 +32,7 @@ public class Breakable : Workable
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < notificationList.Count; i++)
 		{
 			Notification notification = notificationList[i];
@@ -52,7 +52,7 @@ public class Breakable : Workable
 		this.tenPercentDamage = Mathf.CeilToInt((float)this.hp.MaxHitPoints * 0.1f);
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AngerDamage, this);
 		this.notification = this.CreateDamageNotification();
-		base.gameObject.AddOrGet<Notifier>().Add(this.notification, string.Empty);
+		base.gameObject.AddOrGet<Notifier>().Add(this.notification, "");
 		this.elapsedDamageTime = 0f;
 	}
 

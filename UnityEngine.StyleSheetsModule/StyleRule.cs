@@ -22,6 +22,7 @@ namespace UnityEngine.StyleSheets
 		[SerializeField]
 		private StyleProperty[] m_Properties;
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[SerializeField]
 		internal int line;
 	}

@@ -42,11 +42,9 @@ public class OptionsMenuScreen : KModalButtonMenu
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.Deactivate();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	private void OnGraphicsOptions()

@@ -2,13 +2,6 @@
 
 public class GameInputManager : KInputManager
 {
-	public GameInputManager(BindingEntry[] default_keybindings)
-	{
-		GameInputMapping.SetDefaultKeyBindings(default_keybindings);
-		GameInputMapping.LoadBindings();
-		this.AddKeyboardMouseController();
-	}
-
 	public KInputController AddKeyboardMouseController()
 	{
 		KInputController kinputController = new KInputController(false);
@@ -29,6 +22,13 @@ public class GameInputManager : KInputManager
 		}
 		base.AddController(kinputController);
 		return kinputController;
+	}
+
+	public GameInputManager(BindingEntry[] default_keybindings)
+	{
+		GameInputMapping.SetDefaultKeyBindings(default_keybindings);
+		GameInputMapping.LoadBindings();
+		this.AddKeyboardMouseController();
 	}
 
 	public void RebindControls()

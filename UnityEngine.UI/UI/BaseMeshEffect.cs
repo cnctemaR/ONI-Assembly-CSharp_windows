@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	public abstract class BaseMeshEffect : UIBehaviour, IMeshModifier
 	{
 		protected Graphic graphic

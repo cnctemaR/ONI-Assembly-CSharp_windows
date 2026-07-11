@@ -3,15 +3,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Structure containing minimum and maximum terrain patch height values.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct PatchExtents
 	{
-		/// <summary>
-		///   <para>Minimum height of a terrain patch.</para>
-		/// </summary>
 		public float min
 		{
 			get
@@ -24,9 +18,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Maximum height of a terrain patch.</para>
-		/// </summary>
 		public float max
 		{
 			get

@@ -15,12 +15,11 @@ namespace FMODUnity
 		public void Update(ATTRIBUTES_3D attributes)
 		{
 			PLAYBACK_STATE state;
-			List<EventInstance> list = this.instances.FindAll(delegate(EventInstance x)
+			foreach (EventInstance eventInstance in this.instances.FindAll(delegate(EventInstance x)
 			{
 				x.getPlaybackState(out state);
 				return state == PLAYBACK_STATE.STOPPED;
-			});
-			foreach (EventInstance eventInstance in list)
+			}))
 			{
 				eventInstance.release();
 			}

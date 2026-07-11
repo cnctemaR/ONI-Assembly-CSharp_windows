@@ -7,14 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Animations
 {
-	/// <summary>
-	///   <para>A Playable that can run a custom, multi-threaded animation job.</para>
-	/// </summary>
 	[StaticAccessor("AnimationScriptPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationScriptPlayable.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationScriptPlayable.bindings.h")]
+	[RequiredByNativeCode]
 	public struct AnimationScriptPlayable : IAnimationJobPlayable, IEquatable<AnimationScriptPlayable>, IPlayable
 	{
 		internal AnimationScriptPlayable(PlayableHandle handle)
@@ -105,36 +102,29 @@ namespace UnityEngine.Experimental.Animations
 			return this.GetHandle() == other.GetHandle();
 		}
 
-		/// <summary>
-		///   <para>Sets the new value for processing the inputs or not.</para>
-		/// </summary>
-		/// <param name="value">The new value for processing the inputs or not.</param>
 		public void SetProcessInputs(bool value)
 		{
 			AnimationScriptPlayable.SetProcessInputsInternal(this.GetHandle(), value);
 		}
 
-		/// <summary>
-		///   <para>Returns whether the playable inputs will be processed or not.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>true if the inputs will be processed; false otherwise.</para>
-		/// </returns>
 		public bool GetProcessInputs()
 		{
 			return AnimationScriptPlayable.GetProcessInputsInternal(this.GetHandle());
 		}
 
+		[NativeThrows]
 		private static bool CreateHandleInternal(PlayableGraph graph, ref PlayableHandle handle, IntPtr jobReflectionData)
 		{
 			return AnimationScriptPlayable.CreateHandleInternal_Injected(ref graph, ref handle, jobReflectionData);
 		}
 
+		[NativeThrows]
 		private static void SetProcessInputsInternal(PlayableHandle handle, bool value)
 		{
 			AnimationScriptPlayable.SetProcessInputsInternal_Injected(ref handle, value);
 		}
 
+		[NativeThrows]
 		private static bool GetProcessInputsInternal(PlayableHandle handle)
 		{
 			return AnimationScriptPlayable.GetProcessInputsInternal_Injected(ref handle);

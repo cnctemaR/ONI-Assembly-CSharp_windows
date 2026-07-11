@@ -288,11 +288,9 @@ public class HoverTextDrawer
 			if (enabled)
 			{
 				this.root.gameObject.GetComponent<CanvasGroup>().alpha = 1f;
+				return;
 			}
-			else
-			{
-				this.root.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
-			}
+			this.root.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
 		}
 
 		public void Cleanup()

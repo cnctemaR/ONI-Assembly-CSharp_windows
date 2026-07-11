@@ -54,7 +54,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, true);
 		}, null, null);
 		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
-		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 16 : 12];
+		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType == ConduitType.Gas) ? 12 : 16];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
 		this.OnConduitConnectionChanged(null);
@@ -90,20 +90,16 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 			if (primaryElement != null)
 			{
 				primaryElement.KeepZeroMassObject = true;
-				ConduitFlow conduitManager = this.GetConduitManager();
-				float num = conduitManager.AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount);
+				float num = this.GetConduitManager().AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount);
 				if (num > 0f)
 				{
-					float num2 = num / primaryElement.Mass;
-					int num3 = (int)(num2 * (float)primaryElement.DiseaseCount);
-					primaryElement.ModifyDiseaseCount(-num3, "ConduitDispenser.ConduitUpdate");
+					int num2 = (int)(num / primaryElement.Mass * (float)primaryElement.DiseaseCount);
+					primaryElement.ModifyDiseaseCount(-num2, "ConduitDispenser.ConduitUpdate");
 					primaryElement.Mass -= num;
 					base.Trigger(-1697596308, primaryElement.gameObject);
+					return;
 				}
-				else
-				{
-					this.blocked = true;
-				}
+				this.blocked = true;
 			}
 		}
 	}
@@ -116,7 +112,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 		{
 			int num = (i + this.elementOutputOffset) % count;
 			PrimaryElement component = items[num].GetComponent<PrimaryElement>();
-			if (component != null && component.Mass > 0f && ((this.conduitType != ConduitType.Liquid) ? component.Element.IsGas : component.Element.IsLiquid) && (this.elementFilter == null || this.elementFilter.Length == 0 || (!this.invertElementFilter && this.IsFilteredElement(component.ElementID)) || (this.invertElementFilter && !this.IsFilteredElement(component.ElementID))))
+			if (component != null && component.Mass > 0f && ((this.conduitType == ConduitType.Liquid) ? component.Element.IsLiquid : component.Element.IsGas) && (this.elementFilter == null || this.elementFilter.Length == 0 || (!this.invertElementFilter && this.IsFilteredElement(component.ElementID)) || (this.invertElementFilter && !this.IsFilteredElement(component.ElementID))))
 			{
 				this.elementOutputOffset = (this.elementOutputOffset + 1) % count;
 				return component;
@@ -141,7 +137,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 16 : 12];
+			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType == ConduitType.Gas) ? 12 : 16];
 			return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
 		}
 	}

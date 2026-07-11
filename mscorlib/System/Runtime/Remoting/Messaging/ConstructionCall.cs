@@ -4,18 +4,19 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Activation;
 using System.Runtime.Remoting.Proxies;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
 	public class ConstructionCall : MethodCall, IConstructionCallMessage, IMessage, IMethodCallMessage, IMethodMessage
 	{
 		public ConstructionCall(IMessage m)
 			: base(m)
 		{
-			this._activationTypeName = this.TypeName;
+			this._activationTypeName = base.TypeName;
 			this._isContextOk = true;
 		}
 
@@ -57,6 +58,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public Type ActivationType
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._activationType == null)
@@ -69,6 +71,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string ActivationTypeName
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._activationTypeName;
@@ -77,10 +80,12 @@ namespace System.Runtime.Remoting.Messaging
 
 		public IActivator Activator
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._activator;
 			}
+			[SecurityCritical]
 			set
 			{
 				this._activator = value;
@@ -89,6 +94,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] CallSiteActivationAttributes
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._activationAttributes;
@@ -102,6 +108,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public IList ContextProperties
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._contextProperties == null)
@@ -114,25 +121,32 @@ namespace System.Runtime.Remoting.Messaging
 
 		internal override void InitMethodProperty(string key, object value)
 		{
-			switch (key)
+			if (key == "__Activator")
 			{
-			case "__Activator":
 				this._activator = (IActivator)value;
 				return;
-			case "__CallSiteActivationAttributes":
+			}
+			if (key == "__CallSiteActivationAttributes")
+			{
 				this._activationAttributes = (object[])value;
 				return;
-			case "__ActivationType":
+			}
+			if (key == "__ActivationType")
+			{
 				this._activationType = (Type)value;
 				return;
-			case "__ContextProperties":
+			}
+			if (key == "__ContextProperties")
+			{
 				this._contextProperties = (IList)value;
 				return;
-			case "__ActivationTypeName":
-				this._activationTypeName = (string)value;
+			}
+			if (!(key == "__ActivationTypeName"))
+			{
+				base.InitMethodProperty(key, value);
 				return;
 			}
-			base.InitMethodProperty(key, value);
+			this._activationTypeName = (string)value;
 		}
 
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -152,6 +166,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public override IDictionary Properties
 		{
+			[SecurityCritical]
 			get
 			{
 				return base.Properties;

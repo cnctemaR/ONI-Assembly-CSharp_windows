@@ -4,63 +4,111 @@ using System.Runtime.CompilerServices;
 
 namespace System.Security.Cryptography.Xml
 {
-	public sealed class EncryptionPropertyCollection : IEnumerable, IList, ICollection
+	public sealed class EncryptionPropertyCollection : IList, ICollection, IEnumerable
 	{
 		public EncryptionPropertyCollection()
 		{
-			this.list = new ArrayList();
+			this._props = new ArrayList();
 		}
 
-		object IList.this[int index]
+		public IEnumerator GetEnumerator()
 		{
-			get
-			{
-				return this[index];
-			}
-			set
-			{
-				this[index] = (EncryptionProperty)value;
-			}
-		}
-
-		bool IList.Contains(object value)
-		{
-			return this.Contains((EncryptionProperty)value);
-		}
-
-		int IList.Add(object value)
-		{
-			return this.Add((EncryptionProperty)value);
-		}
-
-		int IList.IndexOf(object value)
-		{
-			return this.IndexOf((EncryptionProperty)value);
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			this.Insert(index, (EncryptionProperty)value);
-		}
-
-		void IList.Remove(object value)
-		{
-			this.Remove((EncryptionProperty)value);
+			return this._props.GetEnumerator();
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.list.Count;
+				return this._props.Count;
 			}
+		}
+
+		int IList.Add(object value)
+		{
+			if (!(value is EncryptionProperty))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			return this._props.Add(value);
+		}
+
+		public int Add(EncryptionProperty value)
+		{
+			return this._props.Add(value);
+		}
+
+		public void Clear()
+		{
+			this._props.Clear();
+		}
+
+		bool IList.Contains(object value)
+		{
+			if (!(value is EncryptionProperty))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			return this._props.Contains(value);
+		}
+
+		public bool Contains(EncryptionProperty value)
+		{
+			return this._props.Contains(value);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			if (!(value is EncryptionProperty))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			return this._props.IndexOf(value);
+		}
+
+		public int IndexOf(EncryptionProperty value)
+		{
+			return this._props.IndexOf(value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			if (!(value is EncryptionProperty))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			this._props.Insert(index, value);
+		}
+
+		public void Insert(int index, EncryptionProperty value)
+		{
+			this._props.Insert(index, value);
+		}
+
+		void IList.Remove(object value)
+		{
+			if (!(value is EncryptionProperty))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			this._props.Remove(value);
+		}
+
+		public void Remove(EncryptionProperty value)
+		{
+			this._props.Remove(value);
+		}
+
+		public void RemoveAt(int index)
+		{
+			this._props.RemoveAt(index);
 		}
 
 		public bool IsFixedSize
 		{
 			get
 			{
-				return this.list.IsFixedSize;
+				return this._props.IsFixedSize;
 			}
 		}
 
@@ -68,16 +116,13 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this.list.IsReadOnly;
+				return this._props.IsReadOnly;
 			}
 		}
 
-		public bool IsSynchronized
+		public EncryptionProperty Item(int index)
 		{
-			get
-			{
-				return this.list.IsSynchronized;
-			}
+			return (EncryptionProperty)this._props[index];
 		}
 
 		[IndexerName("ItemOf")]
@@ -85,77 +130,56 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return (EncryptionProperty)this.list[index];
+				return (EncryptionProperty)((IList)this)[index];
 			}
 			set
 			{
-				this.list[index] = value;
+				((IList)this)[index] = value;
 			}
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				return this._props[index];
+			}
+			set
+			{
+				if (!(value is EncryptionProperty))
+				{
+					throw new ArgumentException("Type of input object is invalid.", "value");
+				}
+				this._props[index] = value;
+			}
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			this._props.CopyTo(array, index);
+		}
+
+		public void CopyTo(EncryptionProperty[] array, int index)
+		{
+			this._props.CopyTo(array, index);
 		}
 
 		public object SyncRoot
 		{
 			get
 			{
-				return this.list.SyncRoot;
+				return this._props.SyncRoot;
 			}
 		}
 
-		public int Add(EncryptionProperty value)
+		public bool IsSynchronized
 		{
-			return this.list.Add(value);
+			get
+			{
+				return this._props.IsSynchronized;
+			}
 		}
 
-		public void Clear()
-		{
-			this.list.Clear();
-		}
-
-		public bool Contains(EncryptionProperty value)
-		{
-			return this.list.Contains(value);
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.list.CopyTo(array, index);
-		}
-
-		public void CopyTo(EncryptionProperty[] array, int index)
-		{
-			this.list.CopyTo(array, index);
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.list.GetEnumerator();
-		}
-
-		public int IndexOf(EncryptionProperty value)
-		{
-			return this.list.IndexOf(value);
-		}
-
-		public void Insert(int index, EncryptionProperty value)
-		{
-			this.list.Insert(index, value);
-		}
-
-		public EncryptionProperty Item(int index)
-		{
-			return (EncryptionProperty)this.list[index];
-		}
-
-		public void Remove(EncryptionProperty value)
-		{
-			this.list.Remove(value);
-		}
-
-		public void RemoveAt(int index)
-		{
-			this.list.RemoveAt(index);
-		}
-
-		private ArrayList list;
+		private ArrayList _props;
 	}
 }

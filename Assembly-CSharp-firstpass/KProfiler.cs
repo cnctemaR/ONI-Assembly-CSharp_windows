@@ -33,7 +33,7 @@ public static class KProfiler
 	{
 	}
 
-	public static int BeginSampleI(string region_name)
+	public static int BeginSampleI(string region_name, string group = "Game")
 	{
 		int num = KProfiler.counter;
 		KProfiler.counter++;
@@ -52,14 +52,24 @@ public static class KProfiler
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void Ping(string display, double value)
+	public static void Ping(string display, string group, double value)
 	{
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void BeginSample(string region_name)
+	public static void BeginAsync(string display, string group = "Game")
 	{
-		KProfiler.BeginSampleI(region_name);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void EndAsync(string display)
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSample(string region_name, string group = "Game")
+	{
+		KProfiler.BeginSampleI(region_name, group);
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
@@ -77,7 +87,12 @@ public static class KProfiler
 	[Conditional("ENABLE_KPROFILER")]
 	public static void BeginSample(string region_name, int count)
 	{
-		KProfiler.BeginSampleI(region_name);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSample(string region_name, string group, int count)
+	{
+		KProfiler.BeginSampleI(region_name, group);
 	}
 
 	public static int BeginSampleI(string region_name, global::UnityEngine.Object profiler_obj)

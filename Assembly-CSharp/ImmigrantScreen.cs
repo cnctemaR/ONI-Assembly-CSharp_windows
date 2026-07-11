@@ -63,11 +63,9 @@ public class ImmigrantScreen : CharacterSelectionController
 		if (this.rejectConfirmationScreen.activeSelf)
 		{
 			this.OnRejectionCancelled();
+			return;
 		}
-		else
-		{
-			base.OnPressBack();
-		}
+		base.OnPressBack();
 	}
 
 	public override void Deactivate()

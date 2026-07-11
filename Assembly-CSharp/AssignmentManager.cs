@@ -64,16 +64,16 @@ public class AssignmentManager : KMonoBehaviour
 		int num = int.MaxValue;
 		foreach (Assignable assignable in this.assignables)
 		{
-			if (assignable.slot == slot)
+			if (assignable.slot == slot && assignable.assignee != null)
 			{
-				if (assignable.assignee != null)
+				List<Ownables> owners = assignable.assignee.GetOwners();
+				if (owners.Count > 0)
 				{
-					List<Ownables> owners = assignable.assignee.GetOwners();
-					if (owners.Count > 0)
+					using (List<Ownables>.Enumerator enumerator2 = owners.GetEnumerator())
 					{
-						foreach (Ownables ownables in owners)
+						while (enumerator2.MoveNext())
 						{
-							if (ownables.gameObject == owner.gameObject)
+							if (enumerator2.Current.gameObject == owner.gameObject)
 							{
 								if (assignable.assignee is Room && (assignable.assignee as Room).roomType.priority_building_use)
 								{

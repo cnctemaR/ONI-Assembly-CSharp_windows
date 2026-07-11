@@ -5,13 +5,6 @@ using KSerialization;
 [Serializable]
 public class ScheduleBlock
 {
-	public ScheduleBlock(string name, List<ScheduleBlockType> allowed_types, string groupId)
-	{
-		this.name = name;
-		this.allowed_types = allowed_types;
-		this._groupId = groupId;
-	}
-
 	public string GroupId
 	{
 		get
@@ -26,6 +19,13 @@ public class ScheduleBlock
 		{
 			this._groupId = value;
 		}
+	}
+
+	public ScheduleBlock(string name, List<ScheduleBlockType> allowed_types, string groupId)
+	{
+		this.name = name;
+		this.allowed_types = allowed_types;
+		this._groupId = groupId;
 	}
 
 	public bool IsAllowed(ScheduleBlockType type)

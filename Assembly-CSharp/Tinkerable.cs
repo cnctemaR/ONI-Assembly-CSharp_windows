@@ -26,8 +26,7 @@ public class Tinkerable : Workable
 		tinkerable.shouldShowSkillPerkStatusItem = false;
 		prefab.AddOrGet<Storage>();
 		prefab.AddOrGet<Effects>();
-		KPrefabID component = prefab.GetComponent<KPrefabID>();
-		component.prefabInitFn += delegate(GameObject inst)
+		prefab.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetComponent<Tinkerable>().SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		};
@@ -55,8 +54,7 @@ public class Tinkerable : Workable
 		tinkerable.shouldShowSkillPerkStatusItem = false;
 		prefab.AddOrGet<Storage>();
 		prefab.AddOrGet<Effects>();
-		KPrefabID component = prefab.GetComponent<KPrefabID>();
-		component.prefabInitFn += delegate(GameObject inst)
+		prefab.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetComponent<Tinkerable>().SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		};
@@ -128,10 +126,10 @@ public class Tinkerable : Workable
 				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new Tag[] { this.tinkerMaterialTag }, null, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Functional, 0);
 			}
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
-			RoomTracker component2 = base.GetComponent<RoomTracker>();
-			if (!string.IsNullOrEmpty(component2.requiredRoomType))
+			if (!string.IsNullOrEmpty(base.GetComponent<RoomTracker>().requiredRoomType))
 			{
 				this.chore.AddPrecondition(ChorePreconditions.instance.IsInMyRoom, Grid.PosToCell(base.transform.GetPosition()));
+				return;
 			}
 		}
 		else if (this.chore != null && flag5)
@@ -157,13 +155,9 @@ public class Tinkerable : Workable
 			if (!(kprefabID == null))
 			{
 				TinkerStation component = kprefabID.GetComponent<TinkerStation>();
-				if (component != null && component.outputPrefab == this.tinkerMaterialTag)
+				if (component != null && component.outputPrefab == this.tinkerMaterialTag && kprefabID.GetComponent<Operational>().IsOperational)
 				{
-					Operational component2 = kprefabID.GetComponent<Operational>();
-					if (component2.IsOperational)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 		}
@@ -176,8 +170,9 @@ public class Tinkerable : Workable
 		{
 			MaterialNeeds.Instance.UpdateNeed(this.tinkerMaterialTag, this.tinkerMaterialAmount);
 			this.hasReservedMaterial = shouldReserve;
+			return;
 		}
-		else if (!shouldReserve && this.hasReservedMaterial)
+		if (!shouldReserve && this.hasReservedMaterial)
 		{
 			MaterialNeeds.Instance.UpdateNeed(this.tinkerMaterialTag, -this.tinkerMaterialAmount);
 			this.hasReservedMaterial = shouldReserve;

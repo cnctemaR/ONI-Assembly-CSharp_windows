@@ -19,12 +19,10 @@ namespace System.Configuration
 				lock (this)
 				{
 					this.SaveCore();
+					return;
 				}
 			}
-			else
-			{
-				this.SaveCore();
-			}
+			this.SaveCore();
 		}
 
 		private void SaveCore()
@@ -62,7 +60,7 @@ namespace System.Configuration
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
+		[Browsable(false)]
 		public bool IsSynchronized
 		{
 			get
@@ -91,12 +89,10 @@ namespace System.Configuration
 					lock (this)
 					{
 						this.SetPropertyValue(propertyName, value);
+						return;
 					}
 				}
-				else
-				{
-					this.SetPropertyValue(propertyName, value);
-				}
+				this.SetPropertyValue(propertyName, value);
 			}
 		}
 

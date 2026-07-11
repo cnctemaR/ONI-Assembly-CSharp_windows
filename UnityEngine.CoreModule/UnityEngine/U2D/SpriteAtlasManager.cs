@@ -6,16 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.U2D
 {
-	/// <summary>
-	///   <para>Manages SpriteAtlas during runtime.</para>
-	/// </summary>
-	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
-	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	[StaticAccessor("GetSpriteAtlasManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
+	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	public class SpriteAtlasManager
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static event SpriteAtlasManager.RequestAtlasCallback atlasRequested;
+		public static event Action<string, Action<SpriteAtlas>> atlasRequested;
 
 		[RequiredByNativeCode]
 		private static bool RequestAtlas(string tag)
@@ -54,12 +51,5 @@ namespace UnityEngine.U2D
 			SpriteAtlasManager.atlasRequested = null;
 			SpriteAtlasManager.atlasRegistered = null;
 		}
-
-		/// <summary>
-		///   <para>Delegate type for atlas request callback.</para>
-		/// </summary>
-		/// <param name="tag">Tag of SpriteAtlas that needs to be provided by user.</param>
-		/// <param name="action">An Action that takes user loaded SpriteAtlas.</param>
-		public delegate void RequestAtlasCallback(string tag, Action<SpriteAtlas> action);
 	}
 }

@@ -1,62 +1,44 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeMemberEvent : CodeTypeMember
 	{
-		public CodeTypeReferenceCollection ImplementationTypes
-		{
-			get
-			{
-				if (this.implementationTypes == null)
-				{
-					this.implementationTypes = new CodeTypeReferenceCollection();
-				}
-				return this.implementationTypes;
-			}
-		}
-
-		public CodeTypeReference PrivateImplementationType
-		{
-			get
-			{
-				return this.privateImplementationType;
-			}
-			set
-			{
-				this.privateImplementationType = value;
-			}
-		}
-
 		public CodeTypeReference Type
 		{
 			get
 			{
-				if (this.type == null)
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._type) == null)
 				{
-					this.type = new CodeTypeReference(string.Empty);
+					codeTypeReference = (this._type = new CodeTypeReference(""));
 				}
-				return this.type;
+				return codeTypeReference;
 			}
 			set
 			{
-				this.type = value;
+				this._type = value;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
+		public CodeTypeReference PrivateImplementationType { get; set; }
+
+		public CodeTypeReferenceCollection ImplementationTypes
 		{
-			visitor.Visit(this);
+			get
+			{
+				CodeTypeReferenceCollection codeTypeReferenceCollection;
+				if ((codeTypeReferenceCollection = this._implementationTypes) == null)
+				{
+					codeTypeReferenceCollection = (this._implementationTypes = new CodeTypeReferenceCollection());
+				}
+				return codeTypeReferenceCollection;
+			}
 		}
 
-		private CodeTypeReferenceCollection implementationTypes;
+		private CodeTypeReference _type;
 
-		private CodeTypeReference privateImplementationType;
-
-		private CodeTypeReference type;
+		private CodeTypeReferenceCollection _implementationTypes;
 	}
 }

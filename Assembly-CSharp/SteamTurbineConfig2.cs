@@ -14,12 +14,16 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		int num3 = 30;
 		float num4 = 60f;
 		string[] array = new string[] { "RefinedMetal", "Plastic" };
-		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
+		float[] array2 = new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
-		}, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, none, 1f);
+		};
+		string[] array3 = array;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityOutputOffset = new CellOffset(2, 2);
 		buildingDef.GeneratorWattageRating = SteamTurbineConfig2.MAX_WATTAGE;
@@ -44,8 +48,7 @@ public class SteamTurbineConfig2 : IBuildingConfig
 	{
 		base.DoPostConfigureUnderConstruction(go);
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-		Constructable component = go.GetComponent<Constructable>();
-		component.requiredSkillPerk = Db.Get().SkillPerks.CanPowerTinker.Id;
+		go.GetComponent<Constructable>().requiredSkillPerk = Db.Get().SkillPerks.CanPowerTinker.Id;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

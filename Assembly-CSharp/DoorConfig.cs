@@ -47,14 +47,10 @@ public class DoorConfig : IBuildingConfig
 		door.doorType = Door.DoorType.Internal;
 		door.doorOpeningSoundEventName = "Open_DoorInternal";
 		door.doorClosingSoundEventName = "Close_DoorInternal";
-		AccessControl accessControl = go.AddOrGet<AccessControl>();
-		accessControl.controlEnabled = true;
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.Door;
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 3f;
-		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
-		component.initialAnim = "closed";
+		go.AddOrGet<AccessControl>().controlEnabled = true;
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Door;
+		go.AddOrGet<Workable>().workTime = 3f;
+		go.GetComponent<KBatchedAnimController>().initialAnim = "closed";
 		go.AddOrGet<ZoneTile>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);

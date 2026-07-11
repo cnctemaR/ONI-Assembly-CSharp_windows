@@ -5,9 +5,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A class to access the Mesh of the.</para>
-	/// </summary>
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Graphics/Mesh/MeshFilter.h")]
 	public sealed class MeshFilter : Component
@@ -17,9 +14,6 @@ namespace UnityEngine
 		{
 		}
 
-		/// <summary>
-		///   <para>Returns the shared mesh of the mesh filter.</para>
-		/// </summary>
 		public extern Mesh sharedMesh
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -28,9 +22,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Returns the instantiated Mesh assigned to the mesh filter.</para>
-		/// </summary>
 		public extern Mesh mesh
 		{
 			[NativeName("GetInstantiatedMeshFromScript")]

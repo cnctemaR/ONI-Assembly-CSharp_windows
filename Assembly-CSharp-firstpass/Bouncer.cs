@@ -26,8 +26,8 @@ public class Bouncer : MonoBehaviour
 		while (completion < 1f)
 		{
 			completion = Mathf.Min(completion + Time.unscaledDeltaTime / this.durationSecs, 1f);
-			float bounceOffset = Bouncer.BounceSpline(completion) * this.height;
-			position.y = startPos + bounceOffset;
+			float num = Bouncer.BounceSpline(completion) * this.height;
+			position.y = startPos + num;
 			base.gameObject.transform.position = position;
 			yield return new WaitForEndOfFrame();
 		}

@@ -3,23 +3,23 @@ using System.Diagnostics;
 
 namespace System.Runtime.Versioning
 {
-	[Conditional("RESOURCE_ANNOTATION_WORK")]
 	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field, Inherited = false)]
+	[Conditional("RESOURCE_ANNOTATION_WORK")]
 	public sealed class ResourceExposureAttribute : Attribute
 	{
 		public ResourceExposureAttribute(ResourceScope exposureLevel)
 		{
-			this.exposure = exposureLevel;
+			this._resourceExposureLevel = exposureLevel;
 		}
 
 		public ResourceScope ResourceExposureLevel
 		{
 			get
 			{
-				return this.exposure;
+				return this._resourceExposureLevel;
 			}
 		}
 
-		private ResourceScope exposure;
+		private ResourceScope _resourceExposureLevel;
 	}
 }

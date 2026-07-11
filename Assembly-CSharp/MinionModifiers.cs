@@ -40,8 +40,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
-		if (component != null)
+		if (base.GetComponent<ChoreConsumer>() != null)
 		{
 			base.Subscribe<MinionModifiers>(1623392196, MinionModifiers.OnDeathDelegate);
 			base.Subscribe<MinionModifiers>(-1506069671, MinionModifiers.OnAttachFollowCamDelegate);
@@ -69,8 +68,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		AttributeInstance attributeInstance = attribute.Lookup(this);
 		AttributeModifier target_modifier = new AttributeModifier(targetAttribute.Id, attributeConverter.Lookup(this).Evaluate(), attribute.Name, false, false, false);
 		this.GetAttributes().Add(target_modifier);
-		AttributeInstance attributeInstance2 = attributeInstance;
-		attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, new global::System.Action(delegate
+		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, new global::System.Action(delegate
 		{
 			target_modifier.SetValue(attributeConverter.Lookup(this).Evaluate());
 		}));

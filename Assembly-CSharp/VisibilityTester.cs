@@ -21,12 +21,10 @@ public class VisibilityTester : KMonoBehaviour
 		}
 		int num = Grid.PosToCell(SelectTool.Instance.selected);
 		int mouseCell = DebugHandler.GetMouseCell();
-		string text = string.Empty;
-		string text2 = text;
-		text = string.Concat(new object[] { text2, "Source Cell: ", num, "\n" });
-		text2 = text;
-		text = string.Concat(new object[] { text2, "Target Cell: ", mouseCell, "\n" });
-		text = text + "Visible: " + Grid.VisibilityTest(num, mouseCell, false);
+		string text = "";
+		text = string.Concat(new object[] { text, "Source Cell: ", num, "\n" });
+		text = string.Concat(new object[] { text, "Target Cell: ", mouseCell, "\n" });
+		text = text + "Visible: " + Grid.VisibilityTest(num, mouseCell, false).ToString();
 		for (int i = 0; i < 10000; i++)
 		{
 			Grid.VisibilityTest(num, mouseCell, false);

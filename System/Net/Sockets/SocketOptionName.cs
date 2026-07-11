@@ -23,6 +23,7 @@ namespace System.Net.Sockets
 		ReceiveTimeout,
 		Error,
 		Type,
+		ReuseUnicastPort = 12295,
 		MaxConnections = 2147483647,
 		IPOptions = 1,
 		HeaderIncluded,
@@ -39,12 +40,14 @@ namespace System.Net.Sockets
 		BlockSource,
 		UnblockSource,
 		PacketInformation,
+		HopLimit = 21,
+		IPProtectionLevel = 23,
+		IPv6Only = 27,
 		NoDelay = 1,
 		BsdUrgent,
 		Expedited = 2,
 		NoChecksum = 1,
 		ChecksumCoverage = 20,
-		HopLimit,
 		UpdateAcceptContext = 28683,
 		UpdateConnectContext = 28688
 	}

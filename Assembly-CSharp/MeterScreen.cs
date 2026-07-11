@@ -47,11 +47,9 @@ public class MeterScreen : KScreen, IRender1000ms
 		if (flag)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
+			return;
 		}
-		else
-		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
 	}
 
 	public void Render1000ms(float dt)
@@ -112,8 +110,7 @@ public class MeterScreen : KScreen, IRender1000ms
 	private IList<MinionIdentity> GetStressedMinions()
 	{
 		Amount stress_amount = Db.Get().Amounts.Stress;
-		List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
-		return new List<MinionIdentity>(list.OrderByDescending<MinionIdentity, float>((MinionIdentity x) => stress_amount.Lookup(x).value));
+		return new List<MinionIdentity>(new List<MinionIdentity>(Components.LiveMinionIdentities.Items).OrderByDescending<MinionIdentity, float>((MinionIdentity x) => stress_amount.Lookup(x).value));
 	}
 
 	private string OnStressTooltip()
@@ -129,7 +126,7 @@ public class MeterScreen : KScreen, IRender1000ms
 			AmountInstance amountInstance = stress.Lookup(minionIdentity);
 			this.AddToolTipAmountPercentLine(this.StressTooltip, amountInstance, minionIdentity, i == this.stressDisplayInfo.selectedIndex);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private string OnSickTooltip()
@@ -148,7 +145,7 @@ public class MeterScreen : KScreen, IRender1000ms
 				int num2 = 0;
 				foreach (SicknessInstance sicknessInstance in sicknesses)
 				{
-					text = text + ((num2 <= 0) ? string.Empty : ", ") + sicknessInstance.modifier.Name;
+					text = text + ((num2 > 0) ? ", " : "") + sicknessInstance.modifier.Name;
 					num2++;
 				}
 				text += ")";
@@ -156,18 +153,20 @@ public class MeterScreen : KScreen, IRender1000ms
 			bool flag = i == this.immunityDisplayInfo.selectedIndex;
 			this.AddToolTipLine(this.SickTooltip, text, flag);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private static int CountSickDupes()
 	{
 		int num = 0;
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+		using (List<MinionIdentity>.Enumerator enumerator = Components.LiveMinionIdentities.Items.GetEnumerator())
 		{
-			Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
-			if (sicknesses.IsInfected())
+			while (enumerator.MoveNext())
 			{
-				num++;
+				if (enumerator.Current.GetComponent<MinionModifiers>().sicknesses.IsInfected())
+				{
+					num++;
+				}
 			}
 		}
 		return num;
@@ -178,17 +177,14 @@ public class MeterScreen : KScreen, IRender1000ms
 		if (selected)
 		{
 			tooltip.AddMultiStringTooltip("<color=#F0B310FF>" + str + "</color>", this.ToolTipStyle_Property);
+			return;
 		}
-		else
-		{
-			tooltip.AddMultiStringTooltip(str, this.ToolTipStyle_Property);
-		}
+		tooltip.AddMultiStringTooltip(str, this.ToolTipStyle_Property);
 	}
 
 	private void AddToolTipAmountPercentLine(ToolTip tooltip, AmountInstance amount, MinionIdentity id, bool selected)
 	{
-		string name = id.GetComponent<KSelectable>().GetName();
-		string text = name + ":  " + Mathf.Round(amount.value).ToString() + "%";
+		string text = id.GetComponent<KSelectable>().GetName() + ":  " + Mathf.Round(amount.value).ToString() + "%";
 		this.AddToolTipLine(tooltip, text, selected);
 	}
 
@@ -199,19 +195,17 @@ public class MeterScreen : KScreen, IRender1000ms
 		this.RationsText.text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 		this.RationsTooltip.ClearMultiStringTooltip();
 		this.RationsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_MEALHISTORY, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true)), this.ToolTipStyle_Header);
-		this.RationsTooltip.AddMultiStringTooltip(string.Empty, this.ToolTipStyle_Property);
-		IOrderedEnumerable<KeyValuePair<string, float>> orderedEnumerable = this.rationsDict.OrderByDescending<KeyValuePair<string, float>, float>(delegate(KeyValuePair<string, float> x)
+		this.RationsTooltip.AddMultiStringTooltip("", this.ToolTipStyle_Property);
+		foreach (KeyValuePair<string, float> keyValuePair in this.rationsDict.OrderByDescending<KeyValuePair<string, float>, float>(delegate(KeyValuePair<string, float> x)
 		{
 			EdiblesManager.FoodInfo foodInfo2 = EdiblesManager.GetFoodInfo(x.Key);
-			return x.Value * ((foodInfo2 == null) ? (-1f) : foodInfo2.CaloriesPerUnit);
-		});
-		Dictionary<string, float> dictionary = orderedEnumerable.ToDictionary<KeyValuePair<string, float>, string, float>((KeyValuePair<string, float> t) => t.Key, (KeyValuePair<string, float> t) => t.Value);
-		foreach (KeyValuePair<string, float> keyValuePair in dictionary)
+			return x.Value * ((foodInfo2 != null) ? foodInfo2.CaloriesPerUnit : (-1f));
+		}).ToDictionary<KeyValuePair<string, float>, string, float>((KeyValuePair<string, float> t) => t.Key, (KeyValuePair<string, float> t) => t.Value))
 		{
 			EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(keyValuePair.Key);
-			this.RationsTooltip.AddMultiStringTooltip((foodInfo == null) ? string.Format(UI.TOOLTIPS.METERSCREEN_INVALID_FOOD_TYPE, keyValuePair.Key) : string.Format("{0}: {1}", foodInfo.Name, GameUtil.GetFormattedCalories(keyValuePair.Value * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), this.ToolTipStyle_Property);
+			this.RationsTooltip.AddMultiStringTooltip((foodInfo != null) ? string.Format("{0}: {1}", foodInfo.Name, GameUtil.GetFormattedCalories(keyValuePair.Value * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)) : string.Format(UI.TOOLTIPS.METERSCREEN_INVALID_FOOD_TYPE, keyValuePair.Key), this.ToolTipStyle_Property);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private string OnRedAlertTooltip()
@@ -219,7 +213,7 @@ public class MeterScreen : KScreen, IRender1000ms
 		this.RedAlertTooltip.ClearMultiStringTooltip();
 		this.RedAlertTooltip.AddMultiStringTooltip(UI.TOOLTIPS.RED_ALERT_TITLE, this.ToolTipStyle_Header);
 		this.RedAlertTooltip.AddMultiStringTooltip(UI.TOOLTIPS.RED_ALERT_CONTENT, this.ToolTipStyle_Property);
-		return string.Empty;
+		return "";
 	}
 
 	private void RefreshStress()
@@ -259,10 +253,11 @@ public class MeterScreen : KScreen, IRender1000ms
 		PointerEventData.InputButton button = pointerEventData.button;
 		if (button != PointerEventData.InputButton.Left)
 		{
-			if (button == PointerEventData.InputButton.Right)
+			if (button != PointerEventData.InputButton.Right)
 			{
-				display_info.selectedIndex = -1;
+				return;
 			}
+			display_info.selectedIndex = -1;
 		}
 		else
 		{
@@ -275,6 +270,7 @@ public class MeterScreen : KScreen, IRender1000ms
 				display_info.selectedIndex = (display_info.selectedIndex + 1) % Components.LiveMinionIdentities.Count;
 				MinionIdentity minionIdentity = minions[display_info.selectedIndex];
 				SelectTool.Instance.SelectAndFocus(minionIdentity.transform.GetPosition(), minionIdentity.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+				return;
 			}
 		}
 	}

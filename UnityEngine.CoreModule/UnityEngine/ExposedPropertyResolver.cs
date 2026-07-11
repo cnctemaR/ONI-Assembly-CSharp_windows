@@ -4,11 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Object that is used to resolve references to an ExposedReference field.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Director/Core/ExposedPropertyTable.bindings.h")]
 	[NativeHeader("Runtime/Utilities/PropertyName.h")]
+	[NativeHeader("Runtime/Director/Core/ExposedPropertyTable.bindings.h")]
 	public struct ExposedPropertyResolver
 	{
 		internal static Object ResolveReferenceInternal(IntPtr ptr, PropertyName name, out bool isValid)

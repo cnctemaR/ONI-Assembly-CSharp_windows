@@ -7,7 +7,13 @@ public class PropTableConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropTable", global::STRINGS.BUILDINGS.PREFABS.PROPTABLE.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPTABLE.DESC, 50f, Assets.GetAnim("table_breakroom_kanim"), "off", Grid.SceneLayer.Building, 3, 1, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		string text = "PropTable";
+		string text2 = global::STRINGS.BUILDINGS.PREFABS.PROPTABLE.NAME;
+		string text3 = global::STRINGS.BUILDINGS.PREFABS.PROPTABLE.DESC;
+		float num = 50f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("table_breakroom_kanim"), "off", Grid.SceneLayer.Building, 3, 1, tier, tier2, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
@@ -16,8 +22,7 @@ public class PropTableConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject inst)
 	{
-		OccupyArea component = inst.GetComponent<OccupyArea>();
-		component.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		inst.GetComponent<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 	}
 
 	public void OnSpawn(GameObject inst)

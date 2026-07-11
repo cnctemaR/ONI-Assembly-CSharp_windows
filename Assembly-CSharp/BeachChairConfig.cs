@@ -28,8 +28,7 @@ public class BeachChairConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
-		BeachChairWorkable beachChairWorkable = go.AddOrGet<BeachChairWorkable>();
-		beachChairWorkable.basePriority = RELAXATION.PRIORITY.TIER4;
+		go.AddOrGet<BeachChairWorkable>().basePriority = RELAXATION.PRIORITY.TIER4;
 		BeachChair beachChair = go.AddOrGet<BeachChair>();
 		beachChair.specificEffectUnlit = "BeachChairUnlit";
 		beachChair.specificEffectLit = "BeachChairLit";

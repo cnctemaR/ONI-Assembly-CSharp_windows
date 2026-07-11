@@ -5,17 +5,6 @@ namespace YamlDotNet.Core.Events
 {
 	public class DocumentEnd : ParsingEvent
 	{
-		public DocumentEnd(bool isImplicit, Mark start, Mark end)
-			: base(start, end)
-		{
-			this.isImplicit = isImplicit;
-		}
-
-		public DocumentEnd(bool isImplicit)
-			: this(isImplicit, Mark.Empty, Mark.Empty)
-		{
-		}
-
 		public override int NestingIncrease
 		{
 			get
@@ -40,9 +29,20 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
+		public DocumentEnd(bool isImplicit, Mark start, Mark end)
+			: base(start, end)
+		{
+			this.isImplicit = isImplicit;
+		}
+
+		public DocumentEnd(bool isImplicit)
+			: this(isImplicit, Mark.Empty, Mark.Empty)
+		{
+		}
+
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "Document end [isImplicit = {0}]", new object[] { this.isImplicit });
+			return string.Format(CultureInfo.InvariantCulture, "Document end [isImplicit = {0}]", this.isImplicit);
 		}
 
 		public override void Accept(IParsingEventVisitor visitor)

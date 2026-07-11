@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeGotoStatement : CodeStatement
 	{
@@ -21,23 +18,18 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this.label;
+				return this._label;
 			}
 			set
 			{
-				if (value == null || value.Length == 0)
+				if (string.IsNullOrEmpty(value))
 				{
 					throw new ArgumentNullException("value");
 				}
-				this.label = value;
+				this._label = value;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private string label;
+		private string _label;
 	}
 }

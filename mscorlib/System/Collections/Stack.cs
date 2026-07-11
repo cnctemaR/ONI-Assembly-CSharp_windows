@@ -1,23 +1,41 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
+using System.Threading;
 
 namespace System.Collections
 {
+	[DebuggerTypeProxy(typeof(Stack.StackDebugView))]
 	[ComVisible(true)]
-	[DebuggerTypeProxy(typeof(CollectionDebuggerView))]
-	[DebuggerDisplay("Count={Count}")]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class Stack : IEnumerable, ICloneable, ICollection
+	public class Stack : ICollection, IEnumerable, ICloneable
 	{
 		public Stack()
 		{
-			this.contents = new object[16];
-			this.capacity = 16;
+			this._array = new object[10];
+			this._size = 0;
+			this._version = 0;
+		}
+
+		public Stack(int initialCapacity)
+		{
+			if (initialCapacity < 0)
+			{
+				throw new ArgumentOutOfRangeException("initialCapacity", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (initialCapacity < 10)
+			{
+				initialCapacity = 10;
+			}
+			this._array = new object[initialCapacity];
+			this._size = 0;
+			this._version = 0;
 		}
 
 		public Stack(ICollection col)
-			: this((col != null) ? col.Count : 16)
+			: this((col == null) ? 32 : col.Count)
 		{
 			if (col == null)
 			{
@@ -29,39 +47,11 @@ namespace System.Collections
 			}
 		}
 
-		public Stack(int initialCapacity)
-		{
-			if (initialCapacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("initialCapacity");
-			}
-			this.capacity = initialCapacity;
-			this.contents = new object[this.capacity];
-		}
-
-		private void Resize(int ncapacity)
-		{
-			ncapacity = Math.Max(ncapacity, 16);
-			object[] array = new object[ncapacity];
-			Array.Copy(this.contents, array, this.count);
-			this.capacity = ncapacity;
-			this.contents = array;
-		}
-
-		public static Stack Synchronized(Stack stack)
-		{
-			if (stack == null)
-			{
-				throw new ArgumentNullException("stack");
-			}
-			return new Stack.SyncStack(stack);
-		}
-
 		public virtual int Count
 		{
 			get
 			{
-				return this.count;
+				return this._size;
 			}
 		}
 
@@ -77,54 +67,45 @@ namespace System.Collections
 		{
 			get
 			{
-				return this;
+				if (this._syncRoot == null)
+				{
+					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
+				}
+				return this._syncRoot;
 			}
 		}
 
 		public virtual void Clear()
 		{
-			this.modCount++;
-			for (int i = 0; i < this.count; i++)
-			{
-				this.contents[i] = null;
-			}
-			this.count = 0;
-			this.current = -1;
+			Array.Clear(this._array, 0, this._size);
+			this._size = 0;
+			this._version++;
 		}
 
 		public virtual object Clone()
 		{
-			return new Stack(this.contents)
-			{
-				current = this.current,
-				count = this.count
-			};
+			Stack stack = new Stack(this._size);
+			stack._size = this._size;
+			Array.Copy(this._array, 0, stack._array, 0, this._size);
+			stack._version = this._version;
+			return stack;
 		}
 
 		public virtual bool Contains(object obj)
 		{
-			if (this.count == 0)
+			int size = this._size;
+			while (size-- > 0)
 			{
-				return false;
-			}
-			if (obj == null)
-			{
-				for (int i = 0; i < this.count; i++)
+				if (obj == null)
 				{
-					if (this.contents[i] == null)
+					if (this._array[size] == null)
 					{
 						return true;
 					}
 				}
-			}
-			else
-			{
-				for (int j = 0; j < this.count; j++)
+				else if (this._array[size] != null && this._array[size].Equals(obj))
 				{
-					if (obj.Equals(this.contents[j]))
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;
@@ -136,104 +117,118 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("array");
 			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index");
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
 			}
-			if (array.Rank > 1 || (array.Length > 0 && index >= array.Length) || this.count > array.Length - index)
+			if (array.Length - index < this._size)
 			{
-				throw new ArgumentException();
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			for (int num = this.current; num != -1; num--)
+			int i = 0;
+			if (array is object[])
 			{
-				array.SetValue(this.contents[num], this.count - (num + 1) + index);
+				object[] array2 = (object[])array;
+				while (i < this._size)
+				{
+					array2[i + index] = this._array[this._size - i - 1];
+					i++;
+				}
+				return;
+			}
+			while (i < this._size)
+			{
+				array.SetValue(this._array[this._size - i - 1], i + index);
+				i++;
 			}
 		}
 
 		public virtual IEnumerator GetEnumerator()
 		{
-			return new Stack.Enumerator(this);
+			return new Stack.StackEnumerator(this);
 		}
 
 		public virtual object Peek()
 		{
-			if (this.current == -1)
+			if (this._size == 0)
 			{
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(Environment.GetResourceString("Stack empty."));
 			}
-			return this.contents[this.current];
+			return this._array[this._size - 1];
 		}
 
 		public virtual object Pop()
 		{
-			if (this.current == -1)
+			if (this._size == 0)
 			{
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(Environment.GetResourceString("Stack empty."));
 			}
-			this.modCount++;
-			object obj = this.contents[this.current];
-			this.contents[this.current] = null;
-			this.count--;
-			this.current--;
-			if (this.count <= this.capacity / 4 && this.count > 16)
-			{
-				this.Resize(this.capacity / 2);
-			}
+			this._version++;
+			object[] array = this._array;
+			int num = this._size - 1;
+			this._size = num;
+			object obj = array[num];
+			this._array[this._size] = null;
 			return obj;
 		}
 
 		public virtual void Push(object obj)
 		{
-			this.modCount++;
-			if (this.capacity == this.count)
+			if (this._size == this._array.Length)
 			{
-				this.Resize(this.capacity * 2);
+				object[] array = new object[2 * this._array.Length];
+				Array.Copy(this._array, 0, array, 0, this._size);
+				this._array = array;
 			}
-			this.count++;
-			this.current++;
-			this.contents[this.current] = obj;
+			object[] array2 = this._array;
+			int size = this._size;
+			this._size = size + 1;
+			array2[size] = obj;
+			this._version++;
+		}
+
+		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
+		public static Stack Synchronized(Stack stack)
+		{
+			if (stack == null)
+			{
+				throw new ArgumentNullException("stack");
+			}
+			return new Stack.SyncStack(stack);
 		}
 
 		public virtual object[] ToArray()
 		{
-			object[] array = new object[this.count];
-			Array.Copy(this.contents, array, this.count);
-			Array.Reverse(array);
+			object[] array = new object[this._size];
+			for (int i = 0; i < this._size; i++)
+			{
+				array[i] = this._array[this._size - i - 1];
+			}
 			return array;
 		}
 
-		private const int default_capacity = 16;
+		private object[] _array;
 
-		private object[] contents;
+		private int _size;
 
-		private int current = -1;
+		private int _version;
 
-		private int count;
+		[NonSerialized]
+		private object _syncRoot;
 
-		private int capacity;
-
-		private int modCount;
+		private const int _defaultCapacity = 10;
 
 		[Serializable]
 		private class SyncStack : Stack
 		{
-			internal SyncStack(Stack s)
+			internal SyncStack(Stack stack)
 			{
-				this.stack = s;
-			}
-
-			public override int Count
-			{
-				get
-				{
-					Stack stack = this.stack;
-					int count;
-					lock (stack)
-					{
-						count = this.stack.Count;
-					}
-					return count;
-				}
+				this._s = stack;
+				this._root = stack.SyncRoot;
 			}
 
 			public override bool IsSynchronized
@@ -248,113 +243,131 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.stack.SyncRoot;
+					return this._root;
 				}
 			}
 
-			public override void Clear()
+			public override int Count
 			{
-				Stack stack = this.stack;
-				lock (stack)
+				get
 				{
-					this.stack.Clear();
+					object root = this._root;
+					int count;
+					lock (root)
+					{
+						count = this._s.Count;
+					}
+					return count;
 				}
-			}
-
-			public override object Clone()
-			{
-				Stack stack = this.stack;
-				object obj;
-				lock (stack)
-				{
-					obj = Stack.Synchronized((Stack)this.stack.Clone());
-				}
-				return obj;
 			}
 
 			public override bool Contains(object obj)
 			{
-				Stack stack = this.stack;
-				bool flag;
-				lock (stack)
+				object root = this._root;
+				bool flag2;
+				lock (root)
 				{
-					flag = this.stack.Contains(obj);
+					flag2 = this._s.Contains(obj);
 				}
-				return flag;
+				return flag2;
 			}
 
-			public override void CopyTo(Array array, int index)
+			public override object Clone()
 			{
-				Stack stack = this.stack;
-				lock (stack)
+				object root = this._root;
+				object obj;
+				lock (root)
 				{
-					this.stack.CopyTo(array, index);
+					obj = new Stack.SyncStack((Stack)this._s.Clone());
 				}
+				return obj;
+			}
+
+			public override void Clear()
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._s.Clear();
+				}
+			}
+
+			public override void CopyTo(Array array, int arrayIndex)
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._s.CopyTo(array, arrayIndex);
+				}
+			}
+
+			public override void Push(object value)
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._s.Push(value);
+				}
+			}
+
+			public override object Pop()
+			{
+				object root = this._root;
+				object obj;
+				lock (root)
+				{
+					obj = this._s.Pop();
+				}
+				return obj;
 			}
 
 			public override IEnumerator GetEnumerator()
 			{
-				Stack stack = this.stack;
+				object root = this._root;
 				IEnumerator enumerator;
-				lock (stack)
+				lock (root)
 				{
-					enumerator = new Stack.Enumerator(this.stack);
+					enumerator = this._s.GetEnumerator();
 				}
 				return enumerator;
 			}
 
 			public override object Peek()
 			{
-				Stack stack = this.stack;
+				object root = this._root;
 				object obj;
-				lock (stack)
+				lock (root)
 				{
-					obj = this.stack.Peek();
+					obj = this._s.Peek();
 				}
 				return obj;
-			}
-
-			public override object Pop()
-			{
-				Stack stack = this.stack;
-				object obj;
-				lock (stack)
-				{
-					obj = this.stack.Pop();
-				}
-				return obj;
-			}
-
-			public override void Push(object obj)
-			{
-				Stack stack = this.stack;
-				lock (stack)
-				{
-					this.stack.Push(obj);
-				}
 			}
 
 			public override object[] ToArray()
 			{
-				Stack stack = this.stack;
+				object root = this._root;
 				object[] array;
-				lock (stack)
+				lock (root)
 				{
-					array = this.stack.ToArray();
+					array = this._s.ToArray();
 				}
 				return array;
 			}
 
-			private Stack stack;
+			private Stack _s;
+
+			private object _root;
 		}
 
-		private class Enumerator : IEnumerator, ICloneable
+		[Serializable]
+		private class StackEnumerator : IEnumerator, ICloneable
 		{
-			internal Enumerator(Stack s)
+			internal StackEnumerator(Stack stack)
 			{
-				this.stack = s;
-				this.modCount = s.modCount;
-				this.current = -2;
+				this._stack = stack;
+				this._version = this._stack._version;
+				this._index = -2;
+				this.currentElement = null;
 			}
 
 			public object Clone()
@@ -362,56 +375,94 @@ namespace System.Collections
 				return base.MemberwiseClone();
 			}
 
+			public virtual bool MoveNext()
+			{
+				if (this._version != this._stack._version)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+				}
+				if (this._index == -2)
+				{
+					this._index = this._stack._size - 1;
+					bool flag = this._index >= 0;
+					if (flag)
+					{
+						this.currentElement = this._stack._array[this._index];
+					}
+					return flag;
+				}
+				if (this._index == -1)
+				{
+					return false;
+				}
+				int num = this._index - 1;
+				this._index = num;
+				bool flag2 = num >= 0;
+				if (flag2)
+				{
+					this.currentElement = this._stack._array[this._index];
+					return flag2;
+				}
+				this.currentElement = null;
+				return flag2;
+			}
+
 			public virtual object Current
 			{
 				get
 				{
-					if (this.modCount != this.stack.modCount || this.current == -2 || this.current == -1 || this.current > this.stack.count)
+					if (this._index == -2)
 					{
-						throw new InvalidOperationException();
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
 					}
-					return this.stack.contents[this.current];
+					if (this._index == -1)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					}
+					return this.currentElement;
 				}
-			}
-
-			public virtual bool MoveNext()
-			{
-				if (this.modCount != this.stack.modCount)
-				{
-					throw new InvalidOperationException();
-				}
-				int num = this.current;
-				if (num == -2)
-				{
-					this.current = this.stack.current;
-					return this.current != -1;
-				}
-				if (num != -1)
-				{
-					this.current--;
-					return this.current != -1;
-				}
-				return false;
 			}
 
 			public virtual void Reset()
 			{
-				if (this.modCount != this.stack.modCount)
+				if (this._version != this._stack._version)
 				{
-					throw new InvalidOperationException();
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
 				}
-				this.current = -2;
+				this._index = -2;
+				this.currentElement = null;
 			}
 
-			private const int EOF = -1;
+			private Stack _stack;
 
-			private const int BOF = -2;
+			private int _index;
+
+			private int _version;
+
+			private object currentElement;
+		}
+
+		internal class StackDebugView
+		{
+			public StackDebugView(Stack stack)
+			{
+				if (stack == null)
+				{
+					throw new ArgumentNullException("stack");
+				}
+				this.stack = stack;
+			}
+
+			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+			public object[] Items
+			{
+				get
+				{
+					return this.stack.ToArray();
+				}
+			}
 
 			private Stack stack;
-
-			private int modCount;
-
-			private int current;
 		}
 	}
 }

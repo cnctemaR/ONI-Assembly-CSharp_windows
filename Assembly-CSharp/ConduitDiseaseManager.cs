@@ -5,25 +5,24 @@ using Klei.AI.DiseaseGrowthRules;
 
 public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data>
 {
-	public ConduitDiseaseManager(ConduitTemperatureManager temperature_manager)
-		: base(0)
-	{
-		this.temperatureManager = temperature_manager;
-	}
-
 	private static ElemGrowthInfo GetGrowthInfo(byte disease_idx, byte elem_idx)
 	{
 		ElemGrowthInfo elemGrowthInfo;
 		if (disease_idx != 255)
 		{
-			Disease disease = Db.Get().Diseases[(int)disease_idx];
-			elemGrowthInfo = disease.elemGrowthInfo[(int)elem_idx];
+			elemGrowthInfo = Db.Get().Diseases[(int)disease_idx].elemGrowthInfo[(int)elem_idx];
 		}
 		else
 		{
 			elemGrowthInfo = Disease.DEFAULT_GROWTH_INFO;
 		}
 		return elemGrowthInfo;
+	}
+
+	public ConduitDiseaseManager(ConduitTemperatureManager temperature_manager)
+		: base(0)
+	{
+		this.temperatureManager = temperature_manager;
 	}
 
 	public HandleVector<int>.Handle Allocate(HandleVector<int>.Handle temperature_handle, ref ConduitFlow.ConduitContents contents)
@@ -58,13 +57,11 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 					float num = data.accumulatedError;
 					num += data.growthInfo.CalculateDiseaseCountDelta(data.diseaseCount, data.mass, dt);
 					Disease disease = Db.Get().Diseases[(int)data.diseaseIdx];
-					float temperature = this.temperatureManager.GetTemperature(data.temperatureHandle);
-					float num2 = Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives);
-					float num3 = Disease.HalfLifeToGrowthRate(num2, dt);
-					num += (float)data.diseaseCount * num3 - (float)data.diseaseCount;
-					int num4 = (int)num;
-					data.accumulatedError = num - (float)num4;
-					data.diseaseCount += num4;
+					float num2 = Disease.HalfLifeToGrowthRate(Disease.CalculateRangeHalfLife(this.temperatureManager.GetTemperature(data.temperatureHandle), ref disease.temperatureRange, ref disease.temperatureHalfLives), dt);
+					num += (float)data.diseaseCount * num2 - (float)data.diseaseCount;
+					int num3 = (int)num;
+					data.accumulatedError = num - (float)num3;
+					data.diseaseCount += num3;
 					if (data.diseaseCount <= 0)
 					{
 						data.diseaseCount = 0;

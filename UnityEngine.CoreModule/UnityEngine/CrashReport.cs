@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Holds data for a single application crash event and provides access to all gathered crash reports.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Export/CrashReport.bindings.h")]
 	public sealed class CrashReport
 	{
 		private CrashReport(string id, DateTime time, string text)
@@ -59,9 +57,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns all currently available reports in a new array.</para>
-		/// </summary>
 		public static CrashReport[] reports
 		{
 			get
@@ -77,9 +72,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns last crash report, or null if no reports are available.</para>
-		/// </summary>
 		public static CrashReport lastReport
 		{
 			get
@@ -97,9 +89,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Remove all reports from available reports list.</para>
-		/// </summary>
 		public static void RemoveAll()
 		{
 			foreach (CrashReport crashReport in CrashReport.reports)
@@ -108,9 +97,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Remove report from available reports list.</para>
-		/// </summary>
 		public void Remove()
 		{
 			if (CrashReport.RemoveReport(this.id))
@@ -123,18 +109,15 @@ namespace UnityEngine
 			}
 		}
 
-		[ThreadAndSerializationSafe]
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "CrashReport_Bindings::GetReports", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string[] GetReports();
 
-		[ThreadAndSerializationSafe]
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "CrashReport_Bindings::GetReportData", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string GetReportData(string id, out double secondsSinceUnixEpoch);
 
-		[ThreadAndSerializationSafe]
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "CrashReport_Bindings::RemoveReport", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool RemoveReport(string id);
 
@@ -144,14 +127,8 @@ namespace UnityEngine
 
 		private readonly string id;
 
-		/// <summary>
-		///   <para>Time, when the crash occured.</para>
-		/// </summary>
 		public readonly DateTime time;
 
-		/// <summary>
-		///   <para>Crash report data as formatted text.</para>
-		/// </summary>
 		public readonly string text;
 	}
 }

@@ -14,8 +14,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicMassSensor component = gameObject.GetComponent<LogicMassSensor>();
+		LogicMassSensor component = ((GameObject)data).GetComponent<LogicMassSensor>();
 		if (component != null)
 		{
 			this.Threshold = component.Threshold;
@@ -48,8 +47,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 		if (this.toggleCooldown == 0f)
 		{
 			float currentValue = this.CurrentValue;
-			bool flag = ((!this.activateAboveThreshold) ? (currentValue < this.threshold) : (currentValue > this.threshold));
-			if (flag != base.IsSwitchedOn)
+			if ((this.activateAboveThreshold ? (currentValue > this.threshold) : (currentValue < this.threshold)) != base.IsSwitchedOn)
 			{
 				this.Toggle();
 				this.toggleCooldown = 0.15f;
@@ -64,11 +62,9 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 		if (Grid.Solid[num])
 		{
 			this.massSolid = Grid.Mass[num];
+			return;
 		}
-		else
-		{
-			this.massSolid = 0f;
-		}
+		this.massSolid = 0f;
 	}
 
 	private void OnPickupablesChanged(object data)
@@ -80,15 +76,12 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 		for (int i = 0; i < pooledList.Count; i++)
 		{
 			Pickupable pickupable = pooledList[i].obj as Pickupable;
-			if (!(pickupable == null))
+			if (!(pickupable == null) && !pickupable.wasAbsorbed)
 			{
-				if (!pickupable.wasAbsorbed)
+				KPrefabID component = pickupable.GetComponent<KPrefabID>();
+				if (!component.HasTag(GameTags.Creature) || (component.HasTag(GameTags.Creatures.Walker) || component.HasTag(GameTags.Creatures.Hoverer) || pickupable.HasTag(GameTags.Creatures.Flopping)))
 				{
-					KPrefabID component = pickupable.GetComponent<KPrefabID>();
-					if (!component.HasTag(GameTags.Creature) || component.HasTag(GameTags.Creatures.Walker) || component.HasTag(GameTags.Creatures.Hoverer) || pickupable.HasTag(GameTags.Creatures.Flopping))
-					{
-						num += pickupable.PrimaryElement.Mass;
-					}
+					num += pickupable.PrimaryElement.Mass;
 				}
 			}
 		}
@@ -252,7 +245,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	private void SwitchToggled(bool toggled_on)
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!toggled_on) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, toggled_on ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -265,22 +258,22 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 			{
 				if (force)
 				{
-					component.Play((!base.IsSwitchedOn) ? "off_down" : "on_down", KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(base.IsSwitchedOn ? "on_down" : "off_down", KAnim.PlayMode.Once, 1f, 0f);
 				}
 				else
 				{
-					component.Play((!base.IsSwitchedOn) ? "off_down_pre" : "on_down_pre", KAnim.PlayMode.Once, 1f, 0f);
-					component.Queue((!base.IsSwitchedOn) ? "off_down" : "on_down", KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(base.IsSwitchedOn ? "on_down_pre" : "off_down_pre", KAnim.PlayMode.Once, 1f, 0f);
+					component.Queue(base.IsSwitchedOn ? "on_down" : "off_down", KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 			else if (force)
 			{
-				component.Play((!base.IsSwitchedOn) ? "off_up" : "on_up", KAnim.PlayMode.Once, 1f, 0f);
+				component.Play(base.IsSwitchedOn ? "on_up" : "off_up", KAnim.PlayMode.Once, 1f, 0f);
 			}
 			else
 			{
-				component.Play((!base.IsSwitchedOn) ? "off_up_pre" : "on_up_pre", KAnim.PlayMode.Once, 1f, 0f);
-				component.Queue((!base.IsSwitchedOn) ? "off_up" : "on_up", KAnim.PlayMode.Once, 1f, 0f);
+				component.Play(base.IsSwitchedOn ? "on_up_pre" : "off_up_pre", KAnim.PlayMode.Once, 1f, 0f);
+				component.Queue(base.IsSwitchedOn ? "on_up" : "off_up", KAnim.PlayMode.Once, 1f, 0f);
 			}
 			this.was_pressed = flag;
 			this.was_on = base.IsSwitchedOn;
@@ -289,7 +282,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 

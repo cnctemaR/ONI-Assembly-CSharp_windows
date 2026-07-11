@@ -5,13 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A standard 4x4 transformation matrix.</para>
-	/// </summary>
-	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
-	[UsedByNativeCode]
-	[ThreadAndSerializationSafe]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[ThreadAndSerializationSafe]
+	[NativeClass("Matrix4x4f")]
+	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
 	public struct Matrix4x4 : IEquatable<Matrix4x4>
 	{
 		public Matrix4x4(Vector4 column0, Vector4 column1, Vector4 column2, Vector4 column3)
@@ -70,9 +68,6 @@ namespace UnityEngine
 			return frustumPlanes;
 		}
 
-		/// <summary>
-		///   <para>Attempts to get a rotation quaternion from this matrix.</para>
-		/// </summary>
 		public Quaternion rotation
 		{
 			get
@@ -81,9 +76,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Attempts to get a scale value from the matrix.</para>
-		/// </summary>
 		public Vector3 lossyScale
 		{
 			get
@@ -92,9 +84,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is this the identity matrix?</para>
-		/// </summary>
 		public bool isIdentity
 		{
 			get
@@ -103,9 +92,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The determinant of the matrix.</para>
-		/// </summary>
 		public float determinant
 		{
 			get
@@ -114,9 +100,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>This property takes a projection matrix and returns the six plane coordinates that define a projection frustum.</para>
-		/// </summary>
 		public FrustumPlanes decomposeProjection
 		{
 			get
@@ -125,9 +108,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Checks if this matrix is a valid transform matrix.</para>
-		/// </summary>
 		[ThreadSafe]
 		public bool ValidTRS()
 		{
@@ -139,12 +119,6 @@ namespace UnityEngine
 			return m.determinant;
 		}
 
-		/// <summary>
-		///   <para>Creates a translation, rotation and scaling matrix.</para>
-		/// </summary>
-		/// <param name="pos"></param>
-		/// <param name="q"></param>
-		/// <param name="s"></param>
 		[FreeFunction("MatrixScripting::TRS", IsThreadSafe = true)]
 		public static Matrix4x4 TRS(Vector3 pos, Quaternion q, Vector3 s)
 		{
@@ -153,12 +127,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Sets this matrix to a translation, rotation and scaling matrix.</para>
-		/// </summary>
-		/// <param name="pos"></param>
-		/// <param name="q"></param>
-		/// <param name="s"></param>
 		public void SetTRS(Vector3 pos, Quaternion q, Vector3 s)
 		{
 			this = Matrix4x4.TRS(pos, q, s);
@@ -172,9 +140,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>The inverse of this matrix (Read Only).</para>
-		/// </summary>
 		public Matrix4x4 inverse
 		{
 			get
@@ -191,9 +156,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Returns the transpose of this matrix (Read Only).</para>
-		/// </summary>
 		public Matrix4x4 transpose
 		{
 			get
@@ -202,15 +164,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Creates an orthogonal projection matrix.</para>
-		/// </summary>
-		/// <param name="left"></param>
-		/// <param name="right"></param>
-		/// <param name="bottom"></param>
-		/// <param name="top"></param>
-		/// <param name="zNear"></param>
-		/// <param name="zFar"></param>
 		[FreeFunction("MatrixScripting::Ortho", IsThreadSafe = true)]
 		public static Matrix4x4 Ortho(float left, float right, float bottom, float top, float zNear, float zFar)
 		{
@@ -219,13 +172,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Creates a perspective projection matrix.</para>
-		/// </summary>
-		/// <param name="fov"></param>
-		/// <param name="aspect"></param>
-		/// <param name="zNear"></param>
-		/// <param name="zFar"></param>
 		[FreeFunction("MatrixScripting::Perspective", IsThreadSafe = true)]
 		public static Matrix4x4 Perspective(float fov, float aspect, float zNear, float zFar)
 		{
@@ -234,15 +180,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Given a source point, a target point, and an up vector, computes a transformation matrix that corresponds to a camera viewing the target from the source, such that the right-hand vector is perpendicular to the up vector.</para>
-		/// </summary>
-		/// <param name="from">The source point.</param>
-		/// <param name="to">The target point.</param>
-		/// <param name="up">The vector describing the up direction (typically Vector3.up).</param>
-		/// <returns>
-		///   <para>The resulting transformation matrix.</para>
-		/// </returns>
 		[FreeFunction("MatrixScripting::LookAt", IsThreadSafe = true)]
 		public static Matrix4x4 LookAt(Vector3 from, Vector3 to, Vector3 up)
 		{
@@ -251,20 +188,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>This function returns a projection matrix with viewing frustum that has a near plane defined by the coordinates that were passed in.</para>
-		/// </summary>
-		/// <param name="left">The X coordinate of the left side of the near projection plane in view space.</param>
-		/// <param name="right">The X coordinate of the right side of the near projection plane in view space.</param>
-		/// <param name="bottom">The Y coordinate of the bottom side of the near projection plane in view space.</param>
-		/// <param name="top">The Y coordinate of the top side of the near projection plane in view space.</param>
-		/// <param name="zNear">Z distance to the near plane from the origin in view space.</param>
-		/// <param name="zFar">Z distance to the far plane from the origin in view space.</param>
-		/// <param name="frustumPlanes">Frustum planes struct that contains the view space coordinates of that define a viewing frustum.</param>
-		/// <param name="fp"></param>
-		/// <returns>
-		///   <para>A projection matrix with a viewing frustum defined by the plane coordinates passed in.</para>
-		/// </returns>
 		[FreeFunction("MatrixScripting::Frustum", IsThreadSafe = true)]
 		public static Matrix4x4 Frustum(float left, float right, float bottom, float top, float zNear, float zFar)
 		{
@@ -273,20 +196,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>This function returns a projection matrix with viewing frustum that has a near plane defined by the coordinates that were passed in.</para>
-		/// </summary>
-		/// <param name="left">The X coordinate of the left side of the near projection plane in view space.</param>
-		/// <param name="right">The X coordinate of the right side of the near projection plane in view space.</param>
-		/// <param name="bottom">The Y coordinate of the bottom side of the near projection plane in view space.</param>
-		/// <param name="top">The Y coordinate of the top side of the near projection plane in view space.</param>
-		/// <param name="zNear">Z distance to the near plane from the origin in view space.</param>
-		/// <param name="zFar">Z distance to the far plane from the origin in view space.</param>
-		/// <param name="frustumPlanes">Frustum planes struct that contains the view space coordinates of that define a viewing frustum.</param>
-		/// <param name="fp"></param>
-		/// <returns>
-		///   <para>A projection matrix with a viewing frustum defined by the plane coordinates passed in.</para>
-		/// </returns>
 		public static Matrix4x4 Frustum(FrustumPlanes fp)
 		{
 			return Matrix4x4.Frustum(fp.left, fp.right, fp.bottom, fp.top, fp.zNear, fp.zFar);
@@ -479,10 +388,6 @@ namespace UnityEngine
 			return !(lhs == rhs);
 		}
 
-		/// <summary>
-		///   <para>Get a column of the matrix.</para>
-		/// </summary>
-		/// <param name="index"></param>
 		public Vector4 GetColumn(int index)
 		{
 			Vector4 vector;
@@ -506,10 +411,6 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Returns a row of the matrix.</para>
-		/// </summary>
-		/// <param name="index"></param>
 		public Vector4 GetRow(int index)
 		{
 			Vector4 vector;
@@ -533,11 +434,6 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Sets a column of the matrix.</para>
-		/// </summary>
-		/// <param name="index"></param>
-		/// <param name="column"></param>
 		public void SetColumn(int index, Vector4 column)
 		{
 			this[0, index] = column.x;
@@ -546,11 +442,6 @@ namespace UnityEngine
 			this[3, index] = column.w;
 		}
 
-		/// <summary>
-		///   <para>Sets a row of the matrix.</para>
-		/// </summary>
-		/// <param name="index"></param>
-		/// <param name="row"></param>
 		public void SetRow(int index, Vector4 row)
 		{
 			this[index, 0] = row.x;
@@ -559,10 +450,6 @@ namespace UnityEngine
 			this[index, 3] = row.w;
 		}
 
-		/// <summary>
-		///   <para>Transforms a position by this matrix (generic).</para>
-		/// </summary>
-		/// <param name="point"></param>
 		public Vector3 MultiplyPoint(Vector3 point)
 		{
 			Vector3 vector;
@@ -577,10 +464,6 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Transforms a position by this matrix (fast).</para>
-		/// </summary>
-		/// <param name="point"></param>
 		public Vector3 MultiplyPoint3x4(Vector3 point)
 		{
 			Vector3 vector;
@@ -590,10 +473,6 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>Transforms a direction by this matrix.</para>
-		/// </summary>
-		/// <param name="vector"></param>
 		public Vector3 MultiplyVector(Vector3 vector)
 		{
 			Vector3 vector2;
@@ -603,10 +482,6 @@ namespace UnityEngine
 			return vector2;
 		}
 
-		/// <summary>
-		///   <para>Returns a plane that is transformed in space.</para>
-		/// </summary>
-		/// <param name="plane"></param>
 		public Plane TransformPlane(Plane plane)
 		{
 			Matrix4x4 inverse = this.inverse;
@@ -621,10 +496,6 @@ namespace UnityEngine
 			return new Plane(new Vector3(num, num2, num3), num4);
 		}
 
-		/// <summary>
-		///   <para>Creates a scaling matrix.</para>
-		/// </summary>
-		/// <param name="vector"></param>
 		public static Matrix4x4 Scale(Vector3 vector)
 		{
 			Matrix4x4 matrix4x;
@@ -647,10 +518,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Creates a translation matrix.</para>
-		/// </summary>
-		/// <param name="vector"></param>
 		public static Matrix4x4 Translate(Vector3 vector)
 		{
 			Matrix4x4 matrix4x;
@@ -673,10 +540,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation matrix.</para>
-		/// </summary>
-		/// <param name="q"></param>
 		public static Matrix4x4 Rotate(Quaternion q)
 		{
 			float num = q.x * 2f;
@@ -711,9 +574,6 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		/// <summary>
-		///   <para>Returns a matrix with all elements set to zero (Read Only).</para>
-		/// </summary>
 		public static Matrix4x4 zero
 		{
 			get
@@ -722,9 +582,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the identity matrix (Read Only).</para>
-		/// </summary>
 		public static Matrix4x4 identity
 		{
 			get
@@ -733,10 +590,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for this matrix.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public override string ToString()
 		{
 			return UnityString.Format("{0:F5}\t{1:F5}\t{2:F5}\t{3:F5}\n{4:F5}\t{5:F5}\t{6:F5}\t{7:F5}\n{8:F5}\t{9:F5}\t{10:F5}\t{11:F5}\n{12:F5}\t{13:F5}\t{14:F5}\t{15:F5}\n", new object[]
@@ -746,10 +599,6 @@ namespace UnityEngine
 			});
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for this matrix.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public string ToString(string format)
 		{
 			return UnityString.Format("{0}\t{1}\t{2}\t{3}\n{4}\t{5}\t{6}\t{7}\n{8}\t{9}\t{10}\t{11}\n{12}\t{13}\t{14}\t{15}\n", new object[]
@@ -812,36 +661,52 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Frustum_Injected(float left, float right, float bottom, float top, float zNear, float zFar, out Matrix4x4 ret);
 
+		[NativeName("m_Data[0]")]
 		public float m00;
 
+		[NativeName("m_Data[1]")]
 		public float m10;
 
+		[NativeName("m_Data[2]")]
 		public float m20;
 
+		[NativeName("m_Data[3]")]
 		public float m30;
 
+		[NativeName("m_Data[4]")]
 		public float m01;
 
+		[NativeName("m_Data[5]")]
 		public float m11;
 
+		[NativeName("m_Data[6]")]
 		public float m21;
 
+		[NativeName("m_Data[7]")]
 		public float m31;
 
+		[NativeName("m_Data[8]")]
 		public float m02;
 
+		[NativeName("m_Data[9]")]
 		public float m12;
 
+		[NativeName("m_Data[10]")]
 		public float m22;
 
+		[NativeName("m_Data[11]")]
 		public float m32;
 
+		[NativeName("m_Data[12]")]
 		public float m03;
 
+		[NativeName("m_Data[13]")]
 		public float m13;
 
+		[NativeName("m_Data[14]")]
 		public float m23;
 
+		[NativeName("m_Data[15]")]
 		public float m33;
 
 		private static readonly Matrix4x4 zeroMatrix = new Matrix4x4(new Vector4(0f, 0f, 0f, 0f), new Vector4(0f, 0f, 0f, 0f), new Vector4(0f, 0f, 0f, 0f), new Vector4(0f, 0f, 0f, 0f));

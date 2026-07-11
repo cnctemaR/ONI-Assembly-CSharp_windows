@@ -6,12 +6,6 @@ namespace ProcGen
 	[Serializable]
 	public class SampleDescriber
 	{
-		public SampleDescriber()
-		{
-			this.doAvoidPoints = true;
-			this.dontRelaxChildren = false;
-		}
-
 		public string name { get; set; }
 
 		[StringEnumConverter]
@@ -29,6 +23,12 @@ namespace ProcGen
 		public bool dontRelaxChildren { get; protected set; }
 
 		public MinMax blobSize { get; protected set; }
+
+		public SampleDescriber()
+		{
+			this.doAvoidPoints = true;
+			this.dontRelaxChildren = false;
+		}
 
 		public enum PointSelectionMethod
 		{
@@ -70,12 +70,9 @@ namespace ProcGen
 				if (this.massMultiplier == null)
 				{
 					this.massMultiplier = new float?(mult);
+					return;
 				}
-				else
-				{
-					float? massMultiplier = this.massMultiplier;
-					this.massMultiplier = ((massMultiplier == null) ? null : new float?(massMultiplier.GetValueOrDefault() * mult));
-				}
+				this.massMultiplier *= mult;
 			}
 		}
 	}

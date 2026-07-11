@@ -5,19 +5,6 @@ using UnityEngine;
 
 public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 {
-	public TemplateSelectionInfoPanel()
-	{
-		Func<List<int>, string>[] array = new Func<List<int>, string>[6];
-		array[0] = new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalMass);
-		array[1] = new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageMass);
-		array[2] = new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageTemperature);
-		array[3] = new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalJoules);
-		array[4] = new Func<List<int>, string>(TemplateSelectionInfoPanel.JoulesPerKilogram);
-		array[5] = new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement);
-		this.details = array;
-		base..ctor();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -31,7 +18,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 
 	public void SaveCurrentDetails()
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < this.details.Length; i++)
 		{
 			text = text + this.details[i](DebugBaseTemplateButton.Instance.SelectedCells) + "\n";
@@ -126,10 +113,10 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			}
 			if (!flag)
 			{
-				TemplateSelectionInfoPanel.mass_per_element.Add(new Tuple<Element, float>(Grid.Element[num], Grid.Mass[num]));
+				TemplateSelectionInfoPanel.mass_per_element.Add(new global::Tuple<Element, float>(Grid.Element[num], Grid.Mass[num]));
 			}
 		}
-		TemplateSelectionInfoPanel.mass_per_element.Sort(delegate(Tuple<Element, float> a, Tuple<Element, float> b)
+		TemplateSelectionInfoPanel.mass_per_element.Sort(delegate(global::Tuple<Element, float> a, global::Tuple<Element, float> b)
 		{
 			if (a.second > b.second)
 			{
@@ -141,13 +128,12 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			}
 			return 0;
 		});
-		string text = string.Empty;
-		foreach (Tuple<Element, float> tuple in TemplateSelectionInfoPanel.mass_per_element)
+		string text = "";
+		foreach (global::Tuple<Element, float> tuple in TemplateSelectionInfoPanel.mass_per_element)
 		{
-			string text2 = text;
 			text = string.Concat(new string[]
 			{
-				text2,
+				text,
 				tuple.first.name,
 				": ",
 				GameUtil.GetFormattedMass(tuple.second, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
@@ -169,7 +155,15 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 	[SerializeField]
 	private KButton save_button;
 
-	private Func<List<int>, string>[] details;
+	private Func<List<int>, string>[] details = new Func<List<int>, string>[]
+	{
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalMass),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageMass),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageTemperature),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalJoules),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.JoulesPerKilogram),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement)
+	};
 
-	private static List<Tuple<Element, float>> mass_per_element = new List<Tuple<Element, float>>();
+	private static List<global::Tuple<Element, float>> mass_per_element = new List<global::Tuple<Element, float>>();
 }

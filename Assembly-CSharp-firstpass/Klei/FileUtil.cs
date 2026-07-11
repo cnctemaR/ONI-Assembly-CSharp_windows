@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
@@ -7,12 +6,11 @@ namespace Klei
 {
 	public static class FileUtil
 	{
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event global::System.Action onErrorMessage;
 
 		public static void ErrorDialog(FileUtil.ErrorType errorType, string errorSubject, string exceptionMessage, string exceptionStackTrace)
 		{
-			global::Debug.Log(string.Format("Error encountered during file access: {0} error: {1}", errorType, errorSubject));
+			Debug.Log(string.Format("Error encountered during file access: {0} error: {1}", errorType, errorSubject));
 			FileUtil.errorType = errorType;
 			FileUtil.errorSubject = errorSubject;
 			FileUtil.exceptionMessage = exceptionMessage;
@@ -34,17 +32,14 @@ namespace Klei
 				{
 					return io_op();
 				}
-				catch (UnauthorizedAccessException ex4)
+				catch (UnauthorizedAccessException ex)
 				{
-					ex = ex4;
 				}
-				catch (IOException ex5)
+				catch (IOException ex2)
 				{
-					ex2 = ex5;
 				}
-				catch (Exception ex6)
+				catch (Exception ex3)
 				{
-					ex3 = ex6;
 				}
 				Thread.Sleep(i * 100);
 			}
@@ -75,17 +70,14 @@ namespace Klei
 					io_op();
 					return;
 				}
-				catch (UnauthorizedAccessException ex4)
+				catch (UnauthorizedAccessException ex)
 				{
-					ex = ex4;
 				}
-				catch (IOException ex5)
+				catch (IOException ex2)
 				{
-					ex2 = ex5;
 				}
-				catch (Exception ex6)
+				catch (Exception ex3)
 				{
-					ex3 = ex6;
 				}
 				Thread.Sleep(i * 100);
 			}

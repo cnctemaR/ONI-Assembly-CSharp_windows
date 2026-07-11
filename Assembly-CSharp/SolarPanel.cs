@@ -50,8 +50,7 @@ public class SolarPanel : Generator
 
 	protected void OnActiveChanged(object data)
 	{
-		bool isActive = ((Operational)data).IsActive;
-		StatusItem statusItem = ((!isActive) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
+		StatusItem statusItem = (((Operational)data).IsActive ? Db.Get().BuildingStatusItems.Wattage : Db.Get().BuildingStatusItems.GeneratorOffline);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
 	}
 
@@ -61,8 +60,9 @@ public class SolarPanel : Generator
 		if (this.statusHandle == Guid.Empty)
 		{
 			this.statusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.SolarPanelWattage, this);
+			return;
 		}
-		else if (this.statusHandle != Guid.Empty)
+		if (this.statusHandle != Guid.Empty)
 		{
 			base.GetComponent<KSelectable>().ReplaceStatusItem(this.statusHandle, Db.Get().BuildingStatusItems.SolarPanelWattage, this);
 		}

@@ -148,24 +148,20 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	private void CheckConnectionStatus()
 	{
-		if (this.CircuitID == 65535)
-		{
-			if (this.HasWire)
-			{
-				this.SetStatusItem(Db.Get().BuildingStatusItems.NoPowerConsumers);
-				this.operational.SetFlag(Generator.generatorConnectedFlag, true);
-			}
-			else
-			{
-				this.SetStatusItem(Db.Get().BuildingStatusItems.NoWireConnected);
-				this.operational.SetFlag(Generator.generatorConnectedFlag, false);
-			}
-		}
-		else
+		if (this.CircuitID != 65535)
 		{
 			this.SetStatusItem(null);
 			this.operational.SetFlag(Generator.generatorConnectedFlag, true);
+			return;
 		}
+		if (this.HasWire)
+		{
+			this.SetStatusItem(Db.Get().BuildingStatusItems.NoPowerConsumers);
+			this.operational.SetFlag(Generator.generatorConnectedFlag, true);
+			return;
+		}
+		this.SetStatusItem(Db.Get().BuildingStatusItems.NoWireConnected);
+		this.operational.SetFlag(Generator.generatorConnectedFlag, false);
 	}
 
 	protected override void OnCleanUp()
@@ -182,7 +178,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		{
 			return def.GeneratorBaseCapacity;
 		}
-		return def.GeneratorBaseCapacity * (1f + ((!element.HasTag(GameTags.RefinedMetal)) ? 0f : 1f));
+		return def.GeneratorBaseCapacity * (1f + (element.HasTag(GameTags.RefinedMetal) ? 1f : 0f));
 	}
 
 	public void ResetJoules()
@@ -192,21 +188,21 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	public virtual void ApplyDeltaJoules(float joulesDelta, bool canOverPower = false)
 	{
-		this.joulesAvailable = Mathf.Clamp(this.joulesAvailable + joulesDelta, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
+		this.joulesAvailable = Mathf.Clamp(this.joulesAvailable + joulesDelta, 0f, canOverPower ? float.MaxValue : this.Capacity);
 	}
 
 	public void GenerateJoules(float joulesAvailable, bool canOverPower = false)
 	{
 		global::Debug.Assert(base.GetComponent<Battery>() == null);
-		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
+		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, canOverPower ? float.MaxValue : this.Capacity);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, this.GetProperName(), null);
 		if (!Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(this.PrefabID()))
 		{
 			Game.Instance.savedInfo.powerCreatedbyGeneratorType.Add(this.PrefabID(), 0f);
 		}
-		Dictionary<Tag, float> powerCreatedbyGeneratorType;
-		Tag tag;
-		(powerCreatedbyGeneratorType = Game.Instance.savedInfo.powerCreatedbyGeneratorType)[tag = this.PrefabID()] = powerCreatedbyGeneratorType[tag] + this.joulesAvailable;
+		Dictionary<Tag, float> powerCreatedbyGeneratorType = Game.Instance.savedInfo.powerCreatedbyGeneratorType;
+		Tag tag = this.PrefabID();
+		powerCreatedbyGeneratorType[tag] += this.joulesAvailable;
 	}
 
 	public void AssignJoulesAvailable(float joulesAvailable)
@@ -220,11 +216,9 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		if (this.operational.IsOperational)
 		{
 			Game.Instance.circuitManager.Connect(this);
+			return;
 		}
-		else
-		{
-			Game.Instance.circuitManager.Disconnect(this);
-		}
+		Game.Instance.circuitManager.Disconnect(this);
 	}
 
 	public virtual void ConsumeEnergy(float joules)

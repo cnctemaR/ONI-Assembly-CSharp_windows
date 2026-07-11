@@ -77,16 +77,18 @@ public class ImageToggleState : KMonoBehaviour
 		{
 		case ImageToggleState.State.Disabled:
 			this.SetDisabled();
-			break;
+			return;
 		case ImageToggleState.State.Inactive:
 			this.SetInactive();
-			break;
+			return;
 		case ImageToggleState.State.Active:
 			this.SetActive();
-			break;
+			return;
 		case ImageToggleState.State.DisabledActive:
 			this.SetDisabledActive();
-			break;
+			return;
+		default:
+			return;
 		}
 	}
 
@@ -95,11 +97,9 @@ public class ImageToggleState : KMonoBehaviour
 		if (active)
 		{
 			this.SetActive();
+			return;
 		}
-		else
-		{
-			this.SetInactive();
-		}
+		this.SetInactive();
 	}
 
 	public void SetActive()
@@ -120,8 +120,9 @@ public class ImageToggleState : KMonoBehaviour
 			if (this.ActiveSprite != null && this.TargetImage.sprite != this.ActiveSprite)
 			{
 				this.TargetImage.sprite = this.ActiveSprite;
+				return;
 			}
-			else if (this.ActiveSprite == null)
+			if (this.ActiveSprite == null)
 			{
 				this.TargetImage.sprite = null;
 			}
@@ -141,22 +142,24 @@ public class ImageToggleState : KMonoBehaviour
 		{
 		case ImageToggleState.State.Disabled:
 			this.SetTargetImageColor(this.DisabledColour);
-			break;
+			return;
 		case ImageToggleState.State.Inactive:
 			this.SetTargetImageColor(this.InactiveColour);
-			break;
+			return;
 		case ImageToggleState.State.Active:
 			this.SetTargetImageColor(this.ActiveColour);
-			break;
+			return;
 		case ImageToggleState.State.DisabledActive:
 			this.SetTargetImageColor(this.DisabledActiveColour);
-			break;
+			return;
+		default:
+			return;
 		}
 	}
 
 	public void OnHoverIn()
 	{
-		this.SetTargetImageColor((this.currentState != ImageToggleState.State.Disabled && this.currentState != ImageToggleState.State.DisabledActive) ? this.HoverColour : this.DisabledHoverColor);
+		this.SetTargetImageColor((this.currentState == ImageToggleState.State.Disabled || this.currentState == ImageToggleState.State.DisabledActive) ? this.DisabledHoverColor : this.HoverColour);
 	}
 
 	public void OnHoverOut()
@@ -182,8 +185,9 @@ public class ImageToggleState : KMonoBehaviour
 			if (this.InactiveSprite != null && this.TargetImage.sprite != this.InactiveSprite)
 			{
 				this.TargetImage.sprite = this.InactiveSprite;
+				return;
 			}
-			else if (this.InactiveSprite == null)
+			if (this.InactiveSprite == null)
 			{
 				this.TargetImage.sprite = null;
 			}
@@ -209,8 +213,9 @@ public class ImageToggleState : KMonoBehaviour
 			if (this.DisabledSprite != null && this.TargetImage.sprite != this.DisabledSprite)
 			{
 				this.TargetImage.sprite = this.DisabledSprite;
+				return;
 			}
-			else if (this.DisabledSprite == null)
+			if (this.DisabledSprite == null)
 			{
 				this.TargetImage.sprite = null;
 			}
@@ -231,8 +236,9 @@ public class ImageToggleState : KMonoBehaviour
 			if (this.DisabledActiveSprite != null && this.TargetImage.sprite != this.DisabledActiveSprite)
 			{
 				this.TargetImage.sprite = this.DisabledActiveSprite;
+				return;
 			}
-			else if (this.DisabledActiveSprite == null)
+			if (this.DisabledActiveSprite == null)
 			{
 				this.TargetImage.sprite = null;
 			}

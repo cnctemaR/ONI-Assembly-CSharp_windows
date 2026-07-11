@@ -10,8 +10,7 @@ public class Workaholic : StateMachineComponent<Workaholic.StatesInstance>
 
 	protected bool IsUncomfortable()
 	{
-		ChoreDriver component = base.smi.master.GetComponent<ChoreDriver>();
-		return component.GetCurrentChore() is IdleChore;
+		return base.smi.master.GetComponent<ChoreDriver>().GetCurrentChore() is IdleChore;
 	}
 
 	public class StatesInstance : GameStateMachine<Workaholic.States, Workaholic.StatesInstance, Workaholic, object>.GameInstance
@@ -32,11 +31,9 @@ public class Workaholic : StateMachineComponent<Workaholic.StatesInstance>
 				if (smi.master.IsUncomfortable())
 				{
 					smi.GoTo(this.suffering);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.satisfied);
-				}
+				smi.GoTo(this.satisfied);
 			}, UpdateRate.SIM_1000ms, false);
 			this.suffering.AddEffect("Restless").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();

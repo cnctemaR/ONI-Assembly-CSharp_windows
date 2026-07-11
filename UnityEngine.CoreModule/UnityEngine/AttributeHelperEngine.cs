@@ -9,23 +9,16 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static Type GetParentTypeDisallowingMultipleInclusion(Type type)
 		{
-			Stack<Type> stack = new Stack<Type>();
+			Type type2 = null;
 			while (type != null && type != typeof(MonoBehaviour))
 			{
-				stack.Push(type);
+				if (Attribute.IsDefined(type, typeof(DisallowMultipleComponent)))
+				{
+					type2 = type;
+				}
 				type = type.BaseType;
 			}
-			while (stack.Count > 0)
-			{
-				Type type2 = stack.Pop();
-				object[] customAttributes = type2.GetCustomAttributes(typeof(DisallowMultipleComponent), false);
-				int num = customAttributes.Length;
-				if (num != 0)
-				{
-					return type2;
-				}
-			}
-			return null;
+			return type2;
 		}
 
 		[RequiredByNativeCode]
@@ -68,20 +61,42 @@ namespace UnityEngine
 			return list.ToArray();
 		}
 
+		private static int GetExecuteMode(Type klass)
+		{
+			object[] customAttributes = klass.GetCustomAttributes(typeof(ExecuteAlways), false);
+			int num;
+			if (customAttributes.Length != 0)
+			{
+				num = 2;
+			}
+			else
+			{
+				object[] customAttributes2 = klass.GetCustomAttributes(typeof(ExecuteInEditMode), false);
+				if (customAttributes2.Length != 0)
+				{
+					num = 1;
+				}
+				else
+				{
+					num = 0;
+				}
+			}
+			return num;
+		}
+
 		[RequiredByNativeCode]
-		private static bool CheckIsEditorScript(Type klass)
+		private static int CheckIsEditorScript(Type klass)
 		{
 			while (klass != null && klass != typeof(MonoBehaviour))
 			{
-				object[] customAttributes = klass.GetCustomAttributes(typeof(ExecuteInEditMode), false);
-				int num = customAttributes.Length;
-				if (num != 0)
+				int executeMode = AttributeHelperEngine.GetExecuteMode(klass);
+				if (executeMode > 0)
 				{
-					return true;
+					return executeMode;
 				}
 				klass = klass.BaseType;
 			}
-			return false;
+			return 0;
 		}
 
 		[RequiredByNativeCode]

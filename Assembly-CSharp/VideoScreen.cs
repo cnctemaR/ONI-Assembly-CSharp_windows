@@ -26,8 +26,9 @@ public class VideoScreen : KModalScreen
 			if (this.victoryLoopQueued)
 			{
 				base.StartCoroutine(this.SwitchToVictoryLoop());
+				return;
 			}
-			else if (!this.videoPlayer.isLooping)
+			if (!this.videoPlayer.isLooping)
 			{
 				this.Stop();
 			}
@@ -104,7 +105,7 @@ public class VideoScreen : KModalScreen
 		}
 		base.Show(true);
 		this.videoPlayer.isLooping = false;
-		this.activeAudioSnapshot = ((!string.IsNullOrEmpty(overrideAudioSnapshot)) ? overrideAudioSnapshot : AudioMixerSnapshots.Get().TutorialVideoPlayingSnapshot);
+		this.activeAudioSnapshot = (string.IsNullOrEmpty(overrideAudioSnapshot) ? AudioMixerSnapshots.Get().TutorialVideoPlayingSnapshot : overrideAudioSnapshot);
 		AudioMixer.instance.Start(this.activeAudioSnapshot);
 		this.DisableAllMedia();
 		this.videoPlayer.gameObject.SetActive(true);
@@ -149,8 +150,7 @@ public class VideoScreen : KModalScreen
 			}
 		}
 		DebugUtil.Assert(videoOverlay != null, "Could not find a template named ", overlayTemplate);
-		VideoOverlay videoOverlay3 = global::Util.KInstantiateUI<VideoOverlay>(videoOverlay.gameObject, this.overlayContainer.gameObject, true);
-		videoOverlay3.SetText(strings);
+		global::Util.KInstantiateUI<VideoOverlay>(videoOverlay.gameObject, this.overlayContainer.gameObject, true).SetText(strings);
 		this.overlayContainer.gameObject.SetActive(true);
 	}
 
@@ -174,9 +174,9 @@ public class VideoScreen : KModalScreen
 		this.videoPlayer.Play();
 		this.proceedButton.gameObject.SetActive(true);
 		yield return new WaitForSecondsRealtime(1f);
-		for (float j = 1f; j >= 0f; j -= Time.unscaledDeltaTime)
+		for (float i = 1f; i >= 0f; i -= Time.unscaledDeltaTime)
 		{
-			this.fadeOverlay.color = new Color(color.r, color.g, color.b, j);
+			this.fadeOverlay.color = new Color(color.r, color.g, color.b, i);
 			yield return 0;
 		}
 		this.fadeOverlay.color = new Color(color.r, color.g, color.b, 0f);
@@ -207,11 +207,16 @@ public class VideoScreen : KModalScreen
 			double num2 = this.videoPlayer.time * 1000.0;
 			if ((double)num - num2 > 33.0)
 			{
-				this.videoPlayer.frame += 1L;
+				VideoPlayer videoPlayer = this.videoPlayer;
+				long num3 = videoPlayer.frame;
+				videoPlayer.frame = num3 + 1L;
+				return;
 			}
-			else if (num2 - (double)num > 33.0)
+			if (num2 - (double)num > 33.0)
 			{
-				this.videoPlayer.frame -= 1L;
+				VideoPlayer videoPlayer2 = this.videoPlayer;
+				long num3 = videoPlayer2.frame;
+				videoPlayer2.frame = num3 - 1L;
 			}
 		}
 	}
@@ -249,9 +254,9 @@ public class VideoScreen : KModalScreen
 
 	private bool victoryLoopQueued;
 
-	private string victoryLoopMessage = string.Empty;
+	private string victoryLoopMessage = "";
 
-	private string victoryLoopClip = string.Empty;
+	private string victoryLoopClip = "";
 
 	private bool videoSkippable = true;
 

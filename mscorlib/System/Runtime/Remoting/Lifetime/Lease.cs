@@ -12,14 +12,14 @@ namespace System.Runtime.Remoting.Lifetime
 			this._initialLeaseTime = LifetimeServices.LeaseTime;
 			this._renewOnCallTime = LifetimeServices.RenewOnCallTime;
 			this._sponsorshipTimeout = LifetimeServices.SponsorshipTimeout;
-			this._leaseExpireTime = DateTime.Now + this._initialLeaseTime;
+			this._leaseExpireTime = DateTime.UtcNow + this._initialLeaseTime;
 		}
 
 		public TimeSpan CurrentLeaseTime
 		{
 			get
 			{
-				return this._leaseExpireTime - DateTime.Now;
+				return this._leaseExpireTime - DateTime.UtcNow;
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace System.Runtime.Remoting.Lifetime
 					throw new RemotingException("InitialLeaseTime property can only be set when the lease is in initial state; state is " + this._currentState + ".");
 				}
 				this._initialLeaseTime = value;
-				this._leaseExpireTime = DateTime.Now + this._initialLeaseTime;
+				this._leaseExpireTime = DateTime.UtcNow + this._initialLeaseTime;
 				if (value == TimeSpan.Zero)
 				{
 					this._currentState = LeaseState.Null;
@@ -112,7 +112,7 @@ namespace System.Runtime.Remoting.Lifetime
 
 		public TimeSpan Renew(TimeSpan renewalTime)
 		{
-			DateTime dateTime = DateTime.Now + renewalTime;
+			DateTime dateTime = DateTime.UtcNow + renewalTime;
 			if (dateTime > this._leaseExpireTime)
 			{
 				this._leaseExpireTime = dateTime;
@@ -128,7 +128,7 @@ namespace System.Runtime.Remoting.Lifetime
 				{
 					for (int i = 0; i < this._sponsors.Count; i++)
 					{
-						if (object.ReferenceEquals(this._sponsors[i], obj))
+						if (this._sponsors[i] == obj)
 						{
 							this._sponsors.RemoveAt(i);
 							break;
@@ -156,11 +156,9 @@ namespace System.Runtime.Remoting.Lifetime
 					this._renewingSponsors = new Queue(this._sponsors);
 				}
 				this.CheckNextSponsor();
+				return;
 			}
-			else
-			{
-				this._currentState = LeaseState.Expired;
-			}
+			this._currentState = LeaseState.Expired;
 		}
 
 		private void CheckNextSponsor()

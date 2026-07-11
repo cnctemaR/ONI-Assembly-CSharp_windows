@@ -60,17 +60,15 @@ public class ResourceRemainingDisplayScreen : KScreen
 		}
 		if (this.displayedConstructionCostMultiplier == this.numberOfPendingConstructions)
 		{
-			this.label.text = string.Empty;
+			this.label.text = "";
+			return;
 		}
-		else
-		{
-			this.displayedConstructionCostMultiplier = this.numberOfPendingConstructions;
-		}
+		this.displayedConstructionCostMultiplier = this.numberOfPendingConstructions;
 	}
 
 	public string GetString()
 	{
-		string text = string.Empty;
+		string text = "";
 		if (this.selected_elements != null && this.currentRecipe != null)
 		{
 			for (int i = 0; i < this.currentRecipe.Ingredients.Count; i++)
@@ -83,10 +81,9 @@ public class ResourceRemainingDisplayScreen : KScreen
 				{
 					num3 = 0f;
 				}
-				string text2 = text;
 				text = string.Concat(new string[]
 				{
-					text2,
+					text,
 					tag.ProperName(),
 					": ",
 					GameUtil.GetFormattedMass(num3, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),

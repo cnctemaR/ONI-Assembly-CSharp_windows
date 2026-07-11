@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Configuration;
+using System.Net.Sockets;
+using Unity;
 
 namespace System.Net.Configuration
 {
@@ -48,9 +50,22 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected override void PostDeserialize()
 		{
+		}
+
+		public IPProtectionLevel IPProtectionLevel
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return (IPProtectionLevel)0;
+			}
+			set
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+			}
 		}
 
 		private static ConfigurationPropertyCollection properties;

@@ -27,19 +27,18 @@ public class Dumpable : Workable
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.OnCompleteWork(null);
+			return;
 		}
-		else if (this.isMarkedForDumping)
+		if (this.isMarkedForDumping)
 		{
 			this.isMarkedForDumping = false;
 			this.chore.Cancel("Cancel Dumping!");
 			this.chore = null;
 			base.ShowProgressBar(false);
+			return;
 		}
-		else
-		{
-			this.isMarkedForDumping = true;
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-		}
+		this.isMarkedForDumping = true;
+		this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -75,25 +74,8 @@ public class Dumpable : Workable
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (this.isMarkedForDumping)
-		{
-			string text = "action_empty_contents";
-			string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.ToggleDumping);
-			string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_empty_contents";
-			string text2 = UI.USERMENUACTIONS.DUMP.NAME;
-			global::System.Action action = new global::System.Action(this.ToggleDumping);
-			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = (this.isMarkedForDumping ? new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME_OFF, new global::System.Action(this.ToggleDumping), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF, true) : new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME, new global::System.Action(this.ToggleDumping), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.DUMP.TOOLTIP, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	private Chore chore;

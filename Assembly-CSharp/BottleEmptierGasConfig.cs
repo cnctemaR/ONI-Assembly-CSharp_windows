@@ -34,8 +34,7 @@ public class BottleEmptierGasConfig : IBuildingConfig
 		storage.showDescriptor = true;
 		storage.capacityKg = 200f;
 		go.AddOrGet<TreeFilterable>();
-		BottleEmptier bottleEmptier = go.AddOrGet<BottleEmptier>();
-		bottleEmptier.emptyRate = 0.25f;
+		go.AddOrGet<BottleEmptier>().emptyRate = 0.25f;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

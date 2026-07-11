@@ -1,104 +1,133 @@
 ﻿using System;
 using System.Collections;
-using System.IO;
+using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Authenticode;
+using System.Threading;
 
 namespace System.Net
 {
 	internal sealed class EndPointListener
 	{
-		public EndPointListener(IPAddress addr, int port, bool secure)
+		public EndPointListener(HttpListener listener, IPAddress addr, int port, bool secure)
 		{
+			this.listener = listener;
 			if (secure)
 			{
 				this.secure = secure;
-				this.LoadCertificateAndKey(addr, port);
+				this.cert = listener.LoadCertificateAndKey(addr, port);
 			}
 			this.endpoint = new IPEndPoint(addr, port);
-			this.sock = new global::System.Net.Sockets.Socket(addr.AddressFamily, global::System.Net.Sockets.SocketType.Stream, global::System.Net.Sockets.ProtocolType.Tcp);
+			this.sock = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 			this.sock.Bind(this.endpoint);
 			this.sock.Listen(500);
-			this.sock.BeginAccept(new AsyncCallback(EndPointListener.OnAccept), this);
+			SocketAsyncEventArgs e = new SocketAsyncEventArgs();
+			e.UserToken = this;
+			e.Completed += EndPointListener.OnAccept;
+			Socket socket = null;
+			EndPointListener.Accept(this.sock, e, ref socket);
 			this.prefixes = new Hashtable();
+			this.unregistered = new Dictionary<HttpConnection, HttpConnection>();
 		}
 
-		private void LoadCertificateAndKey(IPAddress addr, int port)
+		internal HttpListener Listener
 		{
-			try
+			get
 			{
-				string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-				string text = Path.Combine(folderPath, ".mono");
-				text = Path.Combine(text, "httplistener");
-				string text2 = Path.Combine(text, string.Format("{0}.cer", port));
-				string text3 = Path.Combine(text, string.Format("{0}.pvk", port));
-				this.cert = new global::System.Security.Cryptography.X509Certificates.X509Certificate2(text2);
-				this.key = PrivateKey.CreateFromFile(text3).RSA;
-			}
-			catch
-			{
+				return this.listener;
 			}
 		}
 
-		private static void OnAccept(IAsyncResult ares)
+		private static void Accept(Socket socket, SocketAsyncEventArgs e, ref Socket accepted)
 		{
-			EndPointListener endPointListener = (EndPointListener)ares.AsyncState;
-			global::System.Net.Sockets.Socket socket = null;
+			e.AcceptSocket = null;
+			bool flag;
 			try
 			{
-				socket = endPointListener.sock.EndAccept(ares);
+				flag = socket.AcceptAsync(e);
 			}
 			catch
 			{
-			}
-			finally
-			{
-				try
+				if (accepted != null)
 				{
-					endPointListener.sock.BeginAccept(new AsyncCallback(EndPointListener.OnAccept), endPointListener);
-				}
-				catch
-				{
-					if (socket != null)
+					try
 					{
-						try
-						{
-							socket.Close();
-						}
-						catch
-						{
-						}
-						socket = null;
+						accepted.Close();
 					}
+					catch
+					{
+					}
+					accepted = null;
 				}
+				return;
 			}
+			if (!flag)
+			{
+				EndPointListener.ProcessAccept(e);
+			}
+		}
+
+		private static void ProcessAccept(SocketAsyncEventArgs args)
+		{
+			Socket socket = null;
+			if (args.SocketError == SocketError.Success)
+			{
+				socket = args.AcceptSocket;
+			}
+			EndPointListener endPointListener = (EndPointListener)args.UserToken;
+			EndPointListener.Accept(endPointListener.sock, args, ref socket);
 			if (socket == null)
 			{
 				return;
 			}
-			if (endPointListener.secure && (endPointListener.cert == null || endPointListener.key == null))
+			if (endPointListener.secure && endPointListener.cert == null)
 			{
 				socket.Close();
 				return;
 			}
-			HttpConnection httpConnection = new HttpConnection(socket, endPointListener, endPointListener.secure, endPointListener.cert, endPointListener.key);
+			HttpConnection httpConnection;
+			try
+			{
+				httpConnection = new HttpConnection(socket, endPointListener, endPointListener.secure, endPointListener.cert);
+			}
+			catch
+			{
+				socket.Close();
+				return;
+			}
+			Dictionary<HttpConnection, HttpConnection> dictionary = endPointListener.unregistered;
+			lock (dictionary)
+			{
+				endPointListener.unregistered[httpConnection] = httpConnection;
+			}
 			httpConnection.BeginReadRequest();
+		}
+
+		private static void OnAccept(object sender, SocketAsyncEventArgs e)
+		{
+			EndPointListener.ProcessAccept(e);
+		}
+
+		internal void RemoveConnection(HttpConnection conn)
+		{
+			Dictionary<HttpConnection, HttpConnection> dictionary = this.unregistered;
+			lock (dictionary)
+			{
+				this.unregistered.Remove(conn);
+			}
 		}
 
 		public bool BindContext(HttpListenerContext context)
 		{
 			HttpListenerRequest request = context.Request;
 			ListenerPrefix listenerPrefix;
-			HttpListener httpListener = this.SearchListener(request.UserHostName, request.Url, out listenerPrefix);
+			HttpListener httpListener = this.SearchListener(request.Url, out listenerPrefix);
 			if (httpListener == null)
 			{
 				return false;
 			}
 			context.Listener = httpListener;
 			context.Connection.Prefix = listenerPrefix;
-			httpListener.RegisterContext(context);
 			return true;
 		}
 
@@ -108,68 +137,60 @@ namespace System.Net
 			{
 				return;
 			}
-			HttpListenerRequest request = context.Request;
-			ListenerPrefix listenerPrefix;
-			HttpListener httpListener = this.SearchListener(request.UserHostName, request.Url, out listenerPrefix);
-			if (httpListener != null)
-			{
-				httpListener.UnregisterContext(context);
-			}
+			context.Listener.UnregisterContext(context);
 		}
 
-		private HttpListener SearchListener(string host, global::System.Uri uri, out ListenerPrefix prefix)
+		private HttpListener SearchListener(Uri uri, out ListenerPrefix prefix)
 		{
 			prefix = null;
 			if (uri == null)
 			{
 				return null;
 			}
-			if (host != null)
+			string host = uri.Host;
+			int port = uri.Port;
+			string text = WebUtility.UrlDecode(uri.AbsolutePath);
+			string text2 = ((text[text.Length - 1] == '/') ? text : (text + "/"));
+			HttpListener httpListener = null;
+			int num = -1;
+			if (host != null && host != "")
 			{
-				int num = host.IndexOf(':');
-				if (num >= 0)
+				Hashtable hashtable = this.prefixes;
+				foreach (object obj in hashtable.Keys)
 				{
-					host = host.Substring(0, num);
+					ListenerPrefix listenerPrefix = (ListenerPrefix)obj;
+					string path = listenerPrefix.Path;
+					if (path.Length >= num && !(listenerPrefix.Host != host) && listenerPrefix.Port == port && (text.StartsWith(path) || text2.StartsWith(path)))
+					{
+						num = path.Length;
+						httpListener = (HttpListener)hashtable[listenerPrefix];
+						prefix = listenerPrefix;
+					}
+				}
+				if (num != -1)
+				{
+					return httpListener;
 				}
 			}
-			string text = HttpUtility.UrlDecode(uri.AbsolutePath);
-			string text2 = ((text[text.Length - 1] != '/') ? (text + "/") : text);
-			HttpListener httpListener = null;
-			int num2 = -1;
-			Hashtable hashtable = this.prefixes;
-			lock (hashtable)
+			ArrayList arrayList = this.unhandled;
+			httpListener = this.MatchFromList(host, text, arrayList, out prefix);
+			if (text != text2 && httpListener == null)
 			{
-				if (host != null && host != string.Empty)
-				{
-					foreach (object obj in this.prefixes.Keys)
-					{
-						ListenerPrefix listenerPrefix = (ListenerPrefix)obj;
-						string path = listenerPrefix.Path;
-						if (path.Length >= num2)
-						{
-							if (listenerPrefix.Host == host && (text.StartsWith(path) || text2.StartsWith(path)))
-							{
-								num2 = path.Length;
-								httpListener = (HttpListener)this.prefixes[listenerPrefix];
-								prefix = listenerPrefix;
-							}
-						}
-					}
-					if (num2 != -1)
-					{
-						return httpListener;
-					}
-				}
-				httpListener = this.MatchFromList(host, text, this.unhandled, out prefix);
-				if (httpListener != null)
-				{
-					return httpListener;
-				}
-				httpListener = this.MatchFromList(host, text, this.all, out prefix);
-				if (httpListener != null)
-				{
-					return httpListener;
-				}
+				httpListener = this.MatchFromList(host, text2, arrayList, out prefix);
+			}
+			if (httpListener != null)
+			{
+				return httpListener;
+			}
+			arrayList = this.all;
+			httpListener = this.MatchFromList(host, text, arrayList, out prefix);
+			if (text != text2 && httpListener == null)
+			{
+				httpListener = this.MatchFromList(host, text2, arrayList, out prefix);
+			}
+			if (httpListener != null)
+			{
+				return httpListener;
 			}
 			return null;
 		}
@@ -187,14 +208,11 @@ namespace System.Net
 			{
 				ListenerPrefix listenerPrefix = (ListenerPrefix)obj;
 				string path2 = listenerPrefix.Path;
-				if (path2.Length >= num)
+				if (path2.Length >= num && path.StartsWith(path2))
 				{
-					if (path.StartsWith(path2))
-					{
-						num = path2.Length;
-						httpListener = listenerPrefix.Listener;
-						prefix = listenerPrefix;
-					}
+					num = path2.Length;
+					httpListener = listenerPrefix.Listener;
+					prefix = listenerPrefix;
 				}
 			}
 			return httpListener;
@@ -206,34 +224,35 @@ namespace System.Net
 			{
 				return;
 			}
-			foreach (object obj in coll)
+			using (IEnumerator enumerator = coll.GetEnumerator())
 			{
-				ListenerPrefix listenerPrefix = (ListenerPrefix)obj;
-				if (listenerPrefix.Path == prefix.Path)
+				while (enumerator.MoveNext())
 				{
-					throw new HttpListenerException(400, "Prefix already in use.");
+					if (((ListenerPrefix)enumerator.Current).Path == prefix.Path)
+					{
+						throw new HttpListenerException(400, "Prefix already in use.");
+					}
 				}
 			}
 			coll.Add(prefix);
 		}
 
-		private void RemoveSpecial(ArrayList coll, ListenerPrefix prefix)
+		private bool RemoveSpecial(ArrayList coll, ListenerPrefix prefix)
 		{
 			if (coll == null)
 			{
-				return;
+				return false;
 			}
 			int count = coll.Count;
 			for (int i = 0; i < count; i++)
 			{
-				ListenerPrefix listenerPrefix = (ListenerPrefix)coll[i];
-				if (listenerPrefix.Path == prefix.Path)
+				if (((ListenerPrefix)coll[i]).Path == prefix.Path)
 				{
 					coll.RemoveAt(i);
-					this.CheckIfRemove();
-					return;
+					return true;
 				}
 			}
+			return false;
 		}
 
 		private void CheckIfRemove()
@@ -242,11 +261,13 @@ namespace System.Net
 			{
 				return;
 			}
-			if (this.unhandled != null && this.unhandled.Count > 0)
+			ArrayList arrayList = this.unhandled;
+			if (arrayList != null && arrayList.Count > 0)
 			{
 				return;
 			}
-			if (this.all != null && this.all.Count > 0)
+			arrayList = this.all;
+			if (arrayList != null && arrayList.Count > 0)
 			{
 				return;
 			}
@@ -256,70 +277,118 @@ namespace System.Net
 		public void Close()
 		{
 			this.sock.Close();
+			Dictionary<HttpConnection, HttpConnection> dictionary = this.unregistered;
+			lock (dictionary)
+			{
+				foreach (HttpConnection httpConnection in new List<HttpConnection>(this.unregistered.Keys))
+				{
+					httpConnection.Close(true);
+				}
+				this.unregistered.Clear();
+			}
 		}
 
 		public void AddPrefix(ListenerPrefix prefix, HttpListener listener)
 		{
-			Hashtable hashtable = this.prefixes;
-			lock (hashtable)
+			if (prefix.Host == "*")
 			{
-				if (prefix.Host == "*")
+				ArrayList arrayList;
+				ArrayList arrayList2;
+				do
 				{
-					if (this.unhandled == null)
-					{
-						this.unhandled = new ArrayList();
-					}
+					arrayList = this.unhandled;
+					arrayList2 = ((arrayList != null) ? ((ArrayList)arrayList.Clone()) : new ArrayList());
 					prefix.Listener = listener;
-					this.AddSpecial(this.unhandled, prefix);
+					this.AddSpecial(arrayList2, prefix);
 				}
-				else if (prefix.Host == "+")
+				while (Interlocked.CompareExchange<ArrayList>(ref this.unhandled, arrayList2, arrayList) != arrayList);
+				return;
+			}
+			if (prefix.Host == "+")
+			{
+				ArrayList arrayList;
+				ArrayList arrayList2;
+				do
 				{
-					if (this.all == null)
-					{
-						this.all = new ArrayList();
-					}
+					arrayList = this.all;
+					arrayList2 = ((arrayList != null) ? ((ArrayList)arrayList.Clone()) : new ArrayList());
 					prefix.Listener = listener;
-					this.AddSpecial(this.all, prefix);
+					this.AddSpecial(arrayList2, prefix);
 				}
-				else if (this.prefixes.ContainsKey(prefix))
+				while (Interlocked.CompareExchange<ArrayList>(ref this.all, arrayList2, arrayList) != arrayList);
+				return;
+			}
+			Hashtable hashtable;
+			for (;;)
+			{
+				hashtable = this.prefixes;
+				if (hashtable.ContainsKey(prefix))
 				{
-					HttpListener httpListener = (HttpListener)this.prefixes[prefix];
-					if (httpListener != listener)
-					{
-						throw new HttpListenerException(400, "There's another listener for " + prefix);
-					}
+					break;
 				}
-				else
+				Hashtable hashtable2 = (Hashtable)hashtable.Clone();
+				hashtable2[prefix] = listener;
+				if (Interlocked.CompareExchange<Hashtable>(ref this.prefixes, hashtable2, hashtable) == hashtable)
 				{
-					this.prefixes[prefix] = listener;
+					return;
 				}
 			}
+			if ((HttpListener)hashtable[prefix] != listener)
+			{
+				throw new HttpListenerException(400, "There's another listener for " + prefix);
+			}
+			return;
 		}
 
 		public void RemovePrefix(ListenerPrefix prefix, HttpListener listener)
 		{
-			Hashtable hashtable = this.prefixes;
-			lock (hashtable)
+			if (prefix.Host == "*")
 			{
-				if (prefix.Host == "*")
+				ArrayList arrayList;
+				ArrayList arrayList2;
+				do
 				{
-					this.RemoveSpecial(this.unhandled, prefix);
+					arrayList = this.unhandled;
+					arrayList2 = ((arrayList != null) ? ((ArrayList)arrayList.Clone()) : new ArrayList());
 				}
-				else if (prefix.Host == "+")
-				{
-					this.RemoveSpecial(this.all, prefix);
-				}
-				else if (this.prefixes.ContainsKey(prefix))
-				{
-					this.prefixes.Remove(prefix);
-					this.CheckIfRemove();
-				}
+				while (this.RemoveSpecial(arrayList2, prefix) && Interlocked.CompareExchange<ArrayList>(ref this.unhandled, arrayList2, arrayList) != arrayList);
+				this.CheckIfRemove();
+				return;
 			}
+			if (prefix.Host == "+")
+			{
+				ArrayList arrayList;
+				ArrayList arrayList2;
+				do
+				{
+					arrayList = this.all;
+					arrayList2 = ((arrayList != null) ? ((ArrayList)arrayList.Clone()) : new ArrayList());
+				}
+				while (this.RemoveSpecial(arrayList2, prefix) && Interlocked.CompareExchange<ArrayList>(ref this.all, arrayList2, arrayList) != arrayList);
+				this.CheckIfRemove();
+				return;
+			}
+			Hashtable hashtable;
+			Hashtable hashtable2;
+			do
+			{
+				hashtable = this.prefixes;
+				if (!hashtable.ContainsKey(prefix))
+				{
+					break;
+				}
+				hashtable2 = (Hashtable)hashtable.Clone();
+				hashtable2.Remove(prefix);
+			}
+			while (Interlocked.CompareExchange<Hashtable>(ref this.prefixes, hashtable2, hashtable) != hashtable);
+			this.CheckIfRemove();
 		}
+
+		private HttpListener listener;
 
 		private IPEndPoint endpoint;
 
-		private global::System.Net.Sockets.Socket sock;
+		private Socket sock;
 
 		private Hashtable prefixes;
 
@@ -327,10 +396,10 @@ namespace System.Net
 
 		private ArrayList all;
 
-		private global::System.Security.Cryptography.X509Certificates.X509Certificate2 cert;
-
-		private AsymmetricAlgorithm key;
+		private X509Certificate cert;
 
 		private bool secure;
+
+		private Dictionary<HttpConnection, HttpConnection> unregistered;
 	}
 }

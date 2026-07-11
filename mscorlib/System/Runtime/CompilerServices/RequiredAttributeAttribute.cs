@@ -10,14 +10,17 @@ namespace System.Runtime.CompilerServices
 	{
 		public RequiredAttributeAttribute(Type requiredContract)
 		{
+			this.requiredContract = requiredContract;
 		}
 
 		public Type RequiredContract
 		{
 			get
 			{
-				throw new NotSupportedException();
+				return this.requiredContract;
 			}
 		}
+
+		private Type requiredContract;
 	}
 }

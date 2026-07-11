@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class KInputManager
 {
-	public KInputManager()
-	{
-		KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
-		KInputManager.isFocused = true;
-	}
-
 	public static bool isFocused { get; private set; }
 
 	public static long lastUserActionTicks { get; private set; }
@@ -20,6 +14,12 @@ public class KInputManager
 		{
 			KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
 		}
+	}
+
+	public KInputManager()
+	{
+		KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
+		KInputManager.isFocused = true;
 	}
 
 	public void AddController(KInputController controller)

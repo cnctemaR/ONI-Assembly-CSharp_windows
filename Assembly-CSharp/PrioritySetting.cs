@@ -2,12 +2,6 @@
 
 public struct PrioritySetting : IComparable<PrioritySetting>
 {
-	public PrioritySetting(PriorityScreen.PriorityClass priority_class, int priority_value)
-	{
-		this.priority_class = priority_class;
-		this.priority_value = priority_value;
-	}
-
 	public override int GetHashCode()
 	{
 		return ((int)((int)this.priority_class << 28)).GetHashCode() ^ this.priority_value.GetHashCode();
@@ -67,6 +61,12 @@ public struct PrioritySetting : IComparable<PrioritySetting>
 			return -1;
 		}
 		return 0;
+	}
+
+	public PrioritySetting(PriorityScreen.PriorityClass priority_class, int priority_value)
+	{
+		this.priority_class = priority_class;
+		this.priority_value = priority_value;
 	}
 
 	public PriorityScreen.PriorityClass priority_class;

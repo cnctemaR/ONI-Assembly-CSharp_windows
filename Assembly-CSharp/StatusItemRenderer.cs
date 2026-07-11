@@ -4,6 +4,24 @@ using UnityEngine;
 
 public class StatusItemRenderer
 {
+	public int layer { get; private set; }
+
+	public int selectedHandle { get; private set; }
+
+	public int highlightHandle { get; private set; }
+
+	public Color32 backgroundColor { get; private set; }
+
+	public Color32 selectedColor { get; private set; }
+
+	public Color32 neutralColor { get; private set; }
+
+	public Sprite arrowSprite { get; private set; }
+
+	public Sprite backgroundSprite { get; private set; }
+
+	public float scale { get; private set; }
+
 	public StatusItemRenderer()
 	{
 		this.layer = LayerMask.NameToLayer("UI");
@@ -24,31 +42,15 @@ public class StatusItemRenderer
 		Game.Instance.Subscribe(2095258329, new Action<object>(this.OnHighlightObject));
 	}
 
-	public int layer { get; private set; }
-
-	public int selectedHandle { get; private set; }
-
-	public int highlightHandle { get; private set; }
-
-	public Color32 backgroundColor { get; private set; }
-
-	public Color32 selectedColor { get; private set; }
-
-	public Color32 neutralColor { get; private set; }
-
-	public Sprite arrowSprite { get; private set; }
-
-	public Sprite backgroundSprite { get; private set; }
-
-	public float scale { get; private set; }
-
 	public int GetIdx(Transform transform)
 	{
 		int instanceID = transform.GetInstanceID();
 		int num = 0;
 		if (!this.handleTable.TryGetValue(instanceID, out num))
 		{
-			num = this.entryCount++;
+			int num2 = this.entryCount;
+			this.entryCount = num2 + 1;
+			num = num2;
 			this.handleTable[instanceID] = num;
 			StatusItemRenderer.Entry entry = this.entries[num];
 			entry.handle = instanceID;
@@ -186,6 +188,7 @@ public class StatusItemRenderer
 			if (this.handleTable.TryGetValue(this.selectedHandle, out num))
 			{
 				this.entries[num].MarkDirty();
+				return;
 			}
 		}
 		else
@@ -212,6 +215,7 @@ public class StatusItemRenderer
 				StatusItemRenderer.Entry entry2 = this.entries[num];
 				entry2.MarkDirty();
 				this.entries[num] = entry2;
+				return;
 			}
 		}
 		else
@@ -287,8 +291,7 @@ public class StatusItemRenderer
 			{
 				return;
 			}
-			KSelectable component2 = this.transform.GetComponent<KSelectable>();
-			if (!component2.IsSelectable)
+			if (!this.transform.GetComponent<KSelectable>().IsSelectable)
 			{
 				return;
 			}
@@ -320,8 +323,7 @@ public class StatusItemRenderer
 				{
 					for (int i = 0; i < this.statusItems.Count; i++)
 					{
-						StatusItem statusItem3 = this.statusItems[i];
-						if (statusItem3.notificationType != NotificationType.Neutral)
+						if (this.statusItems[i].notificationType != NotificationType.Neutral)
 						{
 							color3 = renderer.backgroundColor;
 							break;
@@ -335,8 +337,8 @@ public class StatusItemRenderer
 				int num6 = 0;
 				for (int j = 0; j < this.statusItems.Count; j++)
 				{
-					StatusItem statusItem4 = this.statusItems[j];
-					if (statusItem4.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem4.render_overlay != overlay))
+					StatusItem statusItem3 = this.statusItems[j];
+					if (statusItem3.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem3.render_overlay != overlay))
 					{
 						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
 						Sprite sprite = this.statusItems[j].sprite.sprite;
@@ -395,17 +397,13 @@ public class StatusItemRenderer
 
 		public void GetIntersection(Vector2 pos, List<InterfaceTool.Intersection> intersections, float scale)
 		{
-			if (this.Intersects(pos, scale))
+			if (this.Intersects(pos, scale) && this.transform.GetComponent<KSelectable>().IsSelectable)
 			{
-				KSelectable component = this.transform.GetComponent<KSelectable>();
-				if (component.IsSelectable)
+				intersections.Add(new InterfaceTool.Intersection
 				{
-					intersections.Add(new InterfaceTool.Intersection
-					{
-						component = this.transform.GetComponent<KSelectable>(),
-						distance = -100f
-					});
-				}
+					component = this.transform.GetComponent<KSelectable>(),
+					distance = -100f
+				});
 			}
 		}
 

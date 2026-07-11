@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.Utilities
 				{
 					return obj;
 				}
-				throw new AnchorNotFoundException(string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", new object[] { anchor }));
+				throw new AnchorNotFoundException(string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
 			}
 		}
 

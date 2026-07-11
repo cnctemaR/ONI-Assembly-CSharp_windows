@@ -50,8 +50,7 @@ public class DragTool : InterfaceTool
 			this.areaVisualizer.SetActive(false);
 			this.areaVisualizerSpriteRenderer = this.areaVisualizer.GetComponent<SpriteRenderer>();
 			this.areaVisualizer.transform.SetParent(base.transform);
-			Renderer component = this.areaVisualizer.GetComponent<Renderer>();
-			component.material.color = this.areaColour;
+			this.areaVisualizer.GetComponent<Renderer>().material.color = this.areaColour;
 		}
 	}
 
@@ -81,10 +80,8 @@ public class DragTool : InterfaceTool
 		KScreenManager.Instance.SetEventSystemEnabled(false);
 		if (this.areaVisualizerTextPrefab != null)
 		{
-			this.areaVisualizerText = NameDisplayScreen.Instance.AddWorldText(string.Empty, this.areaVisualizerTextPrefab);
-			GameObject worldText = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText);
-			LocText component = worldText.GetComponent<LocText>();
-			component.color = this.areaColour;
+			this.areaVisualizerText = NameDisplayScreen.Instance.AddWorldText("", this.areaVisualizerTextPrefab);
+			NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText).GetComponent<LocText>().color = this.areaColour;
 		}
 		DragTool.Mode mode = this.GetMode();
 		if (mode == DragTool.Mode.Brush)
@@ -92,6 +89,7 @@ public class DragTool : InterfaceTool
 			if (this.visualizer != null)
 			{
 				this.AddDragPoint(cursor_pos);
+				return;
 			}
 		}
 		else if (mode == DragTool.Mode.Box)
@@ -119,48 +117,47 @@ public class DragTool : InterfaceTool
 			return;
 		}
 		this.dragging = false;
-		DragTool.Mode mode = this.GetMode();
+		int num = (int)this.GetMode();
 		if (this.areaVisualizerText != Guid.Empty)
 		{
 			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
 			this.areaVisualizerText = Guid.Empty;
 		}
-		if (mode == DragTool.Mode.Box && this.areaVisualizer != null)
+		if (num == 1 && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
-			int num;
 			int num2;
-			Grid.PosToXY(this.downPos, out num, out num2);
-			int num3 = num;
+			int num3;
+			Grid.PosToXY(this.downPos, out num2, out num3);
 			int num4 = num2;
-			int num5;
+			int num5 = num3;
 			int num6;
-			Grid.PosToXY(cursor_pos, out num5, out num6);
-			if (num5 < num)
-			{
-				global::Util.Swap<int>(ref num, ref num5);
-			}
+			int num7;
+			Grid.PosToXY(cursor_pos, out num6, out num7);
 			if (num6 < num2)
 			{
 				global::Util.Swap<int>(ref num2, ref num6);
 			}
-			for (int i = num2; i <= num6; i++)
+			if (num7 < num3)
 			{
-				for (int j = num; j <= num5; j++)
+				global::Util.Swap<int>(ref num3, ref num7);
+			}
+			for (int i = num3; i <= num7; i++)
+			{
+				for (int j = num2; j <= num6; j++)
 				{
-					int num7 = Grid.XYToCell(j, i);
-					if (Grid.IsValidCell(num7) && Grid.IsVisible(num7))
+					int num8 = Grid.XYToCell(j, i);
+					if (Grid.IsValidCell(num8) && Grid.IsVisible(num8))
 					{
-						int num8 = i - num4;
-						int num9 = j - num3;
-						num8 = Mathf.Abs(num8);
+						int num9 = i - num5;
+						int num10 = j - num4;
 						num9 = Mathf.Abs(num9);
-						this.OnDragTool(num7, num8 + num9);
+						num10 = Mathf.Abs(num10);
+						this.OnDragTool(num8, num9 + num10);
 					}
 				}
 			}
-			string sound = GlobalAssets.GetSound(this.GetConfirmSound(), false);
-			KMonoBehaviour.PlaySound(sound);
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound(this.GetConfirmSound(), false));
 			this.OnDragComplete(this.downPos, cursor_pos);
 		}
 	}
@@ -239,7 +236,9 @@ public class DragTool : InterfaceTool
 					string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
 					if (sound != null)
 					{
-						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.GetPosition(), 1f, false);
+						Vector3 position = this.areaVisualizer.transform.GetPosition();
+						position.z = 0f;
+						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, 1f, false);
 						eventInstance.setParameterValue("tileCount", (float)num);
 						SoundEvent.EndOneShot(eventInstance);
 					}
@@ -248,8 +247,7 @@ public class DragTool : InterfaceTool
 				if (this.areaVisualizerText != Guid.Empty)
 				{
 					Vector2I vector2I = new Vector2I(Mathf.RoundToInt(vector4.x), Mathf.RoundToInt(vector4.y));
-					GameObject worldText = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText);
-					LocText component = worldText.GetComponent<LocText>();
+					LocText component = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText).GetComponent<LocText>();
 					component.text = string.Format(UI.TOOLS.TOOL_AREA_FMT, vector2I.x, vector2I.y);
 					Vector2 vector6 = vector5;
 					component.transform.SetPosition(vector6);
@@ -262,8 +260,7 @@ public class DragTool : InterfaceTool
 			if (this.areaVisualizerText != Guid.Empty)
 			{
 				int dragLength = this.GetDragLength();
-				GameObject worldText2 = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText);
-				LocText component2 = worldText2.GetComponent<LocText>();
+				LocText component2 = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText).GetComponent<LocText>();
 				component2.text = string.Format(UI.TOOLS.TOOL_LENGTH_FMT, dragLength);
 				Vector3 vector7 = Grid.CellToPos(Grid.PosToCell(cursorPos));
 				vector7 += new Vector3(0f, 1f, 0f);
@@ -362,19 +359,7 @@ public class DragTool : InterfaceTool
 	{
 		this.mode = newMode;
 		DragTool.Mode mode = this.mode;
-		if (mode != DragTool.Mode.Brush)
-		{
-			if (mode == DragTool.Mode.Box)
-			{
-				if (this.visualizer != null)
-				{
-					this.visualizer.SetActive(true);
-				}
-				this.mode = DragTool.Mode.Box;
-				base.SetCursor(this.boxCursor, this.cursorOffset, CursorMode.Auto);
-			}
-		}
-		else
+		if (mode == DragTool.Mode.Brush)
 		{
 			if (this.areaVisualizer != null)
 			{
@@ -385,7 +370,18 @@ public class DragTool : InterfaceTool
 				this.visualizer.SetActive(true);
 			}
 			base.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
+			return;
 		}
+		if (mode != DragTool.Mode.Box)
+		{
+			return;
+		}
+		if (this.visualizer != null)
+		{
+			this.visualizer.SetActive(true);
+		}
+		this.mode = DragTool.Mode.Box;
+		base.SetCursor(this.boxCursor, this.cursorOffset, CursorMode.Auto);
 	}
 
 	public override void OnFocus(bool focus)

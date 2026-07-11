@@ -32,8 +32,7 @@ public class SwitchConfig : IBuildingConfig
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		CircuitSwitch circuitSwitch = go.AddOrGet<CircuitSwitch>();
-		circuitSwitch.objectLayer = ObjectLayer.Wire;
+		go.AddOrGet<CircuitSwitch>().objectLayer = ObjectLayer.Wire;
 		Prioritizable.AddRef(go);
 	}
 

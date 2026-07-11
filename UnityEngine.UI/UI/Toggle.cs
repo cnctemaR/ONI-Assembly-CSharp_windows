@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -174,7 +173,6 @@ namespace UnityEngine.UI
 
 		public Toggle.ToggleEvent onValueChanged = new Toggle.ToggleEvent();
 
-		[FormerlySerializedAs("m_IsActive")]
 		[Tooltip("Is the toggle currently on or off?")]
 		[SerializeField]
 		private bool m_IsOn;

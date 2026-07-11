@@ -15,14 +15,13 @@ public class CellSolidEvent : CellEvent
 		{
 			return;
 		}
-		CellEventInstance cellEventInstance = new CellEventInstance(cell, (!solid) ? 0 : 1, 0, this);
+		CellEventInstance cellEventInstance = new CellEventInstance(cell, solid ? 1 : 0, 0, this);
 		CellEventLogger.Instance.Add(cellEventInstance);
 	}
 
 	public override string GetDescription(EventInstanceBase ev)
 	{
-		CellEventInstance cellEventInstance = ev as CellEventInstance;
-		if (cellEventInstance.data == 1)
+		if ((ev as CellEventInstance).data == 1)
 		{
 			return base.GetMessagePrefix() + "Solid=true (" + this.reason + ")";
 		}

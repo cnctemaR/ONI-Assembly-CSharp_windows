@@ -1,28 +1,102 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
+using System.IO;
+using System.Net.Security;
+using System.Security.Authentication.ExtendedProtection;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Mono.Net.Security.Private;
+using Mono.Security.Authenticode;
+using Mono.Security.Interface;
 
 namespace System.Net
 {
 	public sealed class HttpListener : IDisposable
 	{
+		internal HttpListener(X509Certificate certificate, MonoTlsProvider tlsProvider, MonoTlsSettings tlsSettings)
+			: this()
+		{
+			this.certificate = certificate;
+			this.tlsProvider = tlsProvider;
+			this.tlsSettings = tlsSettings;
+		}
+
+		internal X509Certificate LoadCertificateAndKey(IPAddress addr, int port)
+		{
+			object internalLock = this._internalLock;
+			X509Certificate x509Certificate;
+			lock (internalLock)
+			{
+				if (this.certificate != null)
+				{
+					x509Certificate = this.certificate;
+				}
+				else
+				{
+					try
+					{
+						string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".mono");
+						text = Path.Combine(text, "httplistener");
+						string text2 = Path.Combine(text, string.Format("{0}.cer", port));
+						if (!File.Exists(text2))
+						{
+							x509Certificate = null;
+						}
+						else
+						{
+							string text3 = Path.Combine(text, string.Format("{0}.pvk", port));
+							if (!File.Exists(text3))
+							{
+								x509Certificate = null;
+							}
+							else
+							{
+								this.certificate = new X509Certificate2(text2)
+								{
+									PrivateKey = PrivateKey.CreateFromFile(text3).RSA
+								};
+								x509Certificate = this.certificate;
+							}
+						}
+					}
+					catch
+					{
+						this.certificate = null;
+						x509Certificate = null;
+					}
+				}
+			}
+			return x509Certificate;
+		}
+
+		internal SslStream CreateSslStream(Stream innerStream, bool ownsStream, RemoteCertificateValidationCallback callback)
+		{
+			object internalLock = this._internalLock;
+			SslStream sslStream;
+			lock (internalLock)
+			{
+				if (this.tlsProvider == null)
+				{
+					this.tlsProvider = MonoTlsProviderFactory.GetProvider();
+				}
+				MonoTlsSettings monoTlsSettings = (this.tlsSettings ?? MonoTlsSettings.DefaultSettings).Clone();
+				monoTlsSettings.RemoteCertificateValidationCallback = CallbackHelpers.PublicToMono(callback);
+				sslStream = new SslStream(innerStream, ownsStream, this.tlsProvider, monoTlsSettings);
+			}
+			return sslStream;
+		}
+
 		public HttpListener()
 		{
+			this._internalLock = new object();
 			this.prefixes = new HttpListenerPrefixCollection(this);
 			this.registry = new Hashtable();
+			this.connections = Hashtable.Synchronized(new Hashtable());
 			this.ctx_queue = new ArrayList();
 			this.wait_queue = new ArrayList();
 			this.auth_schemes = AuthenticationSchemes.Anonymous;
-		}
-
-		void IDisposable.Dispose()
-		{
-			if (this.disposed)
-			{
-				return;
-			}
-			this.Close(true);
-			this.disposed = true;
+			this.defaultServiceNames = new ServiceNameStore();
+			this.extendedProtectionPolicy = new ExtendedProtectionPolicy(PolicyEnforcement.Never);
 		}
 
 		public AuthenticationSchemes AuthenticationSchemes
@@ -48,6 +122,27 @@ namespace System.Net
 			{
 				this.CheckDisposed();
 				this.auth_selector = value;
+			}
+		}
+
+		public HttpListener.ExtendedProtectionSelector ExtendedProtectionSelectorDelegate
+		{
+			get
+			{
+				return this.extendedProtectionSelectorDelegate;
+			}
+			set
+			{
+				this.CheckDisposed();
+				if (value == null)
+				{
+					throw new ArgumentNullException();
+				}
+				if (!AuthenticationManager.OSSupportsExtendedProtection)
+				{
+					throw new PlatformNotSupportedException(global::SR.GetString("This operation requires OS support for extended protection."));
+				}
+				this.extendedProtectionSelectorDelegate = value;
 			}
 		}
 
@@ -89,6 +184,49 @@ namespace System.Net
 			}
 		}
 
+		[MonoTODO]
+		public HttpListenerTimeoutManager TimeoutManager
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MonoTODO("not used anywhere in the implementation")]
+		public ExtendedProtectionPolicy ExtendedProtectionPolicy
+		{
+			get
+			{
+				return this.extendedProtectionPolicy;
+			}
+			set
+			{
+				this.CheckDisposed();
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				if (!AuthenticationManager.OSSupportsExtendedProtection && value.PolicyEnforcement == PolicyEnforcement.Always)
+				{
+					throw new PlatformNotSupportedException(global::SR.GetString("This operation requires OS support for extended protection."));
+				}
+				if (value.CustomChannelBinding != null)
+				{
+					throw new ArgumentException(global::SR.GetString("Custom channel bindings are not supported."), "CustomChannelBinding");
+				}
+				this.extendedProtectionPolicy = value;
+			}
+		}
+
+		public ServiceNameCollection DefaultServiceNames
+		{
+			get
+			{
+				return this.defaultServiceNames.ServiceNames;
+			}
+		}
+
 		public string Realm
 		{
 			get
@@ -102,7 +240,7 @@ namespace System.Net
 			}
 		}
 
-		[global::System.MonoTODO("Support for NTLM needs some loving.")]
+		[MonoTODO("Support for NTLM needs some loving.")]
 		public bool UnsafeConnectionNtlmAuthentication
 		{
 			get
@@ -140,7 +278,7 @@ namespace System.Net
 				this.disposed = true;
 				return;
 			}
-			this.Close(false);
+			this.Close(true);
 			this.disposed = true;
 		}
 
@@ -153,35 +291,49 @@ namespace System.Net
 
 		private void Cleanup(bool close_existing)
 		{
-			Hashtable hashtable = this.registry;
-			lock (hashtable)
+			object internalLock = this._internalLock;
+			lock (internalLock)
 			{
 				if (close_existing)
 				{
-					foreach (object obj in this.registry.Keys)
-					{
-						HttpListenerContext httpListenerContext = (HttpListenerContext)obj;
-						httpListenerContext.Connection.Close();
-					}
+					ICollection keys = this.registry.Keys;
+					HttpListenerContext[] array = new HttpListenerContext[keys.Count];
+					keys.CopyTo(array, 0);
 					this.registry.Clear();
+					for (int i = array.Length - 1; i >= 0; i--)
+					{
+						array[i].Connection.Close(true);
+					}
+				}
+				object syncRoot = this.connections.SyncRoot;
+				lock (syncRoot)
+				{
+					ICollection keys2 = this.connections.Keys;
+					HttpConnection[] array2 = new HttpConnection[keys2.Count];
+					keys2.CopyTo(array2, 0);
+					this.connections.Clear();
+					for (int j = array2.Length - 1; j >= 0; j--)
+					{
+						array2[j].Close(true);
+					}
 				}
 				ArrayList arrayList = this.ctx_queue;
 				lock (arrayList)
 				{
-					foreach (object obj2 in this.ctx_queue)
-					{
-						HttpListenerContext httpListenerContext2 = (HttpListenerContext)obj2;
-						httpListenerContext2.Connection.Close();
-					}
+					HttpListenerContext[] array3 = (HttpListenerContext[])this.ctx_queue.ToArray(typeof(HttpListenerContext));
 					this.ctx_queue.Clear();
-				}
-				ArrayList arrayList2 = this.wait_queue;
-				lock (arrayList2)
-				{
-					foreach (object obj3 in this.wait_queue)
+					for (int k = array3.Length - 1; k >= 0; k--)
 					{
-						ListenerAsyncResult listenerAsyncResult = (ListenerAsyncResult)obj3;
-						listenerAsyncResult.Complete("Listener was closed.");
+						array3[k].Connection.Close(true);
+					}
+				}
+				arrayList = this.wait_queue;
+				lock (arrayList)
+				{
+					Exception ex = new ObjectDisposedException("listener");
+					foreach (object obj in this.wait_queue)
+					{
+						((ListenerAsyncResult)obj).Complete(ex);
 					}
 					this.wait_queue.Clear();
 				}
@@ -226,6 +378,11 @@ namespace System.Net
 			{
 				throw new ArgumentException("Wrong IAsyncResult.", "asyncResult");
 			}
+			if (listenerAsyncResult.EndCalled)
+			{
+				throw new ArgumentException("Cannot reuse this IAsyncResult");
+			}
+			listenerAsyncResult.EndCalled = true;
 			if (!listenerAsyncResult.IsCompleted)
 			{
 				listenerAsyncResult.AsyncWaitHandle.WaitOne();
@@ -240,10 +397,7 @@ namespace System.Net
 				}
 			}
 			HttpListenerContext context = listenerAsyncResult.GetContext();
-			if (this.auth_schemes != AuthenticationSchemes.Anonymous)
-			{
-				context.ParseAuthentication(this.auth_schemes);
-			}
+			context.ParseAuthentication(this.SelectAuthenticationScheme(context));
 			return context;
 		}
 
@@ -262,8 +416,9 @@ namespace System.Net
 			{
 				throw new InvalidOperationException("Please, call AddPrefix before using this method.");
 			}
-			IAsyncResult asyncResult = this.BeginGetContext(null, null);
-			return this.EndGetContext(asyncResult);
+			ListenerAsyncResult listenerAsyncResult = (ListenerAsyncResult)this.BeginGetContext(null, null);
+			listenerAsyncResult.InGet = true;
+			return this.EndGetContext(listenerAsyncResult);
 		}
 
 		public void Start()
@@ -282,6 +437,21 @@ namespace System.Net
 			this.CheckDisposed();
 			this.listening = false;
 			this.Close(false);
+		}
+
+		void IDisposable.Dispose()
+		{
+			if (this.disposed)
+			{
+				return;
+			}
+			this.Close(true);
+			this.disposed = true;
+		}
+
+		public Task<HttpListenerContext> GetContextAsync()
+		{
+			return Task<HttpListenerContext>.Factory.FromAsync(new Func<AsyncCallback, object, IAsyncResult>(this.BeginGetContext), new Func<IAsyncResult, HttpListenerContext>(this.EndGetContext), null);
 		}
 
 		internal void CheckDisposed()
@@ -305,50 +475,67 @@ namespace System.Net
 
 		internal void RegisterContext(HttpListenerContext context)
 		{
-			try
+			object internalLock = this._internalLock;
+			lock (internalLock)
 			{
-				Monitor.Enter(this.registry);
 				this.registry[context] = context;
-				Monitor.Enter(this.wait_queue);
-				Monitor.Enter(this.ctx_queue);
+			}
+			ListenerAsyncResult listenerAsyncResult = null;
+			ArrayList arrayList = this.wait_queue;
+			lock (arrayList)
+			{
 				if (this.wait_queue.Count == 0)
 				{
-					this.ctx_queue.Add(context);
+					ArrayList arrayList2 = this.ctx_queue;
+					lock (arrayList2)
+					{
+						this.ctx_queue.Add(context);
+						goto IL_00A3;
+					}
 				}
-				else
-				{
-					ListenerAsyncResult listenerAsyncResult = (ListenerAsyncResult)this.wait_queue[0];
-					this.wait_queue.RemoveAt(0);
-					listenerAsyncResult.Complete(context);
-				}
+				listenerAsyncResult = (ListenerAsyncResult)this.wait_queue[0];
+				this.wait_queue.RemoveAt(0);
 			}
-			finally
+			IL_00A3:
+			if (listenerAsyncResult != null)
 			{
-				Monitor.Exit(this.ctx_queue);
-				Monitor.Exit(this.wait_queue);
-				Monitor.Exit(this.registry);
+				listenerAsyncResult.Complete(context);
 			}
 		}
 
 		internal void UnregisterContext(HttpListenerContext context)
 		{
-			try
+			object internalLock = this._internalLock;
+			lock (internalLock)
 			{
-				Monitor.Enter(this.registry);
-				Monitor.Enter(this.ctx_queue);
+				this.registry.Remove(context);
+			}
+			ArrayList arrayList = this.ctx_queue;
+			lock (arrayList)
+			{
 				int num = this.ctx_queue.IndexOf(context);
 				if (num >= 0)
 				{
 					this.ctx_queue.RemoveAt(num);
 				}
-				this.registry.Remove(context);
-			}
-			finally
-			{
-				Monitor.Exit(this.ctx_queue);
-				Monitor.Exit(this.registry);
 			}
 		}
+
+		internal void AddConnection(HttpConnection cnc)
+		{
+			this.connections[cnc] = cnc;
+		}
+
+		internal void RemoveConnection(HttpConnection cnc)
+		{
+			this.connections.Remove(cnc);
+		}
+
+		private MonoTlsProvider tlsProvider;
+
+		private MonoTlsSettings tlsSettings;
+
+		private X509Certificate certificate;
 
 		private AuthenticationSchemes auth_schemes;
 
@@ -366,10 +553,22 @@ namespace System.Net
 
 		private bool disposed;
 
+		private readonly object _internalLock;
+
 		private Hashtable registry;
 
 		private ArrayList ctx_queue;
 
 		private ArrayList wait_queue;
+
+		private Hashtable connections;
+
+		private ServiceNameStore defaultServiceNames;
+
+		private ExtendedProtectionPolicy extendedProtectionPolicy;
+
+		private HttpListener.ExtendedProtectionSelector extendedProtectionSelectorDelegate;
+
+		public delegate ExtendedProtectionPolicy ExtendedProtectionSelector(HttpListenerRequest request);
 	}
 }

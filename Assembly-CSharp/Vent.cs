@@ -25,8 +25,8 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 			this.lifeTimeVentMass.Add(element, mass);
 			return;
 		}
-		Dictionary<SimHashes, float> dictionary;
-		(dictionary = this.lifeTimeVentMass)[element] = dictionary[element] + mass;
+		Dictionary<SimHashes, float> dictionary = this.lifeTimeVentMass;
+		dictionary[element] += mass;
 	}
 
 	public float GetVentedMass(SimHashes element)
@@ -58,21 +58,20 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 				int num = this.cell;
 				if (!this.IsValidOutputCell(num))
 				{
-					state = ((!Grid.Solid[num]) ? Vent.State.OverPressure : Vent.State.Blocked);
+					state = (Grid.Solid[num] ? Vent.State.Blocked : Vent.State.OverPressure);
 				}
 			}
 		}
 		else
 		{
-			state = ((!this.IsConnected()) ? Vent.State.Blocked : Vent.State.Ready);
+			state = (this.IsConnected() ? Vent.State.Ready : Vent.State.Blocked);
 		}
 		return state;
 	}
 
 	public bool IsConnected()
 	{
-		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
-		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(this.cell);
+		UtilityNetwork networkForCell = Conduit.GetNetworkManager(this.conduitType).GetNetworkForCell(this.cell);
 		return networkForCell != null && (networkForCell as FlowUtilityNetwork).HasSinks;
 	}
 
@@ -151,12 +150,12 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 
 		public bool Blocked()
 		{
-			return base.master.GetEndPointState() == Vent.State.Blocked && base.master.endpointType != Endpoint.Source;
+			return base.master.GetEndPointState() == Vent.State.Blocked && base.master.endpointType > Endpoint.Source;
 		}
 
 		public bool OverPressure()
 		{
-			return this.exhaust != null && base.master.GetEndPointState() == Vent.State.OverPressure && base.master.endpointType != Endpoint.Source;
+			return this.exhaust != null && base.master.GetEndPointState() == Vent.State.OverPressure && base.master.endpointType > Endpoint.Source;
 		}
 
 		public void CheckTransitions()
@@ -164,24 +163,28 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 			if (this.NeedsExhaust())
 			{
 				base.smi.GoTo(base.sm.needExhaust);
+				return;
 			}
-			else if (this.Blocked())
+			if (this.Blocked())
 			{
 				base.smi.GoTo(base.sm.blocked);
+				return;
 			}
-			else if (this.OverPressure())
+			if (this.OverPressure())
 			{
 				base.smi.GoTo(base.sm.overPressure);
+				return;
 			}
-			else
-			{
-				base.smi.GoTo(base.sm.idle);
-			}
+			base.smi.GoTo(base.sm.idle);
 		}
 
 		public StatusItem SelectStatusItem(StatusItem gas_status_item, StatusItem liquid_status_item)
 		{
-			return (base.master.conduitType != ConduitType.Gas) ? liquid_status_item : gas_status_item;
+			if (base.master.conduitType != ConduitType.Gas)
+			{
+				return liquid_status_item;
+			}
+			return gas_status_item;
 		}
 
 		private Exhaust exhaust;

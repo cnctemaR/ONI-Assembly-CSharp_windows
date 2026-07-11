@@ -24,10 +24,20 @@ public class MotdServerClient
 
 	private static string MotdLocalImagePath(int imageVersion)
 	{
+		return MotdServerClient.MotdLocalImagePath(imageVersion, Localization.GetLocale());
+	}
+
+	private static string FallbackMotdLocalImagePath(int imageVersion)
+	{
+		return MotdServerClient.MotdLocalImagePath(imageVersion, null);
+	}
+
+	private static string MotdLocalImagePath(int imageVersion, Localization.Locale locale)
+	{
 		return string.Concat(new object[]
 		{
 			"motd_local/",
-			MotdServerClient.GetLocalePathModifier(),
+			MotdServerClient.GetLocalePathModifier(locale),
 			"image_",
 			imageVersion
 		});
@@ -35,12 +45,16 @@ public class MotdServerClient
 
 	private static string GetLocalePathModifier()
 	{
-		string text = string.Empty;
-		Localization.Locale locale = Localization.GetLocale();
+		return MotdServerClient.GetLocalePathModifier(Localization.GetLocale());
+	}
+
+	private static string GetLocalePathModifier(Localization.Locale locale)
+	{
+		string text = "";
 		if (locale != null)
 		{
 			Localization.Language lang = locale.Lang;
-			if (lang == Localization.Language.Korean || lang == Localization.Language.Russian || lang == Localization.Language.Chinese)
+			if (lang == Localization.Language.Chinese || lang - Localization.Language.Korean <= 1)
 			{
 				text = locale.Code + "/";
 			}
@@ -63,93 +77,100 @@ public class MotdServerClient
 			{
 				global::Debug.Assert(response.image_texture != null, "Attempting to return response with no image texture");
 				this.doCallback(response, err);
+				return;
 			}
-			else
-			{
-				global::Debug.LogWarning("Could not retrieve web motd from " + MotdServerClient.MotdServerUrl + ", falling back to local - err: " + err);
-				this.doCallback(localResponse, null);
-			}
+			global::Debug.LogWarning("Could not retrieve web motd from " + MotdServerClient.MotdServerUrl + ", falling back to local - err: " + err);
+			this.doCallback(localResponse, null);
 		});
 	}
 
 	private MotdServerClient.MotdResponse GetLocalMotd(string filePath)
 	{
-		TextAsset textAsset = Resources.Load<TextAsset>(filePath.Replace(".json", string.Empty));
+		TextAsset textAsset = Resources.Load<TextAsset>(filePath.Replace(".json", ""));
 		this.m_localMotd = JsonConvert.DeserializeObject<MotdServerClient.MotdResponse>(textAsset.ToString());
 		string text = MotdServerClient.MotdLocalImagePath(this.m_localMotd.image_version);
 		this.m_localMotd.image_texture = Resources.Load<Texture2D>(text);
+		if (this.m_localMotd.image_texture == null)
+		{
+			string text2 = MotdServerClient.FallbackMotdLocalImagePath(this.m_localMotd.image_version);
+			if (text2 != text)
+			{
+				global::Debug.Log("Could not load " + text + ", falling back to " + text2);
+				text = text2;
+				this.m_localMotd.image_texture = Resources.Load<Texture2D>(text);
+			}
+		}
 		global::Debug.Assert(this.m_localMotd.image_texture != null, "Failed to load " + text);
 		return this.m_localMotd;
 	}
 
 	private void GetWebMotd(string url, MotdServerClient.MotdResponse localMotd, Action<MotdServerClient.MotdResponse, string> cb)
 	{
-		MotdServerClient.<GetWebMotd>c__AnonStorey1 <GetWebMotd>c__AnonStorey = new MotdServerClient.<GetWebMotd>c__AnonStorey1();
-		<GetWebMotd>c__AnonStorey.localMotd = localMotd;
-		<GetWebMotd>c__AnonStorey.cb = cb;
+		MotdServerClient.<>c__DisplayClass15_0 CS$<>8__locals1 = new MotdServerClient.<>c__DisplayClass15_0();
+		CS$<>8__locals1.localMotd = localMotd;
+		CS$<>8__locals1.cb = cb;
 		Action<string, string> action = delegate(string response, string err)
 		{
-			MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2 <GetWebMotd>c__AnonStorey2 = new MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2();
-			<GetWebMotd>c__AnonStorey2.<>f__ref$1 = <GetWebMotd>c__AnonStorey;
-			DebugUtil.DevAssert(<GetWebMotd>c__AnonStorey.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
-			if (<GetWebMotd>c__AnonStorey.localMotd.image_texture == null)
+			MotdServerClient.<>c__DisplayClass15_1 CS$<>8__locals2 = new MotdServerClient.<>c__DisplayClass15_1();
+			CS$<>8__locals2.CS$<>8__locals1 = CS$<>8__locals1;
+			DebugUtil.DevAssert(CS$<>8__locals1.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
+			if (CS$<>8__locals1.localMotd.image_texture == null)
 			{
-				<GetWebMotd>c__AnonStorey.cb(null, "Local image_texture has been unloaded since we requested the MOTD");
+				CS$<>8__locals1.cb(null, "Local image_texture has been unloaded since we requested the MOTD");
 				return;
 			}
 			if (err != null)
 			{
-				<GetWebMotd>c__AnonStorey.cb(null, err);
+				CS$<>8__locals1.cb(null, err);
 				return;
 			}
-			MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2 <GetWebMotd>c__AnonStorey3 = <GetWebMotd>c__AnonStorey2;
+			MotdServerClient.<>c__DisplayClass15_1 CS$<>8__locals3 = CS$<>8__locals2;
 			JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings();
 			jsonSerializerSettings.Error = delegate(object sender, ErrorEventArgs args)
 			{
 				args.ErrorContext.Handled = true;
 			};
-			<GetWebMotd>c__AnonStorey3.responseStruct = JsonConvert.DeserializeObject<MotdServerClient.MotdResponse>(response, jsonSerializerSettings);
-			if (<GetWebMotd>c__AnonStorey2.responseStruct == null)
+			CS$<>8__locals3.responseStruct = JsonConvert.DeserializeObject<MotdServerClient.MotdResponse>(response, jsonSerializerSettings);
+			if (CS$<>8__locals2.responseStruct == null)
 			{
-				<GetWebMotd>c__AnonStorey.cb(null, "Invalid json from server:" + response);
+				CS$<>8__locals1.cb(null, "Invalid json from server:" + response);
+				return;
 			}
-			else if (<GetWebMotd>c__AnonStorey2.responseStruct.version <= <GetWebMotd>c__AnonStorey.localMotd.version)
+			if (CS$<>8__locals2.responseStruct.version <= CS$<>8__locals1.localMotd.version)
 			{
 				global::Debug.Log(string.Concat(new object[]
 				{
 					"Using local MOTD at version: ",
-					<GetWebMotd>c__AnonStorey.localMotd.version,
+					CS$<>8__locals1.localMotd.version,
 					", web version at ",
-					<GetWebMotd>c__AnonStorey2.responseStruct.version
+					CS$<>8__locals2.responseStruct.version
 				}));
-				<GetWebMotd>c__AnonStorey.cb(<GetWebMotd>c__AnonStorey.localMotd, null);
+				CS$<>8__locals1.cb(CS$<>8__locals1.localMotd, null);
+				return;
 			}
-			else
+			UnityWebRequest unityWebRequest = new UnityWebRequest();
+			unityWebRequest.downloadHandler = new DownloadHandlerTexture();
+			SimpleNetworkCache.LoadFromCacheOrDownload("motd_image", CS$<>8__locals2.responseStruct.image_url, CS$<>8__locals2.responseStruct.image_version, unityWebRequest, delegate(UnityWebRequest wr)
 			{
-				UnityWebRequest unityWebRequest = new UnityWebRequest();
-				unityWebRequest.downloadHandler = new DownloadHandlerTexture();
-				SimpleNetworkCache.LoadFromCacheOrDownload("motd_image", <GetWebMotd>c__AnonStorey2.responseStruct.image_url, <GetWebMotd>c__AnonStorey2.responseStruct.image_version, unityWebRequest, delegate(UnityWebRequest wr)
+				string text = null;
+				if (string.IsNullOrEmpty(wr.error))
 				{
-					string text = null;
-					if (string.IsNullOrEmpty(wr.error))
+					global::Debug.Log(string.Concat(new object[]
 					{
-						global::Debug.Log(string.Concat(new object[]
-						{
-							"Using web MOTD at version: ",
-							<GetWebMotd>c__AnonStorey2.responseStruct.version,
-							", local version at ",
-							<GetWebMotd>c__AnonStorey2.<>f__ref$1.localMotd.version
-						}));
-						<GetWebMotd>c__AnonStorey2.responseStruct.image_texture = DownloadHandlerTexture.GetContent(wr);
-					}
-					else
-					{
-						text = "SimpleNetworkCache - " + wr.error;
-					}
-					<GetWebMotd>c__AnonStorey2.<>f__ref$1.cb(<GetWebMotd>c__AnonStorey2.responseStruct, text);
-					wr.Dispose();
-				});
-			}
+						"Using web MOTD at version: ",
+						CS$<>8__locals2.responseStruct.version,
+						", local version at ",
+						CS$<>8__locals2.CS$<>8__locals1.localMotd.version
+					}));
+					CS$<>8__locals2.responseStruct.image_texture = DownloadHandlerTexture.GetContent(wr);
+				}
+				else
+				{
+					text = "SimpleNetworkCache - " + wr.error;
+				}
+				CS$<>8__locals2.CS$<>8__locals1.cb(CS$<>8__locals2.responseStruct, text);
+				wr.Dispose();
+			});
 		};
 		this.getAsyncRequest(url, action);
 	}
@@ -158,8 +179,7 @@ public class MotdServerClient
 	{
 		UnityWebRequest motdRequest = UnityWebRequest.Get(url);
 		motdRequest.SetRequestHeader("Content-Type", "application/json");
-		AsyncOperation asyncOperation = motdRequest.SendWebRequest();
-		asyncOperation.completed += delegate(AsyncOperation operation)
+		motdRequest.SendWebRequest().completed += delegate(AsyncOperation operation)
 		{
 			cb(motdRequest.downloadHandler.text, motdRequest.error);
 			motdRequest.Dispose();
@@ -176,11 +196,9 @@ public class MotdServerClient
 		if (this.m_callback != null)
 		{
 			this.m_callback(response, error);
+			return;
 		}
-		else
-		{
-			global::Debug.Log("Motd Response receieved, but callback was unregistered");
-		}
+		global::Debug.Log("Motd Response receieved, but callback was unregistered");
 	}
 
 	private Action<MotdServerClient.MotdResponse, string> m_callback;

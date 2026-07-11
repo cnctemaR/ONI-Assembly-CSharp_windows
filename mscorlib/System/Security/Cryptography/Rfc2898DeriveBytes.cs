@@ -1,73 +1,67 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
 	[ComVisible(true)]
 	public class Rfc2898DeriveBytes : DeriveBytes
 	{
+		public Rfc2898DeriveBytes(string password, int saltSize)
+			: this(password, saltSize, 1000)
+		{
+		}
+
+		[SecuritySafeCritical]
+		public Rfc2898DeriveBytes(string password, int saltSize, int iterations)
+		{
+			if (saltSize < 0)
+			{
+				throw new ArgumentOutOfRangeException("saltSize", Environment.GetResourceString("Non-negative number required."));
+			}
+			byte[] array = new byte[saltSize];
+			Utils.StaticRandomNumberGenerator.GetBytes(array);
+			this.Salt = array;
+			this.IterationCount = iterations;
+			this.m_password = new UTF8Encoding(false).GetBytes(password);
+			this.m_hmacsha1 = new HMACSHA1(this.m_password);
+			this.Initialize();
+		}
+
 		public Rfc2898DeriveBytes(string password, byte[] salt)
 			: this(password, salt, 1000)
 		{
 		}
 
 		public Rfc2898DeriveBytes(string password, byte[] salt, int iterations)
+			: this(new UTF8Encoding(false).GetBytes(password), salt, iterations)
 		{
-			if (password == null)
-			{
-				throw new ArgumentNullException("password");
-			}
-			this.Salt = salt;
-			this.IterationCount = iterations;
-			this._hmac = new HMACSHA1(Encoding.UTF8.GetBytes(password));
 		}
 
+		[SecuritySafeCritical]
 		public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations)
 		{
-			if (password == null)
-			{
-				throw new ArgumentNullException("password");
-			}
 			this.Salt = salt;
 			this.IterationCount = iterations;
-			this._hmac = new HMACSHA1(password);
-		}
-
-		public Rfc2898DeriveBytes(string password, int saltSize)
-			: this(password, saltSize, 1000)
-		{
-		}
-
-		public Rfc2898DeriveBytes(string password, int saltSize, int iterations)
-		{
-			if (password == null)
-			{
-				throw new ArgumentNullException("password");
-			}
-			if (saltSize < 0)
-			{
-				throw new ArgumentOutOfRangeException("invalid salt length");
-			}
-			this.Salt = KeyBuilder.Key(saltSize);
-			this.IterationCount = iterations;
-			this._hmac = new HMACSHA1(Encoding.UTF8.GetBytes(password));
+			this.m_password = password;
+			this.m_hmacsha1 = new HMACSHA1(password);
+			this.Initialize();
 		}
 
 		public int IterationCount
 		{
 			get
 			{
-				return this._iteration;
+				return (int)this.m_iterations;
 			}
 			set
 			{
-				if (value < 1)
+				if (value <= 0)
 				{
-					throw new ArgumentOutOfRangeException("IterationCount < 1");
+					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Positive number required."));
 				}
-				this._iteration = value;
+				this.m_iterations = (uint)value;
+				this.Initialize();
 			}
 		}
 
@@ -75,99 +69,152 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return (byte[])this._salt.Clone();
+				return (byte[])this.m_salt.Clone();
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("Salt");
+					throw new ArgumentNullException("value");
 				}
 				if (value.Length < 8)
 				{
-					throw new ArgumentException("Salt < 8 bytes");
+					throw new ArgumentException(Environment.GetResourceString("Salt is not at least eight bytes."));
 				}
-				this._salt = (byte[])value.Clone();
+				this.m_salt = (byte[])value.Clone();
+				this.Initialize();
 			}
-		}
-
-		private byte[] F(byte[] s, int c, int i)
-		{
-			s[s.Length - 4] = (byte)(i >> 24);
-			s[s.Length - 3] = (byte)(i >> 16);
-			s[s.Length - 2] = (byte)(i >> 8);
-			s[s.Length - 1] = (byte)i;
-			byte[] array = this._hmac.ComputeHash(s);
-			byte[] array2 = array;
-			for (int j = 1; j < c; j++)
-			{
-				byte[] array3 = this._hmac.ComputeHash(array2);
-				for (int k = 0; k < 20; k++)
-				{
-					array[k] ^= array3[k];
-				}
-				array2 = array3;
-			}
-			return array;
 		}
 
 		public override byte[] GetBytes(int cb)
 		{
-			if (cb < 1)
+			if (cb <= 0)
 			{
-				throw new ArgumentOutOfRangeException("cb");
-			}
-			int num = cb / 20;
-			int num2 = cb % 20;
-			if (num2 != 0)
-			{
-				num++;
+				throw new ArgumentOutOfRangeException("cb", Environment.GetResourceString("Positive number required."));
 			}
 			byte[] array = new byte[cb];
-			int num3 = 0;
-			if (this._pos > 0)
+			int i = 0;
+			int num = this.m_endIndex - this.m_startIndex;
+			if (num > 0)
 			{
-				int num4 = Math.Min(20 - this._pos, cb);
-				Buffer.BlockCopy(this._buffer, this._pos, array, 0, num4);
-				if (num4 >= cb)
+				if (cb < num)
 				{
+					Buffer.InternalBlockCopy(this.m_buffer, this.m_startIndex, array, 0, cb);
+					this.m_startIndex += cb;
 					return array;
 				}
-				this._pos = 0;
-				num3 = num4;
+				Buffer.InternalBlockCopy(this.m_buffer, this.m_startIndex, array, 0, num);
+				this.m_startIndex = (this.m_endIndex = 0);
+				i += num;
 			}
-			byte[] array2 = new byte[this._salt.Length + 4];
-			Buffer.BlockCopy(this._salt, 0, array2, 0, this._salt.Length);
-			for (int i = 1; i <= num; i++)
+			while (i < cb)
 			{
-				this._buffer = this.F(array2, this._iteration, ++this._f);
-				int num5 = ((i != num) ? 20 : (array.Length - num3));
-				Buffer.BlockCopy(this._buffer, this._pos, array, num3, num5);
-				num3 += this._pos + num5;
-				this._pos = ((num5 != 20) ? num5 : 0);
+				byte[] array2 = this.Func();
+				int num2 = cb - i;
+				if (num2 <= 20)
+				{
+					Buffer.InternalBlockCopy(array2, 0, array, i, num2);
+					i += num2;
+					Buffer.InternalBlockCopy(array2, num2, this.m_buffer, this.m_startIndex, 20 - num2);
+					this.m_endIndex += 20 - num2;
+					return array;
+				}
+				Buffer.InternalBlockCopy(array2, 0, array, i, 20);
+				i += 20;
 			}
 			return array;
 		}
 
 		public override void Reset()
 		{
-			this._buffer = null;
-			this._pos = 0;
-			this._f = 0;
+			this.Initialize();
 		}
 
-		private const int defaultIterations = 1000;
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+			if (disposing)
+			{
+				if (this.m_hmacsha1 != null)
+				{
+					((IDisposable)this.m_hmacsha1).Dispose();
+				}
+				if (this.m_buffer != null)
+				{
+					Array.Clear(this.m_buffer, 0, this.m_buffer.Length);
+				}
+				if (this.m_salt != null)
+				{
+					Array.Clear(this.m_salt, 0, this.m_salt.Length);
+				}
+			}
+		}
 
-		private int _iteration;
+		private void Initialize()
+		{
+			if (this.m_buffer != null)
+			{
+				Array.Clear(this.m_buffer, 0, this.m_buffer.Length);
+			}
+			this.m_buffer = new byte[20];
+			this.m_block = 1U;
+			this.m_startIndex = (this.m_endIndex = 0);
+		}
 
-		private byte[] _salt;
+		private byte[] Func()
+		{
+			byte[] array = Utils.Int(this.m_block);
+			this.m_hmacsha1.TransformBlock(this.m_salt, 0, this.m_salt.Length, null, 0);
+			this.m_hmacsha1.TransformBlock(array, 0, array.Length, null, 0);
+			this.m_hmacsha1.TransformFinalBlock(EmptyArray<byte>.Value, 0, 0);
+			byte[] array2 = this.m_hmacsha1.HashValue;
+			this.m_hmacsha1.Initialize();
+			byte[] array3 = array2;
+			int num = 2;
+			while ((long)num <= (long)((ulong)this.m_iterations))
+			{
+				this.m_hmacsha1.TransformBlock(array2, 0, array2.Length, null, 0);
+				this.m_hmacsha1.TransformFinalBlock(EmptyArray<byte>.Value, 0, 0);
+				array2 = this.m_hmacsha1.HashValue;
+				for (int i = 0; i < 20; i++)
+				{
+					byte[] array4 = array3;
+					int num2 = i;
+					array4[num2] ^= array2[i];
+				}
+				this.m_hmacsha1.Initialize();
+				num++;
+			}
+			this.m_block += 1U;
+			return array3;
+		}
 
-		private HMACSHA1 _hmac;
+		[SecuritySafeCritical]
+		public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
+		{
+			if (keySize < 0)
+			{
+				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+			}
+			throw new NotSupportedException("CspParameters are not supported by Mono");
+		}
 
-		private byte[] _buffer;
+		private byte[] m_buffer;
 
-		private int _pos;
+		private byte[] m_salt;
 
-		private int _f;
+		private HMACSHA1 m_hmacsha1;
+
+		private byte[] m_password;
+
+		private uint m_iterations;
+
+		private uint m_block;
+
+		private int m_startIndex;
+
+		private int m_endIndex;
+
+		private const int BlockSize = 20;
 	}
 }

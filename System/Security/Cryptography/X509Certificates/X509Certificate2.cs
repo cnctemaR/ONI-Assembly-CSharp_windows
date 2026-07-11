@@ -1,17 +1,27 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using Mono.Security;
-using Mono.Security.Cryptography;
 using Mono.Security.X509;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-	public class X509Certificate2 : X509Certificate
+	[Serializable]
+	public class X509Certificate2 : global::System.Security.Cryptography.X509Certificates.X509Certificate
 	{
+		internal new X509Certificate2Impl Impl
+		{
+			get
+			{
+				X509Certificate2Impl x509Certificate2Impl = base.Impl as X509Certificate2Impl;
+				X509Helper2.ThrowIfContextInvalid(x509Certificate2Impl);
+				return x509Certificate2Impl;
+			}
+		}
+
 		public X509Certificate2()
 		{
-			this._cert = null;
 		}
 
 		public X509Certificate2(byte[] rawData)
@@ -67,48 +77,41 @@ namespace System.Security.Cryptography.X509Certificates
 		public X509Certificate2(IntPtr handle)
 			: base(handle)
 		{
-			this._cert = new X509Certificate(base.GetRawCertData());
+			throw new NotImplementedException();
 		}
 
-		public X509Certificate2(X509Certificate certificate)
-			: base(certificate)
+		public X509Certificate2(global::System.Security.Cryptography.X509Certificates.X509Certificate certificate)
+			: base(X509Helper2.Import(certificate, false))
 		{
-			this._cert = new X509Certificate(base.GetRawCertData());
+		}
+
+		protected X509Certificate2(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+
+		internal X509Certificate2(X509Certificate2Impl impl)
+			: base(impl)
+		{
 		}
 
 		public bool Archived
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				return this._archived;
+				return this.Impl.Archived;
 			}
 			set
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				this._archived = value;
+				this.Impl.Archived = true;
 			}
 		}
 
-		public X509ExtensionCollection Extensions
+		public global::System.Security.Cryptography.X509Certificates.X509ExtensionCollection Extensions
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (this._extensions == null)
-				{
-					this._extensions = new X509ExtensionCollection(this._cert);
-				}
-				return this._extensions;
+				return this.Impl.Extensions;
 			}
 		}
 
@@ -116,19 +119,13 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				return this._name;
+				base.ThrowIfContextInvalid();
+				return this.friendlyName;
 			}
 			set
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				this._name = value;
+				base.ThrowIfContextInvalid();
+				this.friendlyName = value;
 			}
 		}
 
@@ -136,7 +133,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				return this.PrivateKey != null;
+				return this.Impl.HasPrivateKey;
 			}
 		}
 
@@ -144,15 +141,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (this.issuer_name == null)
-				{
-					this.issuer_name = new X500DistinguishedName(this._cert.GetIssuerName().GetBytes());
-				}
-				return this.issuer_name;
+				return this.Impl.IssuerName;
 			}
 		}
 
@@ -160,11 +149,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				return this._cert.ValidUntil.ToLocalTime();
+				return this.Impl.GetValidUntil().ToLocalTime();
 			}
 		}
 
@@ -172,11 +157,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				return this._cert.ValidFrom.ToLocalTime();
+				return this.Impl.GetValidFrom().ToLocalTime();
 			}
 		}
 
@@ -184,66 +165,11 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				try
-				{
-					if (this._cert.RSA != null)
-					{
-						RSACryptoServiceProvider rsacryptoServiceProvider = this._cert.RSA as RSACryptoServiceProvider;
-						if (rsacryptoServiceProvider != null)
-						{
-							return (!rsacryptoServiceProvider.PublicOnly) ? rsacryptoServiceProvider : null;
-						}
-						RSAManaged rsamanaged = this._cert.RSA as RSAManaged;
-						if (rsamanaged != null)
-						{
-							return (!rsamanaged.PublicOnly) ? rsamanaged : null;
-						}
-						this._cert.RSA.ExportParameters(true);
-						return this._cert.RSA;
-					}
-					else if (this._cert.DSA != null)
-					{
-						DSACryptoServiceProvider dsacryptoServiceProvider = this._cert.DSA as DSACryptoServiceProvider;
-						if (dsacryptoServiceProvider != null)
-						{
-							return (!dsacryptoServiceProvider.PublicOnly) ? dsacryptoServiceProvider : null;
-						}
-						this._cert.DSA.ExportParameters(true);
-						return this._cert.DSA;
-					}
-				}
-				catch
-				{
-				}
-				return null;
+				return this.Impl.PrivateKey;
 			}
 			set
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (value == null)
-				{
-					this._cert.RSA = null;
-					this._cert.DSA = null;
-				}
-				else if (value is RSA)
-				{
-					this._cert.RSA = (RSA)value;
-				}
-				else
-				{
-					if (!(value is DSA))
-					{
-						throw new NotSupportedException();
-					}
-					this._cert.DSA = (DSA)value;
-				}
+				this.Impl.PrivateKey = value;
 			}
 		}
 
@@ -251,23 +177,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (this._publicKey == null)
-				{
-					try
-					{
-						this._publicKey = new PublicKey(this._cert);
-					}
-					catch (Exception ex)
-					{
-						string text = global::Locale.GetText("Unable to decode public key.");
-						throw new CryptographicException(text, ex);
-					}
-				}
-				return this._publicKey;
+				return this.Impl.PublicKey;
 			}
 		}
 
@@ -275,11 +185,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				return base.GetRawCertData();
+				return this.GetRawCertData();
 			}
 		}
 
@@ -287,21 +193,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (this._serial == null)
-				{
-					StringBuilder stringBuilder = new StringBuilder();
-					byte[] serialNumber = this._cert.SerialNumber;
-					for (int i = serialNumber.Length - 1; i >= 0; i--)
-					{
-						stringBuilder.Append(serialNumber[i].ToString("X2"));
-					}
-					this._serial = stringBuilder.ToString();
-				}
-				return this._serial;
+				return this.GetSerialNumberString();
 			}
 		}
 
@@ -309,15 +201,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (this.signature_algorithm == null)
-				{
-					this.signature_algorithm = new Oid(this._cert.SignatureAlgorithm);
-				}
-				return this.signature_algorithm;
+				return this.Impl.SignatureAlgorithm;
 			}
 		}
 
@@ -325,15 +209,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				if (this.subject_name == null)
-				{
-					this.subject_name = new X500DistinguishedName(this._cert.GetSubjectName().GetBytes());
-				}
-				return this.subject_name;
+				return this.Impl.SubjectName;
 			}
 		}
 
@@ -341,7 +217,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				return base.GetCertHashString();
+				return this.GetCertHashString();
 			}
 		}
 
@@ -349,138 +225,14 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				return this._cert.Version;
+				return this.Impl.Version;
 			}
 		}
 
-		[global::System.MonoTODO("always return String.Empty for UpnName, DnsFromAlternativeName and UrlName")]
+		[MonoTODO("always return String.Empty for UpnName, DnsFromAlternativeName and UrlName")]
 		public string GetNameInfo(X509NameType nameType, bool forIssuer)
 		{
-			switch (nameType)
-			{
-			case X509NameType.SimpleName:
-			{
-				if (this._cert == null)
-				{
-					throw new CryptographicException(X509Certificate2.empty_error);
-				}
-				ASN1 asn = ((!forIssuer) ? this._cert.GetSubjectName() : this._cert.GetIssuerName());
-				ASN1 asn2 = this.Find(X509Certificate2.commonName, asn);
-				if (asn2 != null)
-				{
-					return this.GetValueAsString(asn2);
-				}
-				if (asn.Count == 0)
-				{
-					return string.Empty;
-				}
-				ASN1 asn3 = asn[asn.Count - 1];
-				if (asn3.Count == 0)
-				{
-					return string.Empty;
-				}
-				return this.GetValueAsString(asn3[0]);
-			}
-			case X509NameType.EmailName:
-			{
-				ASN1 asn4 = this.Find(X509Certificate2.email, (!forIssuer) ? this._cert.GetSubjectName() : this._cert.GetIssuerName());
-				if (asn4 != null)
-				{
-					return this.GetValueAsString(asn4);
-				}
-				return string.Empty;
-			}
-			case X509NameType.UpnName:
-				return string.Empty;
-			case X509NameType.DnsName:
-			{
-				ASN1 asn5 = this.Find(X509Certificate2.commonName, (!forIssuer) ? this._cert.GetSubjectName() : this._cert.GetIssuerName());
-				if (asn5 != null)
-				{
-					return this.GetValueAsString(asn5);
-				}
-				return string.Empty;
-			}
-			case X509NameType.DnsFromAlternativeName:
-				return string.Empty;
-			case X509NameType.UrlName:
-				return string.Empty;
-			default:
-				throw new ArgumentException("nameType");
-			}
-		}
-
-		private ASN1 Find(byte[] oid, ASN1 dn)
-		{
-			if (dn.Count == 0)
-			{
-				return null;
-			}
-			for (int i = 0; i < dn.Count; i++)
-			{
-				ASN1 asn = dn[i];
-				for (int j = 0; j < asn.Count; j++)
-				{
-					ASN1 asn2 = asn[j];
-					if (asn2.Count == 2)
-					{
-						ASN1 asn3 = asn2[0];
-						if (asn3 != null)
-						{
-							if (asn3.CompareValue(oid))
-							{
-								return asn2;
-							}
-						}
-					}
-				}
-			}
-			return null;
-		}
-
-		private string GetValueAsString(ASN1 pair)
-		{
-			if (pair.Count != 2)
-			{
-				return string.Empty;
-			}
-			ASN1 asn = pair[1];
-			if (asn.Value == null || asn.Length == 0)
-			{
-				return string.Empty;
-			}
-			if (asn.Tag == 30)
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				for (int i = 1; i < asn.Value.Length; i += 2)
-				{
-					stringBuilder.Append((char)asn.Value[i]);
-				}
-				return stringBuilder.ToString();
-			}
-			return Encoding.UTF8.GetString(asn.Value);
-		}
-
-		private void ImportPkcs12(byte[] rawData, string password)
-		{
-			PKCS12 pkcs = ((password != null) ? new PKCS12(rawData, password) : new PKCS12(rawData));
-			if (pkcs.Certificates.Count > 0)
-			{
-				this._cert = pkcs.Certificates[0];
-			}
-			else
-			{
-				this._cert = null;
-			}
-			if (pkcs.Keys.Count > 0)
-			{
-				this._cert.RSA = pkcs.Keys[0] as RSA;
-				this._cert.DSA = pkcs.Keys[0] as DSA;
-			}
+			return this.Impl.GetNameInfo(nameType, forIssuer);
 		}
 
 		public override void Import(byte[] rawData)
@@ -488,43 +240,14 @@ namespace System.Security.Cryptography.X509Certificates
 			this.Import(rawData, null, X509KeyStorageFlags.DefaultKeySet);
 		}
 
-		[global::System.MonoTODO("missing KeyStorageFlags support")]
+		[MonoTODO("missing KeyStorageFlags support")]
 		public override void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
 		{
-			base.Import(rawData, password, keyStorageFlags);
-			if (password == null)
-			{
-				try
-				{
-					this._cert = new X509Certificate(rawData);
-				}
-				catch (Exception ex)
-				{
-					try
-					{
-						this.ImportPkcs12(rawData, null);
-					}
-					catch
-					{
-						string text = global::Locale.GetText("Unable to decode certificate.");
-						throw new CryptographicException(text, ex);
-					}
-				}
-			}
-			else
-			{
-				try
-				{
-					this.ImportPkcs12(rawData, password);
-				}
-				catch
-				{
-					this._cert = new X509Certificate(rawData);
-				}
-			}
+			X509Certificate2Impl x509Certificate2Impl = X509Helper2.Import(rawData, password, keyStorageFlags, false);
+			base.ImportHandle(x509Certificate2Impl);
 		}
 
-		[global::System.MonoTODO("SecureString is incomplete")]
+		[MonoTODO("SecureString is incomplete")]
 		public override void Import(byte[] rawData, SecureString password, X509KeyStorageFlags keyStorageFlags)
 		{
 			this.Import(rawData, null, keyStorageFlags);
@@ -532,53 +255,39 @@ namespace System.Security.Cryptography.X509Certificates
 
 		public override void Import(string fileName)
 		{
-			byte[] array = X509Certificate2.Load(fileName);
+			byte[] array = File.ReadAllBytes(fileName);
 			this.Import(array, null, X509KeyStorageFlags.DefaultKeySet);
 		}
 
-		[global::System.MonoTODO("missing KeyStorageFlags support")]
+		[MonoTODO("missing KeyStorageFlags support")]
 		public override void Import(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
 		{
-			byte[] array = X509Certificate2.Load(fileName);
+			byte[] array = File.ReadAllBytes(fileName);
 			this.Import(array, password, keyStorageFlags);
 		}
 
-		[global::System.MonoTODO("SecureString is incomplete")]
+		[MonoTODO("SecureString is incomplete")]
 		public override void Import(string fileName, SecureString password, X509KeyStorageFlags keyStorageFlags)
 		{
-			byte[] array = X509Certificate2.Load(fileName);
+			byte[] array = File.ReadAllBytes(fileName);
 			this.Import(array, null, keyStorageFlags);
 		}
 
-		private static byte[] Load(string fileName)
+		[MonoTODO("X509ContentType.SerializedCert is not supported")]
+		public override byte[] Export(X509ContentType contentType, string password)
 		{
-			byte[] array = null;
-			using (FileStream fileStream = File.OpenRead(fileName))
-			{
-				array = new byte[fileStream.Length];
-				fileStream.Read(array, 0, array.Length);
-				fileStream.Close();
-			}
-			return array;
+			return this.Impl.Export(contentType, password);
 		}
 
 		public override void Reset()
 		{
-			this._cert = null;
-			this._archived = false;
-			this._extensions = null;
-			this._name = string.Empty;
-			this._serial = null;
-			this._publicKey = null;
-			this.issuer_name = null;
-			this.subject_name = null;
-			this.signature_algorithm = null;
+			this.friendlyName = string.Empty;
 			base.Reset();
 		}
 
 		public override string ToString()
 		{
-			if (this._cert == null)
+			if (!base.IsValid)
 			{
 				return "System.Security.Cryptography.X509Certificates.X509Certificate2";
 			}
@@ -587,7 +296,7 @@ namespace System.Security.Cryptography.X509Certificates
 
 		public override string ToString(bool verbose)
 		{
-			if (this._cert == null)
+			if (!base.IsValid)
 			{
 				return "System.Security.Cryptography.X509Certificates.X509Certificate2";
 			}
@@ -643,18 +352,13 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[global::System.MonoTODO("by default this depends on the incomplete X509Chain")]
+		[MonoTODO("by default this depends on the incomplete X509Chain")]
 		public bool Verify()
 		{
-			if (this._cert == null)
-			{
-				throw new CryptographicException(X509Certificate2.empty_error);
-			}
-			X509Chain x509Chain = (X509Chain)CryptoConfig.CreateFromName("X509Chain");
-			return x509Chain.Build(this);
+			return this.Impl.Verify(this);
 		}
 
-		[global::System.MonoTODO("Detection limited to Cert, Pfx, Pkcs12, Pkcs7 and Unknown")]
+		[MonoTODO("Detection limited to Cert, Pfx, Pkcs12, Pkcs7 and Unknown")]
 		public static X509ContentType GetCertContentType(byte[] rawData)
 		{
 			if (rawData == null || rawData.Length == 0)
@@ -664,11 +368,10 @@ namespace System.Security.Cryptography.X509Certificates
 			X509ContentType x509ContentType = X509ContentType.Unknown;
 			try
 			{
-				ASN1 asn = new ASN1(rawData);
+				Mono.Security.ASN1 asn = new Mono.Security.ASN1(rawData);
 				if (asn.Tag != 48)
 				{
-					string text = global::Locale.GetText("Unable to decode certificate.");
-					throw new CryptographicException(text);
+					throw new CryptographicException(global::Locale.GetText("Unable to decode certificate."));
 				}
 				if (asn.Count == 0)
 				{
@@ -679,12 +382,9 @@ namespace System.Security.Cryptography.X509Certificates
 					byte tag = asn[0].Tag;
 					if (tag != 2)
 					{
-						if (tag == 48)
+						if (tag == 48 && asn[1].Tag == 48 && asn[2].Tag == 3)
 						{
-							if (asn[1].Tag == 48 && asn[2].Tag == 3)
-							{
-								x509ContentType = X509ContentType.Cert;
-							}
+							x509ContentType = X509ContentType.Cert;
 						}
 					}
 					else if (asn[1].Tag == 48 && asn[2].Tag == 48)
@@ -699,13 +399,12 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			catch (Exception ex)
 			{
-				string text2 = global::Locale.GetText("Unable to decode certificate.");
-				throw new CryptographicException(text2, ex);
+				throw new CryptographicException(global::Locale.GetText("Unable to decode certificate."), ex);
 			}
 			return x509ContentType;
 		}
 
-		[global::System.MonoTODO("Detection limited to Cert, Pfx, Pkcs12 and Unknown")]
+		[MonoTODO("Detection limited to Cert, Pfx, Pkcs12 and Unknown")]
 		public static X509ContentType GetCertContentType(string fileName)
 		{
 			if (fileName == null)
@@ -716,41 +415,19 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				throw new ArgumentException("fileName");
 			}
-			byte[] array = X509Certificate2.Load(fileName);
-			return X509Certificate2.GetCertContentType(array);
+			return X509Certificate2.GetCertContentType(File.ReadAllBytes(fileName));
 		}
 
-		internal X509Certificate MonoCertificate
+		[MonoTODO("See comment in X509Helper2.GetMonoCertificate().")]
+		internal Mono.Security.X509.X509Certificate MonoCertificate
 		{
 			get
 			{
-				return this._cert;
+				return X509Helper2.GetMonoCertificate(this);
 			}
 		}
 
-		private bool _archived;
-
-		private X509ExtensionCollection _extensions;
-
-		private string _name = string.Empty;
-
-		private string _serial;
-
-		private PublicKey _publicKey;
-
-		private X500DistinguishedName issuer_name;
-
-		private X500DistinguishedName subject_name;
-
-		private Oid signature_algorithm;
-
-		private X509Certificate _cert;
-
-		private static string empty_error = global::Locale.GetText("Certificate instance is empty.");
-
-		private static byte[] commonName = new byte[] { 85, 4, 3 };
-
-		private static byte[] email = new byte[] { 42, 134, 72, 134, 247, 13, 1, 9, 1 };
+		private string friendlyName = string.Empty;
 
 		private static byte[] signedData = new byte[] { 42, 134, 72, 134, 247, 13, 1, 7, 2 };
 	}

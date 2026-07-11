@@ -5,12 +5,12 @@ namespace ProcGen
 {
 	public class BiomeSettings : IMerge<BiomeSettings>
 	{
+		public ComposableDictionary<string, ElementBandConfiguration> TerrainBiomeLookupTable { get; private set; }
+
 		public BiomeSettings()
 		{
 			this.TerrainBiomeLookupTable = new ComposableDictionary<string, ElementBandConfiguration>();
 		}
-
-		public ComposableDictionary<string, ElementBandConfiguration> TerrainBiomeLookupTable { get; private set; }
 
 		public string[] GetNames()
 		{

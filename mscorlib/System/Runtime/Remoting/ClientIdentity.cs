@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Remoting.Messaging;
 
 namespace System.Runtime.Remoting
 {
@@ -9,17 +8,7 @@ namespace System.Runtime.Remoting
 			: base(objectUri)
 		{
 			this._objRef = objRef;
-			IMessageSink messageSink;
-			if (this._objRef.EnvoyInfo != null)
-			{
-				IMessageSink envoySinks = this._objRef.EnvoyInfo.EnvoySinks;
-				messageSink = envoySinks;
-			}
-			else
-			{
-				messageSink = null;
-			}
-			this._envoySink = messageSink;
+			this._envoySink = ((this._objRef.EnvoyInfo != null) ? this._objRef.EnvoyInfo.EnvoySinks : null);
 		}
 
 		public MarshalByRefObject ClientProxy

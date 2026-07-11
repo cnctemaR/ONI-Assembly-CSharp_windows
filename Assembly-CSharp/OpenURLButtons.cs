@@ -14,13 +14,13 @@ public class OpenURLButtons : KMonoBehaviour
 			string text = Strings.Get(data.stringKey);
 			gameObject.GetComponentInChildren<LocText>().SetText(text);
 			OpenURLButtons.URLButtonType urlType = data.urlType;
-			if (urlType != OpenURLButtons.URLButtonType.patchNotes)
+			if (urlType != OpenURLButtons.URLButtonType.url)
 			{
-				if (urlType == OpenURLButtons.URLButtonType.url)
+				if (urlType == OpenURLButtons.URLButtonType.patchNotes)
 				{
 					gameObject.GetComponent<KButton>().onClick += delegate
 					{
-						this.OpenURL(data.url);
+						this.OpenPatchNotes();
 					};
 				}
 			}
@@ -28,7 +28,7 @@ public class OpenURLButtons : KMonoBehaviour
 			{
 				gameObject.GetComponent<KButton>().onClick += delegate
 				{
-					this.OpenPatchNotes();
+					this.OpenURL(data.url);
 				};
 			}
 		}

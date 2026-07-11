@@ -65,11 +65,9 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			if (this.ClientCertificate != null)
 			{
 				this.SendCertificates();
+				return;
 			}
-			else
-			{
-				base.WriteInt24(0);
-			}
+			base.WriteInt24(0);
 		}
 
 		private X509Certificate FindParentCertificate(X509Certificate cert)
@@ -80,7 +78,7 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			}
 			foreach (X509Certificate x509Certificate in base.Context.ClientSettings.Certificates)
 			{
-				if (cert.GetName() == cert.GetIssuerName())
+				if (x509Certificate.GetName() == cert.GetIssuerName())
 				{
 					return x509Certificate;
 				}

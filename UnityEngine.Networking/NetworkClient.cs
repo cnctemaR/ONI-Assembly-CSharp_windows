@@ -7,6 +7,7 @@ using UnityEngine.Networking.NetworkSystem;
 
 namespace UnityEngine.Networking
 {
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkClient
 	{
 		public NetworkClient()
@@ -210,7 +211,7 @@ namespace UnityEngine.Networking
 				ClientScene.ClearLocalPlayers();
 				this.m_Connection.Disconnect();
 				this.m_Connection = null;
-				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, this.m_HostPort);
+				this.m_ClientId = NetworkManager.activeTransport.AddHost(this.m_HostTopology, this.m_HostPort, null);
 				this.m_ServerPort = serverPort;
 				if (Application.platform == RuntimePlatform.WebGLPlayer)
 				{
@@ -265,7 +266,7 @@ namespace UnityEngine.Networking
 				ClientScene.ClearLocalPlayers();
 				this.m_Connection.Disconnect();
 				this.m_Connection = null;
-				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, this.m_HostPort);
+				this.m_ClientId = NetworkManager.activeTransport.AddHost(this.m_HostTopology, this.m_HostPort, null);
 				if (secureTunnelEndPoint == null)
 				{
 					if (LogFilter.logError)
@@ -309,7 +310,7 @@ namespace UnityEngine.Networking
 						this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
 						try
 						{
-							this.m_ClientConnectionId = NetworkTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
+							this.m_ClientConnectionId = NetworkManager.activeTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
 						}
 						catch (Exception ex)
 						{
@@ -399,7 +400,7 @@ namespace UnityEngine.Networking
 
 		public void Connect(EndPoint secureTunnelEndPoint)
 		{
-			bool flag = NetworkTransport.DoesEndPointUsePlatformProtocols(secureTunnelEndPoint);
+			bool flag = NetworkManager.activeTransport.DoesEndPointUsePlatformProtocols(secureTunnelEndPoint);
 			this.PrepareForConnect(flag);
 			if (LogFilter.logDebug)
 			{
@@ -429,7 +430,7 @@ namespace UnityEngine.Networking
 					IPEndPoint ipendPoint = (IPEndPoint)secureTunnelEndPoint;
 					this.Connect(ipendPoint.Address.ToString(), ipendPoint.Port);
 				}
-				else if (fullName != "UnityEngine.XboxOne.XboxOneEndPoint" && fullName != "UnityEngine.PS4.SceEndPoint" && fullName != "UnityEngine.PSVita.SceEndPoint")
+				else if (fullName != "UnityEngine.XboxOne.XboxOneEndPoint" && fullName != "UnityEngine.PS4.SceEndPoint")
 				{
 					if (LogFilter.logError)
 					{
@@ -444,7 +445,7 @@ namespace UnityEngine.Networking
 					this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
 					try
 					{
-						this.m_ClientConnectionId = NetworkTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
+						this.m_ClientConnectionId = NetworkManager.activeTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
 					}
 					catch (Exception ex)
 					{
@@ -502,11 +503,11 @@ namespace UnityEngine.Networking
 				{
 					Debug.Log(string.Concat(new object[] { "AddHost Using Simulator ", num, "/", num2 }));
 				}
-				this.m_ClientId = NetworkTransport.AddHostWithSimulator(this.m_HostTopology, num, num2, this.m_HostPort);
+				this.m_ClientId = NetworkManager.activeTransport.AddHostWithSimulator(this.m_HostTopology, num, num2, this.m_HostPort);
 			}
 			else
 			{
-				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, this.m_HostPort);
+				this.m_ClientId = NetworkManager.activeTransport.AddHost(this.m_HostTopology, this.m_HostPort, null);
 			}
 		}
 
@@ -570,12 +571,12 @@ namespace UnityEngine.Networking
 				}
 				ConnectionSimulatorConfig connectionSimulatorConfig = new ConnectionSimulatorConfig(num, this.m_SimulatedLatency, num, this.m_SimulatedLatency, this.m_PacketLoss);
 				byte b;
-				this.m_ClientConnectionId = NetworkTransport.ConnectWithSimulator(this.m_ClientId, this.m_ServerIp, this.m_ServerPort, 0, out b, connectionSimulatorConfig);
+				this.m_ClientConnectionId = NetworkManager.activeTransport.ConnectWithSimulator(this.m_ClientId, this.m_ServerIp, this.m_ServerPort, 0, out b, connectionSimulatorConfig);
 			}
 			else
 			{
 				byte b;
-				this.m_ClientConnectionId = NetworkTransport.Connect(this.m_ClientId, this.m_ServerIp, this.m_ServerPort, 0, out b);
+				this.m_ClientConnectionId = NetworkManager.activeTransport.Connect(this.m_ClientId, this.m_ServerIp, this.m_ServerPort, 0, out b);
 			}
 			this.m_Connection = (NetworkConnection)Activator.CreateInstance(this.m_NetworkConnectionClass);
 			this.m_Connection.SetHandlers(this.m_MessageHandlers);
@@ -587,7 +588,7 @@ namespace UnityEngine.Networking
 			this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
 			this.Update();
 			byte b;
-			this.m_ClientConnectionId = NetworkTransport.ConnectToNetworkPeer(this.m_ClientId, info.address, info.port, 0, 0, info.networkId, Utility.GetSourceID(), info.nodeId, out b);
+			this.m_ClientConnectionId = NetworkManager.activeTransport.ConnectToNetworkPeer(this.m_ClientId, info.address, info.port, 0, 0, info.networkId, Utility.GetSourceID(), info.nodeId, out b);
 			this.m_Connection = (NetworkConnection)Activator.CreateInstance(this.m_NetworkConnectionClass);
 			this.m_Connection.SetHandlers(this.m_MessageHandlers);
 			this.m_Connection.Initialize(info.address, this.m_ClientId, this.m_ClientConnectionId, this.m_HostTopology);
@@ -608,7 +609,7 @@ namespace UnityEngine.Networking
 				this.m_Connection = null;
 				if (this.m_ClientId != -1)
 				{
-					NetworkTransport.RemoveHost(this.m_ClientId);
+					NetworkManager.activeTransport.RemoveHost(this.m_ClientId);
 					this.m_ClientId = -1;
 				}
 			}
@@ -782,7 +783,7 @@ namespace UnityEngine.Networking
 			}
 			if (this.m_ClientId != -1)
 			{
-				NetworkTransport.RemoveHost(this.m_ClientId);
+				NetworkManager.activeTransport.RemoveHost(this.m_ClientId);
 				this.m_ClientId = -1;
 			}
 			NetworkClient.RemoveClient(this);
@@ -826,7 +827,7 @@ namespace UnityEngine.Networking
 					int num2;
 					int num3;
 					int num4;
-					NetworkEventType networkEventType = NetworkTransport.ReceiveFromHost(this.m_ClientId, out num2, out num3, this.m_MsgBuffer, (int)((ushort)this.m_MsgBuffer.Length), out num4, out b);
+					NetworkEventType networkEventType = NetworkManager.activeTransport.ReceiveFromHost(this.m_ClientId, out num2, out num3, this.m_MsgBuffer, (int)((ushort)this.m_MsgBuffer.Length), out num4, out b);
 					if (this.m_Connection != null)
 					{
 						this.m_Connection.lastError = (NetworkError)b;
@@ -898,7 +899,7 @@ namespace UnityEngine.Networking
 					}
 					if (networkEventType == NetworkEventType.Nothing)
 					{
-						goto IL_02C6;
+						goto IL_02CB;
 					}
 				}
 				Block_10:
@@ -913,7 +914,7 @@ namespace UnityEngine.Networking
 					Debug.Log("MaxEventsPerFrame hit (" + 500 + ")");
 				}
 				Block_19:
-				IL_02C6:
+				IL_02CB:
 				if (this.m_Connection != null && this.m_AsyncConnect == NetworkClient.ConnectState.Connected)
 				{
 					this.m_Connection.FlushChannels();
@@ -1027,7 +1028,7 @@ namespace UnityEngine.Networking
 			else
 			{
 				byte b;
-				num = NetworkTransport.GetCurrentRTT(this.m_ClientId, this.m_ClientConnectionId, out b);
+				num = NetworkManager.activeTransport.GetCurrentRTT(this.m_ClientId, this.m_ClientConnectionId, out b);
 			}
 			return num;
 		}
@@ -1125,7 +1126,7 @@ namespace UnityEngine.Networking
 		{
 			if (!NetworkClient.s_IsActive && state)
 			{
-				NetworkTransport.Init();
+				NetworkManager.activeTransport.Init();
 			}
 			NetworkClient.s_IsActive = state;
 		}

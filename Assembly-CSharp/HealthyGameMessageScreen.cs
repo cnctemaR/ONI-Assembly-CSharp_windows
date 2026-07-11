@@ -25,23 +25,23 @@ public class HealthyGameMessageScreen : KMonoBehaviour
 		{
 			this.isFirstUpdate = false;
 			this.spawnTime = Time.unscaledTime;
+			return;
 		}
-		else
+		float num = Mathf.Min(Time.unscaledDeltaTime, 0.033333335f);
+		float num2 = Time.unscaledTime - this.spawnTime;
+		if (num2 < this.totalTime - this.fadeTime)
 		{
-			float num = Mathf.Min(Time.unscaledDeltaTime, 0.033333335f);
-			float num2 = Time.unscaledTime - this.spawnTime;
-			if (num2 < this.totalTime - this.fadeTime)
-			{
-				this.canvasGroup.alpha = this.canvasGroup.alpha + num * (1f / this.fadeTime);
-			}
-			else if (num2 >= this.totalTime + 0.75f)
-			{
-				global::UnityEngine.Object.Destroy(base.gameObject);
-			}
-			else if (num2 >= this.totalTime - this.fadeTime)
-			{
-				this.canvasGroup.alpha = this.canvasGroup.alpha - num * (1f / this.fadeTime);
-			}
+			this.canvasGroup.alpha = this.canvasGroup.alpha + num * (1f / this.fadeTime);
+			return;
+		}
+		if (num2 >= this.totalTime + 0.75f)
+		{
+			global::UnityEngine.Object.Destroy(base.gameObject);
+			return;
+		}
+		if (num2 >= this.totalTime - this.fadeTime)
+		{
+			this.canvasGroup.alpha = this.canvasGroup.alpha - num * (1f / this.fadeTime);
 		}
 	}
 

@@ -11,7 +11,7 @@ namespace System.Threading
 		{
 		}
 
-		[Obsolete("Not 64bit compatible.  Please use the constructor that takes IntPtr for the event handle", false)]
+		[Obsolete("Not 64bit compatible.  Please use the constructor that takes IntPtr for the event handle")]
 		public Overlapped(int offsetLo, int offsetHi, int hEvent, IAsyncResult ar)
 		{
 			this.offsetL = offsetLo;
@@ -54,8 +54,8 @@ namespace System.Threading
 		}
 
 		[CLSCompliant(false)]
-		[Obsolete("Use Pack(iocb, userData) instead", false)]
 		[MonoTODO("Security - we need to propagate the call stack")]
+		[Obsolete("Use Pack(iocb, userData) instead")]
 		public unsafe NativeOverlapped* Pack(IOCompletionCallback iocb)
 		{
 			NativeOverlapped* ptr = (NativeOverlapped*)(void*)Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeOverlapped)));
@@ -65,9 +65,9 @@ namespace System.Threading
 			return ptr;
 		}
 
+		[ComVisible(false)]
 		[MonoTODO("handle userData")]
 		[CLSCompliant(false)]
-		[ComVisible(false)]
 		public unsafe NativeOverlapped* Pack(IOCompletionCallback iocb, object userData)
 		{
 			NativeOverlapped* ptr = (NativeOverlapped*)(void*)Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeOverlapped)));
@@ -78,15 +78,15 @@ namespace System.Threading
 		}
 
 		[CLSCompliant(false)]
-		[Obsolete("Use UnsafePack(iocb, userData) instead", false)]
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+		[Obsolete("Use UnsafePack(iocb, userData) instead")]
+		[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
 		public unsafe NativeOverlapped* UnsafePack(IOCompletionCallback iocb)
 		{
 			return this.Pack(iocb);
 		}
 
-		[ComVisible(false)]
 		[CLSCompliant(false)]
+		[ComVisible(false)]
 		public unsafe NativeOverlapped* UnsafePack(IOCompletionCallback iocb, object userData)
 		{
 			return this.Pack(iocb, userData);
@@ -104,7 +104,7 @@ namespace System.Threading
 			}
 		}
 
-		[Obsolete("Not 64bit compatible.  Use EventHandleIntPtr instead.", false)]
+		[Obsolete("Not 64bit compatible.  Use EventHandleIntPtr instead.")]
 		public int EventHandle
 		{
 			get

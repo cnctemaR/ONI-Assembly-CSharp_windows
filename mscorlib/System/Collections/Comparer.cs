@@ -2,16 +2,17 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
+using System.Security;
 
 namespace System.Collections
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class Comparer : ISerializable, IComparer
+	public sealed class Comparer : IComparer, ISerializable
 	{
 		private Comparer()
 		{
+			this.m_compareInfo = null;
 		}
 
 		public Comparer(CultureInfo culture)
@@ -21,6 +22,20 @@ namespace System.Collections
 				throw new ArgumentNullException("culture");
 			}
 			this.m_compareInfo = culture.CompareInfo;
+		}
+
+		private Comparer(SerializationInfo info, StreamingContext context)
+		{
+			this.m_compareInfo = null;
+			SerializationInfoEnumerator enumerator = info.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				string name = enumerator.Name;
+				if (name == "CompareInfo")
+				{
+					this.m_compareInfo = (CompareInfo)info.GetValue("CompareInfo", typeof(CompareInfo));
+				}
+			}
 		}
 
 		public int Compare(object a, object b)
@@ -46,31 +61,38 @@ namespace System.Collections
 					return this.m_compareInfo.Compare(text, text2);
 				}
 			}
-			if (a is IComparable)
+			IComparable comparable = a as IComparable;
+			if (comparable != null)
 			{
-				return (a as IComparable).CompareTo(b);
+				return comparable.CompareTo(b);
 			}
-			if (b is IComparable)
+			IComparable comparable2 = b as IComparable;
+			if (comparable2 != null)
 			{
-				return -(b as IComparable).CompareTo(a);
+				return -comparable2.CompareTo(a);
 			}
-			throw new ArgumentException(Locale.GetText("Neither 'a' nor 'b' implements IComparable."));
+			throw new ArgumentException(Environment.GetResourceString("At least one object must implement IComparable."));
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecurityCritical]
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
 			{
 				throw new ArgumentNullException("info");
 			}
-			info.AddValue("CompareInfo", this.m_compareInfo, typeof(CompareInfo));
+			if (this.m_compareInfo != null)
+			{
+				info.AddValue("CompareInfo", this.m_compareInfo);
+			}
 		}
 
-		public static readonly Comparer Default = new Comparer();
+		private CompareInfo m_compareInfo;
+
+		public static readonly Comparer Default = new Comparer(CultureInfo.CurrentCulture);
 
 		public static readonly Comparer DefaultInvariant = new Comparer(CultureInfo.InvariantCulture);
 
-		private CompareInfo m_compareInfo;
+		private const string CompareInfoName = "CompareInfo";
 	}
 }

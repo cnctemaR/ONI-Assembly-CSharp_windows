@@ -5,11 +5,12 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Audio
 {
-	[StaticAccessor("AudioPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioPlayableGraphExtensions.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioPlayableGraphExtensions.bindings.h")]
+	[StaticAccessor("AudioPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
 	internal static class AudioPlayableGraphExtensions
 	{
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool InternalCreateAudioOutput(ref PlayableGraph graph, string name, out PlayableOutputHandle handle);
 	}

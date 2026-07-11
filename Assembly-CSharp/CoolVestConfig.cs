@@ -9,8 +9,7 @@ public class CoolVestConfig : IEquipmentConfig
 {
 	public EquipmentDef CreateEquipmentDef()
 	{
-		Dictionary<string, float> dictionary = new Dictionary<string, float>();
-		dictionary.Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS);
+		new Dictionary<string, float>().Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS);
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.COOL_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Cool_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null, null);
@@ -38,16 +37,13 @@ public class CoolVestConfig : IEquipmentConfig
 		{
 			return;
 		}
-		MinionAssignablesProxy component = soleOwner.GetComponent<MinionAssignablesProxy>();
-		ClothingWearer component2 = (component.target as KMonoBehaviour).GetComponent<ClothingWearer>();
-		if (component2 != null)
+		ClothingWearer component = (soleOwner.GetComponent<MinionAssignablesProxy>().target as KMonoBehaviour).GetComponent<ClothingWearer>();
+		if (component != null)
 		{
-			component2.ChangeClothes(clothingInfo);
+			component.ChangeClothes(clothingInfo);
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component");
-		}
+		global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component");
 	}
 
 	public static void OnUnequipVest(Equippable eq)
@@ -81,8 +77,7 @@ public class CoolVestConfig : IEquipmentConfig
 	public void DoPostConfigure(GameObject go)
 	{
 		CoolVestConfig.SetupVest(go);
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.PedestalDisplayable, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.PedestalDisplayable, false);
 	}
 
 	public const string ID = "Cool_Vest";

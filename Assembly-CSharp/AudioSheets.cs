@@ -11,7 +11,7 @@ public abstract class AudioSheets : ScriptableObject
 			foreach (AudioSheet.SoundInfo soundInfo in audioSheet.soundInfos)
 			{
 				string text = soundInfo.Type;
-				if (text == null || text == string.Empty)
+				if (text == null || text == "")
 				{
 					text = audioSheet.defaultType;
 				}
@@ -42,17 +42,15 @@ public abstract class AudioSheets : ScriptableObject
 		if (animEvent == null)
 		{
 			global::Debug.LogError("Unknown sound type: " + type);
+			return;
 		}
-		else
+		List<AnimEvent> list = null;
+		if (!this.events.TryGetValue(hashedString, out list))
 		{
-			List<AnimEvent> list = null;
-			if (!this.events.TryGetValue(hashedString, out list))
-			{
-				list = new List<AnimEvent>();
-				this.events[hashedString] = list;
-			}
-			list.Add(animEvent);
+			list = new List<AnimEvent>();
+			this.events[hashedString] = list;
 		}
+		list.Add(animEvent);
 	}
 
 	protected abstract AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval);

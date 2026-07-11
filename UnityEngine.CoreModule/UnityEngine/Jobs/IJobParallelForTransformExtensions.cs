@@ -5,9 +5,6 @@ using Unity.Jobs.LowLevel.Unsafe;
 
 namespace UnityEngine.Jobs
 {
-	/// <summary>
-	///   <para>Extension methods for IJobParallelForTransform.</para>
-	/// </summary>
 	public static class IJobParallelForTransformExtensions
 	{
 		public static JobHandle Schedule<T>(this T jobData, TransformAccessArray transforms, JobHandle dependsOn = default(JobHandle)) where T : struct, IJobParallelForTransform

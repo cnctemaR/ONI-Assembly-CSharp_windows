@@ -3,44 +3,33 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module)]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module, AllowMultiple = false)]
 	[ComVisible(true)]
 	public sealed class DebuggableAttribute : Attribute
 	{
 		public DebuggableAttribute(bool isJITTrackingEnabled, bool isJITOptimizerDisabled)
 		{
-			this.JITTrackingEnabledFlag = isJITTrackingEnabled;
-			this.JITOptimizerDisabledFlag = isJITOptimizerDisabled;
+			this.m_debuggingModes = DebuggableAttribute.DebuggingModes.None;
 			if (isJITTrackingEnabled)
 			{
-				this.debuggingModes |= DebuggableAttribute.DebuggingModes.Default;
+				this.m_debuggingModes |= DebuggableAttribute.DebuggingModes.Default;
 			}
 			if (isJITOptimizerDisabled)
 			{
-				this.debuggingModes |= DebuggableAttribute.DebuggingModes.DisableOptimizations;
+				this.m_debuggingModes |= DebuggableAttribute.DebuggingModes.DisableOptimizations;
 			}
 		}
 
 		public DebuggableAttribute(DebuggableAttribute.DebuggingModes modes)
 		{
-			this.debuggingModes = modes;
-			this.JITTrackingEnabledFlag = (this.debuggingModes & DebuggableAttribute.DebuggingModes.Default) != DebuggableAttribute.DebuggingModes.None;
-			this.JITOptimizerDisabledFlag = (this.debuggingModes & DebuggableAttribute.DebuggingModes.DisableOptimizations) != DebuggableAttribute.DebuggingModes.None;
-		}
-
-		public DebuggableAttribute.DebuggingModes DebuggingFlags
-		{
-			get
-			{
-				return this.debuggingModes;
-			}
+			this.m_debuggingModes = modes;
 		}
 
 		public bool IsJITTrackingEnabled
 		{
 			get
 			{
-				return this.JITTrackingEnabledFlag;
+				return (this.m_debuggingModes & DebuggableAttribute.DebuggingModes.Default) > DebuggableAttribute.DebuggingModes.None;
 			}
 		}
 
@@ -48,15 +37,19 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.JITOptimizerDisabledFlag;
+				return (this.m_debuggingModes & DebuggableAttribute.DebuggingModes.DisableOptimizations) > DebuggableAttribute.DebuggingModes.None;
 			}
 		}
 
-		private bool JITTrackingEnabledFlag;
+		public DebuggableAttribute.DebuggingModes DebuggingFlags
+		{
+			get
+			{
+				return this.m_debuggingModes;
+			}
+		}
 
-		private bool JITOptimizerDisabledFlag;
-
-		private DebuggableAttribute.DebuggingModes debuggingModes;
+		private DebuggableAttribute.DebuggingModes m_debuggingModes;
 
 		[Flags]
 		[ComVisible(true)]
@@ -64,9 +57,9 @@ namespace System.Diagnostics
 		{
 			None = 0,
 			Default = 1,
+			DisableOptimizations = 256,
 			IgnoreSymbolStoreSequencePoints = 2,
-			EnableEditAndContinue = 4,
-			DisableOptimizations = 256
+			EnableEditAndContinue = 4
 		}
 	}
 }

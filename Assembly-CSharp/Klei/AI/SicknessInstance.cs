@@ -11,11 +11,6 @@ namespace Klei.AI
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class SicknessInstance : ModifierInstance<Sickness>, ISaveLoadable
 	{
-		public SicknessInstance(GameObject game_object, Sickness disease)
-			: base(game_object, disease)
-		{
-		}
-
 		public Sickness Sickness
 		{
 			get
@@ -56,6 +51,11 @@ namespace Klei.AI
 			}
 		}
 
+		public SicknessInstance(GameObject game_object, Sickness disease)
+			: base(game_object, disease)
+		{
+		}
+
 		[OnDeserialized]
 		private void OnDeserialized()
 		{
@@ -80,7 +80,7 @@ namespace Klei.AI
 			Sickness disease = this.modifier;
 			Func<List<Notification>, object, string> func = delegate(List<Notification> notificationList, object data)
 			{
-				string text2 = string.Empty;
+				string text2 = "";
 				for (int i = 0; i < notificationList.Count; i++)
 				{
 					Notification notification = notificationList[i];
@@ -95,11 +95,11 @@ namespace Klei.AI
 			};
 			string name = disease.Name;
 			string text = name;
-			NotificationType notificationType = ((disease.severity > Sickness.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor);
+			NotificationType notificationType = ((disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad);
 			HashedString invalid = HashedString.Invalid;
-			string sourceInfo = this.exposureInfo.sourceInfo;
+			object sourceInfo = this.exposureInfo.sourceInfo;
 			this.notification = new Notification(text, notificationType, invalid, func, sourceInfo, true, 0f, null, null, null);
-			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Sickness.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Sickness.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
+			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, "", (disease.severity <= Sickness.Severity.Minor) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad, false, OverlayModes.None.ID, 129022);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
 			{
@@ -150,7 +150,7 @@ namespace Klei.AI
 				}
 			}
 			List<Descriptor> symptoms = this.modifier.GetSymptoms();
-			string text = string.Empty;
+			string text = "";
 			foreach (Descriptor descriptor in symptoms)
 			{
 				if (!string.IsNullOrEmpty(text))
@@ -160,26 +160,27 @@ namespace Klei.AI
 				text = text + "    • " + descriptor.text;
 			}
 			str = str.Replace("{Symptoms}", text);
-			str = Regex.Replace(str, "{[^}]*}", string.Empty);
+			str = Regex.Replace(str, "{[^}]*}", "");
 			return str;
 		}
 
 		public float GetInfectedTimeRemaining()
 		{
-			float sicknessDuration = this.modifier.SicknessDuration;
-			float num = sicknessDuration * (1f - this.smi.sm.percentRecovered.Get(this.smi));
-			return num / this.TotalCureSpeedMultiplier;
+			return this.modifier.SicknessDuration * (1f - this.smi.sm.percentRecovered.Get(this.smi)) / this.TotalCureSpeedMultiplier;
 		}
 
 		public float GetFatalityTimeRemaining()
 		{
-			float fatalityDuration = this.modifier.fatalityDuration;
-			return fatalityDuration * (1f - this.smi.sm.percentDied.Get(this.smi));
+			return this.modifier.fatalityDuration * (1f - this.smi.sm.percentDied.Get(this.smi));
 		}
 
 		public float GetPercentCured()
 		{
-			return (this.smi == null) ? 0f : this.smi.sm.percentRecovered.Get(this.smi);
+			if (this.smi == null)
+			{
+				return 0f;
+			}
+			return this.smi.sm.percentRecovered.Get(this.smi);
 		}
 
 		public void SetPercentCured(float pct)
@@ -244,11 +245,9 @@ namespace Klei.AI
 					{
 						float num2 = dt / base.master.modifier.fatalityDuration;
 						base.sm.percentDied.Delta(num2, base.smi);
+						return;
 					}
-					else
-					{
-						base.sm.percentDied.Set(0f, base.smi);
-					}
+					base.sm.percentDied.Set(0f, base.smi);
 				}
 			}
 

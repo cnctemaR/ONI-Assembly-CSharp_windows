@@ -34,8 +34,7 @@ public class ResetSkillsStationConfig : IBuildingConfig
 		go.AddTag(GameTags.NotRoomAssignable);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Prioritizable.AddRef(go);
-		Ownable ownable = go.AddOrGet<Ownable>();
-		ownable.slotID = Db.Get().AssignableSlots.ResetSkillsStation.Id;
+		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.ResetSkillsStation.Id;
 		ResetSkillsStation resetSkillsStation = go.AddOrGet<ResetSkillsStation>();
 		resetSkillsStation.workTime = 180f;
 		resetSkillsStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_reSpeccer_kanim") };

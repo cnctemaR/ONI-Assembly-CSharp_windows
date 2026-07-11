@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -7,9 +8,6 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Stores light probes for the scene.</para>
-	/// </summary>
 	[NativeAsStruct]
 	[NativeHeader("Runtime/Export/Graphics.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -29,12 +27,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool AreLightProbesAllowed(Renderer renderer);
 
-		/// <summary>
-		///   <para>Calculate light probes and occlusion probes at the given world space positions.</para>
-		/// </summary>
-		/// <param name="positions">The array of world space positions used to evaluate the probes.</param>
-		/// <param name="lightProbes">The array where the resulting light probes are written to.</param>
-		/// <param name="occlusionProbes">The array where the resulting occlusion probes are written to.</param>
 		public static void CalculateInterpolatedLightAndOcclusionProbes(Vector3[] positions, SphericalHarmonicsL2[] lightProbes, Vector4[] occlusionProbes)
 		{
 			if (positions == null)
@@ -96,18 +88,12 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CalculateInterpolatedLightAndOcclusionProbes_Internal(Vector3[] positions, int positionsCount, SphericalHarmonicsL2[] lightProbes, Vector4[] occlusionProbes);
 
-		/// <summary>
-		///   <para>Positions of the baked light probes (Read Only).</para>
-		/// </summary>
 		public extern Vector3[] positions
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Coefficients of baked light probes.</para>
-		/// </summary>
 		public extern SphericalHarmonicsL2[] bakedProbes
 		{
 			[NativeName("GetBakedCoefficients")]
@@ -118,18 +104,12 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of light probes (Read Only).</para>
-		/// </summary>
 		public extern int count
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The number of cells space is divided into (Read Only).</para>
-		/// </summary>
 		public extern int cellCount
 		{
 			[NativeName("GetTetrahedraSize")]
@@ -137,12 +117,14 @@ namespace UnityEngine
 			get;
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use GetInterpolatedProbe instead.", true)]
 		public void GetInterpolatedLightProbe(Vector3 position, Renderer renderer, float[] coefficients)
 		{
 		}
 
 		[Obsolete("Use bakedProbes instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float[] coefficients
 		{
 			get

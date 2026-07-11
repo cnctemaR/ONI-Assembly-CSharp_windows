@@ -4,55 +4,36 @@ using System.Collections.Generic;
 
 namespace System.Xml
 {
-	public class XmlNamespaceManager : IEnumerable, IXmlNamespaceResolver
+	public class XmlNamespaceManager : IXmlNamespaceResolver, IEnumerable
 	{
-		public XmlNamespaceManager(XmlNameTable nameTable)
-		{
-			if (nameTable == null)
-			{
-				throw new ArgumentNullException("nameTable");
-			}
-			this.nameTable = nameTable;
-			nameTable.Add("xmlns");
-			nameTable.Add("xml");
-			nameTable.Add(string.Empty);
-			nameTable.Add("http://www.w3.org/2000/xmlns/");
-			nameTable.Add("http://www.w3.org/XML/1998/namespace");
-			this.InitData();
-		}
-
-		private void InitData()
-		{
-			this.decls = new XmlNamespaceManager.NsDecl[10];
-			this.scopes = new XmlNamespaceManager.NsScope[40];
-		}
-
-		private void GrowDecls()
-		{
-			XmlNamespaceManager.NsDecl[] array = this.decls;
-			this.decls = new XmlNamespaceManager.NsDecl[this.declPos * 2 + 1];
-			if (this.declPos > 0)
-			{
-				Array.Copy(array, 0, this.decls, 0, this.declPos);
-			}
-		}
-
-		private void GrowScopes()
-		{
-			XmlNamespaceManager.NsScope[] array = this.scopes;
-			this.scopes = new XmlNamespaceManager.NsScope[this.scopePos * 2 + 1];
-			if (this.scopePos > 0)
-			{
-				Array.Copy(array, 0, this.scopes, 0, this.scopePos);
-			}
-		}
-
-		public virtual string DefaultNamespace
+		internal static IXmlNamespaceResolver EmptyResolver
 		{
 			get
 			{
-				return (this.defaultNamespace != null) ? this.defaultNamespace : string.Empty;
+				if (XmlNamespaceManager.s_EmptyResolver == null)
+				{
+					XmlNamespaceManager.s_EmptyResolver = new XmlNamespaceManager(new NameTable());
+				}
+				return XmlNamespaceManager.s_EmptyResolver;
 			}
+		}
+
+		internal XmlNamespaceManager()
+		{
+		}
+
+		public XmlNamespaceManager(XmlNameTable nameTable)
+		{
+			this.nameTable = nameTable;
+			this.xml = nameTable.Add("xml");
+			this.xmlNs = nameTable.Add("xmlns");
+			this.nsdecls = new XmlNamespaceManager.NamespaceDeclaration[8];
+			string text = nameTable.Add(string.Empty);
+			this.nsdecls[0].Set(text, text, -1, -1);
+			this.nsdecls[1].Set(this.xmlNs, nameTable.Add("http://www.w3.org/2000/xmlns/"), -1, -1);
+			this.nsdecls[2].Set(this.xml, nameTable.Add("http://www.w3.org/XML/1998/namespace"), 0, -1);
+			this.lastDecl = 2;
+			this.scopeId = 1;
 		}
 
 		public virtual XmlNameTable NameTable
@@ -63,360 +44,298 @@ namespace System.Xml
 			}
 		}
 
-		public virtual void AddNamespace(string prefix, string uri)
+		public virtual string DefaultNamespace
 		{
-			this.AddNamespace(prefix, uri, false);
-		}
-
-		private void AddNamespace(string prefix, string uri, bool atomizedNames)
-		{
-			if (prefix == null)
+			get
 			{
-				throw new ArgumentNullException("prefix", "Value cannot be null.");
-			}
-			if (uri == null)
-			{
-				throw new ArgumentNullException("uri", "Value cannot be null.");
-			}
-			if (!atomizedNames)
-			{
-				prefix = this.nameTable.Add(prefix);
-				uri = this.nameTable.Add(uri);
-			}
-			if (prefix == "xml" && uri == "http://www.w3.org/XML/1998/namespace")
-			{
-				return;
-			}
-			XmlNamespaceManager.IsValidDeclaration(prefix, uri, true);
-			if (prefix.Length == 0)
-			{
-				this.defaultNamespace = uri;
-			}
-			for (int i = this.declPos; i > this.declPos - this.count; i--)
-			{
-				if (object.ReferenceEquals(this.decls[i].Prefix, prefix))
+				string text = this.LookupNamespace(string.Empty);
+				if (text != null)
 				{
-					this.decls[i].Uri = uri;
-					return;
+					return text;
 				}
-			}
-			this.declPos++;
-			this.count++;
-			if (this.declPos == this.decls.Length)
-			{
-				this.GrowDecls();
-			}
-			this.decls[this.declPos].Prefix = prefix;
-			this.decls[this.declPos].Uri = uri;
-		}
-
-		private static string IsValidDeclaration(string prefix, string uri, bool throwException)
-		{
-			string text = null;
-			if (prefix == "xml" && uri != "http://www.w3.org/XML/1998/namespace")
-			{
-				text = string.Format("Prefix \"xml\" can only be bound to the fixed namespace URI \"{0}\". \"{1}\" is invalid.", "http://www.w3.org/XML/1998/namespace", uri);
-			}
-			else if (text == null && prefix == "xmlns")
-			{
-				text = "Declaring prefix named \"xmlns\" is not allowed to any namespace.";
-			}
-			else if (text == null && uri == "http://www.w3.org/2000/xmlns/")
-			{
-				text = string.Format("Namespace URI \"{0}\" cannot be declared with any namespace.", "http://www.w3.org/2000/xmlns/");
-			}
-			if (text != null && throwException)
-			{
-				throw new ArgumentException(text);
-			}
-			return text;
-		}
-
-		public virtual IEnumerator GetEnumerator()
-		{
-			Hashtable hashtable = new Hashtable();
-			for (int i = 0; i <= this.declPos; i++)
-			{
-				if (this.decls[i].Prefix != string.Empty && this.decls[i].Uri != null)
-				{
-					hashtable[this.decls[i].Prefix] = this.decls[i].Uri;
-				}
-			}
-			hashtable[string.Empty] = this.DefaultNamespace;
-			hashtable["xml"] = "http://www.w3.org/XML/1998/namespace";
-			hashtable["xmlns"] = "http://www.w3.org/2000/xmlns/";
-			return hashtable.Keys.GetEnumerator();
-		}
-
-		public virtual IDictionary<string, string> GetNamespacesInScope(XmlNamespaceScope scope)
-		{
-			IDictionary namespacesInScopeImpl = this.GetNamespacesInScopeImpl(scope);
-			IDictionary<string, string> dictionary = new Dictionary<string, string>(namespacesInScopeImpl.Count);
-			foreach (object obj in namespacesInScopeImpl)
-			{
-				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-				dictionary[(string)dictionaryEntry.Key] = (string)dictionaryEntry.Value;
-			}
-			return dictionary;
-		}
-
-		internal virtual IDictionary GetNamespacesInScopeImpl(XmlNamespaceScope scope)
-		{
-			Hashtable hashtable = new Hashtable();
-			if (scope == XmlNamespaceScope.Local)
-			{
-				for (int i = 0; i < this.count; i++)
-				{
-					if (this.decls[this.declPos - i].Prefix == string.Empty && this.decls[this.declPos - i].Uri == string.Empty)
-					{
-						if (hashtable.Contains(string.Empty))
-						{
-							hashtable.Remove(string.Empty);
-						}
-					}
-					else if (this.decls[this.declPos - i].Uri != null)
-					{
-						hashtable.Add(this.decls[this.declPos - i].Prefix, this.decls[this.declPos - i].Uri);
-					}
-				}
-				return hashtable;
-			}
-			for (int j = 0; j <= this.declPos; j++)
-			{
-				if (this.decls[j].Prefix == string.Empty && this.decls[j].Uri == string.Empty)
-				{
-					if (hashtable.Contains(string.Empty))
-					{
-						hashtable.Remove(string.Empty);
-					}
-				}
-				else if (this.decls[j].Uri != null)
-				{
-					hashtable[this.decls[j].Prefix] = this.decls[j].Uri;
-				}
-			}
-			if (scope == XmlNamespaceScope.All)
-			{
-				hashtable.Add("xml", "http://www.w3.org/XML/1998/namespace");
-			}
-			return hashtable;
-		}
-
-		public virtual bool HasNamespace(string prefix)
-		{
-			return this.HasNamespace(prefix, false);
-		}
-
-		private bool HasNamespace(string prefix, bool atomizedNames)
-		{
-			if (prefix == null || this.count == 0)
-			{
-				return false;
-			}
-			for (int i = this.declPos; i > this.declPos - this.count; i--)
-			{
-				if (this.decls[i].Prefix == prefix)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public virtual string LookupNamespace(string prefix)
-		{
-			switch (prefix)
-			{
-			case "xmlns":
-				return this.nameTable.Get("http://www.w3.org/2000/xmlns/");
-			case "xml":
-				return this.nameTable.Get("http://www.w3.org/XML/1998/namespace");
-
-				return this.DefaultNamespace;
-			case null:
-				break;
-			default:
-			{
-				for (int i = this.declPos; i >= 0; i--)
-				{
-					if (this.CompareString(this.decls[i].Prefix, prefix, this.internalAtomizedNames) && this.decls[i].Uri != null)
-					{
-						return this.decls[i].Uri;
-					}
-				}
-				return null;
-				break;
-			}
-			}
-			return null;
-		}
-
-		internal string LookupNamespace(string prefix, bool atomizedNames)
-		{
-			this.internalAtomizedNames = atomizedNames;
-			string text = this.LookupNamespace(prefix);
-			this.internalAtomizedNames = false;
-			return text;
-		}
-
-		public virtual string LookupPrefix(string uri)
-		{
-			return this.LookupPrefix(uri, false);
-		}
-
-		private bool CompareString(string s1, string s2, bool atomizedNames)
-		{
-			if (atomizedNames)
-			{
-				return object.ReferenceEquals(s1, s2);
-			}
-			return s1 == s2;
-		}
-
-		internal string LookupPrefix(string uri, bool atomizedName)
-		{
-			return this.LookupPrefixCore(uri, atomizedName, false);
-		}
-
-		internal string LookupPrefixExclusive(string uri, bool atomizedName)
-		{
-			return this.LookupPrefixCore(uri, atomizedName, true);
-		}
-
-		private string LookupPrefixCore(string uri, bool atomizedName, bool excludeOverriden)
-		{
-			if (uri == null)
-			{
-				return null;
-			}
-			if (this.CompareString(uri, this.DefaultNamespace, atomizedName))
-			{
 				return string.Empty;
 			}
-			if (this.CompareString(uri, "http://www.w3.org/XML/1998/namespace", atomizedName))
-			{
-				return "xml";
-			}
-			if (this.CompareString(uri, "http://www.w3.org/2000/xmlns/", atomizedName))
-			{
-				return "xmlns";
-			}
-			for (int i = this.declPos; i >= 0; i--)
-			{
-				if (this.CompareString(this.decls[i].Uri, uri, atomizedName) && this.decls[i].Prefix.Length > 0 && (!excludeOverriden || !this.IsOverriden(i)))
-				{
-					return this.decls[i].Prefix;
-				}
-			}
-			return null;
-		}
-
-		private bool IsOverriden(int idx)
-		{
-			if (idx == this.declPos)
-			{
-				return false;
-			}
-			string prefix = this.decls[idx + 1].Prefix;
-			for (int i = idx + 1; i <= this.declPos; i++)
-			{
-				if (this.decls[idx].Prefix == prefix)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public virtual bool PopScope()
-		{
-			if (this.scopePos == -1)
-			{
-				return false;
-			}
-			this.declPos -= this.count;
-			this.defaultNamespace = this.scopes[this.scopePos].DefaultNamespace;
-			this.count = this.scopes[this.scopePos].DeclCount;
-			this.scopePos--;
-			return true;
 		}
 
 		public virtual void PushScope()
 		{
-			this.scopePos++;
-			if (this.scopePos == this.scopes.Length)
-			{
-				this.GrowScopes();
-			}
-			this.scopes[this.scopePos].DefaultNamespace = this.defaultNamespace;
-			this.scopes[this.scopePos].DeclCount = this.count;
-			this.count = 0;
+			this.scopeId++;
 		}
 
-		public virtual void RemoveNamespace(string prefix, string uri)
+		public virtual bool PopScope()
 		{
-			this.RemoveNamespace(prefix, uri, false);
+			int num = this.lastDecl;
+			if (this.scopeId == 1)
+			{
+				return false;
+			}
+			while (this.nsdecls[num].scopeId == this.scopeId)
+			{
+				if (this.useHashtable)
+				{
+					this.hashTable[this.nsdecls[num].prefix] = this.nsdecls[num].previousNsIndex;
+				}
+				num--;
+			}
+			this.lastDecl = num;
+			this.scopeId--;
+			return true;
 		}
 
-		private void RemoveNamespace(string prefix, string uri, bool atomizedNames)
+		public virtual void AddNamespace(string prefix, string uri)
 		{
-			if (prefix == null)
-			{
-				throw new ArgumentNullException("prefix");
-			}
 			if (uri == null)
 			{
 				throw new ArgumentNullException("uri");
 			}
-			if (this.count == 0)
+			if (prefix == null)
 			{
+				throw new ArgumentNullException("prefix");
+			}
+			prefix = this.nameTable.Add(prefix);
+			uri = this.nameTable.Add(uri);
+			if (Ref.Equal(this.xml, prefix) && !uri.Equals("http://www.w3.org/XML/1998/namespace"))
+			{
+				throw new ArgumentException(Res.GetString("Prefix \"xml\" is reserved for use by XML and can be mapped only to namespace name \"http://www.w3.org/XML/1998/namespace\"."));
+			}
+			if (Ref.Equal(this.xmlNs, prefix))
+			{
+				throw new ArgumentException(Res.GetString("Prefix \"xmlns\" is reserved for use by XML."));
+			}
+			int num = this.LookupNamespaceDecl(prefix);
+			int num2 = -1;
+			if (num != -1)
+			{
+				if (this.nsdecls[num].scopeId == this.scopeId)
+				{
+					this.nsdecls[num].uri = uri;
+					return;
+				}
+				num2 = num;
+			}
+			if (this.lastDecl == this.nsdecls.Length - 1)
+			{
+				XmlNamespaceManager.NamespaceDeclaration[] array = new XmlNamespaceManager.NamespaceDeclaration[this.nsdecls.Length * 2];
+				Array.Copy(this.nsdecls, 0, array, 0, this.nsdecls.Length);
+				this.nsdecls = array;
+			}
+			XmlNamespaceManager.NamespaceDeclaration[] array2 = this.nsdecls;
+			int num3 = this.lastDecl + 1;
+			this.lastDecl = num3;
+			array2[num3].Set(prefix, uri, this.scopeId, num2);
+			if (this.useHashtable)
+			{
+				this.hashTable[prefix] = this.lastDecl;
 				return;
 			}
-			for (int i = this.declPos; i > this.declPos - this.count; i--)
+			if (this.lastDecl >= 16)
 			{
-				if (this.CompareString(this.decls[i].Prefix, prefix, atomizedNames) && this.CompareString(this.decls[i].Uri, uri, atomizedNames))
+				this.hashTable = new Dictionary<string, int>(this.lastDecl);
+				for (int i = 0; i <= this.lastDecl; i++)
 				{
-					this.decls[i].Uri = null;
+					this.hashTable[this.nsdecls[i].prefix] = i;
+				}
+				this.useHashtable = true;
+			}
+		}
+
+		public virtual void RemoveNamespace(string prefix, string uri)
+		{
+			if (uri == null)
+			{
+				throw new ArgumentNullException("uri");
+			}
+			if (prefix == null)
+			{
+				throw new ArgumentNullException("prefix");
+			}
+			for (int num = this.LookupNamespaceDecl(prefix); num != -1; num = this.nsdecls[num].previousNsIndex)
+			{
+				if (string.Equals(this.nsdecls[num].uri, uri) && this.nsdecls[num].scopeId == this.scopeId)
+				{
+					this.nsdecls[num].uri = null;
 				}
 			}
 		}
 
-		internal const string XmlnsXml = "http://www.w3.org/XML/1998/namespace";
+		public virtual IEnumerator GetEnumerator()
+		{
+			Dictionary<string, string> dictionary = new Dictionary<string, string>(this.lastDecl + 1);
+			for (int i = 0; i <= this.lastDecl; i++)
+			{
+				if (this.nsdecls[i].uri != null)
+				{
+					dictionary[this.nsdecls[i].prefix] = this.nsdecls[i].prefix;
+				}
+			}
+			return dictionary.Keys.GetEnumerator();
+		}
 
-		internal const string XmlnsXmlns = "http://www.w3.org/2000/xmlns/";
+		public virtual IDictionary<string, string> GetNamespacesInScope(XmlNamespaceScope scope)
+		{
+			int i = 0;
+			switch (scope)
+			{
+			case XmlNamespaceScope.All:
+				i = 2;
+				break;
+			case XmlNamespaceScope.ExcludeXml:
+				i = 3;
+				break;
+			case XmlNamespaceScope.Local:
+				i = this.lastDecl;
+				while (this.nsdecls[i].scopeId == this.scopeId)
+				{
+					i--;
+				}
+				i++;
+				break;
+			}
+			Dictionary<string, string> dictionary = new Dictionary<string, string>(this.lastDecl - i + 1);
+			while (i <= this.lastDecl)
+			{
+				string prefix = this.nsdecls[i].prefix;
+				string uri = this.nsdecls[i].uri;
+				if (uri != null)
+				{
+					if (uri.Length > 0 || prefix.Length > 0 || scope == XmlNamespaceScope.Local)
+					{
+						dictionary[prefix] = uri;
+					}
+					else
+					{
+						dictionary.Remove(prefix);
+					}
+				}
+				i++;
+			}
+			return dictionary;
+		}
 
-		internal const string PrefixXml = "xml";
+		public virtual string LookupNamespace(string prefix)
+		{
+			int num = this.LookupNamespaceDecl(prefix);
+			if (num != -1)
+			{
+				return this.nsdecls[num].uri;
+			}
+			return null;
+		}
 
-		internal const string PrefixXmlns = "xmlns";
+		private int LookupNamespaceDecl(string prefix)
+		{
+			if (!this.useHashtable)
+			{
+				for (int i = this.lastDecl; i >= 0; i--)
+				{
+					if (this.nsdecls[i].prefix == prefix && this.nsdecls[i].uri != null)
+					{
+						return i;
+					}
+				}
+				for (int j = this.lastDecl; j >= 0; j--)
+				{
+					if (string.Equals(this.nsdecls[j].prefix, prefix) && this.nsdecls[j].uri != null)
+					{
+						return j;
+					}
+				}
+				return -1;
+			}
+			int previousNsIndex;
+			if (this.hashTable.TryGetValue(prefix, out previousNsIndex))
+			{
+				while (previousNsIndex != -1 && this.nsdecls[previousNsIndex].uri == null)
+				{
+					previousNsIndex = this.nsdecls[previousNsIndex].previousNsIndex;
+				}
+				return previousNsIndex;
+			}
+			return -1;
+		}
 
-		private XmlNamespaceManager.NsDecl[] decls;
+		public virtual string LookupPrefix(string uri)
+		{
+			for (int i = this.lastDecl; i >= 0; i--)
+			{
+				if (string.Equals(this.nsdecls[i].uri, uri))
+				{
+					string prefix = this.nsdecls[i].prefix;
+					if (string.Equals(this.LookupNamespace(prefix), uri))
+					{
+						return prefix;
+					}
+				}
+			}
+			return null;
+		}
 
-		private int declPos = -1;
+		public virtual bool HasNamespace(string prefix)
+		{
+			int num = this.lastDecl;
+			while (this.nsdecls[num].scopeId == this.scopeId)
+			{
+				if (string.Equals(this.nsdecls[num].prefix, prefix) && this.nsdecls[num].uri != null)
+				{
+					return prefix.Length > 0 || this.nsdecls[num].uri.Length > 0;
+				}
+				num--;
+			}
+			return false;
+		}
 
-		private XmlNamespaceManager.NsScope[] scopes;
+		internal bool GetNamespaceDeclaration(int idx, out string prefix, out string uri)
+		{
+			idx = this.lastDecl - idx;
+			if (idx < 0)
+			{
+				string text;
+				uri = (text = null);
+				prefix = text;
+				return false;
+			}
+			prefix = this.nsdecls[idx].prefix;
+			uri = this.nsdecls[idx].uri;
+			return true;
+		}
 
-		private int scopePos = -1;
+		private static volatile IXmlNamespaceResolver s_EmptyResolver;
 
-		private string defaultNamespace;
+		private XmlNamespaceManager.NamespaceDeclaration[] nsdecls;
 
-		private int count;
+		private int lastDecl;
 
 		private XmlNameTable nameTable;
 
-		internal bool internalAtomizedNames;
+		private int scopeId;
 
-		private struct NsDecl
+		private Dictionary<string, int> hashTable;
+
+		private bool useHashtable;
+
+		private string xml;
+
+		private string xmlNs;
+
+		private const int MinDeclsCountForHashtable = 16;
+
+		private struct NamespaceDeclaration
 		{
-			public string Prefix;
+			public void Set(string prefix, string uri, int scopeId, int previousNsIndex)
+			{
+				this.prefix = prefix;
+				this.uri = uri;
+				this.scopeId = scopeId;
+				this.previousNsIndex = previousNsIndex;
+			}
 
-			public string Uri;
-		}
+			public string prefix;
 
-		private struct NsScope
-		{
-			public int DeclCount;
+			public string uri;
 
-			public string DefaultNamespace;
+			public int scopeId;
+
+			public int previousNsIndex;
 		}
 	}
 }

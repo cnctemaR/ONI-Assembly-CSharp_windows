@@ -19,26 +19,15 @@ namespace Database
 
 		public override bool Success()
 		{
-			IEnumerator enumerator = Components.MonumentParts.GetEnumerator();
-			try
+			using (IEnumerator enumerator = Components.MonumentParts.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
-					object obj = enumerator.Current;
-					MonumentPart monumentPart = (MonumentPart)obj;
-					if (monumentPart.IsMonumentCompleted())
+					if (((MonumentPart)enumerator.Current).IsMonumentCompleted())
 					{
 						Game.Instance.unlocks.Unlock("thriving");
 						return true;
 					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
 				}
 			}
 			return false;

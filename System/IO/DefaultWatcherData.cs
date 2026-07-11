@@ -19,6 +19,8 @@ namespace System.IO
 
 		public DateTime DisabledTime;
 
+		public object FilesLock = new object();
+
 		public Hashtable Files;
 	}
 }

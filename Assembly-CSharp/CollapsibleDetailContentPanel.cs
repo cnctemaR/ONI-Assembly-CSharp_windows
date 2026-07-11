@@ -61,8 +61,9 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		if (base.gameObject.activeSelf && num == 0)
 		{
 			base.gameObject.SetActive(false);
+			return;
 		}
-		else if (!base.gameObject.activeSelf && num > 0)
+		if (!base.gameObject.activeSelf && num > 0)
 		{
 			base.gameObject.SetActive(true);
 		}
@@ -136,11 +137,9 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		{
 			this.ArrowIcon.SetActive();
 			this.ForceLocTextsMeshRebuild();
+			return;
 		}
-		else
-		{
-			this.ArrowIcon.SetInactive();
-		}
+		this.ArrowIcon.SetInactive();
 	}
 
 	public void SetCollapsible(bool bCollapsible)
@@ -152,9 +151,9 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 	public void ForceLocTextsMeshRebuild()
 	{
 		LocText[] componentsInChildren = base.GetComponentsInChildren<LocText>();
-		foreach (LocText locText in componentsInChildren)
+		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
-			locText.ForceMeshUpdate();
+			componentsInChildren[i].ForceMeshUpdate();
 		}
 	}
 

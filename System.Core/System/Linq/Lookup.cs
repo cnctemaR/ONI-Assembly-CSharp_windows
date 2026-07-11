@@ -1,34 +1,60 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using Unity;
 
 namespace System.Linq
 {
-	public class Lookup<TKey, TElement> : IEnumerable, IEnumerable<IGrouping<TKey, TElement>>, ILookup<TKey, TElement>
+	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(SystemLinq_LookupDebugView<, >))]
+	public class Lookup<TKey, TElement> : ILookup<TKey, TElement>, IEnumerable<IGrouping<TKey, TElement>>, IEnumerable, IIListProvider<IGrouping<TKey, TElement>>
 	{
-		internal Lookup(Dictionary<TKey, List<TElement>> lookup, IEnumerable<TElement> nullKeyElements)
+		internal static Lookup<TKey, TElement> Create<TSource>(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
 		{
-			this.groups = new Dictionary<TKey, IGrouping<TKey, TElement>>(lookup.Comparer);
-			foreach (KeyValuePair<TKey, List<TElement>> keyValuePair in lookup)
+			Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
+			foreach (TSource tsource in source)
 			{
-				this.groups.Add(keyValuePair.Key, new Grouping<TKey, TElement>(keyValuePair.Key, keyValuePair.Value));
+				lookup.GetGrouping(keySelector(tsource), true).Add(elementSelector(tsource));
 			}
-			if (nullKeyElements != null)
-			{
-				this.nullGrouping = new Grouping<TKey, TElement>(default(TKey), nullKeyElements);
-			}
+			return lookup;
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
+		internal static Lookup<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer)
 		{
-			return this.GetEnumerator();
+			Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
+			foreach (TElement telement in source)
+			{
+				lookup.GetGrouping(keySelector(telement), true).Add(telement);
+			}
+			return lookup;
+		}
+
+		internal static Lookup<TKey, TElement> CreateForJoin(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer)
+		{
+			Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
+			foreach (TElement telement in source)
+			{
+				TKey tkey = keySelector(telement);
+				if (tkey != null)
+				{
+					lookup.GetGrouping(tkey, true).Add(telement);
+				}
+			}
+			return lookup;
+		}
+
+		private Lookup(IEqualityComparer<TKey> comparer)
+		{
+			this._comparer = comparer ?? EqualityComparer<TKey>.Default;
+			this._groupings = new Grouping<TKey, TElement>[7];
 		}
 
 		public int Count
 		{
 			get
 			{
-				return (this.nullGrouping != null) ? (this.groups.Count + 1) : this.groups.Count;
+				return this._count;
 			}
 		}
 
@@ -36,52 +62,206 @@ namespace System.Linq
 		{
 			get
 			{
-				if (key == null && this.nullGrouping != null)
-				{
-					return this.nullGrouping;
-				}
-				IGrouping<TKey, TElement> grouping;
-				if (key != null && this.groups.TryGetValue(key, out grouping))
+				Grouping<TKey, TElement> grouping = this.GetGrouping(key, false);
+				if (grouping != null)
 				{
 					return grouping;
 				}
-				return new TElement[0];
+				return Array.Empty<TElement>();
 			}
-		}
-
-		public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> selector)
-		{
-			if (this.nullGrouping != null)
-			{
-				yield return selector(this.nullGrouping.Key, this.nullGrouping);
-			}
-			foreach (IGrouping<TKey, TElement> group in this.groups.Values)
-			{
-				yield return selector(group.Key, group);
-			}
-			yield break;
 		}
 
 		public bool Contains(TKey key)
 		{
-			return (key == null) ? (this.nullGrouping != null) : this.groups.ContainsKey(key);
+			return this.GetGrouping(key, false) != null;
 		}
 
 		public IEnumerator<IGrouping<TKey, TElement>> GetEnumerator()
 		{
-			if (this.nullGrouping != null)
+			Grouping<TKey, TElement> g = this._lastGrouping;
+			if (g != null)
 			{
-				yield return this.nullGrouping;
-			}
-			foreach (IGrouping<TKey, TElement> g in this.groups.Values)
-			{
-				yield return g;
+				do
+				{
+					g = g._next;
+					yield return g;
+				}
+				while (g != this._lastGrouping);
 			}
 			yield break;
 		}
 
-		private IGrouping<TKey, TElement> nullGrouping;
+		IGrouping<TKey, TElement>[] IIListProvider<IGrouping<TKey, TElement>>.ToArray()
+		{
+			IGrouping<TKey, TElement>[] array = new IGrouping<TKey, TElement>[this._count];
+			int num = 0;
+			Grouping<TKey, TElement> grouping = this._lastGrouping;
+			if (grouping != null)
+			{
+				do
+				{
+					grouping = grouping._next;
+					array[num] = grouping;
+					num++;
+				}
+				while (grouping != this._lastGrouping);
+			}
+			return array;
+		}
 
-		private Dictionary<TKey, IGrouping<TKey, TElement>> groups;
+		internal TResult[] ToArray<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
+		{
+			TResult[] array = new TResult[this._count];
+			int num = 0;
+			Grouping<TKey, TElement> grouping = this._lastGrouping;
+			if (grouping != null)
+			{
+				do
+				{
+					grouping = grouping._next;
+					grouping.Trim();
+					array[num] = resultSelector(grouping._key, grouping._elements);
+					num++;
+				}
+				while (grouping != this._lastGrouping);
+			}
+			return array;
+		}
+
+		List<IGrouping<TKey, TElement>> IIListProvider<IGrouping<TKey, TElement>>.ToList()
+		{
+			List<IGrouping<TKey, TElement>> list = new List<IGrouping<TKey, TElement>>(this._count);
+			Grouping<TKey, TElement> grouping = this._lastGrouping;
+			if (grouping != null)
+			{
+				do
+				{
+					grouping = grouping._next;
+					list.Add(grouping);
+				}
+				while (grouping != this._lastGrouping);
+			}
+			return list;
+		}
+
+		internal List<TResult> ToList<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
+		{
+			List<TResult> list = new List<TResult>(this._count);
+			Grouping<TKey, TElement> grouping = this._lastGrouping;
+			if (grouping != null)
+			{
+				do
+				{
+					grouping = grouping._next;
+					grouping.Trim();
+					list.Add(resultSelector(grouping._key, grouping._elements));
+				}
+				while (grouping != this._lastGrouping);
+			}
+			return list;
+		}
+
+		int IIListProvider<IGrouping<TKey, TElement>>.GetCount(bool onlyIfCheap)
+		{
+			return this._count;
+		}
+
+		public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
+		{
+			Grouping<TKey, TElement> g = this._lastGrouping;
+			if (g != null)
+			{
+				do
+				{
+					g = g._next;
+					g.Trim();
+					yield return resultSelector(g._key, g._elements);
+				}
+				while (g != this._lastGrouping);
+			}
+			yield break;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
+		private int InternalGetHashCode(TKey key)
+		{
+			if (key != null)
+			{
+				return this._comparer.GetHashCode(key) & int.MaxValue;
+			}
+			return 0;
+		}
+
+		internal Grouping<TKey, TElement> GetGrouping(TKey key, bool create)
+		{
+			int num = this.InternalGetHashCode(key);
+			for (Grouping<TKey, TElement> grouping = this._groupings[num % this._groupings.Length]; grouping != null; grouping = grouping._hashNext)
+			{
+				if (grouping._hashCode == num && this._comparer.Equals(grouping._key, key))
+				{
+					return grouping;
+				}
+			}
+			if (create)
+			{
+				if (this._count == this._groupings.Length)
+				{
+					this.Resize();
+				}
+				int num2 = num % this._groupings.Length;
+				Grouping<TKey, TElement> grouping2 = new Grouping<TKey, TElement>();
+				grouping2._key = key;
+				grouping2._hashCode = num;
+				grouping2._elements = new TElement[1];
+				grouping2._hashNext = this._groupings[num2];
+				this._groupings[num2] = grouping2;
+				if (this._lastGrouping == null)
+				{
+					grouping2._next = grouping2;
+				}
+				else
+				{
+					grouping2._next = this._lastGrouping._next;
+					this._lastGrouping._next = grouping2;
+				}
+				this._lastGrouping = grouping2;
+				this._count++;
+				return grouping2;
+			}
+			return null;
+		}
+
+		private void Resize()
+		{
+			int num = checked(this._count * 2 + 1);
+			Grouping<TKey, TElement>[] array = new Grouping<TKey, TElement>[num];
+			Grouping<TKey, TElement> grouping = this._lastGrouping;
+			do
+			{
+				grouping = grouping._next;
+				int num2 = grouping._hashCode % num;
+				grouping._hashNext = array[num2];
+				array[num2] = grouping;
+			}
+			while (grouping != this._lastGrouping);
+			this._groupings = array;
+		}
+
+		internal Lookup()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		private readonly IEqualityComparer<TKey> _comparer;
+
+		private Grouping<TKey, TElement>[] _groupings;
+
+		private Grouping<TKey, TElement> _lastGrouping;
+
+		private int _count;
 	}
 }

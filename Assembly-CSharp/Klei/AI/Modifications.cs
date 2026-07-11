@@ -9,12 +9,6 @@ namespace Klei.AI
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Modifications<ModifierType, InstanceType> : ISaveLoadableDetails where ModifierType : Resource where InstanceType : ModifierInstance<ModifierType>
 	{
-		public Modifications(GameObject go, ResourceSet<ModifierType> resources = null)
-		{
-			this.resources = resources;
-			this.gameObject = go;
-		}
-
 		public int Count
 		{
 			get
@@ -50,7 +44,13 @@ namespace Klei.AI
 
 		public virtual InstanceType CreateInstance(ModifierType modifier)
 		{
-			return (InstanceType)((object)null);
+			return default(InstanceType);
+		}
+
+		public Modifications(GameObject go, ResourceSet<ModifierType> resources = null)
+		{
+			this.resources = resources;
+			this.gameObject = go;
 		}
 
 		public virtual InstanceType Add(InstanceType instance)
@@ -63,12 +63,11 @@ namespace Klei.AI
 		{
 			for (int i = 0; i < this.ModifierList.Count; i++)
 			{
-				InstanceType instanceType = this.ModifierList[i];
-				if (instanceType == instance)
+				if (this.ModifierList[i] == instance)
 				{
 					this.ModifierList.RemoveAt(i);
 					instance.OnCleanUp();
-					break;
+					return;
 				}
 			}
 		}
@@ -87,7 +86,7 @@ namespace Klei.AI
 					return instanceType;
 				}
 			}
-			return (InstanceType)((object)null);
+			return default(InstanceType);
 		}
 
 		public InstanceType Get(string id)
@@ -99,7 +98,7 @@ namespace Klei.AI
 					return instanceType;
 				}
 			}
-			return (InstanceType)((object)null);
+			return default(InstanceType);
 		}
 
 		public void Serialize(BinaryWriter writer)

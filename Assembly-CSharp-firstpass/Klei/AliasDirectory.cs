@@ -7,6 +7,11 @@ namespace Klei
 {
 	public class AliasDirectory : IFileDirectory
 	{
+		public string GetID()
+		{
+			return this.id;
+		}
+
 		public AliasDirectory(string id, string actual_location, string path_prefix)
 		{
 			this.id = id;
@@ -14,11 +19,6 @@ namespace Klei
 			path_prefix = FileSystem.Normalize(path_prefix);
 			this.root = actual_location;
 			this.prefix = path_prefix;
-		}
-
-		public string GetID()
-		{
-			return this.id;
 		}
 
 		private string GetActualPath(string filename)
@@ -64,10 +64,10 @@ namespace Klei
 				return;
 			}
 			string[] files = Directory.GetFiles(actualPath);
-			foreach (string text in files)
+			for (int i = 0; i < files.Length; i++)
 			{
-				string text2 = FileSystem.Normalize(text);
-				string virtualPath = this.GetVirtualPath(text2);
+				string text = FileSystem.Normalize(files[i]);
+				string virtualPath = this.GetVirtualPath(text);
 				if (re.IsMatch(virtualPath))
 				{
 					result.Add(virtualPath);

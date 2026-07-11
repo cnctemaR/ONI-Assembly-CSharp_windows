@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
+	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	[Serializable]
 	public class CheckoutException : ExternalException
 	{
@@ -21,16 +25,16 @@ namespace System.ComponentModel.Design
 		{
 		}
 
-		public CheckoutException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
-
 		protected CheckoutException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
 
-		public static readonly CheckoutException Canceled = new CheckoutException("The user canceled the checkout.", -2147467260);
+		public CheckoutException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+		}
+
+		public static readonly CheckoutException Canceled = new CheckoutException(global::SR.GetString("The checkout was canceled by the user."), -2147467260);
 	}
 }

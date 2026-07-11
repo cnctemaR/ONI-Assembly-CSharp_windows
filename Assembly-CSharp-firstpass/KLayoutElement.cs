@@ -19,8 +19,7 @@ public class KLayoutElement : LayoutElement
 
 	protected override void OnDisable()
 	{
-		bool flag = this.makeDirtyOnDisable;
-		if (flag)
+		if (this.makeDirtyOnDisable)
 		{
 			base.OnDisable();
 		}

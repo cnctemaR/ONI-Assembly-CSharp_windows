@@ -23,8 +23,8 @@ namespace ProcGen
 			for (int j = 0; j < list.Count; j++)
 			{
 				float num5 = num4;
-				T t2 = list[j];
-				num4 = num5 + t2.weight;
+				T t = list[j];
+				num4 = num5 + t.weight;
 				if (num4 > num3)
 				{
 					return list[j];

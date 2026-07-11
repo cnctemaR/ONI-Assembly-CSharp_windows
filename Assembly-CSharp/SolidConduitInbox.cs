@@ -27,11 +27,9 @@ public class SolidConduitInbox : StateMachineComponent<SolidConduitInbox.SMInsta
 		if (this.operational.IsOperational && this.dispenser.IsDispensing)
 		{
 			this.operational.SetActive(true, false);
+			return;
 		}
-		else
-		{
-			this.operational.SetActive(false, false);
-		}
+		this.operational.SetActive(false, false);
 	}
 
 	[MyCmpReq]

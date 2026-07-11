@@ -2,36 +2,18 @@
 
 namespace UnityEngine.Experimental.GlobalIllumination
 {
-	/// <summary>
-	///   <para>Utility class for converting Unity Lights to light types recognized by the baking backends.</para>
-	/// </summary>
 	public static class LightmapperUtils
 	{
-		/// <summary>
-		///   <para>Extracts informations from Lights.</para>
-		/// </summary>
-		/// <param name="baketype">The lights baketype.</param>
-		/// <returns>
-		///   <para>Returns the light's light mode.</para>
-		/// </returns>
 		public static LightMode Extract(LightmapBakeType baketype)
 		{
 			return (baketype != LightmapBakeType.Realtime) ? ((baketype != LightmapBakeType.Mixed) ? LightMode.Baked : LightMode.Mixed) : LightMode.Realtime;
 		}
 
-		/// <summary>
-		///   <para>Extracts the indirect color from a light.</para>
-		/// </summary>
-		/// <param name="l"></param>
 		public static LinearColor ExtractIndirect(Light l)
 		{
 			return LinearColor.Convert(l.color, l.intensity * l.bounceIntensity);
 		}
 
-		/// <summary>
-		///   <para>Extracts the inner cone angle of spot lights.</para>
-		/// </summary>
-		/// <param name="l"></param>
 		public static float ExtractInnerCone(Light l)
 		{
 			return 2f * Mathf.Atan(Mathf.Tan(l.spotAngle * 0.5f * 0.017453292f) * 46f / 64f);
@@ -89,6 +71,19 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			rect.range = l.range;
 			rect.width = 0f;
 			rect.height = 0f;
+		}
+
+		public static void Extract(Light l, ref DiscLight disc)
+		{
+			disc.instanceID = l.GetInstanceID();
+			disc.mode = LightMode.Realtime;
+			disc.shadow = l.shadows != LightShadows.None;
+			disc.position = l.transform.position;
+			disc.orientation = l.transform.rotation;
+			disc.color = LinearColor.Convert(l.color, l.intensity);
+			disc.indirectColor = LightmapperUtils.ExtractIndirect(l);
+			disc.range = l.range;
+			disc.radius = 0f;
 		}
 	}
 }

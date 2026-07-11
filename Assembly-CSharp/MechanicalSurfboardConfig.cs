@@ -35,15 +35,13 @@ public class MechanicalSurfboardConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
-		Storage storage = go.AddOrGet<Storage>();
-		storage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
+		go.AddOrGet<Storage>().SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
 		conduitConsumer.capacityKG = 20f;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
-		MechanicalSurfboardWorkable mechanicalSurfboardWorkable = go.AddOrGet<MechanicalSurfboardWorkable>();
-		mechanicalSurfboardWorkable.basePriority = RELAXATION.PRIORITY.TIER3;
+		go.AddOrGet<MechanicalSurfboardWorkable>().basePriority = RELAXATION.PRIORITY.TIER3;
 		MechanicalSurfboard mechanicalSurfboard = go.AddOrGet<MechanicalSurfboard>();
 		mechanicalSurfboard.waterSpillRateKG = 0.05f;
 		mechanicalSurfboard.minOperationalWaterKG = 2f;

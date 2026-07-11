@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class PathGrid
 {
+	public void SetGroupProber(IGroupProber group_prober)
+	{
+		this.groupProber = group_prober;
+	}
+
 	public PathGrid(int width_in_cells, int height_in_cells, bool apply_offset, NavType[] valid_nav_types)
 	{
 		this.applyOffset = apply_offset;
@@ -28,11 +33,6 @@ public class PathGrid
 		this.serialNo = 0;
 		this.previousSerialNo = -1;
 		this.isUpdating = false;
-	}
-
-	public void SetGroupProber(IGroupProber group_prober)
-	{
-		this.groupProber = group_prober;
 	}
 
 	public void OnCleanUp()
@@ -106,13 +106,17 @@ public class PathGrid
 			return PathGrid.InvalidCell;
 		}
 		PathFinder.Cell cell2 = this.Cells[num * this.ValidNavTypes.Length + this.NavTypeTable[(int)nav_type]];
-		return (!this.IsValidSerialNo(cell2.queryId)) ? PathGrid.InvalidCell : cell2;
+		if (!this.IsValidSerialNo(cell2.queryId))
+		{
+			return PathGrid.InvalidCell;
+		}
+		return cell2;
 	}
 
 	public void SetCell(PathFinder.PotentialPath potential_path, ref PathFinder.Cell cell_data)
 	{
 		int num = this.OffsetCell(potential_path.cell);
-		if (num == -1)
+		if (-1 == num)
 		{
 			return;
 		}
@@ -154,12 +158,16 @@ public class PathGrid
 	public int GetCost(int cell)
 	{
 		int num = this.OffsetCell(cell);
-		if (num == -1)
+		if (-1 == num)
 		{
 			return -1;
 		}
 		PathGrid.ProberCell proberCell = this.ProberCells[num];
-		return (!this.IsValidSerialNo(proberCell.queryId)) ? (-1) : proberCell.cost;
+		if (!this.IsValidSerialNo(proberCell.queryId))
+		{
+			return -1;
+		}
+		return proberCell.cost;
 	}
 
 	private int OffsetCell(int cell)
@@ -176,8 +184,7 @@ public class PathGrid
 			return -1;
 		}
 		int num3 = num - this.rootX;
-		int num4 = num2 - this.rootY;
-		return num4 * this.widthInCells + num3;
+		return (num2 - this.rootY) * this.widthInCells + num3;
 	}
 
 	private PathFinder.Cell[] Cells;

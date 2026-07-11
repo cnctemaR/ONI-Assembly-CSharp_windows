@@ -5,6 +5,12 @@ namespace YamlDotNet.Core
 	[Serializable]
 	public class Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
 	{
+		public int Index { get; private set; }
+
+		public int Line { get; private set; }
+
+		public int Column { get; private set; }
+
 		public Mark()
 		{
 			this.Line = 1;
@@ -29,12 +35,6 @@ namespace YamlDotNet.Core
 			this.Line = line;
 			this.Column = column;
 		}
-
-		public int Index { get; private set; }
-
-		public int Line { get; private set; }
-
-		public int Column { get; private set; }
 
 		public override string ToString()
 		{

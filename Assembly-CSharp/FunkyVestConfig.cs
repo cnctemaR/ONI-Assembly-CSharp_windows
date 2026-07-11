@@ -9,8 +9,7 @@ public class FunkyVestConfig : IEquipmentConfig
 {
 	public EquipmentDef CreateEquipmentDef()
 	{
-		Dictionary<string, float> dictionary = new Dictionary<string, float>();
-		dictionary.Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS);
+		new Dictionary<string, float>().Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS);
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.FANCY_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Funky_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null, null);
@@ -42,8 +41,7 @@ public class FunkyVestConfig : IEquipmentConfig
 	public void DoPostConfigure(GameObject go)
 	{
 		FunkyVestConfig.SetupVest(go);
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.PedestalDisplayable, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.PedestalDisplayable, false);
 	}
 
 	public const string ID = "Funky_Vest";

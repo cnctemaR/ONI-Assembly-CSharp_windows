@@ -4,17 +4,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Details about a specific point of contact involved in a 2D physics collision.</para>
-	/// </summary>
 	[NativeClass("ScriptingContactPoint2D", "struct ScriptingContactPoint2D;")]
 	[NativeHeader("Modules/Physics2D/Public/PhysicsScripting2D.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[RequiredByNativeCode(Optional = false, GenerateProxy = true)]
 	public struct ContactPoint2D
 	{
-		/// <summary>
-		///   <para>The point of contact between the two colliders in world space.</para>
-		/// </summary>
 		public Vector2 point
 		{
 			get
@@ -23,9 +17,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Surface normal at the contact point.</para>
-		/// </summary>
 		public Vector2 normal
 		{
 			get
@@ -34,9 +25,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the distance between the colliders at the contact point.</para>
-		/// </summary>
 		public float separation
 		{
 			get
@@ -45,9 +33,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the impulse force applied at the contact point along the ContactPoint2D.normal.</para>
-		/// </summary>
 		public float normalImpulse
 		{
 			get
@@ -56,9 +41,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the impulse force applied at the contact point which is perpendicular to the ContactPoint2D.normal.</para>
-		/// </summary>
 		public float tangentImpulse
 		{
 			get
@@ -67,9 +49,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the relative velocity of the two colliders at the contact point (Read Only).</para>
-		/// </summary>
 		public Vector2 relativeVelocity
 		{
 			get
@@ -78,9 +57,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The incoming Collider2D involved in the collision with the otherCollider.</para>
-		/// </summary>
 		public Collider2D collider
 		{
 			get
@@ -89,9 +65,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The other Collider2D involved in the collision with the collider.</para>
-		/// </summary>
 		public Collider2D otherCollider
 		{
 			get
@@ -100,9 +73,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The incoming Rigidbody2D involved in the collision with the otherRigidbody.</para>
-		/// </summary>
 		public Rigidbody2D rigidbody
 		{
 			get
@@ -111,9 +81,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The other Rigidbody2D involved in the collision with the rigidbody.</para>
-		/// </summary>
 		public Rigidbody2D otherRigidbody
 		{
 			get
@@ -122,9 +89,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Indicates whether the collision response or reaction is enabled or disabled.</para>
-		/// </summary>
 		public bool enabled
 		{
 			get

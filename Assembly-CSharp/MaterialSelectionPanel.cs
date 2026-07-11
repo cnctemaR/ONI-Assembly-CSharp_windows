@@ -125,8 +125,7 @@ public class MaterialSelectionPanel : KScreen
 			selector.gameObject.SetActive(false);
 		});
 		TechItem techItem = Db.Get().TechItems.TryGet(this.activeRecipe.GetBuildingDef().PrefabID);
-		bool flag = !DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && techItem != null && !techItem.IsComplete();
-		if (flag)
+		if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && techItem != null && !techItem.IsComplete())
 		{
 			this.ResearchRequired.SetActive(true);
 			LocText[] componentsInChildren = this.ResearchRequired.GetComponentsInChildren<LocText>();
@@ -134,18 +133,16 @@ public class MaterialSelectionPanel : KScreen
 			componentsInChildren[1].text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
 			componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
 			this.priorityScreen.gameObject.SetActive(false);
+			return;
 		}
-		else
+		this.ResearchRequired.SetActive(false);
+		for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
 		{
-			this.ResearchRequired.SetActive(false);
-			for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
-			{
-				this.MaterialSelectors[i].gameObject.SetActive(true);
-				this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
-			}
-			this.priorityScreen.gameObject.SetActive(true);
-			this.priorityScreen.gameObject.transform.SetAsLastSibling();
+			this.MaterialSelectors[i].gameObject.SetActive(true);
+			this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
 		}
+		this.priorityScreen.gameObject.SetActive(true);
+		this.priorityScreen.gameObject.transform.SetAsLastSibling();
 	}
 
 	public void UpdateResourceToggleValues()
@@ -164,8 +161,7 @@ public class MaterialSelectionPanel : KScreen
 		bool flag = true;
 		for (int i = 0; i < this.MaterialSelectors.Count; i++)
 		{
-			MaterialSelector materialSelector = this.MaterialSelectors[i];
-			if (!materialSelector.AutoSelectAvailableMaterial())
+			if (!this.MaterialSelectors[i].AutoSelectAvailableMaterial())
 			{
 				flag = false;
 			}

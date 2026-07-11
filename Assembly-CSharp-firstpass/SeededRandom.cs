@@ -2,6 +2,8 @@
 
 public class SeededRandom
 {
+	public int seed { get; private set; }
+
 	public SeededRandom(int seed)
 	{
 		if (seed == -2147483648)
@@ -11,8 +13,6 @@ public class SeededRandom
 		this.seed = seed;
 		this.rnd = new Random(seed);
 	}
-
-	public int seed { get; private set; }
 
 	public Random RandomSource()
 	{

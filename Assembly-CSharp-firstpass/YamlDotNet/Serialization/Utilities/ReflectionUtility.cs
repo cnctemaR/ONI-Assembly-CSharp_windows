@@ -23,10 +23,11 @@ namespace YamlDotNet.Serialization.Utilities
 			{
 				yield return type;
 			}
-			foreach (Type implementedInterface in type.GetInterfaces())
+			foreach (Type type2 in type.GetInterfaces())
 			{
-				yield return implementedInterface;
+				yield return type2;
 			}
+			Type[] array = null;
 			yield break;
 		}
 	}

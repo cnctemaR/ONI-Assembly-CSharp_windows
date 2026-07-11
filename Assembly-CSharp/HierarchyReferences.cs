@@ -5,9 +5,10 @@ public class HierarchyReferences : KMonoBehaviour
 {
 	public bool HasReference(string name)
 	{
-		foreach (ElementReference elementReference in this.references)
+		ElementReference[] array = this.references;
+		for (int i = 0; i < array.Length; i++)
 		{
-			if (elementReference.Name == name)
+			if (array[i].Name == name)
 			{
 				return true;
 			}
@@ -25,11 +26,11 @@ public class HierarchyReferences : KMonoBehaviour
 				{
 					return (SpecifiedType)((object)elementReference.behaviour);
 				}
-				global::Debug.LogError(string.Format("Behavior is not specified type", new object[0]));
+				global::Debug.LogError(string.Format("Behavior is not specified type", Array.Empty<object>()));
 			}
 		}
 		global::Debug.LogError(string.Format("Could not find UI reference '{0}' or convert to specified type)", name));
-		return (SpecifiedType)((object)null);
+		return default(SpecifiedType);
 	}
 
 	public Component GetReference(string name)

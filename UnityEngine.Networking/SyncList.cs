@@ -6,6 +6,7 @@ using System.ComponentModel;
 namespace UnityEngine.Networking
 {
 	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public abstract class SyncList<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
 	{
 		public int Count

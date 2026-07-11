@@ -22,7 +22,11 @@ namespace YamlDotNet.Serialization
 
 		public static string FormatBoolean(object boolean)
 		{
-			return (!boolean.Equals(true)) ? "false" : "true";
+			if (!boolean.Equals(true))
+			{
+				return "false";
+			}
+			return "true";
 		}
 
 		public static string FormatDateTime(object dateTime)

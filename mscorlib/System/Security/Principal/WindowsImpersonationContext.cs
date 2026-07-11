@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Security.Principal
 {
@@ -62,6 +63,11 @@ namespace System.Security.Principal
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool RevertToSelf();
+
+		internal WindowsImpersonationContext()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
 
 		private IntPtr _token;
 

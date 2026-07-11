@@ -14,8 +14,7 @@ public class CreatureBait : StateMachineComponent<CreatureBait.StatesInstance>
 		base.OnSpawn();
 		Tag[] constructionElements = base.GetComponent<Deconstructable>().constructionElements;
 		this.baitElement = constructionElements[1];
-		Lure.Instance smi = base.gameObject.GetSMI<Lure.Instance>();
-		smi.SetActiveLures(new Tag[] { this.baitElement });
+		base.gameObject.GetSMI<Lure.Instance>().SetActiveLures(new Tag[] { this.baitElement });
 		base.smi.StartSM();
 	}
 
@@ -37,12 +36,10 @@ public class CreatureBait : StateMachineComponent<CreatureBait.StatesInstance>
 			default_state = this.idle;
 			this.idle.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Baited, null).Enter(delegate(CreatureBait.StatesInstance smi)
 			{
-				Element element = ElementLoader.FindElementByName(smi.master.baitElement.ToString());
-				KAnim.Build build = element.substance.anim.GetData().build;
+				KAnim.Build build = ElementLoader.FindElementByName(smi.master.baitElement.ToString()).substance.anim.GetData().build;
 				KAnim.Build.Symbol symbol = build.GetSymbol(new KAnimHashedString(build.name));
 				HashedString hashedString = "snapTo_bait";
-				SymbolOverrideController component = smi.GetComponent<SymbolOverrideController>();
-				component.AddSymbolOverride(hashedString, symbol, 0);
+				smi.GetComponent<SymbolOverrideController>().AddSymbolOverride(hashedString, symbol, 0);
 			}).TagTransition(GameTags.LureUsed, this.destroy, false);
 			this.destroy.PlayAnim("use").EventHandler(GameHashes.AnimQueueComplete, delegate(CreatureBait.StatesInstance smi)
 			{

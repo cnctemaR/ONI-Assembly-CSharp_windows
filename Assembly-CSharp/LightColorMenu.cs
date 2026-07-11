@@ -11,7 +11,7 @@ public class LightColorMenu : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.lightColors.Length > 0)
+		if (this.lightColors.Length != 0)
 		{
 			int num = this.lightColors.Length;
 			for (int i = 0; i < num; i++)
@@ -22,7 +22,7 @@ public class LightColorMenu : KMonoBehaviour
 					Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo(this.lightColors[i].name, this.lightColors[i].name, delegate
 					{
 						this.SetColor(new_color);
-					}, global::Action.NumActions, null, null, null, string.Empty, true), 1f);
+					}, global::Action.NumActions, null, null, null, "", true), 1f);
 				}
 			}
 		}
@@ -30,15 +30,17 @@ public class LightColorMenu : KMonoBehaviour
 
 	private void SetColor(int color_index)
 	{
-		if (this.lightColors.Length > 0 && color_index < this.lightColors.Length)
+		if (this.lightColors.Length != 0 && color_index < this.lightColors.Length)
 		{
-			foreach (Light2D light2D in base.GetComponentsInChildren<Light2D>(true))
+			Light2D[] componentsInChildren = base.GetComponentsInChildren<Light2D>(true);
+			for (int i = 0; i < componentsInChildren.Length; i++)
 			{
-				light2D.Color = this.lightColors[color_index].color;
+				componentsInChildren[i].Color = this.lightColors[color_index].color;
 			}
-			foreach (MeshRenderer meshRenderer in base.GetComponentsInChildren<MeshRenderer>(true))
+			MeshRenderer[] componentsInChildren2 = base.GetComponentsInChildren<MeshRenderer>(true);
+			for (int i = 0; i < componentsInChildren2.Length; i++)
 			{
-				foreach (Material material in meshRenderer.materials)
+				foreach (Material material in componentsInChildren2[i].materials)
 				{
 					if (material.name.StartsWith("matScriptedGlow01"))
 					{

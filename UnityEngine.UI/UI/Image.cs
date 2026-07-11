@@ -185,6 +185,21 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public bool useSpriteMesh
+		{
+			get
+			{
+				return this.m_UseSpriteMesh;
+			}
+			set
+			{
+				if (SetPropertyUtility.SetStruct<bool>(ref this.m_UseSpriteMesh, value))
+				{
+					this.SetVerticesDirty();
+				}
+			}
+		}
+
 		public static Material defaultETC1GraphicMaterial
 		{
 			get
@@ -297,6 +312,24 @@ namespace UnityEngine.UI
 			this.m_FillAmount = Mathf.Clamp(this.m_FillAmount, 0f, 1f);
 		}
 
+		private void PreserveSpriteAspectRatio(ref Rect rect, Vector2 spriteSize)
+		{
+			float num = spriteSize.x / spriteSize.y;
+			float num2 = rect.width / rect.height;
+			if (num > num2)
+			{
+				float height = rect.height;
+				rect.height = rect.width * (1f / num);
+				rect.y += (height - rect.height) * base.rectTransform.pivot.y;
+			}
+			else
+			{
+				float width = rect.width;
+				rect.width = rect.height * num;
+				rect.x += (width - rect.width) * base.rectTransform.pivot.x;
+			}
+		}
+
 		private Vector4 GetDrawingDimensions(bool shouldPreserveAspect)
 		{
 			Vector4 vector = ((!(this.activeSprite == null)) ? DataUtility.GetPadding(this.activeSprite) : Vector4.zero);
@@ -307,20 +340,7 @@ namespace UnityEngine.UI
 			Vector4 vector3 = new Vector4(vector.x / (float)num, vector.y / (float)num2, ((float)num - vector.z) / (float)num, ((float)num2 - vector.w) / (float)num2);
 			if (shouldPreserveAspect && vector2.sqrMagnitude > 0f)
 			{
-				float num3 = vector2.x / vector2.y;
-				float num4 = pixelAdjustedRect.width / pixelAdjustedRect.height;
-				if (num3 > num4)
-				{
-					float height = pixelAdjustedRect.height;
-					pixelAdjustedRect.height = pixelAdjustedRect.width * (1f / num3);
-					pixelAdjustedRect.y += (height - pixelAdjustedRect.height) * base.rectTransform.pivot.y;
-				}
-				else
-				{
-					float width = pixelAdjustedRect.width;
-					pixelAdjustedRect.width = pixelAdjustedRect.height * num3;
-					pixelAdjustedRect.x += (width - pixelAdjustedRect.width) * base.rectTransform.pivot.x;
-				}
+				this.PreserveSpriteAspectRatio(ref pixelAdjustedRect, vector2);
 			}
 			vector3 = new Vector4(pixelAdjustedRect.x + pixelAdjustedRect.width * vector3.x, pixelAdjustedRect.y + pixelAdjustedRect.height * vector3.y, pixelAdjustedRect.x + pixelAdjustedRect.width * vector3.z, pixelAdjustedRect.y + pixelAdjustedRect.height * vector3.w);
 			return vector3;
@@ -349,7 +369,14 @@ namespace UnityEngine.UI
 				switch (this.type)
 				{
 				case Image.Type.Simple:
-					this.GenerateSimpleSprite(toFill, this.m_PreserveAspect);
+					if (!this.useSpriteMesh)
+					{
+						this.GenerateSimpleSprite(toFill, this.m_PreserveAspect);
+					}
+					else
+					{
+						this.GenerateSprite(toFill, this.m_PreserveAspect);
+					}
 					break;
 				case Image.Type.Sliced:
 					this.GenerateSlicedSprite(toFill);
@@ -417,6 +444,34 @@ namespace UnityEngine.UI
 			vh.AddVert(new Vector3(drawingDimensions.z, drawingDimensions.y), color, new Vector2(vector.z, vector.y));
 			vh.AddTriangle(0, 1, 2);
 			vh.AddTriangle(2, 3, 0);
+		}
+
+		private void GenerateSprite(VertexHelper vh, bool lPreserveAspect)
+		{
+			Vector2 vector = new Vector2(this.activeSprite.rect.width, this.activeSprite.rect.height);
+			Vector2 vector2 = this.activeSprite.pivot / vector;
+			Vector2 pivot = base.rectTransform.pivot;
+			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+			if (lPreserveAspect & (vector.sqrMagnitude > 0f))
+			{
+				this.PreserveSpriteAspectRatio(ref pixelAdjustedRect, vector);
+			}
+			Vector2 vector3 = new Vector2(pixelAdjustedRect.width, pixelAdjustedRect.height);
+			Vector3 size = this.activeSprite.bounds.size;
+			Vector2 vector4 = (pivot - vector2) * vector3;
+			Color color = this.color;
+			vh.Clear();
+			Vector2[] vertices = this.activeSprite.vertices;
+			Vector2[] uv = this.activeSprite.uv;
+			for (int i = 0; i < vertices.Length; i++)
+			{
+				vh.AddVert(new Vector3(vertices[i].x / size.x * vector3.x - vector4.x, vertices[i].y / size.y * vector3.y - vector4.y), color, new Vector2(uv[i].x, uv[i].y));
+			}
+			ushort[] triangles = this.activeSprite.triangles;
+			for (int j = 0; j < triangles.Length; j += 3)
+			{
+				vh.AddTriangle((int)triangles[j], (int)triangles[j + 1], (int)triangles[j + 2]);
+			}
 		}
 
 		private void GenerateSlicedSprite(VertexHelper toFill)
@@ -1244,6 +1299,9 @@ namespace UnityEngine.UI
 		private float m_AlphaHitTestMinimumThreshold = 0f;
 
 		private bool m_Tracked = false;
+
+		[SerializeField]
+		private bool m_UseSpriteMesh;
 
 		private static readonly Vector2[] s_VertScratch = new Vector2[4];
 

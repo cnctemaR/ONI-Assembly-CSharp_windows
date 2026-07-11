@@ -60,8 +60,7 @@ public class AutoMinerConfig : IBuildingConfig
 		stationaryChoreRangeVisualizer.vision_offset = new CellOffset(0, 1);
 		stationaryChoreRangeVisualizer.movable = movable;
 		stationaryChoreRangeVisualizer.blocking_tile_visible = false;
-		KPrefabID component = prefab.GetComponent<KPrefabID>();
-		component.instantiateFn += delegate(GameObject go)
+		prefab.GetComponent<KPrefabID>().instantiateFn += delegate(GameObject go)
 		{
 			go.GetComponent<StationaryChoreRangeVisualizer>().blocking_cb = new Func<int, bool>(AutoMiner.DigBlockingCB);
 		};

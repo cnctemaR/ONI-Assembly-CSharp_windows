@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.Timeline
 {
 	[Serializable]
-	public class TimelineClip : ITimelineItem, ISerializationCallbackReceiver
+	public class TimelineClip : ISerializationCallbackReceiver
 	{
 		internal TimelineClip(TrackAsset parent)
 		{
@@ -176,7 +176,7 @@ namespace UnityEngine.Timeline
 			}
 			set
 			{
-				this.m_EaseInDuration = ((!this.clipCaps.HasAny(ClipCaps.Blending)) ? 0.0 : TimelineClip.SanitizeTimeValue(value, this.m_EaseInDuration));
+				this.m_EaseInDuration = ((!this.clipCaps.HasAny(ClipCaps.Blending)) ? 0.0 : Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseInDuration), this.duration * 0.49)));
 			}
 		}
 
@@ -188,7 +188,7 @@ namespace UnityEngine.Timeline
 			}
 			set
 			{
-				this.m_EaseOutDuration = ((!this.clipCaps.HasAny(ClipCaps.Blending)) ? 0.0 : TimelineClip.SanitizeTimeValue(value, this.m_EaseOutDuration));
+				this.m_EaseOutDuration = ((!this.clipCaps.HasAny(ClipCaps.Blending)) ? 0.0 : Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseOutDuration), this.duration * 0.49)));
 			}
 		}
 
@@ -357,6 +357,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		[Obsolete("exposedParameter is deprecated and will be removed in a future release")]
 		public List<string> exposedParameters
 		{
 			get
@@ -379,7 +380,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		int ITimelineItem.Hash()
+		internal int Hash()
 		{
 			int hashCode = this.m_Start.GetHashCode();
 			int hashCode2 = this.m_Duration.GetHashCode();
@@ -391,7 +392,7 @@ namespace UnityEngine.Timeline
 			return HashUtility.CombineHash(hashCode, hashCode2, hashCode3, hashCode4, hashCode5, postExtrapolationMode.GetHashCode());
 		}
 
-		public float EvaluateMixOut(double localTime)
+		public float EvaluateMixOut(double time)
 		{
 			float num;
 			if (!this.clipCaps.HasAny(ClipCaps.Blending))
@@ -400,7 +401,7 @@ namespace UnityEngine.Timeline
 			}
 			else if (this.mixOutDuration > (double)Mathf.Epsilon)
 			{
-				float num2 = (float)(localTime - this.mixOutTime) / (float)this.mixOutDuration;
+				float num2 = (float)(time - this.mixOutTime) / (float)this.mixOutDuration;
 				num2 = Mathf.Clamp01(this.mixOutCurve.Evaluate(num2));
 				num = num2;
 			}
@@ -411,7 +412,7 @@ namespace UnityEngine.Timeline
 			return num;
 		}
 
-		public float EvaluateMixIn(double localTime)
+		public float EvaluateMixIn(double time)
 		{
 			float num;
 			if (!this.clipCaps.HasAny(ClipCaps.Blending))
@@ -420,7 +421,7 @@ namespace UnityEngine.Timeline
 			}
 			else if (this.mixInDuration > (double)Mathf.Epsilon)
 			{
-				float num2 = (float)(localTime - this.m_Start) / (float)this.mixInDuration;
+				float num2 = (float)(time - this.m_Start) / (float)this.mixInDuration;
 				num2 = Mathf.Clamp01(this.mixInCurve.Evaluate(num2));
 				num = num2;
 			}

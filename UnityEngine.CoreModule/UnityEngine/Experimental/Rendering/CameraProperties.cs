@@ -5,19 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Camera related properties in CullingParameters.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct CameraProperties
 	{
-		/// <summary>
-		///   <para>Get a shadow culling plane.</para>
-		/// </summary>
-		/// <param name="index">Plane index (up to 5).</param>
-		/// <returns>
-		///   <para>Shadow culling plane.</para>
-		/// </returns>
 		public unsafe Plane GetShadowCullingPlane(int index)
 		{
 			if (index < 0 || index >= 6)
@@ -30,11 +20,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Set a shadow culling plane.</para>
-		/// </summary>
-		/// <param name="index">Plane index (up to 5).</param>
-		/// <param name="plane">Shadow culling plane.</param>
 		public unsafe void SetShadowCullingPlane(int index, Plane plane)
 		{
 			if (index < 0 || index >= 6)
@@ -50,13 +35,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Get a camera culling plane.</para>
-		/// </summary>
-		/// <param name="index">Plane index (up to 5).</param>
-		/// <returns>
-		///   <para>Camera culling plane.</para>
-		/// </returns>
 		public unsafe Plane GetCameraCullingPlane(int index)
 		{
 			if (index < 0 || index >= 6)
@@ -69,11 +47,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Set a camera culling plane.</para>
-		/// </summary>
-		/// <param name="index">Plane index (up to 5).</param>
-		/// <param name="plane">Camera culling plane.</param>
 		public unsafe void SetCameraCullingPlane(int index, Plane plane)
 		{
 			if (index < 0 || index >= 6)
@@ -135,15 +108,18 @@ namespace UnityEngine.Experimental.Rendering
 
 		private uint rendererCount;
 
-		private CameraProperties.<_shadowCullPlanes>__FixedBuffer2 _shadowCullPlanes;
+		[FixedBuffer(typeof(float), 24)]
+		internal CameraProperties.<_shadowCullPlanes>__FixedBuffer1 _shadowCullPlanes;
 
-		private CameraProperties.<_cameraCullPlanes>__FixedBuffer3 _cameraCullPlanes;
+		[FixedBuffer(typeof(float), 24)]
+		internal CameraProperties.<_cameraCullPlanes>__FixedBuffer2 _cameraCullPlanes;
 
 		private float baseFarDistance;
 
 		private Vector3 shadowCullCenter;
 
-		private CameraProperties.<layerCullDistances>__FixedBuffer4 layerCullDistances;
+		[FixedBuffer(typeof(float), 32)]
+		internal CameraProperties.<layerCullDistances>__FixedBuffer3 layerCullDistances;
 
 		private int layerCullSpherical;
 
@@ -151,26 +127,30 @@ namespace UnityEngine.Experimental.Rendering
 
 		private uint cameraType;
 
-		[UnsafeValueType]
-		[CompilerGenerated]
-		[StructLayout(LayoutKind.Sequential, Size = 96)]
-		public struct <_shadowCullPlanes>__FixedBuffer2
-		{
-			public float FixedElementField;
-		}
+		private int projectionIsOblique;
+
+		private int isImplicitProjectionMatrix;
 
 		[UnsafeValueType]
 		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 96)]
-		public struct <_cameraCullPlanes>__FixedBuffer3
+		public struct <_shadowCullPlanes>__FixedBuffer1
 		{
 			public float FixedElementField;
 		}
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 96)]
+		public struct <_cameraCullPlanes>__FixedBuffer2
+		{
+			public float FixedElementField;
+		}
+
+		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 128)]
-		public struct <layerCullDistances>__FixedBuffer4
+		public struct <layerCullDistances>__FixedBuffer3
 		{
 			public float FixedElementField;
 		}

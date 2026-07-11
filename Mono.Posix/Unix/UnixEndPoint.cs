@@ -14,7 +14,7 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("filename");
 			}
-			if (filename == string.Empty)
+			if (filename == "")
 			{
 				throw new ArgumentException("Cannot be empty.", "filename");
 			}
@@ -43,13 +43,25 @@ namespace Mono.Unix
 
 		public override EndPoint Create(SocketAddress socketAddress)
 		{
-			byte[] array = new byte[socketAddress.Size - 2 - 1];
+			if (socketAddress.Size == 2)
+			{
+				return new UnixEndPoint("a")
+				{
+					filename = ""
+				};
+			}
+			int num = socketAddress.Size - 2;
+			byte[] array = new byte[num];
 			for (int i = 0; i < array.Length; i++)
 			{
 				array[i] = socketAddress[i + 2];
+				if (array[i] == 0)
+				{
+					num = i;
+					break;
+				}
 			}
-			string @string = Encoding.Default.GetString(array);
-			return new UnixEndPoint(@string);
+			return new UnixEndPoint(Encoding.Default.GetString(array, 0, num));
 		}
 
 		public override SocketAddress Serialize()

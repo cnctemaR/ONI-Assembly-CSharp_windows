@@ -3,11 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Add this attribute to a class to prevent creating a Preset from the instances of the class.</para>
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	[UsedByNativeCode]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public class ExcludeFromPresetAttribute : Attribute
 	{
 	}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -14,23 +13,10 @@ public class KFMODDebugger : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		KFMODDebugger.instance = this;
-		IEnumerator enumerator = Enum.GetValues(typeof(KFMODDebugger.DebugSoundType)).GetEnumerator();
-		try
+		foreach (object obj in Enum.GetValues(typeof(KFMODDebugger.DebugSoundType)))
 		{
-			while (enumerator.MoveNext())
-			{
-				object obj = enumerator.Current;
-				KFMODDebugger.DebugSoundType debugSoundType = (KFMODDebugger.DebugSoundType)obj;
-				this.allDebugSoundTypes.Add(debugSoundType, false);
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
-			}
+			KFMODDebugger.DebugSoundType debugSoundType = (KFMODDebugger.DebugSoundType)obj;
+			this.allDebugSoundTypes.Add(debugSoundType, false);
 		}
 	}
 

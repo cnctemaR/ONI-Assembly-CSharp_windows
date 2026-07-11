@@ -6,15 +6,9 @@ using UnityEngine.Bindings;
 
 namespace Unity.Jobs
 {
-	/// <summary>
-	///   <para>JobHandle.</para>
-	/// </summary>
 	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
 	public struct JobHandle
 	{
-		/// <summary>
-		///   <para>Ensures that the job has completed.</para>
-		/// </summary>
 		public void Complete()
 		{
 			if (!(this.jobGroup == IntPtr.Zero))
@@ -50,9 +44,6 @@ namespace Unity.Jobs
 			JobHandle.ScheduleBatchedJobsAndCompleteAll(jobs.GetUnsafeReadOnlyPtr<JobHandle>(), jobs.Length);
 		}
 
-		/// <summary>
-		///   <para>Returns false if the task is currently running. Returns true if the task has completed.</para>
-		/// </summary>
 		public bool IsCompleted
 		{
 			get
@@ -61,9 +52,6 @@ namespace Unity.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>By default jobs are only put on a local queue when using Job Schedule functions, this actually makes them available to the worker threads to execute them.</para>
-		/// </summary>
 		[NativeMethod(IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ScheduleBatchedJobs();
@@ -80,25 +68,11 @@ namespace Unity.Jobs
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void ScheduleBatchedJobsAndCompleteAll(void* jobs, int count);
 
-		/// <summary>
-		///   <para>Combines multiple dependencies into a single one.</para>
-		/// </summary>
-		/// <param name="job0"></param>
-		/// <param name="job1"></param>
-		/// <param name="job2"></param>
-		/// <param name="jobs"></param>
 		public static JobHandle CombineDependencies(JobHandle job0, JobHandle job1)
 		{
 			return JobHandle.CombineDependenciesInternal2(ref job0, ref job1);
 		}
 
-		/// <summary>
-		///   <para>Combines multiple dependencies into a single one.</para>
-		/// </summary>
-		/// <param name="job0"></param>
-		/// <param name="job1"></param>
-		/// <param name="job2"></param>
-		/// <param name="jobs"></param>
 		public static JobHandle CombineDependencies(JobHandle job0, JobHandle job1, JobHandle job2)
 		{
 			return JobHandle.CombineDependenciesInternal3(ref job0, ref job1, ref job2);
@@ -133,14 +107,6 @@ namespace Unity.Jobs
 			return jobHandle;
 		}
 
-		/// <summary>
-		///   <para>CheckFenceIsDependencyOrDidSyncFence.</para>
-		/// </summary>
-		/// <param name="jobHandle">Job handle.</param>
-		/// <param name="dependsOn">Job handle dependency.</param>
-		/// <returns>
-		///   <para>Return value.</para>
-		/// </returns>
 		[NativeMethod(IsFreeFunction = true)]
 		public static bool CheckFenceIsDependencyOrDidSyncFence(JobHandle jobHandle, JobHandle dependsOn)
 		{

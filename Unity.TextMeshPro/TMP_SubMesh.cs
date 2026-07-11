@@ -265,8 +265,7 @@ namespace TMPro
 		{
 			Material material = new Material(source);
 			material.shaderKeywords = source.shaderKeywords;
-			Material material2 = material;
-			material2.name += " (Instance)";
+			material.name += " (Instance)";
 			return material;
 		}
 

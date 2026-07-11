@@ -47,12 +47,9 @@ public class GlassTileConfig : IBuildingConfig
 		simCellOccupier.setTransparent = true;
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
-		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
-		kanimGridTileVisualizer.blockTileConnectorID = GlassTileConfig.BlockTileConnectorID;
-		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
-		buildingHP.destroyOnDamaged = true;
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Window, false);
+		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = GlassTileConfig.BlockTileConnectorID;
+		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Window, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -27,13 +27,12 @@ namespace KMod
 
 		public void GetTopLevelItems(List<FileSystemItem> file_system_items)
 		{
-			DirectoryInfo directoryInfo = new DirectoryInfo(this.root);
-			foreach (FileSystemInfo fileSystemInfo in directoryInfo.GetFileSystemInfos())
+			foreach (FileSystemInfo fileSystemInfo in new DirectoryInfo(this.root).GetFileSystemInfos())
 			{
 				file_system_items.Add(new FileSystemItem
 				{
 					name = fileSystemInfo.Name,
-					type = ((!(fileSystemInfo is DirectoryInfo)) ? FileSystemItem.ItemType.File : FileSystemItem.ItemType.Directory)
+					type = ((fileSystemInfo is DirectoryInfo) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
 				});
 			}
 		}
@@ -100,27 +99,29 @@ namespace KMod
 				bool flag = extensions == null || extensions.Count == 0;
 				if (extensions != null)
 				{
-					foreach (string text in extensions)
+					using (List<string>.Enumerator enumerator = extensions.GetEnumerator())
 					{
-						if (text == Path.GetExtension(fileInfo.Name).ToLower())
+						while (enumerator.MoveNext())
 						{
-							flag = true;
-							break;
+							if (enumerator.Current == Path.GetExtension(fileInfo.Name).ToLower())
+							{
+								flag = true;
+								break;
+							}
 						}
 					}
 				}
 				if (flag)
 				{
-					string text2 = Path.Combine(destDirName, fileInfo.Name);
-					fileInfo.CopyTo(text2, false);
+					string text = Path.Combine(destDirName, fileInfo.Name);
+					fileInfo.CopyTo(text, false);
 					num++;
 				}
 			}
-			DirectoryInfo[] directories = directoryInfo.GetDirectories();
-			foreach (DirectoryInfo directoryInfo2 in directories)
+			foreach (DirectoryInfo directoryInfo2 in directoryInfo.GetDirectories())
 			{
-				string text3 = Path.Combine(destDirName, directoryInfo2.Name);
-				num += Directory.CopyDirectory(directoryInfo2.FullName, text3, extensions);
+				string text2 = Path.Combine(destDirName, directoryInfo2.Name);
+				num += Directory.CopyDirectory(directoryInfo2.FullName, text2, extensions);
 			}
 			if (num == 0)
 			{

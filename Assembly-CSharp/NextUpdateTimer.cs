@@ -45,21 +45,21 @@ public class NextUpdateTimer : KMonoBehaviour
 		TimeSpan timeSpan = this.nextReleaseDate - this.currentReleaseDate;
 		TimeSpan timeSpan2 = this.nextReleaseDate - global::System.DateTime.UtcNow;
 		TimeSpan timeSpan3 = global::System.DateTime.UtcNow - this.currentReleaseDate;
-		string text = string.Empty;
-		string text2 = "4";
+		string text = "4";
+		string text2;
 		if (!string.IsNullOrEmpty(this.m_releaseTextOverride))
 		{
-			text = this.m_releaseTextOverride;
+			text2 = this.m_releaseTextOverride;
 		}
 		else if (timeSpan2.TotalHours < 8.0)
 		{
-			text = UI.DEVELOPMENTBUILDS.UPDATES.TWENTY_FOUR_HOURS;
-			text2 = "4";
+			text2 = UI.DEVELOPMENTBUILDS.UPDATES.TWENTY_FOUR_HOURS;
+			text = "4";
 		}
 		else if (timeSpan2.TotalDays < 1.0)
 		{
-			text = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.FINAL_WEEK, 1);
-			text2 = "3";
+			text2 = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.FINAL_WEEK, 1);
+			text = "3";
 		}
 		else
 		{
@@ -67,20 +67,19 @@ public class NextUpdateTimer : KMonoBehaviour
 			int num2 = (timeSpan2.Days - num) / 7;
 			if (num2 <= 0)
 			{
-				text = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.FINAL_WEEK, num);
-				text2 = "2";
+				text2 = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.FINAL_WEEK, num);
+				text = "2";
 			}
 			else
 			{
-				text = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.BIGGER_TIMES, num, num2);
-				text2 = "1";
+				text2 = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.BIGGER_TIMES, num, num2);
+				text = "1";
 			}
 		}
-		this.TimerText.text = text;
-		this.UpdateAnimController.Play(text2, KAnim.PlayMode.Loop, 1f, 0f);
-		double num3 = timeSpan3.TotalSeconds / timeSpan.TotalSeconds;
-		float num4 = Mathf.Clamp01((float)num3);
-		this.UpdateAnimMeterController.SetPositionPercent(num4);
+		this.TimerText.text = text2;
+		this.UpdateAnimController.Play(text, KAnim.PlayMode.Loop, 1f, 0f);
+		float num3 = Mathf.Clamp01((float)(timeSpan3.TotalSeconds / timeSpan.TotalSeconds));
+		this.UpdateAnimMeterController.SetPositionPercent(num3);
 	}
 
 	private void RefreshScale()

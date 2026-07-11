@@ -5,15 +5,6 @@ namespace System.ComponentModel.Design.Serialization
 	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class DefaultSerializationProviderAttribute : Attribute
 	{
-		public DefaultSerializationProviderAttribute(string providerTypeName)
-		{
-			if (providerTypeName == null)
-			{
-				throw new ArgumentNullException("providerTypeName");
-			}
-			this._providerTypeName = providerTypeName;
-		}
-
 		public DefaultSerializationProviderAttribute(Type providerType)
 		{
 			if (providerType == null)
@@ -21,6 +12,15 @@ namespace System.ComponentModel.Design.Serialization
 				throw new ArgumentNullException("providerType");
 			}
 			this._providerTypeName = providerType.AssemblyQualifiedName;
+		}
+
+		public DefaultSerializationProviderAttribute(string providerTypeName)
+		{
+			if (providerTypeName == null)
+			{
+				throw new ArgumentNullException("providerTypeName");
+			}
+			this._providerTypeName = providerTypeName;
 		}
 
 		public string ProviderTypeName

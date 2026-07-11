@@ -104,9 +104,8 @@ namespace YamlDotNet.Serialization
 
 			public T GetCustomAttribute<T>() where T : Attribute
 			{
-				T attribute = this.overrides.GetAttribute<T>(this.classType, this.Name);
 				T t;
-				if ((t = attribute) == null)
+				if ((t = this.overrides.GetAttribute<T>(this.classType, this.Name)) == null)
 				{
 					t = this.baseDescriptor.GetCustomAttribute<T>();
 				}

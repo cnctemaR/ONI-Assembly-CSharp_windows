@@ -25,7 +25,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			anim2 = anim.GetData().GetAnim(num);
 			if (anim2 == null)
 			{
-				goto IL_009C;
+				goto IL_008F;
 			}
 			if (anim2.name == "working_pre")
 			{
@@ -35,7 +35,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		}
 		float num2 = (float)(anim2.numFrames - 3) / anim2.frameRate;
 		component.SetWorkTime(num2);
-		IL_009C:
+		IL_008F:
 		base.OnSpawn();
 		base.smi.StartSM();
 		Components.Graves.Add(this);
@@ -59,9 +59,6 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 	private void OnWorkEvent(Workable.WorkableEvent evt)
 	{
-		if (evt != Workable.WorkableEvent.WorkStarted)
-		{
-		}
 	}
 
 	[Serialize]
@@ -73,7 +70,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	[Serialize]
 	public float burialTime = -1f;
 
-	private static readonly CellOffset[] DELIVERY_OFFSETS = new CellOffset[] { default(CellOffset) };
+	private static readonly CellOffset[] DELIVERY_OFFSETS = new CellOffset[1];
 
 	private static readonly EventSystem.IntraObjectHandler<Grave> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<Grave>(delegate(Grave component, object data)
 	{

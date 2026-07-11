@@ -45,11 +45,9 @@ public class Claustrophobic : StateMachineComponent<Claustrophobic.StatesInstanc
 				if (smi.master.IsUncomfortable())
 				{
 					smi.GoTo(this.suffering);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.satisfied);
-				}
+				smi.GoTo(this.satisfied);
 			}, UpdateRate.SIM_1000ms, false);
 			this.suffering.AddEffect("Claustrophobic").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();

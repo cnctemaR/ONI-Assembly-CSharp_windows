@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Security.Permissions;
@@ -10,30 +9,6 @@ namespace Mono.Security.X509
 {
 	public class X509Certificate : ISerializable
 	{
-		public X509Certificate(byte[] data)
-		{
-			if (data != null)
-			{
-				if (data.Length > 0 && data[0] != 48)
-				{
-					try
-					{
-						data = X509Certificate.PEM("CERTIFICATE", data);
-					}
-					catch (Exception ex)
-					{
-						throw new CryptographicException(X509Certificate.encoding_error, ex);
-					}
-				}
-				this.Parse(data);
-			}
-		}
-
-		protected X509Certificate(SerializationInfo info, StreamingContext context)
-		{
-			this.Parse((byte[])info.GetValue("raw", typeof(byte[])));
-		}
-
 		private void Parse(byte[] data)
 		{
 			try
@@ -62,7 +37,7 @@ namespace Mono.Security.X509
 					throw new CryptographicException(X509Certificate.encoding_error);
 				}
 				this.serialnumber = asn3.Value;
-				Array.Reverse(this.serialnumber, 0, this.serialnumber.Length);
+				Array.Reverse<byte>(this.serialnumber, 0, this.serialnumber.Length);
 				num++;
 				this.issuer = asn.Element(num++, 48);
 				this.m_issuername = X501.ToString(this.issuer);
@@ -78,7 +53,7 @@ namespace Mono.Security.X509
 				ASN1 asn9 = asn8.Element(0, 6);
 				this.m_keyalgo = ASN1Convert.ToOid(asn9);
 				ASN1 asn10 = asn8[1];
-				this.m_keyalgoparams = ((asn8.Count <= 1) ? null : asn10.GetBytes());
+				this.m_keyalgoparams = ((asn8.Count > 1) ? asn10.GetBytes() : null);
 				ASN1 asn11 = asn7.Element(1, 3);
 				int num2 = asn11.Length - 1;
 				this.m_publickey = new byte[num2];
@@ -127,6 +102,25 @@ namespace Mono.Security.X509
 			}
 		}
 
+		public X509Certificate(byte[] data)
+		{
+			if (data != null)
+			{
+				if (data.Length != 0 && data[0] != 48)
+				{
+					try
+					{
+						data = X509Certificate.PEM("CERTIFICATE", data);
+					}
+					catch (Exception ex)
+					{
+						throw new CryptographicException(X509Certificate.encoding_error, ex);
+					}
+				}
+				this.Parse(data);
+			}
+		}
+
 		private byte[] GetUnsignedBigInteger(byte[] integer)
 		{
 			if (integer[0] == 0)
@@ -147,7 +141,7 @@ namespace Mono.Security.X509
 				{
 					throw new CryptographicException("Missing key algorithm parameters.");
 				}
-				if (this._dsa == null)
+				if (this._dsa == null && this.m_keyalgo == "1.2.840.10040.4.1")
 				{
 					DSAParameters dsaparameters = default(DSAParameters);
 					ASN1 asn = new ASN1(this.m_publickey);
@@ -197,67 +191,21 @@ namespace Mono.Security.X509
 			{
 				if (this.certhash == null)
 				{
-					string signaturealgo = this.m_signaturealgo;
-					if (signaturealgo != null)
+					if (this.decoder == null || this.decoder.Count < 1)
 					{
-						if (X509Certificate.<>f__switch$mapF == null)
-						{
-							X509Certificate.<>f__switch$mapF = new Dictionary<string, int>(9)
-							{
-								{ "1.2.840.113549.1.1.2", 0 },
-								{ "1.2.840.113549.1.1.3", 1 },
-								{ "1.2.840.113549.1.1.4", 2 },
-								{ "1.2.840.113549.1.1.5", 3 },
-								{ "1.3.14.3.2.29", 3 },
-								{ "1.2.840.10040.4.3", 3 },
-								{ "1.2.840.113549.1.1.11", 4 },
-								{ "1.2.840.113549.1.1.12", 5 },
-								{ "1.2.840.113549.1.1.13", 6 }
-							};
-						}
-						int num;
-						if (X509Certificate.<>f__switch$mapF.TryGetValue(signaturealgo, out num))
-						{
-							HashAlgorithm hashAlgorithm;
-							switch (num)
-							{
-							case 0:
-								hashAlgorithm = MD2.Create();
-								break;
-							case 1:
-								hashAlgorithm = MD4.Create();
-								break;
-							case 2:
-								hashAlgorithm = MD5.Create();
-								break;
-							case 3:
-								hashAlgorithm = SHA1.Create();
-								break;
-							case 4:
-								hashAlgorithm = SHA256.Create();
-								break;
-							case 5:
-								hashAlgorithm = SHA384.Create();
-								break;
-							case 6:
-								hashAlgorithm = SHA512.Create();
-								break;
-							default:
-								goto IL_0125;
-							}
-							if (this.decoder == null || this.decoder.Count < 1)
-							{
-								return null;
-							}
-							byte[] bytes = this.decoder[0].GetBytes();
-							this.certhash = hashAlgorithm.ComputeHash(bytes, 0, bytes.Length);
-							goto IL_0168;
-						}
+						return null;
 					}
-					IL_0125:
-					return null;
+					string text = PKCS1.HashNameFromOid(this.m_signaturealgo, false);
+					if (text == null)
+					{
+						return null;
+					}
+					byte[] bytes = this.decoder[0].GetBytes();
+					using (HashAlgorithm hashAlgorithm = PKCS1.CreateFromName(text))
+					{
+						this.certhash = hashAlgorithm.ComputeHash(bytes, 0, bytes.Length);
+					}
 				}
-				IL_0168:
 				return (byte[])this.certhash.Clone();
 			}
 		}
@@ -310,7 +258,7 @@ namespace Mono.Security.X509
 		{
 			get
 			{
-				if (this._rsa == null)
+				if (this._rsa == null && this.m_keyalgo == "1.2.840.113549.1.1.1")
 				{
 					RSAParameters rsaparameters = default(RSAParameters);
 					ASN1 asn = new ASN1(this.m_publickey);
@@ -375,32 +323,28 @@ namespace Mono.Security.X509
 					return null;
 				}
 				string signaturealgo = this.m_signaturealgo;
-				if (signaturealgo != null)
+				uint num = global::<PrivateImplementationDetails>.ComputeStringHash(signaturealgo);
+				if (num <= 719034781U)
 				{
-					if (X509Certificate.<>f__switch$map10 == null)
+					if (num <= 601591448U)
 					{
-						X509Certificate.<>f__switch$map10 = new Dictionary<string, int>(9)
+						if (num != 510574318U)
 						{
-							{ "1.2.840.113549.1.1.2", 0 },
-							{ "1.2.840.113549.1.1.3", 0 },
-							{ "1.2.840.113549.1.1.4", 0 },
-							{ "1.2.840.113549.1.1.5", 0 },
-							{ "1.3.14.3.2.29", 0 },
-							{ "1.2.840.113549.1.1.11", 0 },
-							{ "1.2.840.113549.1.1.12", 0 },
-							{ "1.2.840.113549.1.1.13", 0 },
-							{ "1.2.840.10040.4.3", 1 }
-						};
-					}
-					int num;
-					if (X509Certificate.<>f__switch$map10.TryGetValue(signaturealgo, out num))
-					{
-						if (num == 0)
-						{
-							return (byte[])this.signature.Clone();
+							if (num != 601591448U)
+							{
+								goto IL_021C;
+							}
+							if (!(signaturealgo == "1.2.840.113549.1.1.5"))
+							{
+								goto IL_021C;
+							}
 						}
-						if (num == 1)
+						else
 						{
+							if (!(signaturealgo == "1.2.840.10040.4.3"))
+							{
+								goto IL_021C;
+							}
 							ASN1 asn = new ASN1(this.signature);
 							if (asn == null || asn.Count != 2)
 							{
@@ -418,7 +362,71 @@ namespace Mono.Security.X509
 							return array;
 						}
 					}
+					else if (num != 618369067U)
+					{
+						if (num != 702257162U)
+						{
+							if (num != 719034781U)
+							{
+								goto IL_021C;
+							}
+							if (!(signaturealgo == "1.2.840.113549.1.1.2"))
+							{
+								goto IL_021C;
+							}
+						}
+						else if (!(signaturealgo == "1.2.840.113549.1.1.3"))
+						{
+							goto IL_021C;
+						}
+					}
+					else if (!(signaturealgo == "1.2.840.113549.1.1.4"))
+					{
+						goto IL_021C;
+					}
 				}
+				else if (num <= 2477476687U)
+				{
+					if (num != 875536856U)
+					{
+						if (num != 2477476687U)
+						{
+							goto IL_021C;
+						}
+						if (!(signaturealgo == "1.2.840.113549.1.1.11"))
+						{
+							goto IL_021C;
+						}
+					}
+					else if (!(signaturealgo == "1.3.14.3.2.29"))
+					{
+						goto IL_021C;
+					}
+				}
+				else if (num != 2494254306U)
+				{
+					if (num != 2511031925U)
+					{
+						if (num != 3493391575U)
+						{
+							goto IL_021C;
+						}
+						if (!(signaturealgo == "1.3.36.3.3.1.2"))
+						{
+							goto IL_021C;
+						}
+					}
+					else if (!(signaturealgo == "1.2.840.113549.1.1.13"))
+					{
+						goto IL_021C;
+					}
+				}
+				else if (!(signaturealgo == "1.2.840.113549.1.1.12"))
+				{
+					goto IL_021C;
+				}
+				return (byte[])this.signature.Clone();
+				IL_021C:
 				throw new CryptographicException("Unsupported hash algorithm: " + this.m_signaturealgo);
 			}
 		}
@@ -521,61 +529,13 @@ namespace Mono.Security.X509
 
 		internal bool VerifySignature(RSA rsa)
 		{
-			RSAPKCS1SignatureDeformatter rsapkcs1SignatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-			string signaturealgo = this.m_signaturealgo;
-			if (signaturealgo != null)
+			if (this.m_signaturealgo == "1.2.840.10040.4.3")
 			{
-				if (X509Certificate.<>f__switch$map11 == null)
-				{
-					X509Certificate.<>f__switch$map11 = new Dictionary<string, int>(9)
-					{
-						{ "1.2.840.113549.1.1.2", 0 },
-						{ "1.2.840.113549.1.1.3", 1 },
-						{ "1.2.840.113549.1.1.4", 2 },
-						{ "1.2.840.113549.1.1.5", 3 },
-						{ "1.3.14.3.2.29", 3 },
-						{ "1.2.840.113549.1.1.11", 4 },
-						{ "1.2.840.113549.1.1.12", 5 },
-						{ "1.2.840.113549.1.1.13", 6 },
-						{ "1.2.840.10040.4.3", 7 }
-					};
-				}
-				int num;
-				if (X509Certificate.<>f__switch$map11.TryGetValue(signaturealgo, out num))
-				{
-					switch (num)
-					{
-					case 0:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("MD2");
-						break;
-					case 1:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("MD4");
-						break;
-					case 2:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("MD5");
-						break;
-					case 3:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("SHA1");
-						break;
-					case 4:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("SHA256");
-						break;
-					case 5:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("SHA384");
-						break;
-					case 6:
-						rsapkcs1SignatureDeformatter.SetHashAlgorithm("SHA512");
-						break;
-					case 7:
-						return false;
-					default:
-						goto IL_0147;
-					}
-					return rsapkcs1SignatureDeformatter.VerifySignature(this.Hash, this.Signature);
-				}
+				return false;
 			}
-			IL_0147:
-			throw new CryptographicException("Unsupported hash algorithm: " + this.m_signaturealgo);
+			RSAPKCS1SignatureDeformatter rsapkcs1SignatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
+			rsapkcs1SignatureDeformatter.SetHashAlgorithm(PKCS1.HashNameFromOid(this.m_signaturealgo, true));
+			return rsapkcs1SignatureDeformatter.VerifySignature(this.Hash, this.Signature);
 		}
 
 		public bool VerifySignature(AsymmetricAlgorithm aa)
@@ -597,15 +557,38 @@ namespace Mono.Security.X509
 
 		public bool CheckSignature(byte[] hash, string hashAlgorithm, byte[] signature)
 		{
-			RSACryptoServiceProvider rsacryptoServiceProvider = (RSACryptoServiceProvider)this.RSA;
-			return rsacryptoServiceProvider.VerifyHash(hash, hashAlgorithm, signature);
+			return ((RSACryptoServiceProvider)this.RSA).VerifyHash(hash, hashAlgorithm, signature);
 		}
 
 		public bool IsSelfSigned
 		{
 			get
 			{
-				return this.m_issuername == this.m_subject && this.VerifySignature(this.RSA);
+				if (this.m_issuername != this.m_subject)
+				{
+					return false;
+				}
+				bool flag;
+				try
+				{
+					if (this.RSA != null)
+					{
+						flag = this.VerifySignature(this.RSA);
+					}
+					else if (this.DSA != null)
+					{
+						flag = this.VerifySignature(this.DSA);
+					}
+					else
+					{
+						flag = false;
+					}
+				}
+				catch (CryptographicException)
+				{
+					flag = false;
+				}
+				return flag;
 			}
 		}
 
@@ -619,7 +602,12 @@ namespace Mono.Security.X509
 			return this.subject;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		protected X509Certificate(SerializationInfo info, StreamingContext context)
+		{
+			this.Parse((byte[])info.GetValue("raw", typeof(byte[])));
+		}
+
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("raw", this.m_encodedcert);
@@ -632,8 +620,7 @@ namespace Mono.Security.X509
 			string text2 = string.Format("-----END {0}-----", type);
 			int num = @string.IndexOf(text) + text.Length;
 			int num2 = @string.IndexOf(text2, num);
-			string text3 = @string.Substring(num, num2 - num);
-			return Convert.FromBase64String(text3);
+			return Convert.FromBase64String(@string.Substring(num, num2 - num));
 		}
 
 		private ASN1 decoder;
@@ -669,6 +656,10 @@ namespace Mono.Security.X509
 		private RSA _rsa;
 
 		private DSA _dsa;
+
+		private const string OID_DSA = "1.2.840.10040.4.1";
+
+		private const string OID_RSA = "1.2.840.113549.1.1.1";
 
 		private int version;
 

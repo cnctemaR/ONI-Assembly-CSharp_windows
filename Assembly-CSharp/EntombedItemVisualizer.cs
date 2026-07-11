@@ -51,11 +51,9 @@ public class EntombedItemVisualizer : KMonoBehaviour
 			if (data.refCount == 0)
 			{
 				this.ReleaseVisualizer(cell, data);
+				return;
 			}
-			else
-			{
-				this.cellEntombedCounts[cell] = data;
-			}
+			this.cellEntombedCounts[cell] = data;
 		}
 	}
 

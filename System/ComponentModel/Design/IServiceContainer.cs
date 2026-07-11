@@ -8,9 +8,9 @@ namespace System.ComponentModel.Design
 	{
 		void AddService(Type serviceType, object serviceInstance);
 
-		void AddService(Type serviceType, ServiceCreatorCallback callback);
-
 		void AddService(Type serviceType, object serviceInstance, bool promote);
+
+		void AddService(Type serviceType, ServiceCreatorCallback callback);
 
 		void AddService(Type serviceType, ServiceCreatorCallback callback, bool promote);
 

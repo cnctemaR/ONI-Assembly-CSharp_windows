@@ -1,43 +1,240 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
+using System.Xml.XmlConfiguration;
 
 namespace System.Xml.Schema
 {
-	[Obsolete("Use XmlSchemaSet.")]
-	public sealed class XmlSchemaCollection : IEnumerable, ICollection
+	[Obsolete("Use System.Xml.Schema.XmlSchemaSet for schema compilation and validation. http://go.microsoft.com/fwlink/?linkid=14202")]
+	public sealed class XmlSchemaCollection : ICollection, IEnumerable
 	{
 		public XmlSchemaCollection()
 			: this(new NameTable())
 		{
 		}
 
-		public XmlSchemaCollection(XmlNameTable nameTable)
-			: this(new XmlSchemaSet(nameTable))
+		public XmlSchemaCollection(XmlNameTable nametable)
 		{
-			this.schemaSet.ValidationEventHandler += this.OnValidationError;
+			if (nametable == null)
+			{
+				throw new ArgumentNullException("nametable");
+			}
+			this.nameTable = nametable;
+			this.collection = Hashtable.Synchronized(new Hashtable());
+			this.xmlResolver = XmlReaderSection.CreateDefaultResolver();
+			this.isThreadSafe = true;
+			if (this.isThreadSafe)
+			{
+				this.wLock = new ReaderWriterLock();
+			}
 		}
 
-		internal XmlSchemaCollection(XmlSchemaSet schemaSet)
-		{
-			this.schemaSet = schemaSet;
-		}
-
-		public event ValidationEventHandler ValidationEventHandler;
-
-		int ICollection.Count
+		public int Count
 		{
 			get
 			{
-				return this.Count;
+				return this.collection.Count;
 			}
+		}
+
+		public XmlNameTable NameTable
+		{
+			get
+			{
+				return this.nameTable;
+			}
+		}
+
+		public event ValidationEventHandler ValidationEventHandler
+		{
+			add
+			{
+				this.validationEventHandler = (ValidationEventHandler)Delegate.Combine(this.validationEventHandler, value);
+			}
+			remove
+			{
+				this.validationEventHandler = (ValidationEventHandler)Delegate.Remove(this.validationEventHandler, value);
+			}
+		}
+
+		internal XmlResolver XmlResolver
+		{
+			set
+			{
+				this.xmlResolver = value;
+			}
+		}
+
+		public XmlSchema Add(string ns, string uri)
+		{
+			if (uri == null || uri.Length == 0)
+			{
+				throw new ArgumentNullException("uri");
+			}
+			XmlTextReader xmlTextReader = new XmlTextReader(uri, this.nameTable);
+			xmlTextReader.XmlResolver = this.xmlResolver;
+			XmlSchema xmlSchema = null;
+			try
+			{
+				xmlSchema = this.Add(ns, xmlTextReader, this.xmlResolver);
+				while (xmlTextReader.Read())
+				{
+				}
+			}
+			finally
+			{
+				xmlTextReader.Close();
+			}
+			return xmlSchema;
+		}
+
+		public XmlSchema Add(string ns, XmlReader reader)
+		{
+			return this.Add(ns, reader, this.xmlResolver);
+		}
+
+		public XmlSchema Add(string ns, XmlReader reader, XmlResolver resolver)
+		{
+			if (reader == null)
+			{
+				throw new ArgumentNullException("reader");
+			}
+			XmlNameTable xmlNameTable = reader.NameTable;
+			SchemaInfo schemaInfo = new SchemaInfo();
+			Parser parser = new Parser(SchemaType.None, xmlNameTable, this.GetSchemaNames(xmlNameTable), this.validationEventHandler);
+			parser.XmlResolver = resolver;
+			SchemaType schemaType;
+			try
+			{
+				schemaType = parser.Parse(reader, ns);
+			}
+			catch (XmlSchemaException ex)
+			{
+				this.SendValidationEvent(ex);
+				return null;
+			}
+			if (schemaType == SchemaType.XSD)
+			{
+				schemaInfo.SchemaType = SchemaType.XSD;
+				return this.Add(ns, schemaInfo, parser.XmlSchema, true, resolver);
+			}
+			SchemaInfo xdrSchema = parser.XdrSchema;
+			return this.Add(ns, parser.XdrSchema, null, true, resolver);
+		}
+
+		public XmlSchema Add(XmlSchema schema)
+		{
+			return this.Add(schema, this.xmlResolver);
+		}
+
+		public XmlSchema Add(XmlSchema schema, XmlResolver resolver)
+		{
+			if (schema == null)
+			{
+				throw new ArgumentNullException("schema");
+			}
+			SchemaInfo schemaInfo = new SchemaInfo();
+			schemaInfo.SchemaType = SchemaType.XSD;
+			return this.Add(schema.TargetNamespace, schemaInfo, schema, true, resolver);
+		}
+
+		public void Add(XmlSchemaCollection schema)
+		{
+			if (schema == null)
+			{
+				throw new ArgumentNullException("schema");
+			}
+			if (this == schema)
+			{
+				return;
+			}
+			IDictionaryEnumerator enumerator = schema.collection.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				XmlSchemaCollectionNode xmlSchemaCollectionNode = (XmlSchemaCollectionNode)enumerator.Value;
+				this.Add(xmlSchemaCollectionNode.NamespaceURI, xmlSchemaCollectionNode);
+			}
+		}
+
+		public XmlSchema this[string ns]
+		{
+			get
+			{
+				XmlSchemaCollectionNode xmlSchemaCollectionNode = (XmlSchemaCollectionNode)this.collection[(ns != null) ? ns : string.Empty];
+				if (xmlSchemaCollectionNode == null)
+				{
+					return null;
+				}
+				return xmlSchemaCollectionNode.Schema;
+			}
+		}
+
+		public bool Contains(XmlSchema schema)
+		{
+			if (schema == null)
+			{
+				throw new ArgumentNullException("schema");
+			}
+			return this[schema.TargetNamespace] != null;
+		}
+
+		public bool Contains(string ns)
+		{
+			return this.collection[(ns != null) ? ns : string.Empty] != null;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new XmlSchemaCollectionEnumerator(this.collection);
+		}
+
+		public XmlSchemaCollectionEnumerator GetEnumerator()
+		{
+			return new XmlSchemaCollectionEnumerator(this.collection);
 		}
 
 		void ICollection.CopyTo(Array array, int index)
 		{
-			XmlSchemaSet xmlSchemaSet = this.schemaSet;
-			lock (xmlSchemaSet)
+			if (array == null)
 			{
-				this.schemaSet.CopyTo(array, index);
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			XmlSchemaCollectionEnumerator enumerator = this.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				if (index == array.Length && array.IsFixedSize)
+				{
+					throw new ArgumentOutOfRangeException("index");
+				}
+				array.SetValue(enumerator.Current, index++);
+			}
+		}
+
+		public void CopyTo(XmlSchema[] array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			XmlSchemaCollectionEnumerator enumerator = this.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current != null)
+				{
+					if (index == array.Length)
+					{
+						throw new ArgumentOutOfRangeException("index");
+					}
+					array[index++] = enumerator.Current;
+				}
 			}
 		}
 
@@ -49,11 +246,6 @@ namespace System.Xml.Schema
 			}
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
 		object ICollection.SyncRoot
 		{
 			get
@@ -62,174 +254,134 @@ namespace System.Xml.Schema
 			}
 		}
 
-		internal XmlSchemaSet SchemaSet
+		int ICollection.Count
 		{
 			get
 			{
-				return this.schemaSet;
+				return this.collection.Count;
 			}
 		}
 
-		public int Count
+		internal SchemaInfo GetSchemaInfo(string ns)
 		{
-			get
+			XmlSchemaCollectionNode xmlSchemaCollectionNode = (XmlSchemaCollectionNode)this.collection[(ns != null) ? ns : string.Empty];
+			if (xmlSchemaCollectionNode == null)
 			{
-				return this.schemaSet.Count;
-			}
-		}
-
-		public XmlNameTable NameTable
-		{
-			get
-			{
-				return this.schemaSet.NameTable;
-			}
-		}
-
-		public XmlSchema this[string ns]
-		{
-			get
-			{
-				ICollection collection = this.schemaSet.Schemas(ns);
-				if (collection == null)
-				{
-					return null;
-				}
-				IEnumerator enumerator = collection.GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					return (XmlSchema)enumerator.Current;
-				}
 				return null;
 			}
+			return xmlSchemaCollectionNode.SchemaInfo;
 		}
 
-		public XmlSchema Add(string ns, XmlReader reader)
+		internal SchemaNames GetSchemaNames(XmlNameTable nt)
 		{
-			return this.Add(ns, reader, new XmlUrlResolver());
-		}
-
-		public XmlSchema Add(string ns, XmlReader reader, XmlResolver resolver)
-		{
-			XmlSchema xmlSchema = XmlSchema.Read(reader, this.ValidationEventHandler);
-			if (xmlSchema.TargetNamespace == null)
+			if (this.nameTable != nt)
 			{
-				xmlSchema.TargetNamespace = ns;
+				return new SchemaNames(nt);
 			}
-			else if (ns != null && xmlSchema.TargetNamespace != ns)
+			if (this.schemaNames == null)
 			{
-				throw new XmlSchemaException("The actual targetNamespace in the schema does not match the parameter.");
+				this.schemaNames = new SchemaNames(this.nameTable);
 			}
-			return this.Add(xmlSchema);
+			return this.schemaNames;
 		}
 
-		public XmlSchema Add(string ns, string uri)
+		internal XmlSchema Add(string ns, SchemaInfo schemaInfo, XmlSchema schema, bool compile)
 		{
-			XmlReader xmlReader = new XmlTextReader(uri);
-			XmlSchema xmlSchema;
+			return this.Add(ns, schemaInfo, schema, compile, this.xmlResolver);
+		}
+
+		private XmlSchema Add(string ns, SchemaInfo schemaInfo, XmlSchema schema, bool compile, XmlResolver resolver)
+		{
+			int num = 0;
+			if (schema != null)
+			{
+				if (schema.ErrorCount == 0 && compile)
+				{
+					if (!schema.CompileSchema(this, resolver, schemaInfo, ns, this.validationEventHandler, this.nameTable, true))
+					{
+						num = 1;
+					}
+					ns = ((schema.TargetNamespace == null) ? string.Empty : schema.TargetNamespace);
+				}
+				num += schema.ErrorCount;
+			}
+			else
+			{
+				num += schemaInfo.ErrorCount;
+				ns = this.NameTable.Add(ns);
+			}
+			if (num == 0)
+			{
+				this.Add(ns, new XmlSchemaCollectionNode
+				{
+					NamespaceURI = ns,
+					SchemaInfo = schemaInfo,
+					Schema = schema
+				});
+				return schema;
+			}
+			return null;
+		}
+
+		private void Add(string ns, XmlSchemaCollectionNode node)
+		{
+			if (this.isThreadSafe)
+			{
+				this.wLock.AcquireWriterLock(this.timeout);
+			}
 			try
 			{
-				xmlSchema = this.Add(ns, xmlReader);
+				if (this.collection[ns] != null)
+				{
+					this.collection.Remove(ns);
+				}
+				this.collection.Add(ns, node);
 			}
 			finally
 			{
-				xmlReader.Close();
+				if (this.isThreadSafe)
+				{
+					this.wLock.ReleaseWriterLock();
+				}
 			}
-			return xmlSchema;
 		}
 
-		public XmlSchema Add(XmlSchema schema)
+		private void SendValidationEvent(XmlSchemaException e)
 		{
-			return this.Add(schema, new XmlUrlResolver());
-		}
-
-		public XmlSchema Add(XmlSchema schema, XmlResolver resolver)
-		{
-			if (schema == null)
+			if (this.validationEventHandler != null)
 			{
-				throw new ArgumentNullException("schema");
-			}
-			XmlSchemaSet xmlSchemaSet = new XmlSchemaSet(this.schemaSet.NameTable);
-			xmlSchemaSet.Add(this.schemaSet);
-			xmlSchemaSet.Add(schema);
-			xmlSchemaSet.ValidationEventHandler += this.ValidationEventHandler;
-			xmlSchemaSet.XmlResolver = resolver;
-			xmlSchemaSet.Compile();
-			if (!xmlSchemaSet.IsCompiled)
-			{
-				return null;
-			}
-			this.schemaSet = xmlSchemaSet;
-			return schema;
-		}
-
-		public void Add(XmlSchemaCollection schema)
-		{
-			if (schema == null)
-			{
-				throw new ArgumentNullException("schema");
-			}
-			XmlSchemaSet xmlSchemaSet = new XmlSchemaSet(this.schemaSet.NameTable);
-			xmlSchemaSet.Add(this.schemaSet);
-			xmlSchemaSet.Add(schema.schemaSet);
-			xmlSchemaSet.ValidationEventHandler += this.ValidationEventHandler;
-			xmlSchemaSet.XmlResolver = this.schemaSet.XmlResolver;
-			xmlSchemaSet.Compile();
-			if (!xmlSchemaSet.IsCompiled)
-			{
+				this.validationEventHandler(this, new ValidationEventArgs(e));
 				return;
 			}
-			this.schemaSet = xmlSchemaSet;
+			throw e;
 		}
 
-		public bool Contains(string ns)
+		internal ValidationEventHandler EventHandler
 		{
-			XmlSchemaSet xmlSchemaSet = this.schemaSet;
-			bool flag;
-			lock (xmlSchemaSet)
+			get
 			{
-				flag = this.schemaSet.Contains(ns);
+				return this.validationEventHandler;
 			}
-			return flag;
-		}
-
-		public bool Contains(XmlSchema schema)
-		{
-			XmlSchemaSet xmlSchemaSet = this.schemaSet;
-			bool flag;
-			lock (xmlSchemaSet)
+			set
 			{
-				flag = this.schemaSet.Contains(schema);
-			}
-			return flag;
-		}
-
-		public void CopyTo(XmlSchema[] array, int index)
-		{
-			XmlSchemaSet xmlSchemaSet = this.schemaSet;
-			lock (xmlSchemaSet)
-			{
-				this.schemaSet.CopyTo(array, index);
+				this.validationEventHandler = value;
 			}
 		}
 
-		public XmlSchemaCollectionEnumerator GetEnumerator()
-		{
-			return new XmlSchemaCollectionEnumerator(this.schemaSet.Schemas());
-		}
+		private Hashtable collection;
 
-		private void OnValidationError(object o, ValidationEventArgs e)
-		{
-			if (this.ValidationEventHandler != null)
-			{
-				this.ValidationEventHandler(o, e);
-			}
-			else if (e.Severity == XmlSeverityType.Error)
-			{
-				throw e.Exception;
-			}
-		}
+		private XmlNameTable nameTable;
 
-		private XmlSchemaSet schemaSet;
+		private SchemaNames schemaNames;
+
+		private ReaderWriterLock wLock;
+
+		private int timeout = -1;
+
+		private bool isThreadSafe = true;
+
+		private ValidationEventHandler validationEventHandler;
+
+		private XmlResolver xmlResolver;
 	}
 }

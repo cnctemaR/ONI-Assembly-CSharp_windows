@@ -15,19 +15,14 @@ public class BaseUtilityBuildTool : DragTool
 
 	private void Play(GameObject go, string anim)
 	{
-		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
-		component.Play(anim, KAnim.PlayMode.Once, 1f, 0f);
+		go.GetComponent<KBatchedAnimController>().Play(anim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
 		Vector3 cursorPos = PlayerController.GetCursorPos(KInputManager.GetMousePos());
-		GameObject buildingPreview = this.def.BuildingPreview;
-		Vector3 vector = cursorPos;
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
-		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, null, num);
+		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, cursorPos, Grid.SceneLayer.Ore, null, LayerMask.NameToLayer("Place"));
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -37,11 +32,10 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		this.visualizer.SetActive(true);
 		this.Play(this.visualizer, "None_Place");
-		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
-		component2.currentDef = this.def;
+		base.GetComponent<BuildToolHoverTextCard>().currentDef = this.def;
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
-		IHaveUtilityNetworkMgr component3 = this.def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>();
-		this.conduitMgr = component3.GetNetworkManager();
+		IHaveUtilityNetworkMgr component2 = this.def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>();
+		this.conduitMgr = component2.GetNetworkManager();
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
@@ -82,11 +76,11 @@ public class BaseUtilityBuildTool : DragTool
 				this.previousCellConnection = null;
 			}
 			this.previousCell = cell;
-			this.CheckForConnection(cell, this.def.PrefabID, string.Empty, ref this.previousCellConnection, false);
+			this.CheckForConnection(cell, this.def.PrefabID, "", ref this.previousCellConnection, false);
 			global::UnityEngine.Object.Destroy(this.path[this.path.Count - 1].visualizer);
 			TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer, this.def.ReplacementLayer);
 			this.path.RemoveAt(this.path.Count - 1);
-			this.buildingCount = ((this.buildingCount != 1) ? (this.buildingCount - 1) : (this.buildingCount = 14));
+			this.buildingCount = ((this.buildingCount == 1) ? (this.buildingCount = 14) : (this.buildingCount - 1));
 			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
 			SoundEvent.EndOneShot(eventInstance);
 		}
@@ -151,35 +145,42 @@ public class BaseUtilityBuildTool : DragTool
 		if (defName.Contains("LogicWire"))
 		{
 			LogicPorts component = building.gameObject.GetComponent<LogicPorts>();
-			if (component != null)
+			if (!(component != null))
 			{
-				if (component.inputPorts != null)
+				goto IL_022C;
+			}
+			if (component.inputPorts != null)
+			{
+				foreach (ILogicUIElement logicUIElement in component.inputPorts)
 				{
-					foreach (ILogicUIElement logicUIElement in component.inputPorts)
+					DebugUtil.Assert(logicUIElement != null, "input port was null");
+					if (logicUIElement.GetLogicUICell() == cell)
 					{
-						DebugUtil.Assert(logicUIElement != null, "input port was null");
-						if (logicUIElement.GetLogicUICell() == cell)
-						{
-							num = cell;
-							break;
-						}
-					}
-				}
-				if (num == -1 && component.outputPorts != null)
-				{
-					foreach (ILogicUIElement logicUIElement2 in component.outputPorts)
-					{
-						DebugUtil.Assert(logicUIElement2 != null, "output port was null");
-						if (logicUIElement2.GetLogicUICell() == cell)
-						{
-							num2 = cell;
-							break;
-						}
+						num = cell;
+						break;
 					}
 				}
 			}
+			if (num != -1 || component.outputPorts == null)
+			{
+				goto IL_022C;
+			}
+			using (List<ILogicUIElement>.Enumerator enumerator = component.outputPorts.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					ILogicUIElement logicUIElement2 = enumerator.Current;
+					DebugUtil.Assert(logicUIElement2 != null, "output port was null");
+					if (logicUIElement2.GetLogicUICell() == cell)
+					{
+						num2 = cell;
+						break;
+					}
+				}
+				goto IL_022C;
+			}
 		}
-		else if (defName.Contains("Wire"))
+		if (defName.Contains("Wire"))
 		{
 			num = building.GetPowerInputCell();
 			num2 = building.GetPowerOutputCell();
@@ -224,26 +225,23 @@ public class BaseUtilityBuildTool : DragTool
 				}
 			}
 		}
+		IL_022C:
 		if (cell == num || cell == num2 || cell == num3)
 		{
 			BuildingCellVisualizer component4 = building.gameObject.GetComponent<BuildingCellVisualizer>();
 			outBcv = component4;
-			if (component4 != null)
+			if (component4 != null && true)
 			{
-				bool flag = true;
-				if (flag)
+				if (fireEvents)
 				{
-					if (fireEvents)
+					component4.ConnectedEvent(cell);
+					string sound = GlobalAssets.GetSound(soundName, false);
+					if (sound != null)
 					{
-						component4.ConnectedEvent(cell);
-						string sound = GlobalAssets.GetSound(soundName, false);
-						if (sound != null)
-						{
-							KMonoBehaviour.PlaySound(sound);
-						}
+						KMonoBehaviour.PlaySound(sound);
 					}
-					return true;
 				}
+				return true;
 			}
 		}
 		outBcv = null;
@@ -378,7 +376,7 @@ public class BaseUtilityBuildTool : DragTool
 					pathNode2.Play(this.conduitMgr.GetVisualizerString(pathNode2.cell));
 				}
 				string text2;
-				component.TintColour = ((!this.def.IsValidBuildLocation(null, pathNode2.cell, Orientation.Neutral, out text2)) ? Color.red : Color.white);
+				component.TintColour = (this.def.IsValidBuildLocation(null, pathNode2.cell, Orientation.Neutral, out text2) ? Color.white : Color.red);
 				TileVisualizer.RefreshCell(pathNode2.cell, this.def.TileLayer, this.def.ReplacementLayer);
 			}
 			this.conduitMgr.UnstashVisualGrids();
@@ -404,14 +402,7 @@ public class BaseUtilityBuildTool : DragTool
 				string text;
 				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
-					BuildingDef buildingDef = this.def;
-					int cell = pathNode.cell;
-					Orientation orientation = Orientation.Neutral;
-					Storage storage = null;
-					IList<Tag> list = this.selectedElements;
-					float num2 = 293.15f;
-					float time = GameClock.Instance.GetTime();
-					gameObject = buildingDef.Build(cell, orientation, storage, list, num2, true, time);
+					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, true, GameClock.Instance.GetTime());
 				}
 				else
 				{
@@ -560,8 +551,7 @@ public class BaseUtilityBuildTool : DragTool
 	{
 		public void Play(string anim)
 		{
-			KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
-			component.Play(anim, KAnim.PlayMode.Once, 1f, 0f);
+			this.visualizer.GetComponent<KBatchedAnimController>().Play(anim, KAnim.PlayMode.Once, 1f, 0f);
 		}
 
 		public int cell;

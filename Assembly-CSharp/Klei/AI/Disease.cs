@@ -11,12 +11,21 @@ namespace Klei.AI
 	[DebuggerDisplay("{base.Id}")]
 	public abstract class Disease : Resource
 	{
+		public new string Name
+		{
+			get
+			{
+				return Strings.Get(this.name);
+			}
+		}
+
 		public Disease(string id, byte strength, Disease.RangeInfo temperature_range, Disease.RangeInfo temperature_half_lives, Disease.RangeInfo pressure_range, Disease.RangeInfo pressure_half_lives)
 			: base(id, null, null)
 		{
 			this.name = new StringKey("STRINGS.DUPLICANTS.DISEASES." + id.ToUpper() + ".NAME");
 			this.id = id;
-			this.overlayColour = Assets.instance.DiseaseVisualization.GetInfo(id).overlayColour;
+			DiseaseVisualization.Info info = Assets.instance.DiseaseVisualization.GetInfo(id);
+			this.overlayColour = info.overlayColour;
 			this.temperatureRange = temperature_range;
 			this.temperatureHalfLives = temperature_half_lives;
 			this.pressureRange = pressure_range;
@@ -25,9 +34,9 @@ namespace Klei.AI
 			this.ApplyRules();
 			string text = Strings.Get("STRINGS.DUPLICANTS.DISEASES." + id.ToUpper() + ".LEGEND_HOVERTEXT").ToString();
 			this.overlayLegendHovertext = text + DUPLICANTS.DISEASES.LEGEND_POSTAMBLE;
-			Attribute attribute = new Attribute(id + "Min", "Minimum" + id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Normal, false, null, null);
-			Attribute attribute2 = new Attribute(id + "Max", "Maximum" + id.ToString(), string.Empty, string.Empty, 10000000f, Attribute.Display.Normal, false, null, null);
-			this.amountDeltaAttribute = new Attribute(id + "Delta", id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Normal, false, null, null);
+			Attribute attribute = new Attribute(id + "Min", "Minimum" + id.ToString(), "", "", 0f, Attribute.Display.Normal, false, null, null);
+			Attribute attribute2 = new Attribute(id + "Max", "Maximum" + id.ToString(), "", "", 10000000f, Attribute.Display.Normal, false, null, null);
+			this.amountDeltaAttribute = new Attribute(id + "Delta", id.ToString(), "", "", 0f, Attribute.Display.Normal, false, null, null);
 			this.amount = new Amount(id, id + " " + DUPLICANTS.DISEASES.GERMS, id + " " + DUPLICANTS.DISEASES.GERMS, attribute, attribute2, this.amountDeltaAttribute, false, Units.Flat, 0.01f, true, null, null);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);
@@ -38,27 +47,19 @@ namespace Klei.AI
 			Db.Get().Attributes.Add(this.cureSpeedBase);
 		}
 
-		public new string Name
-		{
-			get
-			{
-				return Strings.Get(this.name);
-			}
-		}
-
 		protected virtual void PopulateElemGrowthInfo()
 		{
 			this.InitializeElemGrowthArray(ref this.elemGrowthInfo, Disease.DEFAULT_GROWTH_INFO);
 			this.AddGrowthRule(new GrowthRule
 			{
 				underPopulationDeathRate = new float?(0f),
-				minCountPerKG = new float?(100f),
+				minCountPerKG = new float?((float)100),
 				populationHalfLife = new float?(float.PositiveInfinity),
-				maxCountPerKG = new float?(1000f),
+				maxCountPerKG = new float?((float)1000),
 				overPopulationHalfLife = new float?(float.PositiveInfinity),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
-				minDiffusionInfestationTickCount = new byte?(1)
+				minDiffusionInfestationTickCount = new byte?((byte)1)
 			});
 			this.InitializeElemExposureArray(ref this.elemExposureInfo, Disease.DEFAULT_EXPOSURE_INFO);
 			this.AddExposureRule(new ExposureRule
@@ -73,22 +74,14 @@ namespace Klei.AI
 			{
 				this.growthRules = new List<GrowthRule>();
 				global::Debug.Assert(g.GetType() == typeof(GrowthRule), "First rule must be a fully defined base rule.");
-				float? underPopulationDeathRate = g.underPopulationDeathRate;
-				global::Debug.Assert(underPopulationDeathRate != null, "First rule must be a fully defined base rule.");
-				float? populationHalfLife = g.populationHalfLife;
-				global::Debug.Assert(populationHalfLife != null, "First rule must be a fully defined base rule.");
-				float? overPopulationHalfLife = g.overPopulationHalfLife;
-				global::Debug.Assert(overPopulationHalfLife != null, "First rule must be a fully defined base rule.");
-				float? diffusionScale = g.diffusionScale;
-				global::Debug.Assert(diffusionScale != null, "First rule must be a fully defined base rule.");
-				float? minCountPerKG = g.minCountPerKG;
-				global::Debug.Assert(minCountPerKG != null, "First rule must be a fully defined base rule.");
-				float? maxCountPerKG = g.maxCountPerKG;
-				global::Debug.Assert(maxCountPerKG != null, "First rule must be a fully defined base rule.");
-				int? minDiffusionCount = g.minDiffusionCount;
-				global::Debug.Assert(minDiffusionCount != null, "First rule must be a fully defined base rule.");
-				byte? minDiffusionInfestationTickCount = g.minDiffusionInfestationTickCount;
-				global::Debug.Assert(minDiffusionInfestationTickCount != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.underPopulationDeathRate != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.populationHalfLife != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.overPopulationHalfLife != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.diffusionScale != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.minCountPerKG != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.maxCountPerKG != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.minDiffusionCount != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.minDiffusionInfestationTickCount != null, "First rule must be a fully defined base rule.");
 			}
 			else
 			{
@@ -103,8 +96,7 @@ namespace Klei.AI
 			{
 				this.exposureRules = new List<ExposureRule>();
 				global::Debug.Assert(g.GetType() == typeof(ExposureRule), "First rule must be a fully defined base rule.");
-				float? populationHalfLife = g.populationHalfLife;
-				global::Debug.Assert(populationHalfLife != null, "First rule must be a fully defined base rule.");
+				global::Debug.Assert(g.populationHalfLife != null, "First rule must be a fully defined base rule.");
 			}
 			else
 			{
@@ -230,7 +222,7 @@ namespace Klei.AI
 					TagGrowthRule tagGrowthRule = this.growthRules[i] as TagGrowthRule;
 					if (tagGrowthRule != null && tags.Contains(tagGrowthRule.tag))
 					{
-						num *= Disease.HalfLifeToGrowthRate(((!overpopulated) ? tagGrowthRule.populationHalfLife : tagGrowthRule.overPopulationHalfLife).Value, 1f);
+						num *= Disease.HalfLifeToGrowthRate((overpopulated ? tagGrowthRule.overPopulationHalfLife : tagGrowthRule.populationHalfLife).Value, 1f);
 					}
 				}
 			}
@@ -341,44 +333,27 @@ namespace Klei.AI
 			List<GrowthRule> list6 = new List<GrowthRule>();
 			foreach (GrowthRule growthRule in this.growthRules)
 			{
-				float? populationHalfLife = growthRule.populationHalfLife;
-				if (populationHalfLife != null)
+				if (growthRule.populationHalfLife != null && growthRule.Name() != null)
 				{
-					if (growthRule.Name() != null)
+					if (growthRule.populationHalfLife.Value < 0f)
 					{
-						float? populationHalfLife2 = growthRule.populationHalfLife;
-						if (populationHalfLife2.Value < 0f)
-						{
-							list2.Add(growthRule);
-						}
-						else
-						{
-							float? populationHalfLife3 = growthRule.populationHalfLife;
-							if (populationHalfLife3.Value == float.PositiveInfinity)
-							{
-								list3.Add(growthRule);
-							}
-							else
-							{
-								float? populationHalfLife4 = growthRule.populationHalfLife;
-								if (populationHalfLife4.Value >= 12000f)
-								{
-									list4.Add(growthRule);
-								}
-								else
-								{
-									float? populationHalfLife5 = growthRule.populationHalfLife;
-									if (populationHalfLife5.Value >= 1200f)
-									{
-										list5.Add(growthRule);
-									}
-									else
-									{
-										list6.Add(growthRule);
-									}
-								}
-							}
-						}
+						list2.Add(growthRule);
+					}
+					else if (growthRule.populationHalfLife.Value == float.PositiveInfinity)
+					{
+						list3.Add(growthRule);
+					}
+					else if (growthRule.populationHalfLife.Value >= 12000f)
+					{
+						list4.Add(growthRule);
+					}
+					else if (growthRule.populationHalfLife.Value >= 1200f)
+					{
+						list5.Add(growthRule);
+					}
+					else
+					{
+						list6.Add(growthRule);
 					}
 				}
 			}
@@ -398,10 +373,7 @@ namespace Klei.AI
 				list.Add(new Descriptor(section_text, section_tooltip, Descriptor.DescriptorType.Information, false));
 				for (int i = 0; i < rules.Count; i++)
 				{
-					List<Descriptor> list2 = list;
-					string text = string.Format(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.GROWTH_FORMAT, rules[i].Name());
-					float? populationHalfLife = rules[i].populationHalfLife;
-					list2.Add(new Descriptor(text, string.Format(item_tooltip, GameUtil.GetFormattedCycles(Mathf.Abs(populationHalfLife.Value), "F1")), Descriptor.DescriptorType.Information, false));
+					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.GROWTH_FORMAT, rules[i].Name()), string.Format(item_tooltip, GameUtil.GetFormattedCycles(Mathf.Abs(rules[i].populationHalfLife.Value), "F1")), Descriptor.DescriptorType.Information, false));
 				}
 			}
 			return list;

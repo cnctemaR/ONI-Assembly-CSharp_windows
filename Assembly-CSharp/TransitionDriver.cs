@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class TransitionDriver
 {
-	public TransitionDriver(Navigator navigator)
-	{
-		this.log = new LoggerFS("TransitionDriver", 35);
-	}
-
 	public Navigator.ActiveTransition GetTransition
 	{
 		get
 		{
 			return this.transition;
 		}
+	}
+
+	public TransitionDriver(Navigator navigator)
+	{
+		this.log = new LoggerFS("TransitionDriver", 35);
 	}
 
 	public void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
@@ -39,69 +39,66 @@ public class TransitionDriver
 		}
 		else if (transition.navGridTransition.start == NavType.Solid || transition.navGridTransition.end == NavType.Solid)
 		{
-			KBatchedAnimController component2 = navigator.GetComponent<KBatchedAnimController>();
-			component2.SetSceneLayer(sceneLayer);
+			navigator.GetComponent<KBatchedAnimController>().SetSceneLayer(sceneLayer);
 		}
-		int num = Grid.PosToCell(navigator);
-		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
-		this.targetPos = Grid.CellToPosCBC(num2, sceneLayer);
+		int num = Grid.OffsetCell(Grid.PosToCell(navigator), transition.x, transition.y);
+		this.targetPos = Grid.CellToPosCBC(num, sceneLayer);
 		if (transition.isLooping)
 		{
-			KAnimControllerBase component3 = navigator.GetComponent<KAnimControllerBase>();
-			component3.PlaySpeedMultiplier = transition.animSpeed;
-			bool flag = transition.preAnim != string.Empty;
-			bool flag2 = component3.CurrentAnim != null && component3.CurrentAnim.name == transition.anim;
-			bool flag3 = flag && component3.CurrentAnim != null && component3.CurrentAnim.name == transition.preAnim;
-			if (flag3)
+			KAnimControllerBase component2 = navigator.GetComponent<KAnimControllerBase>();
+			component2.PlaySpeedMultiplier = transition.animSpeed;
+			bool flag = transition.preAnim != "";
+			bool flag2 = component2.CurrentAnim != null && component2.CurrentAnim.name == transition.anim;
+			if (flag && component2.CurrentAnim != null && component2.CurrentAnim.name == transition.preAnim)
 			{
-				component3.ClearQueue();
-				component3.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				component2.ClearQueue();
+				component2.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 			else if (flag2)
 			{
-				if (component3.PlayMode != KAnim.PlayMode.Loop)
+				if (component2.PlayMode != KAnim.PlayMode.Loop)
 				{
-					component3.ClearQueue();
-					component3.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+					component2.ClearQueue();
+					component2.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 				}
 			}
 			else if (flag)
 			{
-				component3.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
-				component3.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				component2.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
+				component2.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 			else
 			{
-				component3.Play(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				component2.Play(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}
 		else if (transition.anim != null)
 		{
-			KAnimControllerBase component4 = navigator.GetComponent<KAnimControllerBase>();
-			component4.PlaySpeedMultiplier = transition.animSpeed;
-			component4.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
+			KAnimControllerBase component3 = navigator.GetComponent<KAnimControllerBase>();
+			component3.PlaySpeedMultiplier = transition.animSpeed;
+			component3.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
 			navigator.Subscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 		}
-		if ((int)transition.navGridTransition.y != 0)
+		if (transition.navGridTransition.y != 0)
 		{
 			if (transition.navGridTransition.start == NavType.RightWall)
 			{
-				navigator.GetComponent<Facing>().SetFacing((int)transition.navGridTransition.y < 0);
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.y < 0);
 			}
 			else if (transition.navGridTransition.start == NavType.LeftWall)
 			{
-				navigator.GetComponent<Facing>().SetFacing((int)transition.navGridTransition.y > 0);
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.y > 0);
 			}
 		}
-		if ((int)transition.navGridTransition.x != 0)
+		if (transition.navGridTransition.x != 0)
 		{
 			if (transition.navGridTransition.start == NavType.Ceiling)
 			{
-				navigator.GetComponent<Facing>().SetFacing((int)transition.navGridTransition.x > 0);
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.x > 0);
 			}
 			else if (transition.navGridTransition.start != NavType.LeftWall && transition.navGridTransition.start != NavType.RightWall)
 			{
-				navigator.GetComponent<Facing>().SetFacing((int)transition.navGridTransition.x < 0);
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.x < 0);
 			}
 		}
 		this.brain = navigator.GetComponent<Brain>();
@@ -121,8 +118,9 @@ public class TransitionDriver
 		{
 			this.isComplete = this.transition.isCompleteCB();
 		}
-		if (!(this.brain != null) || this.isComplete)
+		if (this.brain != null)
 		{
+			bool flag = this.isComplete;
 		}
 		if (this.transition.isLooping)
 		{

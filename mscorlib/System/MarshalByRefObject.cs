@@ -8,6 +8,7 @@ namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
 	public abstract class MarshalByRefObject
 	{
 		internal Identity GetObjectIdentity(MarshalByRefObject obj, out bool IsClient)
@@ -38,7 +39,7 @@ namespace System
 			}
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"Infrastructure\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 		public virtual ObjRef CreateObjRef(Type requestedType)
 		{
 			if (this._identity == null)
@@ -48,7 +49,7 @@ namespace System
 			return this._identity.CreateObjRef(requestedType);
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"Infrastructure\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 		public object GetLifetimeService()
 		{
 			if (this._identity == null)
@@ -58,7 +59,7 @@ namespace System
 			return this._identity.Lease;
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"Infrastructure\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 		public virtual object InitializeLifetimeService()
 		{
 			if (this._identity != null && this._identity.Lease != null)

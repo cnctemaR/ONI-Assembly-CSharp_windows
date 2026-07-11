@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-internal class LogicEventSender : ILogicEventSender, ILogicUIElement, ILogicNetworkConnection, IUniformGridObject
+internal class LogicEventSender : ILogicEventSender, ILogicNetworkConnection, ILogicUIElement, IUniformGridObject
 {
 	public LogicEventSender(HashedString id, int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
 	{

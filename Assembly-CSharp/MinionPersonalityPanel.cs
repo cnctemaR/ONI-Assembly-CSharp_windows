@@ -137,8 +137,7 @@ public class MinionPersonalityPanel : TargetScreen
 
 	private void RefreshTraits()
 	{
-		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
-		if (!component)
+		if (!this.selectedTarget.GetComponent<MinionIdentity>())
 		{
 			this.traitsPanel.SetActive(false);
 			return;

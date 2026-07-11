@@ -34,15 +34,15 @@ public class KAnim
 	[Serializable]
 	public class Anim
 	{
+		public int index { get; private set; }
+
+		public KAnimFileData animFile { get; private set; }
+
 		public Anim(KAnimFileData anim_file, int idx)
 		{
 			this.animFile = anim_file;
 			this.index = idx;
 		}
-
-		public int index { get; private set; }
-
-		public KAnimFileData animFile { get; private set; }
 
 		public int GetFrameIdx(KAnim.PlayMode mode, float t)
 		{
@@ -115,8 +115,7 @@ public class KAnim
 
 		public KAnim.Anim.Frame GetFrame(HashedString batchTag, int idx)
 		{
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(batchTag);
-			return batchGroupData.GetFrame(idx + this.firstFrameIdx);
+			return KAnimBatchManager.Instance().GetBatchGroupData(batchTag).GetFrame(idx + this.firstFrameIdx);
 		}
 
 		public KAnim.Anim Copy()
@@ -244,7 +243,7 @@ public class KAnim
 			{
 				return null;
 			}
-			return this.symbols[(int)((UIntPtr)index)];
+			return this.symbols[(int)index];
 		}
 
 		public Texture2D GetTexture(int index)
@@ -253,8 +252,7 @@ public class KAnim
 			{
 				global::Debug.LogError("Invalid texture index:" + index);
 			}
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag);
-			return batchGroupData.GetTexure(this.textureStartIdx + index);
+			return KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag).GetTexure(this.textureStartIdx + index);
 		}
 
 		public int GetSymbolOffset(KAnimHashedString symbol_name)
@@ -360,15 +358,13 @@ public class KAnim
 
 			public bool HasFrame(int frame)
 			{
-				int frameIdx = this.GetFrameIdx(frame);
-				return frameIdx >= 0;
+				return this.GetFrameIdx(frame) >= 0;
 			}
 
 			public KAnim.Build.SymbolFrameInstance GetFrame(int frame)
 			{
 				int frameIdx = this.GetFrameIdx(frame);
-				KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.build.batchTag);
-				return batchGroupData.GetSymbolFrameInstance(frameIdx);
+				return KAnimBatchManager.Instance().GetBatchGroupData(this.build.batchTag).GetSymbolFrameInstance(frameIdx);
 			}
 
 			public int CompareTo(object obj)

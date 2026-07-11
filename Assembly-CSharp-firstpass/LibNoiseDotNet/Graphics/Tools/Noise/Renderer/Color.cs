@@ -4,29 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 {
 	public class Color : IEquatable<Color>, IColor
 	{
-		public Color()
-		{
-			this._hashcode = (int)(this._red + this._green + this._blue) ^ Color._rnd.Next();
-		}
-
-		public Color(byte r, byte g, byte b, byte a)
-			: this()
-		{
-			this._red = r;
-			this._green = g;
-			this._blue = b;
-			this._alpha = a;
-		}
-
-		public Color(byte r, byte g, byte b)
-			: this()
-		{
-			this._red = r;
-			this._green = g;
-			this._blue = b;
-			this._alpha = byte.MaxValue;
-		}
-
 		public byte Red
 		{
 			get
@@ -123,6 +100,29 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 			}
 		}
 
+		public Color()
+		{
+			this._hashcode = (int)(this._red + this._green + this._blue) ^ Color._rnd.Next();
+		}
+
+		public Color(byte r, byte g, byte b, byte a)
+			: this()
+		{
+			this._red = r;
+			this._green = g;
+			this._blue = b;
+			this._alpha = a;
+		}
+
+		public Color(byte r, byte g, byte b)
+			: this()
+		{
+			this._red = r;
+			this._green = g;
+			this._blue = b;
+			this._alpha = byte.MaxValue;
+		}
+
 		public bool Equals(Color other)
 		{
 			return this._red == other.Red && this._green == other.Green && this._blue == other.Blue && this._alpha == other.Alpha;
@@ -134,7 +134,7 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 			color2.Red = Libnoise.Lerp(color0.Red, color1.Red, t);
 			color2.Green = Libnoise.Lerp(color0.Green, color1.Green, t);
 			color2.Blue = Libnoise.Lerp(color0.Blue, color1.Blue, t);
-			color2.Alpha = ((!withAlphaChannel) ? byte.MaxValue : Libnoise.Lerp(color0.Alpha, color1.Alpha, t));
+			color2.Alpha = (withAlphaChannel ? Libnoise.Lerp(color0.Alpha, color1.Alpha, t) : byte.MaxValue);
 			return color2;
 		}
 
@@ -156,12 +156,7 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 		public static IColor Grayscale(IColor color)
 		{
 			IColor color2 = (IColor)Activator.CreateInstance(color.GetType());
-			IColor color3 = color2;
-			byte b = Color.GrayscaleLuminosityStrategy(color);
-			color2.Blue = b;
-			b = b;
-			color2.Green = b;
-			color3.Red = b;
+			color2.Red = (color2.Green = (color2.Blue = Color.GrayscaleLuminosityStrategy(color)));
 			color2.Alpha = byte.MaxValue;
 			return color2;
 		}
@@ -170,12 +165,7 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 		{
 			IColor color2 = (IColor)Activator.CreateInstance(color.GetType());
 			byte b = Strategy(color);
-			IColor color3 = color2;
-			byte b2 = b;
-			color2.Blue = b2;
-			b2 = b2;
-			color2.Green = b2;
-			color3.Red = b2;
+			color2.Red = (color2.Green = (color2.Blue = b));
 			color2.Alpha = byte.MaxValue;
 			return color2;
 		}

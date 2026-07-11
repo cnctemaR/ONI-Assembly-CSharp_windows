@@ -1,12 +1,58 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Globalization
 {
 	[ComVisible(true)]
 	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
 	public class SortKey
 	{
+		public static int Compare(SortKey sortkey1, SortKey sortkey2)
+		{
+			if (sortkey1 == null)
+			{
+				throw new ArgumentNullException("sortkey1");
+			}
+			if (sortkey2 == null)
+			{
+				throw new ArgumentNullException("sortkey2");
+			}
+			if (sortkey1 == sortkey2 || sortkey1.OriginalString == sortkey2.OriginalString)
+			{
+				return 0;
+			}
+			byte[] keyData = sortkey1.KeyData;
+			byte[] keyData2 = sortkey2.KeyData;
+			int num = ((keyData.Length > keyData2.Length) ? keyData2.Length : keyData.Length);
+			int i = 0;
+			while (i < num)
+			{
+				if (keyData[i] != keyData2[i])
+				{
+					if (keyData[i] >= keyData2[i])
+					{
+						return 1;
+					}
+					return -1;
+				}
+				else
+				{
+					i++;
+				}
+			}
+			if (keyData.Length == keyData2.Length)
+			{
+				return 0;
+			}
+			if (keyData.Length >= keyData2.Length)
+			{
+				return 1;
+			}
+			return -1;
+		}
+
 		internal SortKey(int lcid, string source, CompareOptions opt)
 		{
 			this.lcid = lcid;
@@ -20,33 +66,6 @@ namespace System.Globalization
 			this.source = source;
 			this.key = buffer;
 			this.options = opt;
-		}
-
-		public static int Compare(SortKey sortkey1, SortKey sortkey2)
-		{
-			if (sortkey1 == null)
-			{
-				throw new ArgumentNullException("sortkey1");
-			}
-			if (sortkey2 == null)
-			{
-				throw new ArgumentNullException("sortkey2");
-			}
-			if (object.ReferenceEquals(sortkey1, sortkey2) || object.ReferenceEquals(sortkey1.OriginalString, sortkey2.OriginalString))
-			{
-				return 0;
-			}
-			byte[] keyData = sortkey1.KeyData;
-			byte[] keyData2 = sortkey2.KeyData;
-			int num = ((keyData.Length <= keyData2.Length) ? keyData.Length : keyData2.Length);
-			for (int i = 0; i < num; i++)
-			{
-				if (keyData[i] != keyData2[i])
-				{
-					return (keyData[i] >= keyData2[i]) ? 1 : (-1);
-				}
-			}
-			return (keyData.Length != keyData2.Length) ? ((keyData.Length >= keyData2.Length) ? 1 : (-1)) : 0;
 		}
 
 		public virtual string OriginalString
@@ -90,11 +109,16 @@ namespace System.Globalization
 			return string.Concat(new object[] { "SortKey - ", this.lcid, ", ", this.options, ", ", this.source });
 		}
 
+		internal SortKey()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
 		private readonly string source;
 
-		private readonly CompareOptions options;
-
 		private readonly byte[] key;
+
+		private readonly CompareOptions options;
 
 		private readonly int lcid;
 	}

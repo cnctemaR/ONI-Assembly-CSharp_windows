@@ -22,6 +22,10 @@ namespace UnityEngine
 
 		public void LogException(Exception exception, Object context)
 		{
+			if (exception == null)
+			{
+				throw new ArgumentNullException("exception");
+			}
 			DebugLogHandler.Internal_LogException(exception, context);
 		}
 	}

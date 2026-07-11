@@ -7,6 +7,22 @@ namespace YamlDotNet.Core.Tokens
 	[Serializable]
 	public class TagDirective : Token
 	{
+		public string Handle
+		{
+			get
+			{
+				return this.handle;
+			}
+		}
+
+		public string Prefix
+		{
+			get
+			{
+				return this.prefix;
+			}
+		}
+
 		public TagDirective(string handle, string prefix)
 			: this(handle, prefix, Mark.Empty, Mark.Empty)
 		{
@@ -31,22 +47,6 @@ namespace YamlDotNet.Core.Tokens
 			this.prefix = prefix;
 		}
 
-		public string Handle
-		{
-			get
-			{
-				return this.handle;
-			}
-		}
-
-		public string Prefix
-		{
-			get
-			{
-				return this.prefix;
-			}
-		}
-
 		public override bool Equals(object obj)
 		{
 			TagDirective tagDirective = obj as TagDirective;
@@ -60,13 +60,13 @@ namespace YamlDotNet.Core.Tokens
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", new object[] { this.handle, this.prefix });
+			return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", this.handle, this.prefix);
 		}
 
 		private readonly string handle;
 
 		private readonly string prefix;
 
-		private static readonly Regex tagHandleValidator = new Regex("^!([0-9A-Za-z_\\-]*!)?$", RegexOptions.Compiled);
+		private static readonly Regex tagHandleValidator = new Regex("^!([0-9A-Za-z_\\-]*!)?$", RegexOptions.None);
 	}
 }

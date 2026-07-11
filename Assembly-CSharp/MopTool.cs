@@ -31,6 +31,7 @@ public class MopTool : DragTool
 				if (Grid.IsValidCell(cell))
 				{
 					Moppable.MopCell(cell, 1000000f, null);
+					return;
 				}
 			}
 			else

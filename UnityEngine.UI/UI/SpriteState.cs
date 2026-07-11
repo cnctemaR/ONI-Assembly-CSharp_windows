@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -47,16 +46,12 @@ namespace UnityEngine.UI
 			return this.highlightedSprite == other.highlightedSprite && this.pressedSprite == other.pressedSprite && this.disabledSprite == other.disabledSprite;
 		}
 
-		[FormerlySerializedAs("highlightedSprite")]
-		[FormerlySerializedAs("m_SelectedSprite")]
 		[SerializeField]
 		private Sprite m_HighlightedSprite;
 
-		[FormerlySerializedAs("pressedSprite")]
 		[SerializeField]
 		private Sprite m_PressedSprite;
 
-		[FormerlySerializedAs("disabledSprite")]
 		[SerializeField]
 		private Sprite m_DisabledSprite;
 	}

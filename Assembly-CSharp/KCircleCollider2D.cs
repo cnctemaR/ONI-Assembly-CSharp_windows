@@ -30,8 +30,7 @@ public class KCircleCollider2D : KCollider2D
 	{
 		get
 		{
-			Vector3 vector = base.transform.GetPosition() + new Vector3(base.offset.x, base.offset.y, 0f);
-			return new Bounds(vector, new Vector3(this._radius, this._radius, 0f));
+			return new Bounds(base.transform.GetPosition() + new Vector3(base.offset.x, base.offset.y, 0f), new Vector3(this._radius, this._radius, 0f));
 		}
 	}
 
@@ -39,8 +38,7 @@ public class KCircleCollider2D : KCollider2D
 	{
 		Vector3 position = base.transform.GetPosition();
 		Vector2 vector = new Vector2(position.x, position.y) + base.offset;
-		float sqrMagnitude = (pos - vector).sqrMagnitude;
-		return sqrMagnitude <= this._radius * this._radius;
+		return (pos - vector).sqrMagnitude <= this._radius * this._radius;
 	}
 
 	private void OnDrawGizmosSelected()

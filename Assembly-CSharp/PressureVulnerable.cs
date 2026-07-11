@@ -123,7 +123,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			string text = string.Empty;
+			string text = "";
 			if (base.smi.IsInsideState(base.smi.sm.warningLow) || base.smi.IsInsideState(base.smi.sm.lethalLow))
 			{
 				text += Db.Get().CreatureStatusItems.AtmosphericPressureTooLow.resolveStringCallback(CREATURES.STATUSITEMS.ATMOSPHERICPRESSURETOOLOW.NAME, this);
@@ -151,9 +151,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		Game.Instance.accumulators.Accumulate(base.smi.master.pressureAccumulator, pressureOverArea);
 		float averageRate = Game.Instance.accumulators.GetAverageRate(base.smi.master.pressureAccumulator);
 		this.displayPressureAmount.value = averageRate;
-		Game.Instance.accumulators.Accumulate(base.smi.master.elementAccumulator, (!this.testAreaElementSafe) ? 0f : 1f);
-		float averageRate2 = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator);
-		bool flag = averageRate2 > 0f;
+		Game.Instance.accumulators.Accumulate(base.smi.master.elementAccumulator, this.testAreaElementSafe ? 1f : 0f);
+		bool flag = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator) > 0f;
 		base.smi.sm.safe_element.Set(flag, base.smi);
 		base.smi.sm.pressure.Set(averageRate, base.smi);
 	}
@@ -172,7 +171,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		this.currentAtmoElement = null;
 		this.occupyArea.TestArea(cell, this, PressureVulnerable.testAreaCB);
 		this.occupyArea.TestAreaAbove(cell, this, PressureVulnerable.testAreaCB);
-		PressureVulnerable.testAreaPressure = ((PressureVulnerable.testAreaCount <= 0) ? 0f : (PressureVulnerable.testAreaPressure / (float)PressureVulnerable.testAreaCount));
+		PressureVulnerable.testAreaPressure = ((PressureVulnerable.testAreaCount > 0) ? (PressureVulnerable.testAreaPressure / (float)PressureVulnerable.testAreaCount) : 0f);
 		if (this.testAreaElementSafe != flag)
 		{
 			base.Trigger(-2023773544, null);
@@ -189,7 +188,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 		if (this.safe_atmospheres != null && this.safe_atmospheres.Count > 0)
 		{
-			string text = string.Empty;
+			string text = "";
 			foreach (Element element in this.safe_atmospheres)
 			{
 				text = text + "\n        • " + element.name;
@@ -257,8 +256,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		public StatesInstance(PressureVulnerable master)
 			: base(master)
 		{
-			AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(base.gameObject);
-			if (amountInstance != null)
+			if (Db.Get().Amounts.Maturity.Lookup(base.gameObject) != null)
 			{
 				this.hasMaturity = true;
 			}

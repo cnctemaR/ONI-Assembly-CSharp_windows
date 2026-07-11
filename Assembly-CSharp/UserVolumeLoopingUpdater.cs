@@ -29,7 +29,8 @@ internal abstract class UserVolumeLoopingUpdater : LoopingSoundParameterUpdater
 		float @float = KPlayerPrefs.GetFloat(this.playerPref);
 		foreach (UserVolumeLoopingUpdater.Entry entry in this.entries)
 		{
-			entry.ev.setParameterValueByIndex(entry.parameterIdx, @float);
+			EventInstance ev = entry.ev;
+			ev.setParameterValueByIndex(entry.parameterIdx, @float);
 		}
 	}
 
@@ -40,7 +41,7 @@ internal abstract class UserVolumeLoopingUpdater : LoopingSoundParameterUpdater
 			if (this.entries[i].ev.handle == sound.ev.handle)
 			{
 				this.entries.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}

@@ -27,8 +27,7 @@ public class ResearchEntry : KMonoBehaviour
 				zero = new Vector2(0f, -20f);
 				zero2 = new Vector2(0f, 20f);
 			}
-			GameObject gameObject = Util.KInstantiateUI(this.linePrefab, this.lineContainer.gameObject, true);
-			UILineRenderer component = gameObject.GetComponent<UILineRenderer>();
+			UILineRenderer component = Util.KInstantiateUI(this.linePrefab, this.lineContainer.gameObject, true).GetComponent<UILineRenderer>();
 			component.Points = new Vector2[]
 			{
 				new Vector2(0f, 0f) + zero,
@@ -43,11 +42,14 @@ public class ResearchEntry : KMonoBehaviour
 		this.QueueStateChanged(false);
 		if (this.targetTech != null)
 		{
-			foreach (TechInstance techInstance in Research.Instance.GetResearchQueue())
+			using (List<TechInstance>.Enumerator enumerator2 = Research.Instance.GetResearchQueue().GetEnumerator())
 			{
-				if (techInstance.tech == this.targetTech)
+				while (enumerator2.MoveNext())
 				{
-					this.QueueStateChanged(true);
+					if (enumerator2.Current.tech == this.targetTech)
+					{
+						this.QueueStateChanged(true);
+					}
 				}
 			}
 		}
@@ -86,12 +88,12 @@ public class ResearchEntry : KMonoBehaviour
 		}
 		this.targetTech = newTech;
 		this.researchName.text = this.targetTech.Name;
-		string text = string.Empty;
+		string text = "";
 		foreach (TechItem techItem in this.targetTech.unlockedItems)
 		{
 			KImage componentInChildrenOnly = this.GetFreeIcon().GetComponentInChildrenOnly<KImage>();
 			componentInChildrenOnly.transform.parent.gameObject.SetActive(true);
-			if (text != string.Empty)
+			if (text != "")
 			{
 				text += ", ";
 			}
@@ -206,15 +208,16 @@ public class ResearchEntry : KMonoBehaviour
 			}
 			foreach (KeyValuePair<string, GameObject> keyValuePair in this.progressBarsByResearchTypeID)
 			{
-				Transform child = keyValuePair.Value.transform.GetChild(0);
-				child.GetComponentsInChildren<Image>()[1].color = Color.white;
+				keyValuePair.Value.transform.GetChild(0).GetComponentsInChildren<Image>()[1].color = Color.white;
 			}
-			foreach (Image image in this.iconPanel.GetComponentsInChildren<Image>())
+			Image[] array = this.iconPanel.GetComponentsInChildren<Image>();
+			for (int i = 0; i < array.Length; i++)
 			{
-				image.material = this.StandardUIMaterial;
+				array[i].material = this.StandardUIMaterial;
 			}
+			return;
 		}
-		else if (this.targetTech.IsComplete())
+		if (this.targetTech.IsComplete())
 		{
 			this.toggle.isOn = false;
 			this.BG.color = this.completedColor;
@@ -223,26 +226,23 @@ public class ResearchEntry : KMonoBehaviour
 			this.toggle.ClearOnClick();
 			foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.progressBarsByResearchTypeID)
 			{
-				Transform child2 = keyValuePair2.Value.transform.GetChild(0);
-				child2.GetComponentsInChildren<Image>()[1].color = Color.white;
+				keyValuePair2.Value.transform.GetChild(0).GetComponentsInChildren<Image>()[1].color = Color.white;
 			}
-			foreach (Image image2 in this.iconPanel.GetComponentsInChildren<Image>())
+			Image[] array = this.iconPanel.GetComponentsInChildren<Image>();
+			for (int i = 0; i < array.Length; i++)
 			{
-				image2.material = this.StandardUIMaterial;
+				array[i].material = this.StandardUIMaterial;
 			}
+			return;
 		}
-		else
+		this.toggle.isOn = false;
+		this.BG.color = this.defaultColor;
+		this.titleBG.color = this.incompleteHeaderColor;
+		this.toggle.ClearOnClick();
+		this.toggle.onClick += this.OnResearchClicked;
+		foreach (KeyValuePair<string, GameObject> keyValuePair3 in this.progressBarsByResearchTypeID)
 		{
-			this.toggle.isOn = false;
-			this.BG.color = this.defaultColor;
-			this.titleBG.color = this.incompleteHeaderColor;
-			this.toggle.ClearOnClick();
-			this.toggle.onClick += this.OnResearchClicked;
-			foreach (KeyValuePair<string, GameObject> keyValuePair3 in this.progressBarsByResearchTypeID)
-			{
-				Transform child3 = keyValuePair3.Value.transform.GetChild(0);
-				child3.GetComponentsInChildren<Image>()[1].color = new Color(0.52156866f, 0.52156866f, 0.52156866f);
-			}
+			keyValuePair3.Value.transform.GetChild(0).GetComponentsInChildren<Image>()[1].color = new Color(0.52156866f, 0.52156866f, 0.52156866f);
 		}
 	}
 
@@ -251,20 +251,17 @@ public class ResearchEntry : KMonoBehaviour
 		bool flag = false;
 		if (!string.IsNullOrEmpty(filter_string))
 		{
-			string text = UI.StripLinkFormatting(this.researchName.text).ToLower();
-			flag = text.Contains(filter_string);
+			flag = UI.StripLinkFormatting(this.researchName.text).ToLower().Contains(filter_string);
 			if (!flag)
 			{
 				foreach (TechItem techItem in this.targetTech.unlockedItems)
 				{
-					string text2 = UI.StripLinkFormatting(techItem.Name).ToLower();
-					if (text2.Contains(filter_string))
+					if (UI.StripLinkFormatting(techItem.Name).ToLower().Contains(filter_string))
 					{
 						flag = true;
 						break;
 					}
-					string text3 = UI.StripLinkFormatting(techItem.description).ToLower();
-					if (text3.Contains(filter_string))
+					if (UI.StripLinkFormatting(techItem.description).ToLower().Contains(filter_string))
 					{
 						flag = true;
 						break;

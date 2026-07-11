@@ -5,14 +5,6 @@ using Klei;
 
 public class KPlayerPrefs
 {
-	public KPlayerPrefs()
-	{
-		this.strings = new Dictionary<string, string>();
-		this.ints = new Dictionary<string, int>();
-		this.floats = new Dictionary<string, float>();
-		KPlayerPrefs._instance = this;
-	}
-
 	public static KPlayerPrefs instance
 	{
 		get
@@ -44,6 +36,14 @@ public class KPlayerPrefs
 	public Dictionary<string, int> ints { get; private set; }
 
 	public Dictionary<string, float> floats { get; private set; }
+
+	public KPlayerPrefs()
+	{
+		this.strings = new Dictionary<string, string>();
+		this.ints = new Dictionary<string, int>();
+		this.floats = new Dictionary<string, float>();
+		KPlayerPrefs._instance = this;
+	}
 
 	public static bool HasCorruptedFlag()
 	{
@@ -190,13 +190,13 @@ public class KPlayerPrefs
 		KPlayerPrefs.Save();
 	}
 
-	private static KPlayerPrefs _instance;
+	private static KPlayerPrefs _instance = null;
 
-	private static bool _corruptedFlag;
+	private static bool _corruptedFlag = false;
 
 	public const string KPLAYER_PREFS_DATA_COLLECTION_KEY = "DisableDataCollection";
 
 	public static readonly string FILENAME = "kplayerprefs.yaml";
 
-	private static string PATH;
+	private static string PATH = null;
 }

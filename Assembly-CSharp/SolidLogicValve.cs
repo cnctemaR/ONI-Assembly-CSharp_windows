@@ -25,11 +25,9 @@ public class SolidLogicValve : StateMachineComponent<SolidLogicValve.StatesInsta
 		if (this.operational.IsOperational && this.bridge.IsDispensing)
 		{
 			this.operational.SetActive(true, false);
+			return;
 		}
-		else
-		{
-			this.operational.SetActive(false, false);
-		}
+		this.operational.SetActive(false, false);
 	}
 
 	[MyCmpReq]

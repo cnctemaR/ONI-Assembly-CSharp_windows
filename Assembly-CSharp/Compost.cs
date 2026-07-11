@@ -13,8 +13,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
-		component.ShowStatusItem = false;
+		base.GetComponent<ManualDeliveryKG>().ShowStatusItem = false;
 		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
 		base.smi.StartSM();
 	}
@@ -26,11 +25,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 
 	private void OnStorageChanged(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		if (gameObject == null)
-		{
-			return;
-		}
+		(GameObject)data == null;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

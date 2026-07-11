@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum TypeLibImporterFlags
 	{
@@ -18,6 +18,8 @@ namespace System.Runtime.InteropServices
 		ImportAsX64 = 512,
 		ImportAsX86 = 256,
 		ReflectionOnlyLoading = 4096,
-		SerializableValueClasses = 32
+		SerializableValueClasses = 32,
+		NoDefineVersionResource = 8192,
+		ImportAsArm = 16384
 	}
 }

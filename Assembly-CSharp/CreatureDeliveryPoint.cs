@@ -16,13 +16,12 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		Prioritizable.AddRef(base.gameObject);
 		if (CreatureDeliveryPoint.capacityStatusItem == null)
 		{
-			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			CreatureDeliveryPoint.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				IUserControlledCapacity userControlledCapacity = (IUserControlledCapacity)data;
 				string text = Util.FormatWholeNumber(Mathf.Floor(userControlledCapacity.AmountStored));
-				float userMaxCapacity = userControlledCapacity.UserMaxCapacity;
-				string text2 = Util.FormatWholeNumber(userMaxCapacity);
+				string text2 = Util.FormatWholeNumber(userControlledCapacity.UserMaxCapacity);
 				str = str.Replace("{Stored}", text).Replace("{Capacity}", text2).Replace("{Units}", userControlledCapacity.CapacityUnits);
 				return str;
 			};
@@ -57,9 +56,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	private void OnFilterChanged(Tag[] tags)
 	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		bool flag = tags != null && tags.Length != 0;
-		component.TintColour = ((!flag) ? this.noFilterTint : this.filterTint);
+		base.GetComponent<KBatchedAnimController>().TintColour = ((tags != null && tags.Length != 0) ? this.filterTint : this.noFilterTint);
 		this.ClearFetches();
 		this.RebalanceFetches();
 	}
@@ -97,10 +94,9 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	private void RebalanceFetches()
 	{
-		TreeFilterable component = base.GetComponent<TreeFilterable>();
-		Tag[] tags = component.GetTags();
+		Tag[] tags = base.GetComponent<TreeFilterable>().GetTags();
 		ChoreType creatureFetch = Db.Get().ChoreTypes.CreatureFetch;
-		Storage component2 = base.GetComponent<Storage>();
+		Storage component = base.GetComponent<Storage>();
 		int num = this.creatureLimit - this.storedCreatureCount;
 		int count = this.fetches.Count;
 		int num2 = 0;
@@ -125,23 +121,25 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		}
 		if (num6 == 0 && this.fetches.Count < num)
 		{
-			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, this.requiredFetchTags, null, component2, 1f, FetchOrder2.OperationalRequirement.Operational, 0);
+			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, this.requiredFetchTags, null, component, 1f, FetchOrder2.OperationalRequirement.Operational, 0);
 			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchComplete), false, new Action<FetchOrder2, Pickupable>(this.OnFetchBegun));
 			this.fetches.Add(fetchOrder);
 			num3++;
 		}
 		int num7 = this.fetches.Count - num;
-		int num8 = this.fetches.Count - 1;
-		while (num8 >= 0 && num7 > 0)
+		for (int k = this.fetches.Count - 1; k >= 0; k--)
 		{
-			if (!this.fetches[num8].InProgress)
+			if (num7 <= 0)
 			{
-				this.fetches[num8].Cancel("fewer creatures in room");
-				this.fetches.RemoveAt(num8);
+				break;
+			}
+			if (!this.fetches[k].InProgress)
+			{
+				this.fetches[k].Cancel("fewer creatures in room");
+				this.fetches.RemoveAt(k);
 				num7--;
 				num4++;
 			}
-			num8--;
 		}
 		while (num7 > 0 && this.fetches.Count > 0)
 		{
@@ -237,7 +235,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	private int storedCreatureCount;
 
-	public CellOffset[] deliveryOffsets = new CellOffset[] { default(CellOffset) };
+	public CellOffset[] deliveryOffsets = new CellOffset[1];
 
 	public CellOffset spawnOffset = new CellOffset(0, 0);
 
@@ -290,15 +288,13 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			}
 			List<GameObject> items = component.items;
 			int count = items.Count;
-			int num = Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset);
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Creatures);
+			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset), Grid.SceneLayer.Creatures);
 			for (int i = count - 1; i >= 0; i--)
 			{
 				GameObject gameObject = items[i];
 				component.Drop(gameObject, true);
 				gameObject.transform.SetPosition(vector);
-				KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-				component2.SetSceneLayer(Grid.SceneLayer.Creatures);
+				gameObject.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 			}
 			smi.master.RefreshCreatureCount(null);
 		}

@@ -5,13 +5,6 @@ using KSerialization.Converters;
 
 public class AnimCommandFile
 {
-	public AnimCommandFile()
-	{
-		this.MaxGroupSize = 30;
-		this.DefaultBuilds = new Dictionary<string, List<string>>();
-		this.TagGroup = AnimCommandFile.GroupBy.DontGroup;
-	}
-
 	[StringEnumConverter]
 	public AnimCommandFile.ConfigType Type { get; private set; }
 
@@ -30,6 +23,13 @@ public class AnimCommandFile
 	public Dictionary<string, List<string>> DefaultBuilds { get; private set; }
 
 	public int MaxGroupSize { get; private set; }
+
+	public AnimCommandFile()
+	{
+		this.MaxGroupSize = 30;
+		this.DefaultBuilds = new Dictionary<string, List<string>>();
+		this.TagGroup = AnimCommandFile.GroupBy.DontGroup;
+	}
 
 	public bool IsSwap(KAnimFile file)
 	{
@@ -86,7 +86,7 @@ public class AnimCommandFile
 	}
 
 	[NonSerialized]
-	public string directory = string.Empty;
+	public string directory = "";
 
 	[NonSerialized]
 	private List<KAnimGroupFile.GroupFile> groupFiles = new List<KAnimGroupFile.GroupFile>();

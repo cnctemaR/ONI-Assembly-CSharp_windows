@@ -16,16 +16,16 @@ namespace System.Configuration
 		}
 
 		[Obsolete("This property is obsolete.  Please use System.Configuration.ConfigurationManager.AppSettings")]
-		public static global::System.Collections.Specialized.NameValueCollection AppSettings
+		public static NameValueCollection AppSettings
 		{
 			get
 			{
 				object obj = ConfigurationManager.GetSection("appSettings");
 				if (obj == null)
 				{
-					obj = new global::System.Collections.Specialized.NameValueCollection();
+					obj = new NameValueCollection();
 				}
-				return (global::System.Collections.Specialized.NameValueCollection)obj;
+				return (NameValueCollection)obj;
 			}
 		}
 

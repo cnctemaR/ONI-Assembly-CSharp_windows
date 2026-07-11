@@ -67,21 +67,24 @@ public class FabricatorIngredientStatusManager : KMonoBehaviour, ISim1000ms
 					}
 					if (this.fabricator.IsRecipeQueued(complexRecipe2))
 					{
-						foreach (float num2 in this.recipeRequiredResourceBalances[complexRecipe2].Values)
+						using (Dictionary<Tag, float>.ValueCollection.Enumerator enumerator3 = this.recipeRequiredResourceBalances[complexRecipe2].Values.GetEnumerator())
 						{
-							if (num2 < 0f)
+							while (enumerator3.MoveNext())
 							{
-								Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
-								foreach (KeyValuePair<Tag, float> keyValuePair2 in this.recipeRequiredResourceBalances[complexRecipe2])
+								if (enumerator3.Current < 0f)
 								{
-									if (keyValuePair2.Value < 0f)
+									Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+									foreach (KeyValuePair<Tag, float> keyValuePair2 in this.recipeRequiredResourceBalances[complexRecipe2])
 									{
-										dictionary.Add(keyValuePair2.Key, -keyValuePair2.Value);
+										if (keyValuePair2.Value < 0f)
+										{
+											dictionary.Add(keyValuePair2.Key, -keyValuePair2.Value);
+										}
 									}
+									Guid guid = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, dictionary);
+									this.statusItems.Add(complexRecipe2, guid);
+									break;
 								}
-								Guid guid = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, dictionary);
-								this.statusItems.Add(complexRecipe2, guid);
-								break;
 							}
 						}
 					}

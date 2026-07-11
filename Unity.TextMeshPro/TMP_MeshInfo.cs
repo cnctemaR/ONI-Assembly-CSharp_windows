@@ -70,8 +70,8 @@ namespace TMPro
 				mesh.Clear();
 			}
 			this.mesh = mesh;
-			int num = (isVolumetric ? 8 : 4);
-			int num2 = (isVolumetric ? 36 : 6);
+			int num = ((!isVolumetric) ? 4 : 8);
+			int num2 = ((!isVolumetric) ? 6 : 36);
 			size = Mathf.Min(size, 65532 / num);
 			int num3 = size * num;
 			int num4 = size * num2;
@@ -193,8 +193,8 @@ namespace TMPro
 
 		public void ResizeMeshInfo(int size, bool isVolumetric)
 		{
-			int num = (isVolumetric ? 8 : 4);
-			int num2 = (isVolumetric ? 36 : 6);
+			int num = ((!isVolumetric) ? 4 : 8);
+			int num2 = ((!isVolumetric) ? 6 : 36);
 			size = Mathf.Min(size, 65532 / num);
 			int num3 = size * num;
 			int num4 = size * num2;
@@ -344,19 +344,16 @@ namespace TMPro
 
 		public void SortGeometry(VertexSortingOrder order)
 		{
-			if (order != VertexSortingOrder.Normal)
+			if (order != VertexSortingOrder.Normal && order == VertexSortingOrder.Reverse)
 			{
-				if (order == VertexSortingOrder.Reverse)
+				int num = this.vertexCount / 4;
+				for (int i = 0; i < num; i++)
 				{
-					int num = this.vertexCount / 4;
-					for (int i = 0; i < num; i++)
+					int num2 = i * 4;
+					int num3 = (num - i - 1) * 4;
+					if (num2 < num3)
 					{
-						int num2 = i * 4;
-						int num3 = (num - i - 1) * 4;
-						if (num2 < num3)
-						{
-							this.SwapVertexData(num2, num3);
-						}
+						this.SwapVertexData(num2, num3);
 					}
 				}
 			}

@@ -6,6 +6,9 @@ namespace System.Security.Authentication
 	{
 		None,
 		Md5 = 32771,
-		Sha1
+		Sha1,
+		Sha256 = 32780,
+		Sha384,
+		Sha512
 	}
 }

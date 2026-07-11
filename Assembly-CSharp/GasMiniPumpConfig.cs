@@ -50,8 +50,7 @@ public class GasMiniPumpConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Pump>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 0.1f;
+		go.AddOrGet<Storage>().capacityKg = 0.1f;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.configuration = ElementConsumer.Configuration.AllGas;
 		elementConsumer.consumptionRate = 0.05f;

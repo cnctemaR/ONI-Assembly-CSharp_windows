@@ -31,8 +31,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		MassageTable component = gameObject.GetComponent<MassageTable>();
+		MassageTable component = ((GameObject)data).GetComponent<MassageTable>();
 		if (component != null)
 		{
 			this.ActivateValue = component.ActivateValue;
@@ -57,7 +56,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		Descriptor descriptor = default(Descriptor);
 		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
-		if (MassageTable.EffectsRemoved.Length > 0)
+		if (MassageTable.EffectsRemoved.Length != 0)
 		{
 			Descriptor descriptor2 = default(Descriptor);
 			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE, UI.BUILDINGEFFECTS.TOOLTIPS.REMOVESEFFECTSUBTITLE, Descriptor.DescriptorType.Effect);
@@ -172,9 +171,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			IActivationRangeTarget activationRangeTarget = (IActivationRangeTarget)data;
-			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumerState.gameObject);
-			float value = amountInstance.value;
-			return value >= activationRangeTarget.ActivateValue;
+			return Db.Get().Amounts.Stress.Lookup(context.consumerState.gameObject).value >= activationRangeTarget.ActivateValue;
 		}
 	};
 }

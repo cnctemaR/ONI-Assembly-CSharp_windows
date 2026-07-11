@@ -6,8 +6,7 @@ public class MouthAnimation : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(MouthAnimation.ID, MouthAnimation.ID, false);
-		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
-		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("anim_mouth_flap_kanim") };
+		gameObject.AddOrGet<KBatchedAnimController>().AnimFiles = new KAnimFile[] { Assets.GetAnim("anim_mouth_flap_kanim") };
 		return gameObject;
 	}
 

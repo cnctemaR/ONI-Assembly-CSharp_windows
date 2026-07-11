@@ -42,7 +42,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 					if (poly.Contains(zero))
 					{
 						int num = (int)(zero.x + zero.y * (float)Grid.WidthInCells);
-						array2[num] = ((overworldCell.zoneType != SubWorld.ZoneType.Space) ? ((byte)overworldCell.zoneType) : byte.MaxValue);
+						array2[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
 						Color32 color = this.zoneColours[(int)overworldCell.zoneType];
 						array[num * 3] = color.r;
 						array[num * 3 + 1] = color.g;
@@ -113,8 +113,17 @@ public class SubworldZoneRenderData : KMonoBehaviour
 
 	private unsafe void InitSimZones(byte[] bytes)
 	{
-		fixed (byte* ptr = (ref bytes != null && bytes.Length != 0 ? ref bytes[0] : ref *null))
+		fixed (byte[] array = bytes)
 		{
+			byte* ptr;
+			if (bytes == null || array.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array[0];
+			}
 			Sim.SIM_HandleMessage(-457308393, bytes.Length, ptr);
 		}
 	}

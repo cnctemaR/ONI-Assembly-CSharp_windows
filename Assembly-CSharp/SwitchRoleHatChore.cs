@@ -29,11 +29,9 @@ public class SwitchRoleHatChore : Chore<SwitchRoleHatChore.StatesInstance>
 				if (this.duplicant.Get(smi).GetComponent<MinionResume>().CurrentHat == null)
 				{
 					smi.GoTo(this.delay);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.remove_hat);
-				}
+				smi.GoTo(this.remove_hat);
 			});
 			this.remove_hat.ToggleAnims("anim_hat_kanim", 0f).PlayAnim("hat_off").OnAnimQueueComplete(this.delay);
 			this.delay.ToggleThought(Db.Get().Thoughts.NewRole, null).ToggleExpression(Db.Get().Expressions.Happy, null).ToggleAnims("anim_selfish_kanim", 0f)

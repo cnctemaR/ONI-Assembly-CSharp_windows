@@ -33,8 +33,7 @@ public class EggIncubatorConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Prioritizable.AddRef(go);
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.SetDefaultStoredItemModifiers(EggIncubatorConfig.IncubatorStorage);
+		BuildingTemplates.CreateDefaultStorage(go, false).SetDefaultStoredItemModifiers(EggIncubatorConfig.IncubatorStorage);
 		EggIncubator eggIncubator = go.AddOrGet<EggIncubator>();
 		eggIncubator.AddDepositTag(GameTags.Egg);
 		eggIncubator.SetWorkTime(5f);

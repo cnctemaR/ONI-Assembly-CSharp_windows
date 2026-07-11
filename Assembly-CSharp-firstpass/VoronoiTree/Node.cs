@@ -10,6 +10,15 @@ namespace VoronoiTree
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Node
 	{
+		public Tree parent { get; private set; }
+
+		public PowerDiagram debug_LastPD { get; private set; }
+
+		public void SetParent(Tree newParent)
+		{
+			this.parent = newParent;
+		}
+
 		public Node()
 		{
 			this.type = Node.NodeType.Unknown;
@@ -30,15 +39,6 @@ namespace VoronoiTree
 			this.type = type;
 			this.parent = parent;
 			this.log = new LoggerSSF("VoronoiNode", 35);
-		}
-
-		public Tree parent { get; private set; }
-
-		public PowerDiagram debug_LastPD { get; private set; }
-
-		public void SetParent(Tree newParent)
-		{
-			this.parent = newParent;
 		}
 
 		public Node GetNeighbour(uint id)
@@ -83,8 +83,8 @@ namespace VoronoiTree
 						if (keyValuePair.Value == i)
 						{
 							HashSet<KeyValuePair<uint, int>>.Enumerator enumerator;
-							KeyValuePair<uint, int> keyValuePair2 = enumerator.Current;
-							node = this.GetSibling(keyValuePair2.Key);
+							keyValuePair = enumerator.Current;
+							node = this.GetSibling(keyValuePair.Key);
 						}
 					}
 					if (node != null)
@@ -185,8 +185,7 @@ namespace VoronoiTree
 			hashSet.Add(new Diagram.Site(Node.maxIndex + 2U, new Vector2(this.site.poly.bounds.xMax + 500f, this.site.poly.bounds.yMin + this.site.poly.bounds.height / 2f), 1f));
 			hashSet.Add(new Diagram.Site(Node.maxIndex + 3U, new Vector2(this.site.poly.bounds.xMin + this.site.poly.bounds.width / 2f, this.site.poly.bounds.yMin - 500f), 1f));
 			hashSet.Add(new Diagram.Site(Node.maxIndex + 4U, new Vector2(this.site.poly.bounds.xMin + this.site.poly.bounds.width / 2f, this.site.poly.bounds.yMax + 500f), 1f));
-			Rect rect = new Rect(this.site.poly.bounds.xMin - 500f, this.site.poly.bounds.yMin - 500f, this.site.poly.bounds.width + 500f, this.site.poly.bounds.height + 500f);
-			Diagram diagram = new Diagram(rect, hashSet);
+			Diagram diagram = new Diagram(new Rect(this.site.poly.bounds.xMin - 500f, this.site.poly.bounds.yMin - 500f, this.site.poly.bounds.width + 500f, this.site.poly.bounds.height + 500f), hashSet);
 			for (int j = 0; j < diagramSites.Count; j++)
 			{
 				if (diagramSites[j].id <= Node.maxIndex)
@@ -284,9 +283,15 @@ namespace VoronoiTree
 			}
 			HashSet<KeyValuePair<uint, int>> hashSet = new HashSet<KeyValuePair<uint, int>>();
 			HashSet<uint>.Enumerator niter = neighbours.GetEnumerator();
+			Predicate<Diagram.Site> <>9__0;
 			while (niter.MoveNext())
 			{
-				Diagram.Site site = sites.Find((Diagram.Site s) => s.id == niter.Current);
+				Predicate<Diagram.Site> predicate;
+				if ((predicate = <>9__0) == null)
+				{
+					predicate = (<>9__0 = (Diagram.Site s) => s.id == niter.Current);
+				}
+				Diagram.Site site = sites.Find(predicate);
 				if (site != null)
 				{
 					if (site.poly == null)
@@ -294,8 +299,7 @@ namespace VoronoiTree
 						global::Debug.LogError("FilterNeighbours neighbour.poly == null");
 					}
 					int num = -1;
-					Polygon.Commonality commonality = home.poly.SharesEdge(site.poly, ref num);
-					if (commonality == Polygon.Commonality.Edge)
+					if (home.poly.SharesEdge(site.poly, ref num) == Polygon.Commonality.Edge)
 					{
 						hashSet.Add(new KeyValuePair<uint, int>(niter.Current, num));
 					}

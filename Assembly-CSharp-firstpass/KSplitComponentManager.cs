@@ -3,22 +3,17 @@ using System.Collections.Generic;
 
 public abstract class KSplitComponentManager<Header, Payload> : KSplitCompactedVector<Header, Payload>, IComponentManager where Header : new() where Payload : new()
 {
+	public string Name { get; set; }
+
 	public KSplitComponentManager()
 		: base(0)
 	{
 		this.Name = base.GetType().Name;
 	}
 
-	public string Name { get; set; }
-
 	public bool Has(object go)
 	{
-		if (this.cleanupList.Exists((KSplitComponentManager<Header, Payload>.CleanupInfo x) => x.instance == go))
-		{
-			return false;
-		}
-		HandleVector<int>.Handle handle = this.GetHandle(go);
-		return !(handle == HandleVector<int>.InvalidHandle);
+		return !this.cleanupList.Exists((KSplitComponentManager<Header, Payload>.CleanupInfo x) => x.instance == go) && !(this.GetHandle(go) == HandleVector<int>.InvalidHandle);
 	}
 
 	protected HandleVector<int>.Handle InternalAddComponent(object instance, Header header, ref Payload payload)
@@ -134,7 +129,7 @@ public abstract class KSplitComponentManager<Header, Payload> : KSplitCompactedV
 			{
 				this.cleanupList[i] = this.cleanupList[this.cleanupList.Count - 1];
 				this.cleanupList.RemoveAt(this.cleanupList.Count - 1);
-				break;
+				return;
 			}
 		}
 	}
@@ -159,11 +154,6 @@ public abstract class KSplitComponentManager<Header, Payload> : KSplitCompactedV
 
 	protected virtual void OnCleanUp(HandleVector<int>.Handle h)
 	{
-	}
-
-	int IComponentManager.get_Count()
-	{
-		return base.Count;
 	}
 
 	protected Dictionary<object, HandleVector<int>.Handle> instanceHandleMap = new Dictionary<object, HandleVector<int>.Handle>();

@@ -30,7 +30,7 @@ public class CodexScreen : KScreen
 		};
 		this.clearSearchButton.onClick += delegate
 		{
-			this.searchInputField.text = string.Empty;
+			this.searchInputField.text = "";
 		};
 		if (string.IsNullOrEmpty(this.activeEntryID))
 		{
@@ -74,7 +74,7 @@ public class CodexScreen : KScreen
 		this.SetupPrefabs();
 		this.PopulatePools();
 		this.CategorizeEntries();
-		this.FilterSearch(string.Empty);
+		this.FilterSearch("");
 		this.backButtonButton.onClick += this.HistoryStepBack;
 		this.backButtonButton.soundPlayer.AcceptClickCondition = () => this.currentHistoryIdx > 0;
 		this.fwdButtonButton.onClick += this.HistoryStepForward;
@@ -118,7 +118,7 @@ public class CodexScreen : KScreen
 		input = input.ToLower();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
-			if (input == string.Empty)
+			if (input == "")
 			{
 				if (!keyValuePair.Value.searchOnly)
 				{
@@ -137,7 +137,7 @@ public class CodexScreen : KScreen
 				this.subEntrySearchResults.Add(keyValuePair2.Value);
 			}
 		}
-		this.FilterEntries(input != string.Empty);
+		this.FilterEntries(input != "");
 		return this.searchResults;
 	}
 
@@ -191,8 +191,7 @@ public class CodexScreen : KScreen
 
 	private void ToggleCategoryOpen(GameObject header, bool open)
 	{
-		MultiToggle reference = header.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("ExpandToggle");
-		reference.ChangeState((!open) ? 0 : 1);
+		header.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("ExpandToggle").ChangeState(open ? 1 : 0);
 		header.GetComponent<HierarchyReferences>().GetReference("Content").gameObject.SetActive(open);
 	}
 
@@ -208,7 +207,7 @@ public class CodexScreen : KScreen
 
 	private GameObject NewCategoryHeader(KeyValuePair<string, CodexEntry> entryKVP, Dictionary<string, GameObject> categories)
 	{
-		if (entryKVP.Value.category == string.Empty)
+		if (entryKVP.Value.category == "")
 		{
 			entryKVP.Value.category = "Root";
 		}
@@ -226,8 +225,7 @@ public class CodexScreen : KScreen
 		}
 		this.categoryHeaders.Add(categoryHeader);
 		categoryContent.SetActive(false);
-		MultiToggle reference2 = categoryHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("ExpandToggle");
-		reference2.onClick = delegate
+		categoryHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("ExpandToggle").onClick = delegate
 		{
 			this.ToggleCategoryOpen(categoryHeader, !categoryContent.activeSelf);
 		};
@@ -236,24 +234,23 @@ public class CodexScreen : KScreen
 
 	private void CategorizeEntries()
 	{
-		string text = string.Empty;
 		GameObject gameObject = this.navigatorContent.gameObject;
 		Dictionary<string, GameObject> dictionary = new Dictionary<string, GameObject>();
-		List<Tuple<string, CodexEntry>> list = new List<Tuple<string, CodexEntry>>();
+		List<global::Tuple<string, CodexEntry>> list = new List<global::Tuple<string, CodexEntry>>();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
 			if (string.IsNullOrEmpty(keyValuePair.Value.sortString))
 			{
 				keyValuePair.Value.sortString = UI.StripLinkFormatting(Strings.Get(keyValuePair.Value.title));
 			}
-			list.Add(new Tuple<string, CodexEntry>(keyValuePair.Key, keyValuePair.Value));
+			list.Add(new global::Tuple<string, CodexEntry>(keyValuePair.Key, keyValuePair.Value));
 		}
-		list.Sort((Tuple<string, CodexEntry> a, Tuple<string, CodexEntry> b) => string.Compare(a.second.sortString, b.second.sortString));
+		list.Sort((global::Tuple<string, CodexEntry> a, global::Tuple<string, CodexEntry> b) => string.Compare(a.second.sortString, b.second.sortString));
 		for (int i = 0; i < list.Count; i++)
 		{
-			Tuple<string, CodexEntry> tuple = list[i];
-			text = tuple.second.category;
-			if (text == string.Empty || text == "Root")
+			global::Tuple<string, CodexEntry> tuple = list[i];
+			string text = tuple.second.category;
+			if (text == "" || text == "Root")
 			{
 				text = "Root";
 			}
@@ -339,7 +336,7 @@ public class CodexScreen : KScreen
 		{
 			this.CodexScreenInit();
 		}
-		string text = string.Empty;
+		string text = "";
 		SubEntry subEntry = null;
 		if (!CodexCache.entries.ContainsKey(id))
 		{
@@ -377,7 +374,7 @@ public class CodexScreen : KScreen
 			}
 		}
 		int num = 0;
-		string text2 = string.Empty;
+		string text2 = "";
 		while (this.contentContainers.transform.childCount > 0)
 		{
 			while (!string.IsNullOrEmpty(text2) && CodexCache.entries[this.activeEntryID].contentContainers[num].lockID == text2)
@@ -412,7 +409,7 @@ public class CodexScreen : KScreen
 			CodexCache.entries[id].CreateContentContainerCollection();
 		}
 		bool flag2 = false;
-		string text3 = string.Empty;
+		string text3 = "";
 		for (int i = 0; i < CodexCache.entries[id].contentContainers.Count; i++)
 		{
 			ContentContainer contentContainer2 = CodexCache.entries[id].contentContainers[i];
@@ -445,7 +442,7 @@ public class CodexScreen : KScreen
 				}
 			}
 		}
-		string text4 = string.Empty;
+		string text4 = "";
 		string text5 = id;
 		int num3 = 0;
 		while (text5 != CodexCache.FormatLinkID("HOME") && num3 < 10)
@@ -469,7 +466,7 @@ public class CodexScreen : KScreen
 				text4 = text4.Insert(0, CodexCache.entries[text5].name + " > ");
 			}
 		}
-		this.currentLocationText.text = ((!(text4 == string.Empty)) ? text4 : ("<b>" + UI.StripLinkFormatting(CodexCache.entries["HOME"].name) + "</b>"));
+		this.currentLocationText.text = ((text4 == "") ? ("<b>" + UI.StripLinkFormatting(CodexCache.entries["HOME"].name) + "</b>") : text4);
 		if (this.history.Count == 0)
 		{
 			this.history.Add(new CodexScreen.HistoryEntry(id, Vector3.zero, text));
@@ -533,19 +530,18 @@ public class CodexScreen : KScreen
 				base.StopCoroutine(this.scrollToTargetRoutine);
 			}
 			this.scrollToTargetRoutine = base.StartCoroutine(this.ScrollToTarget(targetPosition));
+			return;
 		}
-		else if (rectTransform != null)
+		if (rectTransform != null)
 		{
 			if (this.scrollToTargetRoutine != null)
 			{
 				base.StopCoroutine(this.scrollToTargetRoutine);
 			}
 			this.scrollToTargetRoutine = base.StartCoroutine(this.ScrollToTarget(rectTransform));
+			return;
 		}
-		else
-		{
-			this.displayScrollRect.content.SetLocalPosition(Vector3.zero);
-		}
+		this.displayScrollRect.content.SetLocalPosition(Vector3.zero);
 	}
 
 	private void HistoryStepBack()
@@ -554,9 +550,7 @@ public class CodexScreen : KScreen
 		{
 			return;
 		}
-		string id = this.history[this.currentHistoryIdx - 1].id;
-		Vector3 position = this.history[this.currentHistoryIdx - 1].position;
-		this.ChangeArticle(id, false, position, CodexScreen.HistoryDirection.Back);
+		this.ChangeArticle(this.history[this.currentHistoryIdx - 1].id, false, this.history[this.currentHistoryIdx - 1].position, CodexScreen.HistoryDirection.Back);
 	}
 
 	private void HistoryStepForward()
@@ -565,9 +559,7 @@ public class CodexScreen : KScreen
 		{
 			return;
 		}
-		string id = this.history[this.currentHistoryIdx + 1].id;
-		Vector3 position = this.history[this.currentHistoryIdx + 1].position;
-		this.ChangeArticle(id, false, position, CodexScreen.HistoryDirection.Forward);
+		this.ChangeArticle(this.history[this.currentHistoryIdx + 1].id, false, this.history[this.currentHistoryIdx + 1].position, CodexScreen.HistoryDirection.Forward);
 	}
 
 	private void HistoryStepUp()
@@ -601,62 +593,49 @@ public class CodexScreen : KScreen
 		{
 			global::UnityEngine.Object.DestroyImmediate(layoutGroup);
 		}
-		if (Game.Instance.unlocks.IsUnlocked(container.lockID) || string.IsNullOrEmpty(container.lockID))
-		{
-			switch (container.contentLayout)
-			{
-			case ContentContainer.ContentLayout.Vertical:
-			{
-				layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
-				HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = layoutGroup as HorizontalOrVerticalLayoutGroup;
-				bool flag = false;
-				(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
-				horizontalOrVerticalLayoutGroup.childForceExpandHeight = flag;
-				(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
-				break;
-			}
-			case ContentContainer.ContentLayout.Horizontal:
-			{
-				layoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
-				layoutGroup.childAlignment = TextAnchor.MiddleLeft;
-				HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup2 = layoutGroup as HorizontalOrVerticalLayoutGroup;
-				bool flag = false;
-				(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
-				horizontalOrVerticalLayoutGroup2.childForceExpandHeight = flag;
-				(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
-				break;
-			}
-			case ContentContainer.ContentLayout.Grid:
-				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
-				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-				(layoutGroup as GridLayoutGroup).constraintCount = 4;
-				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(128f, 180f);
-				(layoutGroup as GridLayoutGroup).spacing = new Vector2(6f, 6f);
-				break;
-			case ContentContainer.ContentLayout.GridTwoColumn:
-				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
-				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-				(layoutGroup as GridLayoutGroup).constraintCount = 2;
-				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(264f, 32f);
-				(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
-				break;
-			case ContentContainer.ContentLayout.GridTwoColumnTall:
-				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
-				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-				(layoutGroup as GridLayoutGroup).constraintCount = 2;
-				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(264f, 64f);
-				(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
-				break;
-			}
-		}
-		else
+		if (!Game.Instance.unlocks.IsUnlocked(container.lockID) && !string.IsNullOrEmpty(container.lockID))
 		{
 			layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
-			HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup3 = layoutGroup as HorizontalOrVerticalLayoutGroup;
-			bool flag = false;
-			(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
-			horizontalOrVerticalLayoutGroup3.childForceExpandHeight = flag;
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandHeight = ((layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = false);
 			(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
+			return;
+		}
+		switch (container.contentLayout)
+		{
+		case ContentContainer.ContentLayout.Vertical:
+			layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandHeight = ((layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = false);
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
+			return;
+		case ContentContainer.ContentLayout.Horizontal:
+			layoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
+			layoutGroup.childAlignment = TextAnchor.MiddleLeft;
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandHeight = ((layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = false);
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
+			return;
+		case ContentContainer.ContentLayout.Grid:
+			layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+			(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+			(layoutGroup as GridLayoutGroup).constraintCount = 4;
+			(layoutGroup as GridLayoutGroup).cellSize = new Vector2(128f, 180f);
+			(layoutGroup as GridLayoutGroup).spacing = new Vector2(6f, 6f);
+			return;
+		case ContentContainer.ContentLayout.GridTwoColumn:
+			layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+			(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+			(layoutGroup as GridLayoutGroup).constraintCount = 2;
+			(layoutGroup as GridLayoutGroup).cellSize = new Vector2(264f, 32f);
+			(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
+			return;
+		case ContentContainer.ContentLayout.GridTwoColumnTall:
+			layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+			(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+			(layoutGroup as GridLayoutGroup).constraintCount = 2;
+			(layoutGroup as GridLayoutGroup).cellSize = new Vector2(264f, 64f);
+			(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
+			return;
+		default:
+			return;
 		}
 	}
 

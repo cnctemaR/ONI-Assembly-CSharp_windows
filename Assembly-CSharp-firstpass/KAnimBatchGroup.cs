@@ -6,25 +6,6 @@ using UnityEngine;
 
 public class KAnimBatchGroup
 {
-	public KAnimBatchGroup(HashedString id)
-	{
-		this.data = KAnimBatchManager.Instance().GetBatchGroupData(id);
-		this.materials = new Material[5];
-		this.batchID = id;
-		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(id);
-		if (group == null)
-		{
-			return;
-		}
-		this.maxGroupSize = group.maxGroupSize;
-		if (this.maxGroupSize <= 0)
-		{
-			this.maxGroupSize = 30;
-		}
-		this.SetupMeshData();
-		this.InitBuildAndAnimTex();
-	}
-
 	public static void FinalizeTextureCache()
 	{
 		KAnimBatchGroup.cache.Finalise();
@@ -37,16 +18,16 @@ public class KAnimBatchGroup
 		{
 		case KAnimBatchGroup.MaterialType.Simple:
 			material = new Material(Shader.Find("Klei/AnimationSimple"));
-			goto IL_0075;
+			goto IL_0064;
 		case KAnimBatchGroup.MaterialType.UI:
 			material = new Material(Shader.Find("Klei/BatchedAnimationUI"));
-			goto IL_0075;
+			goto IL_0064;
 		case KAnimBatchGroup.MaterialType.Overlay:
 			material = new Material(Shader.Find("Klei/AnimationOverlay"));
-			goto IL_0075;
+			goto IL_0064;
 		}
 		material = new Material(Shader.Find("Klei/BatchedAnimation"));
-		IL_0075:
+		IL_0064:
 		material.name = "Material:" + this.batchID.ToString();
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)this.data.animDataStartOffset);
@@ -72,6 +53,25 @@ public class KAnimBatchGroup
 	public KBatchGroupData data { get; private set; }
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry buildAndAnimTex { get; private set; }
+
+	public KAnimBatchGroup(HashedString id)
+	{
+		this.data = KAnimBatchManager.Instance().GetBatchGroupData(id);
+		this.materials = new Material[5];
+		this.batchID = id;
+		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(id);
+		if (group == null)
+		{
+			return;
+		}
+		this.maxGroupSize = group.maxGroupSize;
+		if (this.maxGroupSize <= 0)
+		{
+			this.maxGroupSize = 30;
+		}
+		this.SetupMeshData();
+		this.InitBuildAndAnimTex();
+	}
 
 	public bool InitOK
 	{
@@ -110,12 +110,9 @@ public class KAnimBatchGroup
 
 	public static int GetBestTextureSize(float cost)
 	{
-		float num = Mathf.Sqrt(cost);
-		int num2 = Mathf.CeilToInt(num);
-		int num3 = 32;
-		float num4 = (float)num2 / (float)num3;
-		int num5 = Mathf.CeilToInt(num4);
-		return num5 * num3;
+		float num = (float)Mathf.CeilToInt(Mathf.Sqrt(cost));
+		int num2 = 32;
+		return Mathf.CeilToInt(num / (float)num2) * num2;
 	}
 
 	private void SetupMeshData()
@@ -129,8 +126,7 @@ public class KAnimBatchGroup
 
 	private float GetBuildDataSize()
 	{
-		int num = this.data.GetBuildSymbolFrameCount() * 16;
-		return (float)num / 4f;
+		return (float)(this.data.GetBuildSymbolFrameCount() * 16) / 4f;
 	}
 
 	private float GetAnimDataSize()
@@ -359,24 +355,6 @@ public class KAnimBatchGroup
 
 		public class Entry
 		{
-			public Entry(int float4s_per_side)
-			{
-				this.texture = new Texture2D(float4s_per_side, float4s_per_side, TextureFormat.RGBAFloat, false);
-				this.texture.wrapMode = TextureWrapMode.Clamp;
-				this.texture.filterMode = FilterMode.Point;
-				this.texture.anisoLevel = 0;
-				this.floatConverter = new KAnimBatchGroup.KAnimBatchTextureCache.Entry.ByteToFloatConverter
-				{
-					bytes = new byte[float4s_per_side * float4s_per_side * 4 * 4]
-				};
-				int num = float4s_per_side * float4s_per_side;
-				NativeArray<Color> rawTextureData = this.texture.GetRawTextureData<Color>();
-				for (int i = 0; i < num; i++)
-				{
-					rawTextureData[i] = KAnimBatchGroup.ResetColor;
-				}
-			}
-
 			public Texture2D texture { get; private set; }
 
 			public byte[] bytes
@@ -392,6 +370,24 @@ public class KAnimBatchGroup
 				get
 				{
 					return this.floatConverter.floats;
+				}
+			}
+
+			public Entry(int float4s_per_side)
+			{
+				this.texture = new Texture2D(float4s_per_side, float4s_per_side, TextureFormat.RGBAFloat, false);
+				this.texture.wrapMode = TextureWrapMode.Clamp;
+				this.texture.filterMode = FilterMode.Point;
+				this.texture.anisoLevel = 0;
+				this.floatConverter = new KAnimBatchGroup.KAnimBatchTextureCache.Entry.ByteToFloatConverter
+				{
+					bytes = new byte[float4s_per_side * float4s_per_side * 4 * 4]
+				};
+				int num = float4s_per_side * float4s_per_side;
+				NativeArray<Color> rawTextureData = this.texture.GetRawTextureData<Color>();
+				for (int i = 0; i < num; i++)
+				{
+					rawTextureData[i] = KAnimBatchGroup.ResetColor;
 				}
 			}
 

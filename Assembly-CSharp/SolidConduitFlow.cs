@@ -7,21 +7,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class SolidConduitFlow : IConduitFlow
 {
-	public SolidConduitFlow(int num_cells, IUtilityNetworkMgr network_mgr, float initial_elapsed_time)
-	{
-		this.elapsedTime = initial_elapsed_time;
-		this.networkMgr = network_mgr;
-		this.maskedOverlayLayer = LayerMask.NameToLayer("MaskedOverlay");
-		this.Initialize(num_cells);
-		network_mgr.AddNetworksRebuiltListener(new Action<IList<UtilityNetwork>, ICollection<int>>(this.OnUtilityNetworksRebuilt));
-	}
-
 	public SolidConduitFlow.SOAInfo GetSOAInfo()
 	{
 		return this.soaInfo;
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onConduitsRebuilt;
 
 	public void AddConduitUpdater(Action<float> callback, ConduitFlowPriority priority = ConduitFlowPriority.Default)
@@ -42,7 +32,7 @@ public class SolidConduitFlow : IConduitFlow
 			{
 				this.conduitUpdaters.RemoveAt(i);
 				this.dirtyConduitUpdaters = true;
-				break;
+				return;
 			}
 		}
 	}
@@ -50,6 +40,15 @@ public class SolidConduitFlow : IConduitFlow
 	public static int FlowBit(SolidConduitFlow.FlowDirection direction)
 	{
 		return 1 << direction - SolidConduitFlow.FlowDirection.Left;
+	}
+
+	public SolidConduitFlow(int num_cells, IUtilityNetworkMgr network_mgr, float initial_elapsed_time)
+	{
+		this.elapsedTime = initial_elapsed_time;
+		this.networkMgr = network_mgr;
+		this.maskedOverlayLayer = LayerMask.NameToLayer("MaskedOverlay");
+		this.Initialize(num_cells);
+		network_mgr.AddNetworksRebuiltListener(new Action<IList<UtilityNetwork>, ICollection<int>>(this.OnUtilityNetworksRebuilt));
 	}
 
 	public void Initialize(int num_cells)
@@ -95,34 +94,31 @@ public class SolidConduitFlow : IConduitFlow
 		foreach (int num3 in root_nodes)
 		{
 			UtilityConnections connections = this.networkMgr.GetConnections(num3, true);
-			if (connections != (UtilityConnections)0)
+			if (connections != (UtilityConnections)0 && this.grid[num3].conduitIdx != -1)
 			{
-				if (this.grid[num3].conduitIdx != -1)
+				int conduitIdx = this.grid[num3].conduitIdx;
+				SolidConduitFlow.ConduitConnections conduitConnections = this.soaInfo.GetConduitConnections(conduitIdx);
+				int num4 = num3 - 1;
+				if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
 				{
-					int conduitIdx = this.grid[num3].conduitIdx;
-					SolidConduitFlow.ConduitConnections conduitConnections = this.soaInfo.GetConduitConnections(conduitIdx);
-					int num4 = num3 - 1;
-					if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
-					{
-						conduitConnections.left = this.grid[num4].conduitIdx;
-					}
-					num4 = num3 + 1;
-					if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
-					{
-						conduitConnections.right = this.grid[num4].conduitIdx;
-					}
-					num4 = num3 - Grid.WidthInCells;
-					if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
-					{
-						conduitConnections.down = this.grid[num4].conduitIdx;
-					}
-					num4 = num3 + Grid.WidthInCells;
-					if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
-					{
-						conduitConnections.up = this.grid[num4].conduitIdx;
-					}
-					this.soaInfo.SetConduitConnections(conduitIdx, conduitConnections);
+					conduitConnections.left = this.grid[num4].conduitIdx;
 				}
+				num4 = num3 + 1;
+				if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
+				{
+					conduitConnections.right = this.grid[num4].conduitIdx;
+				}
+				num4 = num3 - Grid.WidthInCells;
+				if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
+				{
+					conduitConnections.down = this.grid[num4].conduitIdx;
+				}
+				num4 = num3 + Grid.WidthInCells;
+				if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
+				{
+					conduitConnections.up = this.grid[num4].conduitIdx;
+				}
+				this.soaInfo.SetConduitConnections(conduitIdx, conduitConnections);
 			}
 		}
 		if (this.onConduitsRebuilt != null)
@@ -180,8 +176,7 @@ public class SolidConduitFlow : IConduitFlow
 		}
 		this.visited.Add(conduit_idx);
 		SolidConduitFlow.Conduit conduit = this.soaInfo.GetConduit(conduit_idx);
-		int permittedFlowDirections = conduit.GetPermittedFlowDirections(this);
-		if (permittedFlowDirections == -1)
+		if (conduit.GetPermittedFlowDirections(this) == -1)
 		{
 			return;
 		}
@@ -264,13 +259,27 @@ public class SolidConduitFlow : IConduitFlow
 
 	private void TryAdd(List<SolidConduitFlow.Conduit> new_path)
 	{
+		Predicate<SolidConduitFlow.Conduit> <>9__0;
+		Predicate<SolidConduitFlow.Conduit> <>9__1;
 		foreach (List<SolidConduitFlow.Conduit> list in this.pathList)
 		{
 			if (list.Count >= new_path.Count)
 			{
 				bool flag = false;
-				int num = list.FindIndex((SolidConduitFlow.Conduit t) => t.idx == new_path[0].idx);
-				int num2 = list.FindIndex((SolidConduitFlow.Conduit t) => t.idx == new_path[new_path.Count - 1].idx);
+				List<SolidConduitFlow.Conduit> list2 = list;
+				Predicate<SolidConduitFlow.Conduit> predicate;
+				if ((predicate = <>9__0) == null)
+				{
+					predicate = (<>9__0 = (SolidConduitFlow.Conduit t) => t.idx == new_path[0].idx);
+				}
+				int num = list2.FindIndex(predicate);
+				List<SolidConduitFlow.Conduit> list3 = list;
+				Predicate<SolidConduitFlow.Conduit> predicate2;
+				if ((predicate2 = <>9__1) == null)
+				{
+					predicate2 = (<>9__1 = (SolidConduitFlow.Conduit t) => t.idx == new_path[new_path.Count - 1].idx);
+				}
+				int num2 = list3.FindIndex(predicate2);
 				if (num != -1 && num2 != -1)
 				{
 					flag = true;
@@ -330,19 +339,14 @@ public class SolidConduitFlow : IConduitFlow
 				}
 			}
 		}
-		foreach (List<SolidConduitFlow.Conduit> list2 in this.pathList)
+		foreach (List<SolidConduitFlow.Conduit> list4 in this.pathList)
 		{
 			for (int m = new_path.Count - 1; m >= 0; m--)
 			{
 				SolidConduitFlow.Conduit new_conduit = new_path[m];
-				int num7 = list2.FindIndex((SolidConduitFlow.Conduit t) => t.idx == new_conduit.idx);
-				if (num7 != -1)
+				if (list4.FindIndex((SolidConduitFlow.Conduit t) => t.idx == new_conduit.idx) != -1 && Mathf.IsPowerOfTwo(this.soaInfo.GetPermittedFlowDirections(new_conduit.idx)))
 				{
-					int permittedFlowDirections = this.soaInfo.GetPermittedFlowDirections(new_conduit.idx);
-					if (Mathf.IsPowerOfTwo(permittedFlowDirections))
-					{
-						new_path.RemoveAt(m);
-					}
+					new_path.RemoveAt(m);
 				}
 			}
 		}
@@ -366,11 +370,9 @@ public class SolidConduitFlow : IConduitFlow
 		if (gridNode.conduitIdx != -1)
 		{
 			this.soaInfo.GetConduit(gridNode.conduitIdx).SetContents(this, contents);
+			return;
 		}
-		else
-		{
-			this.grid[cell].contents = contents;
-		}
+		this.grid[cell].contents = contents;
 	}
 
 	public void SetContents(int cell, Pickupable pickupable)
@@ -471,20 +473,19 @@ public class SolidConduitFlow : IConduitFlow
 		Vector2I vector2I2 = new Vector2I(Mathf.Min(Grid.WidthInCells - 1, visibleArea.Max.x + 1), Mathf.Min(Grid.HeightInCells - 1, visibleArea.Max.y + 1));
 		for (int i = 0; i < this.GetSOAInfo().NumEntries; i++)
 		{
-			int cell = this.GetSOAInfo().GetCell(i);
-			Vector2I vector2I3 = Grid.CellToXY(cell);
+			Vector2I vector2I3 = Grid.CellToXY(this.GetSOAInfo().GetCell(i));
 			if (!(vector2I3 < vector2I) && !(vector2I3 > vector2I2))
 			{
 				SolidConduitFlow.Conduit conduit = this.GetSOAInfo().GetConduit(i);
 				SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this);
 				if (lastFlowInfo.direction != SolidConduitFlow.FlowDirection.None)
 				{
-					int cell2 = conduit.GetCell(this);
-					int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
+					int cell = conduit.GetCell(this);
+					int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
 					SolidConduitFlow.ConduitContents contents = this.GetContents(cellFromDirection);
 					if (contents.pickupableHandle.IsValid())
 					{
-						Vector3 vector = Grid.CellToPosCCC(cell2, Grid.SceneLayer.SolidConduitContents);
+						Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
 						Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
 						Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
 						Pickupable pickupable = this.GetPickupable(contents.pickupableHandle);
@@ -528,8 +529,7 @@ public class SolidConduitFlow : IConduitFlow
 			this.soaInfo.SetTargetFlowDirection(conduit.idx, conduit.GetNextFlowTarget(this));
 			return;
 		}
-		int permittedFlowDirections = this.soaInfo.GetPermittedFlowDirections(conduit.idx);
-		if ((permittedFlowDirections & SolidConduitFlow.FlowBit(targetFlowDirection)) != 0)
+		if ((this.soaInfo.GetPermittedFlowDirections(conduit.idx) & SolidConduitFlow.FlowBit(targetFlowDirection)) != 0)
 		{
 			bool flag = false;
 			for (int i = 0; i < 5; i++)
@@ -667,7 +667,11 @@ public class SolidConduitFlow : IConduitFlow
 	public SolidConduitFlow.Conduit GetConduit(int cell)
 	{
 		int conduitIdx = this.grid[cell].conduitIdx;
-		return (conduitIdx == -1) ? SolidConduitFlow.Conduit.Invalid() : this.soaInfo.GetConduit(conduitIdx);
+		if (conduitIdx == -1)
+		{
+			return SolidConduitFlow.Conduit.Invalid();
+		}
+		return this.soaInfo.GetConduit(conduitIdx);
 	}
 
 	private void DumpPipeContents(int cell)
@@ -750,8 +754,8 @@ public class SolidConduitFlow : IConduitFlow
 			return;
 		}
 		this.viewingConduits = flag;
-		int num = ((!this.viewingConduits) ? Game.PickupableLayer : this.maskedOverlayLayer);
-		Color32 color = ((!this.viewingConduits) ? SolidConduitFlow.NormalColour : SolidConduitFlow.OverlayColour);
+		int num = (this.viewingConduits ? this.maskedOverlayLayer : Game.PickupableLayer);
+		Color32 color = (this.viewingConduits ? SolidConduitFlow.OverlayColour : SolidConduitFlow.NormalColour);
 		List<SolidConduitFlow.StoredInfo> dataList = this.conveyorPickupables.GetDataList();
 		for (int i = 0; i < dataList.Count; i++)
 		{
@@ -937,8 +941,7 @@ public class SolidConduitFlow : IConduitFlow
 
 		public void ForcePermanentDiseaseContainer(int idx, bool force_on)
 		{
-			bool flag = this.diseaseContentsVisible[idx];
-			if (flag != force_on)
+			if (this.diseaseContentsVisible[idx] != force_on)
 			{
 				this.diseaseContentsVisible[idx] = force_on;
 				GameObject gameObject = this.conduitGOs[idx];
@@ -946,8 +949,7 @@ public class SolidConduitFlow : IConduitFlow
 				{
 					return;
 				}
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				component.ForcePermanentDiseaseContainer(force_on);
+				gameObject.GetComponent<PrimaryElement>().ForcePermanentDiseaseContainer(force_on);
 			}
 		}
 
@@ -958,16 +960,16 @@ public class SolidConduitFlow : IConduitFlow
 			switch (direction)
 			{
 			case SolidConduitFlow.FlowDirection.Left:
-				conduit = ((conduitConnections.left == -1) ? SolidConduitFlow.Conduit.Invalid() : this.conduits[conduitConnections.left]);
+				conduit = ((conduitConnections.left != -1) ? this.conduits[conduitConnections.left] : SolidConduitFlow.Conduit.Invalid());
 				break;
 			case SolidConduitFlow.FlowDirection.Right:
-				conduit = ((conduitConnections.right == -1) ? SolidConduitFlow.Conduit.Invalid() : this.conduits[conduitConnections.right]);
+				conduit = ((conduitConnections.right != -1) ? this.conduits[conduitConnections.right] : SolidConduitFlow.Conduit.Invalid());
 				break;
 			case SolidConduitFlow.FlowDirection.Up:
-				conduit = ((conduitConnections.up == -1) ? SolidConduitFlow.Conduit.Invalid() : this.conduits[conduitConnections.up]);
+				conduit = ((conduitConnections.up != -1) ? this.conduits[conduitConnections.up] : SolidConduitFlow.Conduit.Invalid());
 				break;
 			case SolidConduitFlow.FlowDirection.Down:
-				conduit = ((conduitConnections.down == -1) ? SolidConduitFlow.Conduit.Invalid() : this.conduits[conduitConnections.down]);
+				conduit = ((conduitConnections.down != -1) ? this.conduits[conduitConnections.down] : SolidConduitFlow.Conduit.Invalid());
 				break;
 			}
 			return conduit;
@@ -1179,14 +1181,14 @@ public class SolidConduitFlow : IConduitFlow
 	[Serializable]
 	public struct Conduit : IEquatable<SolidConduitFlow.Conduit>
 	{
-		public Conduit(int idx)
-		{
-			this.idx = idx;
-		}
-
 		public static SolidConduitFlow.Conduit Invalid()
 		{
 			return new SolidConduitFlow.Conduit(-1);
+		}
+
+		public Conduit(int idx)
+		{
+			this.idx = idx;
 		}
 
 		public int GetPermittedFlowDirections(SolidConduitFlow manager)
@@ -1227,16 +1229,14 @@ public class SolidConduitFlow : IConduitFlow
 					pickupable.transform.parent = null;
 					Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
 					pickupable.transform.SetPosition(vector);
-					KBatchedAnimController component = pickupable.GetComponent<KBatchedAnimController>();
-					component.SetSceneLayer(Grid.SceneLayer.SolidConduitContents);
+					pickupable.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.SolidConduitContents);
 				}
 			}
 		}
 
 		public SolidConduitFlow.FlowDirection GetNextFlowSource(SolidConduitFlow manager)
 		{
-			int permittedFlowDirections = manager.soaInfo.GetPermittedFlowDirections(this.idx);
-			if (permittedFlowDirections == -1)
+			if (manager.soaInfo.GetPermittedFlowDirections(this.idx) == -1)
 			{
 				return SolidConduitFlow.FlowDirection.Blocked;
 			}
@@ -1247,20 +1247,18 @@ public class SolidConduitFlow : IConduitFlow
 			}
 			for (int i = 0; i < 5; i++)
 			{
-				int num = flowDirection + i - SolidConduitFlow.FlowDirection.Left;
-				int num2 = (num + 1) % 5;
-				SolidConduitFlow.FlowDirection flowDirection2 = num2 + SolidConduitFlow.FlowDirection.Left;
+				SolidConduitFlow.FlowDirection flowDirection2 = (flowDirection + i - 1 + 1) % SolidConduitFlow.FlowDirection.Num + 1;
 				SolidConduitFlow.Conduit conduitFromDirection = manager.soaInfo.GetConduitFromDirection(this.idx, flowDirection2);
 				if (conduitFromDirection.idx != -1)
 				{
 					SolidConduitFlow.ConduitContents contents = manager.grid[conduitFromDirection.GetCell(manager)].contents;
 					if (contents.pickupableHandle.IsValid())
 					{
-						int permittedFlowDirections2 = manager.soaInfo.GetPermittedFlowDirections(conduitFromDirection.idx);
-						if (permittedFlowDirections2 != -1)
+						int permittedFlowDirections = manager.soaInfo.GetPermittedFlowDirections(conduitFromDirection.idx);
+						if (permittedFlowDirections != -1)
 						{
 							SolidConduitFlow.FlowDirection flowDirection3 = SolidConduitFlow.InverseFlow(flowDirection2);
-							if (manager.soaInfo.GetConduitFromDirection(conduitFromDirection.idx, flowDirection3).idx != -1 && (permittedFlowDirections2 & SolidConduitFlow.FlowBit(flowDirection3)) != 0)
+							if (manager.soaInfo.GetConduitFromDirection(conduitFromDirection.idx, flowDirection3).idx != -1 && (permittedFlowDirections & SolidConduitFlow.FlowBit(flowDirection3)) != 0)
 							{
 								return flowDirection2;
 							}
@@ -1270,21 +1268,15 @@ public class SolidConduitFlow : IConduitFlow
 			}
 			for (int j = 0; j < 5; j++)
 			{
-				SolidConduitFlow.FlowDirection targetFlowDirection = manager.soaInfo.GetTargetFlowDirection(this.idx);
-				int num3 = targetFlowDirection + j - SolidConduitFlow.FlowDirection.Left;
-				int num4 = (num3 + 1) % 5;
-				SolidConduitFlow.FlowDirection flowDirection4 = num4 + SolidConduitFlow.FlowDirection.Left;
+				SolidConduitFlow.FlowDirection flowDirection4 = (manager.soaInfo.GetTargetFlowDirection(this.idx) + j - 1 + 1) % SolidConduitFlow.FlowDirection.Num + 1;
 				SolidConduitFlow.FlowDirection flowDirection5 = SolidConduitFlow.InverseFlow(flowDirection4);
 				SolidConduitFlow.Conduit conduitFromDirection2 = manager.soaInfo.GetConduitFromDirection(this.idx, flowDirection4);
 				if (conduitFromDirection2.idx != -1)
 				{
-					int permittedFlowDirections3 = manager.soaInfo.GetPermittedFlowDirections(conduitFromDirection2.idx);
-					if (permittedFlowDirections3 != -1)
+					int permittedFlowDirections2 = manager.soaInfo.GetPermittedFlowDirections(conduitFromDirection2.idx);
+					if (permittedFlowDirections2 != -1 && (permittedFlowDirections2 & SolidConduitFlow.FlowBit(flowDirection5)) != 0)
 					{
-						if ((permittedFlowDirections3 & SolidConduitFlow.FlowBit(flowDirection5)) != 0)
-						{
-							return flowDirection4;
-						}
+						return flowDirection4;
 					}
 				}
 			}
@@ -1300,13 +1292,10 @@ public class SolidConduitFlow : IConduitFlow
 			}
 			for (int i = 0; i < 5; i++)
 			{
-				SolidConduitFlow.FlowDirection targetFlowDirection = manager.soaInfo.GetTargetFlowDirection(this.idx);
-				int num = targetFlowDirection + i - SolidConduitFlow.FlowDirection.Left;
-				int num2 = (num + 1) % 5;
-				int num3 = num2 + 1;
-				if (manager.soaInfo.GetConduitFromDirection(this.idx, (SolidConduitFlow.FlowDirection)num3).idx != -1 && (permittedFlowDirections & SolidConduitFlow.FlowBit((SolidConduitFlow.FlowDirection)num3)) != 0)
+				int num = (manager.soaInfo.GetTargetFlowDirection(this.idx) + i - SolidConduitFlow.FlowDirection.Left + 1) % 5 + 1;
+				if (manager.soaInfo.GetConduitFromDirection(this.idx, (SolidConduitFlow.FlowDirection)num).idx != -1 && (permittedFlowDirections & SolidConduitFlow.FlowBit((SolidConduitFlow.FlowDirection)num)) != 0)
 				{
-					return (SolidConduitFlow.FlowDirection)num3;
+					return (SolidConduitFlow.FlowDirection)num;
 				}
 			}
 			return SolidConduitFlow.FlowDirection.Blocked;

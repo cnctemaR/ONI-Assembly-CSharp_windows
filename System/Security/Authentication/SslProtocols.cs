@@ -9,6 +9,10 @@ namespace System.Security.Authentication
 		Ssl2 = 12,
 		Ssl3 = 48,
 		Tls = 192,
+		[MonoTODO("unsupported")]
+		Tls11 = 768,
+		[MonoTODO("unsupported")]
+		Tls12 = 3072,
 		Default = 240
 	}
 }

@@ -12,30 +12,18 @@ public class BulbPlantConfig : IEntityConfig
 		string text2 = global::STRINGS.CREATURES.SPECIES.BULBPLANT.NAME;
 		string text3 = global::STRINGS.CREATURES.SPECIES.BULBPLANT.DESC;
 		float num = 1f;
-		KAnimFile kanimFile = Assets.GetAnim("potted_bulb_kanim");
-		string text4 = "grow_seed";
 		EffectorValues positive_DECOR_EFFECT = this.POSITIVE_DECOR_EFFECT;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 1, positive_DECOR_EFFECT, default(EffectorValues), SimHashes.Creature, null, 293f);
-		GameObject gameObject2 = gameObject;
-		SimHashes[] array = new SimHashes[]
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("potted_bulb_kanim"), "grow_seed", Grid.SceneLayer.BuildingFront, 1, 1, positive_DECOR_EFFECT, default(EffectorValues), SimHashes.Creature, null, 293f);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 288f, 293.15f, 313.15f, 333.15f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		};
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 288f, 293.15f, 313.15f, 333.15f, array, true, 0f, 0.15f, null, true, false, true, true, 2400f);
+		}, true, 0f, 0.15f, null, true, false, true, true, 2400f);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
-		gameObject2 = gameObject;
-		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
-		text4 = "BulbPlantSeed";
-		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.NAME;
-		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.DESC;
-		kanimFile = Assets.GetAnim("seed_potted_bulb_kanim");
-		List<Tag> list = new List<Tag> { GameTags.DecorSeed };
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 6, global::STRINGS.CREATURES.SPECIES.BULBPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, null, string.Empty, false);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "BulbPlant_preview", Assets.GetAnim("potted_bulb_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "BulbPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.DESC, Assets.GetAnim("seed_potted_bulb_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 6, global::STRINGS.CREATURES.SPECIES.BULBPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, null, "", false), "BulbPlant_preview", Assets.GetAnim("potted_bulb_kanim"), "place", 1, 1);
 		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 		DiseaseDropper.Def def = gameObject.AddOrGetDef<DiseaseDropper.Def>();
 		def.diseaseIdx = Db.Get().Diseases.GetIndex(Db.Get().Diseases.PollenGerms.id);

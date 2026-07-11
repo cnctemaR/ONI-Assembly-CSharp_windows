@@ -10,8 +10,7 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CREATURE_AVAILABLE_FOR_FIXED_CAPTURE;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			FixedCapturePoint.Instance instance = data as FixedCapturePoint.Instance;
-			return instance.IsCreatureAvailableForFixedCapture();
+			return (data as FixedCapturePoint.Instance).IsCreatureAvailableForFixedCapture();
 		};
 		this.IsCreatureAvailableForFixedCapture = precondition;
 		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);

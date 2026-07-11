@@ -33,12 +33,9 @@ namespace UnityEngine.Timeline
 
 		public override void OnBehaviourPause(Playable playable, FrameData info)
 		{
-			if (!(this.gameObject == null))
+			if (this.gameObject != null && info.effectivePlayState == PlayState.Paused)
 			{
-				if (info.evaluationType == FrameData.EvaluationType.Evaluate || playable.GetGraph<Playable>().IsPlaying())
-				{
-					this.gameObject.SetActive(false);
-				}
+				this.gameObject.SetActive(false);
 			}
 		}
 

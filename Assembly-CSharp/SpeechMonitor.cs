@@ -45,8 +45,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		{
 			return true;
 		}
-		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
-		KAnim.Anim currentAnim = component.GetCurrentAnim();
+		KAnim.Anim currentAnim = go.GetComponent<KBatchedAnimController>().GetCurrentAnim();
 		return currentAnim == null || GameAudioSheets.Get().IsAnimAllowedToPlaySpeech(currentAnim);
 	}
 
@@ -184,8 +183,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			base.GetComponent<SymbolOverrideController>().AddSymbolOverride(SpeechMonitor.HASH_SNAPTO_MOUTH, base.smi.mouth.AnimFiles[0].GetData().build.GetSymbol(firstFrameElement.symbol), 3);
 			KAnim.Build.Symbol symbol2 = KAnimBatchManager.Instance().GetBatchGroupData(component.batchGroupID).GetSymbol(SpeechMonitor.HASH_SNAPTO_MOUTH);
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(symbol.build.batchTag);
-			KAnim.Build.SymbolFrameInstance symbolFrameInstance = batchGroupData.symbolFrameInstances[symbol.firstFrameIdx + firstFrameElement.frame];
+			KAnim.Build.SymbolFrameInstance symbolFrameInstance = KAnimBatchManager.Instance().GetBatchGroupData(symbol.build.batchTag).symbolFrameInstances[symbol.firstFrameIdx + firstFrameElement.frame];
 			symbolFrameInstance.buildImageIdx = base.GetComponent<SymbolOverrideController>().GetAtlasIdx(symbol.build.GetTexture(0));
 			component.SetSymbolOverride(symbol2.firstFrameIdx, symbolFrameInstance);
 		}

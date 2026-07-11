@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace System.Runtime.Versioning
+{
+	internal static class BinaryCompatibility
+	{
+		public static bool TargetsAtLeast_Desktop_V4_5_2
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public static readonly bool TargetsAtLeast_Desktop_V4_5 = true;
+
+		public static readonly bool TargetsAtLeast_Desktop_V4_5_1 = true;
+	}
+}

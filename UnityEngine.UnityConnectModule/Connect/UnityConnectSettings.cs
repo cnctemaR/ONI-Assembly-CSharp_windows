@@ -26,7 +26,7 @@ namespace UnityEngine.Connect
 		}
 
 		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
-		public static extern string testEventUrl
+		public static extern string eventUrl
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -35,7 +35,16 @@ namespace UnityEngine.Connect
 		}
 
 		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
-		public static extern string testConfigUrl
+		public static extern string eventOldUrl
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
+		public static extern string configUrl
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;

@@ -36,16 +36,14 @@ public class BuildingDamageSoundEvent : SoundEvent
 			if (component2 != null)
 			{
 				BuildingDef def = component2.Def;
-				string text = StringFormatter.Combine(base.name, "_", def.AudioCategory);
-				string text2 = GlobalAssets.GetSound(text, false);
-				if (text2 == null)
+				string text = GlobalAssets.GetSound(StringFormatter.Combine(base.name, "_", def.AudioCategory), false);
+				if (text == null)
 				{
-					text = "Building_Dmg_Metal";
-					text2 = GlobalAssets.GetSound(text, false);
+					text = GlobalAssets.GetSound("Building_Dmg_Metal", false);
 				}
-				if (text2 != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text2, base.looping, this.isDynamic)))
+				if (text != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text, base.looping, this.isDynamic)))
 				{
-					SoundEvent.PlayOneShot(text2, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible));
+					SoundEvent.PlayOneShot(text, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible));
 				}
 			}
 		}

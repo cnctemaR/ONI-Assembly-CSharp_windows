@@ -4,7 +4,7 @@ using System.Security.Permissions;
 namespace System.Diagnostics
 {
 	[Serializable]
-	public sealed class PerformanceCounterPermission : global::System.Security.Permissions.ResourcePermissionBase
+	public sealed class PerformanceCounterPermission : ResourcePermissionBase
 	{
 		public PerformanceCounterPermission()
 		{
@@ -53,7 +53,7 @@ namespace System.Diagnostics
 			base.PermissionAccessType = typeof(PerformanceCounterPermissionAccess);
 		}
 
-		internal global::System.Security.Permissions.ResourcePermissionBaseEntry[] GetEntries()
+		internal ResourcePermissionBaseEntry[] GetEntries()
 		{
 			return base.GetPermissionEntries();
 		}

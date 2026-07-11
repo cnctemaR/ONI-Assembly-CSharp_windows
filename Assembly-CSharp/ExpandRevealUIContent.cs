@@ -66,14 +66,12 @@ public class ExpandRevealUIContent : MonoBehaviour
 		if (base.gameObject.activeInHierarchy)
 		{
 			this.activeRoutine = base.StartCoroutine(this.collapse(completeCallback));
+			return;
 		}
-		else
+		this.activeRoutine = null;
+		if (completeCallback != null)
 		{
-			this.activeRoutine = null;
-			if (completeCallback != null)
-			{
-				completeCallback(null);
-			}
+			completeCallback(null);
 		}
 	}
 
@@ -81,15 +79,15 @@ public class ExpandRevealUIContent : MonoBehaviour
 	{
 		this.Collapsing = false;
 		this.Expanding = true;
-		float xMax = 0f;
+		float num = 0f;
 		foreach (Keyframe keyframe in this.expandAnimation.keys)
 		{
-			if (keyframe.time > xMax)
+			if (keyframe.time > num)
 			{
-				xMax = keyframe.time;
+				num = keyframe.time;
 			}
 		}
-		float duration = xMax / this.speedScale;
+		float duration = num / this.speedScale;
 		for (float remaining = duration; remaining >= 0f; remaining -= Time.unscaledDeltaTime * this.speedScale)
 		{
 			this.SetStretch(this.expandAnimation.Evaluate(duration - remaining));
@@ -157,15 +155,15 @@ public class ExpandRevealUIContent : MonoBehaviour
 	{
 		this.Expanding = false;
 		this.Collapsing = true;
-		float xMax = 0f;
+		float num = 0f;
 		foreach (Keyframe keyframe in this.collapseAnimation.keys)
 		{
-			if (keyframe.time > xMax)
+			if (keyframe.time > num)
 			{
-				xMax = keyframe.time;
+				num = keyframe.time;
 			}
 		}
-		float duration = xMax;
+		float duration = num;
 		for (float remaining = duration; remaining >= 0f; remaining -= Time.unscaledDeltaTime)
 		{
 			this.SetStretch(this.collapseAnimation.Evaluate(duration - remaining));

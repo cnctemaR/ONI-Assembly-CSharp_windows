@@ -88,15 +88,19 @@ public struct AABB3
 
 	public unsafe void Transform(Matrix4x4 t)
 	{
-		Vector3* ptr = stackalloc Vector3[checked(8 * sizeof(Vector3))];
-		*ptr = this.min;
+		Vector3* ptr;
+		checked
+		{
+			ptr = stackalloc Vector3[unchecked((UIntPtr)8) * (UIntPtr)sizeof(Vector3)];
+			*ptr = this.min;
+		}
 		ptr[1] = new Vector3(this.min.x, this.min.y, this.max.z);
-		ptr[sizeof(Vector3) * 2 / sizeof(Vector3)] = new Vector3(this.min.x, this.max.y, this.min.z);
-		ptr[sizeof(Vector3) * 3 / sizeof(Vector3)] = new Vector3(this.max.x, this.min.y, this.min.z);
-		ptr[sizeof(Vector3) * 4 / sizeof(Vector3)] = new Vector3(this.min.x, this.max.y, this.max.z);
-		ptr[sizeof(Vector3) * 5 / sizeof(Vector3)] = new Vector3(this.max.x, this.min.y, this.max.z);
-		ptr[sizeof(Vector3) * 6 / sizeof(Vector3)] = new Vector3(this.max.x, this.max.y, this.min.z);
-		ptr[sizeof(Vector3) * 7 / sizeof(Vector3)] = this.max;
+		ptr[2] = new Vector3(this.min.x, this.max.y, this.min.z);
+		ptr[3] = new Vector3(this.max.x, this.min.y, this.min.z);
+		ptr[4] = new Vector3(this.min.x, this.max.y, this.max.z);
+		ptr[5] = new Vector3(this.max.x, this.min.y, this.max.z);
+		ptr[6] = new Vector3(this.max.x, this.max.y, this.min.z);
+		ptr[7] = this.max;
 		this.min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
 		this.max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 		for (int i = 0; i < 8; i++)

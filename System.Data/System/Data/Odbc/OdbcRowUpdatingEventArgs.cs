@@ -6,29 +6,31 @@ namespace System.Data.Odbc
 	public sealed class OdbcRowUpdatingEventArgs : RowUpdatingEventArgs
 	{
 		public OdbcRowUpdatingEventArgs(DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-			: base(null, null, StatementType.Select, null)
+			: base(row, command, statementType, tableMapping)
 		{
-		}
-
-		protected override IDbCommand BaseCommand
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
 		}
 
 		public new OdbcCommand Command
 		{
 			get
 			{
-				throw null;
+				return base.Command as OdbcCommand;
 			}
 			set
 			{
+				base.Command = value;
+			}
+		}
+
+		protected override IDbCommand BaseCommand
+		{
+			get
+			{
+				return base.BaseCommand;
+			}
+			set
+			{
+				base.BaseCommand = value as OdbcCommand;
 			}
 		}
 	}

@@ -6,13 +6,6 @@ namespace ProcGen.Noise
 {
 	public class Transformer : NoiseBase
 	{
-		public Transformer()
-		{
-			this.transformerType = Transformer.TransformerType.Displace;
-			this.power = 1f;
-			this.rotation = new Vector2f(0, 0);
-		}
-
 		public override Type GetObjectType()
 		{
 			return typeof(Transformer);
@@ -24,12 +17,18 @@ namespace ProcGen.Noise
 
 		public Vector2f rotation { get; set; }
 
+		public Transformer()
+		{
+			this.transformerType = Transformer.TransformerType.Displace;
+			this.power = 1f;
+			this.rotation = new Vector2f(0, 0);
+		}
+
 		public IModule3D CreateModule()
 		{
 			if (this.transformerType == Transformer.TransformerType.Turbulence)
 			{
-				Turbulence turbulence = new Turbulence();
-				turbulence.Power = this.power;
+				new Turbulence().Power = this.power;
 			}
 			else if (this.transformerType == Transformer.TransformerType.RotatePoint)
 			{
@@ -65,20 +64,18 @@ namespace ProcGen.Noise
 				turbulence.XDistortModule = xModule;
 				turbulence.YDistortModule = yModule;
 				turbulence.ZDistortModule = zModule;
+				return;
 			}
-			else if (this.transformerType == Transformer.TransformerType.RotatePoint)
+			if (this.transformerType == Transformer.TransformerType.RotatePoint)
 			{
-				RotatePoint rotatePoint = target as RotatePoint;
-				rotatePoint.SourceModule = sourceModule;
+				(target as RotatePoint).SourceModule = sourceModule;
+				return;
 			}
-			else
-			{
-				Displace displace = target as Displace;
-				displace.SourceModule = sourceModule;
-				displace.XDisplaceModule = xModule;
-				displace.YDisplaceModule = yModule;
-				displace.ZDisplaceModule = zModule;
-			}
+			Displace displace = target as Displace;
+			displace.SourceModule = sourceModule;
+			displace.XDisplaceModule = xModule;
+			displace.YDisplaceModule = yModule;
+			displace.ZDisplaceModule = zModule;
 		}
 
 		public enum TransformerType

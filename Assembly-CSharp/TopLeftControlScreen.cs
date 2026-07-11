@@ -41,7 +41,7 @@ public class TopLeftControlScreen : KScreen
 		else
 		{
 			this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_UNLOCKED, global::Action.ToggleSandboxTools));
-			this.SandboxToggle.ChangeState((!Game.Instance.SandboxModeActive) ? 1 : 2);
+			this.SandboxToggle.ChangeState(Game.Instance.SandboxModeActive ? 2 : 1);
 		}
 		this.SandboxToggle.gameObject.SetActive(SaveGame.Instance.sandboxEnabled);
 	}

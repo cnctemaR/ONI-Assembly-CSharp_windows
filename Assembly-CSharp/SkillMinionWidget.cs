@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IEventSystemHandler
+public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
 {
 	public IAssignableIdentity minion { get; private set; }
 
@@ -30,7 +30,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 	{
 		if (this.skillsScreen.CurrentlySelectedMinion != this.minion)
 		{
-			this.SetColor((!on) ? this.unselected_color : this.hover_color);
+			this.SetColor(on ? this.hover_color : this.unselected_color);
 		}
 	}
 
@@ -56,15 +56,15 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 			return;
 		}
 		this.portrait.SetIdentityObject(this.minion, true);
-		string text = string.Empty;
 		MinionIdentity minionIdentity = this.minion as MinionIdentity;
 		this.hatDropDown.gameObject.SetActive(true);
+		string text;
 		if (minionIdentity != null)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
 			int availableSkillpoints = component.AvailableSkillpoints;
 			int totalSkillPointsGained = component.TotalSkillPointsGained;
-			this.masteryPoints.text = ((availableSkillpoints <= 0) ? "0" : GameUtil.ApplyBoldString(GameUtil.ColourizeString(new Color(0.5f, 1f, 0.5f, 1f), availableSkillpoints.ToString())));
+			this.masteryPoints.text = ((availableSkillpoints > 0) ? GameUtil.ApplyBoldString(GameUtil.ColourizeString(new Color(0.5f, 1f, 0.5f, 1f), availableSkillpoints.ToString())) : "0");
 			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component);
 			AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component);
 			this.morale.text = string.Format("{0}/{1}", attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue());
@@ -78,7 +78,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 				}
 			}
 			this.hatDropDown.Initialize(list, new Action<IListableOption, object>(this.OnHatDropEntryClick), new Func<IListableOption, IListableOption, object, int>(this.hatDropDownSort), new Action<DropDownEntry, object>(this.hatDropEntryRefreshAction), false, this.minion);
-			text = ((!string.IsNullOrEmpty(component.TargetHat)) ? component.TargetHat : component.CurrentHat);
+			text = (string.IsNullOrEmpty(component.TargetHat) ? component.CurrentHat : component.TargetHat);
 		}
 		else
 		{
@@ -86,11 +86,11 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 			ToolTip component2 = base.GetComponent<ToolTip>();
 			component2.ClearMultiStringTooltip();
 			component2.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, storedMinionIdentity.GetStorageReason(), this.minion.GetProperName()), null);
-			text = ((!string.IsNullOrEmpty(storedMinionIdentity.targetHat)) ? storedMinionIdentity.targetHat : storedMinionIdentity.currentHat);
+			text = (string.IsNullOrEmpty(storedMinionIdentity.targetHat) ? storedMinionIdentity.currentHat : storedMinionIdentity.targetHat);
 			this.masteryPoints.text = UI.TABLESCREENS.NA;
 			this.morale.text = UI.TABLESCREENS.NA;
 		}
-		this.SetColor((this.skillsScreen.CurrentlySelectedMinion != this.minion) ? this.unselected_color : this.selected_color);
+		this.SetColor((this.skillsScreen.CurrentlySelectedMinion == this.minion) ? this.selected_color : this.unselected_color);
 		HierarchyReferences component3 = base.GetComponent<HierarchyReferences>();
 		this.RefreshHat(text);
 		component3.GetReference("openButton").gameObject.SetActive(minionIdentity != null);
@@ -136,8 +136,8 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 
 	public void RefreshHat(string hat)
 	{
-		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
-		component.GetReference("selectedHat").GetComponent<Image>().sprite = Assets.GetSprite((!string.IsNullOrEmpty(hat)) ? hat : "hat_role_none");
+		base.GetComponent<HierarchyReferences>().GetReference("selectedHat").GetComponent<Image>()
+			.sprite = Assets.GetSprite(string.IsNullOrEmpty(hat) ? "hat_role_none" : hat);
 	}
 
 	private void OnHatDropEntryClick(IListableOption skill, object data)
@@ -150,8 +150,8 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 		MinionResume component = minionIdentity.GetComponent<MinionResume>();
 		if (skill != null)
 		{
-			HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-			component2.GetReference("selectedHat").GetComponent<Image>().sprite = Assets.GetSprite((skill as SkillListable).skillHat);
+			base.GetComponent<HierarchyReferences>().GetReference("selectedHat").GetComponent<Image>()
+				.sprite = Assets.GetSprite((skill as SkillListable).skillHat);
 			if (component != null)
 			{
 				string skillHat = (skill as SkillListable).skillHat;
@@ -164,8 +164,8 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 		}
 		else
 		{
-			HierarchyReferences component3 = base.GetComponent<HierarchyReferences>();
-			component3.GetReference("selectedHat").GetComponent<Image>().sprite = Assets.GetSprite("hat_role_none");
+			base.GetComponent<HierarchyReferences>().GetReference("selectedHat").GetComponent<Image>()
+				.sprite = Assets.GetSprite("hat_role_none");
 			if (component != null)
 			{
 				component.SetHats(component.CurrentHat, null);
@@ -174,7 +174,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 		}
 		if (this.minion == this.skillsScreen.CurrentlySelectedMinion)
 		{
-			this.skillsScreen.selectedHat.sprite = Assets.GetSprite((!string.IsNullOrEmpty(component.TargetHat)) ? component.TargetHat : "hat_role_none");
+			this.skillsScreen.selectedHat.sprite = Assets.GetSprite(string.IsNullOrEmpty(component.TargetHat) ? "hat_role_none" : component.TargetHat);
 		}
 	}
 

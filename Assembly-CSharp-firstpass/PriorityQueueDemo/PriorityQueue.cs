@@ -245,8 +245,7 @@ namespace PriorityQueueDemo
 			}
 			this._baseHeap[num] = this._baseHeap[this._baseHeap.Count - 1];
 			this._baseHeap.RemoveAt(this._baseHeap.Count - 1);
-			int num2 = this.HeapifyFromEndToBeginning(num);
-			if (num2 == num)
+			if (this.HeapifyFromEndToBeginning(num) == num)
 			{
 				this.HeapifyFromBeginningToEnd(num);
 			}

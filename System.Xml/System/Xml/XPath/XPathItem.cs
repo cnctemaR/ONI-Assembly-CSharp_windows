@@ -5,18 +5,15 @@ namespace System.Xml.XPath
 {
 	public abstract class XPathItem
 	{
-		public virtual object ValueAs(Type type)
-		{
-			return this.ValueAs(type, null);
-		}
-
-		public abstract object ValueAs(Type type, IXmlNamespaceResolver nsResolver);
-
 		public abstract bool IsNode { get; }
+
+		public abstract XmlSchemaType XmlType { get; }
+
+		public abstract string Value { get; }
 
 		public abstract object TypedValue { get; }
 
-		public abstract string Value { get; }
+		public abstract Type ValueType { get; }
 
 		public abstract bool ValueAsBoolean { get; }
 
@@ -28,8 +25,11 @@ namespace System.Xml.XPath
 
 		public abstract long ValueAsLong { get; }
 
-		public abstract Type ValueType { get; }
+		public virtual object ValueAs(Type returnType)
+		{
+			return this.ValueAs(returnType, null);
+		}
 
-		public abstract XmlSchemaType XmlType { get; }
+		public abstract object ValueAs(Type returnType, IXmlNamespaceResolver nsResolver);
 	}
 }

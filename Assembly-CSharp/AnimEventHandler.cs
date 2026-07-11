@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 
 public class AnimEventHandler : KMonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private event AnimEventHandler.SetPos onWorkTargetSet;
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		KBatchedAnimTracker[] componentsInChildren = base.GetComponentsInChildren<KBatchedAnimTracker>(true);
-		foreach (KBatchedAnimTracker kbatchedAnimTracker in componentsInChildren)
+		foreach (KBatchedAnimTracker kbatchedAnimTracker in base.GetComponentsInChildren<KBatchedAnimTracker>(true))
 		{
 			if (kbatchedAnimTracker.useTargetPoint)
 			{

@@ -59,8 +59,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		Vector3 zero = Vector3.zero;
 		Vector3 zero2 = Vector3.zero;
 		MultitoolController.GetTargetPoints(workable, worker, out zero2, out zero);
-		Vector2 vector = new Vector2(zero.x - zero2.x, zero.y - zero2.y);
-		Vector2 normalized = vector.normalized;
+		Vector2 normalized = new Vector2(zero.x - zero2.x, zero.y - zero2.y).normalized;
 		float num = Vector2.Angle(new Vector2(0f, -1f), normalized);
 		float num2 = Mathf.Lerp(0f, 1f, num / 180f);
 		int num3 = array.Length;
@@ -160,8 +159,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 		public void PlayLoop()
 		{
-			KAnimControllerBase kanimControllerBase = base.sm.worker.Get<KAnimControllerBase>(base.smi);
-			if (kanimControllerBase.currentAnim != this.anims[1])
+			if (base.sm.worker.Get<KAnimControllerBase>(base.smi).currentAnim != this.anims[1])
 			{
 				base.sm.worker.Get<KAnimControllerBase>(base.smi).Play(this.anims[1], KAnim.PlayMode.Loop, 1f, 0f);
 			}
@@ -169,8 +167,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 		public void PlayPost()
 		{
-			KAnimControllerBase kanimControllerBase = base.sm.worker.Get<KAnimControllerBase>(base.smi);
-			if (kanimControllerBase.currentAnim != this.anims[2])
+			if (base.sm.worker.Get<KAnimControllerBase>(base.smi).currentAnim != this.anims[2])
 			{
 				base.sm.worker.Get<KAnimControllerBase>(base.smi).Play(this.anims[2], KAnim.PlayMode.Once, 1f, 0f);
 			}

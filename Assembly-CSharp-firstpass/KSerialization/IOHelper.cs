@@ -15,11 +15,9 @@ namespace KSerialization
 				byte[] bytes = Encoding.UTF8.GetBytes(str);
 				writer.Write(bytes.Length);
 				writer.Write(bytes);
+				return;
 			}
-			else
-			{
-				writer.Write(-1);
-			}
+			writer.Write(-1);
 		}
 
 		[Conditional("DEBUG_VALIDATE")]

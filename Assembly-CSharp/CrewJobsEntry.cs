@@ -49,7 +49,7 @@ public class CrewJobsEntry : CrewListEntry
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.Prefab_JobPriorityButtonAllTasks, base.transform.gameObject, false);
 		gameObject.GetComponent<OverviewColumnIdentity>().columnID = "AllTasks";
-		gameObject.GetComponent<OverviewColumnIdentity>().Column_DisplayName = string.Empty;
+		gameObject.GetComponent<OverviewColumnIdentity>().Column_DisplayName = "";
 		Button b = gameObject.GetComponent<Button>();
 		b.onClick.AddListener(delegate
 		{
@@ -110,8 +110,7 @@ public class CrewJobsEntry : CrewListEntry
 				{
 					priorityButton.ToggleIcon.SetActive(flag);
 				}
-				AttributeInstance attributeInstance = attributes.Get(priorityButton.choreGroup.attribute);
-				float num = Mathf.Min(attributeInstance.GetTotalValue() / 10f, 1f);
+				float num = Mathf.Min(attributes.Get(priorityButton.choreGroup.attribute).GetTotalValue() / 10f, 1f);
 				Color baseBorderColor = priorityButton.baseBorderColor;
 				baseBorderColor.r = Mathf.Lerp(priorityButton.baseBorderColor.r, 0.72156864f, num);
 				baseBorderColor.g = Mathf.Lerp(priorityButton.baseBorderColor.g, 0.44313726f, num);
@@ -161,24 +160,17 @@ public class CrewJobsEntry : CrewListEntry
 				this.rowToggleState = CrewJobsScreen.everyoneToggleState.on;
 			}
 			ImageToggleState component = this.AllTasksButton.ToggleIcon.GetComponent<ImageToggleState>();
-			CrewJobsScreen.everyoneToggleState everyoneToggleState = this.rowToggleState;
-			if (everyoneToggleState != CrewJobsScreen.everyoneToggleState.mixed)
+			switch (this.rowToggleState)
 			{
-				if (everyoneToggleState != CrewJobsScreen.everyoneToggleState.on)
-				{
-					if (everyoneToggleState == CrewJobsScreen.everyoneToggleState.off)
-					{
-						component.SetDisabled();
-					}
-				}
-				else
-				{
-					component.SetActive();
-				}
-			}
-			else
-			{
+			case CrewJobsScreen.everyoneToggleState.off:
+				component.SetDisabled();
+				break;
+			case CrewJobsScreen.everyoneToggleState.mixed:
 				component.SetInactive();
+				break;
+			case CrewJobsScreen.everyoneToggleState.on:
+				component.SetActive();
+				break;
 			}
 			this.dirty = false;
 		}
@@ -196,7 +188,7 @@ public class CrewJobsEntry : CrewListEntry
 				{
 					string text = string.Format(UI.TOOLTIPS.JOBSSCREEN_CANNOTPERFORMTASK, this.consumer.GetComponent<MinionIdentity>().GetProperName());
 					b.tooltip.AddMultiStringTooltip(text, this.TooltipTextStyle_AbilityNegativeModifier);
-					return string.Empty;
+					return "";
 				}
 				b.tooltip.AddMultiStringTooltip(UI.TOOLTIPS.JOBSSCREEN_RELEVANT_ATTRIBUTES, this.TooltipTextStyle_Ability);
 				Klei.AI.Attribute attribute = b.choreGroup.attribute;
@@ -214,7 +206,7 @@ public class CrewJobsEntry : CrewListEntry
 				b.tooltip.AddMultiStringTooltip(attribute.Name + " " + attributeInstance.GetTotalValue(), textStyleSetting);
 			}
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private void LateUpdate()

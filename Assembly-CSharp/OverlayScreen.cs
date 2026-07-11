@@ -140,13 +140,17 @@ public class OverlayScreen : KMonoBehaviour
 
 	public HashedString GetMode()
 	{
-		return (this.currentModeInfo.mode == null) ? OverlayModes.None.ID : this.currentModeInfo.mode.ViewMode();
+		if (this.currentModeInfo.mode == null)
+		{
+			return OverlayModes.None.ID;
+		}
+		return this.currentModeInfo.mode.ViewMode();
 	}
 
 	private void UpdateOverlaySounds()
 	{
 		string text = this.currentModeInfo.mode.GetSoundName();
-		if (text != string.Empty)
+		if (text != "")
 		{
 			text = GlobalAssets.GetSound(text, false);
 			KMonoBehaviour.PlaySound(text);

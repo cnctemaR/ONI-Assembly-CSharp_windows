@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization
 					return (T)((object)attributeMapping.Attribute);
 				}
 			}
-			return (T)((object)null);
+			return default(T);
 		}
 
 		public void Add(Type type, string member, Attribute attribute)
@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization
 			}
 			else if (list.Contains(attributeMapping))
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Attribute ({2}) already set for Type {0}, Member {1}", new object[] { type.FullName, member, attribute }));
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Attribute ({2}) already set for Type {0}, Member {1}", type.FullName, member, attribute));
 			}
 			list.Add(attributeMapping);
 		}
@@ -119,13 +119,15 @@ namespace YamlDotNet.Serialization
 			public int Matches(Type matchType)
 			{
 				int num = 0;
-				for (Type type = matchType; type != null; type = type.BaseType())
+				Type type = matchType;
+				while (type != null)
 				{
 					num++;
 					if (type == this.RegisteredType)
 					{
 						return num;
 					}
+					type = type.BaseType();
 				}
 				if (matchType.GetInterfaces().Contains(this.RegisteredType))
 				{

@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity;
 
 namespace System.IO.Ports
 {
@@ -15,6 +16,11 @@ namespace System.IO.Ports
 			{
 				return this.eventType;
 			}
+		}
+
+		internal SerialErrorReceivedEventArgs()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private SerialError eventType;

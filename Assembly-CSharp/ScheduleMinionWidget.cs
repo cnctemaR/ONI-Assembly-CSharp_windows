@@ -66,17 +66,14 @@ public class ScheduleMinionWidget : KMonoBehaviour
 	private void DropEntryRefreshAction(DropDownEntry entry, object obj)
 	{
 		Schedule schedule = (Schedule)entry.entryData;
-		Schedulable schedulable = (Schedulable)obj;
-		if (schedulable.GetSchedule() == schedule)
+		if (((Schedulable)obj).GetSchedule() == schedule)
 		{
 			entry.label.text = string.Format(UI.SCHEDULESCREEN.SCHEDULE_DROPDOWN_ASSIGNED, schedule.name);
 			entry.button.isInteractable = false;
+			return;
 		}
-		else
-		{
-			entry.label.text = schedule.name;
-			entry.button.isInteractable = true;
-		}
+		entry.label.text = schedule.name;
+		entry.button.isInteractable = true;
 	}
 
 	public void SetupBlank(Schedule schedule)

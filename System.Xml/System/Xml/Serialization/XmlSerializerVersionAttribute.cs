@@ -11,42 +11,18 @@ namespace System.Xml.Serialization
 
 		public XmlSerializerVersionAttribute(Type type)
 		{
-			this._type = type;
-		}
-
-		public string Namespace
-		{
-			get
-			{
-				return this._namespace;
-			}
-			set
-			{
-				this._namespace = value;
-			}
+			this.type = type;
 		}
 
 		public string ParentAssemblyId
 		{
 			get
 			{
-				return this._parentAssemblyId;
+				return this.mvid;
 			}
 			set
 			{
-				this._parentAssemblyId = value;
-			}
-		}
-
-		public Type Type
-		{
-			get
-			{
-				return this._type;
-			}
-			set
-			{
-				this._type = value;
+				this.mvid = value;
 			}
 		}
 
@@ -54,20 +30,44 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this._version;
+				return this.serializerVersion;
 			}
 			set
 			{
-				this._version = value;
+				this.serializerVersion = value;
 			}
 		}
 
-		private string _namespace;
+		public string Namespace
+		{
+			get
+			{
+				return this.ns;
+			}
+			set
+			{
+				this.ns = value;
+			}
+		}
 
-		private string _parentAssemblyId;
+		public Type Type
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
+			}
+		}
 
-		private Type _type;
+		private string mvid;
 
-		private string _version;
+		private string serializerVersion;
+
+		private string ns;
+
+		private Type type;
 	}
 }

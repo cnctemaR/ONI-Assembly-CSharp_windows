@@ -27,22 +27,16 @@ namespace UnityEngine
 			return StackTraceUtility.ExtractFormattedStackTrace(stackTrace).ToString();
 		}
 
-		private static bool IsSystemStacktraceType(object name)
-		{
-			string text = (string)name;
-			return text.StartsWith("UnityEditor.") || text.StartsWith("UnityEngine.") || text.StartsWith("System.") || text.StartsWith("UnityScript.Lang.") || text.StartsWith("Boo.Lang.") || text.StartsWith("UnityEngine.SetupCoroutine");
-		}
-
 		public static string ExtractStringFromException(object exception)
 		{
-			string text = "";
-			string text2 = "";
+			string text;
+			string text2;
 			StackTraceUtility.ExtractStringFromExceptionInternal(exception, out text, out text2);
 			return text + "\n" + text2;
 		}
 
-		[RequiredByNativeCode]
 		[SecuritySafeCritical]
+		[RequiredByNativeCode]
 		internal static void ExtractStringFromExceptionInternal(object exceptiono, out string message, out string stackTrace)
 		{
 			if (exceptiono == null)
@@ -89,95 +83,6 @@ namespace UnityEngine
 			StackTrace stackTrace2 = new StackTrace(1, true);
 			stringBuilder.Append(StackTraceUtility.ExtractFormattedStackTrace(stackTrace2));
 			stackTrace = stringBuilder.ToString();
-		}
-
-		[RequiredByNativeCode]
-		internal static string PostprocessStacktrace(string oldString, bool stripEngineInternalInformation)
-		{
-			string text;
-			if (oldString == null)
-			{
-				text = string.Empty;
-			}
-			else
-			{
-				string[] array = oldString.Split(new char[] { '\n' });
-				StringBuilder stringBuilder = new StringBuilder(oldString.Length);
-				for (int i = 0; i < array.Length; i++)
-				{
-					array[i] = array[i].Trim();
-				}
-				for (int j = 0; j < array.Length; j++)
-				{
-					string text2 = array[j];
-					if (text2.Length != 0 && text2[0] != '\n')
-					{
-						if (!text2.StartsWith("in (unmanaged)"))
-						{
-							if (stripEngineInternalInformation && text2.StartsWith("UnityEditor.EditorGUIUtility:RenderGameViewCameras"))
-							{
-								break;
-							}
-							if (stripEngineInternalInformation && j < array.Length - 1 && StackTraceUtility.IsSystemStacktraceType(text2))
-							{
-								if (StackTraceUtility.IsSystemStacktraceType(array[j + 1]))
-								{
-									goto IL_0297;
-								}
-								int num = text2.IndexOf(" (at");
-								if (num != -1)
-								{
-									text2 = text2.Substring(0, num);
-								}
-							}
-							if (text2.IndexOf("(wrapper managed-to-native)") == -1)
-							{
-								if (text2.IndexOf("(wrapper delegate-invoke)") == -1)
-								{
-									if (text2.IndexOf("at <0x00000> <unknown method>") == -1)
-									{
-										if (!stripEngineInternalInformation || !text2.StartsWith("[") || !text2.EndsWith("]"))
-										{
-											if (text2.StartsWith("at "))
-											{
-												text2 = text2.Remove(0, 3);
-											}
-											int num2 = text2.IndexOf("[0x");
-											int num3 = -1;
-											if (num2 != -1)
-											{
-												num3 = text2.IndexOf("]", num2);
-											}
-											if (num2 != -1 && num3 > num2)
-											{
-												text2 = text2.Remove(num2, num3 - num2 + 1);
-											}
-											text2 = text2.Replace("  in <filename unknown>:0", "");
-											text2 = text2.Replace("\\", "/");
-											if (!string.IsNullOrEmpty(StackTraceUtility.projectFolder))
-											{
-												text2 = text2.Replace(StackTraceUtility.projectFolder, "");
-											}
-											text2 = text2.Replace('\\', '/');
-											int num4 = text2.LastIndexOf("  in ");
-											if (num4 != -1)
-											{
-												text2 = text2.Remove(num4, 5);
-												text2 = text2.Insert(num4, " (at ");
-												text2 = text2.Insert(text2.Length, ")");
-											}
-											stringBuilder.Append(text2 + "\n");
-										}
-									}
-								}
-							}
-						}
-					}
-					IL_0297:;
-				}
-				text = stringBuilder.ToString();
-			}
-			return text;
 		}
 
 		[SecuritySafeCritical]

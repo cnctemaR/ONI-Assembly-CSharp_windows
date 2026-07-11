@@ -31,8 +31,7 @@ public class RustDeoxidizerConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		RustDeoxidizer rustDeoxidizer = go.AddOrGet<RustDeoxidizer>();
-		rustDeoxidizer.maxMass = 1.8f;
+		go.AddOrGet<RustDeoxidizer>().maxMass = 1.8f;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.showInUI = true;
@@ -58,7 +57,7 @@ public class RustDeoxidizerConfig : IBuildingConfig
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.57f, SimHashes.Oxygen, 348.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.030000001f, SimHashes.ChlorineGas, 348.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.029999971f, SimHashes.ChlorineGas, 348.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0),
 			new ElementConverter.OutputElement(0.4f, SimHashes.IronOre, 348.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0)
 		};
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
@@ -101,7 +100,7 @@ public class RustDeoxidizerConfig : IBuildingConfig
 
 	private const float OXYGEN_CONVERSION_RATIO = 0.57f;
 
-	private const float CHLORINE_CONVERSION_RATIO = 0.030000001f;
+	private const float CHLORINE_CONVERSION_RATIO = 0.029999971f;
 
 	public const float OXYGEN_TEMPERATURE = 348.15f;
 }

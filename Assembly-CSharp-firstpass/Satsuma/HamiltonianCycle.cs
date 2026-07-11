@@ -6,6 +6,10 @@ namespace Satsuma
 {
 	public sealed class HamiltonianCycle
 	{
+		public IGraph Graph { get; private set; }
+
+		public IPath Cycle { get; private set; }
+
 		public HamiltonianCycle(IGraph graph)
 		{
 			this.Graph = graph;
@@ -13,13 +17,9 @@ namespace Satsuma
 			this.Run();
 		}
 
-		public IGraph Graph { get; private set; }
-
-		public IPath Cycle { get; private set; }
-
 		private void Run()
 		{
-			Func<Node, Node, double> func = (Node u, Node v) => (double)((!this.Graph.Arcs(u, v, ArcFilter.Forward).Any<Arc>()) ? 10 : 1);
+			Func<Node, Node, double> func = (Node u, Node v) => (double)(this.Graph.Arcs(u, v, ArcFilter.Forward).Any<Arc>() ? 1 : 10);
 			IEnumerable<Node> enumerable = null;
 			double num = (double)this.Graph.NodeCount();
 			InsertionTsp<Node> insertionTsp = new InsertionTsp<Node>(this.Graph.Nodes(), func, TspSelectionRule.Farthest);
@@ -40,29 +40,27 @@ namespace Satsuma
 			if (enumerable == null)
 			{
 				this.Cycle = null;
+				return;
 			}
-			else
+			Path path = new Path(this.Graph);
+			if (enumerable.Any<Node>())
 			{
-				Path path = new Path(this.Graph);
-				if (enumerable.Any<Node>())
+				Node node = Node.Invalid;
+				foreach (Node node2 in enumerable)
 				{
-					Node node = Node.Invalid;
-					foreach (Node node2 in enumerable)
+					if (node == Node.Invalid)
 					{
-						if (node == Node.Invalid)
-						{
-							path.Begin(node2);
-						}
-						else
-						{
-							path.AddLast(this.Graph.Arcs(node, node2, ArcFilter.Forward).First<Arc>());
-						}
-						node = node2;
+						path.Begin(node2);
 					}
-					path.AddLast(this.Graph.Arcs(node, enumerable.First<Node>(), ArcFilter.Forward).First<Arc>());
+					else
+					{
+						path.AddLast(this.Graph.Arcs(node, node2, ArcFilter.Forward).First<Arc>());
+					}
+					node = node2;
 				}
-				this.Cycle = path;
+				path.AddLast(this.Graph.Arcs(node, enumerable.First<Node>(), ArcFilter.Forward).First<Arc>());
 			}
+			this.Cycle = path;
 		}
 	}
 }

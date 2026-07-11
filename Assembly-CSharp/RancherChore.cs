@@ -11,8 +11,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CREATURE_AVAILABLE_FOR_RANCHING;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			RanchStation.Instance instance = data as RanchStation.Instance;
-			return instance.IsCreatureAvailableForRanching();
+			return (data as RanchStation.Instance).IsCreatureAvailableForRanching();
 		};
 		this.IsCreatureAvailableForRanching = precondition;
 		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
@@ -209,11 +208,9 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				if (this.ranchStation.IsCreatureAvailableForRanching())
 				{
 					this.GoTo(base.sm.movetoranch);
+					return;
 				}
-				else
-				{
-					this.GoTo(null);
-				}
+				this.GoTo(null);
 			}
 
 			public void TriggerRanchStationNoLongerAvailable()

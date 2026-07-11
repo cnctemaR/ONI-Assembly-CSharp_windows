@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DestinationAsteroid2 : KMonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<ColonyDestinationAsteroidData> OnClicked;
 
 	protected override void OnPrefabInit()

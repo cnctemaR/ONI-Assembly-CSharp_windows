@@ -2,12 +2,12 @@
 
 public class SafetyChecker
 {
+	public SafetyChecker.Condition[] conditions { get; private set; }
+
 	public SafetyChecker(SafetyChecker.Condition[] conditions)
 	{
 		this.conditions = conditions;
 	}
-
-	public SafetyChecker.Condition[] conditions { get; private set; }
 
 	public int GetSafetyConditions(int cell, int cost, SafetyChecker.Context context, out bool all_conditions_met)
 	{
@@ -28,16 +28,16 @@ public class SafetyChecker
 
 	public struct Condition
 	{
+		public SafetyChecker.Condition.Callback callback { get; private set; }
+
+		public int mask { get; private set; }
+
 		public Condition(string id, int condition_mask, SafetyChecker.Condition.Callback condition_callback)
 		{
 			this = default(SafetyChecker.Condition);
 			this.callback = condition_callback;
 			this.mask = condition_mask;
 		}
-
-		public SafetyChecker.Condition.Callback callback { get; private set; }
-
-		public int mask { get; private set; }
 
 		public delegate bool Callback(int cell, int cost, SafetyChecker.Context context);
 	}

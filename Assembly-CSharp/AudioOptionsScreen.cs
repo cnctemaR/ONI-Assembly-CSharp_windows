@@ -20,8 +20,7 @@ public class AudioOptionsScreen : KModalScreen
 			this.OnClose(base.gameObject);
 		};
 		this.sliderPool = new UIPool<SliderContainer>(this.sliderPrefab);
-		Dictionary<string, AudioMixer.UserVolumeBus> userVolumeSettings = AudioMixer.instance.userVolumeSettings;
-		foreach (KeyValuePair<string, AudioMixer.UserVolumeBus> keyValuePair in userVolumeSettings)
+		foreach (KeyValuePair<string, AudioMixer.UserVolumeBus> keyValuePair in AudioMixer.instance.userVolumeSettings)
 		{
 			SliderContainer newSlider = this.sliderPool.GetFreeElement(this.sliderGroup, true);
 			this.sliderBusMap.Add(newSlider.slider, keyValuePair.Key);
@@ -48,8 +47,7 @@ public class AudioOptionsScreen : KModalScreen
 		{
 			this.ToggleAlwaysPlayMusic();
 		};
-		LocText reference = component.GetReference<LocText>("Label");
-		reference.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUSIC_EVERY_CYCLE);
+		component.GetReference<LocText>("Label").SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUSIC_EVERY_CYCLE);
 		if (!KPlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayAutomation))
 		{
 			KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayAutomation, 1);
@@ -61,8 +59,7 @@ public class AudioOptionsScreen : KModalScreen
 		{
 			this.ToggleAlwaysPlayAutomation();
 		};
-		LocText reference2 = component2.GetReference<LocText>("Label");
-		reference2.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUTOMATION_SOUNDS_ALWAYS);
+		component2.GetReference<LocText>("Label").SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUTOMATION_SOUNDS_ALWAYS);
 		component2.GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
 		if (!KPlayerPrefs.HasKey(AudioOptionsScreen.MuteOnFocusLost))
 		{
@@ -75,8 +72,7 @@ public class AudioOptionsScreen : KModalScreen
 		{
 			this.ToggleMuteOnFocusLost();
 		};
-		LocText reference3 = component3.GetReference<LocText>("Label");
-		reference3.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUTE_ON_FOCUS_LOST);
+		component3.GetReference<LocText>("Label").SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUTE_ON_FOCUS_LOST);
 		component3.GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) == 1);
 	}
 
@@ -85,11 +81,9 @@ public class AudioOptionsScreen : KModalScreen
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.Deactivate();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	private void CheckMasterValue(float value)
@@ -106,18 +100,18 @@ public class AudioOptionsScreen : KModalScreen
 	{
 		MusicManager.instance.alwaysPlayMusic = !MusicManager.instance.alwaysPlayMusic;
 		this.alwaysPlayMusicButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
-		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayMusicKey, (!MusicManager.instance.alwaysPlayMusic) ? 0 : 1);
+		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayMusicKey, MusicManager.instance.alwaysPlayMusic ? 1 : 0);
 	}
 
 	private void ToggleAlwaysPlayAutomation()
 	{
-		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayAutomation, (KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) != 1) ? 1 : 0);
+		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayAutomation, (KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1) ? 0 : 1);
 		this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
 	}
 
 	private void ToggleMuteOnFocusLost()
 	{
-		KPlayerPrefs.SetInt(AudioOptionsScreen.MuteOnFocusLost, (KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) != 1) ? 1 : 0);
+		KPlayerPrefs.SetInt(AudioOptionsScreen.MuteOnFocusLost, (KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) == 1) ? 0 : 1);
 		this.muteOnFocusLostToggle.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) == 1);
 	}
 
@@ -148,7 +142,7 @@ public class AudioOptionsScreen : KModalScreen
 			{
 				KFMOD.currentDevice = this.audioDevices[i];
 				KPlayerPrefs.SetString("AudioDeviceGuid", KFMOD.currentDevice.guid.ToString());
-				break;
+				return;
 			}
 		}
 	}

@@ -9,18 +9,21 @@ namespace System
 	public sealed class StackOverflowException : SystemException
 	{
 		public StackOverflowException()
-			: base(Locale.GetText("The requested operation caused a stack overflow."))
+			: base(Environment.GetResourceString("Operation caused a stack overflow."))
 		{
+			base.SetErrorCode(-2147023895);
 		}
 
 		public StackOverflowException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2147023895);
 		}
 
 		public StackOverflowException(string message, Exception innerException)
 			: base(message, innerException)
 		{
+			base.SetErrorCode(-2147023895);
 		}
 
 		internal StackOverflowException(SerializationInfo info, StreamingContext context)

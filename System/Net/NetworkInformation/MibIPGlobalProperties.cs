@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Net.NetworkInformation
 {
-	internal class MibIPGlobalProperties : IPGlobalProperties
+	internal class MibIPGlobalProperties : UnixIPGlobalProperties
 	{
 		public MibIPGlobalProperties(string procDir)
 		{
@@ -20,17 +19,11 @@ namespace System.Net.NetworkInformation
 			this.Udp6File = Path.Combine(procDir, "net/udp6");
 		}
 
-		[DllImport("libc")]
-		private static extern int gethostname([MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 1)] byte[] name, int len);
-
-		[DllImport("libc")]
-		private static extern int getdomainname([MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 1)] byte[] name, int len);
-
-		private global::System.Collections.Specialized.StringDictionary GetProperties4(string item)
+		private StringDictionary GetProperties4(string item)
 		{
 			string statisticsFile = this.StatisticsFile;
 			string text = item + ": ";
-			global::System.Collections.Specialized.StringDictionary stringDictionary2;
+			StringDictionary stringDictionary2;
 			using (StreamReader streamReader = new StreamReader(statisticsFile, Encoding.ASCII))
 			{
 				string[] array = null;
@@ -39,20 +32,17 @@ namespace System.Net.NetworkInformation
 				for (;;)
 				{
 					text2 = streamReader.ReadLine();
-					if (!string.IsNullOrEmpty(text2))
+					if (!string.IsNullOrEmpty(text2) && text2.Length > text.Length && string.CompareOrdinal(text2, 0, text, 0, text.Length) == 0)
 					{
-						if (text2.Length > text.Length && string.CompareOrdinal(text2, 0, text, 0, text.Length) == 0)
+						if (array != null)
 						{
-							if (array != null)
-							{
-								break;
-							}
-							array = text2.Substring(text.Length).Split(new char[] { ' ' });
+							break;
 						}
+						array = text2.Substring(text.Length).Split(new char[] { ' ' });
 					}
 					if (streamReader.EndOfStream)
 					{
-						goto IL_00E2;
+						goto IL_00C3;
 					}
 				}
 				if (array2 != null)
@@ -60,7 +50,7 @@ namespace System.Net.NetworkInformation
 					throw this.CreateException(statisticsFile, string.Format("Found duplicate line for values for the same item '{0}'", item));
 				}
 				array2 = text2.Substring(text.Length).Split(new char[] { ' ' });
-				IL_00E2:
+				IL_00C3:
 				if (array2 == null)
 				{
 					throw this.CreateException(statisticsFile, string.Format("No corresponding line was not found for '{0}'", item));
@@ -69,7 +59,7 @@ namespace System.Net.NetworkInformation
 				{
 					throw this.CreateException(statisticsFile, string.Format("The counts in the header line and the value line do not match for '{0}'", item));
 				}
-				global::System.Collections.Specialized.StringDictionary stringDictionary = new global::System.Collections.Specialized.StringDictionary();
+				StringDictionary stringDictionary = new StringDictionary();
 				for (int i = 0; i < array.Length; i++)
 				{
 					stringDictionary[array[i]] = array2[i];
@@ -79,40 +69,37 @@ namespace System.Net.NetworkInformation
 			return stringDictionary2;
 		}
 
-		private global::System.Collections.Specialized.StringDictionary GetProperties6(string item)
+		private StringDictionary GetProperties6(string item)
 		{
 			if (!File.Exists(this.StatisticsFileIPv6))
 			{
 				throw new NetworkInformationException();
 			}
 			string statisticsFileIPv = this.StatisticsFileIPv6;
-			global::System.Collections.Specialized.StringDictionary stringDictionary2;
+			StringDictionary stringDictionary2;
 			using (StreamReader streamReader = new StreamReader(statisticsFileIPv, Encoding.ASCII))
 			{
-				global::System.Collections.Specialized.StringDictionary stringDictionary = new global::System.Collections.Specialized.StringDictionary();
+				StringDictionary stringDictionary = new StringDictionary();
 				string text = string.Empty;
 				for (;;)
 				{
 					text = streamReader.ReadLine();
-					if (!string.IsNullOrEmpty(text))
+					if (!string.IsNullOrEmpty(text) && text.Length > item.Length && string.CompareOrdinal(text, 0, item, 0, item.Length) == 0)
 					{
-						if (text.Length > item.Length && string.CompareOrdinal(text, 0, item, 0, item.Length) == 0)
+						int num = text.IndexOfAny(MibIPGlobalProperties.wsChars, item.Length);
+						if (num < 0)
 						{
-							int num = text.IndexOfAny(MibIPGlobalProperties.wsChars, item.Length);
-							if (num < 0)
-							{
-								break;
-							}
-							stringDictionary[text.Substring(item.Length, num - item.Length)] = text.Substring(num + 1).Trim(MibIPGlobalProperties.wsChars);
+							break;
 						}
+						stringDictionary[text.Substring(item.Length, num - item.Length)] = text.Substring(num + 1).Trim(MibIPGlobalProperties.wsChars);
 					}
 					if (streamReader.EndOfStream)
 					{
-						goto Block_7;
+						goto Block_8;
 					}
 				}
 				throw this.CreateException(statisticsFileIPv, null);
-				Block_7:
+				Block_8:
 				stringDictionary2 = stringDictionary;
 			}
 			return stringDictionary2;
@@ -183,7 +170,7 @@ namespace System.Net.NetworkInformation
 				IPEndPoint ipendPoint = this.ToEndpoint(list[i][1]);
 				IPEndPoint ipendPoint2 = this.ToEndpoint(list[i][2]);
 				TcpState tcpState = (TcpState)int.Parse(list[i][3], NumberStyles.HexNumber);
-				array[i] = new TcpConnectionInformationImpl(ipendPoint, ipendPoint2, tcpState);
+				array[i] = new SystemTcpConnectionInformation(ipendPoint, ipendPoint2, tcpState);
 			}
 			return array;
 		}
@@ -242,58 +229,6 @@ namespace System.Net.NetworkInformation
 		public override UdpStatistics GetUdpIPv6Statistics()
 		{
 			return new MibUdpStatistics(this.GetProperties6("Udp6"));
-		}
-
-		public override string DhcpScopeName
-		{
-			get
-			{
-				return string.Empty;
-			}
-		}
-
-		public override string DomainName
-		{
-			get
-			{
-				byte[] array = new byte[256];
-				if (MibIPGlobalProperties.getdomainname(array, 256) != 0)
-				{
-					throw new NetworkInformationException();
-				}
-				int num = Array.IndexOf<byte>(array, 0);
-				return Encoding.ASCII.GetString(array, 0, (num >= 0) ? num : 256);
-			}
-		}
-
-		public override string HostName
-		{
-			get
-			{
-				byte[] array = new byte[256];
-				if (MibIPGlobalProperties.gethostname(array, 256) != 0)
-				{
-					throw new NetworkInformationException();
-				}
-				int num = Array.IndexOf<byte>(array, 0);
-				return Encoding.ASCII.GetString(array, 0, (num >= 0) ? num : 256);
-			}
-		}
-
-		public override bool IsWinsProxy
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public override NetBiosNodeType NodeType
-		{
-			get
-			{
-				return NetBiosNodeType.Unknown;
-			}
 		}
 
 		public const string ProcDir = "/proc";

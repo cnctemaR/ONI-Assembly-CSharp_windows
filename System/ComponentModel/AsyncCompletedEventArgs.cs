@@ -1,57 +1,68 @@
 ﻿using System;
 using System.Reflection;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class AsyncCompletedEventArgs : EventArgs
 	{
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		public AsyncCompletedEventArgs()
+		{
+		}
+
 		public AsyncCompletedEventArgs(Exception error, bool cancelled, object userState)
 		{
-			this._error = error;
-			this._cancelled = cancelled;
-			this._userState = userState;
+			this.error = error;
+			this.cancelled = cancelled;
+			this.userState = userState;
 		}
 
-		protected void RaiseExceptionIfNecessary()
-		{
-			if (this._error != null)
-			{
-				throw new TargetInvocationException(this._error);
-			}
-			if (this._cancelled)
-			{
-				throw new InvalidOperationException("The operation was cancelled");
-			}
-		}
-
+		[SRDescription("True if operation was cancelled.")]
 		public bool Cancelled
 		{
 			get
 			{
-				return this._cancelled;
+				return this.cancelled;
 			}
 		}
 
+		[SRDescription("Exception that occurred during operation.  Null if no error.")]
 		public Exception Error
 		{
 			get
 			{
-				return this._error;
+				return this.error;
 			}
 		}
 
+		[SRDescription("User-supplied state to identify operation.")]
 		public object UserState
 		{
 			get
 			{
-				return this._userState;
+				return this.userState;
 			}
 		}
 
-		private Exception _error;
+		protected void RaiseExceptionIfNecessary()
+		{
+			if (this.Error != null)
+			{
+				throw new TargetInvocationException(global::SR.GetString("An exception occurred during the operation, making the result invalid.  Check InnerException for exception details."), this.Error);
+			}
+			if (this.Cancelled)
+			{
+				throw new InvalidOperationException(global::SR.GetString("Operation has been cancelled."));
+			}
+		}
 
-		private bool _cancelled;
+		private readonly Exception error;
 
-		private object _userState;
+		private readonly bool cancelled;
+
+		private readonly object userState;
 	}
 }

@@ -53,8 +53,9 @@ public class HarvestTool : DragTool
 			if (this.options["HARVEST_WHEN_READY"] == ToolParameterMenu.ToggleState.On)
 			{
 				componentInChildren.material.mainTexture = this.visualizerTextures[0];
+				return;
 			}
-			else if (this.options["DO_NOT_HARVEST"] == ToolParameterMenu.ToggleState.On)
+			if (this.options["DO_NOT_HARVEST"] == ToolParameterMenu.ToggleState.On)
 			{
 				componentInChildren.material.mainTexture = this.visualizerTextures[1];
 			}

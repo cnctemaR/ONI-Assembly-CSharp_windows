@@ -33,11 +33,7 @@ public class BuildTool : DragTool
 		this.buildingOrientation = Orientation.Neutral;
 		this.placementPivot = this.def.placementPivot;
 		Vector3 cursorPos = PlayerController.GetCursorPos(KInputManager.GetMousePos());
-		GameObject buildingPreview = this.def.BuildingPreview;
-		Vector3 vector = cursorPos;
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
-		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, null, num);
+		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, cursorPos, Grid.SceneLayer.Ore, null, LayerMask.NameToLayer("Place"));
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -49,8 +45,7 @@ public class BuildTool : DragTool
 		}
 		this.visualizer.SetActive(true);
 		this.UpdateVis(cursorPos);
-		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
-		component2.currentDef = this.def;
+		base.GetComponent<BuildToolHoverTextCard>().currentDef = this.def;
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)
 		{
@@ -237,6 +232,7 @@ public class BuildTool : DragTool
 					if (base.Dragging && this.lastDragCell != -1)
 					{
 						this.TryBuild(this.lastDragCell);
+						return;
 					}
 				}
 			}
@@ -262,8 +258,7 @@ public class BuildTool : DragTool
 		{
 			return;
 		}
-		int num = Grid.PosToCell(this.visualizer);
-		if (num != cell)
+		if (Grid.PosToCell(this.visualizer) != cell)
 		{
 			if (this.def.BuildingComplete.GetComponent<LogicPorts>())
 			{
@@ -335,7 +330,9 @@ public class BuildTool : DragTool
 				if (this.placeSound != null)
 				{
 					this.buildingCount = this.buildingCount % 14 + 1;
-					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f, false);
+					Vector3 vector2 = vector;
+					vector2.z = 0f;
+					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector2, 1f, false);
 					if (this.def.AudioSize == "small")
 					{
 						eventInstance.setParameterValue("tileCount", (float)this.buildingCount);

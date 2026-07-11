@@ -1,21 +1,22 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
+	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 	public class ConsoleTraceListener : TextWriterTraceListener
 	{
 		public ConsoleTraceListener()
-			: this(false)
+			: base(Console.Out)
 		{
 		}
 
 		public ConsoleTraceListener(bool useErrorStream)
-			: base((!useErrorStream) ? Console.Out : Console.Error)
+			: base(useErrorStream ? Console.Error : Console.Out)
 		{
 		}
 
-		internal ConsoleTraceListener(string data)
-			: this(Convert.ToBoolean(data))
+		public override void Close()
 		{
 		}
 	}

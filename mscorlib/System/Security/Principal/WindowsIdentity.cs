@@ -1,34 +1,38 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security.Claims;
 using System.Security.Permissions;
+using Microsoft.Win32.SafeHandles;
+using Unity;
 
 namespace System.Security.Principal
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class WindowsIdentity : IDisposable, ISerializable, IDeserializationCallback, IIdentity
+	public class WindowsIdentity : ClaimsIdentity, IIdentity, IDeserializationCallback, ISerializable, IDisposable
 	{
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(IntPtr userToken)
 			: this(userToken, null, WindowsAccountType.Normal, false)
 		{
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(IntPtr userToken, string type)
 			: this(userToken, type, WindowsAccountType.Normal, false)
 		{
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(IntPtr userToken, string type, WindowsAccountType acctType)
 			: this(userToken, type, acctType, false)
 		{
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(IntPtr userToken, string type, WindowsAccountType acctType, bool isAuthenticated)
 		{
 			this._type = type;
@@ -38,13 +42,13 @@ namespace System.Security.Principal
 			this.SetToken(userToken);
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(string sUserPrincipalName)
 			: this(sUserPrincipalName, null)
 		{
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(string sUserPrincipalName, string type)
 		{
 			if (sUserPrincipalName == null)
@@ -52,7 +56,7 @@ namespace System.Security.Principal
 				throw new NullReferenceException("sUserPrincipalName");
 			}
 			IntPtr userToken = WindowsIdentity.GetUserToken(sUserPrincipalName);
-			if (!WindowsIdentity.IsPosix && userToken == IntPtr.Zero)
+			if (!Environment.IsUnix && userToken == IntPtr.Zero)
 			{
 				throw new ArgumentException("only for Windows Server 2003 +");
 			}
@@ -62,44 +66,19 @@ namespace System.Security.Principal
 			this.SetToken(userToken);
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public WindowsIdentity(SerializationInfo info, StreamingContext context)
 		{
 			this._info = info;
 		}
 
-		void IDeserializationCallback.OnDeserialization(object sender)
+		internal WindowsIdentity(ClaimsIdentity claimsIdentity, IntPtr userToken)
+			: base(claimsIdentity)
 		{
-			this._token = (IntPtr)this._info.GetValue("m_userToken", typeof(IntPtr));
-			this._name = this._info.GetString("m_name");
-			if (this._name != null)
+			if (userToken != IntPtr.Zero && userToken.ToInt64() > 0L)
 			{
-				string tokenName = WindowsIdentity.GetTokenName(this._token);
-				if (tokenName != this._name)
-				{
-					throw new SerializationException("Token-Name mismatch.");
-				}
+				this.SetToken(userToken);
 			}
-			else
-			{
-				this._name = WindowsIdentity.GetTokenName(this._token);
-				if (this._name == string.Empty || this._name == null)
-				{
-					throw new SerializationException("Token doesn't match a user.");
-				}
-			}
-			this._type = this._info.GetString("m_type");
-			this._account = (WindowsAccountType)((int)this._info.GetValue("m_acctType", typeof(WindowsAccountType)));
-			this._authenticated = this._info.GetBoolean("m_isAuthenticated");
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			info.AddValue("m_userToken", this._token);
-			info.AddValue("m_name", this._name);
-			info.AddValue("m_type", this._type);
-			info.AddValue("m_acctType", this._account);
-			info.AddValue("m_isAuthenticated", this._authenticated);
 		}
 
 		[ComVisible(false)]
@@ -117,7 +96,7 @@ namespace System.Security.Principal
 		public static WindowsIdentity GetAnonymous()
 		{
 			WindowsIdentity windowsIdentity;
-			if (WindowsIdentity.IsPosix)
+			if (Environment.IsUnix)
 			{
 				windowsIdentity = new WindowsIdentity("nobody");
 				windowsIdentity._account = WindowsAccountType.Anonymous;
@@ -154,14 +133,27 @@ namespace System.Security.Principal
 			return new WindowsImpersonationContext(this._token);
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public static WindowsImpersonationContext Impersonate(IntPtr userToken)
 		{
 			return new WindowsImpersonationContext(userToken);
 		}
 
-		public string AuthenticationType
+		[SecuritySafeCritical]
+		public static void RunImpersonated(SafeAccessTokenHandle safeAccessTokenHandle, Action action)
 		{
+			throw new NotImplementedException();
+		}
+
+		[SecuritySafeCritical]
+		public static T RunImpersonated<T>(SafeAccessTokenHandle safeAccessTokenHandle, Func<T> func)
+		{
+			throw new NotImplementedException();
+		}
+
+		public sealed override string AuthenticationType
+		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this._type;
@@ -176,7 +168,7 @@ namespace System.Security.Principal
 			}
 		}
 
-		public virtual bool IsAuthenticated
+		public override bool IsAuthenticated
 		{
 			get
 			{
@@ -200,8 +192,9 @@ namespace System.Security.Principal
 			}
 		}
 
-		public virtual string Name
+		public override string Name
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				if (this._name == null)
@@ -229,8 +222,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[MonoTODO("not implemented")]
 		[ComVisible(false)]
+		[MonoTODO("not implemented")]
 		public TokenImpersonationLevel ImpersonationLevel
 		{
 			get
@@ -239,8 +232,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[MonoTODO("not implemented")]
 		[ComVisible(false)]
+		[MonoTODO("not implemented")]
 		public SecurityIdentifier Owner
 		{
 			get
@@ -259,18 +252,52 @@ namespace System.Security.Principal
 			}
 		}
 
-		private static bool IsPosix
+		void IDeserializationCallback.OnDeserialization(object sender)
 		{
-			get
+			this._token = (IntPtr)this._info.GetValue("m_userToken", typeof(IntPtr));
+			this._name = this._info.GetString("m_name");
+			if (this._name != null)
 			{
-				int platform = (int)Environment.Platform;
-				return platform == 128 || platform == 4 || platform == 6;
+				if (WindowsIdentity.GetTokenName(this._token) != this._name)
+				{
+					throw new SerializationException("Token-Name mismatch.");
+				}
 			}
+			else
+			{
+				this._name = WindowsIdentity.GetTokenName(this._token);
+				if (this._name == null)
+				{
+					throw new SerializationException("Token doesn't match a user.");
+				}
+			}
+			this._type = this._info.GetString("m_type");
+			this._account = (WindowsAccountType)this._info.GetValue("m_acctType", typeof(WindowsAccountType));
+			this._authenticated = this._info.GetBoolean("m_isAuthenticated");
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			info.AddValue("m_userToken", this._token);
+			info.AddValue("m_name", this._name);
+			info.AddValue("m_type", this._type);
+			info.AddValue("m_acctType", this._account);
+			info.AddValue("m_isAuthenticated", this._authenticated);
+		}
+
+		internal ClaimsIdentity CloneAsBase()
+		{
+			return base.Clone();
+		}
+
+		internal IntPtr GetTokenInternal()
+		{
+			return this._token;
 		}
 
 		private void SetToken(IntPtr token)
 		{
-			if (WindowsIdentity.IsPosix)
+			if (Environment.IsUnix)
 			{
 				this._token = token;
 				if (this._type == null)
@@ -280,6 +307,7 @@ namespace System.Security.Principal
 				if (this._token == IntPtr.Zero)
 				{
 					this._account = WindowsAccountType.System;
+					return;
 				}
 			}
 			else
@@ -296,6 +324,14 @@ namespace System.Security.Principal
 			}
 		}
 
+		public SafeAccessTokenHandle AccessToken
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string[] _GetRoles(IntPtr token);
 
@@ -307,6 +343,30 @@ namespace System.Security.Principal
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr GetUserToken(string username);
+
+		[SecuritySafeCritical]
+		protected WindowsIdentity(WindowsIdentity identity)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		public virtual IEnumerable<Claim> DeviceClaims
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return 0;
+			}
+		}
+
+		public virtual IEnumerable<Claim> UserClaims
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return 0;
+			}
+		}
 
 		private IntPtr _token;
 
@@ -321,5 +381,8 @@ namespace System.Security.Principal
 		private SerializationInfo _info;
 
 		private static IntPtr invalidWindows = IntPtr.Zero;
+
+		[NonSerialized]
+		public new const string DefaultIssuer = "AD AUTHORITY";
 	}
 }

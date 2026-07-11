@@ -142,22 +142,22 @@ namespace System.Security.Cryptography
 
 		private static void InitialiseBuff(uint[] buff, byte[] input, uint inputOffset)
 		{
-			buff[0] = (uint)(((int)input[(int)((UIntPtr)inputOffset)] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 1U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 2U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 3U))]);
-			buff[1] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 4U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 5U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 6U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 7U))]);
-			buff[2] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 8U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 9U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 10U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 11U))]);
-			buff[3] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 12U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 13U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 14U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 15U))]);
-			buff[4] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 16U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 17U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 18U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 19U))]);
-			buff[5] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 20U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 21U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 22U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 23U))]);
-			buff[6] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 24U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 25U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 26U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 27U))]);
-			buff[7] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 28U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 29U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 30U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 31U))]);
-			buff[8] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 32U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 33U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 34U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 35U))]);
-			buff[9] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 36U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 37U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 38U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 39U))]);
-			buff[10] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 40U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 41U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 42U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 43U))]);
-			buff[11] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 44U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 45U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 46U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 47U))]);
-			buff[12] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 48U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 49U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 50U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 51U))]);
-			buff[13] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 52U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 53U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 54U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 55U))]);
-			buff[14] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 56U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 57U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 58U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 59U))]);
-			buff[15] = (uint)(((int)input[(int)((UIntPtr)(inputOffset + 60U))] << 24) | ((int)input[(int)((UIntPtr)(inputOffset + 61U))] << 16) | ((int)input[(int)((UIntPtr)(inputOffset + 62U))] << 8) | (int)input[(int)((UIntPtr)(inputOffset + 63U))]);
+			buff[0] = (uint)(((int)input[(int)inputOffset] << 24) | ((int)input[(int)(inputOffset + 1U)] << 16) | ((int)input[(int)(inputOffset + 2U)] << 8) | (int)input[(int)(inputOffset + 3U)]);
+			buff[1] = (uint)(((int)input[(int)(inputOffset + 4U)] << 24) | ((int)input[(int)(inputOffset + 5U)] << 16) | ((int)input[(int)(inputOffset + 6U)] << 8) | (int)input[(int)(inputOffset + 7U)]);
+			buff[2] = (uint)(((int)input[(int)(inputOffset + 8U)] << 24) | ((int)input[(int)(inputOffset + 9U)] << 16) | ((int)input[(int)(inputOffset + 10U)] << 8) | (int)input[(int)(inputOffset + 11U)]);
+			buff[3] = (uint)(((int)input[(int)(inputOffset + 12U)] << 24) | ((int)input[(int)(inputOffset + 13U)] << 16) | ((int)input[(int)(inputOffset + 14U)] << 8) | (int)input[(int)(inputOffset + 15U)]);
+			buff[4] = (uint)(((int)input[(int)(inputOffset + 16U)] << 24) | ((int)input[(int)(inputOffset + 17U)] << 16) | ((int)input[(int)(inputOffset + 18U)] << 8) | (int)input[(int)(inputOffset + 19U)]);
+			buff[5] = (uint)(((int)input[(int)(inputOffset + 20U)] << 24) | ((int)input[(int)(inputOffset + 21U)] << 16) | ((int)input[(int)(inputOffset + 22U)] << 8) | (int)input[(int)(inputOffset + 23U)]);
+			buff[6] = (uint)(((int)input[(int)(inputOffset + 24U)] << 24) | ((int)input[(int)(inputOffset + 25U)] << 16) | ((int)input[(int)(inputOffset + 26U)] << 8) | (int)input[(int)(inputOffset + 27U)]);
+			buff[7] = (uint)(((int)input[(int)(inputOffset + 28U)] << 24) | ((int)input[(int)(inputOffset + 29U)] << 16) | ((int)input[(int)(inputOffset + 30U)] << 8) | (int)input[(int)(inputOffset + 31U)]);
+			buff[8] = (uint)(((int)input[(int)(inputOffset + 32U)] << 24) | ((int)input[(int)(inputOffset + 33U)] << 16) | ((int)input[(int)(inputOffset + 34U)] << 8) | (int)input[(int)(inputOffset + 35U)]);
+			buff[9] = (uint)(((int)input[(int)(inputOffset + 36U)] << 24) | ((int)input[(int)(inputOffset + 37U)] << 16) | ((int)input[(int)(inputOffset + 38U)] << 8) | (int)input[(int)(inputOffset + 39U)]);
+			buff[10] = (uint)(((int)input[(int)(inputOffset + 40U)] << 24) | ((int)input[(int)(inputOffset + 41U)] << 16) | ((int)input[(int)(inputOffset + 42U)] << 8) | (int)input[(int)(inputOffset + 43U)]);
+			buff[11] = (uint)(((int)input[(int)(inputOffset + 44U)] << 24) | ((int)input[(int)(inputOffset + 45U)] << 16) | ((int)input[(int)(inputOffset + 46U)] << 8) | (int)input[(int)(inputOffset + 47U)]);
+			buff[12] = (uint)(((int)input[(int)(inputOffset + 48U)] << 24) | ((int)input[(int)(inputOffset + 49U)] << 16) | ((int)input[(int)(inputOffset + 50U)] << 8) | (int)input[(int)(inputOffset + 51U)]);
+			buff[13] = (uint)(((int)input[(int)(inputOffset + 52U)] << 24) | ((int)input[(int)(inputOffset + 53U)] << 16) | ((int)input[(int)(inputOffset + 54U)] << 8) | (int)input[(int)(inputOffset + 55U)]);
+			buff[14] = (uint)(((int)input[(int)(inputOffset + 56U)] << 24) | ((int)input[(int)(inputOffset + 57U)] << 16) | ((int)input[(int)(inputOffset + 58U)] << 8) | (int)input[(int)(inputOffset + 59U)]);
+			buff[15] = (uint)(((int)input[(int)(inputOffset + 60U)] << 24) | ((int)input[(int)(inputOffset + 61U)] << 16) | ((int)input[(int)(inputOffset + 62U)] << 8) | (int)input[(int)(inputOffset + 63U)]);
 		}
 
 		private static void FillBuff(uint[] buff)
@@ -192,7 +192,7 @@ namespace System.Security.Cryptography
 				num2 += 64;
 			}
 			int num3 = inputCount + num2 + 8;
-			byte[] array = ((num3 != 64) ? new byte[num3] : this._ProcessingBuffer);
+			byte[] array = ((num3 == 64) ? this._ProcessingBuffer : new byte[num3]);
 			for (int i = 0; i < inputCount; i++)
 			{
 				array[i] = inputBuffer[i + inputOffset];
@@ -224,8 +224,6 @@ namespace System.Security.Cryptography
 		}
 
 		private const int BLOCK_SIZE_BYTES = 64;
-
-		private const int HASH_SIZE_BYTES = 20;
 
 		private uint[] _H;
 

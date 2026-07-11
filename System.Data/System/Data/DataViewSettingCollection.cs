@@ -1,14 +1,121 @@
 ﻿using System;
 using System.Collections;
 using System.ComponentModel;
+using Unity;
 
 namespace System.Data
 {
-	[Editor("Microsoft.VSDesigner.Data.Design.DataViewSettingsCollectionEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 	public class DataViewSettingCollection : ICollection, IEnumerable
 	{
-		internal DataViewSettingCollection()
+		internal DataViewSettingCollection(DataViewManager dataViewManager)
 		{
+			this._list = new Hashtable();
+			base..ctor();
+			if (dataViewManager == null)
+			{
+				throw ExceptionBuilder.ArgumentNull("dataViewManager");
+			}
+			this._dataViewManager = dataViewManager;
+		}
+
+		public virtual DataViewSetting this[DataTable table]
+		{
+			get
+			{
+				if (table == null)
+				{
+					throw ExceptionBuilder.ArgumentNull("table");
+				}
+				DataViewSetting dataViewSetting = (DataViewSetting)this._list[table];
+				if (dataViewSetting == null)
+				{
+					dataViewSetting = new DataViewSetting();
+					this[table] = dataViewSetting;
+				}
+				return dataViewSetting;
+			}
+			set
+			{
+				if (table == null)
+				{
+					throw ExceptionBuilder.ArgumentNull("table");
+				}
+				value.SetDataViewManager(this._dataViewManager);
+				value.SetDataTable(table);
+				this._list[table] = value;
+			}
+		}
+
+		private DataTable GetTable(string tableName)
+		{
+			DataTable dataTable = null;
+			DataSet dataSet = this._dataViewManager.DataSet;
+			if (dataSet != null)
+			{
+				dataTable = dataSet.Tables[tableName];
+			}
+			return dataTable;
+		}
+
+		private DataTable GetTable(int index)
+		{
+			DataTable dataTable = null;
+			DataSet dataSet = this._dataViewManager.DataSet;
+			if (dataSet != null)
+			{
+				dataTable = dataSet.Tables[index];
+			}
+			return dataTable;
+		}
+
+		public virtual DataViewSetting this[string tableName]
+		{
+			get
+			{
+				DataTable table = this.GetTable(tableName);
+				if (table != null)
+				{
+					return this[table];
+				}
+				return null;
+			}
+		}
+
+		public virtual DataViewSetting this[int index]
+		{
+			get
+			{
+				DataTable table = this.GetTable(index);
+				if (table != null)
+				{
+					return this[table];
+				}
+				return null;
+			}
+			set
+			{
+				DataTable table = this.GetTable(index);
+				if (table != null)
+				{
+					this[table] = value;
+				}
+			}
+		}
+
+		public void CopyTo(Array ar, int index)
+		{
+			foreach (object obj in this)
+			{
+				ar.SetValue(obj, index++);
+			}
+		}
+
+		public void CopyTo(DataViewSetting[] ar, int index)
+		{
+			foreach (object obj in this)
+			{
+				ar.SetValue(obj, index++);
+			}
 		}
 
 		[Browsable(false)]
@@ -16,8 +123,18 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				DataSet dataSet = this._dataViewManager.DataSet;
+				if (dataSet != null)
+				{
+					return dataSet.Tables.Count;
+				}
+				return 0;
 			}
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return new DataViewSettingCollection.DataViewSettingsEnumerator(this._dataViewManager);
 		}
 
 		[Browsable(false)]
@@ -25,7 +142,7 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return true;
 			}
 		}
 
@@ -34,37 +151,7 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
-			}
-		}
-
-		public virtual DataViewSetting this[DataTable table]
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
-		}
-
-		public virtual DataViewSetting this[int index]
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
-		}
-
-		public virtual DataViewSetting this[string tableName]
-		{
-			get
-			{
-				throw null;
+				return false;
 			}
 		}
 
@@ -73,21 +160,59 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this;
 			}
 		}
 
-		public void CopyTo(Array ar, int index)
+		internal void Remove(DataTable table)
 		{
+			this._list.Remove(table);
 		}
 
-		public void CopyTo(DataViewSetting[] ar, int index)
+		internal DataViewSettingCollection()
 		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
-		public IEnumerator GetEnumerator()
+		private readonly DataViewManager _dataViewManager;
+
+		private readonly Hashtable _list;
+
+		private sealed class DataViewSettingsEnumerator : IEnumerator
 		{
-			throw null;
+			public DataViewSettingsEnumerator(DataViewManager dvm)
+			{
+				if (dvm.DataSet != null)
+				{
+					this._dataViewSettings = dvm.DataViewSettings;
+					this._tableEnumerator = dvm.DataSet.Tables.GetEnumerator();
+					return;
+				}
+				this._dataViewSettings = null;
+				this._tableEnumerator = Array.Empty<DataTable>().GetEnumerator();
+			}
+
+			public bool MoveNext()
+			{
+				return this._tableEnumerator.MoveNext();
+			}
+
+			public void Reset()
+			{
+				this._tableEnumerator.Reset();
+			}
+
+			public object Current
+			{
+				get
+				{
+					return this._dataViewSettings[(DataTable)this._tableEnumerator.Current];
+				}
+			}
+
+			private DataViewSettingCollection _dataViewSettings;
+
+			private IEnumerator _tableEnumerator;
 		}
 	}
 }

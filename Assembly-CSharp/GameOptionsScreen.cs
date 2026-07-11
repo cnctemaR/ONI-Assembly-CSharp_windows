@@ -38,11 +38,9 @@ public class GameOptionsScreen : KModalButtonMenu
 			this.savePanel.SetActive(true);
 			this.saveConfiguration.Show(show);
 			this.SetSandboxModeActive(SaveGame.Instance.sandboxEnabled);
+			return;
 		}
-		else
-		{
-			this.savePanel.SetActive(false);
-		}
+		this.savePanel.SetActive(false);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -50,11 +48,9 @@ public class GameOptionsScreen : KModalButtonMenu
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.Deactivate();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	private void OnTutorialReset()
@@ -72,7 +68,6 @@ public class GameOptionsScreen : KModalButtonMenu
 	private void OnUnlockSandboxMode()
 	{
 		ConfirmDialogScreen component = base.ActivateChildScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<ConfirmDialogScreen>();
-		ConfirmDialogScreen confirmDialogScreen = component;
 		string text = UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.UNLOCK_SANDBOX_WARNING;
 		global::System.Action action = delegate
 		{
@@ -84,10 +79,9 @@ public class GameOptionsScreen : KModalButtonMenu
 		global::System.Action action2 = delegate
 		{
 			string text4 = SaveLoader.GetSavePrefixAndCreateFolder();
-			string text5 = text4;
 			text4 = string.Concat(new string[]
 			{
-				text5,
+				text4,
 				"\\",
 				SaveGame.Instance.BaseName,
 				UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.BACKUP_SAVE_GAME_APPEND,
@@ -98,12 +92,11 @@ public class GameOptionsScreen : KModalButtonMenu
 			TopLeftControlScreen.Instance.UpdateSandboxToggleState();
 			this.Deactivate();
 		};
-		string text2 = UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CANCEL;
-		global::System.Action action3 = delegate
-		{
-		};
+		string text2 = UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CONFIRM;
 		string text3 = UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CONFIRM_SAVE_BACKUP;
-		confirmDialogScreen.PopupConfirmDialog(text, action, action2, text2, action3, null, UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CONFIRM, text3, null, true);
+		component.PopupConfirmDialog(text, action, action2, UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CANCEL, delegate
+		{
+		}, null, text2, text3, null, true);
 		component.Activate();
 	}
 
@@ -116,7 +109,7 @@ public class GameOptionsScreen : KModalButtonMenu
 	{
 		this.sandboxButton.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(active);
 		this.sandboxButton.isInteractable = !active;
-		this.sandboxButton.gameObject.GetComponentInParent<CanvasGroup>().alpha = ((!active) ? 1f : 0.5f);
+		this.sandboxButton.gameObject.GetComponentInParent<CanvasGroup>().alpha = (active ? 0.5f : 1f);
 	}
 
 	[SerializeField]

@@ -4,6 +4,7 @@ namespace System.Runtime.InteropServices
 {
 	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, Inherited = false)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class MarshalAsAttribute : Attribute
 	{
 		public MarshalAsAttribute(short unmanagedType)
@@ -24,9 +25,10 @@ namespace System.Runtime.InteropServices
 			}
 		}
 
-		private UnmanagedType utype;
-
-		public UnmanagedType ArraySubType;
+		internal MarshalAsAttribute Copy()
+		{
+			return (MarshalAsAttribute)base.MemberwiseClone();
+		}
 
 		public string MarshalCookie;
 
@@ -36,14 +38,18 @@ namespace System.Runtime.InteropServices
 		[ComVisible(true)]
 		public Type MarshalTypeRef;
 
+		public Type SafeArrayUserDefinedSubType;
+
+		private UnmanagedType utype;
+
+		public UnmanagedType ArraySubType;
+
 		public VarEnum SafeArraySubType;
 
 		public int SizeConst;
 
-		public short SizeParamIndex;
-
-		public Type SafeArrayUserDefinedSubType;
-
 		public int IidParameterIndex;
+
+		public short SizeParamIndex;
 	}
 }

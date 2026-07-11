@@ -10,6 +10,8 @@ namespace UnityEngine
 
 		void SendMessage(Guid messageId, byte[] data, int playerId);
 
+		bool TrySendMessage(Guid messageId, byte[] data, int playerId);
+
 		void Poll();
 
 		void RegisterInternal(Guid messageId);

@@ -50,8 +50,7 @@ public class RanchStationConfig : IBuildingConfig
 		def.isCreatureEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
 		def.onRanchCompleteCb = delegate(GameObject creature_go)
 		{
-			RanchableMonitor.Instance smi3 = creature_go.GetSMI<RanchableMonitor.Instance>();
-			RanchStation.Instance targetRanchStation = smi3.targetRanchStation;
+			RanchStation.Instance targetRanchStation = creature_go.GetSMI<RanchableMonitor.Instance>().targetRanchStation;
 			RancherChore.RancherChoreStates.Instance smi2 = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>();
 			GameObject gameObject = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>().sm.rancher.Get(smi2);
 			float num = 1f + gameObject.GetAttributes().Get(Db.Get().Attributes.Ranching.Id).GetTotalValue() * 0.1f;
@@ -76,8 +75,7 @@ public class RanchStationConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
-		SkillPerkMissingComplainer skillPerkMissingComplainer = go.AddOrGet<SkillPerkMissingComplainer>();
-		skillPerkMissingComplainer.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
+		go.AddOrGet<SkillPerkMissingComplainer>().requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
 		Prioritizable.AddRef(go);
 	}
 

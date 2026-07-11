@@ -5,18 +5,6 @@ using UnityEngine;
 
 public class StandardAmountDisplayer : IAmountDisplayer
 {
-	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice, StandardAttributeFormatter formatter = null)
-	{
-		if (formatter != null)
-		{
-			this.formatter = formatter;
-		}
-		else
-		{
-			this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
-		}
-	}
-
 	public IAttributeFormatter Formatter
 	{
 		get
@@ -37,14 +25,21 @@ public class StandardAmountDisplayer : IAmountDisplayer
 		}
 	}
 
+	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice, StandardAttributeFormatter formatter = null)
+	{
+		if (formatter != null)
+		{
+			this.formatter = formatter;
+			return;
+		}
+		this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
+	}
+
 	public virtual string GetValueString(Amount master, AmountInstance instance)
 	{
 		if (!master.showMax)
 		{
-			StandardAttributeFormatter standardAttributeFormatter = this.formatter;
-			float value = instance.value;
-			GameObject gameObject = instance.gameObject;
-			return standardAttributeFormatter.GetFormattedValue(value, GameUtil.TimeSlice.None, gameObject);
+			return this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, instance.gameObject);
 		}
 		return string.Format("{0} / {1}", this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(instance.GetMax(), GameUtil.TimeSlice.None, null));
 	}
@@ -56,7 +51,7 @@ public class StandardAmountDisplayer : IAmountDisplayer
 
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (master.description.IndexOf("{1}") > -1)
 		{
 			text += string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), GameUtil.GetIdentityDescriptor(instance.gameObject));

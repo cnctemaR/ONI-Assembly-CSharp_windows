@@ -11,9 +11,21 @@ namespace YamlDotNet.RepresentationModel
 	[Serializable]
 	public sealed class YamlScalarNode : YamlNode, IYamlConvertible
 	{
+		public string Value { get; set; }
+
+		public ScalarStyle Style { get; set; }
+
 		internal YamlScalarNode(IParser parser, DocumentLoadingState state)
 		{
 			this.Load(parser, state);
+		}
+
+		private void Load(IParser parser, DocumentLoadingState state)
+		{
+			Scalar scalar = parser.Expect<Scalar>();
+			base.Load(scalar, state);
+			this.Value = scalar.Value;
+			this.Style = scalar.Style;
 		}
 
 		public YamlScalarNode()
@@ -23,18 +35,6 @@ namespace YamlDotNet.RepresentationModel
 		public YamlScalarNode(string value)
 		{
 			this.Value = value;
-		}
-
-		public string Value { get; set; }
-
-		public ScalarStyle Style { get; set; }
-
-		private void Load(IParser parser, DocumentLoadingState state)
-		{
-			Scalar scalar = parser.Expect<Scalar>();
-			base.Load(scalar, state);
-			this.Value = scalar.Value;
-			this.Style = scalar.Style;
 		}
 
 		internal override void ResolveAliases(DocumentLoadingState state)

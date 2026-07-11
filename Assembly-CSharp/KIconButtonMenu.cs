@@ -44,7 +44,7 @@ public class KIconButtonMenu : KScreen
 				GameObject binstance = global::UnityEngine.Object.Instantiate<GameObject>(this.buttonPrefab, Vector3.zero, Quaternion.identity);
 				buttonInfo.buttonGo = binstance;
 				this.buttonObjects[j] = binstance;
-				Transform transform = ((!(this.buttonParent != null)) ? base.transform : this.buttonParent);
+				Transform transform = ((this.buttonParent != null) ? this.buttonParent : base.transform);
 				binstance.transform.SetParent(transform, false);
 				binstance.SetActive(true);
 				binstance.name = buttonInfo.text + "Button";
@@ -81,7 +81,7 @@ public class KIconButtonMenu : KScreen
 					}
 				}
 				ToolTip componentInChildren2 = binstance.GetComponentInChildren<ToolTip>();
-				if (buttonInfo.text != null && buttonInfo.text != string.Empty && componentInChildren2 != null)
+				if (buttonInfo.text != null && buttonInfo.text != "" && componentInChildren2 != null)
 				{
 					componentInChildren2.toolTip = buttonInfo.GetTooltipText();
 					LocText componentInChildren3 = binstance.GetComponentInChildren<LocText>();
@@ -115,7 +115,6 @@ public class KIconButtonMenu : KScreen
 				KToggle componentInChildren4 = binstance.GetComponentInChildren<KToggle>();
 				if (componentInChildren4 != null)
 				{
-					componentInChildren4.onRefresh += buttonInfo.onRefresh;
 					ToggleGroup component2 = base.GetComponent<ToggleGroup>();
 					if (component2 == null)
 					{
@@ -124,7 +123,7 @@ public class KIconButtonMenu : KScreen
 					componentInChildren4.group = component2;
 					componentInChildren4.onClick += action;
 					Navigation navigation = componentInChildren4.navigation;
-					navigation.mode = ((!this.automaticNavigation) ? Navigation.Mode.None : Navigation.Mode.Automatic);
+					navigation.mode = (this.automaticNavigation ? Navigation.Mode.Automatic : Navigation.Mode.None);
 					componentInChildren4.navigation = navigation;
 				}
 				else
@@ -208,9 +207,10 @@ public class KIconButtonMenu : KScreen
 		{
 			this.currentlySelectedToggle = selectedToggle;
 		}
-		foreach (GameObject gameObject in this.buttonObjects)
+		GameObject[] array = this.buttonObjects;
+		for (int i = 0; i < array.Length; i++)
 		{
-			KToggle component = gameObject.GetComponent<KToggle>();
+			KToggle component = array[i].GetComponent<KToggle>();
 			if (component != null)
 			{
 				if (component == this.currentlySelectedToggle)
@@ -305,7 +305,6 @@ public class KIconButtonMenu : KScreen
 			this.text = text;
 			this.shortcutKey = shortcutKey;
 			this.onClick = on_click;
-			this.onRefresh = on_refresh;
 			this.onCreate = on_create;
 			this.texture = texture;
 			this.tooltipText = tooltipText;
@@ -314,7 +313,7 @@ public class KIconButtonMenu : KScreen
 
 		public string GetTooltipText()
 		{
-			string text = ((!(this.tooltipText == string.Empty)) ? this.tooltipText : this.text);
+			string text = ((this.tooltipText == "") ? this.text : this.tooltipText);
 			if (this.shortcutKey != global::Action.NumActions)
 			{
 				text = GameUtil.ReplaceHotkeyString(text, this.shortcutKey);
@@ -337,8 +336,6 @@ public class KIconButtonMenu : KScreen
 		public Action<KIconButtonMenu.ButtonInfo> onCreate;
 
 		public global::System.Action onClick;
-
-		public Action<GameObject> onRefresh;
 
 		public Func<string> onToolTip;
 

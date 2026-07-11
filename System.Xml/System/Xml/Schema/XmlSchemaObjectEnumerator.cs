@@ -1,51 +1,57 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Xml.Schema
 {
 	public class XmlSchemaObjectEnumerator : IEnumerator
 	{
-		internal XmlSchemaObjectEnumerator(IList list)
+		internal XmlSchemaObjectEnumerator(IEnumerator enumerator)
 		{
-			this.ienum = list.GetEnumerator();
+			this.enumerator = enumerator;
 		}
 
-		bool IEnumerator.MoveNext()
+		public void Reset()
 		{
-			return this.ienum.MoveNext();
+			this.enumerator.Reset();
 		}
 
-		void IEnumerator.Reset()
+		public bool MoveNext()
 		{
-			this.ienum.Reset();
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return (XmlSchemaObject)this.ienum.Current;
-			}
+			return this.enumerator.MoveNext();
 		}
 
 		public XmlSchemaObject Current
 		{
 			get
 			{
-				return (XmlSchemaObject)this.ienum.Current;
+				return (XmlSchemaObject)this.enumerator.Current;
 			}
 		}
 
-		public bool MoveNext()
+		void IEnumerator.Reset()
 		{
-			return this.ienum.MoveNext();
+			this.enumerator.Reset();
 		}
 
-		public void Reset()
+		bool IEnumerator.MoveNext()
 		{
-			this.ienum.Reset();
+			return this.enumerator.MoveNext();
 		}
 
-		private IEnumerator ienum;
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.enumerator.Current;
+			}
+		}
+
+		internal XmlSchemaObjectEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		private IEnumerator enumerator;
 	}
 }

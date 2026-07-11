@@ -43,14 +43,13 @@ public class AchievementWidget : KMonoBehaviour
 		this.SetNeverAchieved();
 		if (base.GetComponent<Canvas>() == null)
 		{
-			Canvas canvas = base.gameObject.AddComponent<Canvas>();
-			canvas.sortingOrder = 1;
+			base.gameObject.AddComponent<Canvas>().sortingOrder = 1;
 		}
 		base.GetComponent<Canvas>().overrideSorting = true;
 		yield return new WaitForSecondsRealtime(startDelay);
-		KScrollRect scrollRect = base.transform.parent.parent.GetComponent<KScrollRect>();
-		float scrollTarget = 1f + base.transform.localPosition.y / scrollRect.content.rect.height;
-		scrollRect.SetSmoothAutoScrollTarget(scrollTarget);
+		KScrollRect component = base.transform.parent.parent.GetComponent<KScrollRect>();
+		float num = 1f + base.transform.localPosition.y / component.content.rect.height;
+		component.SetSmoothAutoScrollTarget(num);
 		GameObject icon = base.GetComponent<HierarchyReferences>().GetReference<Image>("icon").transform.parent.gameObject;
 		foreach (KBatchedAnimController kbatchedAnimController in this.sparks)
 		{
@@ -62,15 +61,15 @@ public class AchievementWidget : KMonoBehaviour
 				kbatchedAnimController.GetComponent<KBatchedAnimCanvasRenderer>().compare = CompareFunction.Always;
 			}
 		}
-		HierarchyReferences refs = base.GetComponent<HierarchyReferences>();
-		refs.GetReference<Image>("iconBG").color = this.color_dark_red;
-		refs.GetReference<Image>("iconBorder").color = this.color_gold;
-		refs.GetReference<Image>("icon").color = this.color_gold;
+		HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
+		component2.GetReference<Image>("iconBG").color = this.color_dark_red;
+		component2.GetReference<Image>("iconBorder").color = this.color_gold;
+		component2.GetReference<Image>("icon").color = this.color_gold;
 		bool colorChanged = false;
-		EventInstance achievementUnlockedSound = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero, 1f);
-		int pitchParamValue = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
-		achievementUnlockedSound.setParameterValue("num_achievements", (float)pitchParamValue);
-		KFMOD.EndOneShot(achievementUnlockedSound);
+		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero, 1f);
+		int num2 = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
+		eventInstance.setParameterValue("num_achievements", (float)num2);
+		KFMOD.EndOneShot(eventInstance);
 		for (float i = 0f; i < 1.2f; i += Time.unscaledDeltaTime)
 		{
 			icon.transform.localScale = Vector3.one * this.flourish_iconScaleCurve.Evaluate(i);
@@ -78,16 +77,17 @@ public class AchievementWidget : KMonoBehaviour
 			if (i > 1f && !colorChanged)
 			{
 				colorChanged = true;
-				foreach (KBatchedAnimController kbatchedAnimController2 in this.sparks)
+				KBatchedAnimController[] array = this.sparks;
+				for (int j = 0; j < array.Length; j++)
 				{
-					kbatchedAnimController2.Play("spark", KAnim.PlayMode.Once, 1f, 0f);
+					array[j].Play("spark", KAnim.PlayMode.Once, 1f, 0f);
 				}
 				this.SetAchievedNow();
 			}
 			yield return 0;
 		}
 		icon.transform.localScale = Vector3.one;
-		for (float j = 0f; j < 0.3f; j += Time.unscaledDeltaTime)
+		for (float i = 0f; i < 0.3f; i += Time.unscaledDeltaTime)
 		{
 			yield return 0;
 		}
@@ -98,42 +98,41 @@ public class AchievementWidget : KMonoBehaviour
 
 	public void SetAchievedNow()
 	{
-		MultiToggle component = base.GetComponent<MultiToggle>();
-		component.ChangeState(1);
-		HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-		component2.GetReference<Image>("iconBG").color = this.color_dark_red;
-		component2.GetReference<Image>("iconBorder").color = this.color_gold;
-		component2.GetReference<Image>("icon").color = this.color_gold;
-		foreach (LocText locText in base.GetComponentsInChildren<LocText>())
+		base.GetComponent<MultiToggle>().ChangeState(1);
+		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("iconBG").color = this.color_dark_red;
+		component.GetReference<Image>("iconBorder").color = this.color_gold;
+		component.GetReference<Image>("icon").color = this.color_gold;
+		LocText[] componentsInChildren = base.GetComponentsInChildren<LocText>();
+		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
-			locText.color = Color.white;
+			componentsInChildren[i].color = Color.white;
 		}
 		this.ConfigureToolTip(base.GetComponent<ToolTip>(), COLONY_ACHIEVEMENTS.ACHIEVED_THIS_COLONY_TOOLTIP);
 	}
 
 	public void SetAchievedBefore()
 	{
-		MultiToggle component = base.GetComponent<MultiToggle>();
-		component.ChangeState(1);
-		HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-		component2.GetReference<Image>("iconBG").color = this.color_dark_red;
-		component2.GetReference<Image>("iconBorder").color = this.color_gold;
-		component2.GetReference<Image>("icon").color = this.color_gold;
-		foreach (LocText locText in base.GetComponentsInChildren<LocText>())
+		base.GetComponent<MultiToggle>().ChangeState(1);
+		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("iconBG").color = this.color_dark_red;
+		component.GetReference<Image>("iconBorder").color = this.color_gold;
+		component.GetReference<Image>("icon").color = this.color_gold;
+		LocText[] componentsInChildren = base.GetComponentsInChildren<LocText>();
+		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
-			locText.color = Color.white;
+			componentsInChildren[i].color = Color.white;
 		}
 		this.ConfigureToolTip(base.GetComponent<ToolTip>(), COLONY_ACHIEVEMENTS.ACHIEVED_OTHER_COLONY_TOOLTIP);
 	}
 
 	public void SetNeverAchieved()
 	{
-		MultiToggle component = base.GetComponent<MultiToggle>();
-		component.ChangeState(2);
-		HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-		component2.GetReference<Image>("iconBG").color = this.color_dark_grey;
-		component2.GetReference<Image>("iconBorder").color = this.color_grey;
-		component2.GetReference<Image>("icon").color = this.color_grey;
+		base.GetComponent<MultiToggle>().ChangeState(2);
+		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("iconBG").color = this.color_dark_grey;
+		component.GetReference<Image>("iconBorder").color = this.color_grey;
+		component.GetReference<Image>("icon").color = this.color_grey;
 		foreach (LocText locText in base.GetComponentsInChildren<LocText>())
 		{
 			locText.color = new Color(locText.color.r, locText.color.g, locText.color.b, 0.6f);
@@ -143,12 +142,11 @@ public class AchievementWidget : KMonoBehaviour
 
 	public void SetNotAchieved()
 	{
-		MultiToggle component = base.GetComponent<MultiToggle>();
-		component.ChangeState(2);
-		HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-		component2.GetReference<Image>("iconBG").color = this.color_dark_grey;
-		component2.GetReference<Image>("iconBorder").color = this.color_grey;
-		component2.GetReference<Image>("icon").color = this.color_grey;
+		base.GetComponent<MultiToggle>().ChangeState(2);
+		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("iconBG").color = this.color_dark_grey;
+		component.GetReference<Image>("iconBorder").color = this.color_grey;
+		component.GetReference<Image>("icon").color = this.color_grey;
 		foreach (LocText locText in base.GetComponentsInChildren<LocText>())
 		{
 			locText.color = new Color(locText.color.r, locText.color.g, locText.color.b, 0.6f);
@@ -158,15 +156,14 @@ public class AchievementWidget : KMonoBehaviour
 
 	public void SetFailed()
 	{
-		MultiToggle component = base.GetComponent<MultiToggle>();
-		component.ChangeState(2);
-		HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-		component2.GetReference<Image>("iconBG").color = this.color_dark_grey;
-		component2.GetReference<Image>("iconBG").SetAlpha(0.5f);
-		component2.GetReference<Image>("iconBorder").color = this.color_grey;
-		component2.GetReference<Image>("iconBorder").SetAlpha(0.5f);
-		component2.GetReference<Image>("icon").color = this.color_grey;
-		component2.GetReference<Image>("icon").SetAlpha(0.5f);
+		base.GetComponent<MultiToggle>().ChangeState(2);
+		HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("iconBG").color = this.color_dark_grey;
+		component.GetReference<Image>("iconBG").SetAlpha(0.5f);
+		component.GetReference<Image>("iconBorder").color = this.color_grey;
+		component.GetReference<Image>("iconBorder").SetAlpha(0.5f);
+		component.GetReference<Image>("icon").color = this.color_grey;
+		component.GetReference<Image>("icon").SetAlpha(0.5f);
 		foreach (LocText locText in base.GetComponentsInChildren<LocText>())
 		{
 			locText.color = new Color(locText.color.r, locText.color.g, locText.color.b, 0.25f);
@@ -239,8 +236,7 @@ public class AchievementWidget : KMonoBehaviour
 
 	private void SetDescription(string str, HierarchyReferences refs)
 	{
-		LocText reference = refs.GetReference<LocText>("Desc");
-		reference.SetText(str);
+		refs.GetReference<LocText>("Desc").SetText(str);
 	}
 
 	private void SetIcon(Sprite sprite, Color color, HierarchyReferences refs)
@@ -253,8 +249,7 @@ public class AchievementWidget : KMonoBehaviour
 
 	private void ShowIcon(bool show, HierarchyReferences refs)
 	{
-		Image reference = refs.GetReference<Image>("Icon");
-		reference.gameObject.SetActive(show);
+		refs.GetReference<Image>("Icon").gameObject.SetActive(show);
 	}
 
 	private void ShowRequirement(bool succeed, ColonyAchievementRequirement req)
@@ -311,7 +306,7 @@ public class AchievementWidget : KMonoBehaviour
 		{
 			this.SetIcon(this.statusSuccessIcon, Color.green, hierarchyReferences);
 		}
-		this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.ARM_PERFORMANCE, (!succeed) ? dupesVsSolidTransferArmFetch.currentCycleCount : dupesVsSolidTransferArmFetch.numCycles, dupesVsSolidTransferArmFetch.numCycles), hierarchyReferences);
+		this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.ARM_PERFORMANCE, succeed ? dupesVsSolidTransferArmFetch.numCycles : dupesVsSolidTransferArmFetch.currentCycleCount, dupesVsSolidTransferArmFetch.numCycles), hierarchyReferences);
 		if (!succeed)
 		{
 			Dictionary<int, int> fetchDupeChoreDeliveries = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().fetchDupeChoreDeliveries;
@@ -349,7 +344,7 @@ public class AchievementWidget : KMonoBehaviour
 		{
 			this.ShowIcon(false, hierarchyReferences);
 		}
-		this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.EXOSUIT_CYCLES, (!succeed) ? dupesCompleteChoreInExoSuitForCycles.currentCycleStreak : dupesCompleteChoreInExoSuitForCycles.numCycles, dupesCompleteChoreInExoSuitForCycles.numCycles), hierarchyReferences);
+		this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.EXOSUIT_CYCLES, succeed ? dupesCompleteChoreInExoSuitForCycles.numCycles : dupesCompleteChoreInExoSuitForCycles.currentCycleStreak, dupesCompleteChoreInExoSuitForCycles.numCycles), hierarchyReferences);
 		if (!succeed)
 		{
 			hierarchyReferences = this.GetNextRequirementWidget();
@@ -407,45 +402,26 @@ public class AchievementWidget : KMonoBehaviour
 		if (success)
 		{
 			this.ShowRequirement(success, req);
+			return;
 		}
-		else
+		foreach (object obj in Components.MinionAssignablesProxy)
 		{
-			IEnumerator enumerator = Components.MinionAssignablesProxy.GetEnumerator();
-			try
+			GameObject targetGameObject = ((MinionAssignablesProxy)obj).GetTargetGameObject();
+			if (targetGameObject != null && !targetGameObject.HasTag(GameTags.Dead))
 			{
-				while (enumerator.MoveNext())
+				AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(targetGameObject.GetComponent<MinionModifiers>());
+				if (attributeInstance != null)
 				{
-					object obj = enumerator.Current;
-					MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)obj;
-					GameObject targetGameObject = minionAssignablesProxy.GetTargetGameObject();
-					if (targetGameObject != null)
+					HierarchyReferences nextRequirementWidget = this.GetNextRequirementWidget();
+					if (attributeInstance.GetTotalValue() >= (float)minimumMorale.minimumMorale)
 					{
-						if (!targetGameObject.HasTag(GameTags.Dead))
-						{
-							AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(targetGameObject.GetComponent<MinionModifiers>());
-							if (attributeInstance != null)
-							{
-								HierarchyReferences nextRequirementWidget = this.GetNextRequirementWidget();
-								if (attributeInstance.GetTotalValue() >= (float)minimumMorale.minimumMorale)
-								{
-									this.SetIcon(this.statusSuccessIcon, Color.green, nextRequirementWidget);
-								}
-								else
-								{
-									this.ShowIcon(false, nextRequirementWidget);
-								}
-								this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.MORALE, targetGameObject.GetProperName(), attributeInstance.GetTotalDisplayValue()), nextRequirementWidget);
-							}
-						}
+						this.SetIcon(this.statusSuccessIcon, Color.green, nextRequirementWidget);
 					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
+					else
+					{
+						this.ShowIcon(false, nextRequirementWidget);
+					}
+					this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.MORALE, targetGameObject.GetProperName(), attributeInstance.GetTotalDisplayValue()), nextRequirementWidget);
 				}
 			}
 		}

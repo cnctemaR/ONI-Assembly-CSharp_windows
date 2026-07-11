@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	protected override void OnPrefabInit()
 	{
@@ -31,22 +31,18 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 
 	private void SetInteractable(bool state)
 	{
-		if (state)
-		{
-			if (!this.IsOpen)
-			{
-				this.expandArrow.SetInactive();
-			}
-			else
-			{
-				this.expandArrow.SetActive();
-			}
-		}
-		else
+		if (!state)
 		{
 			this.SetOpen(false);
 			this.expandArrow.SetDisabled();
+			return;
 		}
+		if (!this.IsOpen)
+		{
+			this.expandArrow.SetInactive();
+			return;
+		}
+		this.expandArrow.SetActive();
 	}
 
 	private void SetActiveColor(bool state)
@@ -58,15 +54,13 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 			this.expandArrow.ActiveColour = this.TextColor_Interactable;
 			this.expandArrow.InactiveColour = this.TextColor_Interactable;
 			this.expandArrow.TargetImage.color = this.TextColor_Interactable;
+			return;
 		}
-		else
-		{
-			this.elements.LabelText.color = this.TextColor_NonInteractable;
-			this.elements.QuantityText.color = this.TextColor_NonInteractable;
-			this.expandArrow.ActiveColour = this.TextColor_NonInteractable;
-			this.expandArrow.InactiveColour = this.TextColor_NonInteractable;
-			this.expandArrow.TargetImage.color = this.TextColor_NonInteractable;
-		}
+		this.elements.LabelText.color = this.TextColor_NonInteractable;
+		this.elements.QuantityText.color = this.TextColor_NonInteractable;
+		this.expandArrow.ActiveColour = this.TextColor_NonInteractable;
+		this.expandArrow.InactiveColour = this.TextColor_NonInteractable;
+		this.expandArrow.TargetImage.color = this.TextColor_NonInteractable;
 	}
 
 	public void SetTag(Tag t, GameUtil.MeasureUnit measure)
@@ -100,22 +94,20 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 			this.SetOpen(true);
 			this.elements.LabelText.fontSize = (float)this.maximizedFontSize;
 			this.elements.QuantityText.fontSize = (float)this.maximizedFontSize;
+			return;
 		}
-		else
+		if (play_sound)
 		{
-			if (play_sound)
-			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-			}
-			this.SetOpen(false);
-			this.elements.LabelText.fontSize = (float)this.minimizedFontSize;
-			this.elements.QuantityText.fontSize = (float)this.minimizedFontSize;
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
 		}
+		this.SetOpen(false);
+		this.elements.LabelText.fontSize = (float)this.minimizedFontSize;
+		this.elements.QuantityText.fontSize = (float)this.minimizedFontSize;
 	}
 
 	private void Hover(bool is_hovering)
 	{
-		this.Background.color = ((!is_hovering) ? new Color(0f, 0f, 0f, 0f) : this.BackgroundHoverColor);
+		this.Background.color = (is_hovering ? this.BackgroundHoverColor : new Color(0f, 0f, 0f, 0f));
 		List<Pickupable> list = null;
 		if (WorldInventory.Instance != null)
 		{
@@ -132,7 +124,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 				KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
 				if (!(component == null))
 				{
-					component.HighlightColour = ((!is_hovering) ? Color.black : this.highlightColour);
+					component.HighlightColour = (is_hovering ? this.highlightColour : Color.black);
 				}
 			}
 		}
@@ -222,24 +214,17 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 		{
 			if (this.quantityString == null || this.currentQuantity != num)
 			{
-				GameUtil.MeasureUnit measure = this.Measure;
-				if (measure != GameUtil.MeasureUnit.mass)
+				switch (this.Measure)
 				{
-					if (measure != GameUtil.MeasureUnit.quantity)
-					{
-						if (measure == GameUtil.MeasureUnit.kcal)
-						{
-							this.quantityString = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-						}
-					}
-					else
-					{
-						this.quantityString = num.ToString();
-					}
-				}
-				else
-				{
+				case GameUtil.MeasureUnit.mass:
 					this.quantityString = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+					break;
+				case GameUtil.MeasureUnit.kcal:
+					this.quantityString = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+					break;
+				case GameUtil.MeasureUnit.quantity:
+					this.quantityString = num.ToString();
+					break;
 				}
 				this.elements.QuantityText.text = this.quantityString;
 				this.currentQuantity = num;
@@ -262,14 +247,12 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 		float num2;
 		float num3;
 		this.GetAmounts(true, out num, out num2, out num3);
-		string text = this.elements.LabelText.text + "\n";
-		return text + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
+		return this.elements.LabelText.text + "\n" + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
 	}
 
 	private ResourceEntry NewResourceEntry(Tag resourceTag, GameUtil.MeasureUnit measure)
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.Prefab_ResourceEntry, this.EntryContainer.gameObject, true);
-		ResourceEntry component = gameObject.GetComponent<ResourceEntry>();
+		ResourceEntry component = Util.KInstantiateUI(this.Prefab_ResourceEntry, this.EntryContainer.gameObject, true).GetComponent<ResourceEntry>();
 		component.SetTag(resourceTag, measure);
 		return component;
 	}

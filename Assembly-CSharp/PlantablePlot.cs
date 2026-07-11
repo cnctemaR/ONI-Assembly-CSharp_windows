@@ -57,8 +57,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		PlantablePlot component = gameObject.GetComponent<PlantablePlot>();
+		PlantablePlot component = ((GameObject)data).GetComponent<PlantablePlot>();
 		if (component != null)
 		{
 			if (base.occupyingObject == null && (this.requestedEntityTag != component.requestedEntityTag || component.occupyingObject != null))
@@ -96,11 +95,9 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		if (this.ValidPlant)
 		{
 			base.CreateOrder(entityTag);
+			return;
 		}
-		else
-		{
-			this.SetPreview(Tag.Invalid, false);
-		}
+		this.SetPreview(Tag.Invalid, false);
 	}
 
 	private void SyncPriority(PrioritySetting priority)
@@ -130,8 +127,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		this.autoReplaceEntity = false;
 		Components.PlantablePlots.Add(this);
 		Prioritizable component = base.GetComponent<Prioritizable>();
-		Prioritizable prioritizable = component;
-		prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.SyncPriority));
+		component.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(component.onPriorityChanged, new Action<PrioritySetting>(this.SyncPriority));
 	}
 
 	public void SetFertilizationFlags(bool fertilizer, bool liquid_piping)

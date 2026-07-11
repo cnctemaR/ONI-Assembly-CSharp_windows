@@ -26,7 +26,7 @@ public class KFMOD
 		catch (Exception ex)
 		{
 			KFMOD.didFmodInitializeSuccessfully = false;
-			if (ex.GetType() != typeof(SystemNotInitializedException))
+			if (!(ex.GetType() == typeof(SystemNotInitializedException)))
 			{
 				throw ex;
 			}
@@ -38,8 +38,7 @@ public class KFMOD
 
 	public static void PlayOneShot(string sound, Vector3 position, float volume = 1f)
 	{
-		EventInstance eventInstance = KFMOD.BeginOneShot(sound, position, volume);
-		KFMOD.EndOneShot(eventInstance);
+		KFMOD.EndOneShot(KFMOD.BeginOneShot(sound, position, volume));
 	}
 
 	public static void PlayUISound(string sound)
@@ -56,15 +55,11 @@ public class KFMOD
 		EventInstance eventInstance = KFMOD.CreateInstance(sound);
 		if (!eventInstance.isValid())
 		{
-			if (KFMODDebugger.instance != null)
-			{
-			}
+			KFMODDebugger.instance != null;
 			return eventInstance;
 		}
 		Vector3 vector = new Vector3(position.x, position.y, position.z);
-		if (KFMODDebugger.instance != null)
-		{
-		}
+		KFMODDebugger.instance != null;
 		ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
 		eventInstance.set3DAttributes(attributes_3D);
 		eventInstance.setVolume(volume);
@@ -86,31 +81,34 @@ public class KFMOD
 	{
 		if (!RuntimeManager.IsInitialized)
 		{
-			return default(EventInstance);
+			EventInstance eventInstance = default(EventInstance);
+			return eventInstance;
 		}
-		EventInstance eventInstance;
+		EventInstance eventInstance2;
 		try
 		{
-			eventInstance = RuntimeManager.CreateInstance(path);
+			eventInstance2 = RuntimeManager.CreateInstance(path);
 		}
 		catch (EventNotFoundException ex)
 		{
 			global::Debug.LogWarning(ex);
-			return default(EventInstance);
+			EventInstance eventInstance = default(EventInstance);
+			return eventInstance;
 		}
 		HashedString hashedString = path;
 		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(hashedString);
 		OneShotSoundParameterUpdater.Sound sound = new OneShotSoundParameterUpdater.Sound
 		{
-			ev = eventInstance,
+			ev = eventInstance2,
 			path = hashedString,
 			description = soundEventDescription
 		};
-		foreach (OneShotSoundParameterUpdater oneShotSoundParameterUpdater in soundEventDescription.oneShotParameterUpdaters)
+		OneShotSoundParameterUpdater[] oneShotParameterUpdaters = soundEventDescription.oneShotParameterUpdaters;
+		for (int i = 0; i < oneShotParameterUpdaters.Length; i++)
 		{
-			oneShotSoundParameterUpdater.Play(sound);
+			oneShotParameterUpdaters[i].Play(sound);
 		}
-		return eventInstance;
+		return eventInstance2;
 	}
 
 	private static void CollectSoundDescriptions()
@@ -169,13 +167,15 @@ public class KFMOD
 			if (!type.IsAbstract)
 			{
 				bool flag = false;
-				for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
+				Type type2 = type.BaseType;
+				while (type2 != null)
 				{
 					if (type2 == typeof(OneShotSoundParameterUpdater))
 					{
 						flag = true;
 						break;
 					}
+					type2 = type2.BaseType;
 				}
 				if (flag)
 				{

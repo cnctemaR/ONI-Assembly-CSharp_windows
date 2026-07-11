@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML attribute representing a Color as a string.</para>
-	/// </summary>
 	public class UxmlColorAttributeDescription : UxmlAttributeDescription
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public UxmlColorAttributeDescription()
 		{
 			base.type = "string";
@@ -17,14 +11,8 @@ namespace UnityEngine.Experimental.UIElements
 			this.defaultValue = new Color(0f, 0f, 0f, 1f);
 		}
 
-		/// <summary>
-		///   <para>The default value for the attribute.</para>
-		/// </summary>
 		public Color defaultValue { get; set; }
 
-		/// <summary>
-		///   <para>The default value for the attribute, as a string.</para>
-		/// </summary>
 		public override string defaultValueAsString
 		{
 			get
@@ -33,16 +21,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieves the value of this attribute from the attribute bag. Returns it if it is found, otherwise return defaultValue.</para>
-		/// </summary>
-		/// <param name="bag">The bag of attributes.</param>
-		/// <returns>
-		///   <para>The value of the attribute.</para>
-		/// </returns>
+		[Obsolete("Pass a creation context to the method.")]
 		public Color GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyColor(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public Color GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<Color>(bag, cc, new Func<string, Color, Color>(UxmlColorAttributeDescription.ConvertValueToColor), this.defaultValue);
+		}
+
+		private static Color ConvertValueToColor(string v, Color defaultValue)
+		{
+			Color color;
+			Color color2;
+			if (v == null || !ColorUtility.TryParseHtmlString(v, out color))
+			{
+				color2 = defaultValue;
+			}
+			else
+			{
+				color2 = color;
+			}
+			return color2;
 		}
 	}
 }

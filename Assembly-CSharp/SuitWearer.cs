@@ -26,13 +26,12 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 			this.navigator = master.GetComponent<Navigator>();
 			this.navigator.SetFlags(PathFinder.PotentialPath.Flags.PerformSuitChecks);
 			this.prefabInstanceID = this.navigator.GetComponent<KPrefabID>().InstanceID;
-			KBatchedAnimController component = master.GetComponent<KBatchedAnimController>();
-			component.SetSymbolVisiblity("snapto_neck", false);
+			master.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("snapto_neck", false);
 		}
 
 		public void OnPathAdvanced(object data)
 		{
-			if (this.navigator.CurrentNavType == NavType.Hover && (byte)(this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) == 0)
+			if (this.navigator.CurrentNavType == NavType.Hover && (this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) <= PathFinder.PotentialPath.Flags.None)
 			{
 				this.navigator.SetCurrentNavType(NavType.Floor);
 			}
@@ -47,8 +46,8 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 			{
 				return;
 			}
-			bool flag = (byte)(this.navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
-			bool flag2 = (byte)(this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) != 0;
+			bool flag = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
+			bool flag2 = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
 			for (int i = 0; i < path.nodes.Count - 1; i++)
 			{
 				int cell = path.nodes[i].cell;
@@ -56,8 +55,8 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 				PathFinder.PotentialPath.Flags flags2 = PathFinder.PotentialPath.Flags.None;
 				if (Grid.TryGetSuitMarkerFlags(cell, out flags, out flags2))
 				{
-					bool flag3 = (byte)(flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
-					bool flag4 = (byte)(flags2 & PathFinder.PotentialPath.Flags.HasJetPack) != 0;
+					bool flag3 = (flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
+					bool flag4 = (flags2 & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
 					bool flag5 = flag2 || flag;
 					bool flag6 = flag3 == flag && flag4 == flag2;
 					bool flag7 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);

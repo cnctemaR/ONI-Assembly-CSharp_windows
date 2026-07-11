@@ -48,16 +48,14 @@ public class LiquidConduitPreferentialFlowConfig : IBuildingConfig
 
 	private void AttachPort(GameObject go)
 	{
-		ConduitSecondaryInput conduitSecondaryInput = go.AddComponent<ConduitSecondaryInput>();
-		conduitSecondaryInput.portInfo = this.secondaryPort;
+		go.AddComponent<ConduitSecondaryInput>().portInfo = this.secondaryPort;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
-		ConduitPreferentialFlow conduitPreferentialFlow = go.AddOrGet<ConduitPreferentialFlow>();
-		conduitPreferentialFlow.portInfo = this.secondaryPort;
+		go.AddOrGet<ConduitPreferentialFlow>().portInfo = this.secondaryPort;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

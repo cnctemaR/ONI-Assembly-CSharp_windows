@@ -70,7 +70,7 @@ namespace ProcGenGame
 						tc.LogInfo("\t\tpossible", string.Concat(new object[] { mobReference.type, " mps: ", mobPossibleSpawnPoints.Count, " ps:" }), (float)availableSpawnCellsFeature.Count);
 						int num2 = Mathf.RoundToInt(mobReference.count.GetRandomValueWithinRange(rnd));
 						tc.LogInfo("\t\tcount", mobReference.type, (float)num2);
-						Tag tag2 = ((mob.prefabName != null) ? new Tag(mob.prefabName) : new Tag(mobReference.type));
+						Tag tag2 = ((mob.prefabName == null) ? new Tag(mobReference.type) : new Tag(mob.prefabName));
 						MobSpawning.SpawnCountMobs(mob, tag2, num2, mobPossibleSpawnPoints, tc, ref dictionary, ref hashSet);
 					}
 				}
@@ -101,7 +101,7 @@ namespace ProcGenGame
 				tc.LogInfo("PlaceBiomeAmbientMobs", "No biome MOBS", (float)node.node.Id);
 				return null;
 			}
-			List<int> list2 = ((!node.tags.Contains(WorldGenTags.PreventAmbientMobsInFeature)) ? tc.GetAvailableSpawnCellsAll() : tc.GetAvailableSpawnCellsBiome());
+			List<int> list2 = (node.tags.Contains(WorldGenTags.PreventAmbientMobsInFeature) ? tc.GetAvailableSpawnCellsBiome() : tc.GetAvailableSpawnCellsAll());
 			tc.LogInfo("PlaceBiomAmbientMobs", "possibleSpawnPoints", (float)list2.Count);
 			for (int i = list2.Count - 1; i > 0; i--)
 			{
@@ -155,10 +155,10 @@ namespace ProcGenGame
 							}
 							num2 = 1f;
 						}
-						tc.LogInfo("\t\tdensity:", string.Empty, num2);
+						tc.LogInfo("\t\tdensity:", "", num2);
 						int num3 = Mathf.RoundToInt((float)mobPossibleSpawnPoints.Count * num2);
 						tc.LogInfo("\t\tcount", list[j].ToString(), (float)num3);
-						Tag tag2 = ((mob.prefabName != null) ? new Tag(mob.prefabName) : list[j]);
+						Tag tag2 = ((mob.prefabName == null) ? list[j] : new Tag(mob.prefabName));
 						MobSpawning.SpawnCountMobs(mob, tag2, num3, mobPossibleSpawnPoints, tc, ref dictionary, ref hashSet);
 					}
 				}
@@ -195,7 +195,7 @@ namespace ProcGenGame
 
 		public static int MobWidthOffset(int occupiedCell, int widthIterator)
 		{
-			return Grid.OffsetCell(occupiedCell, (widthIterator % 2 != 0) ? (widthIterator / 2 + widthIterator % 2) : (-(widthIterator / 2)), 0);
+			return Grid.OffsetCell(occupiedCell, (widthIterator % 2 == 0) ? (-(widthIterator / 2)) : (widthIterator / 2 + widthIterator % 2), 0);
 		}
 
 		private static bool IsSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, ref HashSet<int> alreadyOccupiedCells)
@@ -255,6 +255,7 @@ namespace ProcGenGame
 		{
 			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0.8f, WorldGenProgressStages.Stages.DetectNaturalCavities);
 			HashSet<int> invalidCells = new HashSet<int>();
+			Func<int, bool> <>9__0;
 			for (int i = 0; i < terrainCells.Count; i++)
 			{
 				TerrainCell terrainCell = terrainCells[i];
@@ -268,7 +269,13 @@ namespace ProcGenGame
 					int num2 = allCells[j];
 					if (!Grid.Solid[num2] && !invalidCells.Contains(num2))
 					{
-						HashSet<int> hashSet = GameUtil.FloodCollectCells(num2, (int checkCell) => !invalidCells.Contains(checkCell) && !Grid.Solid[checkCell], 300, invalidCells, true);
+						int num3 = num2;
+						Func<int, bool> func;
+						if ((func = <>9__0) == null)
+						{
+							func = (<>9__0 = (int checkCell) => !invalidCells.Contains(checkCell) && !Grid.Solid[checkCell]);
+						}
+						HashSet<int> hashSet = GameUtil.FloodCollectCells(num3, func, 300, invalidCells, true);
 						if (hashSet != null && hashSet.Count > 0)
 						{
 							MobSpawning.NaturalCavities[terrainCell].Add(hashSet);

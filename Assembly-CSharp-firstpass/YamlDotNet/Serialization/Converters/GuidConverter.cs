@@ -25,7 +25,7 @@ namespace YamlDotNet.Serialization.Converters
 
 		public void WriteYaml(IEmitter emitter, object value, Type type)
 		{
-			emitter.Emit(new Scalar(null, null, ((Guid)value).ToString("D"), (!this.jsonCompatible) ? ScalarStyle.Any : ScalarStyle.DoubleQuoted, true, false));
+			emitter.Emit(new Scalar(null, null, ((Guid)value).ToString("D"), this.jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
 		}
 
 		private readonly bool jsonCompatible;

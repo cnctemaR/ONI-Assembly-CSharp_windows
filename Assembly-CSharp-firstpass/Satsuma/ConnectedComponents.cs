@@ -5,6 +5,12 @@ namespace Satsuma
 {
 	public sealed class ConnectedComponents
 	{
+		public IGraph Graph { get; private set; }
+
+		public int Count { get; private set; }
+
+		public List<HashSet<Node>> Components { get; private set; }
+
 		public ConnectedComponents(IGraph graph, ConnectedComponents.Flags flags = ConnectedComponents.Flags.None)
 		{
 			this.Graph = graph;
@@ -17,12 +23,6 @@ namespace Satsuma
 				Parent = this
 			}.Run(graph, null);
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public int Count { get; private set; }
-
-		public List<HashSet<Node>> Components { get; private set; }
 
 		[Flags]
 		public enum Flags
@@ -42,7 +42,9 @@ namespace Satsuma
 			{
 				if (arc == Arc.Invalid)
 				{
-					this.Parent.Count++;
+					ConnectedComponents parent = this.Parent;
+					int count = parent.Count;
+					parent.Count = count + 1;
 					if (this.Parent.Components != null)
 					{
 						this.Parent.Components.Add(new HashSet<Node> { node });

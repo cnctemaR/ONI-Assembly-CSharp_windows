@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System
 {
@@ -16,6 +17,17 @@ namespace System
 			}
 			this._platform = platform;
 			this._version = version;
+			if (platform == PlatformID.Win32NT && version.Revision != 0)
+			{
+				this._servicePack = "Service Pack " + (version.Revision >> 16);
+			}
+		}
+
+		private OperatingSystem(SerializationInfo information, StreamingContext context)
+		{
+			this._platform = (PlatformID)information.GetValue("_platform", typeof(PlatformID));
+			this._version = (Version)information.GetValue("_version", typeof(Version));
+			this._servicePack = information.GetString("_servicePack");
 		}
 
 		public PlatformID Platform
@@ -55,6 +67,7 @@ namespace System
 			return new OperatingSystem(this._platform, this._version);
 		}
 
+		[SecurityCritical]
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("_platform", this._platform);
@@ -70,35 +83,40 @@ namespace System
 			{
 			case 0:
 				text = "Microsoft Win32S";
-				goto IL_0096;
+				goto IL_0076;
 			case 1:
 				text = "Microsoft Windows 98";
-				goto IL_0096;
+				goto IL_0076;
 			case 2:
 				text = "Microsoft Windows NT";
-				goto IL_0096;
+				goto IL_0076;
 			case 3:
 				text = "Microsoft Windows CE";
-				goto IL_0096;
+				goto IL_0076;
 			case 4:
 				break;
 			case 5:
 				text = "XBox";
-				goto IL_0096;
+				goto IL_0076;
 			case 6:
 				text = "OSX";
-				goto IL_0096;
+				goto IL_0076;
 			default:
 				if (platform != 128)
 				{
 					text = Locale.GetText("<unknown>");
-					goto IL_0096;
+					goto IL_0076;
 				}
 				break;
 			}
 			text = "Unix";
-			IL_0096:
-			return text + " " + this._version.ToString();
+			IL_0076:
+			string text2 = "";
+			if (this.ServicePack != string.Empty)
+			{
+				text2 = " " + this.ServicePack;
+			}
+			return text + " " + this._version.ToString() + text2;
 		}
 
 		private PlatformID _platform;

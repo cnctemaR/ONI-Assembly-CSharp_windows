@@ -4,9 +4,14 @@ using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
-	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
+	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
 	public sealed class AesCryptoServiceProvider : Aes
 	{
+		public AesCryptoServiceProvider()
+		{
+			this.FeedbackSizeValue = 8;
+		}
+
 		public override void GenerateIV()
 		{
 			this.IVValue = KeyBuilder.IV(this.BlockSizeValue >> 3);
@@ -17,14 +22,22 @@ namespace System.Security.Cryptography
 			this.KeyValue = KeyBuilder.Key(this.KeySizeValue >> 3);
 		}
 
-		public override ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV)
+		public override ICryptoTransform CreateDecryptor(byte[] key, byte[] iv)
 		{
-			return new AesTransform(this, false, rgbKey, rgbIV);
+			if (this.Mode == CipherMode.CFB && this.FeedbackSize > 64)
+			{
+				throw new CryptographicException("CFB with Feedbaack > 64 bits");
+			}
+			return new AesTransform(this, false, key, iv);
 		}
 
-		public override ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV)
+		public override ICryptoTransform CreateEncryptor(byte[] key, byte[] iv)
 		{
-			return new AesTransform(this, true, rgbKey, rgbIV);
+			if (this.Mode == CipherMode.CFB && this.FeedbackSize > 64)
+			{
+				throw new CryptographicException("CFB with Feedbaack > 64 bits");
+			}
+			return new AesTransform(this, true, key, iv);
 		}
 
 		public override byte[] IV
@@ -60,6 +73,46 @@ namespace System.Security.Cryptography
 			set
 			{
 				base.KeySize = value;
+			}
+		}
+
+		public override int FeedbackSize
+		{
+			get
+			{
+				return base.FeedbackSize;
+			}
+			set
+			{
+				base.FeedbackSize = value;
+			}
+		}
+
+		public override CipherMode Mode
+		{
+			get
+			{
+				return base.Mode;
+			}
+			set
+			{
+				if (value == CipherMode.CTS)
+				{
+					throw new CryptographicException("CTS is not supported");
+				}
+				base.Mode = value;
+			}
+		}
+
+		public override PaddingMode Padding
+		{
+			get
+			{
+				return base.Padding;
+			}
+			set
+			{
+				base.Padding = value;
 			}
 		}
 

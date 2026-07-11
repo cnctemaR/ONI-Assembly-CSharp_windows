@@ -2,14 +2,8 @@
 
 namespace Unity.Collections
 {
-	/// <summary>
-	///   <para>Static class for native leak detection settings.</para>
-	/// </summary>
 	public static class NativeLeakDetection
 	{
-		/// <summary>
-		///   <para>Set whether native memory leak detection should be enabled or disabled.</para>
-		/// </summary>
 		public static NativeLeakDetectionMode Mode
 		{
 			get

@@ -66,6 +66,7 @@ public class PriorityScreen : KScreen
 			if (play_sound)
 			{
 				b.toggle.soundPlayer.Play(0);
+				return;
 			}
 		}
 		else
@@ -91,8 +92,8 @@ public class PriorityScreen : KScreen
 		}
 		for (int i = 0; i < this.buttons_basic.Count; i++)
 		{
-			this.buttons_basic[i].priority = new PrioritySetting((!this.button_toggleHigh.isOn) ? PriorityScreen.PriorityClass.basic : PriorityScreen.PriorityClass.high, i + 1);
-			this.buttons_basic[i].tooltip.SetSimpleTooltip(string.Format((!this.button_toggleHigh.isOn) ? UI.PRIORITYSCREEN.BASIC : UI.PRIORITYSCREEN.HIGH, i + 1));
+			this.buttons_basic[i].priority = new PrioritySetting(this.button_toggleHigh.isOn ? PriorityScreen.PriorityClass.high : PriorityScreen.PriorityClass.basic, i + 1);
+			this.buttons_basic[i].tooltip.SetSimpleTooltip(string.Format(this.button_toggleHigh.isOn ? UI.PRIORITYSCREEN.HIGH : UI.PRIORITYSCREEN.BASIC, i + 1));
 			this.RefreshButton(this.buttons_basic[i], this.lastSelectedPriority, play_sound);
 		}
 		this.RefreshButton(this.button_emergency, this.lastSelectedPriority, play_sound);
@@ -115,7 +116,7 @@ public class PriorityScreen : KScreen
 			}
 			if (priority.priority_class >= PriorityScreen.PriorityClass.topPriority)
 			{
-				num = num;
+				num += 0f;
 			}
 			num += (float)priority.priority_value;
 			eventInstance.setParameterValue("priority", num);

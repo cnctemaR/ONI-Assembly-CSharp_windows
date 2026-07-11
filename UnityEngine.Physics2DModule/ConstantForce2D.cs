@@ -4,16 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Applies both linear and angular (torque) forces continuously to the rigidbody each physics update.</para>
-	/// </summary>
-	[NativeHeader("Modules/Physics2D/ConstantForce2D.h")]
 	[RequireComponent(typeof(Rigidbody2D))]
+	[NativeHeader("Modules/Physics2D/ConstantForce2D.h")]
 	public sealed class ConstantForce2D : PhysicsUpdateBehaviour2D
 	{
-		/// <summary>
-		///   <para>The linear force applied to the rigidbody each physics update.</para>
-		/// </summary>
 		public Vector2 force
 		{
 			get
@@ -28,9 +22,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The linear force, relative to the rigid-body coordinate system, applied each physics update.</para>
-		/// </summary>
 		public Vector2 relativeForce
 		{
 			get
@@ -45,9 +36,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The torque applied to the rigidbody each physics update.</para>
-		/// </summary>
 		public extern float torque
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

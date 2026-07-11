@@ -42,8 +42,7 @@ public class BuildingChoresPanel : TargetScreen
 
 	private void RefreshDetails()
 	{
-		List<Chore> chores = GlobalChoreProvider.Instance.chores;
-		foreach (Chore chore in chores)
+		foreach (Chore chore in GlobalChoreProvider.Instance.chores)
 		{
 			if (!chore.isNull && chore.gameObject == this.selectedTarget)
 			{
@@ -67,12 +66,12 @@ public class BuildingChoresPanel : TargetScreen
 		HierarchyReferences choreEntry = this.GetChoreEntry(GameUtil.GetChoreName(chore, null), chore.choreType, this.choreGroup.GetReference<RectTransform>("EntriesContainer"));
 		FetchChore fetchChore = chore as FetchChore;
 		ListPool<Chore.Precondition.Context, BuildingChoresPanel>.PooledList pooledList = ListPool<Chore.Precondition.Context, BuildingChoresPanel>.Allocate();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+		foreach (Component component in Components.LiveMinionIdentities.Items)
 		{
 			pooledList.Clear();
-			ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
+			ChoreConsumer component2 = component.GetComponent<ChoreConsumer>();
 			Chore.Precondition.Context context = default(Chore.Precondition.Context);
-			ChoreConsumer.PreconditionSnapshot lastPreconditionSnapshot = component.GetLastPreconditionSnapshot();
+			ChoreConsumer.PreconditionSnapshot lastPreconditionSnapshot = component2.GetLastPreconditionSnapshot();
 			if (lastPreconditionSnapshot.doFailedContextsNeedSorting)
 			{
 				lastPreconditionSnapshot.failedContexts.Sort();
@@ -84,7 +83,7 @@ public class BuildingChoresPanel : TargetScreen
 			int num2 = 0;
 			for (int i = pooledList.Count - 1; i >= 0; i--)
 			{
-				if (!(pooledList[i].chore.driver != null) || !(pooledList[i].chore.driver != component.choreDriver))
+				if (!(pooledList[i].chore.driver != null) || !(pooledList[i].chore.driver != component2.choreDriver))
 				{
 					bool flag = pooledList[i].IsPotentialSuccess();
 					if (flag)
@@ -94,7 +93,7 @@ public class BuildingChoresPanel : TargetScreen
 					FetchAreaChore fetchAreaChore = pooledList[i].chore as FetchAreaChore;
 					if (pooledList[i].chore == chore || (fetchChore != null && fetchAreaChore != null && fetchAreaChore.smi.SameDestination(fetchChore)))
 					{
-						num = ((!flag) ? int.MaxValue : num2);
+						num = (flag ? num2 : int.MaxValue);
 						context = pooledList[i];
 						break;
 					}
@@ -104,9 +103,9 @@ public class BuildingChoresPanel : TargetScreen
 			{
 				this.DupeEntryDatas.Add(new BuildingChoresPanel.DupeEntryData
 				{
-					consumer = component,
+					consumer = component2,
 					context = context,
-					personalPriority = component.GetPersonalPriority(chore.choreType),
+					personalPriority = component2.GetPersonalPriority(chore.choreType),
 					rank = num
 				});
 			}
@@ -138,7 +137,7 @@ public class BuildingChoresPanel : TargetScreen
 		hierarchyReferences.GetReference<LocText>("ChoreLabel").text = label;
 		hierarchyReferences.GetReference<LocText>("ChoreSubLabel").text = GameUtil.ChoreGroupsForChoreType(choreType);
 		Image reference = hierarchyReferences.GetReference<Image>("Icon");
-		if (choreType.groups.Length > 0)
+		if (choreType.groups.Length != 0)
 		{
 			Sprite sprite = Assets.GetSprite(choreType.groups[0].sprite);
 			reference.sprite = sprite;

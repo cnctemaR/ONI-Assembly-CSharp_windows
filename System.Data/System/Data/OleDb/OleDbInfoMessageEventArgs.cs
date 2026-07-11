@@ -1,53 +1,51 @@
 ﻿using System;
+using System.Data.Common;
 
 namespace System.Data.OleDb
 {
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbInfoMessageEventArgs : EventArgs
 	{
 		internal OleDbInfoMessageEventArgs()
 		{
+			throw ADP.OleDb();
 		}
 
 		public int ErrorCode
 		{
-			[MonoTODO]
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
 		public OleDbErrorCollection Errors
 		{
-			[MonoTODO]
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
 		public string Message
 		{
-			[MonoTODO]
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
 		public string Source
 		{
-			[MonoTODO]
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
-		[MonoTODO]
 		public override string ToString()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 	}
 }

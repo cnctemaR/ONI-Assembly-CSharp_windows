@@ -33,9 +33,9 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Filter
 			x *= this._frequency;
 			y *= this._frequency;
 			z *= this._frequency;
-			int num = ((x <= 0f) ? ((int)x - 1) : ((int)x));
-			int num2 = ((y <= 0f) ? ((int)y - 1) : ((int)y));
-			int num3 = ((z <= 0f) ? ((int)z - 1) : ((int)z));
+			int num = ((x > 0f) ? ((int)x) : ((int)x - 1));
+			int num2 = ((y > 0f) ? ((int)y) : ((int)y - 1));
+			int num3 = ((z > 0f) ? ((int)z) : ((int)z - 1));
 			float num4 = 2.1474836E+09f;
 			float num5 = 0f;
 			float num6 = 0f;

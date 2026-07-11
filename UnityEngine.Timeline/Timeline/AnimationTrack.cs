@@ -47,15 +47,27 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		[Obsolete("applyOffset is deprecated. Use trackOffset instead", true)]
 		public bool applyOffsets
 		{
 			get
 			{
-				return this.m_ApplyOffsets;
+				return false;
 			}
 			set
 			{
-				this.m_ApplyOffsets = value;
+			}
+		}
+
+		public TrackOffset trackOffset
+		{
+			get
+			{
+				return this.m_TrackOffset;
+			}
+			set
+			{
+				this.m_TrackOffset = value;
 			}
 		}
 
@@ -68,6 +80,18 @@ namespace UnityEngine.Timeline
 			set
 			{
 				this.m_MatchTargetFields = value & MatchTargetFieldConstants.All;
+			}
+		}
+
+		internal bool openClipRemoveOffset
+		{
+			get
+			{
+				return this.m_OpenClipRemoveOffset;
+			}
+			set
+			{
+				this.m_OpenClipRemoveOffset = value;
 			}
 		}
 
@@ -180,6 +204,18 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		internal bool infiniteClipApplyFootIK
+		{
+			get
+			{
+				return this.m_InfiniteClipApplyFootIK;
+			}
+			set
+			{
+				this.m_InfiniteClipApplyFootIK = value;
+			}
+		}
+
 		internal double openClipTimeOffset
 		{
 			get
@@ -255,7 +291,7 @@ namespace UnityEngine.Timeline
 		{
 		}
 
-		internal Playable CompileTrackPlayable(PlayableGraph graph, TrackAsset track, GameObject go, IntervalTree<RuntimeElement> tree)
+		private Playable CompileTrackPlayable(PlayableGraph graph, TrackAsset track, GameObject go, IntervalTree<RuntimeElement> tree, AppliedOffsetMode mode)
 		{
 			AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, track.clips.Length, false);
 			for (int i = 0; i < track.clips.Length; i++)
@@ -264,13 +300,10 @@ namespace UnityEngine.Timeline
 				PlayableAsset playableAsset = timelineClip.asset as PlayableAsset;
 				if (!(playableAsset == null))
 				{
-					if (timelineClip.recordable)
+					AnimationPlayableAsset animationPlayableAsset = playableAsset as AnimationPlayableAsset;
+					if (animationPlayableAsset != null)
 					{
-						AnimationPlayableAsset animationPlayableAsset = playableAsset as AnimationPlayableAsset;
-						if (animationPlayableAsset != null)
-						{
-							animationPlayableAsset.removeStartOffset = !timelineClip.recordable;
-						}
+						animationPlayableAsset.appliedOffsetMode = mode;
 					}
 					Playable playable = playableAsset.CreatePlayable(graph, go);
 					if (playable.IsValid<Playable>())
@@ -282,7 +315,7 @@ namespace UnityEngine.Timeline
 					}
 				}
 			}
-			return this.ApplyTrackOffset(graph, animationMixerPlayable);
+			return this.ApplyTrackOffset(graph, animationMixerPlayable, go, mode);
 		}
 
 		internal override Playable OnCreatePlayableGraph(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree)
@@ -296,21 +329,21 @@ namespace UnityEngine.Timeline
 			{
 				list.Add(this);
 			}
+			bool flag = this.AnimatesRootTransform();
 			foreach (TrackAsset trackAsset in base.GetChildTracks())
 			{
 				AnimationTrack animationTrack = trackAsset as AnimationTrack;
 				if (animationTrack != null && animationTrack.compilable)
 				{
+					flag |= animationTrack.AnimatesRootTransform();
 					list.Add(animationTrack);
 				}
 			}
-			AnimationMotionXToDeltaPlayable animationMotionXToDeltaPlayable = AnimationMotionXToDeltaPlayable.Create(graph);
+			AppliedOffsetMode offsetMode = this.GetOffsetMode(go, flag);
 			AnimationLayerMixerPlayable animationLayerMixerPlayable = AnimationTrack.CreateGroupMixer(graph, go, list.Count);
-			graph.Connect<AnimationLayerMixerPlayable, AnimationMotionXToDeltaPlayable>(animationLayerMixerPlayable, 0, animationMotionXToDeltaPlayable, 0);
-			animationMotionXToDeltaPlayable.SetInputWeight(0, 1f);
 			for (int i = 0; i < list.Count; i++)
 			{
-				Playable playable = ((!list[i].inClipMode) ? list[i].CreateInfiniteTrackPlayable(graph, go, tree) : this.CompileTrackPlayable(graph, list[i], go, tree));
+				Playable playable = ((!list[i].inClipMode) ? list[i].CreateInfiniteTrackPlayable(graph, go, tree, offsetMode) : this.CompileTrackPlayable(graph, list[i], go, tree, offsetMode));
 				graph.Connect<Playable, AnimationLayerMixerPlayable>(playable, 0, animationLayerMixerPlayable, i);
 				animationLayerMixerPlayable.SetInputWeight(i, (float)((!list[i].inClipMode) ? 1 : 0));
 				if (list[i].applyAvatarMask && list[i].avatarMask != null)
@@ -318,7 +351,85 @@ namespace UnityEngine.Timeline
 					animationLayerMixerPlayable.SetLayerMaskFromAvatarMask((uint)i, list[i].avatarMask);
 				}
 			}
-			return animationMotionXToDeltaPlayable;
+			Playable playable2 = animationLayerMixerPlayable;
+			Playable playable3;
+			if (!this.RequiresMotionXPlayable(offsetMode, go))
+			{
+				playable3 = playable2;
+			}
+			else
+			{
+				AnimationMotionXToDeltaPlayable animationMotionXToDeltaPlayable = AnimationMotionXToDeltaPlayable.Create(graph);
+				graph.Connect<Playable, AnimationMotionXToDeltaPlayable>(playable2, 0, animationMotionXToDeltaPlayable, 0);
+				animationMotionXToDeltaPlayable.SetInputWeight(0, 1f);
+				animationMotionXToDeltaPlayable.SetAbsoluteMotion(AnimationTrack.UsesAbsoluteMotion(offsetMode));
+				playable3 = animationMotionXToDeltaPlayable;
+			}
+			return playable3;
+		}
+
+		private bool RequiresMotionXPlayable(AppliedOffsetMode mode, GameObject gameObject)
+		{
+			bool flag;
+			if (mode == AppliedOffsetMode.NoRootTransform)
+			{
+				flag = false;
+			}
+			else if (mode == AppliedOffsetMode.SceneOffsetLegacy)
+			{
+				Animator binding = this.GetBinding((!(gameObject != null)) ? null : gameObject.GetComponent<PlayableDirector>());
+				flag = binding != null && binding.hasRootMotion;
+			}
+			else
+			{
+				flag = true;
+			}
+			return flag;
+		}
+
+		private static bool UsesAbsoluteMotion(AppliedOffsetMode mode)
+		{
+			return mode != AppliedOffsetMode.SceneOffset && mode != AppliedOffsetMode.SceneOffsetLegacy;
+		}
+
+		private bool HasController(GameObject gameObject)
+		{
+			Animator binding = this.GetBinding((!(gameObject != null)) ? null : gameObject.GetComponent<PlayableDirector>());
+			return binding != null && binding.runtimeAnimatorController != null;
+		}
+
+		internal Animator GetBinding(PlayableDirector director)
+		{
+			Animator animator;
+			if (director == null)
+			{
+				animator = null;
+			}
+			else
+			{
+				Object @object = this;
+				if (base.isSubTrack)
+				{
+					@object = base.parent;
+				}
+				Object object2 = null;
+				if (director != null)
+				{
+					object2 = director.GetGenericBinding(@object);
+				}
+				Animator animator2 = null;
+				if (object2 != null)
+				{
+					animator2 = object2 as Animator;
+					GameObject gameObject = object2 as GameObject;
+					if (animator2 == null && gameObject != null)
+					{
+						animator2 = gameObject.GetComponent<Animator>();
+					}
+				}
+				animator = animator2;
+			}
+			return animator;
 		}
 
 		private static AnimationLayerMixerPlayable CreateGroupMixer(PlayableGraph graph, GameObject go, int inputCount)
@@ -326,7 +437,7 @@ namespace UnityEngine.Timeline
 			return AnimationLayerMixerPlayable.Create(graph, inputCount);
 		}
 
-		private Playable CreateInfiniteTrackPlayable(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree)
+		private Playable CreateInfiniteTrackPlayable(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree, AppliedOffsetMode mode)
 		{
 			Playable playable;
 			if (base.animClip == null)
@@ -336,28 +447,30 @@ namespace UnityEngine.Timeline
 			else
 			{
 				AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, 1, false);
-				Playable playable2 = AnimationPlayableAsset.CreatePlayable(graph, base.animClip, this.m_OpenClipOffsetPosition, this.m_OpenClipOffsetEulerAngles, false);
+				Playable playable2 = AnimationPlayableAsset.CreatePlayable(graph, base.animClip, this.m_OpenClipOffsetPosition, this.m_OpenClipOffsetEulerAngles, false, mode, this.infiniteClipApplyFootIK);
 				if (playable2.IsValid<Playable>())
 				{
 					tree.Add(new InfiniteRuntimeClip(playable2));
 					graph.Connect<Playable, AnimationMixerPlayable>(playable2, 0, animationMixerPlayable, 0);
 					animationMixerPlayable.SetInputWeight(0, 1f);
 				}
-				playable = this.ApplyTrackOffset(graph, animationMixerPlayable);
+				playable = this.ApplyTrackOffset(graph, animationMixerPlayable, go, mode);
 			}
 			return playable;
 		}
 
-		private Playable ApplyTrackOffset(PlayableGraph graph, Playable root)
+		private Playable ApplyTrackOffset(PlayableGraph graph, Playable root, GameObject go, AppliedOffsetMode mode)
 		{
 			Playable playable;
-			if (!this.m_ApplyOffsets)
+			if (mode == AppliedOffsetMode.SceneOffsetLegacy || mode == AppliedOffsetMode.SceneOffset || mode == AppliedOffsetMode.NoRootTransform || !this.AnimatesRootTransform())
 			{
 				playable = root;
 			}
 			else
 			{
-				AnimationOffsetPlayable animationOffsetPlayable = AnimationOffsetPlayable.Create(graph, this.position, this.rotation, 1);
+				Vector3 position = this.position;
+				Quaternion rotation = this.rotation;
+				AnimationOffsetPlayable animationOffsetPlayable = AnimationOffsetPlayable.Create(graph, position, rotation, 1);
 				graph.Connect<Playable, AnimationOffsetPlayable>(root, 0, animationOffsetPlayable, 0);
 				animationOffsetPlayable.SetInputWeight(0, 1f);
 				playable = animationOffsetPlayable;
@@ -420,7 +533,85 @@ namespace UnityEngine.Timeline
 
 		public override void GatherProperties(PlayableDirector director, IPropertyCollector driver)
 		{
-			base.GatherProperties(director, driver);
+		}
+
+		private void GetAnimationClips(List<AnimationClip> animClips)
+		{
+			foreach (TimelineClip timelineClip in base.clips)
+			{
+				AnimationPlayableAsset animationPlayableAsset = timelineClip.asset as AnimationPlayableAsset;
+				if (animationPlayableAsset != null && animationPlayableAsset.clip != null)
+				{
+					animClips.Add(animationPlayableAsset.clip);
+				}
+			}
+			if (base.animClip != null)
+			{
+				animClips.Add(base.animClip);
+			}
+			foreach (TrackAsset trackAsset in base.GetChildTracks())
+			{
+				AnimationTrack animationTrack = trackAsset as AnimationTrack;
+				if (animationTrack != null)
+				{
+					animationTrack.GetAnimationClips(animClips);
+				}
+			}
+		}
+
+		private AppliedOffsetMode GetOffsetMode(GameObject go, bool animatesRootTransform)
+		{
+			AppliedOffsetMode appliedOffsetMode;
+			if (!animatesRootTransform)
+			{
+				appliedOffsetMode = AppliedOffsetMode.NoRootTransform;
+			}
+			else if (this.m_TrackOffset == TrackOffset.ApplyTransformOffsets)
+			{
+				appliedOffsetMode = AppliedOffsetMode.TransformOffset;
+			}
+			else if (this.m_TrackOffset == TrackOffset.ApplySceneOffsets)
+			{
+				appliedOffsetMode = ((!Application.isPlaying) ? AppliedOffsetMode.SceneOffsetEditor : AppliedOffsetMode.SceneOffset);
+			}
+			else if (this.HasController(go))
+			{
+				if (!Application.isPlaying)
+				{
+					appliedOffsetMode = AppliedOffsetMode.SceneOffsetLegacyEditor;
+				}
+				else
+				{
+					appliedOffsetMode = AppliedOffsetMode.SceneOffsetLegacy;
+				}
+			}
+			else
+			{
+				appliedOffsetMode = AppliedOffsetMode.TransformOffsetLegacy;
+			}
+			return appliedOffsetMode;
+		}
+
+		internal bool AnimatesRootTransform()
+		{
+			bool flag;
+			if (AnimationPlayableAsset.HasRootTransforms(base.animClip))
+			{
+				flag = true;
+			}
+			else
+			{
+				foreach (TimelineClip timelineClip in base.GetClips())
+				{
+					AnimationPlayableAsset animationPlayableAsset = timelineClip.asset as AnimationPlayableAsset;
+					if (animationPlayableAsset != null && animationPlayableAsset.hasRootTransforms)
+					{
+						return true;
+					}
+				}
+				flag = false;
+			}
+			return flag;
 		}
 
 		protected internal override void OnUpgradeFromVersion(int oldVersion)
@@ -428,6 +619,10 @@ namespace UnityEngine.Timeline
 			if (oldVersion < 1)
 			{
 				AnimationTrack.AnimationTrackUpgrade.ConvertRotationsToEuler(this);
+			}
+			if (oldVersion < 2)
+			{
+				AnimationTrack.AnimationTrackUpgrade.ConvertRootMotion(this);
 			}
 		}
 
@@ -447,6 +642,12 @@ namespace UnityEngine.Timeline
 		private double m_OpenClipTimeOffset;
 
 		[SerializeField]
+		private bool m_OpenClipRemoveOffset;
+
+		[SerializeField]
+		private bool m_InfiniteClipApplyFootIK = true;
+
+		[SerializeField]
 		private MatchTargetFields m_MatchTargetFields = MatchTargetFieldConstants.All;
 
 		[SerializeField]
@@ -456,13 +657,13 @@ namespace UnityEngine.Timeline
 		private Vector3 m_EulerAngles = Vector3.zero;
 
 		[SerializeField]
-		private bool m_ApplyOffsets;
-
-		[SerializeField]
 		private AvatarMask m_AvatarMask;
 
 		[SerializeField]
 		private bool m_ApplyAvatarMask = true;
+
+		[SerializeField]
+		private TrackOffset m_TrackOffset = TrackOffset.ApplyTransformOffsets;
 
 		[SerializeField]
 		[Obsolete("Use m_OpenClipOffsetEuler Instead", false)]
@@ -474,12 +675,27 @@ namespace UnityEngine.Timeline
 		[HideInInspector]
 		private Quaternion m_Rotation = Quaternion.identity;
 
+		[SerializeField]
+		[Obsolete("Use m_RootTransformOffsetMode", false)]
+		[HideInInspector]
+		private bool m_ApplyOffsets;
+
 		private static class AnimationTrackUpgrade
 		{
 			public static void ConvertRotationsToEuler(AnimationTrack track)
 			{
 				track.m_EulerAngles = track.m_Rotation.eulerAngles;
 				track.m_OpenClipOffsetEulerAngles = track.m_OpenClipOffsetRotation.eulerAngles;
+			}
+
+			public static void ConvertRootMotion(AnimationTrack track)
+			{
+				track.m_TrackOffset = TrackOffset.Auto;
+				if (!track.m_ApplyOffsets)
+				{
+					track.m_Position = Vector3.zero;
+					track.m_EulerAngles = Vector3.zero;
+				}
 			}
 		}
 	}

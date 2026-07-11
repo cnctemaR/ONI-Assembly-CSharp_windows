@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Stores lightmaps of the scene.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Graphics/LightmapSettings.h")]
 	[StaticAccessor("GetLightmapSettings()")]
 	public sealed class LightmapSettings : Object
@@ -15,9 +12,6 @@ namespace UnityEngine
 		{
 		}
 
-		/// <summary>
-		///   <para>Lightmap array.</para>
-		/// </summary>
 		public static extern LightmapData[] lightmaps
 		{
 			[FreeFunction]
@@ -28,9 +22,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>NonDirectional or CombinedDirectional Specular lightmaps rendering mode.</para>
-		/// </summary>
 		public static extern LightmapsMode lightmapsMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -40,9 +31,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Holds all data needed by the light probes.</para>
-		/// </summary>
 		public static extern LightProbes lightProbes
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

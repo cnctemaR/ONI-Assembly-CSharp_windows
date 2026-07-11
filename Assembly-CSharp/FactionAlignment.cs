@@ -37,11 +37,9 @@ public class FactionAlignment : KMonoBehaviour
 		if (active)
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
+			return;
 		}
-		else
-		{
-			FactionManager.Instance.GetFaction(this.Alignment).Members.Remove(this);
-		}
+		FactionManager.Instance.GetFaction(this.Alignment).Members.Remove(this);
 	}
 
 	public bool IsAlignmentActive()
@@ -69,11 +67,9 @@ public class FactionAlignment : KMonoBehaviour
 		if (this.targeted)
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderAttack, null);
+			return;
 		}
-		else
-		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderAttack, false);
-		}
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderAttack, false);
 	}
 
 	public void SwitchAlignment(FactionManager.FactionID newAlignment)
@@ -100,31 +96,14 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (!this.targeted)
+		KIconButtonMenu.ButtonInfo buttonInfo = ((!this.targeted) ? new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.ATTACK.NAME, delegate
 		{
-			string text = "action_attack";
-			string text2 = UI.USERMENUACTIONS.ATTACK.NAME;
-			global::System.Action action = delegate
-			{
-				this.SetPlayerTargeted(true);
-			};
-			string text3 = UI.USERMENUACTIONS.ATTACK.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
+			this.SetPlayerTargeted(true);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.ATTACK.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
 		{
-			string text3 = "action_attack";
-			string text2 = UI.USERMENUACTIONS.CANCELATTACK.NAME;
-			global::System.Action action = delegate
-			{
-				this.SetPlayerTargeted(false);
-			};
-			string text = UI.USERMENUACTIONS.CANCELATTACK.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+			this.SetPlayerTargeted(false);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELATTACK.TOOLTIP, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	[Serialize]

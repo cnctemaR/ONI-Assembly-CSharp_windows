@@ -16,9 +16,8 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
 		this.occupyingObjectRelativePosition = new Vector3(0.5f, 1f, -1f);
 		this.synchronizeAnims = false;
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.SetSymbolVisiblity("egg_target", false);
-		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
+		base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("egg_target", false);
+		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 	}
 
 	protected override void OnSpawn()
@@ -108,12 +107,11 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	protected override void PositionOccupyingObject()
 	{
 		base.PositionOccupyingObject();
-		KBatchedAnimController component = base.occupyingObject.GetComponent<KBatchedAnimController>();
-		component.SetSceneLayer(Grid.SceneLayer.BuildingUse);
-		KSelectable component2 = base.occupyingObject.GetComponent<KSelectable>();
-		if (component2 != null)
+		base.occupyingObject.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.BuildingUse);
+		KSelectable component = base.occupyingObject.GetComponent<KSelectable>();
+		if (component != null)
 		{
-			component2.IsSelectable = true;
+			component.IsSelectable = true;
 		}
 	}
 
@@ -131,8 +129,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		float num = 0f;
 		if (base.occupyingObject)
 		{
-			Amounts amounts = base.occupyingObject.GetAmounts();
-			AmountInstance amountInstance = amounts.Get(Db.Get().Amounts.Incubation);
+			AmountInstance amountInstance = base.occupyingObject.GetAmounts().Get(Db.Get().Amounts.Incubation);
 			if (amountInstance != null)
 			{
 				num = amountInstance.value / amountInstance.GetMax();
@@ -174,6 +171,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 			if (this.chore == null)
 			{
 				this.chore = new WorkChore<EggIncubatorWorkable>(Db.Get().ChoreTypes.EggSing, this.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+				return;
 			}
 		}
 		else if (this.chore != null)

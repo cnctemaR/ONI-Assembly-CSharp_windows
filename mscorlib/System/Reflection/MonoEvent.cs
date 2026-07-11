@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[Serializable]
-	internal sealed class MonoEvent : EventInfo, ISerializable
+	[StructLayout(LayoutKind.Sequential)]
+	internal sealed class MonoEvent : RuntimeEventInfo
 	{
 		public override EventAttributes Attributes
 		{
@@ -52,9 +54,10 @@ namespace System.Reflection
 				return eventInfo.other_methods;
 			}
 			int num = 0;
-			foreach (MethodInfo methodInfo in eventInfo.other_methods)
+			MethodInfo[] array = eventInfo.other_methods;
+			for (int i = 0; i < array.Length; i++)
 			{
-				if (methodInfo.IsPublic)
+				if (array[i].IsPublic)
 				{
 					num++;
 				}
@@ -63,16 +66,16 @@ namespace System.Reflection
 			{
 				return eventInfo.other_methods;
 			}
-			MethodInfo[] array = new MethodInfo[num];
+			MethodInfo[] array2 = new MethodInfo[num];
 			num = 0;
-			foreach (MethodInfo methodInfo2 in eventInfo.other_methods)
+			foreach (MethodInfo methodInfo in eventInfo.other_methods)
 			{
-				if (methodInfo2.IsPublic)
+				if (methodInfo.IsPublic)
 				{
-					array[num++] = methodInfo2;
+					array2[num++] = methodInfo;
 				}
 			}
-			return array;
+			return array2;
 		}
 
 		public override Type DeclaringType
@@ -119,9 +122,9 @@ namespace System.Reflection
 			return MonoCustomAttrs.GetCustomAttributes(this, attributeType, inherit);
 		}
 
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		public override IList<CustomAttributeData> GetCustomAttributesData()
 		{
-			MemberInfoSerializationHolder.Serialize(info, this.Name, this.ReflectedType, this.ToString(), MemberTypes.Event);
+			return CustomAttributeData.GetCustomAttributes(this);
 		}
 
 		private IntPtr klass;

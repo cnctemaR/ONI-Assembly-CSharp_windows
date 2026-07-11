@@ -11,8 +11,7 @@ public class MinionBrain : Brain
 			return false;
 		}
 		GameObject gameObject = Grid.Objects[cell, 0];
-		bool flag = gameObject != null && base.gameObject != gameObject && !gameObject.GetComponent<Navigator>().IsMoving();
-		return !flag;
+		return !(gameObject != null) || !(base.gameObject != gameObject) || gameObject.GetComponent<Navigator>().IsMoving();
 	}
 
 	protected override void OnPrefabInit()
@@ -26,8 +25,7 @@ public class MinionBrain : Brain
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Storage component = base.GetComponent<Storage>();
-		foreach (GameObject gameObject in component.items)
+		foreach (GameObject gameObject in base.GetComponent<Storage>().items)
 		{
 			this.AddAnimTracker(gameObject);
 		}
@@ -52,7 +50,7 @@ public class MinionBrain : Brain
 		{
 			return;
 		}
-		if (component.AnimFiles != null && component.AnimFiles.Length > 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
+		if (component.AnimFiles != null && component.AnimFiles.Length != 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
 		{
 			KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
 			kbatchedAnimTracker.useTargetPoint = false;
@@ -81,12 +79,10 @@ public class MinionBrain : Brain
 		if (!Game.Instance.savedInfo.discoveredSurface)
 		{
 			int num = Grid.PosToCell(base.gameObject);
-			SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num);
-			if (subWorldZoneType == SubWorld.ZoneType.Space)
+			if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num) == SubWorld.ZoneType.Space)
 			{
 				Game.Instance.savedInfo.discoveredSurface = true;
-				Vector3 position = base.gameObject.transform.GetPosition();
-				DiscoveredSpaceMessage discoveredSpaceMessage = new DiscoveredSpaceMessage(position);
+				DiscoveredSpaceMessage discoveredSpaceMessage = new DiscoveredSpaceMessage(base.gameObject.transform.GetPosition());
 				Messenger.Instance.QueueMessage(discoveredSpaceMessage);
 				Game.Instance.Trigger(-818188514, base.gameObject);
 			}
@@ -94,8 +90,7 @@ public class MinionBrain : Brain
 		if (!Game.Instance.savedInfo.discoveredOilField)
 		{
 			int num2 = Grid.PosToCell(base.gameObject);
-			SubWorld.ZoneType subWorldZoneType2 = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num2);
-			if (subWorldZoneType2 == SubWorld.ZoneType.OilField)
+			if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num2) == SubWorld.ZoneType.OilField)
 			{
 				Game.Instance.savedInfo.discoveredOilField = true;
 			}

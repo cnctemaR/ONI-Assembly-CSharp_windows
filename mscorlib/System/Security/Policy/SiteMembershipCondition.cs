@@ -7,7 +7,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class SiteMembershipCondition : ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition, IMembershipCondition
+	public sealed class SiteMembershipCondition : IMembershipCondition, ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition
 	{
 		internal SiteMembershipCondition()
 		{
@@ -79,16 +79,7 @@ namespace System.Security.Policy
 
 		public override bool Equals(object o)
 		{
-			if (o == null)
-			{
-				return false;
-			}
-			if (o is SiteMembershipCondition)
-			{
-				Site site = new Site((o as SiteMembershipCondition)._site);
-				return site.Equals(new Site(this._site));
-			}
-			return false;
+			return o != null && o is SiteMembershipCondition && new Site((o as SiteMembershipCondition)._site).Equals(new Site(this._site));
 		}
 
 		public void FromXml(SecurityElement e)

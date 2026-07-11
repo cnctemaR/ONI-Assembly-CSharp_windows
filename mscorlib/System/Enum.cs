@@ -1,112 +1,304 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
+using System.Text;
 
 namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public abstract class Enum : ValueType, IFormattable, IConvertible, IComparable
+	public abstract class Enum : ValueType, IComparable, IFormattable, IConvertible
 	{
-		bool IConvertible.ToBoolean(IFormatProvider provider)
+		[SecuritySafeCritical]
+		private static Enum.ValuesAndNames GetCachedValuesAndNames(RuntimeType enumType, bool getNames)
 		{
-			return Convert.ToBoolean(this.Value, provider);
-		}
-
-		byte IConvertible.ToByte(IFormatProvider provider)
-		{
-			return Convert.ToByte(this.Value, provider);
-		}
-
-		char IConvertible.ToChar(IFormatProvider provider)
-		{
-			return Convert.ToChar(this.Value, provider);
-		}
-
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
-		{
-			return Convert.ToDateTime(this.Value, provider);
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			return Convert.ToDecimal(this.Value, provider);
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			return Convert.ToDouble(this.Value, provider);
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			return Convert.ToInt16(this.Value, provider);
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			return Convert.ToInt32(this.Value, provider);
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return Convert.ToInt64(this.Value, provider);
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			return Convert.ToSByte(this.Value, provider);
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			return Convert.ToSingle(this.Value, provider);
-		}
-
-		object IConvertible.ToType(Type targetType, IFormatProvider provider)
-		{
-			if (targetType == null)
+			Enum.ValuesAndNames valuesAndNames = enumType.GenericCache as Enum.ValuesAndNames;
+			if (valuesAndNames == null || (getNames && valuesAndNames.Names == null))
 			{
-				throw new ArgumentNullException("targetType");
+				ulong[] array = null;
+				string[] array2 = null;
+				if (!Enum.GetEnumValuesAndNames(enumType, out array, out array2))
+				{
+					Array.Sort<ulong, string>(array, array2, Comparer<ulong>.Default);
+				}
+				valuesAndNames = new Enum.ValuesAndNames(array, array2);
+				enumType.GenericCache = valuesAndNames;
 			}
-			if (targetType == typeof(string))
+			return valuesAndNames;
+		}
+
+		private static string InternalFormattedHexString(object value)
+		{
+			switch (Convert.GetTypeCode(value))
 			{
-				return this.ToString(provider);
+			case TypeCode.Boolean:
+				return Convert.ToByte((bool)value).ToString("X2", null);
+			case TypeCode.Char:
+				return ((ushort)((char)value)).ToString("X4", null);
+			case TypeCode.SByte:
+				return ((byte)((sbyte)value)).ToString("X2", null);
+			case TypeCode.Byte:
+				return ((byte)value).ToString("X2", null);
+			case TypeCode.Int16:
+				return ((ushort)((short)value)).ToString("X4", null);
+			case TypeCode.UInt16:
+				return ((ushort)value).ToString("X4", null);
+			case TypeCode.Int32:
+				return ((uint)((int)value)).ToString("X8", null);
+			case TypeCode.UInt32:
+				return ((uint)value).ToString("X8", null);
+			case TypeCode.Int64:
+				return ((ulong)((long)value)).ToString("X16", null);
+			case TypeCode.UInt64:
+				return ((ulong)value).ToString("X16", null);
+			default:
+				throw new InvalidOperationException(Environment.GetResourceString("Unknown enum type."));
 			}
-			return Convert.ToType(this.Value, targetType, provider, false);
 		}
 
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		private static string InternalFormat(RuntimeType eT, object value)
 		{
-			return Convert.ToUInt16(this.Value, provider);
+			if (eT.IsDefined(typeof(FlagsAttribute), false))
+			{
+				return Enum.InternalFlagsFormat(eT, value);
+			}
+			string name = Enum.GetName(eT, value);
+			if (name == null)
+			{
+				return value.ToString();
+			}
+			return name;
 		}
 
-		uint IConvertible.ToUInt32(IFormatProvider provider)
+		private static string InternalFlagsFormat(RuntimeType eT, object value)
 		{
-			return Convert.ToUInt32(this.Value, provider);
+			ulong num = Enum.ToUInt64(value);
+			Enum.ValuesAndNames cachedValuesAndNames = Enum.GetCachedValuesAndNames(eT, true);
+			string[] names = cachedValuesAndNames.Names;
+			ulong[] values = cachedValuesAndNames.Values;
+			int num2 = values.Length - 1;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool flag = true;
+			ulong num3 = num;
+			while (num2 >= 0 && (num2 != 0 || values[num2] != 0UL))
+			{
+				if ((num & values[num2]) == values[num2])
+				{
+					num -= values[num2];
+					if (!flag)
+					{
+						stringBuilder.Insert(0, ", ");
+					}
+					stringBuilder.Insert(0, names[num2]);
+					flag = false;
+				}
+				num2--;
+			}
+			if (num != 0UL)
+			{
+				return value.ToString();
+			}
+			if (num3 != 0UL)
+			{
+				return stringBuilder.ToString();
+			}
+			if (values.Length != 0 && values[0] == 0UL)
+			{
+				return names[0];
+			}
+			return "0";
 		}
 
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		internal static ulong ToUInt64(object value)
 		{
-			return Convert.ToUInt64(this.Value, provider);
+			ulong num;
+			switch (Convert.GetTypeCode(value))
+			{
+			case TypeCode.Boolean:
+			case TypeCode.Char:
+			case TypeCode.Byte:
+			case TypeCode.UInt16:
+			case TypeCode.UInt32:
+			case TypeCode.UInt64:
+				num = Convert.ToUInt64(value, CultureInfo.InvariantCulture);
+				break;
+			case TypeCode.SByte:
+			case TypeCode.Int16:
+			case TypeCode.Int32:
+			case TypeCode.Int64:
+				num = (ulong)Convert.ToInt64(value, CultureInfo.InvariantCulture);
+				break;
+			default:
+				throw new InvalidOperationException(Environment.GetResourceString("Unknown enum type."));
+			}
+			return num;
 		}
 
-		public TypeCode GetTypeCode()
-		{
-			return Type.GetTypeCode(Enum.GetUnderlyingType(base.GetType()));
-		}
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int InternalCompareTo(object o1, object o2);
+
+		[SecuritySafeCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern RuntimeType InternalGetUnderlyingType(RuntimeType enumType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern object get_value();
+		private static extern bool GetEnumValuesAndNames(RuntimeType enumType, out ulong[] values, out string[] names);
 
-		private object Value
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern object InternalBoxEnum(RuntimeType enumType, long value);
+
+		public static bool TryParse<TEnum>(string value, out TEnum result) where TEnum : struct
 		{
-			get
+			return Enum.TryParse<TEnum>(value, false, out result);
+		}
+
+		public static bool TryParse<TEnum>(string value, bool ignoreCase, out TEnum result) where TEnum : struct
+		{
+			result = default(TEnum);
+			Enum.EnumResult enumResult = default(Enum.EnumResult);
+			enumResult.Init(false);
+			bool flag = Enum.TryParseEnum(typeof(TEnum), value, ignoreCase, ref enumResult);
+			if (flag)
 			{
-				return this.get_value();
+				result = (TEnum)((object)enumResult.parsedEnum);
 			}
+			return flag;
+		}
+
+		[ComVisible(true)]
+		public static object Parse(Type enumType, string value)
+		{
+			return Enum.Parse(enumType, value, false);
+		}
+
+		[ComVisible(true)]
+		public static object Parse(Type enumType, string value, bool ignoreCase)
+		{
+			Enum.EnumResult enumResult = default(Enum.EnumResult);
+			enumResult.Init(true);
+			if (Enum.TryParseEnum(enumType, value, ignoreCase, ref enumResult))
+			{
+				return enumResult.parsedEnum;
+			}
+			throw enumResult.GetEnumParseException();
+		}
+
+		private static bool TryParseEnum(Type enumType, string value, bool ignoreCase, ref Enum.EnumResult parseResult)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			if (value == null)
+			{
+				parseResult.SetFailure(Enum.ParseFailureKind.ArgumentNull, "value");
+				return false;
+			}
+			value = value.Trim();
+			if (value.Length == 0)
+			{
+				parseResult.SetFailure(Enum.ParseFailureKind.Argument, "Must specify valid information for parsing in the string.", null);
+				return false;
+			}
+			ulong num = 0UL;
+			if (char.IsDigit(value[0]) || value[0] == '-' || value[0] == '+')
+			{
+				Type underlyingType = Enum.GetUnderlyingType(enumType);
+				try
+				{
+					object obj = Convert.ChangeType(value, underlyingType, CultureInfo.InvariantCulture);
+					parseResult.parsedEnum = Enum.ToObject(enumType, obj);
+					return true;
+				}
+				catch (FormatException)
+				{
+				}
+				catch (Exception ex)
+				{
+					if (parseResult.canThrow)
+					{
+						throw;
+					}
+					parseResult.SetFailure(ex);
+					return false;
+				}
+			}
+			string[] array = value.Split(Enum.enumSeperatorCharArray);
+			Enum.ValuesAndNames cachedValuesAndNames = Enum.GetCachedValuesAndNames(runtimeType, true);
+			string[] names = cachedValuesAndNames.Names;
+			ulong[] values = cachedValuesAndNames.Values;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i] = array[i].Trim();
+				bool flag = false;
+				int j = 0;
+				while (j < names.Length)
+				{
+					if (ignoreCase)
+					{
+						if (string.Compare(names[j], array[i], StringComparison.OrdinalIgnoreCase) == 0)
+						{
+							goto IL_0158;
+						}
+					}
+					else if (names[j].Equals(array[i]))
+					{
+						goto IL_0158;
+					}
+					j++;
+					continue;
+					IL_0158:
+					ulong num2 = values[j];
+					num |= num2;
+					flag = true;
+					break;
+				}
+				if (!flag)
+				{
+					parseResult.SetFailure(Enum.ParseFailureKind.ArgumentWithParameter, "Requested value '{0}' was not found.", value);
+					return false;
+				}
+			}
+			bool flag2;
+			try
+			{
+				parseResult.parsedEnum = Enum.ToObject(enumType, num);
+				flag2 = true;
+			}
+			catch (Exception ex2)
+			{
+				if (parseResult.canThrow)
+				{
+					throw;
+				}
+				parseResult.SetFailure(ex2);
+				flag2 = false;
+			}
+			return flag2;
+		}
+
+		[ComVisible(true)]
+		public static Type GetUnderlyingType(Type enumType)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			return enumType.GetEnumUnderlyingType();
 		}
 
 		[ComVisible(true)]
@@ -116,53 +308,12 @@ namespace System
 			{
 				throw new ArgumentNullException("enumType");
 			}
-			if (!enumType.IsEnum)
-			{
-				throw new ArgumentException("enumType is not an Enum type.", "enumType");
-			}
-			MonoEnumInfo monoEnumInfo;
-			MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-			return (Array)monoEnumInfo.values.Clone();
+			return enumType.GetEnumValues();
 		}
 
-		[ComVisible(true)]
-		public static string[] GetNames(Type enumType)
+		internal static ulong[] InternalGetValues(RuntimeType enumType)
 		{
-			if (enumType == null)
-			{
-				throw new ArgumentNullException("enumType");
-			}
-			if (!enumType.IsEnum)
-			{
-				throw new ArgumentException("enumType is not an Enum type.");
-			}
-			MonoEnumInfo monoEnumInfo;
-			MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-			return (string[])monoEnumInfo.names.Clone();
-		}
-
-		private static int FindPosition(object value, Array values)
-		{
-			if (!(values is byte[]) && !(values is ushort[]) && !(values is uint[]) && !(values is ulong[]))
-			{
-				if (values is int[])
-				{
-					return Array.BinarySearch(values, value, MonoEnumInfo.int_comparer);
-				}
-				if (values is short[])
-				{
-					return Array.BinarySearch(values, value, MonoEnumInfo.short_comparer);
-				}
-				if (values is sbyte[])
-				{
-					return Array.BinarySearch(values, value, MonoEnumInfo.sbyte_comparer);
-				}
-				if (values is long[])
-				{
-					return Array.BinarySearch(values, value, MonoEnumInfo.long_comparer);
-				}
-			}
-			return Array.BinarySearch(values, value);
+			return Enum.GetCachedValuesAndNames(enumType, false).Values;
 		}
 
 		[ComVisible(true)]
@@ -172,19 +323,61 @@ namespace System
 			{
 				throw new ArgumentNullException("enumType");
 			}
+			return enumType.GetEnumName(value);
+		}
+
+		[ComVisible(true)]
+		public static string[] GetNames(Type enumType)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			return enumType.GetEnumNames();
+		}
+
+		internal static string[] InternalGetNames(RuntimeType enumType)
+		{
+			return Enum.GetCachedValuesAndNames(enumType, true).Names;
+		}
+
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, object value)
+		{
 			if (value == null)
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (!enumType.IsEnum)
+			TypeCode typeCode = Convert.GetTypeCode(value);
+			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8 && (typeCode == TypeCode.Boolean || typeCode == TypeCode.Char))
 			{
-				throw new ArgumentException("enumType is not an Enum type.", "enumType");
+				throw new ArgumentException(Environment.GetResourceString("The value passed in must be an enum base or an underlying type for an enum, such as an Int32."), "value");
 			}
-			value = Enum.ToObject(enumType, value);
-			MonoEnumInfo monoEnumInfo;
-			MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-			int num = Enum.FindPosition(value, monoEnumInfo.values);
-			return (num < 0) ? null : monoEnumInfo.names[num];
+			switch (typeCode)
+			{
+			case TypeCode.Boolean:
+				return Enum.ToObject(enumType, (bool)value);
+			case TypeCode.Char:
+				return Enum.ToObject(enumType, (char)value);
+			case TypeCode.SByte:
+				return Enum.ToObject(enumType, (sbyte)value);
+			case TypeCode.Byte:
+				return Enum.ToObject(enumType, (byte)value);
+			case TypeCode.Int16:
+				return Enum.ToObject(enumType, (short)value);
+			case TypeCode.UInt16:
+				return Enum.ToObject(enumType, (ushort)value);
+			case TypeCode.Int32:
+				return Enum.ToObject(enumType, (int)value);
+			case TypeCode.UInt32:
+				return Enum.ToObject(enumType, (uint)value);
+			case TypeCode.Int64:
+				return Enum.ToObject(enumType, (long)value);
+			case TypeCode.UInt64:
+				return Enum.ToObject(enumType, (ulong)value);
+			default:
+				throw new ArgumentException(Environment.GetResourceString("The value passed in must be an enum base or an underlying type for an enum, such as an Int32."), "value");
+			}
 		}
 
 		[ComVisible(true)]
@@ -194,567 +387,7 @@ namespace System
 			{
 				throw new ArgumentNullException("enumType");
 			}
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (!enumType.IsEnum)
-			{
-				throw new ArgumentException("enumType is not an Enum type.", "enumType");
-			}
-			MonoEnumInfo monoEnumInfo;
-			MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-			Type type = value.GetType();
-			if (type == typeof(string))
-			{
-				return ((IList)monoEnumInfo.names).Contains(value);
-			}
-			if (type == monoEnumInfo.utype || type == enumType)
-			{
-				value = Enum.ToObject(enumType, value);
-				MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-				return Enum.FindPosition(value, monoEnumInfo.values) >= 0;
-			}
-			throw new ArgumentException("The value parameter is not the correct type.It must be type String or the same type as the underlying typeof the Enum.");
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Type get_underlying_type(Type enumType);
-
-		[ComVisible(true)]
-		public static Type GetUnderlyingType(Type enumType)
-		{
-			if (enumType == null)
-			{
-				throw new ArgumentNullException("enumType");
-			}
-			if (!enumType.IsEnum)
-			{
-				throw new ArgumentException("enumType is not an Enum type.", "enumType");
-			}
-			return Enum.get_underlying_type(enumType);
-		}
-
-		[ComVisible(true)]
-		public static object Parse(Type enumType, string value)
-		{
-			return Enum.Parse(enumType, value, false);
-		}
-
-		private static int FindName(Hashtable name_hash, string[] names, string name, bool ignoreCase)
-		{
-			if (!ignoreCase)
-			{
-				if (name_hash != null)
-				{
-					object obj = name_hash[name];
-					if (obj != null)
-					{
-						return (int)obj;
-					}
-				}
-				else
-				{
-					for (int i = 0; i < names.Length; i++)
-					{
-						if (name == names[i])
-						{
-							return i;
-						}
-					}
-				}
-			}
-			else
-			{
-				for (int j = 0; j < names.Length; j++)
-				{
-					if (string.Compare(name, names[j], ignoreCase, CultureInfo.InvariantCulture) == 0)
-					{
-						return j;
-					}
-				}
-			}
-			return -1;
-		}
-
-		private static ulong GetValue(object value, TypeCode typeCode)
-		{
-			switch (typeCode)
-			{
-			case TypeCode.SByte:
-				return (ulong)((byte)((sbyte)value));
-			case TypeCode.Byte:
-				return (ulong)((byte)value);
-			case TypeCode.Int16:
-				return (ulong)((ushort)((short)value));
-			case TypeCode.UInt16:
-				return (ulong)((ushort)value);
-			case TypeCode.Int32:
-				return (ulong)((int)value);
-			case TypeCode.UInt32:
-				return (ulong)((uint)value);
-			case TypeCode.Int64:
-				return (ulong)((long)value);
-			case TypeCode.UInt64:
-				return (ulong)value;
-			default:
-				throw new ArgumentException("typeCode is not a valid type code for an Enum");
-			}
-		}
-
-		[ComVisible(true)]
-		public static object Parse(Type enumType, string value, bool ignoreCase)
-		{
-			if (enumType == null)
-			{
-				throw new ArgumentNullException("enumType");
-			}
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (!enumType.IsEnum)
-			{
-				throw new ArgumentException("enumType is not an Enum type.", "enumType");
-			}
-			value = value.Trim();
-			if (value.Length == 0)
-			{
-				throw new ArgumentException("An empty string is not considered a valid value.");
-			}
-			MonoEnumInfo monoEnumInfo;
-			MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-			int num = Enum.FindName(monoEnumInfo.name_hash, monoEnumInfo.names, value, ignoreCase);
-			if (num >= 0)
-			{
-				return monoEnumInfo.values.GetValue(num);
-			}
-			TypeCode typeCode = ((Enum)monoEnumInfo.values.GetValue(0)).GetTypeCode();
-			if (value.IndexOf(',') != -1)
-			{
-				string[] array = value.Split(Enum.split_char);
-				ulong num2 = 0UL;
-				for (int i = 0; i < array.Length; i++)
-				{
-					num = Enum.FindName(monoEnumInfo.name_hash, monoEnumInfo.names, array[i].Trim(), ignoreCase);
-					if (num < 0)
-					{
-						throw new ArgumentException("The requested value was not found.");
-					}
-					num2 |= Enum.GetValue(monoEnumInfo.values.GetValue(num), typeCode);
-				}
-				return Enum.ToObject(enumType, num2);
-			}
-			switch (typeCode)
-			{
-			case TypeCode.SByte:
-			{
-				sbyte b;
-				if (sbyte.TryParse(value, out b))
-				{
-					return Enum.ToObject(enumType, b);
-				}
-				break;
-			}
-			case TypeCode.Byte:
-			{
-				byte b2;
-				if (byte.TryParse(value, out b2))
-				{
-					return Enum.ToObject(enumType, b2);
-				}
-				break;
-			}
-			case TypeCode.Int16:
-			{
-				short num3;
-				if (short.TryParse(value, out num3))
-				{
-					return Enum.ToObject(enumType, num3);
-				}
-				break;
-			}
-			case TypeCode.UInt16:
-			{
-				ushort num4;
-				if (ushort.TryParse(value, out num4))
-				{
-					return Enum.ToObject(enumType, num4);
-				}
-				break;
-			}
-			case TypeCode.Int32:
-			{
-				int num5;
-				if (int.TryParse(value, out num5))
-				{
-					return Enum.ToObject(enumType, num5);
-				}
-				break;
-			}
-			case TypeCode.UInt32:
-			{
-				uint num6;
-				if (uint.TryParse(value, out num6))
-				{
-					return Enum.ToObject(enumType, num6);
-				}
-				break;
-			}
-			case TypeCode.Int64:
-			{
-				long num7;
-				if (long.TryParse(value, out num7))
-				{
-					return Enum.ToObject(enumType, num7);
-				}
-				break;
-			}
-			case TypeCode.UInt64:
-			{
-				ulong num8;
-				if (ulong.TryParse(value, out num8))
-				{
-					return Enum.ToObject(enumType, num8);
-				}
-				break;
-			}
-			}
-			throw new ArgumentException(string.Format("The requested value '{0}' was not found.", value));
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int compare_value_to(object other);
-
-		public int CompareTo(object target)
-		{
-			if (target == null)
-			{
-				return 1;
-			}
-			Type type = base.GetType();
-			if (target.GetType() != type)
-			{
-				throw new ArgumentException(string.Format("Object must be the same type as the enum. The type passed in was {0}; the enum type was {1}.", target.GetType(), type));
-			}
-			return this.compare_value_to(target);
-		}
-
-		public override string ToString()
-		{
-			return this.ToString("G");
-		}
-
-		[Obsolete("Provider is ignored, just use ToString")]
-		public string ToString(IFormatProvider provider)
-		{
-			return this.ToString("G", provider);
-		}
-
-		public string ToString(string format)
-		{
-			if (format == string.Empty || format == null)
-			{
-				format = "G";
-			}
-			return Enum.Format(base.GetType(), this.Value, format);
-		}
-
-		[Obsolete("Provider is ignored, just use ToString")]
-		public string ToString(string format, IFormatProvider provider)
-		{
-			if (format == string.Empty || format == null)
-			{
-				format = "G";
-			}
-			return Enum.Format(base.GetType(), this.Value, format);
-		}
-
-		[ComVisible(true)]
-		public static object ToObject(Type enumType, byte value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[ComVisible(true)]
-		public static object ToObject(Type enumType, short value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[ComVisible(true)]
-		public static object ToObject(Type enumType, int value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[ComVisible(true)]
-		public static object ToObject(Type enumType, long value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[ComVisible(true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern object ToObject(Type enumType, object value);
-
-		[CLSCompliant(false)]
-		[ComVisible(true)]
-		public static object ToObject(Type enumType, sbyte value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[ComVisible(true)]
-		[CLSCompliant(false)]
-		public static object ToObject(Type enumType, ushort value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[ComVisible(true)]
-		[CLSCompliant(false)]
-		public static object ToObject(Type enumType, uint value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		[CLSCompliant(false)]
-		[ComVisible(true)]
-		public static object ToObject(Type enumType, ulong value)
-		{
-			return Enum.ToObject(enumType, value);
-		}
-
-		public override bool Equals(object obj)
-		{
-			return ValueType.DefaultEquals(this, obj);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int get_hashcode();
-
-		public override int GetHashCode()
-		{
-			return this.get_hashcode();
-		}
-
-		private static string FormatSpecifier_X(Type enumType, object value, bool upper)
-		{
-			switch (Type.GetTypeCode(enumType))
-			{
-			case TypeCode.SByte:
-				return ((sbyte)value).ToString((!upper) ? "x2" : "X2");
-			case TypeCode.Byte:
-				return ((byte)value).ToString((!upper) ? "x2" : "X2");
-			case TypeCode.Int16:
-				return ((short)value).ToString((!upper) ? "x4" : "X4");
-			case TypeCode.UInt16:
-				return ((ushort)value).ToString((!upper) ? "x4" : "X4");
-			case TypeCode.Int32:
-				return ((int)value).ToString((!upper) ? "x8" : "X8");
-			case TypeCode.UInt32:
-				return ((uint)value).ToString((!upper) ? "x8" : "X8");
-			case TypeCode.Int64:
-				return ((long)value).ToString((!upper) ? "x16" : "X16");
-			case TypeCode.UInt64:
-				return ((ulong)value).ToString((!upper) ? "x16" : "X16");
-			default:
-				throw new Exception("Invalid type code for enumeration.");
-			}
-		}
-
-		private static string FormatFlags(Type enumType, object value)
-		{
-			string text = string.Empty;
-			MonoEnumInfo monoEnumInfo;
-			MonoEnumInfo.GetInfo(enumType, out monoEnumInfo);
-			string text2 = value.ToString();
-			if (text2 == "0")
-			{
-				text = Enum.GetName(enumType, value);
-				if (text == null)
-				{
-					text = text2;
-				}
-				return text;
-			}
-			switch (((Enum)monoEnumInfo.values.GetValue(0)).GetTypeCode())
-			{
-			case TypeCode.SByte:
-			{
-				sbyte b = (sbyte)value;
-				for (int i = monoEnumInfo.values.Length - 1; i >= 0; i--)
-				{
-					sbyte b2 = (sbyte)monoEnumInfo.values.GetValue(i);
-					if ((int)b2 != 0)
-					{
-						if (((int)b & (int)b2) == (int)b2)
-						{
-							text = monoEnumInfo.names[i] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							b = (sbyte)((int)b - (int)b2);
-						}
-					}
-				}
-				if ((int)b != 0)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.Byte:
-			{
-				byte b3 = (byte)value;
-				for (int j = monoEnumInfo.values.Length - 1; j >= 0; j--)
-				{
-					byte b4 = (byte)monoEnumInfo.values.GetValue(j);
-					if (b4 != 0)
-					{
-						if ((b3 & b4) == b4)
-						{
-							text = monoEnumInfo.names[j] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							b3 -= b4;
-						}
-					}
-				}
-				if (b3 != 0)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.Int16:
-			{
-				short num = (short)value;
-				for (int k = monoEnumInfo.values.Length - 1; k >= 0; k--)
-				{
-					short num2 = (short)monoEnumInfo.values.GetValue(k);
-					if (num2 != 0)
-					{
-						if ((num & num2) == num2)
-						{
-							text = monoEnumInfo.names[k] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							num -= num2;
-						}
-					}
-				}
-				if (num != 0)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.UInt16:
-			{
-				ushort num3 = (ushort)value;
-				for (int l = monoEnumInfo.values.Length - 1; l >= 0; l--)
-				{
-					ushort num4 = (ushort)monoEnumInfo.values.GetValue(l);
-					if (num4 != 0)
-					{
-						if ((num3 & num4) == num4)
-						{
-							text = monoEnumInfo.names[l] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							num3 -= num4;
-						}
-					}
-				}
-				if (num3 != 0)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.Int32:
-			{
-				int num5 = (int)value;
-				for (int m = monoEnumInfo.values.Length - 1; m >= 0; m--)
-				{
-					int num6 = (int)monoEnumInfo.values.GetValue(m);
-					if (num6 != 0)
-					{
-						if ((num5 & num6) == num6)
-						{
-							text = monoEnumInfo.names[m] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							num5 -= num6;
-						}
-					}
-				}
-				if (num5 != 0)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.UInt32:
-			{
-				uint num7 = (uint)value;
-				for (int n = monoEnumInfo.values.Length - 1; n >= 0; n--)
-				{
-					uint num8 = (uint)monoEnumInfo.values.GetValue(n);
-					if (num8 != 0U)
-					{
-						if ((num7 & num8) == num8)
-						{
-							text = monoEnumInfo.names[n] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							num7 -= num8;
-						}
-					}
-				}
-				if (num7 != 0U)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.Int64:
-			{
-				long num9 = (long)value;
-				for (int num10 = monoEnumInfo.values.Length - 1; num10 >= 0; num10--)
-				{
-					long num11 = (long)monoEnumInfo.values.GetValue(num10);
-					if (num11 != 0L)
-					{
-						if ((num9 & num11) == num11)
-						{
-							text = monoEnumInfo.names[num10] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							num9 -= num11;
-						}
-					}
-				}
-				if (num9 != 0L)
-				{
-					return text2;
-				}
-				break;
-			}
-			case TypeCode.UInt64:
-			{
-				ulong num12 = (ulong)value;
-				for (int num13 = monoEnumInfo.values.Length - 1; num13 >= 0; num13--)
-				{
-					ulong num14 = (ulong)monoEnumInfo.values.GetValue(num13);
-					if (num14 != 0UL)
-					{
-						if ((num12 & num14) == num14)
-						{
-							text = monoEnumInfo.names[num13] + ((!(text == string.Empty)) ? ", " : string.Empty) + text;
-							num12 -= num14;
-						}
-					}
-				}
-				if (num12 != 0UL)
-				{
-					return text2;
-				}
-				break;
-			}
-			}
-			if (text == string.Empty)
-			{
-				return text2;
-			}
-			return text;
+			return enumType.IsEnumDefined(value);
 		}
 
 		[ComVisible(true)]
@@ -764,6 +397,10 @@ namespace System
 			{
 				throw new ArgumentNullException("enumType");
 			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
 			if (value == null)
 			{
 				throw new ArgumentNullException("value");
@@ -772,74 +409,585 @@ namespace System
 			{
 				throw new ArgumentNullException("format");
 			}
-			if (!enumType.IsEnum)
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
 			{
-				throw new ArgumentException("enumType is not an Enum type.", "enumType");
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
 			}
 			Type type = value.GetType();
 			Type underlyingType = Enum.GetUnderlyingType(enumType);
 			if (type.IsEnum)
 			{
-				if (type != enumType)
+				Type underlyingType2 = Enum.GetUnderlyingType(type);
+				if (!type.IsEquivalentTo(enumType))
 				{
-					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Object must be the same type as the enum. The type passed in was {0}; the enum type was {1}.", new object[] { type.FullName, enumType.FullName }));
+					throw new ArgumentException(Environment.GetResourceString("Object must be the same type as the enum. The type passed in was '{0}'; the enum type was '{1}'.", new object[]
+					{
+						type.ToString(),
+						enumType.ToString()
+					}));
 				}
+				value = ((Enum)value).GetValue();
 			}
 			else if (type != underlyingType)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Enum underlying type and the object must be the same type or object. Type passed in was {0}; the enum underlying type was {1}.", new object[] { type.FullName, underlyingType.FullName }));
+				throw new ArgumentException(Environment.GetResourceString("Enum underlying type and the object must be same type or object. Type passed in was '{0}'; the enum underlying type was '{1}'.", new object[]
+				{
+					type.ToString(),
+					underlyingType.ToString()
+				}));
 			}
 			if (format.Length != 1)
 			{
-				throw new FormatException("Format String can be only \"G\",\"g\",\"X\",\"x\",\"F\",\"f\",\"D\" or \"d\".");
+				throw new FormatException(Environment.GetResourceString("Format String can be only \"G\", \"g\", \"X\", \"x\", \"F\", \"f\", \"D\" or \"d\"."));
 			}
 			char c = format[0];
-			string text;
+			if (c == 'D' || c == 'd')
+			{
+				return value.ToString();
+			}
+			if (c == 'X' || c == 'x')
+			{
+				return Enum.InternalFormattedHexString(value);
+			}
 			if (c == 'G' || c == 'g')
 			{
-				if (!enumType.IsDefined(typeof(FlagsAttribute), false))
-				{
-					text = Enum.GetName(enumType, value);
-					if (text == null)
-					{
-						text = value.ToString();
-					}
-					return text;
-				}
-				c = 'f';
+				return Enum.InternalFormat(runtimeType, value);
 			}
-			if (c == 'f' || c == 'F')
+			if (c == 'F' || c == 'f')
 			{
-				return Enum.FormatFlags(enumType, value);
+				return Enum.InternalFlagsFormat(runtimeType, value);
 			}
-			text = string.Empty;
-			char c2 = c;
-			if (c2 != 'D')
+			throw new FormatException(Environment.GetResourceString("Format String can be only \"G\", \"g\", \"X\", \"x\", \"F\", \"f\", \"D\" or \"d\"."));
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern object get_value();
+
+		[SecuritySafeCritical]
+		internal object GetValue()
+		{
+			return this.get_value();
+		}
+
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool InternalHasFlag(Enum flags);
+
+		[SecuritySafeCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int get_hashcode();
+
+		public override bool Equals(object obj)
+		{
+			return ValueType.DefaultEquals(this, obj);
+		}
+
+		[SecuritySafeCritical]
+		public override int GetHashCode()
+		{
+			return this.get_hashcode();
+		}
+
+		public override string ToString()
+		{
+			return Enum.InternalFormat((RuntimeType)base.GetType(), this.GetValue());
+		}
+
+		[Obsolete("The provider argument is not used. Please use ToString(String).")]
+		public string ToString(string format, IFormatProvider provider)
+		{
+			return this.ToString(format);
+		}
+
+		[SecuritySafeCritical]
+		public int CompareTo(object target)
+		{
+			if (this == null)
 			{
-				if (c2 == 'X')
+				throw new NullReferenceException();
+			}
+			int num = Enum.InternalCompareTo(this, target);
+			if (num < 2)
+			{
+				return num;
+			}
+			if (num == 2)
+			{
+				Type type = base.GetType();
+				Type type2 = target.GetType();
+				throw new ArgumentException(Environment.GetResourceString("Object must be the same type as the enum. The type passed in was '{0}'; the enum type was '{1}'.", new object[]
 				{
-					return Enum.FormatSpecifier_X(enumType, value, true);
-				}
-				if (c2 != 'd')
+					type2.ToString(),
+					type.ToString()
+				}));
+			}
+			throw new InvalidOperationException(Environment.GetResourceString("Unknown enum type."));
+		}
+
+		public string ToString(string format)
+		{
+			if (format == null || format.Length == 0)
+			{
+				format = "G";
+			}
+			if (string.Compare(format, "G", StringComparison.OrdinalIgnoreCase) == 0)
+			{
+				return this.ToString();
+			}
+			if (string.Compare(format, "D", StringComparison.OrdinalIgnoreCase) == 0)
+			{
+				return this.GetValue().ToString();
+			}
+			if (string.Compare(format, "X", StringComparison.OrdinalIgnoreCase) == 0)
+			{
+				return Enum.InternalFormattedHexString(this.GetValue());
+			}
+			if (string.Compare(format, "F", StringComparison.OrdinalIgnoreCase) == 0)
+			{
+				return Enum.InternalFlagsFormat((RuntimeType)base.GetType(), this.GetValue());
+			}
+			throw new FormatException(Environment.GetResourceString("Format String can be only \"G\", \"g\", \"X\", \"x\", \"F\", \"f\", \"D\" or \"d\"."));
+		}
+
+		[Obsolete("The provider argument is not used. Please use ToString().")]
+		public string ToString(IFormatProvider provider)
+		{
+			return this.ToString();
+		}
+
+		[SecuritySafeCritical]
+		public bool HasFlag(Enum flag)
+		{
+			if (flag == null)
+			{
+				throw new ArgumentNullException("flag");
+			}
+			if (!base.GetType().IsEquivalentTo(flag.GetType()))
+			{
+				throw new ArgumentException(Environment.GetResourceString("The argument type, '{0}', is not the same as the enum type '{1}'.", new object[]
 				{
-					if (c2 != 'x')
-					{
-						throw new FormatException("Format String can be only \"G\",\"g\",\"X\",\"x\",\"F\",\"f\",\"D\" or \"d\".");
-					}
-					return Enum.FormatSpecifier_X(enumType, value, false);
-				}
+					flag.GetType(),
+					base.GetType()
+				}));
+			}
+			return this.InternalHasFlag(flag);
+		}
+
+		public TypeCode GetTypeCode()
+		{
+			Type underlyingType = Enum.GetUnderlyingType(base.GetType());
+			if (underlyingType == typeof(int))
+			{
+				return TypeCode.Int32;
+			}
+			if (underlyingType == typeof(sbyte))
+			{
+				return TypeCode.SByte;
+			}
+			if (underlyingType == typeof(short))
+			{
+				return TypeCode.Int16;
+			}
+			if (underlyingType == typeof(long))
+			{
+				return TypeCode.Int64;
+			}
+			if (underlyingType == typeof(uint))
+			{
+				return TypeCode.UInt32;
+			}
+			if (underlyingType == typeof(byte))
+			{
+				return TypeCode.Byte;
+			}
+			if (underlyingType == typeof(ushort))
+			{
+				return TypeCode.UInt16;
 			}
 			if (underlyingType == typeof(ulong))
 			{
-				text = Convert.ToUInt64(value).ToString();
+				return TypeCode.UInt64;
 			}
-			else
+			if (underlyingType == typeof(bool))
 			{
-				text = Convert.ToInt64(value).ToString();
+				return TypeCode.Boolean;
 			}
-			return text;
+			if (underlyingType == typeof(char))
+			{
+				return TypeCode.Char;
+			}
+			throw new InvalidOperationException(Environment.GetResourceString("Unknown enum type."));
 		}
 
-		private static char[] split_char = new char[] { ',' };
+		bool IConvertible.ToBoolean(IFormatProvider provider)
+		{
+			return Convert.ToBoolean(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		char IConvertible.ToChar(IFormatProvider provider)
+		{
+			return Convert.ToChar(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		{
+			return Convert.ToSByte(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		byte IConvertible.ToByte(IFormatProvider provider)
+		{
+			return Convert.ToByte(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		short IConvertible.ToInt16(IFormatProvider provider)
+		{
+			return Convert.ToInt16(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		{
+			return Convert.ToUInt16(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		int IConvertible.ToInt32(IFormatProvider provider)
+		{
+			return Convert.ToInt32(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		uint IConvertible.ToUInt32(IFormatProvider provider)
+		{
+			return Convert.ToUInt32(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		long IConvertible.ToInt64(IFormatProvider provider)
+		{
+			return Convert.ToInt64(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		{
+			return Convert.ToUInt64(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		float IConvertible.ToSingle(IFormatProvider provider)
+		{
+			return Convert.ToSingle(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		double IConvertible.ToDouble(IFormatProvider provider)
+		{
+			return Convert.ToDouble(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
+		{
+			return Convert.ToDecimal(this.GetValue(), CultureInfo.CurrentCulture);
+		}
+
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
+		{
+			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Enum", "DateTime" }));
+		}
+
+		object IConvertible.ToType(Type type, IFormatProvider provider)
+		{
+			return Convert.DefaultToType(this, type, provider);
+		}
+
+		[SecuritySafeCritical]
+		[CLSCompliant(false)]
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, sbyte value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)value);
+		}
+
+		[SecuritySafeCritical]
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, short value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)value);
+		}
+
+		[SecuritySafeCritical]
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, int value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)value);
+		}
+
+		[SecuritySafeCritical]
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, byte value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)((ulong)value));
+		}
+
+		[CLSCompliant(false)]
+		[ComVisible(true)]
+		[SecuritySafeCritical]
+		public static object ToObject(Type enumType, ushort value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)((ulong)value));
+		}
+
+		[CLSCompliant(false)]
+		[SecuritySafeCritical]
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, uint value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)((ulong)value));
+		}
+
+		[SecuritySafeCritical]
+		[ComVisible(true)]
+		public static object ToObject(Type enumType, long value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, value);
+		}
+
+		[SecuritySafeCritical]
+		[ComVisible(true)]
+		[CLSCompliant(false)]
+		public static object ToObject(Type enumType, ulong value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)value);
+		}
+
+		[SecuritySafeCritical]
+		private static object ToObject(Type enumType, char value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, (long)((ulong)value));
+		}
+
+		[SecuritySafeCritical]
+		private static object ToObject(Type enumType, bool value)
+		{
+			if (enumType == null)
+			{
+				throw new ArgumentNullException("enumType");
+			}
+			if (!enumType.IsEnum)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
+			}
+			RuntimeType runtimeType = enumType as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
+			}
+			return Enum.InternalBoxEnum(runtimeType, value ? 1L : 0L);
+		}
+
+		private static readonly char[] enumSeperatorCharArray = new char[] { ',' };
+
+		private const string enumSeperator = ", ";
+
+		private enum ParseFailureKind
+		{
+			None,
+			Argument,
+			ArgumentNull,
+			ArgumentWithParameter,
+			UnhandledException
+		}
+
+		private struct EnumResult
+		{
+			internal void Init(bool canMethodThrow)
+			{
+				this.parsedEnum = 0;
+				this.canThrow = canMethodThrow;
+			}
+
+			internal void SetFailure(Exception unhandledException)
+			{
+				this.m_failure = Enum.ParseFailureKind.UnhandledException;
+				this.m_innerException = unhandledException;
+			}
+
+			internal void SetFailure(Enum.ParseFailureKind failure, string failureParameter)
+			{
+				this.m_failure = failure;
+				this.m_failureParameter = failureParameter;
+				if (this.canThrow)
+				{
+					throw this.GetEnumParseException();
+				}
+			}
+
+			internal void SetFailure(Enum.ParseFailureKind failure, string failureMessageID, object failureMessageFormatArgument)
+			{
+				this.m_failure = failure;
+				this.m_failureMessageID = failureMessageID;
+				this.m_failureMessageFormatArgument = failureMessageFormatArgument;
+				if (this.canThrow)
+				{
+					throw this.GetEnumParseException();
+				}
+			}
+
+			internal Exception GetEnumParseException()
+			{
+				switch (this.m_failure)
+				{
+				case Enum.ParseFailureKind.Argument:
+					return new ArgumentException(Environment.GetResourceString(this.m_failureMessageID));
+				case Enum.ParseFailureKind.ArgumentNull:
+					return new ArgumentNullException(this.m_failureParameter);
+				case Enum.ParseFailureKind.ArgumentWithParameter:
+					return new ArgumentException(Environment.GetResourceString(this.m_failureMessageID, new object[] { this.m_failureMessageFormatArgument }));
+				case Enum.ParseFailureKind.UnhandledException:
+					return this.m_innerException;
+				default:
+					return new ArgumentException(Environment.GetResourceString("Requested value '{0}' was not found."));
+				}
+			}
+
+			internal object parsedEnum;
+
+			internal bool canThrow;
+
+			internal Enum.ParseFailureKind m_failure;
+
+			internal string m_failureMessageID;
+
+			internal string m_failureParameter;
+
+			internal object m_failureMessageFormatArgument;
+
+			internal Exception m_innerException;
+		}
+
+		private class ValuesAndNames
+		{
+			public ValuesAndNames(ulong[] values, string[] names)
+			{
+				this.Values = values;
+				this.Names = names;
+			}
+
+			public ulong[] Values;
+
+			public string[] Names;
+		}
 	}
 }

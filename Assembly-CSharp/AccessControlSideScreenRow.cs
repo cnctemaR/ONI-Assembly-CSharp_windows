@@ -22,8 +22,7 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 	protected override void UpdateButtonStates(bool isDefault)
 	{
 		base.UpdateButtonStates(isDefault);
-		ToolTip component = this.defaultButton.GetComponent<ToolTip>();
-		component.SetSimpleTooltip((!isDefault) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.SET_TO_DEFAULT : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.SET_TO_CUSTOM);
+		this.defaultButton.GetComponent<ToolTip>().SetSimpleTooltip(isDefault ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.SET_TO_CUSTOM : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.SET_TO_DEFAULT);
 		this.defaultControls.SetActive(isDefault);
 		this.customControls.SetActive(!isDefault);
 	}
@@ -43,7 +42,7 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 		}
 		this.targetIdentity = identity;
 		this.portraitInstance.SetIdentityObject(identity, false);
-		this.portraitInstance.SetSubTitle((!isDefault) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT);
+		this.portraitInstance.SetSubTitle(isDefault ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM);
 		this.defaultClickedCallback = null;
 		this.defaultButton.isOn = !isDefault;
 		this.defaultClickedCallback = onDefaultClick;

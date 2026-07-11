@@ -36,8 +36,7 @@ public class SolidBoosterConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		BuildingAttachPoint buildingAttachPoint = go.AddOrGet<BuildingAttachPoint>();
-		buildingAttachPoint.points = new BuildingAttachPoint.HardPoint[]
+		go.AddOrGet<BuildingAttachPoint>().points = new BuildingAttachPoint.HardPoint[]
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 5), GameTags.Rocket, null)
 		};
@@ -73,8 +72,7 @@ public class SolidBoosterConfig : IBuildingConfig
 		manualDeliveryKG2.refillMass = storage.capacityKg / 2f;
 		manualDeliveryKG2.capacity = storage.capacityKg / 2f;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		RocketModule rocketModule = go.AddOrGet<RocketModule>();
-		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_solid_booster_bg_kanim"));
+		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_solid_booster_bg_kanim"));
 		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 

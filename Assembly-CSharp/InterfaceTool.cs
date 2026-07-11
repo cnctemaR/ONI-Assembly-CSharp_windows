@@ -87,8 +87,7 @@ public class InterfaceTool : KMonoBehaviour
 		{
 			return;
 		}
-		int num = Grid.PosToCell(cursor_pos);
-		cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
+		cursor_pos = Grid.CellToPosCBC(Grid.PosToCell(cursor_pos), this.visualizerLayer);
 		cursor_pos.z += -0.15f;
 		this.visualizer.transform.SetLocalPosition(cursor_pos);
 	}
@@ -129,8 +128,7 @@ public class InterfaceTool : KMonoBehaviour
 	protected Vector2 GetRegularizedPos(Vector2 input, bool minimize)
 	{
 		Vector3 vector = new Vector3(Grid.HalfCellSizeInMeters, Grid.HalfCellSizeInMeters, 0f);
-		int num = Grid.PosToCell(input);
-		return Grid.CellToPosCCC(num, Grid.SceneLayer.Background) + ((!minimize) ? vector : (-vector));
+		return Grid.CellToPosCCC(Grid.PosToCell(input), Grid.SceneLayer.Background) + (minimize ? (-vector) : vector);
 	}
 
 	protected void SetCursor(Texture2D new_cursor, Vector2 offset, CursorMode mode)
@@ -152,42 +150,39 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual void LateUpdate()
 	{
-		if (this.populateHitsList)
-		{
-			if (!this.isAppFocused)
-			{
-				return;
-			}
-			int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
-			if (!Grid.IsValidCell(num))
-			{
-				return;
-			}
-			this.hits.Clear();
-			this.GetSelectablesUnderCursor(this.hits);
-			KSelectable objectUnderCursor = this.GetObjectUnderCursor<KSelectable>(false, (KSelectable s) => s.GetComponent<KSelectable>().IsSelectable, null);
-			this.UpdateHoverElements(this.hits);
-			if (!this.hasFocus && this.hoverOverride == null)
-			{
-				this.ClearHover();
-			}
-			else if (objectUnderCursor != this.hover)
-			{
-				this.ClearHover();
-				this.hover = objectUnderCursor;
-				if (objectUnderCursor != null)
-				{
-					Game.Instance.Trigger(2095258329, objectUnderCursor.gameObject);
-					objectUnderCursor.Hover(!this.playedSoundThisFrame);
-					this.playedSoundThisFrame = true;
-				}
-			}
-			this.playedSoundThisFrame = false;
-		}
-		else
+		if (!this.populateHitsList)
 		{
 			this.UpdateHoverElements(null);
+			return;
 		}
+		if (!this.isAppFocused)
+		{
+			return;
+		}
+		if (!Grid.IsValidCell(Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()))))
+		{
+			return;
+		}
+		this.hits.Clear();
+		this.GetSelectablesUnderCursor(this.hits);
+		KSelectable objectUnderCursor = this.GetObjectUnderCursor<KSelectable>(false, (KSelectable s) => s.GetComponent<KSelectable>().IsSelectable, null);
+		this.UpdateHoverElements(this.hits);
+		if (!this.hasFocus && this.hoverOverride == null)
+		{
+			this.ClearHover();
+		}
+		else if (objectUnderCursor != this.hover)
+		{
+			this.ClearHover();
+			this.hover = objectUnderCursor;
+			if (objectUnderCursor != null)
+			{
+				Game.Instance.Trigger(2095258329, objectUnderCursor.gameObject);
+				objectUnderCursor.Hover(!this.playedSoundThisFrame);
+				this.playedSoundThisFrame = true;
+			}
+		}
+		this.playedSoundThisFrame = false;
 	}
 
 	public void GetSelectablesUnderCursor(List<KSelectable> hits)
@@ -212,28 +207,16 @@ public class InterfaceTool : KMonoBehaviour
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
-			if (!(kcollider2D == null))
+			if (!(kcollider2D == null) && kcollider2D.Intersects(new Vector2(vector3.x, vector3.y)))
 			{
-				if (kcollider2D.Intersects(new Vector2(vector3.x, vector3.y)))
+				KSelectable kselectable = kcollider2D.GetComponent<KSelectable>();
+				if (kselectable == null)
 				{
-					KSelectable kselectable = kcollider2D.GetComponent<KSelectable>();
-					if (kselectable == null)
-					{
-						kselectable = kcollider2D.GetComponentInParent<KSelectable>();
-					}
-					if (!(kselectable == null))
-					{
-						if (kselectable.isActiveAndEnabled)
-						{
-							if (!hits.Contains(kselectable))
-							{
-								if (kselectable.IsSelectable)
-								{
-									hits.Add(kselectable);
-								}
-							}
-						}
-					}
+					kselectable = kcollider2D.GetComponentInParent<KSelectable>();
+				}
+				if (!(kselectable == null) && kselectable.isActiveAndEnabled && !hits.Contains(kselectable) && kselectable.IsSelectable)
+				{
+					hits.Add(kselectable);
 				}
 			}
 		}
@@ -242,7 +225,7 @@ public class InterfaceTool : KMonoBehaviour
 
 	public void SetLinkCursor(bool set)
 	{
-		this.SetCursor((!set) ? this.cursor : Assets.GetTexture("cursor_hand"), (!set) ? this.cursorOffset : Vector2.zero, CursorMode.Auto);
+		this.SetCursor(set ? Assets.GetTexture("cursor_hand") : this.cursor, set ? Vector2.zero : this.cursorOffset, CursorMode.Auto);
 	}
 
 	protected T GetObjectUnderCursor<T>(bool cycleSelection, Func<T, bool> condition = null, Component previous_selection = null) where T : MonoBehaviour
@@ -253,7 +236,7 @@ public class InterfaceTool : KMonoBehaviour
 		if (this.intersections.Count <= 0)
 		{
 			this.prevIntersectionGroup.Clear();
-			return (T)((object)null);
+			return default(T);
 		}
 		this.curIntersectionGroup.Clear();
 		foreach (InterfaceTool.Intersection intersection in this.intersections)
@@ -277,7 +260,9 @@ public class InterfaceTool : KMonoBehaviour
 			}
 			else
 			{
-				num = ++this.hitCycleCount % this.intersections.Count;
+				int num2 = this.hitCycleCount + 1;
+				this.hitCycleCount = num2;
+				num = num2 % this.intersections.Count;
 			}
 		}
 		return this.intersections[num].component as T;
@@ -309,44 +294,35 @@ public class InterfaceTool : KMonoBehaviour
 			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 			{
 				KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
-				if (!(kcollider2D == null))
+				if (!(kcollider2D == null) && kcollider2D.Intersects(new Vector2(vector2.x, vector2.y)))
 				{
-					if (kcollider2D.Intersects(new Vector2(vector2.x, vector2.y)))
+					T t = kcollider2D.GetComponent<T>();
+					if (t == null)
 					{
-						T t = kcollider2D.GetComponent<T>();
-						if (t == null)
+						t = kcollider2D.GetComponentInParent<T>();
+					}
+					if (!(t == null) && ((1 << t.gameObject.layer) & layer_mask) != 0 && !(t == null) && (condition == null || condition(t)))
+					{
+						float num4 = t.transform.GetPosition().z - vector2.z;
+						bool flag = false;
+						for (int i = 0; i < intersections.Count; i++)
 						{
-							t = kcollider2D.GetComponentInParent<T>();
-						}
-						if (!(t == null))
-						{
-							if (((1 << t.gameObject.layer) & layer_mask) != 0)
+							InterfaceTool.Intersection intersection = intersections[i];
+							if (intersection.component.gameObject == t.gameObject)
 							{
-								if (!(t == null) && (condition == null || condition(t)))
-								{
-									float num4 = t.transform.GetPosition().z - vector2.z;
-									bool flag = false;
-									for (int i = 0; i < intersections.Count; i++)
-									{
-										InterfaceTool.Intersection intersection = intersections[i];
-										if (intersection.component.gameObject == t.gameObject)
-										{
-											intersection.distance = Mathf.Min(intersection.distance, num4);
-											intersections[i] = intersection;
-											flag = true;
-											break;
-										}
-									}
-									if (!flag)
-									{
-										intersections.Add(new InterfaceTool.Intersection
-										{
-											component = t,
-											distance = num4
-										});
-									}
-								}
+								intersection.distance = Mathf.Min(intersection.distance, num4);
+								intersections[i] = intersection;
+								flag = true;
+								break;
 							}
+						}
+						if (!flag)
+						{
+							intersections.Add(new InterfaceTool.Intersection
+							{
+								component = t,
+								distance = num4
+							});
 						}
 					}
 				}
@@ -370,7 +346,11 @@ public class InterfaceTool : KMonoBehaviour
 			return 1;
 		}
 		int num = x.transform.GetPosition().z.CompareTo(y.transform.GetPosition().z);
-		return (num != 0) ? num : x.GetInstanceID().CompareTo(y.GetInstanceID());
+		if (num != 0)
+		{
+			return num;
+		}
+		return x.GetInstanceID().CompareTo(y.GetInstanceID());
 	}
 
 	public void SetHoverOverride(KSelectable hover_override)

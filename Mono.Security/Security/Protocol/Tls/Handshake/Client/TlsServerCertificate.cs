@@ -3,6 +3,7 @@ using System.Collections;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
+using Mono.Security.Interface;
 using Mono.Security.X509;
 using Mono.Security.X509.Extensions;
 
@@ -38,8 +39,7 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 				i += 3;
 				if (num2 > 0)
 				{
-					byte[] array = base.ReadBytes(num2);
-					Mono.Security.X509.X509Certificate x509Certificate = new Mono.Security.X509.X509Certificate(array);
+					Mono.Security.X509.X509Certificate x509Certificate = new Mono.Security.X509.X509Certificate(base.ReadBytes(num2));
 					this.certificates.Add(x509Certificate);
 					i += num2;
 				}
@@ -94,16 +94,7 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 				return extendedKeyUsageExtension.KeyPurpose.Contains("1.3.6.1.5.5.7.3.1") || extendedKeyUsageExtension.KeyPurpose.Contains("2.16.840.1.113730.4.1");
 			}
 			x509Extension = cert.Extensions["2.16.840.1.113730.1.1"];
-			if (x509Extension != null)
-			{
-				NetscapeCertTypeExtension netscapeCertTypeExtension = new NetscapeCertTypeExtension(x509Extension);
-				return netscapeCertTypeExtension.Support(NetscapeCertTypeExtension.CertTypes.SslServer);
-			}
-			return true;
-		}
-
-		private static void VerifyOSX(Mono.Security.X509.X509CertificateCollection certificates)
-		{
+			return x509Extension == null || new NetscapeCertTypeExtension(x509Extension).Support(NetscapeCertTypeExtension.CertTypes.SslServer);
 		}
 
 		private void validateCertificates(Mono.Security.X509.X509CertificateCollection certificates)
@@ -112,127 +103,127 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			AlertDescription alertDescription = AlertDescription.BadCertificate;
 			if (clientContext.SslStream.HaveRemoteValidation2Callback)
 			{
-				ValidationResult validationResult = clientContext.SslStream.RaiseServerCertificateValidation2(certificates);
-				if (validationResult.Trusted)
+				this.RemoteValidation(clientContext, alertDescription);
+				return;
+			}
+			this.LocalValidation(clientContext, alertDescription);
+		}
+
+		private void RemoteValidation(ClientContext context, AlertDescription description)
+		{
+			ValidationResult validationResult = context.SslStream.RaiseServerCertificateValidation2(this.certificates);
+			if (validationResult.Trusted)
+			{
+				return;
+			}
+			long num = (long)validationResult.ErrorCode;
+			if (num != (long)((ulong)(-2146762495)))
+			{
+				if (num != (long)((ulong)(-2146762487)))
 				{
-					return;
-				}
-				long num = (long)validationResult.ErrorCode;
-				long num2 = num;
-				if (num2 != (long)((ulong)(-2146762487)))
-				{
-					if (num2 != (long)((ulong)(-2146762486)))
+					if (num != (long)((ulong)(-2146762486)))
 					{
-						if (num2 != (long)((ulong)(-2146762495)))
-						{
-							alertDescription = AlertDescription.CertificateUnknown;
-						}
-						else
-						{
-							alertDescription = AlertDescription.CertificateExpired;
-						}
+						description = AlertDescription.CertificateUnknown;
 					}
 					else
 					{
-						alertDescription = AlertDescription.UnknownCA;
+						description = AlertDescription.UnknownCA;
 					}
 				}
 				else
 				{
-					alertDescription = AlertDescription.UnknownCA;
+					description = AlertDescription.UnknownCA;
 				}
-				string text = string.Format("0x{0:x}", num);
-				throw new TlsException(alertDescription, "Invalid certificate received from server. Error code: " + text);
 			}
 			else
 			{
-				Mono.Security.X509.X509Certificate x509Certificate = certificates[0];
-				global::System.Security.Cryptography.X509Certificates.X509Certificate x509Certificate2 = new global::System.Security.Cryptography.X509Certificates.X509Certificate(x509Certificate.RawData);
-				ArrayList arrayList = new ArrayList();
-				if (!this.checkCertificateUsage(x509Certificate))
+				description = AlertDescription.CertificateExpired;
+			}
+			string text = string.Format("Invalid certificate received from server. Error code: 0x{0:x}", num);
+			throw new TlsException(description, text);
+		}
+
+		private void LocalValidation(ClientContext context, AlertDescription description)
+		{
+			Mono.Security.X509.X509Certificate x509Certificate = this.certificates[0];
+			global::System.Security.Cryptography.X509Certificates.X509Certificate x509Certificate2 = new global::System.Security.Cryptography.X509Certificates.X509Certificate(x509Certificate.RawData);
+			ArrayList arrayList = new ArrayList();
+			if (!this.checkCertificateUsage(x509Certificate))
+			{
+				arrayList.Add(-2146762490);
+			}
+			if (!this.checkServerIdentity(x509Certificate))
+			{
+				arrayList.Add(-2146762481);
+			}
+			Mono.Security.X509.X509CertificateCollection x509CertificateCollection = new Mono.Security.X509.X509CertificateCollection(this.certificates);
+			x509CertificateCollection.Remove(x509Certificate);
+			Mono.Security.X509.X509Chain x509Chain = new Mono.Security.X509.X509Chain(x509CertificateCollection);
+			bool flag = false;
+			try
+			{
+				flag = x509Chain.Build(x509Certificate);
+			}
+			catch (Exception)
+			{
+				flag = false;
+			}
+			if (!flag)
+			{
+				Mono.Security.X509.X509ChainStatusFlags status = x509Chain.Status;
+				if (status <= Mono.Security.X509.X509ChainStatusFlags.NotSignatureValid)
 				{
-					arrayList.Add(-2146762490);
-				}
-				if (!this.checkServerIdentity(x509Certificate))
-				{
-					arrayList.Add(-2146762481);
-				}
-				Mono.Security.X509.X509CertificateCollection x509CertificateCollection = new Mono.Security.X509.X509CertificateCollection(certificates);
-				x509CertificateCollection.Remove(x509Certificate);
-				Mono.Security.X509.X509Chain x509Chain = new Mono.Security.X509.X509Chain(x509CertificateCollection);
-				bool flag = false;
-				try
-				{
-					flag = x509Chain.Build(x509Certificate);
-				}
-				catch (Exception)
-				{
-					flag = false;
-				}
-				if (!flag)
-				{
-					Mono.Security.X509.X509ChainStatusFlags status = x509Chain.Status;
-					if (status != Mono.Security.X509.X509ChainStatusFlags.NotTimeValid)
+					if (status == Mono.Security.X509.X509ChainStatusFlags.NotTimeValid)
 					{
-						if (status != Mono.Security.X509.X509ChainStatusFlags.NotTimeNested)
-						{
-							if (status != Mono.Security.X509.X509ChainStatusFlags.NotSignatureValid)
-							{
-								if (status != Mono.Security.X509.X509ChainStatusFlags.UntrustedRoot)
-								{
-									if (status != Mono.Security.X509.X509ChainStatusFlags.InvalidBasicConstraints)
-									{
-										if (status != Mono.Security.X509.X509ChainStatusFlags.PartialChain)
-										{
-											alertDescription = AlertDescription.CertificateUnknown;
-											arrayList.Add((int)x509Chain.Status);
-										}
-										else
-										{
-											alertDescription = AlertDescription.UnknownCA;
-											arrayList.Add(-2146762486);
-										}
-									}
-									else
-									{
-										arrayList.Add(-2146869223);
-									}
-								}
-								else
-								{
-									alertDescription = AlertDescription.UnknownCA;
-									arrayList.Add(-2146762487);
-								}
-							}
-							else
-							{
-								arrayList.Add(-2146869232);
-							}
-						}
-						else
-						{
-							arrayList.Add(-2146762494);
-						}
-					}
-					else
-					{
-						alertDescription = AlertDescription.CertificateExpired;
+						description = AlertDescription.CertificateExpired;
 						arrayList.Add(-2146762495);
+						goto IL_015E;
+					}
+					if (status == Mono.Security.X509.X509ChainStatusFlags.NotTimeNested)
+					{
+						arrayList.Add(-2146762494);
+						goto IL_015E;
+					}
+					if (status == Mono.Security.X509.X509ChainStatusFlags.NotSignatureValid)
+					{
+						arrayList.Add(-2146869232);
+						goto IL_015E;
 					}
 				}
-				int[] array = (int[])arrayList.ToArray(typeof(int));
-				if (!clientContext.SslStream.RaiseServerCertificateValidation(x509Certificate2, array))
+				else
 				{
-					throw new TlsException(alertDescription, "Invalid certificate received from server.");
+					if (status == Mono.Security.X509.X509ChainStatusFlags.UntrustedRoot)
+					{
+						description = AlertDescription.UnknownCA;
+						arrayList.Add(-2146762487);
+						goto IL_015E;
+					}
+					if (status == Mono.Security.X509.X509ChainStatusFlags.InvalidBasicConstraints)
+					{
+						arrayList.Add(-2146869223);
+						goto IL_015E;
+					}
+					if (status == Mono.Security.X509.X509ChainStatusFlags.PartialChain)
+					{
+						description = AlertDescription.UnknownCA;
+						arrayList.Add(-2146762486);
+						goto IL_015E;
+					}
 				}
-				return;
+				description = AlertDescription.CertificateUnknown;
+				arrayList.Add((int)x509Chain.Status);
+			}
+			IL_015E:
+			int[] array = (int[])arrayList.ToArray(typeof(int));
+			if (!context.SslStream.RaiseServerCertificateValidation(x509Certificate2, array))
+			{
+				throw new TlsException(description, "Invalid certificate received from server.");
 			}
 		}
 
 		private bool checkServerIdentity(Mono.Security.X509.X509Certificate cert)
 		{
-			ClientContext clientContext = (ClientContext)base.Context;
-			string targetHost = clientContext.ClientSettings.TargetHost;
+			string targetHost = ((ClientContext)base.Context).ClientSettings.TargetHost;
 			Mono.Security.X509.X509Extension x509Extension = cert.Extensions["2.5.29.17"];
 			if (x509Extension != null)
 			{
@@ -244,9 +235,10 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 						return true;
 					}
 				}
-				foreach (string text2 in subjectAltNameExtension.IPAddresses)
+				string[] array = subjectAltNameExtension.IPAddresses;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (text2 == targetHost)
+					if (array[i] == targetHost)
 					{
 						return true;
 					}
@@ -257,15 +249,14 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 
 		private bool checkDomainName(string subjectName)
 		{
-			ClientContext clientContext = (ClientContext)base.Context;
+			Context context = (ClientContext)base.Context;
 			string text = string.Empty;
-			Regex regex = new Regex("CN\\s*=\\s*([^,]*)");
-			MatchCollection matchCollection = regex.Matches(subjectName);
+			MatchCollection matchCollection = new Regex("CN\\s*=\\s*([^,]*)").Matches(subjectName);
 			if (matchCollection.Count == 1 && matchCollection[0].Success)
 			{
 				text = matchCollection[0].Groups[1].Value.ToString();
 			}
-			return TlsServerCertificate.Match(clientContext.ClientSettings.TargetHost, text);
+			return TlsServerCertificate.Match(context.ClientSettings.TargetHost, text);
 		}
 
 		private static bool Match(string hostname, string pattern)
@@ -279,25 +270,24 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			{
 				return false;
 			}
-			int num2 = pattern.IndexOf('*', num + 1);
-			if (num2 != -1)
+			if (pattern.IndexOf('*', num + 1) != -1)
 			{
 				return false;
 			}
 			string text = pattern.Substring(num + 1);
-			int num3 = hostname.Length - text.Length;
-			if (num3 <= 0)
+			int num2 = hostname.Length - text.Length;
+			if (num2 <= 0)
 			{
 				return false;
 			}
-			if (string.Compare(hostname, num3, text, 0, text.Length, true, CultureInfo.InvariantCulture) != 0)
+			if (string.Compare(hostname, num2, text, 0, text.Length, true, CultureInfo.InvariantCulture) != 0)
 			{
 				return false;
 			}
 			if (num == 0)
 			{
-				int num4 = hostname.IndexOf('.');
-				return num4 == -1 || num4 >= hostname.Length - text.Length;
+				int num3 = hostname.IndexOf('.');
+				return num3 == -1 || num3 >= hostname.Length - text.Length;
 			}
 			string text2 = pattern.Substring(0, num);
 			return string.Compare(hostname, 0, text2, 0, text2.Length, true, CultureInfo.InvariantCulture) == 0;

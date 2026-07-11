@@ -39,6 +39,18 @@ namespace Mono.Security.X509.Extensions
 			}
 		}
 
+		protected override void Encode()
+		{
+			ASN1 asn = new ASN1(48);
+			if (this.aki == null)
+			{
+				throw new InvalidOperationException("Invalid AuthorityKeyIdentifier extension");
+			}
+			asn.Add(new ASN1(128, this.aki));
+			this.extnValue = new ASN1(4);
+			this.extnValue.Add(asn);
+		}
+
 		public override string Name
 		{
 			get
@@ -56,6 +68,10 @@ namespace Mono.Security.X509.Extensions
 					return null;
 				}
 				return (byte[])this.aki.Clone();
+			}
+			set
+			{
+				this.aki = value;
 			}
 		}
 

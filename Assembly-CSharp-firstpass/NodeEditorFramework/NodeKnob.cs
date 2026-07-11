@@ -73,12 +73,11 @@ namespace NodeEditorFramework
 					if (texture != null)
 					{
 						this.knobTexture = texture;
+						return;
 					}
-					else
-					{
-						this.knobTexture = RTEditorGUI.RotateTextureCCW(this.knobTexture, rotationStepsAntiCW);
-						ResourceManager.AddTextureToMemory(memoryTexture.path, this.knobTexture, array.ToArray<string>());
-					}
+					this.knobTexture = RTEditorGUI.RotateTextureCCW(this.knobTexture, rotationStepsAntiCW);
+					ResourceManager.AddTextureToMemory(memoryTexture.path, this.knobTexture, array.ToArray<string>());
+					return;
 				}
 				else
 				{
@@ -103,8 +102,7 @@ namespace NodeEditorFramework
 
 		public virtual void DrawKnob()
 		{
-			Rect guiknob = this.GetGUIKnob();
-			GUI.DrawTexture(guiknob, this.knobTexture);
+			GUI.DrawTexture(this.GetGUIKnob(), this.knobTexture);
 		}
 
 		public void DisplayLayout()
@@ -124,7 +122,7 @@ namespace NodeEditorFramework
 
 		public void DisplayLayout(GUIContent content, GUIStyle style)
 		{
-			GUILayout.Label(content, style, new GUILayoutOption[0]);
+			GUILayout.Label(content, style, Array.Empty<GUILayoutOption>());
 			if (Event.current.type == EventType.Repaint)
 			{
 				this.SetPosition();
@@ -149,7 +147,7 @@ namespace NodeEditorFramework
 		public void SetPosition()
 		{
 			Vector2 vector = GUILayoutUtility.GetLastRect().center + this.body.contentOffset;
-			this.sidePosition = ((this.side != NodeSide.Bottom && this.side != NodeSide.Top) ? vector.y : vector.x);
+			this.sidePosition = ((this.side == NodeSide.Bottom || this.side == NodeSide.Top) ? vector.x : vector.y);
 		}
 
 		public Rect GetGUIKnob()
@@ -186,12 +184,24 @@ namespace NodeEditorFramework
 
 		public Vector2 GetDirection()
 		{
-			return (this.side != NodeSide.Right) ? ((this.side != NodeSide.Bottom) ? ((this.side != NodeSide.Top) ? Vector2.left : Vector2.down) : Vector2.up) : Vector2.right;
+			if (this.side == NodeSide.Right)
+			{
+				return Vector2.right;
+			}
+			if (this.side == NodeSide.Bottom)
+			{
+				return Vector2.up;
+			}
+			if (this.side != NodeSide.Top)
+			{
+				return Vector2.left;
+			}
+			return Vector2.down;
 		}
 
 		private static int getRotationStepsAntiCW(NodeSide sideA, NodeSide sideB)
 		{
-			return sideB - sideA + ((sideA <= sideB) ? 0 : 4);
+			return sideB - sideA + ((sideA > sideB) ? 4 : 0);
 		}
 
 		public virtual Node GetNodeAcrossConnection()

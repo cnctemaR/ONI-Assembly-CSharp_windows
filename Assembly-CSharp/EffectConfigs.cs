@@ -7,13 +7,13 @@ public class EffectConfigs : IMultiEntityConfig
 	public List<GameObject> CreatePrefabs()
 	{
 		List<GameObject> list = new List<GameObject>();
-		var anon = new <>__AnonType0<string, string[], string, KAnim.PlayMode, bool>[]
+		var anon = new <>f__AnonymousType0<string, string[], string, KAnim.PlayMode, bool>[]
 		{
 			new
 			{
 				id = EffectConfigs.EffectTemplateId,
 				animFiles = new string[0],
-				initialAnim = string.Empty,
+				initialAnim = "",
 				initialMode = KAnim.PlayMode.Once,
 				destroyOnAnimComplete = false
 			},
@@ -50,23 +50,22 @@ public class EffectConfigs : IMultiEntityConfig
 				destroyOnAnimComplete = false
 			}
 		};
-		var anon2 = anon;
-		for (int i = 0; i < anon2.Length; i++)
+		for (int i = 0; i < anon.Length; i++)
 		{
-			var anon3 = anon2[i];
-			GameObject gameObject = EntityTemplates.CreateEntity(anon3.id, anon3.id, false);
+			var anon2 = anon[i];
+			GameObject gameObject = EntityTemplates.CreateEntity(anon2.id, anon2.id, false);
 			KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 			kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.Simple;
-			kbatchedAnimController.initialAnim = anon3.initialAnim;
-			kbatchedAnimController.initialMode = anon3.initialMode;
+			kbatchedAnimController.initialAnim = anon2.initialAnim;
+			kbatchedAnimController.initialMode = anon2.initialMode;
 			kbatchedAnimController.isMovable = true;
-			kbatchedAnimController.destroyOnAnimComplete = anon3.destroyOnAnimComplete;
-			if (anon3.animFiles.Length > 0)
+			kbatchedAnimController.destroyOnAnimComplete = anon2.destroyOnAnimComplete;
+			if (anon2.animFiles.Length != 0)
 			{
-				KAnimFile[] array = new KAnimFile[anon3.animFiles.Length];
+				KAnimFile[] array = new KAnimFile[anon2.animFiles.Length];
 				for (int j = 0; j < array.Length; j++)
 				{
-					array[j] = Assets.GetAnim(anon3.animFiles[j]);
+					array[j] = Assets.GetAnim(anon2.animFiles[j]);
 				}
 				kbatchedAnimController.AnimFiles = array;
 			}

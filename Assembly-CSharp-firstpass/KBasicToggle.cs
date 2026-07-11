@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDoubleClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerEnter;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerExit;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<bool> onValueChanged;
 
 	public bool isOn
@@ -43,23 +37,17 @@ public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterH
 		{
 			this.onDoubleClick();
 			this.didDoubleClick = true;
+			return;
 		}
-		else
-		{
-			this.doubleClickCoroutine = this.DoubleClickTimer(eventData);
-			base.StartCoroutine(this.doubleClickCoroutine);
-		}
+		this.doubleClickCoroutine = this.DoubleClickTimer(eventData);
+		base.StartCoroutine(this.doubleClickCoroutine);
 	}
 
 	private IEnumerator DoubleClickTimer(PointerEventData eventData)
 	{
 		float startTime = Time.unscaledTime;
-		while (Time.unscaledTime - startTime < 0.15f)
+		while (Time.unscaledTime - startTime < 0.15f && !this.didDoubleClick)
 		{
-			if (this.didDoubleClick)
-			{
-				break;
-			}
 			yield return null;
 		}
 		if (!this.didDoubleClick && this.onClick != null)

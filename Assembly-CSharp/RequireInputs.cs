@@ -86,21 +86,21 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 			{
 				this.previouslyConnected = flag4;
 				StatusItem statusItem = null;
-				ConduitType typeOfConduit = this.conduitConsumer.TypeOfConduit;
-				if (typeOfConduit != ConduitType.Liquid)
+				ConduitType conduitType = this.conduitConsumer.TypeOfConduit;
+				if (conduitType != ConduitType.Gas)
 				{
-					if (typeOfConduit == ConduitType.Gas)
+					if (conduitType == ConduitType.Liquid)
 					{
-						statusItem = Db.Get().BuildingStatusItems.NeedGasIn;
+						statusItem = Db.Get().BuildingStatusItems.NeedLiquidIn;
 					}
 				}
 				else
 				{
-					statusItem = Db.Get().BuildingStatusItems.NeedLiquidIn;
+					statusItem = Db.Get().BuildingStatusItems.NeedGasIn;
 				}
 				if (statusItem != null)
 				{
-					this.selectable.ToggleStatusItem(statusItem, !flag4, new Tuple<ConduitType, Tag>(this.conduitConsumer.TypeOfConduit, this.conduitConsumer.capacityTag));
+					this.selectable.ToggleStatusItem(statusItem, !flag4, new global::Tuple<ConduitType, Tag>(this.conduitConsumer.TypeOfConduit, this.conduitConsumer.capacityTag));
 				}
 				this.operational.SetFlag(RequireInputs.inputConnectedFlag, flag4);
 			}
@@ -109,17 +109,17 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 			{
 				this.previouslySatisfied = flag5;
 				StatusItem statusItem2 = null;
-				ConduitType typeOfConduit2 = this.conduitConsumer.TypeOfConduit;
-				if (typeOfConduit2 != ConduitType.Liquid)
+				ConduitType conduitType = this.conduitConsumer.TypeOfConduit;
+				if (conduitType != ConduitType.Gas)
 				{
-					if (typeOfConduit2 == ConduitType.Gas)
+					if (conduitType == ConduitType.Liquid)
 					{
-						statusItem2 = Db.Get().BuildingStatusItems.GasPipeEmpty;
+						statusItem2 = Db.Get().BuildingStatusItems.LiquidPipeEmpty;
 					}
 				}
 				else
 				{
-					statusItem2 = Db.Get().BuildingStatusItems.LiquidPipeEmpty;
+					statusItem2 = Db.Get().BuildingStatusItems.GasPipeEmpty;
 				}
 				if (this.requireConduitHasMass)
 				{

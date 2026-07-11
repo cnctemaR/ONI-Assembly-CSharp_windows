@@ -8,6 +8,11 @@ namespace Klei
 {
 	public class ZipFileDirectory : IFileDirectory
 	{
+		public string GetID()
+		{
+			return this.id;
+		}
+
 		public ZipFileDirectory(string id, ZipFile zipfile, string mount_point = "")
 		{
 			this.id = id;
@@ -18,11 +23,6 @@ namespace Klei
 		public ZipFileDirectory(string id, Stream zip_data_stream, string mount_point = "")
 			: this(id, ZipFile.Read(zip_data_stream), mount_point)
 		{
-		}
-
-		public string GetID()
-		{
-			return this.id;
 		}
 
 		public string MountPoint

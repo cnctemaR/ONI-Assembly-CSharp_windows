@@ -81,30 +81,25 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 	public List<Descriptor> EffectDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		MedicineInfo.MedicineType medicineType = this.info.medicineType;
-		if (medicineType != MedicineInfo.MedicineType.Booster)
+		switch (this.info.medicineType)
 		{
-			if (medicineType != MedicineInfo.MedicineType.CureAny)
+		case MedicineInfo.MedicineType.Booster:
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
+			break;
+		case MedicineInfo.MedicineType.CureAny:
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY, Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY_TOOLTIP, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
+			break;
+		case MedicineInfo.MedicineType.CureSpecific:
+		{
+			List<string> list2 = new List<string>();
+			foreach (string text in this.info.curedSicknesses)
 			{
-				if (medicineType == MedicineInfo.MedicineType.CureSpecific)
-				{
-					List<string> list2 = new List<string>();
-					foreach (string text in this.info.curedSicknesses)
-					{
-						list2.Add(Strings.Get("STRINGS.DUPLICANTS.DISEASES." + text.ToUpper() + ".NAME"));
-					}
-					string text2 = string.Join(",", list2.ToArray());
-					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES, text2), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_TOOLTIP, text2), Descriptor.DescriptorType.Effect, false));
-				}
+				list2.Add(Strings.Get("STRINGS.DUPLICANTS.DISEASES." + text.ToUpper() + ".NAME"));
 			}
-			else
-			{
-				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
-			}
+			string text2 = string.Join(",", list2.ToArray());
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES, text2), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_TOOLTIP, text2), Descriptor.DescriptorType.Effect, false));
+			break;
 		}
-		else
-		{
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
 		}
 		if (!string.IsNullOrEmpty(this.info.effect))
 		{

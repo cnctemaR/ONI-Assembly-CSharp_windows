@@ -78,7 +78,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 		this.smi.StartSM();
 		if (ObjectDispenser.infoStatusItem == null)
 		{
-			ObjectDispenser.infoStatusItem = new StatusItem("ObjectDispenserAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			ObjectDispenser.infoStatusItem = new StatusItem("ObjectDispenserAutomationInfo", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			ObjectDispenser.infoStatusItem.resolveStringCallback = new Func<string, object, string>(ObjectDispenser.ResolveInfoStatusItemString);
 		}
 		this.filteredStorage.FilterChanged();
@@ -139,8 +139,8 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 	private static string ResolveInfoStatusItemString(string format_str, object data)
 	{
 		ObjectDispenser.Instance instance = (ObjectDispenser.Instance)data;
-		string text = ((!instance.IsAutomated()) ? BUILDING.STATUSITEMS.OBJECTDISPENSER.MANUAL_CONTROL : BUILDING.STATUSITEMS.OBJECTDISPENSER.AUTOMATION_CONTROL);
-		string text2 = ((!instance.IsOpened) ? BUILDING.STATUSITEMS.OBJECTDISPENSER.CLOSED : BUILDING.STATUSITEMS.OBJECTDISPENSER.OPENED);
+		string text = (instance.IsAutomated() ? BUILDING.STATUSITEMS.OBJECTDISPENSER.AUTOMATION_CONTROL : BUILDING.STATUSITEMS.OBJECTDISPENSER.MANUAL_CONTROL);
+		string text2 = (instance.IsOpened ? BUILDING.STATUSITEMS.OBJECTDISPENSER.OPENED : BUILDING.STATUSITEMS.OBJECTDISPENSER.CLOSED);
 		return string.Format(text, text2);
 	}
 
@@ -229,7 +229,11 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 		{
 			get
 			{
-				return (!this.IsAutomated()) ? this.manual_on : this.logic_on;
+				if (!this.IsAutomated())
+				{
+					return this.manual_on;
+				}
+				return this.logic_on;
 			}
 		}
 
@@ -269,11 +273,9 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 			if (this.IsAutomated())
 			{
 				base.smi.sm.should_open.Set(this.logic_on, base.smi);
+				return;
 			}
-			else
-			{
-				base.smi.sm.should_open.Set(this.manual_on, base.smi);
-			}
+			base.smi.sm.should_open.Set(this.manual_on, base.smi);
 		}
 
 		private Operational operational;

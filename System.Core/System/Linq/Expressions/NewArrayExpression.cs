@@ -1,83 +1,56 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
-using System.Reflection.Emit;
+using System.Diagnostics;
+using System.Dynamic.Utils;
+using Unity;
 
 namespace System.Linq.Expressions
 {
-	public sealed class NewArrayExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.NewArrayExpressionProxy))]
+	public class NewArrayExpression : Expression
 	{
-		internal NewArrayExpression(ExpressionType et, Type type, ReadOnlyCollection<Expression> expressions)
-			: base(et, type)
+		internal NewArrayExpression(Type type, ReadOnlyCollection<Expression> expressions)
 		{
-			this.expressions = expressions;
+			this.Expressions = expressions;
+			this.Type = type;
 		}
 
-		public ReadOnlyCollection<Expression> Expressions
+		internal static NewArrayExpression Make(ExpressionType nodeType, Type type, ReadOnlyCollection<Expression> expressions)
 		{
-			get
-			{
-				return this.expressions;
-			}
-		}
-
-		private void EmitNewArrayInit(EmitContext ec, Type type)
-		{
-			int count = this.expressions.Count;
-			ec.ig.Emit(OpCodes.Ldc_I4, count);
-			ec.ig.Emit(OpCodes.Newarr, type);
-			for (int i = 0; i < count; i++)
-			{
-				ec.ig.Emit(OpCodes.Dup);
-				ec.ig.Emit(OpCodes.Ldc_I4, i);
-				this.expressions[i].Emit(ec);
-				ec.ig.Emit(OpCodes.Stelem, type);
-			}
-		}
-
-		private void EmitNewArrayBounds(EmitContext ec, Type type)
-		{
-			int count = this.expressions.Count;
-			ec.EmitCollection<Expression>(this.expressions);
-			if (count == 1)
-			{
-				ec.ig.Emit(OpCodes.Newarr, type);
-				return;
-			}
-			ec.ig.Emit(OpCodes.Newobj, NewArrayExpression.GetArrayConstructor(type, count));
-		}
-
-		private static ConstructorInfo GetArrayConstructor(Type type, int rank)
-		{
-			return NewArrayExpression.CreateArray(type, rank).GetConstructor(NewArrayExpression.CreateTypeParameters(rank));
-		}
-
-		private static Type[] CreateTypeParameters(int rank)
-		{
-			return Enumerable.Repeat<Type>(typeof(int), rank).ToArray<Type>();
-		}
-
-		private static Type CreateArray(Type type, int rank)
-		{
-			return type.MakeArrayType(rank);
-		}
-
-		internal override void Emit(EmitContext ec)
-		{
-			Type elementType = base.Type.GetElementType();
-			ExpressionType nodeType = base.NodeType;
 			if (nodeType == ExpressionType.NewArrayInit)
 			{
-				this.EmitNewArrayInit(ec, elementType);
-				return;
+				return new NewArrayInitExpression(type, expressions);
 			}
-			if (nodeType != ExpressionType.NewArrayBounds)
-			{
-				throw new NotSupportedException();
-			}
-			this.EmitNewArrayBounds(ec, elementType);
+			return new NewArrayBoundsExpression(type, expressions);
 		}
 
-		private ReadOnlyCollection<Expression> expressions;
+		public sealed override Type Type { get; }
+
+		public ReadOnlyCollection<Expression> Expressions { get; }
+
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitNewArray(this);
+		}
+
+		public NewArrayExpression Update(IEnumerable<Expression> expressions)
+		{
+			ContractUtils.RequiresNotNull(expressions, "expressions");
+			if (ExpressionUtils.SameElements<Expression>(ref expressions, this.Expressions))
+			{
+				return this;
+			}
+			if (this.NodeType != ExpressionType.NewArrayInit)
+			{
+				return Expression.NewArrayBounds(this.Type.GetElementType(), expressions);
+			}
+			return Expression.NewArrayInit(this.Type.GetElementType(), expressions);
+		}
+
+		internal NewArrayExpression()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
 	}
 }

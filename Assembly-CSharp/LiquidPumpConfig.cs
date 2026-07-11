@@ -49,8 +49,7 @@ public class LiquidPumpConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Pump>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 20f;
+		go.AddOrGet<Storage>().capacityKg = 20f;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.configuration = ElementConsumer.Configuration.AllLiquid;
 		elementConsumer.consumptionRate = 10f;

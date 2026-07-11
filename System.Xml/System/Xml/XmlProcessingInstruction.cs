@@ -8,36 +8,19 @@ namespace System.Xml
 		protected internal XmlProcessingInstruction(string target, string data, XmlDocument doc)
 			: base(doc)
 		{
-			XmlConvert.VerifyName(target);
-			if (data == null)
-			{
-				data = string.Empty;
-			}
 			this.target = target;
 			this.data = data;
 		}
 
-		public string Data
+		public override string Name
 		{
 			get
 			{
-				return this.data;
-			}
-			set
-			{
-				this.data = value;
-			}
-		}
-
-		public override string InnerText
-		{
-			get
-			{
-				return this.Data;
-			}
-			set
-			{
-				this.data = value;
+				if (this.target != null)
+				{
+					return this.target;
+				}
+				return string.Empty;
 			}
 		}
 
@@ -45,39 +28,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.target;
-			}
-		}
-
-		public override string Name
-		{
-			get
-			{
-				return this.target;
-			}
-		}
-
-		public override XmlNodeType NodeType
-		{
-			get
-			{
-				return XmlNodeType.ProcessingInstruction;
-			}
-		}
-
-		internal override XPathNodeType XPathNodeType
-		{
-			get
-			{
-				return XPathNodeType.ProcessingInstruction;
-			}
-		}
-
-		public string Target
-		{
-			get
-			{
-				return this.target;
+				return this.Name;
 			}
 		}
 
@@ -89,26 +40,88 @@ namespace System.Xml
 			}
 			set
 			{
-				if (this.IsReadOnly)
+				this.Data = value;
+			}
+		}
+
+		public string Target
+		{
+			get
+			{
+				return this.target;
+			}
+		}
+
+		public string Data
+		{
+			get
+			{
+				return this.data;
+			}
+			set
+			{
+				XmlNode parentNode = this.ParentNode;
+				XmlNodeChangedEventArgs eventArgs = this.GetEventArgs(this, parentNode, parentNode, this.data, value, XmlNodeChangedAction.Change);
+				if (eventArgs != null)
 				{
-					throw new ArgumentException("This node is read-only.");
+					this.BeforeEvent(eventArgs);
 				}
 				this.data = value;
+				if (eventArgs != null)
+				{
+					this.AfterEvent(eventArgs);
+				}
+			}
+		}
+
+		public override string InnerText
+		{
+			get
+			{
+				return this.data;
+			}
+			set
+			{
+				this.Data = value;
+			}
+		}
+
+		public override XmlNodeType NodeType
+		{
+			get
+			{
+				return XmlNodeType.ProcessingInstruction;
 			}
 		}
 
 		public override XmlNode CloneNode(bool deep)
 		{
-			return new XmlProcessingInstruction(this.target, this.data, this.OwnerDocument);
+			return this.OwnerDocument.CreateProcessingInstruction(this.target, this.data);
+		}
+
+		public override void WriteTo(XmlWriter w)
+		{
+			w.WriteProcessingInstruction(this.target, this.data);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
-		public override void WriteTo(XmlWriter w)
+		internal override string XPLocalName
 		{
-			w.WriteProcessingInstruction(this.target, this.data);
+			get
+			{
+				return this.Name;
+			}
+		}
+
+		internal override XPathNodeType XPNodeType
+		{
+			get
+			{
+				return XPathNodeType.ProcessingInstruction;
+			}
 		}
 
 		private string target;

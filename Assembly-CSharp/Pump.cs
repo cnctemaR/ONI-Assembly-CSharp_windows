@@ -33,11 +33,9 @@ public class Pump : KMonoBehaviour, ISim1000ms
 		if (this.operational.IsOperational && this.pumpable)
 		{
 			this.operational.SetActive(true, false);
+			return;
 		}
-		else
-		{
-			this.operational.SetActive(false, false);
-		}
+		this.operational.SetActive(false, false);
 	}
 
 	private bool UpdateOperational()
@@ -56,7 +54,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 			state = Element.State.Gas;
 		}
 		bool flag = this.IsPumpable(state, (int)this.consumer.consumptionRadius);
-		StatusItem statusItem = ((state != Element.State.Gas) ? Db.Get().BuildingStatusItems.NoLiquidElementToPump : Db.Get().BuildingStatusItems.NoGasElementToPump);
+		StatusItem statusItem = ((state == Element.State.Gas) ? Db.Get().BuildingStatusItems.NoGasElementToPump : Db.Get().BuildingStatusItems.NoLiquidElementToPump);
 		this.noElementStatusGuid = this.selectable.ToggleStatusItem(statusItem, this.noElementStatusGuid, !flag, null);
 		this.operational.SetFlag(Pump.PumpableFlag, !this.storage.IsFull() && flag);
 		return flag;
@@ -70,8 +68,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 			for (int j = 0; j < (int)this.consumer.consumptionRadius; j++)
 			{
 				int num2 = num + j + Grid.WidthInCells * i;
-				bool flag = Grid.Element[num2].IsState(expected_state);
-				if (flag)
+				if (Grid.Element[num2].IsState(expected_state))
 				{
 					return true;
 				}

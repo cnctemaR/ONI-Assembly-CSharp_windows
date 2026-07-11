@@ -7,6 +7,14 @@ namespace NodeEditorFramework
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 	public class HotkeyAttribute : Attribute
 	{
+		public KeyCode handledHotKey { get; private set; }
+
+		public EventModifiers? modifiers { get; private set; }
+
+		public EventType? limitingEventType { get; private set; }
+
+		public int priority { get; private set; }
+
 		public HotkeyAttribute(KeyCode handledKey)
 		{
 			this.handledHotKey = handledKey;
@@ -46,14 +54,6 @@ namespace NodeEditorFramework
 			this.limitingEventType = new EventType?(LimitEventType);
 			this.priority = 50;
 		}
-
-		public KeyCode handledHotKey { get; private set; }
-
-		public EventModifiers? modifiers { get; private set; }
-
-		public EventType? limitingEventType { get; private set; }
-
-		public int priority { get; private set; }
 
 		internal static bool AssureValidity(MethodInfo method, HotkeyAttribute attr)
 		{

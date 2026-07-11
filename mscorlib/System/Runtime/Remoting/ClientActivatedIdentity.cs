@@ -36,7 +36,7 @@ namespace System.Runtime.Remoting
 			if (this._serverSink == null)
 			{
 				bool flag = this._targetThis != null;
-				this._serverSink = this._context.CreateServerObjectSinkChain((!flag) ? this._serverObject : this._targetThis, flag);
+				this._serverSink = this._context.CreateServerObjectSinkChain(flag ? this._targetThis : this._serverObject, flag);
 			}
 			return this._serverSink.SyncProcessMessage(msg);
 		}
@@ -46,7 +46,7 @@ namespace System.Runtime.Remoting
 			if (this._serverSink == null)
 			{
 				bool flag = this._targetThis != null;
-				this._serverSink = this._context.CreateServerObjectSinkChain((!flag) ? this._serverObject : this._targetThis, flag);
+				this._serverSink = this._context.CreateServerObjectSinkChain(flag ? this._targetThis : this._serverObject, flag);
 			}
 			return this._serverSink.AsyncProcessMessage(msg, replySink);
 		}

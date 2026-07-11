@@ -6,13 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Represents a Sprite object for use in 2D gameplay.</para>
-	/// </summary>
-	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
-	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
-	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[NativeType("Runtime/Graphics/SpriteFrame.h")]
+	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
+	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
+	[ExcludeFromPreset]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]
@@ -76,9 +74,6 @@ namespace UnityEngine
 			return Sprite.CreateSprite_Injected(texture, ref rect, ref pivot, pixelsPerUnit, extrude, meshType, ref border, generateFallbackPhysicsShape);
 		}
 
-		/// <summary>
-		///   <para>Bounds of the Sprite, specified by its center and extents in world space units.</para>
-		/// </summary>
 		public Bounds bounds
 		{
 			get
@@ -89,9 +84,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Location of the Sprite on the original Texture, specified in pixels.</para>
-		/// </summary>
 		public Rect rect
 		{
 			get
@@ -102,9 +94,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the border sizes of the sprite.</para>
-		/// </summary>
 		public Vector4 border
 		{
 			get
@@ -115,18 +104,12 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Get the reference to the used texture. If packed this will point to the atlas, if not packed will point to the source sprite.</para>
-		/// </summary>
 		public extern Texture2D texture
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The number of pixels in the sprite that correspond to one unit in world space. (Read Only)</para>
-		/// </summary>
 		public extern float pixelsPerUnit
 		{
 			[NativeMethod("GetPixelsToUnits")]
@@ -134,11 +117,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Returns the texture that contains the alpha channel from the source texture. Unity generates this texture under the hood for sprites that have alpha in the source, and need to be compressed using techniques like ETC1.
-		///
-		/// Returns NULL if there is no associated alpha texture for the source sprite. This is the case if the sprite has not been setup to use ETC1 compression.</para>
-		/// </summary>
 		public extern Texture2D associatedAlphaSplitTexture
 		{
 			[NativeMethod("GetAlphaTexture")]
@@ -146,9 +124,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Location of the Sprite's center point in the Rect on the original Texture, specified in pixels.</para>
-		/// </summary>
 		public Vector2 pivot
 		{
 			[NativeMethod("GetPivotInPixels")]
@@ -160,9 +135,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if this Sprite is packed in an atlas.</para>
-		/// </summary>
 		public bool packed
 		{
 			get
@@ -171,9 +143,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>If Sprite is packed (see Sprite.packed), returns its SpritePackingMode.</para>
-		/// </summary>
 		public SpritePackingMode packingMode
 		{
 			get
@@ -182,9 +151,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>If Sprite is packed (see Sprite.packed), returns its SpritePackingRotation.</para>
-		/// </summary>
 		public SpritePackingRotation packingRotation
 		{
 			get
@@ -193,9 +159,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Get the rectangle this sprite uses on its texture. Raises an exception if this sprite is tightly packed in an atlas.</para>
-		/// </summary>
 		public Rect textureRect
 		{
 			get
@@ -213,9 +176,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the offset of the rectangle this sprite uses on its texture to the original sprite bounds. If sprite mesh type is FullRect, offset is zero.</para>
-		/// </summary>
 		public Vector2 textureRectOffset
 		{
 			get
@@ -233,9 +193,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns a copy of the array containing sprite mesh vertex positions.</para>
-		/// </summary>
 		public extern Vector2[] vertices
 		{
 			[FreeFunction("SpriteAccessLegacy::GetSpriteVertices", HasExplicitThis = true)]
@@ -243,9 +200,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Returns a copy of the array containing sprite mesh triangles.</para>
-		/// </summary>
 		public extern ushort[] triangles
 		{
 			[FreeFunction("SpriteAccessLegacy::GetSpriteIndices", HasExplicitThis = true)]
@@ -253,9 +207,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The base texture coordinates of the sprite mesh.</para>
-		/// </summary>
 		public extern Vector2[] uv
 		{
 			[FreeFunction("SpriteAccessLegacy::GetSpriteUVs", HasExplicitThis = true)]
@@ -263,22 +214,9 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The number of physics shapes for the Sprite.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The number of physics shapes for the Sprite.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetPhysicsShapeCount();
 
-		/// <summary>
-		///   <para>The number of points in the selected physics shape for the Sprite.</para>
-		/// </summary>
-		/// <param name="shapeIdx">The index of the physics shape to retrieve the number of points from.</param>
-		/// <returns>
-		///   <para>The number of points in the selected physics shape for the Sprite.</para>
-		/// </returns>
 		public int GetPhysicsShapePointCount(int shapeIdx)
 		{
 			int physicsShapeCount = this.GetPhysicsShapeCount();
@@ -337,11 +275,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void OverridePhysicsShape(Sprite sprite, Vector2[] physicsShape, int idx);
 
-		/// <summary>
-		///   <para>Sets up new Sprite geometry.</para>
-		/// </summary>
-		/// <param name="vertices">Array of vertex positions in Sprite Rect space.</param>
-		/// <param name="triangles">Array of sprite mesh triangle indices.</param>
 		[FreeFunction("SpritesBindings::OverrideGeometry", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void OverrideGeometry(Vector2[] vertices, ushort[] triangles);
@@ -356,17 +289,6 @@ namespace UnityEngine
 			return Sprite.CreateSpriteWithoutTextureScripting(rect, pivot, pixelsToUnits, null);
 		}
 
-		/// <summary>
-		///   <para>Create a new Sprite object.</para>
-		/// </summary>
-		/// <param name="texture">Texture from which to obtain the sprite graphic.</param>
-		/// <param name="rect">Rectangular section of the texture to use for the sprite.</param>
-		/// <param name="pivot">Sprite's pivot point relative to its graphic rectangle.</param>
-		/// <param name="pixelsPerUnit">The number of pixels in the sprite that correspond to one unit in world space.</param>
-		/// <param name="extrude">Amount by which the sprite mesh should be expanded outwards.</param>
-		/// <param name="meshType">Controls the type of mesh generated for the sprite.</param>
-		/// <param name="border">The border sizes of the sprite (X=left, Y=bottom, Z=right, W=top).</param>
-		/// <param name="generateFallbackPhysicsShape">Generates a default physics shape for the sprite.</param>
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape)
 		{
 			Sprite sprite;
@@ -389,81 +311,26 @@ namespace UnityEngine
 			return sprite;
 		}
 
-		/// <summary>
-		///   <para>Create a new Sprite object.</para>
-		/// </summary>
-		/// <param name="texture">Texture from which to obtain the sprite graphic.</param>
-		/// <param name="rect">Rectangular section of the texture to use for the sprite.</param>
-		/// <param name="pivot">Sprite's pivot point relative to its graphic rectangle.</param>
-		/// <param name="pixelsPerUnit">The number of pixels in the sprite that correspond to one unit in world space.</param>
-		/// <param name="extrude">Amount by which the sprite mesh should be expanded outwards.</param>
-		/// <param name="meshType">Controls the type of mesh generated for the sprite.</param>
-		/// <param name="border">The border sizes of the sprite (X=left, Y=bottom, Z=right, W=top).</param>
-		/// <param name="generateFallbackPhysicsShape">Generates a default physics shape for the sprite.</param>
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border)
 		{
 			return Sprite.Create(texture, rect, pivot, pixelsPerUnit, extrude, meshType, border, false);
 		}
 
-		/// <summary>
-		///   <para>Create a new Sprite object.</para>
-		/// </summary>
-		/// <param name="texture">Texture from which to obtain the sprite graphic.</param>
-		/// <param name="rect">Rectangular section of the texture to use for the sprite.</param>
-		/// <param name="pivot">Sprite's pivot point relative to its graphic rectangle.</param>
-		/// <param name="pixelsPerUnit">The number of pixels in the sprite that correspond to one unit in world space.</param>
-		/// <param name="extrude">Amount by which the sprite mesh should be expanded outwards.</param>
-		/// <param name="meshType">Controls the type of mesh generated for the sprite.</param>
-		/// <param name="border">The border sizes of the sprite (X=left, Y=bottom, Z=right, W=top).</param>
-		/// <param name="generateFallbackPhysicsShape">Generates a default physics shape for the sprite.</param>
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType)
 		{
 			return Sprite.Create(texture, rect, pivot, pixelsPerUnit, extrude, meshType, Vector4.zero);
 		}
 
-		/// <summary>
-		///   <para>Create a new Sprite object.</para>
-		/// </summary>
-		/// <param name="texture">Texture from which to obtain the sprite graphic.</param>
-		/// <param name="rect">Rectangular section of the texture to use for the sprite.</param>
-		/// <param name="pivot">Sprite's pivot point relative to its graphic rectangle.</param>
-		/// <param name="pixelsPerUnit">The number of pixels in the sprite that correspond to one unit in world space.</param>
-		/// <param name="extrude">Amount by which the sprite mesh should be expanded outwards.</param>
-		/// <param name="meshType">Controls the type of mesh generated for the sprite.</param>
-		/// <param name="border">The border sizes of the sprite (X=left, Y=bottom, Z=right, W=top).</param>
-		/// <param name="generateFallbackPhysicsShape">Generates a default physics shape for the sprite.</param>
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude)
 		{
 			return Sprite.Create(texture, rect, pivot, pixelsPerUnit, extrude, SpriteMeshType.Tight);
 		}
 
-		/// <summary>
-		///   <para>Create a new Sprite object.</para>
-		/// </summary>
-		/// <param name="texture">Texture from which to obtain the sprite graphic.</param>
-		/// <param name="rect">Rectangular section of the texture to use for the sprite.</param>
-		/// <param name="pivot">Sprite's pivot point relative to its graphic rectangle.</param>
-		/// <param name="pixelsPerUnit">The number of pixels in the sprite that correspond to one unit in world space.</param>
-		/// <param name="extrude">Amount by which the sprite mesh should be expanded outwards.</param>
-		/// <param name="meshType">Controls the type of mesh generated for the sprite.</param>
-		/// <param name="border">The border sizes of the sprite (X=left, Y=bottom, Z=right, W=top).</param>
-		/// <param name="generateFallbackPhysicsShape">Generates a default physics shape for the sprite.</param>
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit)
 		{
 			return Sprite.Create(texture, rect, pivot, pixelsPerUnit, 0U);
 		}
 
-		/// <summary>
-		///   <para>Create a new Sprite object.</para>
-		/// </summary>
-		/// <param name="texture">Texture from which to obtain the sprite graphic.</param>
-		/// <param name="rect">Rectangular section of the texture to use for the sprite.</param>
-		/// <param name="pivot">Sprite's pivot point relative to its graphic rectangle.</param>
-		/// <param name="pixelsPerUnit">The number of pixels in the sprite that correspond to one unit in world space.</param>
-		/// <param name="extrude">Amount by which the sprite mesh should be expanded outwards.</param>
-		/// <param name="meshType">Controls the type of mesh generated for the sprite.</param>
-		/// <param name="border">The border sizes of the sprite (X=left, Y=bottom, Z=right, W=top).</param>
-		/// <param name="generateFallbackPhysicsShape">Generates a default physics shape for the sprite.</param>
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot)
 		{
 			return Sprite.Create(texture, rect, pivot, 100f);

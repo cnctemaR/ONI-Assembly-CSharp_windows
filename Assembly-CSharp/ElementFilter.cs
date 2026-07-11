@@ -27,30 +27,22 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		base.GetComponent<ConduitConsumer>().isConsuming = false;
 		this.OnFilterChanged(this.filterable.SelectedTag);
 		this.filterable.onFilterChanged += this.OnFilterChanged;
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
-		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlowPriority.Default);
+		Conduit.GetFlowManager(this.portInfo.conduitType).AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlowPriority.Default);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, ElementFilter.filterStatusItem, this);
 		this.UpdateConduitExistsStatus();
 		this.UpdateConduitBlockedStatus();
 		ScenePartitionerLayer scenePartitionerLayer = null;
-		ConduitType conduitType = this.portInfo.conduitType;
-		if (conduitType != ConduitType.Gas)
+		switch (this.portInfo.conduitType)
 		{
-			if (conduitType != ConduitType.Liquid)
-			{
-				if (conduitType == ConduitType.Solid)
-				{
-					scenePartitionerLayer = GameScenePartitioner.Instance.solidConduitsLayer;
-				}
-			}
-			else
-			{
-				scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
-			}
-		}
-		else
-		{
+		case ConduitType.Gas:
 			scenePartitionerLayer = GameScenePartitioner.Instance.gasConduitsLayer;
+			break;
+		case ConduitType.Liquid:
+			scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
+			break;
+		case ConduitType.Solid:
+			scenePartitionerLayer = GameScenePartitioner.Instance.solidConduitsLayer;
+			break;
 		}
 		if (scenePartitionerLayer != null)
 		{
@@ -63,10 +55,8 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 
 	protected override void OnCleanUp()
 	{
-		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
-		networkManager.RemoveFromNetworks(this.filteredCell, this.itemFilter, true);
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
-		flowManager.RemoveConduitUpdater(new Action<float>(this.OnConduitTick));
+		Conduit.GetNetworkManager(this.portInfo.conduitType).RemoveFromNetworks(this.filteredCell, this.itemFilter, true);
+		Conduit.GetFlowManager(this.portInfo.conduitType).RemoveConduitUpdater(new Action<float>(this.OnConduitTick));
 		if (this.partitionerEntry.IsValid() && GameScenePartitioner.Instance != null)
 		{
 			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
@@ -82,7 +72,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		{
 			ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
 			ConduitFlow.ConduitContents contents = flowManager.GetContents(this.inputCell);
-			int num = ((contents.element != this.filteredElem) ? this.outputCell : this.filteredCell);
+			int num = ((contents.element == this.filteredElem) ? this.filteredCell : this.outputCell);
 			ConduitFlow.ConduitContents contents2 = flowManager.GetContents(num);
 			if (contents.mass > 0f && contents2.mass <= 0f)
 			{
@@ -124,8 +114,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 
 	private void UpdateConduitBlockedStatus()
 	{
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
-		bool flag = flowManager.IsConduitEmpty(this.filteredCell);
+		bool flag = Conduit.GetFlowManager(this.portInfo.conduitType).IsConduitEmpty(this.filteredCell);
 		StatusItem conduitBlockedMultiples = Db.Get().BuildingStatusItems.ConduitBlockedMultiples;
 		bool flag2 = this.conduitBlockedStatusItemGuid != Guid.Empty;
 		if (flag == flag2)
@@ -150,7 +139,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	{
 		if (ElementFilter.filterStatusItem == null)
 		{
-			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.LiquidConduits.ID, true, 129022);
+			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.LiquidConduits.ID, true, 129022);
 			ElementFilter.filterStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementFilter elementFilter = (ElementFilter)data;
@@ -172,8 +161,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	private bool ShowInUtilityOverlay(HashedString mode, object data)
 	{
 		bool flag = false;
-		ElementFilter elementFilter = (ElementFilter)data;
-		ConduitType conduitType = elementFilter.portInfo.conduitType;
+		ConduitType conduitType = ((ElementFilter)data).portInfo.conduitType;
 		if (conduitType != ConduitType.Gas)
 		{
 			if (conduitType == ConduitType.Liquid)

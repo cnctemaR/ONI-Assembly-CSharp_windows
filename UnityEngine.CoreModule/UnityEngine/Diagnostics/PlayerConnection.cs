@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
+using System.ComponentModel;
 using UnityEngine.Networking.PlayerConnection;
-using UnityEngine.Scripting;
 
 namespace UnityEngine.Diagnostics
 {
@@ -17,8 +16,9 @@ namespace UnityEngine.Diagnostics
 		}
 
 		[Obsolete("PlayerConnection.SendFile is no longer supported.", true)]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SendFile(string remoteFilePath, byte[] data);
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public static void SendFile(string remoteFilePath, byte[] data)
+		{
+		}
 	}
 }

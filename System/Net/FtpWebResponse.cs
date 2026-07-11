@@ -1,19 +1,32 @@
 ﻿using System;
 using System.IO;
+using Unity;
 
 namespace System.Net
 {
 	public class FtpWebResponse : WebResponse
 	{
-		internal FtpWebResponse(FtpWebRequest request, global::System.Uri uri, string method, bool keepAlive)
+		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, bool keepAlive)
 		{
+			this.lastModified = DateTime.MinValue;
+			this.bannerMessage = string.Empty;
+			this.welcomeMessage = string.Empty;
+			this.exitMessage = string.Empty;
+			this.contentLength = -1L;
+			base..ctor();
 			this.request = request;
 			this.uri = uri;
 			this.method = method;
 		}
 
-		internal FtpWebResponse(FtpWebRequest request, global::System.Uri uri, string method, FtpStatusCode statusCode, string statusDescription)
+		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, FtpStatusCode statusCode, string statusDescription)
 		{
+			this.lastModified = DateTime.MinValue;
+			this.bannerMessage = string.Empty;
+			this.welcomeMessage = string.Empty;
+			this.exitMessage = string.Empty;
+			this.contentLength = -1L;
+			base..ctor();
 			this.request = request;
 			this.uri = uri;
 			this.method = method;
@@ -21,7 +34,7 @@ namespace System.Net
 			this.statusDescription = statusDescription;
 		}
 
-		internal FtpWebResponse(FtpWebRequest request, global::System.Uri uri, string method, FtpStatus status)
+		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, FtpStatus status)
 			: this(request, uri, method, status.StatusCode, status.StatusDescription)
 		{
 		}
@@ -42,7 +55,7 @@ namespace System.Net
 			}
 		}
 
-		public override global::System.Uri ResponseUri
+		public override Uri ResponseUri
 		{
 			get
 			{
@@ -104,9 +117,17 @@ namespace System.Net
 			{
 				return this.statusCode;
 			}
-			private set
+			internal set
 			{
 				this.statusCode = value;
+			}
+		}
+
+		public override bool SupportsHeaders
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -116,7 +137,7 @@ namespace System.Net
 			{
 				return this.statusDescription;
 			}
-			private set
+			internal set
 			{
 				this.statusDescription = value;
 			}
@@ -184,19 +205,24 @@ namespace System.Net
 			return this.statusCode >= FtpStatusCode.CommandOK;
 		}
 
+		internal FtpWebResponse()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
 		private Stream stream;
 
-		private global::System.Uri uri;
+		private Uri uri;
 
 		private FtpStatusCode statusCode;
 
-		private DateTime lastModified = DateTime.MinValue;
+		private DateTime lastModified;
 
-		private string bannerMessage = string.Empty;
+		private string bannerMessage;
 
-		private string welcomeMessage = string.Empty;
+		private string welcomeMessage;
 
-		private string exitMessage = string.Empty;
+		private string exitMessage;
 
 		private string statusDescription;
 
@@ -206,6 +232,6 @@ namespace System.Net
 
 		private FtpWebRequest request;
 
-		internal long contentLength = -1L;
+		internal long contentLength;
 	}
 }

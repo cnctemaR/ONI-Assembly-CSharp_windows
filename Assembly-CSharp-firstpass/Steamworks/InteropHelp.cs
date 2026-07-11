@@ -102,16 +102,17 @@ namespace Steamworks
 				};
 				Marshal.Copy(this.m_Strings, 0, steamParamStringArray_t.m_ppStrings, this.m_Strings.Length);
 				this.m_pSteamParamStringArray = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SteamParamStringArray_t)));
-				Marshal.StructureToPtr(steamParamStringArray_t, this.m_pSteamParamStringArray, false);
+				Marshal.StructureToPtr<SteamParamStringArray_t>(steamParamStringArray_t, this.m_pSteamParamStringArray, false);
 			}
 
 			protected override void Finalize()
 			{
 				try
 				{
-					foreach (IntPtr intPtr in this.m_Strings)
+					IntPtr[] strings = this.m_Strings;
+					for (int i = 0; i < strings.Length; i++)
 					{
-						Marshal.FreeHGlobal(intPtr);
+						Marshal.FreeHGlobal(strings[i]);
 					}
 					if (this.m_ptrStrings != IntPtr.Zero)
 					{

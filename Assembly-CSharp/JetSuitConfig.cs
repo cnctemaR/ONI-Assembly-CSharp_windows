@@ -19,13 +19,7 @@ public class JetSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(Db.Get().Attributes.Digging.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DIGGING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		this.expertAthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), Db.Get().Skills.Suits1.Name, false, false, true);
-		string text = "Jet_Suit";
-		string slot = global::TUNING.EQUIPMENT.SUITS.SLOT;
-		SimHashes simHashes = SimHashes.Steel;
-		float num = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS;
-		List<AttributeModifier> list2 = list;
-		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, simHashes, num, "suit_jetpack_kanim", string.Empty, "body_jetpack_kanim", 6, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, "JetSuit");
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Jet_Suit", global::TUNING.EQUIPMENT.SUITS.SLOT, SimHashes.Steel, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_jetpack_kanim", "", "body_jetpack_kanim", 6, list, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, new Tag[] { GameTags.Suit }, "JetSuit");
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
@@ -79,7 +73,7 @@ public class JetSuitConfig : IEquipmentConfig
 							component5.RemoveAnimOverrides(Assets.GetAnim("anim_loco_hover_kanim"));
 						}
 						Effects component6 = targetGameObject2.GetComponent<Effects>();
-						if (component6.HasEffect("SoiledSuit"))
+						if (component6 != null && component6.HasEffect("SoiledSuit"))
 						{
 							component6.Remove("SoiledSuit");
 						}
@@ -99,8 +93,7 @@ public class JetSuitConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.capacity = 75f;
 		go.AddComponent<JetSuitTank>();
-		HelmetController helmetController = go.AddComponent<HelmetController>();
-		helmetController.has_jets = true;
+		go.AddComponent<HelmetController>().has_jets = true;
 		KPrefabID component = go.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Clothes, false);
 		component.AddTag(GameTags.PedestalDisplayable, false);

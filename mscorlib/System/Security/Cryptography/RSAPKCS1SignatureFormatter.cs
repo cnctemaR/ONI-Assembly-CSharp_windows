@@ -35,7 +35,11 @@ namespace System.Security.Cryptography
 
 		public override void SetHashAlgorithm(string strName)
 		{
-			this.hash = HashAlgorithm.Create(strName);
+			if (strName == null)
+			{
+				throw new ArgumentNullException("strName");
+			}
+			this.hash = strName;
 		}
 
 		public override void SetKey(AsymmetricAlgorithm key)
@@ -49,6 +53,6 @@ namespace System.Security.Cryptography
 
 		private RSA rsa;
 
-		private HashAlgorithm hash;
+		private string hash;
 	}
 }

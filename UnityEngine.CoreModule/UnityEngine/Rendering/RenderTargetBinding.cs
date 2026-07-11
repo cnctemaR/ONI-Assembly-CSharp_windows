@@ -2,26 +2,8 @@
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Describes a render target with one or more color buffers, a depthstencil buffer and the associated loadstore-actions that are applied when the render target is active.</para>
-	/// </summary>
 	public struct RenderTargetBinding
 	{
-		/// <summary>
-		///   <para>Constructs RenderTargetBinding.</para>
-		/// </summary>
-		/// <param name="color">Color buffers to use as render targets.</param>
-		/// <param name="depth">Depth buffer to use as render target.</param>
-		/// <param name="colorLoadAction">Load actions for color buffers.</param>
-		/// <param name="colorStoreAction">Store actions for color buffers.</param>
-		/// <param name="depthLoadAction">Load action for the depth/stencil buffer.</param>
-		/// <param name="depthStoreAction">Store action for the depth/stencil buffer.</param>
-		/// <param name="colorRenderTarget"></param>
-		/// <param name="depthRenderTarget"></param>
-		/// <param name="colorRenderTargets"></param>
-		/// <param name="colorLoadActions"></param>
-		/// <param name="colorStoreActions"></param>
-		/// <param name="setup"></param>
 		public RenderTargetBinding(RenderTargetIdentifier[] colorRenderTargets, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
 		{
 			this.m_ColorRenderTargets = colorRenderTargets;
@@ -32,41 +14,11 @@ namespace UnityEngine.Rendering
 			this.m_DepthStoreAction = depthStoreAction;
 		}
 
-		/// <summary>
-		///   <para>Constructs RenderTargetBinding.</para>
-		/// </summary>
-		/// <param name="color">Color buffers to use as render targets.</param>
-		/// <param name="depth">Depth buffer to use as render target.</param>
-		/// <param name="colorLoadAction">Load actions for color buffers.</param>
-		/// <param name="colorStoreAction">Store actions for color buffers.</param>
-		/// <param name="depthLoadAction">Load action for the depth/stencil buffer.</param>
-		/// <param name="depthStoreAction">Store action for the depth/stencil buffer.</param>
-		/// <param name="colorRenderTarget"></param>
-		/// <param name="depthRenderTarget"></param>
-		/// <param name="colorRenderTargets"></param>
-		/// <param name="colorLoadActions"></param>
-		/// <param name="colorStoreActions"></param>
-		/// <param name="setup"></param>
 		public RenderTargetBinding(RenderTargetIdentifier colorRenderTarget, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
 		{
 			this = new RenderTargetBinding(new RenderTargetIdentifier[] { colorRenderTarget }, new RenderBufferLoadAction[] { colorLoadAction }, new RenderBufferStoreAction[] { colorStoreAction }, depthRenderTarget, depthLoadAction, depthStoreAction);
 		}
 
-		/// <summary>
-		///   <para>Constructs RenderTargetBinding.</para>
-		/// </summary>
-		/// <param name="color">Color buffers to use as render targets.</param>
-		/// <param name="depth">Depth buffer to use as render target.</param>
-		/// <param name="colorLoadAction">Load actions for color buffers.</param>
-		/// <param name="colorStoreAction">Store actions for color buffers.</param>
-		/// <param name="depthLoadAction">Load action for the depth/stencil buffer.</param>
-		/// <param name="depthStoreAction">Store action for the depth/stencil buffer.</param>
-		/// <param name="colorRenderTarget"></param>
-		/// <param name="depthRenderTarget"></param>
-		/// <param name="colorRenderTargets"></param>
-		/// <param name="colorLoadActions"></param>
-		/// <param name="colorStoreActions"></param>
-		/// <param name="setup"></param>
 		public RenderTargetBinding(RenderTargetSetup setup)
 		{
 			this.m_ColorRenderTargets = new RenderTargetIdentifier[setup.color.Length];
@@ -81,9 +33,6 @@ namespace UnityEngine.Rendering
 			this.m_DepthStoreAction = setup.depthStore;
 		}
 
-		/// <summary>
-		///   <para>Color buffers to use as render targets.</para>
-		/// </summary>
 		public RenderTargetIdentifier[] colorRenderTargets
 		{
 			get
@@ -96,9 +45,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Depth/stencil buffer to use as render target.</para>
-		/// </summary>
 		public RenderTargetIdentifier depthRenderTarget
 		{
 			get
@@ -111,9 +57,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Load actions for color buffers.</para>
-		/// </summary>
 		public RenderBufferLoadAction[] colorLoadActions
 		{
 			get
@@ -126,9 +69,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Store actions for color buffers.</para>
-		/// </summary>
 		public RenderBufferStoreAction[] colorStoreActions
 		{
 			get
@@ -141,9 +81,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Load action for the depth/stencil buffer.</para>
-		/// </summary>
 		public RenderBufferLoadAction depthLoadAction
 		{
 			get
@@ -156,9 +93,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Store action for the depth/stencil buffer.</para>
-		/// </summary>
 		public RenderBufferStoreAction depthStoreAction
 		{
 			get

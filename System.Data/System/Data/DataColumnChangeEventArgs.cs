@@ -4,35 +4,36 @@ namespace System.Data
 {
 	public class DataColumnChangeEventArgs : EventArgs
 	{
+		internal DataColumnChangeEventArgs(DataRow row)
+		{
+			this.Row = row;
+		}
+
 		public DataColumnChangeEventArgs(DataRow row, DataColumn column, object value)
 		{
+			this.Row = row;
+			this._column = column;
+			this.ProposedValue = value;
 		}
 
 		public DataColumn Column
 		{
 			get
 			{
-				throw null;
+				return this._column;
 			}
 		}
 
-		public object ProposedValue
+		public DataRow Row { get; }
+
+		public object ProposedValue { get; set; }
+
+		internal void InitializeColumnChangeEvent(DataColumn column, object value)
 		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
+			this._column = column;
+			this.ProposedValue = value;
 		}
 
-		public DataRow Row
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		private DataColumn _column;
 	}
 }

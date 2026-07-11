@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class AssemblyConfigurationAttribute : Attribute
 	{
 		public AssemblyConfigurationAttribute(string configuration)
 		{
-			this.name = configuration;
+			this.m_configuration = configuration;
 		}
 
 		public string Configuration
 		{
 			get
 			{
-				return this.name;
+				return this.m_configuration;
 			}
 		}
 
-		private string name;
+		private string m_configuration;
 	}
 }

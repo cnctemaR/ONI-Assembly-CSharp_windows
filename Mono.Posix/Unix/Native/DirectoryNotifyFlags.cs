@@ -3,8 +3,8 @@
 namespace Mono.Unix.Native
 {
 	[Map]
-	[CLSCompliant(false)]
 	[Flags]
+	[CLSCompliant(false)]
 	public enum DirectoryNotifyFlags
 	{
 		DN_ACCESS = 1,

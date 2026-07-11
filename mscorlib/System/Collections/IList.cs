@@ -4,19 +4,19 @@ using System.Runtime.InteropServices;
 namespace System.Collections
 {
 	[ComVisible(true)]
-	public interface IList : IEnumerable, ICollection
+	public interface IList : ICollection, IEnumerable
 	{
-		bool IsFixedSize { get; }
-
-		bool IsReadOnly { get; }
-
 		object this[int index] { get; set; }
 
 		int Add(object value);
 
+		bool Contains(object value);
+
 		void Clear();
 
-		bool Contains(object value);
+		bool IsReadOnly { get; }
+
+		bool IsFixedSize { get; }
 
 		int IndexOf(object value);
 

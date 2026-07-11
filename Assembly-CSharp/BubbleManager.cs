@@ -33,23 +33,21 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 		ListPool<BubbleManager.Bubble, BubbleManager>.PooledList pooledList2 = ListPool<BubbleManager.Bubble, BubbleManager>.Allocate();
 		foreach (BubbleManager.Bubble bubble in this.bubbles)
 		{
-			BubbleManager.Bubble bubble2 = bubble;
-			bubble2.position += bubble2.velocity * dt;
-			bubble2.elapsedTime += dt;
-			int num = Grid.PosToCell(bubble2.position);
-			if (!Grid.IsVisiblyInLiquid(bubble2.position) || Grid.Element[num].id == bubble2.element)
+			bubble.position += bubble.velocity * dt;
+			bubble.elapsedTime += dt;
+			int num = Grid.PosToCell(bubble.position);
+			if (!Grid.IsVisiblyInLiquid(bubble.position) || Grid.Element[num].id == bubble.element)
 			{
-				pooledList2.Add(bubble2);
+				pooledList2.Add(bubble);
 			}
 			else
 			{
-				pooledList.Add(bubble2);
+				pooledList.Add(bubble);
 			}
 		}
-		foreach (BubbleManager.Bubble bubble3 in pooledList2)
+		foreach (BubbleManager.Bubble bubble2 in pooledList2)
 		{
-			int num2 = Grid.PosToCell(bubble3.position);
-			SimMessages.AddRemoveSubstance(num2, bubble3.element, CellEventLogger.Instance.FallingWaterAddToSim, bubble3.mass, bubble3.temperature, byte.MaxValue, 0, true, -1);
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(bubble2.position), bubble2.element, CellEventLogger.Instance.FallingWaterAddToSim, bubble2.mass, bubble2.temperature, byte.MaxValue, 0, true, -1);
 		}
 		this.bubbles.Clear();
 		this.bubbles.AddRange(pooledList);
@@ -63,12 +61,11 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 		SpriteSheetAnimator spriteSheetAnimator = SpriteSheetAnimManager.instance.GetSpriteSheetAnimator("liquid_splash1");
 		foreach (BubbleManager.Bubble bubble in this.bubbles)
 		{
-			BubbleManager.Bubble bubble2 = bubble;
 			SpriteSheetAnimator.AnimInfo animInfo = new SpriteSheetAnimator.AnimInfo
 			{
-				frame = spriteSheetAnimator.GetFrameFromElapsedTimeLooping(bubble2.elapsedTime),
-				elapsedTime = bubble2.elapsedTime,
-				pos = new Vector3(bubble2.position.x, bubble2.position.y, 0f),
+				frame = spriteSheetAnimator.GetFrameFromElapsedTimeLooping(bubble.elapsedTime),
+				elapsedTime = bubble.elapsedTime,
+				pos = new Vector3(bubble.position.x, bubble.position.y, 0f),
 				rotation = Quaternion.identity,
 				size = Vector2.one,
 				colour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue)

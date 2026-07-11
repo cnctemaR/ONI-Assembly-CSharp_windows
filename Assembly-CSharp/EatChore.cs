@@ -85,7 +85,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				soleOwner.AutoAssignSlot(Db.Get().AssignableSlots.MessStation);
 				list = Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, Db.Get().AssignableSlots.MessStation);
 			}
-			Assignable assignable = ((list.Count <= 0) ? null : list[0]);
+			Assignable assignable = ((list.Count > 0) ? list[0] : null);
 			base.smi.sm.messstation.Set(assignable, base.smi);
 		}
 
@@ -132,8 +132,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.sm.messstation.Get(base.smi).gameObject);
 			if (roomOfGameObject != null)
 			{
-				RoomType roomType = roomOfGameObject.roomType;
-				roomType.TriggerRoomEffects(base.sm.messstation.Get(base.smi).gameObject.GetComponent<KPrefabID>(), base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>());
+				roomOfGameObject.roomType.TriggerRoomEffects(base.sm.messstation.Get(base.smi).gameObject.GetComponent<KPrefabID>(), base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>());
 			}
 		}
 
@@ -143,9 +142,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			if (component != null && component.Has(TableSaltConfig.ID.ToTag()))
 			{
 				component.ConsumeIgnoringDisease(TableSaltConfig.ID.ToTag(), TableSaltTuning.CONSUMABLE_RATE);
-				Worker component2 = base.sm.eater.Get(base.smi).gameObject.GetComponent<Worker>();
-				Effects component3 = component2.GetComponent<Effects>();
-				component3.Add("MessTableSalt", true);
+				base.sm.eater.Get(base.smi).gameObject.GetComponent<Worker>().GetComponent<Effects>().Add("MessTableSalt", true);
 				base.sm.messstation.Get(base.smi).gameObject.Trigger(1356255274, null);
 			}
 		}

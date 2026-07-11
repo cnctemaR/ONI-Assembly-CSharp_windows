@@ -1,36 +1,38 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class UInt64Converter : BaseNumberConverter
 	{
-		public UInt64Converter()
-		{
-			this.InnerType = typeof(ulong);
-		}
-
-		internal override bool SupportHex
+		internal override Type TargetType
 		{
 			get
 			{
-				return true;
+				return typeof(ulong);
 			}
 		}
 
-		internal override string ConvertToString(object value, NumberFormatInfo format)
+		internal override object FromString(string value, int radix)
 		{
-			return ((ulong)value).ToString("G", format);
+			return Convert.ToUInt64(value, radix);
 		}
 
-		internal override object ConvertFromString(string value, NumberFormatInfo format)
+		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
-			return ulong.Parse(value, NumberStyles.Integer, format);
+			return ulong.Parse(value, NumberStyles.Integer, formatInfo);
 		}
 
-		internal override object ConvertFromString(string value, int fromBase)
+		internal override object FromString(string value, CultureInfo culture)
 		{
-			return Convert.ToUInt64(value, fromBase);
+			return ulong.Parse(value, culture);
+		}
+
+		internal override string ToString(object value, NumberFormatInfo formatInfo)
+		{
+			return ((ulong)value).ToString("G", formatInfo);
 		}
 	}
 }

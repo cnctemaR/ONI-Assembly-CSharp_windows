@@ -6,29 +6,31 @@ namespace System.Data.SqlClient
 	public sealed class SqlRowUpdatingEventArgs : RowUpdatingEventArgs
 	{
 		public SqlRowUpdatingEventArgs(DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-			: base(null, null, StatementType.Select, null)
+			: base(row, command, statementType, tableMapping)
 		{
-		}
-
-		protected override IDbCommand BaseCommand
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
 		}
 
 		public new SqlCommand Command
 		{
 			get
 			{
-				throw null;
+				return base.Command as SqlCommand;
 			}
 			set
 			{
+				base.Command = value;
+			}
+		}
+
+		protected override IDbCommand BaseCommand
+		{
+			get
+			{
+				return base.BaseCommand;
+			}
+			set
+			{
+				base.BaseCommand = value as SqlCommand;
 			}
 		}
 	}

@@ -5,6 +5,24 @@ namespace YamlDotNet.Core.Events
 {
 	public abstract class NodeEvent : ParsingEvent
 	{
+		public string Anchor
+		{
+			get
+			{
+				return this.anchor;
+			}
+		}
+
+		public string Tag
+		{
+			get
+			{
+				return this.tag;
+			}
+		}
+
+		public abstract bool IsCanonical { get; }
+
 		protected NodeEvent(string anchor, string tag, Mark start, Mark end)
 			: base(start, end)
 		{
@@ -32,25 +50,7 @@ namespace YamlDotNet.Core.Events
 		{
 		}
 
-		public string Anchor
-		{
-			get
-			{
-				return this.anchor;
-			}
-		}
-
-		public string Tag
-		{
-			get
-			{
-				return this.tag;
-			}
-		}
-
-		public abstract bool IsCanonical { get; }
-
-		internal static readonly Regex anchorValidator = new Regex("^[0-9a-zA-Z_\\-]+$", RegexOptions.Compiled);
+		internal static readonly Regex anchorValidator = new Regex("^[0-9a-zA-Z_\\-]+$", RegexOptions.None);
 
 		private readonly string anchor;
 

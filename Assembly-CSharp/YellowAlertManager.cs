@@ -47,12 +47,6 @@ public class YellowAlertManager : GameStateMachine<YellowAlertManager, YellowAle
 
 	public new class Instance : GameStateMachine<YellowAlertManager, YellowAlertManager.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
-		{
-			YellowAlertManager.Instance.instance = this;
-		}
-
 		public static void DestroyInstance()
 		{
 			YellowAlertManager.Instance.instance = null;
@@ -61,6 +55,12 @@ public class YellowAlertManager : GameStateMachine<YellowAlertManager, YellowAle
 		public static YellowAlertManager.Instance Get()
 		{
 			return YellowAlertManager.Instance.instance;
+		}
+
+		public Instance(IStateMachineTarget master)
+			: base(master)
+		{
+			YellowAlertManager.Instance.instance = this;
 		}
 
 		public bool IsOn()

@@ -14,12 +14,16 @@ public class SteamTurbineConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 60f;
 		string[] array = new string[] { "RefinedMetal", "Plastic" };
-		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
+		float[] array2 = new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
-		}, array, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, none, 1f);
+		};
+		string[] array3 = array;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.GeneratorWattageRating = 2000f;
 		buildingDef.GeneratorBaseCapacity = 2000f;
 		buildingDef.Entombable = true;
@@ -42,23 +46,21 @@ public class SteamTurbineConfig : IBuildingConfig
 	{
 		base.DoPostConfigureUnderConstruction(go);
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-		Constructable component = go.GetComponent<Constructable>();
-		component.requiredSkillPerk = Db.Get().SkillPerks.CanPowerTinker.Id;
+		go.GetComponent<Constructable>().requiredSkillPerk = Db.Get().SkillPerks.CanPowerTinker.Id;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-		Storage storage = go.AddOrGet<Storage>();
-		storage.SetDefaultStoredItemModifiers(SteamTurbineConfig.StoredItemModifiers);
+		go.AddOrGet<Storage>().SetDefaultStoredItemModifiers(SteamTurbineConfig.StoredItemModifiers);
 		Turbine turbine = go.AddOrGet<Turbine>();
 		turbine.srcElem = SimHashes.Steam;
 		turbine.pumpKGRate = 10f;
 		turbine.requiredMassFlowDifferential = 3f;
 		turbine.minEmitMass = 10f;
 		turbine.maxRPM = 4000f;
-		turbine.rpmAcceleration = turbine.maxRPM / 30f;
-		turbine.rpmDeceleration = turbine.maxRPM / 20f;
+		turbine.maxRPM /= 30f;
+		turbine.maxRPM /= 20f;
 		turbine.minGenerationRPM = 3000f;
 		turbine.minActiveTemperature = 500f;
 		turbine.emitTemperature = 425f;

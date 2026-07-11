@@ -108,18 +108,15 @@ public class Deconstructable : Workable
 		{
 			return;
 		}
-		for (int i = 0; i < this.constructionElements.Length; i++)
+		int num = 0;
+		while (num < this.constructionElements.Length && building.Def.Mass.Length > num)
 		{
-			if (building.Def.Mass.Length <= i)
-			{
-				break;
-			}
-			GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), building.Def, this.constructionElements[i], building.Def.Mass[i], temperature, disease_idx, disease_count);
+			GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), building.Def, this.constructionElements[num], building.Def.Mass[num], temperature, disease_idx, disease_count);
 			gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
-			int num = Grid.PosToCell(gameObject.transform.GetPosition());
-			int num2 = Grid.CellAbove(num);
+			int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
+			int num3 = Grid.CellAbove(num2);
 			Vector2 zero;
-			if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
+			if ((Grid.IsValidCell(num2) && Grid.Solid[num2]) || (Grid.IsValidCell(num3) && Grid.Solid[num3]))
 			{
 				zero = Vector2.zero;
 			}
@@ -132,6 +129,7 @@ public class Deconstructable : Workable
 				GameComps.Fallers.Remove(gameObject);
 			}
 			GameComps.Fallers.Add(gameObject, zero);
+			num++;
 		}
 		this.destroyed = true;
 		base.gameObject.DeleteObject();
@@ -144,15 +142,13 @@ public class Deconstructable : Workable
 			if (DebugHandler.InstantBuildMode)
 			{
 				this.OnCompleteWork(null);
+				return;
 			}
-			else
-			{
-				Prioritizable.AddRef(base.gameObject);
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
-				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
-				this.isMarkedForDeconstruction = true;
-				base.Trigger(2108245096, "Deconstruct");
-			}
+			Prioritizable.AddRef(base.gameObject);
+			this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
+			this.isMarkedForDeconstruction = true;
+			base.Trigger(2108245096, "Deconstruct");
 		}
 	}
 
@@ -161,11 +157,9 @@ public class Deconstructable : Workable
 		if (this.chore == null)
 		{
 			this.QueueDeconstruction();
+			return;
 		}
-		else
-		{
-			this.CancelDeconstruction();
-		}
+		this.CancelDeconstruction();
 	}
 
 	public bool IsMarkedForDeconstruction()
@@ -213,8 +207,7 @@ public class Deconstructable : Workable
 			{
 				int num8 = num7 % def.PlacementOffsets.Length;
 				int num9 = Grid.OffsetCell(num, placementOffsets[num8]);
-				GameObject prefab = Assets.GetPrefab(src_element);
-				gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num9, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
+				gameObject = GameUtil.KInstantiate(Assets.GetPrefab(src_element), Grid.CellToPosCBC(num9, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
 				gameObject.SetActive(true);
 				num7++;
 			}
@@ -228,25 +221,8 @@ public class Deconstructable : Workable
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (this.chore == null)
-		{
-			string text = "action_deconstruct";
-			string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME;
-			global::System.Action action = new global::System.Action(this.OnDeconstruct);
-			string text3 = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_deconstruct";
-			string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.OnDeconstruct);
-			string text = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore == null) ? new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.DEMOLISH.NAME, new global::System.Action(this.OnDeconstruct), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.DEMOLISH.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.DEMOLISH.NAME_OFF, new global::System.Action(this.OnDeconstruct), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.DEMOLISH.TOOLTIP_OFF, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 0f);
 	}
 
 	private void CancelDeconstruction()

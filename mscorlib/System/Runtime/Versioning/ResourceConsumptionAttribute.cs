@@ -3,40 +3,40 @@ using System.Diagnostics;
 
 namespace System.Runtime.Versioning
 {
-	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property, Inherited = false)]
 	[Conditional("RESOURCE_ANNOTATION_WORK")]
+	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property, Inherited = false)]
 	public sealed class ResourceConsumptionAttribute : Attribute
 	{
 		public ResourceConsumptionAttribute(ResourceScope resourceScope)
 		{
-			this.resource = resourceScope;
-			this.consumption = resourceScope;
+			this._resourceScope = resourceScope;
+			this._consumptionScope = this._resourceScope;
 		}
 
 		public ResourceConsumptionAttribute(ResourceScope resourceScope, ResourceScope consumptionScope)
 		{
-			this.resource = resourceScope;
-			this.consumption = consumptionScope;
-		}
-
-		public ResourceScope ConsumptionScope
-		{
-			get
-			{
-				return this.consumption;
-			}
+			this._resourceScope = resourceScope;
+			this._consumptionScope = consumptionScope;
 		}
 
 		public ResourceScope ResourceScope
 		{
 			get
 			{
-				return this.resource;
+				return this._resourceScope;
 			}
 		}
 
-		private ResourceScope resource;
+		public ResourceScope ConsumptionScope
+		{
+			get
+			{
+				return this._consumptionScope;
+			}
+		}
 
-		private ResourceScope consumption;
+		private ResourceScope _consumptionScope;
+
+		private ResourceScope _resourceScope;
 	}
 }

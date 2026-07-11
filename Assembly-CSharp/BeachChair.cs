@@ -19,10 +19,10 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEff
 
 	public static void AddModifierDescriptions(List<Descriptor> descs, string effect_id, bool high_lux)
 	{
-		Effect effect = Db.Get().effects.Get(effect_id);
-		LocString locString = ((!high_lux) ? BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_LOW : BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_HIGH);
-		LocString locString2 = ((!high_lux) ? BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_LOW_TOOLTIP : BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_HIGH_TOOLTIP);
-		foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
+		Klei.AI.Modifier modifier = Db.Get().effects.Get(effect_id);
+		LocString locString = (high_lux ? BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_HIGH : BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_LOW);
+		LocString locString2 = (high_lux ? BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_HIGH_TOOLTIP : BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_LOW_TOOLTIP);
+		foreach (AttributeModifier attributeModifier in modifier.SelfModifiers)
 		{
 			Descriptor descriptor = new Descriptor(locString.Replace("{attrib}", Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME")).Replace("{amount}", attributeModifier.GetFormattedString(null)).Replace("{lux}", GameUtil.GetFormattedLux(10000)), locString2.Replace("{attrib}", Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME")).Replace("{amount}", attributeModifier.GetFormattedString(null)).Replace("{lux}", GameUtil.GetFormattedLux(10000)), Descriptor.DescriptorType.Effect, false);
 			descriptor.IncreaseIndent();
@@ -73,11 +73,9 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEff
 					if (this.lit.Get(smi))
 					{
 						smi.GoTo(this.ready.working_lit);
+						return;
 					}
-					else
-					{
-						smi.GoTo(this.ready.working_unlit);
-					}
+					smi.GoTo(this.ready.working_unlit);
 				});
 			this.ready.working_unlit.DefaultState(this.ready.working_unlit.working).Enter(delegate(BeachChair.StatesInstance smi)
 			{
@@ -93,11 +91,9 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEff
 				if (this.lit.Get(smi))
 				{
 					smi.GoTo(this.ready.working_lit);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.ready.working_unlit.working);
-				}
+				smi.GoTo(this.ready.working_unlit.working);
 			});
 			this.ready.working_lit.DefaultState(this.ready.working_lit.working).Enter(delegate(BeachChair.StatesInstance smi)
 			{
@@ -116,11 +112,9 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEff
 				if (!this.lit.Get(smi))
 				{
 					smi.GoTo(this.ready.working_unlit);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.ready.working_lit.working);
-				}
+				smi.GoTo(this.ready.working_lit.working);
 			});
 			this.ready.post.PlayAnim("working_pst").Exit(delegate(BeachChair.StatesInstance smi)
 			{
@@ -131,12 +125,9 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEff
 		private Chore CreateChore(BeachChair.StatesInstance smi)
 		{
 			Workable component = smi.master.GetComponent<BeachChairWorkable>();
-			ChoreType relax = Db.Get().ChoreTypes.Relax;
-			Workable workable = component;
-			ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-			Chore chore = new WorkChore<BeachChairWorkable>(relax, workable, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-			chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
-			return chore;
+			WorkChore<BeachChairWorkable> workChore = new WorkChore<BeachChairWorkable>(Db.Get().ChoreTypes.Relax, component, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
+			return workChore;
 		}
 
 		public StateMachine<BeachChair.States, BeachChair.StatesInstance, BeachChair, object>.BoolParameter lit;

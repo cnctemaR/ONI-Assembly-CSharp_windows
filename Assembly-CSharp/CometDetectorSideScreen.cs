@@ -59,7 +59,7 @@ public class CometDetectorSideScreen : SideScreenContent
 		component.GetReference<LocText>("label").text = name;
 		component.GetReference<Image>("icon").sprite = icon;
 		MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
-		component2.ChangeState((!(this.detector.GetTargetCraft() == target)) ? 0 : 1);
+		component2.ChangeState((this.detector.GetTargetCraft() == target) ? 1 : 0);
 		LaunchConditionManager _target = target;
 		component2.onClick = delegate
 		{

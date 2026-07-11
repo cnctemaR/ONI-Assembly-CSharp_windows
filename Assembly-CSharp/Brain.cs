@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 public class Brain : KMonoBehaviour
 {
@@ -14,7 +13,6 @@ public class Brain : KMonoBehaviour
 		Components.Brains.Add(this);
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPreUpdate;
 
 	public virtual void UpdateBrain()
@@ -46,11 +44,9 @@ public class Brain : KMonoBehaviour
 			if (this.HasTag(GameTags.PerformingWorkRequest))
 			{
 				base.Trigger(1485595942, null);
+				return;
 			}
-			else
-			{
-				base.GetComponent<ChoreDriver>().SetChore(context);
-			}
+			base.GetComponent<ChoreDriver>().SetChore(context);
 		}
 	}
 

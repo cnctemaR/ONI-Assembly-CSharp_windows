@@ -4,30 +4,6 @@ using STRINGS;
 
 public class RoomType : Resource
 {
-	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null, int sortKey = 0)
-		: base(id, name)
-	{
-		this.tooltip = tooltip;
-		this.effect = effect;
-		this.category = category;
-		this.primary_constraint = primary_constraint;
-		this.additional_constraints = additional_constraints;
-		this.display_details = display_details;
-		this.priority = priority;
-		this.upgrade_paths = upgrade_paths;
-		this.single_assignee = single_assignee;
-		this.priority_building_use = priority_building_use;
-		this.effects = effects;
-		this.sortKey = sortKey;
-		if (this.upgrade_paths != null)
-		{
-			foreach (RoomType roomType in this.upgrade_paths)
-			{
-				Debug.Assert(roomType != null, name + " has a null upgrade path. Maybe it wasn't initialized yet.");
-			}
-		}
-	}
-
 	public string tooltip { get; private set; }
 
 	public string effect { get; private set; }
@@ -52,6 +28,31 @@ public class RoomType : Resource
 
 	public int sortKey { get; private set; }
 
+	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null, int sortKey = 0)
+		: base(id, name)
+	{
+		this.tooltip = tooltip;
+		this.effect = effect;
+		this.category = category;
+		this.primary_constraint = primary_constraint;
+		this.additional_constraints = additional_constraints;
+		this.display_details = display_details;
+		this.priority = priority;
+		this.upgrade_paths = upgrade_paths;
+		this.single_assignee = single_assignee;
+		this.priority_building_use = priority_building_use;
+		this.effects = effects;
+		this.sortKey = sortKey;
+		if (this.upgrade_paths != null)
+		{
+			RoomType[] upgrade_paths2 = this.upgrade_paths;
+			for (int i = 0; i < upgrade_paths2.Length; i++)
+			{
+				Debug.Assert(upgrade_paths2[i] != null, name + " has a null upgrade path. Maybe it wasn't initialized yet.");
+			}
+		}
+	}
+
 	public RoomType.RoomIdentificationResult isSatisfactory(Room candidate_room)
 	{
 		if (this.primary_constraint != null && !this.primary_constraint.isSatisfied(candidate_room))
@@ -60,9 +61,10 @@ public class RoomType : Resource
 		}
 		if (this.additional_constraints != null)
 		{
-			foreach (RoomConstraints.Constraint constraint in this.additional_constraints)
+			RoomConstraints.Constraint[] additional_constraints = this.additional_constraints;
+			for (int i = 0; i < additional_constraints.Length; i++)
 			{
-				if (!constraint.isSatisfied(candidate_room))
+				if (!additional_constraints[i].isSatisfied(candidate_room))
 				{
 					return RoomType.RoomIdentificationResult.primary_satisfied;
 				}
@@ -86,7 +88,7 @@ public class RoomType : Resource
 		{
 			text = text + "\n    • " + ROOMS.CRITERIA.NEUTRAL_TYPE;
 		}
-		text += ((this.primary_constraint != null) ? ("\n    • " + this.primary_constraint.name) : string.Empty);
+		text += ((this.primary_constraint == null) ? "" : ("\n    • " + this.primary_constraint.name));
 		if (this.additional_constraints != null)
 		{
 			foreach (RoomConstraints.Constraint constraint in this.additional_constraints)
@@ -99,7 +101,7 @@ public class RoomType : Resource
 
 	public string GetRoomEffectsString()
 	{
-		if (this.effects != null && this.effects.Length > 0)
+		if (this.effects != null && this.effects.Length != 0)
 		{
 			string text = ROOMS.EFFECTS.HEADER;
 			foreach (string text2 in this.effects)

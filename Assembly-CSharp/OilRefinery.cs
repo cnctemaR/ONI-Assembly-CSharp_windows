@@ -17,8 +17,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 
 	private void OnStorageChanged(object data)
 	{
-		float massAvailable = this.storage.GetMassAvailable(SimHashes.CrudeOil);
-		float num = Mathf.Clamp01(massAvailable / this.maxSrcMass);
+		float num = Mathf.Clamp01(this.storage.GetMassAvailable(SimHashes.CrudeOil) / this.maxSrcMass);
 		this.meter.SetPositionPercent(num);
 	}
 
@@ -105,8 +104,9 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 			{
 				base.smi.master.wasOverPressure = true;
 				base.sm.isOverPressure.Set(true, this);
+				return;
 			}
-			else if (base.smi.master.wasOverPressure && !flag2)
+			if (base.smi.master.wasOverPressure && !flag2)
 			{
 				base.sm.isOverPressure.Set(false, this);
 			}

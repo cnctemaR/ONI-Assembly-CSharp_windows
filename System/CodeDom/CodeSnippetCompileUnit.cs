@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeSnippetCompileUnit : CodeCompileUnit
 	{
@@ -14,39 +11,23 @@ namespace System.CodeDom
 
 		public CodeSnippetCompileUnit(string value)
 		{
-			this.value = value;
-		}
-
-		public CodeLinePragma LinePragma
-		{
-			get
-			{
-				return this.linePragma;
-			}
-			set
-			{
-				this.linePragma = value;
-			}
+			this.Value = value;
 		}
 
 		public string Value
 		{
 			get
 			{
-				if (this.value == null)
-				{
-					return string.Empty;
-				}
-				return this.value;
+				return this._value ?? string.Empty;
 			}
 			set
 			{
-				this.value = value;
+				this._value = value;
 			}
 		}
 
-		private CodeLinePragma linePragma;
+		public CodeLinePragma LinePragma { get; set; }
 
-		private string value;
+		private string _value;
 	}
 }

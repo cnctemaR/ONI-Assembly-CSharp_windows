@@ -3,15 +3,12 @@ using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
-using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.U2D
 {
-	/// <summary>
-	///   <para>A list of methods designed for reading and writing to the rich internal data of a Sprite.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	public static class SpriteDataAccessExtensions
 	{
 		private static void CheckAttributeTypeMatchesAndThrow<T>(VertexAttribute channel)
@@ -61,13 +58,6 @@ namespace UnityEngine.Experimental.U2D
 			SpriteDataAccessExtensions.SetChannelData(sprite, channel, src.GetUnsafeReadOnlyPtr<T>());
 		}
 
-		/// <summary>
-		///   <para>Returns an array of BindPoses.</para>
-		/// </summary>
-		/// <param name="sprite">The sprite to retrieve the bind pose from.</param>
-		/// <returns>
-		///   <para>A list of bind poses for this sprite. There is no need to dispose the returned NativeArray.</para>
-		/// </returns>
 		public static NativeArray<Matrix4x4> GetBindPoses(this Sprite sprite)
 		{
 			SpriteChannelInfo bindPoseInfo = SpriteDataAccessExtensions.GetBindPoseInfo(sprite);
@@ -79,13 +69,6 @@ namespace UnityEngine.Experimental.U2D
 			SpriteDataAccessExtensions.SetBindPoseData(sprite, src.GetUnsafeReadOnlyPtr<Matrix4x4>(), src.Length);
 		}
 
-		/// <summary>
-		///   <para>Returns a list of indices. This is the same as Sprite.triangle.</para>
-		/// </summary>
-		/// <param name="sprite"></param>
-		/// <returns>
-		///   <para>A read-only list of indices indicating how the triangles are formed between the vertices. The array is marked as undisposable.</para>
-		/// </returns>
 		public static NativeArray<ushort> GetIndices(this Sprite sprite)
 		{
 			SpriteChannelInfo indicesInfo = SpriteDataAccessExtensions.GetIndicesInfo(sprite);
@@ -97,13 +80,6 @@ namespace UnityEngine.Experimental.U2D
 			SpriteDataAccessExtensions.SetIndicesData(sprite, src.GetUnsafeReadOnlyPtr<ushort>(), src.Length);
 		}
 
-		/// <summary>
-		///   <para>Returns a list of BoneWeight that corresponds to each and every vertice in this Sprite.</para>
-		/// </summary>
-		/// <param name="sprite">The Sprite to get the BoneWeights from.</param>
-		/// <returns>
-		///   <para>The list of BoneWeight. The length should equal the number of vertices. There is no need to call dispose on this NativeArray.</para>
-		/// </returns>
 		public static NativeArray<BoneWeight> GetBoneWeights(this Sprite sprite)
 		{
 			SpriteChannelInfo boneWeightsInfo = SpriteDataAccessExtensions.GetBoneWeightsInfo(sprite);
@@ -115,52 +91,23 @@ namespace UnityEngine.Experimental.U2D
 			SpriteDataAccessExtensions.SetBoneWeightsData(sprite, src.GetUnsafeReadOnlyPtr<BoneWeight>(), src.Length);
 		}
 
-		/// <summary>
-		///   <para>Returns a list of SpriteBone in this Sprite.</para>
-		/// </summary>
-		/// <param name="sprite">The sprite to get the list of SpriteBone from.</param>
-		/// <returns>
-		///   <para>An array of SpriteBone that belongs to this Sprite.</para>
-		/// </returns>
 		public static SpriteBone[] GetBones(this Sprite sprite)
 		{
 			return SpriteDataAccessExtensions.GetBoneInfo(sprite);
 		}
 
-		/// <summary>
-		///   <para>Sets the SpriteBones for this Sprite.</para>
-		/// </summary>
-		/// <param name="sprite"></param>
-		/// <param name="src"></param>
 		public static void SetBones(this Sprite sprite, SpriteBone[] src)
 		{
 			SpriteDataAccessExtensions.SetBoneData(sprite, src);
 		}
 
-		/// <summary>
-		///   <para>Checks if a specific channel exists for this Sprite.</para>
-		/// </summary>
-		/// <param name="sprite"></param>
-		/// <param name="channel"></param>
-		/// <returns>
-		///   <para>True if the channel exists.</para>
-		/// </returns>
 		[NativeName("HasChannel")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasVertexAttribute(this Sprite sprite, VertexAttribute channel);
 
-		/// <summary>
-		///   <para>Sets the vertex count. This resizes the internal buffer. It also preserves any configurations of VertexAttributes.</para>
-		/// </summary>
-		/// <param name="sprite"></param>
-		/// <param name="count"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetVertexCount(this Sprite sprite, int count);
 
-		/// <summary>
-		///   <para>Returns the number of vertices in this Sprite.</para>
-		/// </summary>
-		/// <param name="sprite"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetVertexCount(this Sprite sprite);
 

@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Delegate, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Delegate, Inherited = false)]
 	public sealed class GuidAttribute : Attribute
 	{
 		public GuidAttribute(string guid)
 		{
-			this.guidValue = guid;
+			this._val = guid;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this.guidValue;
+				return this._val;
 			}
 		}
 
-		private string guidValue;
+		internal string _val;
 	}
 }

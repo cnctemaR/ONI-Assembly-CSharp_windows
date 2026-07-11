@@ -11,9 +11,7 @@ public class SuitEquipper : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		MinionIdentity component = base.GetComponent<MinionIdentity>();
-		Equipment equipment = component.GetEquipment();
-		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
+		foreach (AssignableSlotInstance assignableSlotInstance in base.GetComponent<MinionIdentity>().GetEquipment().Slots)
 		{
 			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
 			Equippable equippable = equipmentSlotInstance.assignable as Equippable;
@@ -23,7 +21,7 @@ public class SuitEquipper : KMonoBehaviour
 				Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
 				{
 					equippable.Unassign();
-				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
+				}, global::Action.NumActions, null, null, null, "", true), 2f);
 			}
 		}
 	}
@@ -31,12 +29,9 @@ public class SuitEquipper : KMonoBehaviour
 	public Equippable IsWearingAirtightSuit()
 	{
 		Equippable equippable = null;
-		MinionIdentity component = base.GetComponent<MinionIdentity>();
-		Equipment equipment = component.GetEquipment();
-		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
+		foreach (AssignableSlotInstance assignableSlotInstance in base.GetComponent<MinionIdentity>().GetEquipment().Slots)
 		{
-			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
-			Equippable equippable2 = equipmentSlotInstance.assignable as Equippable;
+			Equippable equippable2 = ((EquipmentSlotInstance)assignableSlotInstance).assignable as Equippable;
 			if (equippable2 && equippable2.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit))
 			{
 				equippable = equippable2;

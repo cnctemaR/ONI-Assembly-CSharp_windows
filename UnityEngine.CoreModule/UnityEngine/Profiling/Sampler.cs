@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	/// <summary>
-	///   <para>Provides control over a CPU Profiler label.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Profiler/Marker.h")]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
 	[UsedByNativeCode]
 	public class Sampler
 	{
@@ -15,9 +15,11 @@ namespace UnityEngine.Profiling
 		{
 		}
 
-		/// <summary>
-		///   <para>Returns true if Sampler is valid. (Read Only)</para>
-		/// </summary>
+		internal Sampler(IntPtr ptr)
+		{
+			this.m_Ptr = ptr;
+		}
+
 		public bool isValid
 		{
 			get
@@ -26,29 +28,34 @@ namespace UnityEngine.Profiling
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns Recorder associated with the Sampler.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Recorder object associated with the Sampler.</para>
-		/// </returns>
 		public Recorder GetRecorder()
 		{
-			Recorder recorderInternal = this.GetRecorderInternal();
-			return recorderInternal ?? Recorder.s_InvalidRecorder;
+			IntPtr recorderInternal = Sampler.GetRecorderInternal(this.m_Ptr);
+			Recorder recorder;
+			if (recorderInternal == IntPtr.Zero)
+			{
+				recorder = Recorder.s_InvalidRecorder;
+			}
+			else
+			{
+				recorder = new Recorder(recorderInternal);
+			}
+			return recorder;
 		}
 
-		/// <summary>
-		///   <para>Returns Sampler object for the specific CPU Profiler label.</para>
-		/// </summary>
-		/// <param name="name">Profiler Sampler name.</param>
-		/// <returns>
-		///   <para>Sampler object which represents specific profiler label.</para>
-		/// </returns>
 		public static Sampler Get(string name)
 		{
-			Sampler samplerInternal = Sampler.GetSamplerInternal(name);
-			return samplerInternal ?? Sampler.s_InvalidSampler;
+			IntPtr samplerInternal = Sampler.GetSamplerInternal(name);
+			Sampler sampler;
+			if (samplerInternal == IntPtr.Zero)
+			{
+				sampler = Sampler.s_InvalidSampler;
+			}
+			else
+			{
+				sampler = new Sampler(samplerInternal);
+			}
+			return sampler;
 		}
 
 		public static int GetNames(List<string> names)
@@ -56,28 +63,30 @@ namespace UnityEngine.Profiling
 			return Sampler.GetSamplerNamesInternal(names);
 		}
 
-		/// <summary>
-		///   <para>Sampler name. (Read Only)</para>
-		/// </summary>
-		[ThreadAndSerializationSafe]
-		public extern string name
+		[NativeConditional("ENABLE_PROFILER")]
+		[NativeMethod(Name = "GetName", IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string GetSamplerName();
+
+		public string name
 		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return (!this.isValid) ? null : this.GetSamplerName();
+			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod(Name = "ProfilerBindings::GetRecorderInternal", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Recorder GetRecorderInternal();
+		private static extern IntPtr GetRecorderInternal(IntPtr ptr);
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod(Name = "ProfilerBindings::GetSamplerInternal", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Sampler GetSamplerInternal(string name);
+		private static extern IntPtr GetSamplerInternal([NotNull] string name);
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod(Name = "ProfilerBindings::GetSamplerNamesInternal", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSamplerNamesInternal(object namesScriptingPtr);
+		private static extern int GetSamplerNamesInternal(List<string> namesScriptingPtr);
 
 		internal IntPtr m_Ptr;
 

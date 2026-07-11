@@ -58,9 +58,10 @@ namespace Rendering.World
 
 		public void Commit()
 		{
-			foreach (DynamicSubMesh dynamicSubMesh in this.Meshes)
+			DynamicSubMesh[] meshes = this.Meshes;
+			for (int i = 0; i < meshes.Length; i++)
 			{
-				dynamicSubMesh.Commit();
+				meshes[i].Commit();
 			}
 			this.TriangleMeshIdx = 0;
 			this.UVMeshIdx = 0;
@@ -69,10 +70,12 @@ namespace Rendering.World
 
 		public void AddTriangle(int triangle)
 		{
-			DynamicSubMesh dynamicSubMesh = this.Meshes[this.TriangleMeshIdx];
-			if (dynamicSubMesh.AreTrianglesFull())
+			if (this.Meshes[this.TriangleMeshIdx].AreTrianglesFull())
 			{
-				dynamicSubMesh = this.Meshes[++this.TriangleMeshIdx];
+				DynamicSubMesh[] meshes = this.Meshes;
+				int num = this.TriangleMeshIdx + 1;
+				this.TriangleMeshIdx = num;
+				object obj = meshes[num];
 			}
 			this.Meshes[this.TriangleMeshIdx].AddTriangle(triangle);
 		}
@@ -82,7 +85,10 @@ namespace Rendering.World
 			DynamicSubMesh dynamicSubMesh = this.Meshes[this.UVMeshIdx];
 			if (dynamicSubMesh.AreUVsFull())
 			{
-				dynamicSubMesh = this.Meshes[++this.UVMeshIdx];
+				DynamicSubMesh[] meshes = this.Meshes;
+				int num = this.UVMeshIdx + 1;
+				this.UVMeshIdx = num;
+				dynamicSubMesh = meshes[num];
 			}
 			dynamicSubMesh.AddUV(uv);
 		}
@@ -92,16 +98,20 @@ namespace Rendering.World
 			DynamicSubMesh dynamicSubMesh = this.Meshes[this.VertexMeshIdx];
 			if (dynamicSubMesh.AreVerticesFull())
 			{
-				dynamicSubMesh = this.Meshes[++this.VertexMeshIdx];
+				DynamicSubMesh[] meshes = this.Meshes;
+				int num = this.VertexMeshIdx + 1;
+				this.VertexMeshIdx = num;
+				dynamicSubMesh = meshes[num];
 			}
 			dynamicSubMesh.AddVertex(vertex);
 		}
 
 		public void Render(Vector3 position, Quaternion rotation, Material material, int layer, MaterialPropertyBlock property_block)
 		{
-			foreach (DynamicSubMesh dynamicSubMesh in this.Meshes)
+			DynamicSubMesh[] meshes = this.Meshes;
+			for (int i = 0; i < meshes.Length; i++)
 			{
-				dynamicSubMesh.Render(position, rotation, material, layer, property_block);
+				meshes[i].Render(position, rotation, material, layer, property_block);
 			}
 		}
 

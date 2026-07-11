@@ -1,40 +1,98 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Dynamic.Utils;
+using Unity;
 
 namespace System.Linq.Expressions
 {
-	public sealed class InvocationExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.InvocationExpressionProxy))]
+	public class InvocationExpression : Expression, IArgumentProvider
 	{
-		internal InvocationExpression(Expression expression, Type type, ReadOnlyCollection<Expression> arguments)
-			: base(ExpressionType.Invoke, type)
+		internal InvocationExpression(Expression expression, Type returnType)
 		{
-			this.expression = expression;
-			this.arguments = arguments;
+			this.Expression = expression;
+			this.Type = returnType;
 		}
 
-		public Expression Expression
+		public sealed override Type Type { get; }
+
+		public sealed override ExpressionType NodeType
 		{
 			get
 			{
-				return this.expression;
+				return ExpressionType.Invoke;
 			}
 		}
+
+		public Expression Expression { get; }
 
 		public ReadOnlyCollection<Expression> Arguments
 		{
 			get
 			{
-				return this.arguments;
+				return this.GetOrMakeArguments();
 			}
 		}
 
-		internal override void Emit(EmitContext ec)
+		public InvocationExpression Update(Expression expression, IEnumerable<Expression> arguments)
 		{
-			ec.EmitCall(this.expression, this.arguments, this.expression.Type.GetInvokeMethod());
+			if (((expression == this.Expression) & (arguments != null)) && ExpressionUtils.SameElements<Expression>(ref arguments, this.Arguments))
+			{
+				return this;
+			}
+			return Expression.Invoke(expression, arguments);
 		}
 
-		private Expression expression;
+		[ExcludeFromCodeCoverage]
+		internal virtual ReadOnlyCollection<Expression> GetOrMakeArguments()
+		{
+			throw ContractUtils.Unreachable;
+		}
 
-		private ReadOnlyCollection<Expression> arguments;
+		[ExcludeFromCodeCoverage]
+		public virtual Expression GetArgument(int index)
+		{
+			throw ContractUtils.Unreachable;
+		}
+
+		[ExcludeFromCodeCoverage]
+		public virtual int ArgumentCount
+		{
+			get
+			{
+				throw ContractUtils.Unreachable;
+			}
+		}
+
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitInvocation(this);
+		}
+
+		[ExcludeFromCodeCoverage]
+		internal virtual InvocationExpression Rewrite(Expression lambda, Expression[] arguments)
+		{
+			throw ContractUtils.Unreachable;
+		}
+
+		internal LambdaExpression LambdaOperand
+		{
+			get
+			{
+				if (this.Expression.NodeType != ExpressionType.Quote)
+				{
+					return this.Expression as LambdaExpression;
+				}
+				return (LambdaExpression)((UnaryExpression)this.Expression).Operand;
+			}
+		}
+
+		internal InvocationExpression()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
 	}
 }

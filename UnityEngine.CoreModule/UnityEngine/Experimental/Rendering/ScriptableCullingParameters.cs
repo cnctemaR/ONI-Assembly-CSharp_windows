@@ -5,15 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Parameters controlling culling process in CullResults.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct ScriptableCullingParameters
 	{
-		/// <summary>
-		///   <para>Number of culling planes to use.</para>
-		/// </summary>
 		public int cullingPlaneCount
 		{
 			get
@@ -30,9 +24,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the cull orthographic.</para>
-		/// </summary>
 		public bool isOrthographic
 		{
 			get
@@ -45,9 +36,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>LODParameters for culling.</para>
-		/// </summary>
 		public LODParameters lodParameters
 		{
 			get
@@ -60,9 +48,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>CullingMask used for culling.</para>
-		/// </summary>
 		public int cullingMask
 		{
 			get
@@ -75,9 +60,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Scene Mask to use for the cull.</para>
-		/// </summary>
 		public long sceneMask
 		{
 			get
@@ -90,9 +72,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Layers to cull.</para>
-		/// </summary>
 		public int layerCull
 		{
 			get
@@ -105,9 +84,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>CullingMatrix used for culling.</para>
-		/// </summary>
 		public Matrix4x4 cullingMatrix
 		{
 			get
@@ -120,9 +96,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Position for the origin of th cull.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			get
@@ -135,9 +108,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Shadow distance to use for the cull.</para>
-		/// </summary>
 		public float shadowDistance
 		{
 			get
@@ -150,9 +120,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Culling Flags for the culling.</para>
-		/// </summary>
 		public CullFlag cullingFlags
 		{
 			get
@@ -165,9 +132,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Reflection Probe Sort options for the cull.</para>
-		/// </summary>
 		public ReflectionProbeSortOptions reflectionProbeSortOptions
 		{
 			get
@@ -180,9 +144,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Camera Properties used for culling.</para>
-		/// </summary>
 		public CameraProperties cameraProperties
 		{
 			get
@@ -195,10 +156,18 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Get the distance for the culling of a specific layer.</para>
-		/// </summary>
-		/// <param name="layerIndex"></param>
+		public float accurateOcclusionThreshold
+		{
+			get
+			{
+				return this.m_AccurateoOcclusionThreshold;
+			}
+			set
+			{
+				this.m_AccurateoOcclusionThreshold = Mathf.Max(-1f, value);
+			}
+		}
+
 		public unsafe float GetLayerCullDistance(int layerIndex)
 		{
 			if (layerIndex < 0 || layerIndex >= 32)
@@ -211,11 +180,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Set the distance for the culling of a specific layer.</para>
-		/// </summary>
-		/// <param name="layerIndex"></param>
-		/// <param name="distance"></param>
 		public unsafe void SetLayerCullDistance(int layerIndex, float distance)
 		{
 			if (layerIndex < 0 || layerIndex >= 32)
@@ -228,10 +192,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Fetch the culling plane at the given index.</para>
-		/// </summary>
-		/// <param name="index"></param>
 		public unsafe Plane GetCullingPlane(int index)
 		{
 			if (index < 0 || index >= this.cullingPlaneCount || index >= 10)
@@ -244,11 +204,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Set the culling plane at a given index.</para>
-		/// </summary>
-		/// <param name="index"></param>
-		/// <param name="plane"></param>
 		public unsafe void SetCullingPlane(int index, Plane plane)
 		{
 			if (index < 0 || index >= this.cullingPlaneCount || index >= 10)
@@ -268,7 +223,8 @@ namespace UnityEngine.Experimental.Rendering
 
 		private LODParameters m_LodParameters;
 
-		private ScriptableCullingParameters.<m_CullingPlanes>__FixedBuffer5 m_CullingPlanes;
+		[FixedBuffer(typeof(float), 40)]
+		internal ScriptableCullingParameters.<m_CullingPlanes>__FixedBuffer4 m_CullingPlanes;
 
 		private int m_CullingPlaneCount;
 
@@ -276,7 +232,8 @@ namespace UnityEngine.Experimental.Rendering
 
 		private long m_SceneMask;
 
-		private ScriptableCullingParameters.<m_LayerFarCullDistances>__FixedBuffer6 m_LayerFarCullDistances;
+		[FixedBuffer(typeof(float), 32)]
+		internal ScriptableCullingParameters.<m_LayerFarCullDistances>__FixedBuffer5 m_LayerFarCullDistances;
 
 		private int m_LayerCull;
 
@@ -292,27 +249,20 @@ namespace UnityEngine.Experimental.Rendering
 
 		private CameraProperties m_CameraProperties;
 
-		/// <summary>
-		///   <para>The view matrix generated for single-pass stereo culling.</para>
-		/// </summary>
+		private float m_AccurateoOcclusionThreshold;
+
 		public Matrix4x4 cullStereoView;
 
-		/// <summary>
-		///   <para>The projection matrix generated for single-pass stereo culling.</para>
-		/// </summary>
 		public Matrix4x4 cullStereoProj;
 
-		/// <summary>
-		///   <para>Distance between the virtual eyes.</para>
-		/// </summary>
 		public float cullStereoSeparation;
 
 		private int padding2;
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
-		public struct <m_CullingPlanes>__FixedBuffer5
+		public struct <m_CullingPlanes>__FixedBuffer4
 		{
 			public float FixedElementField;
 		}
@@ -320,7 +270,7 @@ namespace UnityEngine.Experimental.Rendering
 		[UnsafeValueType]
 		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 128)]
-		public struct <m_LayerFarCullDistances>__FixedBuffer6
+		public struct <m_LayerFarCullDistances>__FixedBuffer5
 		{
 			public float FixedElementField;
 		}

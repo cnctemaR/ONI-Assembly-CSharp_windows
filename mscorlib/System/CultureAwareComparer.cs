@@ -1,40 +1,85 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace System
 {
 	[Serializable]
 	internal sealed class CultureAwareComparer : StringComparer
 	{
-		public CultureAwareComparer(CultureInfo ci, bool ignore_case)
+		internal CultureAwareComparer(CultureInfo culture, bool ignoreCase)
 		{
-			this._compareInfo = ci.CompareInfo;
-			this._ignoreCase = ignore_case;
+			this._compareInfo = culture.CompareInfo;
+			this._ignoreCase = ignoreCase;
+			this._options = (ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+		}
+
+		internal CultureAwareComparer(CompareInfo compareInfo, bool ignoreCase)
+		{
+			this._compareInfo = compareInfo;
+			this._ignoreCase = ignoreCase;
+			this._options = (ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+		}
+
+		internal CultureAwareComparer(CompareInfo compareInfo, CompareOptions options)
+		{
+			this._compareInfo = compareInfo;
+			this._options = options;
+			this._ignoreCase = (options & CompareOptions.IgnoreCase) == CompareOptions.IgnoreCase || (options & CompareOptions.OrdinalIgnoreCase) == CompareOptions.OrdinalIgnoreCase;
 		}
 
 		public override int Compare(string x, string y)
 		{
-			CompareOptions compareOptions = ((!this._ignoreCase) ? CompareOptions.None : CompareOptions.IgnoreCase);
-			return this._compareInfo.Compare(x, y, compareOptions);
+			if (x == y)
+			{
+				return 0;
+			}
+			if (x == null)
+			{
+				return -1;
+			}
+			if (y == null)
+			{
+				return 1;
+			}
+			return this._compareInfo.Compare(x, y, this._options);
 		}
 
 		public override bool Equals(string x, string y)
 		{
-			return this.Compare(x, y) == 0;
+			return x == y || (x != null && y != null && this._compareInfo.Compare(x, y, this._options) == 0);
 		}
 
-		public override int GetHashCode(string s)
+		public override int GetHashCode(string obj)
 		{
-			if (s == null)
+			if (obj == null)
 			{
-				throw new ArgumentNullException("s");
+				throw new ArgumentNullException("obj");
 			}
-			CompareOptions compareOptions = ((!this._ignoreCase) ? CompareOptions.None : CompareOptions.IgnoreCase);
-			return this._compareInfo.GetSortKey(s, compareOptions).GetHashCode();
+			return this._compareInfo.GetHashCodeOfString(obj, this._options);
 		}
 
-		private readonly bool _ignoreCase;
+		public override bool Equals(object obj)
+		{
+			CultureAwareComparer cultureAwareComparer = obj as CultureAwareComparer;
+			return cultureAwareComparer != null && this._ignoreCase == cultureAwareComparer._ignoreCase && this._compareInfo.Equals(cultureAwareComparer._compareInfo) && this._options == cultureAwareComparer._options;
+		}
 
-		private readonly CompareInfo _compareInfo;
+		public override int GetHashCode()
+		{
+			int hashCode = this._compareInfo.GetHashCode();
+			if (!this._ignoreCase)
+			{
+				return hashCode;
+			}
+			return ~hashCode;
+		}
+
+		private CompareInfo _compareInfo;
+
+		private bool _ignoreCase;
+
+		[OptionalField]
+		private CompareOptions _options;
 	}
 }

@@ -5,11 +5,6 @@ namespace Klei.AI
 {
 	public class ModifierGroup<T> : Resource
 	{
-		public ModifierGroup(string id, string name)
-			: base(id, name)
-		{
-		}
-
 		public IEnumerator<T> GetEnumerator()
 		{
 			return this.modifiers.GetEnumerator();
@@ -29,6 +24,11 @@ namespace Klei.AI
 			{
 				return this.modifiers.Count;
 			}
+		}
+
+		public ModifierGroup(string id, string name)
+			: base(id, name)
+		{
 		}
 
 		public void Add(T modifier)

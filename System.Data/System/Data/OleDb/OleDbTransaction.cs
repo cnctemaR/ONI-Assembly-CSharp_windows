@@ -3,7 +3,8 @@ using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	public sealed class OleDbTransaction : DbTransaction, IDbTransaction, IDisposable
+	[MonoTODO("OleDb is not implemented.")]
+	public sealed class OleDbTransaction : DbTransaction
 	{
 		internal OleDbTransaction()
 		{
@@ -13,7 +14,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -21,7 +22,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -29,30 +30,33 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
 		public OleDbTransaction Begin()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public OleDbTransaction Begin(IsolationLevel isolevel)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override void Commit()
 		{
+			throw ADP.OleDb();
 		}
 
 		protected override void Dispose(bool disposing)
 		{
+			throw ADP.OleDb();
 		}
 
 		public override void Rollback()
 		{
+			throw ADP.OleDb();
 		}
 	}
 }

@@ -6,7 +6,11 @@ namespace YamlDotNet.Serialization.TypeResolvers
 	{
 		public Type Resolve(Type staticType, object actualValue)
 		{
-			return (actualValue == null) ? staticType : actualValue.GetType();
+			if (actualValue == null)
+			{
+				return staticType;
+			}
+			return actualValue.GetType();
 		}
 	}
 }

@@ -9,7 +9,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	{
 		if (this.targetReceptacle == null)
 		{
-			return Strings.Get(this.titleKey).ToString().Replace("{0}", string.Empty);
+			return Strings.Get(this.titleKey).ToString().Replace("{0}", "");
 		}
 		return string.Format(Strings.Get(this.titleKey), this.targetReceptacle.GetProperName());
 	}
@@ -29,9 +29,10 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			global::UnityEngine.Object.Destroy(rbi.gameObject);
 		});
 		this.entityToggles.Clear();
-		foreach (Tag tag in target.possibleDepositObjectTags)
+		Tag[] possibleDepositObjectTags = target.possibleDepositObjectTags;
+		for (int i = 0; i < possibleDepositObjectTags.Length; i++)
 		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
+			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(possibleDepositObjectTags[i]);
 			if (this.targetReceptacle.rotatable == null)
 			{
 				prefabsWithTag.RemoveAll(delegate(GameObject go)
@@ -77,7 +78,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
 				{
 					tag = gameObject2.PrefabID(),
-					direction = ((component2 == null) ? SingleEntityReceptacle.ReceptacleDirection.Top : component2.Direction),
+					direction = ((component2 != null) ? component2.Direction : SingleEntityReceptacle.ReceptacleDirection.Top),
 					asset = gameObject2
 				});
 				this.entityToggles.Add(newToggle);
@@ -174,7 +175,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
 			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle]);
 			this.requestSelectedEntityBtn.isInteractable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
+			this.SetImageToggleState(this.selectedEntityToggle.toggle, flag ? ImageToggleState.State.Active : ImageToggleState.State.DisabledActive);
 			this.ToggleObjectPicker(true);
 			GameObject prefab2 = Assets.GetPrefab(this.selectedDepositObjectTag);
 			if (prefab2 != null)
@@ -203,6 +204,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				{
 					this.UpdateState(null);
 				});
+				return;
 			}
 		}
 		else if (this.onObjectDestroyedHandle != -1)
@@ -271,17 +273,14 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 
 	private void ConfigureActiveEntity(Tag tag)
 	{
-		GameObject prefab = Assets.GetPrefab(tag);
-		string properName = prefab.GetProperName();
+		string properName = Assets.GetPrefab(tag).GetProperName();
 		this.activeEntityContainer.GetComponentInChildrenOnly<LocText>().text = properName;
 		this.activeEntityContainer.transform.GetChild(0).gameObject.GetComponentInChildrenOnly<Image>().sprite = this.GetEntityIcon(tag);
 	}
 
 	protected virtual Sprite GetEntityIcon(Tag prefabTag)
 	{
-		GameObject prefab = Assets.GetPrefab(prefabTag);
-		Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
-		return uisprite.first;
+		return Def.GetUISprite(Assets.GetPrefab(prefabTag), "ui", false).first;
 	}
 
 	public override bool IsValidForTarget(GameObject target)
@@ -330,19 +329,21 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		case ImageToggleState.State.Disabled:
 			toggle.GetComponent<ImageToggleState>().SetDisabled();
 			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.desaturatedMaterial;
-			break;
+			return;
 		case ImageToggleState.State.Inactive:
 			toggle.GetComponent<ImageToggleState>().SetInactive();
 			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.defaultMaterial;
-			break;
+			return;
 		case ImageToggleState.State.Active:
 			toggle.GetComponent<ImageToggleState>().SetActive();
 			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.defaultMaterial;
-			break;
+			return;
 		case ImageToggleState.State.DisabledActive:
 			toggle.GetComponent<ImageToggleState>().SetDisabledActive();
 			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.desaturatedMaterial;
-			break;
+			return;
+		default:
+			return;
 		}
 	}
 
@@ -357,8 +358,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			return;
 		}
-		bool flag = this.UpdateAvailableAmounts(null);
-		if (flag)
+		if (this.UpdateAvailableAmounts(null))
 		{
 			this.UpdateState(null);
 		}
@@ -428,7 +428,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle]);
 			this.requestSelectedEntityBtn.isInteractable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+			this.SetImageToggleState(this.selectedEntityToggle.toggle, flag ? ImageToggleState.State.Inactive : ImageToggleState.State.Disabled);
 		}
 		this.selectedEntityToggle = toggle;
 		this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);

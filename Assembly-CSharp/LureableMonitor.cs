@@ -72,6 +72,10 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		private struct LureIterator : GameScenePartitioner.Iterator
 		{
+			public int cost { get; private set; }
+
+			public GameObject result { get; private set; }
+
 			public LureIterator(Navigator navigator, Tag[] lures)
 			{
 				this.navigator = navigator;
@@ -79,10 +83,6 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 				this.cost = -1;
 				this.result = null;
 			}
-
-			public int cost { get; private set; }
-
-			public GameObject result { get; private set; }
 
 			public void Iterate(object target_obj)
 			{

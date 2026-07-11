@@ -6,18 +6,6 @@ namespace Satsuma
 {
 	public sealed class InsertionTsp<TNode> : ITsp<TNode>
 	{
-		public InsertionTsp(IEnumerable<TNode> nodes, Func<TNode, TNode, double> cost, TspSelectionRule selectionRule = TspSelectionRule.Farthest)
-		{
-			this.Nodes = nodes;
-			this.Cost = cost;
-			this.SelectionRule = selectionRule;
-			this.tour = new LinkedList<TNode>();
-			this.tourNodes = new Dictionary<TNode, LinkedListNode<TNode>>();
-			this.insertableNodes = new HashSet<TNode>();
-			this.insertableNodeQueue = new PriorityQueue<TNode, double>();
-			this.Clear();
-		}
-
 		public IEnumerable<TNode> Nodes { get; private set; }
 
 		public Func<TNode, TNode, double> Cost { get; private set; }
@@ -34,14 +22,26 @@ namespace Satsuma
 
 		public double TourCost { get; private set; }
 
+		public InsertionTsp(IEnumerable<TNode> nodes, Func<TNode, TNode, double> cost, TspSelectionRule selectionRule = TspSelectionRule.Farthest)
+		{
+			this.Nodes = nodes;
+			this.Cost = cost;
+			this.SelectionRule = selectionRule;
+			this.tour = new LinkedList<TNode>();
+			this.tourNodes = new Dictionary<TNode, LinkedListNode<TNode>>();
+			this.insertableNodes = new HashSet<TNode>();
+			this.insertableNodeQueue = new PriorityQueue<TNode, double>();
+			this.Clear();
+		}
+
 		private double PriorityFromCost(double c)
 		{
 			TspSelectionRule selectionRule = this.SelectionRule;
-			if (selectionRule != TspSelectionRule.Farthest)
+			if (selectionRule == TspSelectionRule.Farthest)
 			{
-				return c;
+				return -c;
 			}
-			return -c;
+			return c;
 		}
 
 		public void Clear()

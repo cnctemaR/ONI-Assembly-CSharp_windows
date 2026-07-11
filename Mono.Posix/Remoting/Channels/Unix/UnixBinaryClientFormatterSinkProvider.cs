@@ -4,7 +4,7 @@ using System.Runtime.Remoting.Channels;
 
 namespace Mono.Remoting.Channels.Unix
 {
-	internal class UnixBinaryClientFormatterSinkProvider : IClientChannelSinkProvider, IClientFormatterSinkProvider
+	internal class UnixBinaryClientFormatterSinkProvider : IClientFormatterSinkProvider, IClientChannelSinkProvider
 	{
 		public UnixBinaryClientFormatterSinkProvider()
 		{

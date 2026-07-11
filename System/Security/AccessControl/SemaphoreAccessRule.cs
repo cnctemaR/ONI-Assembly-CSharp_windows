@@ -7,26 +7,22 @@ namespace System.Security.AccessControl
 	[ComVisible(false)]
 	public sealed class SemaphoreAccessRule : AccessRule
 	{
-		public SemaphoreAccessRule(IdentityReference identity, SemaphoreRights semaphoreRights, AccessControlType type)
-			: base(identity, 0, false, InheritanceFlags.None, PropagationFlags.None, type)
+		public SemaphoreAccessRule(IdentityReference identity, SemaphoreRights eventRights, AccessControlType type)
+			: base(identity, (int)eventRights, false, InheritanceFlags.None, PropagationFlags.None, type)
 		{
-			this.semaphoreRights = semaphoreRights;
 		}
 
-		public SemaphoreAccessRule(string identity, SemaphoreRights semaphoreRights, AccessControlType type)
-			: base(null, 0, false, InheritanceFlags.None, PropagationFlags.None, type)
+		public SemaphoreAccessRule(string identity, SemaphoreRights eventRights, AccessControlType type)
+			: this(new NTAccount(identity), eventRights, type)
 		{
-			this.semaphoreRights = semaphoreRights;
 		}
 
 		public SemaphoreRights SemaphoreRights
 		{
 			get
 			{
-				return this.semaphoreRights;
+				return (SemaphoreRights)base.AccessMask;
 			}
 		}
-
-		private SemaphoreRights semaphoreRights;
 	}
 }

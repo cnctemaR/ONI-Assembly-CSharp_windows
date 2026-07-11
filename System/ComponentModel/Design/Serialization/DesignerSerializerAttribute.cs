@@ -5,28 +5,22 @@ namespace System.ComponentModel.Design.Serialization
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
 	public sealed class DesignerSerializerAttribute : Attribute
 	{
-		public DesignerSerializerAttribute(string serializerTypeName, string baseSerializerTypeName)
+		public DesignerSerializerAttribute(Type serializerType, Type baseSerializerType)
 		{
-			this.serializerTypeName = serializerTypeName;
-			this.baseSerializerTypeName = baseSerializerTypeName;
+			this.serializerTypeName = serializerType.AssemblyQualifiedName;
+			this.serializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
 		}
 
 		public DesignerSerializerAttribute(string serializerTypeName, Type baseSerializerType)
-			: this(serializerTypeName, baseSerializerType.AssemblyQualifiedName)
 		{
+			this.serializerTypeName = serializerTypeName;
+			this.serializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
 		}
 
-		public DesignerSerializerAttribute(Type serializerType, Type baseSerializerType)
-			: this(serializerType.AssemblyQualifiedName, baseSerializerType.AssemblyQualifiedName)
+		public DesignerSerializerAttribute(string serializerTypeName, string baseSerializerTypeName)
 		{
-		}
-
-		public string SerializerBaseTypeName
-		{
-			get
-			{
-				return this.baseSerializerTypeName;
-			}
+			this.serializerTypeName = serializerTypeName;
+			this.serializerBaseTypeName = baseSerializerTypeName;
 		}
 
 		public string SerializerTypeName
@@ -37,16 +31,36 @@ namespace System.ComponentModel.Design.Serialization
 			}
 		}
 
+		public string SerializerBaseTypeName
+		{
+			get
+			{
+				return this.serializerBaseTypeName;
+			}
+		}
+
 		public override object TypeId
 		{
 			get
 			{
-				return this.ToString() + this.baseSerializerTypeName;
+				if (this.typeId == null)
+				{
+					string text = this.serializerBaseTypeName;
+					int num = text.IndexOf(',');
+					if (num != -1)
+					{
+						text = text.Substring(0, num);
+					}
+					this.typeId = base.GetType().FullName + text;
+				}
+				return this.typeId;
 			}
 		}
 
 		private string serializerTypeName;
 
-		private string baseSerializerTypeName;
+		private string serializerBaseTypeName;
+
+		private string typeId;
 	}
 }

@@ -12,8 +12,7 @@ public class PlanterSideScreen : ReceptacleSideScreen
 
 	protected override Sprite GetEntityIcon(Tag prefabTag)
 	{
-		GameObject prefab = Assets.GetPrefab(prefabTag);
-		PlantableSeed component = prefab.GetComponent<PlantableSeed>();
+		PlantableSeed component = Assets.GetPrefab(prefabTag).GetComponent<PlantableSeed>();
 		if (component != null)
 		{
 			return base.GetEntityIcon(new Tag(component.PlantID));
@@ -23,7 +22,7 @@ public class PlanterSideScreen : ReceptacleSideScreen
 
 	protected override void SetResultDescriptions(GameObject seed_or_plant)
 	{
-		string text = string.Empty;
+		string text = "";
 		GameObject gameObject = seed_or_plant;
 		PlantableSeed component = seed_or_plant.GetComponent<PlantableSeed>();
 		List<Descriptor> list = new List<Descriptor>();
@@ -83,17 +82,14 @@ public class PlanterSideScreen : ReceptacleSideScreen
 		{
 			this.EffectsDescriptorPanel.SetDescriptors(plantEffectDescriptors);
 			this.EffectsDescriptorPanel.gameObject.SetActive(true);
+			return;
 		}
-		else
-		{
-			this.EffectsDescriptorPanel.gameObject.SetActive(false);
-		}
+		this.EffectsDescriptorPanel.gameObject.SetActive(false);
 	}
 
 	protected override bool AdditionalCanDepositTest()
 	{
-		PlantablePlot plantablePlot = this.targetReceptacle as PlantablePlot;
-		return plantablePlot.ValidPlant;
+		return (this.targetReceptacle as PlantablePlot).ValidPlant;
 	}
 
 	public DescriptorPanel RequirementsDescriptorPanel;

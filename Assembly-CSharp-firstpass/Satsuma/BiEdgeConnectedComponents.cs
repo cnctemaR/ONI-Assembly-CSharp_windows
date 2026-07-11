@@ -5,6 +5,14 @@ namespace Satsuma
 {
 	public sealed class BiEdgeConnectedComponents
 	{
+		public IGraph Graph { get; private set; }
+
+		public int Count { get; private set; }
+
+		public List<HashSet<Node>> Components { get; private set; }
+
+		public HashSet<Arc> Bridges { get; private set; }
+
 		public BiEdgeConnectedComponents(IGraph graph, BiEdgeConnectedComponents.Flags flags = BiEdgeConnectedComponents.Flags.None)
 		{
 			this.Graph = graph;
@@ -25,14 +33,6 @@ namespace Satsuma
 				this.Components = new ConnectedComponents(subgraph, ConnectedComponents.Flags.CreateComponents).Components;
 			}
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public int Count { get; private set; }
-
-		public List<HashSet<Node>> Components { get; private set; }
-
-		public HashSet<Arc> Bridges { get; private set; }
 
 		[Flags]
 		public enum Flags

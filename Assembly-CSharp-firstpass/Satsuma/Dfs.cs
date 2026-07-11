@@ -66,12 +66,14 @@ namespace Satsuma
 					}
 					else
 					{
-						this.Level++;
+						int num = this.Level;
+						this.Level = num + 1;
 						if (!this.Traverse(node2, arc2))
 						{
 							return false;
 						}
-						this.Level--;
+						num = this.Level;
+						this.Level = num - 1;
 					}
 				}
 			}

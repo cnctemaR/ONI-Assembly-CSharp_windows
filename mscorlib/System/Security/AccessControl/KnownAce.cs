@@ -1,12 +1,20 @@
 ﻿using System;
+using System.Globalization;
 using System.Security.Principal;
+using System.Text;
+using Unity;
 
 namespace System.Security.AccessControl
 {
 	public abstract class KnownAce : GenericAce
 	{
-		internal KnownAce(InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags)
-			: base(inheritanceFlags, propagationFlags)
+		internal KnownAce(AceType type, AceFlags flags)
+			: base(type, flags)
+		{
+		}
+
+		internal KnownAce(byte[] binaryForm, int offset)
+			: base(binaryForm, offset)
 		{
 		}
 
@@ -32,6 +40,36 @@ namespace System.Security.AccessControl
 			{
 				this.identifier = value;
 			}
+		}
+
+		internal static string GetSddlAccessRights(int accessMask)
+		{
+			string sddlAliasRights = KnownAce.GetSddlAliasRights(accessMask);
+			if (!string.IsNullOrEmpty(sddlAliasRights))
+			{
+				return sddlAliasRights;
+			}
+			return string.Format(CultureInfo.InvariantCulture, "0x{0:x}", accessMask);
+		}
+
+		private static string GetSddlAliasRights(int accessMask)
+		{
+			SddlAccessRight[] array = SddlAccessRight.Decompose(accessMask);
+			if (array == null)
+			{
+				return null;
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (SddlAccessRight sddlAccessRight in array)
+			{
+				stringBuilder.Append(sddlAccessRight.Name);
+			}
+			return stringBuilder.ToString();
+		}
+
+		internal KnownAce()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private int access_mask;

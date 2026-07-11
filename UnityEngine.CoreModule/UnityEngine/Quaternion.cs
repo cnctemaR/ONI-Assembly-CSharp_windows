@@ -6,22 +6,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Quaternions are used to represent rotations.</para>
-	/// </summary>
+	[ThreadAndSerializationSafe]
 	[NativeType(Header = "Runtime/Math/Quaternion.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[ThreadAndSerializationSafe]
 	[UsedByNativeCode]
 	public struct Quaternion : IEquatable<Quaternion>
 	{
-		/// <summary>
-		///   <para>Constructs new Quaternion with given x,y,z,w components.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="w"></param>
 		public Quaternion(float x, float y, float z, float w)
 		{
 			this.x = x;
@@ -30,11 +20,6 @@ namespace UnityEngine
 			this.w = w;
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation which rotates from fromDirection to toDirection.</para>
-		/// </summary>
-		/// <param name="fromDirection"></param>
-		/// <param name="toDirection"></param>
 		[FreeFunction("FromToQuaternionSafe", IsThreadSafe = true)]
 		public static Quaternion FromToRotation(Vector3 fromDirection, Vector3 toDirection)
 		{
@@ -43,10 +28,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Returns the Inverse of rotation.</para>
-		/// </summary>
-		/// <param name="rotation"></param>
 		[FreeFunction(IsThreadSafe = true)]
 		public static Quaternion Inverse(Quaternion rotation)
 		{
@@ -55,12 +36,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Spherically interpolates between a and b by t. The parameter t is clamped to the range [0, 1].</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
-		/// <param name="t"></param>
 		[FreeFunction("QuaternionScripting::Slerp", IsThreadSafe = true)]
 		public static Quaternion Slerp(Quaternion a, Quaternion b, float t)
 		{
@@ -69,12 +44,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Spherically interpolates between a and b by t. The parameter t is not clamped.</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
-		/// <param name="t"></param>
 		[FreeFunction("QuaternionScripting::SlerpUnclamped", IsThreadSafe = true)]
 		public static Quaternion SlerpUnclamped(Quaternion a, Quaternion b, float t)
 		{
@@ -83,12 +52,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Interpolates between a and b by t and normalizes the result afterwards. The parameter t is clamped to the range [0, 1].</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
-		/// <param name="t"></param>
 		[FreeFunction("QuaternionScripting::Lerp", IsThreadSafe = true)]
 		public static Quaternion Lerp(Quaternion a, Quaternion b, float t)
 		{
@@ -97,12 +60,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Interpolates between a and b by t and normalizes the result afterwards. The parameter t is not clamped.</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
-		/// <param name="t"></param>
 		[FreeFunction("QuaternionScripting::LerpUnclamped", IsThreadSafe = true)]
 		public static Quaternion LerpUnclamped(Quaternion a, Quaternion b, float t)
 		{
@@ -133,11 +90,6 @@ namespace UnityEngine
 			Quaternion.Internal_ToAxisAngleRad_Injected(ref q, out axis, out angle);
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation which rotates angle degrees around axis.</para>
-		/// </summary>
-		/// <param name="angle"></param>
-		/// <param name="axis"></param>
 		[FreeFunction("QuaternionScripting::AngleAxis", IsThreadSafe = true)]
 		public static Quaternion AngleAxis(float angle, Vector3 axis)
 		{
@@ -146,11 +98,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation with the specified forward and upwards directions.</para>
-		/// </summary>
-		/// <param name="forward">The direction to look in.</param>
-		/// <param name="upwards">The vector that defines in which direction up is.</param>
 		[FreeFunction("QuaternionScripting::LookRotation", IsThreadSafe = true)]
 		public static Quaternion LookRotation(Vector3 forward, [DefaultValue("Vector3.up")] Vector3 upwards)
 		{
@@ -159,11 +106,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation with the specified forward and upwards directions.</para>
-		/// </summary>
-		/// <param name="forward">The direction to look in.</param>
-		/// <param name="upwards">The vector that defines in which direction up is.</param>
 		[ExcludeFromDocs]
 		public static Quaternion LookRotation(Vector3 forward)
 		{
@@ -216,13 +158,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Set x, y, z and w components of an existing Quaternion.</para>
-		/// </summary>
-		/// <param name="newX"></param>
-		/// <param name="newY"></param>
-		/// <param name="newZ"></param>
-		/// <param name="newW"></param>
 		public void Set(float newX, float newY, float newZ, float newW)
 		{
 			this.x = newX;
@@ -231,9 +166,6 @@ namespace UnityEngine
 			this.w = newW;
 		}
 
-		/// <summary>
-		///   <para>The identity rotation (Read Only).</para>
-		/// </summary>
 		public static Quaternion identity
 		{
 			get
@@ -283,21 +215,11 @@ namespace UnityEngine
 			return !(lhs == rhs);
 		}
 
-		/// <summary>
-		///   <para>The dot product between two rotations.</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
 		public static float Dot(Quaternion a, Quaternion b)
 		{
 			return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation with the specified forward and upwards directions.</para>
-		/// </summary>
-		/// <param name="view">The direction to look in.</param>
-		/// <param name="up">The vector that defines in which direction up is.</param>
 		[ExcludeFromDocs]
 		public void SetLookRotation(Vector3 view)
 		{
@@ -305,21 +227,11 @@ namespace UnityEngine
 			this.SetLookRotation(view, up);
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation with the specified forward and upwards directions.</para>
-		/// </summary>
-		/// <param name="view">The direction to look in.</param>
-		/// <param name="up">The vector that defines in which direction up is.</param>
 		public void SetLookRotation(Vector3 view, [DefaultValue("Vector3.up")] Vector3 up)
 		{
 			this = Quaternion.LookRotation(view, up);
 		}
 
-		/// <summary>
-		///   <para>Returns the angle in degrees between two rotations a and b.</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
 		public static float Angle(Quaternion a, Quaternion b)
 		{
 			float num = Quaternion.Dot(a, b);
@@ -357,9 +269,6 @@ namespace UnityEngine
 			return euler;
 		}
 
-		/// <summary>
-		///   <para>Returns or sets the euler angle representation of the rotation.</para>
-		/// </summary>
 		public Vector3 eulerAngles
 		{
 			get
@@ -372,21 +281,11 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns a rotation that rotates z degrees around the z axis, x degrees around the x axis, and y degrees around the y axis.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public static Quaternion Euler(float x, float y, float z)
 		{
 			return Quaternion.Internal_FromEulerRad(new Vector3(x, y, z) * 0.017453292f);
 		}
 
-		/// <summary>
-		///   <para>Returns a rotation that rotates z degrees around the z axis, x degrees around the x axis, and y degrees around the y axis.</para>
-		/// </summary>
-		/// <param name="euler"></param>
 		public static Quaternion Euler(Vector3 euler)
 		{
 			return Quaternion.Internal_FromEulerRad(euler * 0.017453292f);
@@ -398,22 +297,11 @@ namespace UnityEngine
 			angle *= 57.29578f;
 		}
 
-		/// <summary>
-		///   <para>Creates a rotation which rotates from fromDirection to toDirection.</para>
-		/// </summary>
-		/// <param name="fromDirection"></param>
-		/// <param name="toDirection"></param>
 		public void SetFromToRotation(Vector3 fromDirection, Vector3 toDirection)
 		{
 			this = Quaternion.FromToRotation(fromDirection, toDirection);
 		}
 
-		/// <summary>
-		///   <para>Rotates a rotation from towards to.</para>
-		/// </summary>
-		/// <param name="from"></param>
-		/// <param name="to"></param>
-		/// <param name="maxDegreesDelta"></param>
 		public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDegreesDelta)
 		{
 			float num = Quaternion.Angle(from, to);
@@ -429,10 +317,6 @@ namespace UnityEngine
 			return quaternion;
 		}
 
-		/// <summary>
-		///   <para>Converts this quaternion to one with the same orientation but with a magnitude of 1.</para>
-		/// </summary>
-		/// <param name="q"></param>
 		public static Quaternion Normalize(Quaternion q)
 		{
 			float num = Mathf.Sqrt(Quaternion.Dot(q, q));
@@ -453,9 +337,6 @@ namespace UnityEngine
 			this = Quaternion.Normalize(this);
 		}
 
-		/// <summary>
-		///   <para>Returns this quaternion with a magnitude of 1 (Read Only).</para>
-		/// </summary>
 		public Quaternion normalized
 		{
 			get
@@ -479,19 +360,11 @@ namespace UnityEngine
 			return this.x.Equals(other.x) && this.y.Equals(other.y) && this.z.Equals(other.z) && this.w.Equals(other.w);
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string of the Quaternion.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public override string ToString()
 		{
 			return UnityString.Format("({0:F1}, {1:F1}, {2:F1}, {3:F1})", new object[] { this.x, this.y, this.z, this.w });
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string of the Quaternion.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public string ToString(string format)
 		{
 			return UnityString.Format("({0}, {1}, {2}, {3})", new object[]
@@ -620,24 +493,12 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void LookRotation_Injected(ref Vector3 forward, [DefaultValue("Vector3.up")] ref Vector3 upwards, out Quaternion ret);
 
-		/// <summary>
-		///   <para>X component of the Quaternion. Don't modify this directly unless you know quaternions inside out.</para>
-		/// </summary>
 		public float x;
 
-		/// <summary>
-		///   <para>Y component of the Quaternion. Don't modify this directly unless you know quaternions inside out.</para>
-		/// </summary>
 		public float y;
 
-		/// <summary>
-		///   <para>Z component of the Quaternion. Don't modify this directly unless you know quaternions inside out.</para>
-		/// </summary>
 		public float z;
 
-		/// <summary>
-		///   <para>W component of the Quaternion. Do not directly modify quaternions.</para>
-		/// </summary>
 		public float w;
 
 		private static readonly Quaternion identityQuaternion = new Quaternion(0f, 0f, 0f, 1f);

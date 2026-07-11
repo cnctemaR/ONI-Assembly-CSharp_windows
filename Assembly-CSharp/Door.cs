@@ -6,19 +6,18 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Door : Workable, ISaveLoadable, ISim200ms
 {
-	public Door()
-	{
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-	}
-
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		Door component = gameObject.GetComponent<Door>();
+		Door component = ((GameObject)data).GetComponent<Door>();
 		if (component != null)
 		{
 			this.QueueStateChange(component.requestedState);
 		}
+	}
+
+	public Door()
+	{
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
 	public Door.ControlState CurrentState
@@ -83,8 +82,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		if (component != null)
+		if (base.GetComponent<KPrefabID>() != null)
 		{
 			this.log = new LoggerFSS("Door", 35);
 		}
@@ -110,8 +108,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
 		this.requestedState = this.CurrentState;
 		this.ApplyRequestedControlState(true);
-		int num = ((this.rotatable.GetOrientation() != Orientation.Neutral) ? 0 : (this.building.Def.WidthInCells * (this.building.Def.HeightInCells - 1)));
-		int num2 = ((this.rotatable.GetOrientation() != Orientation.Neutral) ? this.building.Def.HeightInCells : this.building.Def.WidthInCells);
+		int num = ((this.rotatable.GetOrientation() == Orientation.Neutral) ? (this.building.Def.WidthInCells * (this.building.Def.HeightInCells - 1)) : 0);
+		int num2 = ((this.rotatable.GetOrientation() == Orientation.Neutral) ? this.building.Def.WidthInCells : this.building.Def.HeightInCells);
 		for (int num3 = 0; num3 != num2; num3++)
 		{
 			int num4 = this.building.PlacementCells[num + num3];
@@ -190,24 +188,17 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 	private void RefreshControlState()
 	{
-		Door.ControlState controlState = this.controlState;
-		if (controlState != Door.ControlState.Auto)
+		switch (this.controlState)
 		{
-			if (controlState != Door.ControlState.Opened)
-			{
-				if (controlState == Door.ControlState.Locked)
-				{
-					this.controller.sm.isLocked.Set(true, this.controller);
-				}
-			}
-			else
-			{
-				this.controller.sm.isLocked.Set(false, this.controller);
-			}
-		}
-		else
-		{
+		case Door.ControlState.Auto:
 			this.controller.sm.isLocked.Set(false, this.controller);
+			break;
+		case Door.ControlState.Opened:
+			this.controller.sm.isLocked.Set(false, this.controller);
+			break;
+		case Door.ControlState.Locked:
+			this.controller.sm.isLocked.Set(true, this.controller);
+			break;
 		}
 		base.Trigger(279163026, this.controlState);
 		this.SetWorldState();
@@ -223,11 +214,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			if (this.on && base.GetComponent<KPrefabID>().HasTag(GameTags.Transition))
 			{
 				this.SetActive(true);
+				return;
 			}
-			else
-			{
-				this.SetActive(false);
-			}
+			this.SetActive(false);
 		}
 	}
 
@@ -252,6 +241,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			if (this.doorOpeningSound != null)
 			{
 				this.loopingSounds.UpdateFirstParameter(this.doorOpeningSound, Door.SOUND_POWERED_PARAMETER, 1f);
+				return;
 			}
 		}
 		else
@@ -323,7 +313,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		{
 			int num2 = cells[i];
 			Door.DoorType doorType = this.doorType;
-			if (doorType == Door.DoorType.Pressure || doorType == Door.DoorType.Sealed || doorType == Door.DoorType.ManualPressure)
+			if (doorType <= Door.DoorType.ManualPressure || doorType == Door.DoorType.Sealed)
 			{
 				World.Instance.groundRenderer.MarkDirty(num2);
 				if (is_door_open)
@@ -346,13 +336,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 					{
 						num3 = component.Temperature;
 					}
-					int num4 = num2;
-					SimHashes elementID = component.ElementID;
-					CellElementEvent doorClose = CellEventLogger.Instance.DoorClose;
-					float num5 = num;
-					float num6 = num3;
-					int index = handle.index;
-					SimMessages.ReplaceAndDisplaceElement(num4, elementID, doorClose, num5, num6, byte.MaxValue, 0, index);
+					SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.DoorClose, num, num3, byte.MaxValue, 0, handle.index);
 					SimMessages.SetCellProperties(num2, 4);
 				}
 			}
@@ -398,16 +382,14 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
 			this.Open();
 			this.Close();
+			return;
 		}
-		else
+		if (this.changeStateChore != null)
 		{
-			if (this.changeStateChore != null)
-			{
-				this.changeStateChore.Cancel("Change state");
-			}
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.changeStateChore.Cancel("Change state");
 		}
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
+		this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
 	private void OnSimDoorOpened()
@@ -473,10 +455,10 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		float num4 = 1f;
 		if (this.consumer != null)
 		{
-			num4 = ((!this.consumer.IsPowered) ? 0.5f : 1f);
+			num4 = (this.consumer.IsPowered ? 1f : 0.5f);
 		}
 		Door.ControlState controlState = this.controlState;
-		if (controlState != Door.ControlState.Auto && controlState != Door.ControlState.Opened)
+		if (controlState > Door.ControlState.Opened)
 		{
 			if (controlState != Door.ControlState.Locked)
 			{
@@ -503,24 +485,22 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				component.Temperature = temperature;
 			}
 		}
-		Door.ControlState controlState = this.controlState;
-		if (controlState != Door.ControlState.Opened)
+		switch (this.controlState)
 		{
-			if (controlState != Door.ControlState.Locked)
-			{
-				if (controlState == Door.ControlState.Auto)
-				{
-					if (this.openCount == 0)
-					{
-						this.controller.sm.isOpen.Set(false, this.controller);
-						Game.Instance.userMenu.Refresh(base.gameObject);
-					}
-				}
-			}
-			else
+		case Door.ControlState.Auto:
+			if (this.openCount == 0)
 			{
 				this.controller.sm.isOpen.Set(false, this.controller);
+				Game.Instance.userMenu.Refresh(base.gameObject);
 			}
+			break;
+		case Door.ControlState.Opened:
+			break;
+		case Door.ControlState.Locked:
+			this.controller.sm.isOpen.Set(false, this.controller);
+			return;
+		default:
+			return;
 		}
 	}
 
@@ -560,8 +540,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			this.changeStateChore.Cancel("Change state");
 			this.changeStateChore = null;
 		}
-		bool flag = newValue == 1;
-		this.requestedState = ((!flag) ? Door.ControlState.Locked : Door.ControlState.Opened);
+		this.requestedState = ((newValue == 1) ? Door.ControlState.Opened : Door.ControlState.Locked);
 		this.applyLogicChange = true;
 	}
 
@@ -598,9 +577,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				{
 					if (!Grid.Solid[num2])
 					{
-						PrimaryElement component = base.GetComponent<PrimaryElement>();
-						StructureTemperatureComponents.DoMelt(component);
-						break;
+						StructureTemperatureComponents.DoMelt(base.GetComponent<PrimaryElement>());
+						return;
 					}
 				}
 			}
@@ -802,8 +780,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				smi.master.RefreshControlState();
 				if (smi.master.GetComponent<Unsealable>().facingRight)
 				{
-					KBatchedAnimController component2 = smi.master.GetComponent<KBatchedAnimController>();
-					component2.FlipX = true;
+					smi.master.GetComponent<KBatchedAnimController>().FlipX = true;
 				}
 			}).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 			{
@@ -828,11 +805,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 					smi.GoTo(this.opening);
 					FogOfWarMask.ClearMask(Grid.CellRight(Grid.PosToCell(smi.master.gameObject)));
 					FogOfWarMask.ClearMask(Grid.CellLeft(Grid.PosToCell(smi.master.gameObject)));
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.Sealed.closed);
-				}
+				smi.GoTo(this.Sealed.closed);
 			});
 		}
 

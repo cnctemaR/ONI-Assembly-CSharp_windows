@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
@@ -13,14 +12,6 @@ namespace System.Net.NetworkInformation
 			this.addresses = new List<IPAddress>();
 		}
 
-		[DllImport("libc")]
-		private static extern int if_nametoindex(string ifname);
-
-		public static int IfNameToIndex(string ifname)
-		{
-			return UnixNetworkInterface.if_nametoindex(ifname);
-		}
-
 		internal void AddAddress(IPAddress address)
 		{
 			this.addresses.Add(address);
@@ -28,7 +19,6 @@ namespace System.Net.NetworkInformation
 
 		internal void SetLinkLayerInfo(int index, byte[] macAddress, NetworkInterfaceType type)
 		{
-			this.index = index;
 			this.macAddress = macAddress;
 			this.type = type;
 		}
@@ -48,11 +38,11 @@ namespace System.Net.NetworkInformation
 			bool flag2 = !flag && networkInterfaceComponent == NetworkInterfaceComponent.IPv6;
 			foreach (IPAddress ipaddress in this.addresses)
 			{
-				if (flag && ipaddress.AddressFamily == global::System.Net.Sockets.AddressFamily.InterNetwork)
+				if (flag && ipaddress.AddressFamily == AddressFamily.InterNetwork)
 				{
 					return true;
 				}
-				if (flag2 && ipaddress.AddressFamily == global::System.Net.Sockets.AddressFamily.InterNetworkV6)
+				if (flag2 && ipaddress.AddressFamily == AddressFamily.InterNetworkV6)
 				{
 					return true;
 				}
@@ -100,7 +90,7 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		[global::System.MonoTODO("Parse dmesg?")]
+		[MonoTODO("Parse dmesg?")]
 		public override long Speed
 		{
 			get
@@ -109,13 +99,19 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
+		internal int NameIndex
+		{
+			get
+			{
+				return NetworkInterfaceFactory.UnixNetworkInterfaceAPI.if_nametoindex(this.Name);
+			}
+		}
+
 		protected IPv4InterfaceStatistics ipv4stats;
 
 		protected IPInterfaceProperties ipproperties;
 
 		private string name;
-
-		private int index;
 
 		protected List<IPAddress> addresses;
 

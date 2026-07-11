@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Base class for defining in which direction the focus moves in a focus ring.</para>
-	/// </summary>
 	public class FocusChangeDirection
 	{
 		protected FocusChangeDirection(int value)
@@ -12,9 +9,6 @@ namespace UnityEngine.Experimental.UIElements
 			this.m_Value = value;
 		}
 
-		/// <summary>
-		///   <para>Focus came from an unspecified direction, for example after a mouse down.</para>
-		/// </summary>
 		public static FocusChangeDirection unspecified
 		{
 			get
@@ -23,9 +17,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>The null direction. This is usually used when the focus stays on the same element.</para>
-		/// </summary>
 		public static FocusChangeDirection none
 		{
 			get
@@ -34,9 +25,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Last value for the direction defined by this class.</para>
-		/// </summary>
 		protected static FocusChangeDirection lastValue
 		{
 			get

@@ -8,19 +8,19 @@ namespace UnityEngine
 	internal class GUIDebugger
 	{
 		[NativeConditional("UNITY_EDITOR")]
-		public static void LogLayoutEntry(Rect rect, RectOffset margins, GUIStyle style)
+		public static void LogLayoutEntry(Rect rect, int left, int right, int top, int bottom, GUIStyle style)
 		{
-			GUIDebugger.LogLayoutEntry_Injected(ref rect, margins, style);
+			GUIDebugger.LogLayoutEntry_Injected(ref rect, left, right, top, bottom, style);
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		public static void LogLayoutGroupEntry(Rect rect, RectOffset margins, GUIStyle style, bool isVertical)
+		public static void LogLayoutGroupEntry(Rect rect, int left, int right, int top, int bottom, GUIStyle style, bool isVertical)
 		{
-			GUIDebugger.LogLayoutGroupEntry_Injected(ref rect, margins, style, isVertical);
+			GUIDebugger.LogLayoutGroupEntry_Injected(ref rect, left, right, top, bottom, style, isVertical);
 		}
 
-		[NativeMethod("LogEndGroup")]
 		[StaticAccessor("GetGUIDebuggerManager()", StaticAccessorType.Dot)]
+		[NativeMethod("LogEndGroup")]
 		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void LogLayoutEndGroup();
@@ -45,10 +45,10 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void LogLayoutEntry_Injected(ref Rect rect, RectOffset margins, GUIStyle style);
+		private static extern void LogLayoutEntry_Injected(ref Rect rect, int left, int right, int top, int bottom, GUIStyle style);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void LogLayoutGroupEntry_Injected(ref Rect rect, RectOffset margins, GUIStyle style, bool isVertical);
+		private static extern void LogLayoutGroupEntry_Injected(ref Rect rect, int left, int right, int top, int bottom, GUIStyle style, bool isVertical);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void LogBeginProperty_Injected(string targetTypeAssemblyQualifiedName, string path, ref Rect position);

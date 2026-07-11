@@ -13,7 +13,6 @@ namespace YamlDotNet.Serialization
 			this.overrides = new YamlAttributeOverrides();
 			this.typeConverterFactories = new LazyComponentRegistrationList<Nothing, IYamlTypeConverter>();
 			this.typeConverterFactories.Add(typeof(GuidConverter), (Nothing _) => new GuidConverter(false));
-			this.typeConverterFactories.Add(typeof(SystemTypeConverter), (Nothing _) => new SystemTypeConverter());
 			this.typeInspectorFactories = new LazyComponentRegistrationList<ITypeInspector, ITypeInspector>();
 		}
 

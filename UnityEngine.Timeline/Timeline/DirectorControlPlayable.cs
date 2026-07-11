@@ -21,6 +21,14 @@ namespace UnityEngine.Timeline
 			return scriptPlayable;
 		}
 
+		public override void OnPlayableDestroy(Playable playable)
+		{
+			if (this.director != null && this.director.playableAsset != null)
+			{
+				this.director.Stop();
+			}
+		}
+
 		public override void PrepareFrame(Playable playable, FrameData info)
 		{
 			if (!(this.director == null) && this.director.isActiveAndEnabled && !(this.director.playableAsset == null))
@@ -44,7 +52,14 @@ namespace UnityEngine.Timeline
 		{
 			if (this.director != null && this.director.playableAsset != null)
 			{
-				this.director.Stop();
+				if (info.effectivePlayState == PlayState.Playing)
+				{
+					this.director.Pause();
+				}
+				else
+				{
+					this.director.Stop();
+				}
 			}
 		}
 

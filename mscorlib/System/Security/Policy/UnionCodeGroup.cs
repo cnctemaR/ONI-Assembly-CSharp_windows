@@ -53,8 +53,7 @@ namespace System.Security.Policy
 			{
 				foreach (object obj in base.Children)
 				{
-					CodeGroup codeGroup = (CodeGroup)obj;
-					PolicyStatement policyStatement = codeGroup.Resolve(evidence);
+					PolicyStatement policyStatement = ((CodeGroup)obj).Resolve(evidence);
 					if (policyStatement != null)
 					{
 						permissionSet = permissionSet.Union(policyStatement.PermissionSet);
@@ -81,11 +80,10 @@ namespace System.Security.Policy
 			{
 				foreach (object obj in base.Children)
 				{
-					CodeGroup codeGroup2 = (CodeGroup)obj;
-					CodeGroup codeGroup3 = codeGroup2.ResolveMatchingCodeGroups(evidence);
-					if (codeGroup3 != null)
+					CodeGroup codeGroup2 = ((CodeGroup)obj).ResolveMatchingCodeGroups(evidence);
+					if (codeGroup2 != null)
 					{
-						codeGroup.AddChild(codeGroup3);
+						codeGroup.AddChild(codeGroup2);
 					}
 				}
 			}

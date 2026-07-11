@@ -97,7 +97,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			return;
 		}
 		int value = this.inputOne.Value;
-		int num = ((this.inputTwo == null) ? 0 : this.inputTwo.Value);
+		int num = ((this.inputTwo != null) ? this.inputTwo.Value : 0);
 		this.outputValue = 0;
 		switch (this.op)
 		{
@@ -108,7 +108,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			this.outputValue = value | num;
 			break;
 		case LogicGateBase.Op.Not:
-			this.outputValue = ((value != 0) ? 0 : 1);
+			this.outputValue = ((value == 0) ? 1 : 0);
 			break;
 		case LogicGateBase.Op.Xor:
 			this.outputValue = value ^ num;
@@ -136,7 +136,11 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		case LogicGateBase.PortId.InputOne:
 			return this.inputOne.Value;
 		case LogicGateBase.PortId.InputTwo:
-			return (!base.RequiresTwoInputs) ? 0 : this.inputTwo.Value;
+			if (!base.RequiresTwoInputs)
+			{
+				return 0;
+			}
+			return this.inputTwo.Value;
 		}
 		return this.outputValue;
 	}
@@ -148,9 +152,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			return false;
 		}
 		int num = base.PortCell(port);
-		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-		LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(num);
-		return networkForCell != null;
+		return Game.Instance.logicCircuitManager.GetNetworkForCell(num) != null;
 	}
 
 	public void SetPortDescriptions(LogicGate.LogicGateDescriptions descriptions)
@@ -163,9 +165,21 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		switch (port)
 		{
 		case LogicGateBase.PortId.InputOne:
-			return (this.descriptions.inputOne == null) ? ((!base.RequiresTwoInputs) ? LogicGate.INPUT_ONE_SINGLE_DESCRIPTION : LogicGate.INPUT_ONE_DOUBLE_DESCRIPTION) : this.descriptions.inputOne;
+			if (this.descriptions.inputOne != null)
+			{
+				return this.descriptions.inputOne;
+			}
+			if (!base.RequiresTwoInputs)
+			{
+				return LogicGate.INPUT_ONE_SINGLE_DESCRIPTION;
+			}
+			return LogicGate.INPUT_ONE_DOUBLE_DESCRIPTION;
 		case LogicGateBase.PortId.InputTwo:
-			return (this.descriptions.inputTwo == null) ? LogicGate.INPUT_TWO_DESCRIPTION : this.descriptions.inputTwo;
+			if (this.descriptions.inputTwo == null)
+			{
+				return LogicGate.INPUT_TWO_DESCRIPTION;
+			}
+			return this.descriptions.inputTwo;
 		}
 		return this.descriptions.output;
 	}
@@ -201,15 +215,14 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork))
 		{
 			component.Play("off", KAnim.PlayMode.Once, 1f, 0f);
+			return;
 		}
-		else if (base.RequiresTwoInputs)
+		if (base.RequiresTwoInputs)
 		{
 			component.Play("on_" + (this.inputOne.Value + this.inputTwo.Value * 2 + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
+			return;
 		}
-		else
-		{
-			component.Play("on_" + (this.inputOne.Value + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
-		}
+		component.Play("on_" + (this.inputOne.Value + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	public void OnLogicNetworkConnectionChanged(bool connected)

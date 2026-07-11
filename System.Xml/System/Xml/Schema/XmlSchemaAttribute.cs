@@ -6,23 +6,6 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaAttribute : XmlSchemaAnnotated
 	{
-		public XmlSchemaAttribute()
-		{
-			this.form = XmlSchemaForm.None;
-			this.use = XmlSchemaUse.None;
-			this.schemaTypeName = XmlQualifiedName.Empty;
-			this.qualifiedName = XmlQualifiedName.Empty;
-			this.refName = XmlQualifiedName.Empty;
-		}
-
-		internal bool ParentIsSchema
-		{
-			get
-			{
-				return base.Parent is XmlSchema;
-			}
-		}
-
 		[DefaultValue(null)]
 		[XmlAttribute("default")]
 		public string DefaultValue
@@ -33,7 +16,6 @@ namespace System.Xml.Schema
 			}
 			set
 			{
-				this.fixedValue = null;
 				this.defaultValue = value;
 			}
 		}
@@ -48,13 +30,12 @@ namespace System.Xml.Schema
 			}
 			set
 			{
-				this.defaultValue = null;
 				this.fixedValue = value;
 			}
 		}
 
-		[DefaultValue(XmlSchemaForm.None)]
 		[XmlAttribute("form")]
+		[DefaultValue(XmlSchemaForm.None)]
 		public XmlSchemaForm Form
 		{
 			get
@@ -89,7 +70,7 @@ namespace System.Xml.Schema
 			}
 			set
 			{
-				this.refName = value;
+				this.refName = ((value == null) ? XmlQualifiedName.Empty : value);
 			}
 		}
 
@@ -98,11 +79,11 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.schemaTypeName;
+				return this.typeName;
 			}
 			set
 			{
-				this.schemaTypeName = value;
+				this.typeName = ((value == null) ? XmlQualifiedName.Empty : value);
 			}
 		}
 
@@ -111,11 +92,11 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.schemaType;
+				return this.type;
 			}
 			set
 			{
-				this.schemaType = value;
+				this.type = value;
 			}
 		}
 
@@ -142,15 +123,19 @@ namespace System.Xml.Schema
 			}
 		}
 
+		[Obsolete("This property has been deprecated. Please use AttributeSchemaType property that returns a strongly typed attribute type. http://go.microsoft.com/fwlink/?linkid=14202")]
 		[XmlIgnore]
-		[Obsolete]
 		public object AttributeType
 		{
 			get
 			{
-				if (this.referencedAttribute != null)
+				if (this.attributeType == null)
 				{
-					return this.referencedAttribute.AttributeType;
+					return null;
+				}
+				if (this.attributeType.QualifiedName.Namespace == "http://www.w3.org/2001/XMLSchema")
+				{
+					return this.attributeType.Datatype;
 				}
 				return this.attributeType;
 			}
@@ -161,447 +146,108 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				if (this.referencedAttribute != null)
-				{
-					return this.referencedAttribute.AttributeSchemaType;
-				}
-				return this.attributeSchemaType;
+				return this.attributeType;
 			}
 		}
 
-		internal string ValidatedDefaultValue
+		internal XmlReader Validate(XmlReader reader, XmlResolver resolver, XmlSchemaSet schemaSet, ValidationEventHandler valEventHandler)
+		{
+			if (schemaSet != null)
+			{
+				XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+				xmlReaderSettings.ValidationType = ValidationType.Schema;
+				xmlReaderSettings.Schemas = schemaSet;
+				xmlReaderSettings.ValidationEventHandler += valEventHandler;
+				return new XsdValidatingReader(reader, resolver, xmlReaderSettings, this);
+			}
+			return null;
+		}
+
+		[XmlIgnore]
+		internal XmlSchemaDatatype Datatype
 		{
 			get
 			{
-				return this.validatedDefaultValue;
-			}
-		}
-
-		internal string ValidatedFixedValue
-		{
-			get
-			{
-				return this.validatedFixedValue;
-			}
-		}
-
-		internal object ValidatedFixedTypedValue
-		{
-			get
-			{
-				return this.validatedFixedTypedValue;
-			}
-		}
-
-		internal XmlSchemaUse ValidatedUse
-		{
-			get
-			{
-				return this.validatedUse;
-			}
-		}
-
-		internal override void SetParent(XmlSchemaObject parent)
-		{
-			base.SetParent(parent);
-			if (this.schemaType != null)
-			{
-				this.schemaType.SetParent(this);
-			}
-		}
-
-		internal override int Compile(ValidationEventHandler h, XmlSchema schema)
-		{
-			if (this.CompilationId == schema.CompilationId)
-			{
-				return 0;
-			}
-			this.errorCount = 0;
-			if (this.ParentIsSchema || this.isRedefineChild)
-			{
-				if (this.RefName != null && !this.RefName.IsEmpty)
+				if (this.attributeType != null)
 				{
-					base.error(h, "ref must be absent in the top level <attribute>");
+					return this.attributeType.Datatype;
 				}
-				if (this.Form != XmlSchemaForm.None)
-				{
-					base.error(h, "form must be absent in the top level <attribute>");
-				}
-				if (this.Use != XmlSchemaUse.None)
-				{
-					base.error(h, "use must be absent in the top level <attribute>");
-				}
-				this.targetNamespace = base.AncestorSchema.TargetNamespace;
-				this.CompileCommon(h, schema, true);
-			}
-			else if (this.RefName == null || this.RefName.IsEmpty)
-			{
-				if (this.form == XmlSchemaForm.Qualified || (this.form == XmlSchemaForm.None && schema.AttributeFormDefault == XmlSchemaForm.Qualified))
-				{
-					this.targetNamespace = base.AncestorSchema.TargetNamespace;
-				}
-				else
-				{
-					this.targetNamespace = string.Empty;
-				}
-				this.CompileCommon(h, schema, true);
-			}
-			else
-			{
-				if (this.name != null)
-				{
-					base.error(h, "name must be absent if ref is present");
-				}
-				if (this.form != XmlSchemaForm.None)
-				{
-					base.error(h, "form must be absent if ref is present");
-				}
-				if (this.schemaType != null)
-				{
-					base.error(h, "simpletype must be absent if ref is present");
-				}
-				if (this.schemaTypeName != null && !this.schemaTypeName.IsEmpty)
-				{
-					base.error(h, "type must be absent if ref is present");
-				}
-				this.CompileCommon(h, schema, false);
-			}
-			this.CompilationId = schema.CompilationId;
-			return this.errorCount;
-		}
-
-		private void CompileCommon(ValidationEventHandler h, XmlSchema schema, bool refIsNotPresent)
-		{
-			if (refIsNotPresent)
-			{
-				if (this.Name == null)
-				{
-					base.error(h, "Required attribute name must be present");
-				}
-				else if (!XmlSchemaUtil.CheckNCName(this.Name))
-				{
-					base.error(h, "attribute name must be NCName");
-				}
-				else if (this.Name == "xmlns")
-				{
-					base.error(h, "attribute name must not be xmlns");
-				}
-				else
-				{
-					this.qualifiedName = new XmlQualifiedName(this.Name, this.targetNamespace);
-				}
-				if (this.SchemaType != null)
-				{
-					if (this.SchemaTypeName != null && !this.SchemaTypeName.IsEmpty)
-					{
-						base.error(h, "attribute can't have both a type and <simpleType> content");
-					}
-					this.errorCount += this.SchemaType.Compile(h, schema);
-				}
-				if (this.SchemaTypeName != null && !XmlSchemaUtil.CheckQName(this.SchemaTypeName))
-				{
-					base.error(h, this.SchemaTypeName + " is not a valid QName");
-				}
-			}
-			else
-			{
-				if (this.RefName == null || this.RefName.IsEmpty)
-				{
-					throw new InvalidOperationException("Error: Should Never Happen. refname must be present");
-				}
-				this.qualifiedName = this.RefName;
-			}
-			if (base.AncestorSchema.TargetNamespace == "http://www.w3.org/2001/XMLSchema-instance" && this.Name != "nil" && this.Name != "type" && this.Name != "schemaLocation" && this.Name != "noNamespaceSchemaLocation")
-			{
-				base.error(h, "targetNamespace can't be http://www.w3.org/2001/XMLSchema-instance");
-			}
-			if (this.DefaultValue != null && this.FixedValue != null)
-			{
-				base.error(h, "default and fixed must not both be present in an Attribute");
-			}
-			if (this.DefaultValue != null && this.Use != XmlSchemaUse.None && this.Use != XmlSchemaUse.Optional)
-			{
-				base.error(h, "if default is present, use must be optional");
-			}
-			XmlSchemaUtil.CompileID(base.Id, this, schema.IDCollection, h);
-		}
-
-		internal override int Validate(ValidationEventHandler h, XmlSchema schema)
-		{
-			if (base.IsValidated(schema.ValidationId))
-			{
-				return this.errorCount;
-			}
-			if (this.SchemaType != null)
-			{
-				this.SchemaType.Validate(h, schema);
-				this.attributeType = this.SchemaType;
-			}
-			else if (this.SchemaTypeName != null && this.SchemaTypeName != XmlQualifiedName.Empty)
-			{
-				XmlSchemaType xmlSchemaType = schema.FindSchemaType(this.SchemaTypeName);
-				if (xmlSchemaType is XmlSchemaComplexType)
-				{
-					base.error(h, "An attribute can't have complexType Content");
-				}
-				else if (xmlSchemaType != null)
-				{
-					this.errorCount += xmlSchemaType.Validate(h, schema);
-					this.attributeType = xmlSchemaType;
-				}
-				else if (this.SchemaTypeName == XmlSchemaComplexType.AnyTypeName)
-				{
-					this.attributeType = XmlSchemaComplexType.AnyType;
-				}
-				else if (XmlSchemaUtil.IsBuiltInDatatypeName(this.SchemaTypeName))
-				{
-					this.attributeType = XmlSchemaDatatype.FromName(this.SchemaTypeName);
-					if (this.attributeType == null)
-					{
-						base.error(h, "Invalid xml schema namespace datatype was specified.");
-					}
-				}
-				else if (!schema.IsNamespaceAbsent(this.SchemaTypeName.Namespace))
-				{
-					base.error(h, "Referenced schema type " + this.SchemaTypeName + " was not found in the corresponding schema.");
-				}
-			}
-			if (this.RefName != null && this.RefName != XmlQualifiedName.Empty)
-			{
-				this.referencedAttribute = schema.FindAttribute(this.RefName);
-				if (this.referencedAttribute != null)
-				{
-					this.errorCount += this.referencedAttribute.Validate(h, schema);
-				}
-				else if (!schema.IsNamespaceAbsent(this.RefName.Namespace))
-				{
-					base.error(h, "Referenced attribute " + this.RefName + " was not found in the corresponding schema.");
-				}
-			}
-			if (this.attributeType == null)
-			{
-				this.attributeType = XmlSchemaSimpleType.AnySimpleType;
-			}
-			if (this.defaultValue != null || this.fixedValue != null)
-			{
-				XmlSchemaDatatype xmlSchemaDatatype = this.attributeType as XmlSchemaDatatype;
-				if (xmlSchemaDatatype == null)
-				{
-					xmlSchemaDatatype = ((XmlSchemaSimpleType)this.attributeType).Datatype;
-				}
-				if (xmlSchemaDatatype.TokenizedType == XmlTokenizedType.QName)
-				{
-					base.error(h, "By the defection of the W3C XML Schema specification, it is impossible to supply QName default or fixed values.");
-				}
-				else
-				{
-					try
-					{
-						if (this.defaultValue != null)
-						{
-							this.validatedDefaultValue = xmlSchemaDatatype.Normalize(this.defaultValue);
-							xmlSchemaDatatype.ParseValue(this.validatedDefaultValue, null, null);
-						}
-					}
-					catch (Exception ex)
-					{
-						XmlSchemaObject.error(h, "The Attribute's default value is invalid with its type definition.", ex);
-					}
-					try
-					{
-						if (this.fixedValue != null)
-						{
-							this.validatedFixedValue = xmlSchemaDatatype.Normalize(this.fixedValue);
-							this.validatedFixedTypedValue = xmlSchemaDatatype.ParseValue(this.validatedFixedValue, null, null);
-						}
-					}
-					catch (Exception ex2)
-					{
-						XmlSchemaObject.error(h, "The Attribute's fixed value is invalid with its type definition.", ex2);
-					}
-				}
-			}
-			if (this.Use == XmlSchemaUse.None)
-			{
-				this.validatedUse = XmlSchemaUse.Optional;
-			}
-			else
-			{
-				this.validatedUse = this.Use;
-			}
-			if (this.attributeType != null)
-			{
-				this.attributeSchemaType = this.attributeType as XmlSchemaSimpleType;
-				if (this.attributeType == XmlSchemaSimpleType.AnySimpleType)
-				{
-					this.attributeSchemaType = XmlSchemaSimpleType.XsAnySimpleType;
-				}
-				if (this.attributeSchemaType == null)
-				{
-					this.attributeSchemaType = XmlSchemaType.GetBuiltInSimpleType(this.SchemaTypeName);
-				}
-			}
-			this.ValidationId = schema.ValidationId;
-			return this.errorCount;
-		}
-
-		internal bool AttributeEquals(XmlSchemaAttribute other)
-		{
-			return !(base.Id != other.Id) && !(this.QualifiedName != other.QualifiedName) && this.AttributeType == other.AttributeType && this.ValidatedUse == other.ValidatedUse && !(this.ValidatedDefaultValue != other.ValidatedDefaultValue) && !(this.ValidatedFixedValue != other.ValidatedFixedValue);
-		}
-
-		internal static XmlSchemaAttribute Read(XmlSchemaReader reader, ValidationEventHandler h)
-		{
-			XmlSchemaAttribute xmlSchemaAttribute = new XmlSchemaAttribute();
-			reader.MoveToElement();
-			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "attribute")
-			{
-				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaAttribute.Read, name=" + reader.Name, null);
-				reader.SkipToEnd();
 				return null;
 			}
-			xmlSchemaAttribute.LineNumber = reader.LineNumber;
-			xmlSchemaAttribute.LinePosition = reader.LinePosition;
-			xmlSchemaAttribute.SourceUri = reader.BaseURI;
-			while (reader.MoveToNextAttribute())
-			{
-				if (reader.Name == "default")
-				{
-					xmlSchemaAttribute.defaultValue = reader.Value;
-				}
-				else if (reader.Name == "fixed")
-				{
-					xmlSchemaAttribute.fixedValue = reader.Value;
-				}
-				else if (reader.Name == "form")
-				{
-					Exception ex;
-					xmlSchemaAttribute.form = XmlSchemaUtil.ReadFormAttribute(reader, out ex);
-					if (ex != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for form attribute", ex);
-					}
-				}
-				else if (reader.Name == "id")
-				{
-					xmlSchemaAttribute.Id = reader.Value;
-				}
-				else if (reader.Name == "name")
-				{
-					xmlSchemaAttribute.name = reader.Value;
-				}
-				else if (reader.Name == "ref")
-				{
-					Exception ex2;
-					xmlSchemaAttribute.refName = XmlSchemaUtil.ReadQNameAttribute(reader, out ex2);
-					if (ex2 != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for ref attribute", ex2);
-					}
-				}
-				else if (reader.Name == "type")
-				{
-					Exception ex3;
-					xmlSchemaAttribute.schemaTypeName = XmlSchemaUtil.ReadQNameAttribute(reader, out ex3);
-					if (ex3 != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for type attribute", ex3);
-					}
-				}
-				else if (reader.Name == "use")
-				{
-					Exception ex4;
-					xmlSchemaAttribute.use = XmlSchemaUtil.ReadUseAttribute(reader, out ex4);
-					if (ex4 != null)
-					{
-						XmlSchemaObject.error(h, reader.Value + " is not a valid value for use attribute", ex4);
-					}
-				}
-				else if ((reader.NamespaceURI == string.Empty && reader.Name != "xmlns") || reader.NamespaceURI == "http://www.w3.org/2001/XMLSchema")
-				{
-					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for attribute", null);
-				}
-				else
-				{
-					XmlSchemaUtil.ReadUnhandledAttribute(reader, xmlSchemaAttribute);
-				}
-			}
-			reader.MoveToElement();
-			if (reader.IsEmptyElement)
-			{
-				return xmlSchemaAttribute;
-			}
-			int num = 1;
-			while (reader.ReadNextElement())
-			{
-				if (reader.NodeType == XmlNodeType.EndElement)
-				{
-					if (reader.LocalName != "attribute")
-					{
-						XmlSchemaObject.error(h, "Should not happen :2: XmlSchemaAttribute.Read, name=" + reader.Name, null);
-					}
-					break;
-				}
-				if (num <= 1 && reader.LocalName == "annotation")
-				{
-					num = 2;
-					XmlSchemaAnnotation xmlSchemaAnnotation = XmlSchemaAnnotation.Read(reader, h);
-					if (xmlSchemaAnnotation != null)
-					{
-						xmlSchemaAttribute.Annotation = xmlSchemaAnnotation;
-					}
-				}
-				else if (num <= 2 && reader.LocalName == "simpleType")
-				{
-					num = 3;
-					XmlSchemaSimpleType xmlSchemaSimpleType = XmlSchemaSimpleType.Read(reader, h);
-					if (xmlSchemaSimpleType != null)
-					{
-						xmlSchemaAttribute.schemaType = xmlSchemaSimpleType;
-					}
-				}
-				else
-				{
-					reader.RaiseInvalidElementError();
-				}
-			}
-			return xmlSchemaAttribute;
 		}
 
-		private const string xmlname = "attribute";
+		internal void SetQualifiedName(XmlQualifiedName value)
+		{
+			this.qualifiedName = value;
+		}
 
-		private object attributeType;
+		internal void SetAttributeType(XmlSchemaSimpleType value)
+		{
+			this.attributeType = value;
+		}
 
-		private XmlSchemaSimpleType attributeSchemaType;
+		internal SchemaAttDef AttDef
+		{
+			get
+			{
+				return this.attDef;
+			}
+			set
+			{
+				this.attDef = value;
+			}
+		}
+
+		internal bool HasDefault
+		{
+			get
+			{
+				return this.defaultValue != null;
+			}
+		}
+
+		[XmlIgnore]
+		internal override string NameAttribute
+		{
+			get
+			{
+				return this.Name;
+			}
+			set
+			{
+				this.Name = value;
+			}
+		}
+
+		internal override XmlSchemaObject Clone()
+		{
+			XmlSchemaAttribute xmlSchemaAttribute = (XmlSchemaAttribute)base.MemberwiseClone();
+			xmlSchemaAttribute.refName = this.refName.Clone();
+			xmlSchemaAttribute.typeName = this.typeName.Clone();
+			xmlSchemaAttribute.qualifiedName = this.qualifiedName.Clone();
+			return xmlSchemaAttribute;
+		}
 
 		private string defaultValue;
 
 		private string fixedValue;
 
-		private string validatedDefaultValue;
-
-		private string validatedFixedValue;
-
-		private object validatedFixedTypedValue;
+		private string name;
 
 		private XmlSchemaForm form;
 
-		private string name;
-
-		private string targetNamespace;
-
-		private XmlQualifiedName qualifiedName;
-
-		private XmlQualifiedName refName;
-
-		private XmlSchemaSimpleType schemaType;
-
-		private XmlQualifiedName schemaTypeName;
-
 		private XmlSchemaUse use;
 
-		private XmlSchemaUse validatedUse;
+		private XmlQualifiedName refName = XmlQualifiedName.Empty;
 
-		private XmlSchemaAttribute referencedAttribute;
+		private XmlQualifiedName typeName = XmlQualifiedName.Empty;
+
+		private XmlQualifiedName qualifiedName = XmlQualifiedName.Empty;
+
+		private XmlSchemaSimpleType type;
+
+		private XmlSchemaSimpleType attributeType;
+
+		private SchemaAttDef attDef;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Unity.Collections
 {
@@ -11,6 +12,7 @@ namespace Unity.Collections
 
 		public T[] Items
 		{
+			[CompilerGenerated]
 			get
 			{
 				return this.m_Array.ToArray();

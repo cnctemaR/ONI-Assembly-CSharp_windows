@@ -11,12 +11,7 @@ public class IncubatorMonitor : GameStateMachine<IncubatorMonitor, IncubatorMoni
 
 	public static bool InIncubator(IncubatorMonitor.Instance smi)
 	{
-		if (smi.gameObject.transform.parent)
-		{
-			EggIncubator component = smi.gameObject.transform.parent.GetComponent<EggIncubator>();
-			return component != null;
-		}
-		return false;
+		return smi.gameObject.transform.parent && smi.gameObject.transform.parent.GetComponent<EggIncubator>() != null;
 	}
 
 	public GameStateMachine<IncubatorMonitor, IncubatorMonitor.Instance, IStateMachineTarget, IncubatorMonitor.Def>.State not;

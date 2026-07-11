@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field)]
 	internal class NativeNameAttribute : Attribute, IBindingsNameProviderAttribute, IBindingsAttribute
 	{
 		public NativeNameAttribute()

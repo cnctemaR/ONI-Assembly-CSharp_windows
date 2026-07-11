@@ -27,7 +27,7 @@ public class SandboxToolParameterMenu : KScreen
 		sandboxSettings.OnChangeElement = (global::System.Action)Delegate.Combine(sandboxSettings.OnChangeElement, new global::System.Action(delegate
 		{
 			this.elementSelector.button.GetComponentInChildren<LocText>().text = SandboxToolParameterMenu.instance.settings.Element.name + " (" + SandboxToolParameterMenu.instance.settings.Element.GetStateString() + ")";
-			Tuple<Sprite, Color> uisprite = Def.GetUISprite(this.settings.Element, "ui", false);
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(this.settings.Element, "ui", false);
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].sprite = uisprite.first;
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].color = uisprite.second;
 			this.temperatureSlider.SetRange(Mathf.Max(SandboxToolParameterMenu.instance.settings.Element.lowTemp - 10f, 1f), Mathf.Min(9999f, SandboxToolParameterMenu.instance.settings.Element.highTemp + 10f));
@@ -45,10 +45,10 @@ public class SandboxToolParameterMenu : KScreen
 		sandboxSettings3.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings3.OnChangeEntity, new global::System.Action(delegate
 		{
 			this.entitySelector.button.GetComponentInChildren<LocText>().text = SandboxToolParameterMenu.instance.settings.Entity.GetProperName();
-			Tuple<Sprite, Color> tuple;
+			global::Tuple<Sprite, Color> tuple;
 			if (this.settings.Entity.PrefabTag == MinionConfig.ID)
 			{
-				tuple = new Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
+				tuple = new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
 			}
 			else
 			{
@@ -164,55 +164,31 @@ public class SandboxToolParameterMenu : KScreen
 		}
 		list.Sort((Element a, Element b) => a.name.CompareTo(b.name));
 		object[] array = list.ToArray();
-		Action<object> action = delegate(object element)
+		this.elementSelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object element)
 		{
 			this.settings.SelectElement(element as Element);
-		};
-		Func<object, string> func5 = (object element) => (element as Element).name + " (" + (element as Element).GetStateString() + ")";
-		Func<string, object, bool> func6 = (string filterString, object option) => ((option as Element).name.ToUpper() + (option as Element).GetStateString().ToUpper()).Contains(filterString.ToUpper());
-		Func<object, Tuple<Sprite, Color>> func7 = (object element) => Def.GetUISprite(element as Element, "ui", false);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter[] array2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter[4];
-		array2[0] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.COMMON, func4, null, null);
-		int num = 1;
-		string text = UI.SANDBOXTOOLS.FILTERS.SOLID;
-		Func<object, bool> func8 = func;
-		Tuple<Sprite, Color> tuple = Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.SandStone), "ui", false);
-		array2[num] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func8, null, tuple);
-		int num2 = 2;
-		text = UI.SANDBOXTOOLS.FILTERS.LIQUID;
-		func8 = func2;
-		tuple = Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.Water), "ui", false);
-		array2[num2] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func8, null, tuple);
-		int num3 = 3;
-		text = UI.SANDBOXTOOLS.FILTERS.GAS;
-		func8 = func3;
-		tuple = Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.Oxygen), "ui", false);
-		array2[num3] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func8, null, tuple);
-		this.elementSelector = new SandboxToolParameterMenu.SelectorValue(array, action, func5, func6, func7, array2);
+		}, (object element) => (element as Element).name + " (" + (element as Element).GetStateString() + ")", (string filterString, object option) => ((option as Element).name.ToUpper() + (option as Element).GetStateString().ToUpper()).Contains(filterString.ToUpper()), (object element) => Def.GetUISprite(element as Element, "ui", false), new SandboxToolParameterMenu.SelectorValue.SearchFilter[]
+		{
+			new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.COMMON, func4, null, null),
+			new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.SOLID, func, null, Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.SandStone), "ui", false)),
+			new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.LIQUID, func2, null, Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.Water), "ui", false)),
+			new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.GAS, func3, null, Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.Oxygen), "ui", false))
+		});
 	}
 
 	private void ConfigureEntitySelector()
 	{
 		List<SandboxToolParameterMenu.SelectorValue.SearchFilter> list = new List<SandboxToolParameterMenu.SelectorValue.SearchFilter>();
-		string text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.FOOD;
-		Func<object, bool> func = delegate(object entity)
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.FOOD, delegate(object entity)
 		{
 			string idString = (entity as KPrefabID).PrefabID().ToString();
 			return !(entity as KPrefabID).HasTag(GameTags.Egg) && FOOD.FOOD_TYPES_LIST.Find((EdiblesManager.FoodInfo match) => match.Id == idString) != null;
-		};
-		Tuple<Sprite, Color> tuple = Def.GetUISprite(Assets.GetPrefab("MushBar"), "ui", false);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		}, null, Def.GetUISprite(Assets.GetPrefab("MushBar"), "ui", false));
 		list.Add(searchFilter);
-		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.SPECIAL;
-		func = (object entity) => (entity as KPrefabID).PrefabID().Name == MinionConfig.ID || (entity as KPrefabID).PrefabID().Name == DustCometConfig.ID || (entity as KPrefabID).PrefabID().Name == RockCometConfig.ID || (entity as KPrefabID).PrefabID().Name == IronCometConfig.ID;
-		tuple = new Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.SPECIAL, (object entity) => (entity as KPrefabID).PrefabID().Name == MinionConfig.ID || (entity as KPrefabID).PrefabID().Name == DustCometConfig.ID || (entity as KPrefabID).PrefabID().Name == RockCometConfig.ID || (entity as KPrefabID).PrefabID().Name == IronCometConfig.ID, null, new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white));
 		list.Add(searchFilter2);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter3 = null;
-		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE;
-		func = (object entity) => false;
-		tuple = Def.GetUISprite(Assets.GetPrefab("Hatch"), "ui", false);
-		searchFilter3 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		searchFilter3 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE, (object entity) => false, null, Def.GetUISprite(Assets.GetPrefab("Hatch"), "ui", false));
 		list.Add(searchFilter3);
 		List<Tag> list2 = new List<Tag>();
 		foreach (GameObject gameObject in Assets.GetPrefabsWithTag("CreatureBrain".ToTag()))
@@ -220,21 +196,19 @@ public class SandboxToolParameterMenu : KScreen
 			CreatureBrain brain = gameObject.GetComponent<CreatureBrain>();
 			if (!list2.Contains(brain.species))
 			{
-				Tuple<Sprite, Color> tuple2 = new Tuple<Sprite, Color>(CodexCache.entries[brain.species.ToString().ToUpper()].icon, CodexCache.entries[brain.species.ToString().ToUpper()].iconColor);
+				global::Tuple<Sprite, Color> tuple = new global::Tuple<Sprite, Color>(CodexCache.entries[brain.species.ToString().ToUpper()].icon, CodexCache.entries[brain.species.ToString().ToUpper()].iconColor);
 				list2.Add(brain.species);
-				string text2 = "STRINGS.CREATURES.FAMILY_PLURAL." + brain.species.ToString().ToUpper();
-				SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter4 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(Strings.Get(text2), delegate(object entity)
+				SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter4 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(Strings.Get("STRINGS.CREATURES.FAMILY_PLURAL." + brain.species.ToString().ToUpper()), delegate(object entity)
 				{
 					CreatureBrain component = Assets.GetPrefab((entity as KPrefabID).PrefabID()).GetComponent<CreatureBrain>();
 					return (entity as KPrefabID).HasTag("CreatureBrain".ToString()) && component.species == brain.species;
-				}, searchFilter3, tuple2);
+				}, searchFilter3, tuple);
 				list.Add(searchFilter4);
 			}
 		}
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter5 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE_EGG, (object entity) => (entity as KPrefabID).HasTag(GameTags.Egg), searchFilter3, Def.GetUISprite(Assets.GetPrefab("HatchEgg"), "ui", false));
 		list.Add(searchFilter5);
-		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.EQUIPMENT;
-		func = delegate(object entity)
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter6 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.EQUIPMENT, delegate(object entity)
 		{
 			if ((entity as KPrefabID).gameObject == null)
 			{
@@ -242,12 +216,9 @@ public class SandboxToolParameterMenu : KScreen
 			}
 			GameObject gameObject2 = (entity as KPrefabID).gameObject;
 			return gameObject2 != null && gameObject2.GetComponent<Equippable>() != null;
-		};
-		tuple = Def.GetUISprite(Assets.GetPrefab("Funky_Vest"), "ui", false);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter6 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		}, null, Def.GetUISprite(Assets.GetPrefab("Funky_Vest"), "ui", false));
 		list.Add(searchFilter6);
-		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.PLANTS;
-		func = delegate(object entity)
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter7 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.PLANTS, delegate(object entity)
 		{
 			if ((entity as KPrefabID).gameObject == null)
 			{
@@ -255,9 +226,7 @@ public class SandboxToolParameterMenu : KScreen
 			}
 			GameObject gameObject3 = (entity as KPrefabID).gameObject;
 			return gameObject3 != null && (gameObject3.GetComponent<Harvestable>() != null || gameObject3.GetComponent<WiltCondition>() != null);
-		};
-		tuple = Def.GetUISprite(Assets.GetPrefab("PrickleFlower"), "ui", false);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter7 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		}, null, Def.GetUISprite(Assets.GetPrefab("PrickleFlower"), "ui", false));
 		list.Add(searchFilter7);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter8 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.SEEDS, delegate(object entity)
 		{
@@ -269,8 +238,7 @@ public class SandboxToolParameterMenu : KScreen
 			return gameObject4 != null && gameObject4.GetComponent<PlantableSeed>() != null;
 		}, searchFilter7, Def.GetUISprite(Assets.GetPrefab("PrickleFlowerSeed"), "ui", false));
 		list.Add(searchFilter8);
-		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS;
-		func = delegate(object entity)
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter9 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS, delegate(object entity)
 		{
 			if ((entity as KPrefabID).gameObject == null)
 			{
@@ -278,23 +246,25 @@ public class SandboxToolParameterMenu : KScreen
 			}
 			GameObject gameObject5 = (entity as KPrefabID).gameObject;
 			return gameObject5 != null && (gameObject5.HasTag(GameTags.IndustrialIngredient) || gameObject5.HasTag(GameTags.IndustrialProduct) || gameObject5.HasTag(GameTags.Medicine) || gameObject5.HasTag(GameTags.MedicalSupplies));
-		};
-		tuple = Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false);
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter9 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		}, null, Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false));
 		list.Add(searchFilter9);
 		List<KPrefabID> list3 = new List<KPrefabID>();
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
-			foreach (SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter10 in list)
+			using (List<SandboxToolParameterMenu.SelectorValue.SearchFilter>.Enumerator enumerator3 = list.GetEnumerator())
 			{
-				if (searchFilter10.condition(kprefabID))
+				while (enumerator3.MoveNext())
 				{
-					list3.Add(kprefabID);
-					break;
+					if (enumerator3.Current.condition(kprefabID))
+					{
+						list3.Add(kprefabID);
+						break;
+					}
 				}
 			}
 		}
-		this.entitySelector = new SandboxToolParameterMenu.SelectorValue(list3.ToArray(), delegate(object entity)
+		object[] array = list3.ToArray();
+		this.entitySelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object entity)
 		{
 			this.settings.SelectEntity(entity as KPrefabID);
 		}, (object entity) => (entity as KPrefabID).GetProperName(), (string filterString, object option) => (option as KPrefabID).GetProperName().ToUpper().Contains(filterString.ToUpper()), delegate(object entity)
@@ -304,16 +274,12 @@ public class SandboxToolParameterMenu : KScreen
 			{
 				if (prefab.PrefabID() == MinionConfig.ID)
 				{
-					return new Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
+					return new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
 				}
 				KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
-				if (component2 != null && component2.AnimFiles.Length > 0)
+				if (component2 != null && component2.AnimFiles.Length != 0 && component2.AnimFiles[0] != null)
 				{
-					KAnimFile kanimFile = component2.AnimFiles[0];
-					if (kanimFile != null)
-					{
-						return Def.GetUISprite(prefab, "ui", false);
-					}
+					return Def.GetUISprite(prefab, "ui", false);
 				}
 			}
 			return null;
@@ -322,10 +288,11 @@ public class SandboxToolParameterMenu : KScreen
 
 	private void ConfigureDiseaseSelector()
 	{
-		this.diseaseSelector = new SandboxToolParameterMenu.SelectorValue(Db.Get().Diseases.resources.ToArray(), delegate(object disease)
+		object[] array = Db.Get().Diseases.resources.ToArray();
+		this.diseaseSelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object disease)
 		{
 			this.settings.SelectDisease(disease as Disease);
-		}, (object disease) => (disease as Disease).Name, (string filterText, object option) => (option as Disease).Name.ToUpper().Contains(filterText.ToUpper()), (object disease) => new Tuple<Sprite, Color>(Assets.GetSprite("germ"), (disease as Disease).overlayColour), null);
+		}, (object disease) => (disease as Disease).Name, (string filterText, object option) => (option as Disease).Name.ToUpper().Contains(filterText.ToUpper()), (object disease) => new global::Tuple<Sprite, Color>(Assets.GetSprite("germ"), (disease as Disease).overlayColour), null);
 	}
 
 	protected override void OnCmpEnable()
@@ -383,11 +350,9 @@ public class SandboxToolParameterMenu : KScreen
 					if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter)
 					{
 						test.Value.SetActive((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).parentFilter == null);
+						return;
 					}
-					else
-					{
-						test.Value.SetActive(false);
-					}
+					test.Value.SetActive(false);
 				});
 				clearFilterButton.SetActive(false);
 				panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
@@ -404,34 +369,40 @@ public class SandboxToolParameterMenu : KScreen
 					gameObject4.GetComponentsInChildren<Image>()[1].sprite = filter.icon.first;
 					gameObject4.GetComponentsInChildren<Image>()[1].color = filter.icon.second;
 				}
+				Action<KeyValuePair<object, GameObject>> <>9__5;
 				gameObject4.GetComponent<KButton>().onClick += delegate
 				{
 					selector.currentFilter = filter;
 					clearFilterButton.SetActive(true);
-					selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
+					List<KeyValuePair<object, GameObject>> optionButtons = selector.optionButtons;
+					Action<KeyValuePair<object, GameObject>> action;
+					if ((action = <>9__5) == null)
 					{
-						if (!(test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter))
+						action = (<>9__5 = delegate(KeyValuePair<object, GameObject> test)
 						{
-							test.Value.SetActive(selector.runCurrentFilter(test.Key));
-						}
-						else if ((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).parentFilter == null)
-						{
-							test.Value.SetActive(false);
-						}
-						else
-						{
+							if (!(test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter))
+							{
+								test.Value.SetActive(selector.runCurrentFilter(test.Key));
+								return;
+							}
+							if ((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).parentFilter == null)
+							{
+								test.Value.SetActive(false);
+								return;
+							}
 							test.Value.SetActive((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).parentFilter == filter);
-						}
-					});
+						});
+					}
+					optionButtons.ForEach(action);
 					panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
 				};
 				selector.optionButtons.Add(new KeyValuePair<object, GameObject>(filter, gameObject4));
 			}
 		}
 		object[] options = selector.options;
-		for (int j = 0; j < options.Length; j++)
+		for (int i = 0; i < options.Length; i++)
 		{
-			object option = options[j];
+			object option = options[i];
 			GameObject gameObject5 = Util.KInstantiateUI(gameObject3, gameObject2, true);
 			gameObject5.GetComponentInChildren<LocText>().text = selector.getOptionName(option);
 			gameObject5.GetComponent<KButton>().onClick += delegate
@@ -439,7 +410,7 @@ public class SandboxToolParameterMenu : KScreen
 				selector.onValueChanged(option);
 				panel.SetActive(false);
 			};
-			Tuple<Sprite, Color> tuple = selector.getOptionSprite(option);
+			global::Tuple<Sprite, Color> tuple = selector.getOptionSprite(option);
 			gameObject5.GetComponentsInChildren<Image>()[1].sprite = tuple.first;
 			gameObject5.GetComponentsInChildren<Image>()[1].color = tuple.second;
 			selector.optionButtons.Add(new KeyValuePair<object, GameObject>(option, gameObject5));
@@ -455,7 +426,7 @@ public class SandboxToolParameterMenu : KScreen
 		selector.button = reference;
 		filterInputField.onValueChanged.AddListener(delegate(string filterString)
 		{
-			List<KeyValuePair<object, GameObject>> list = new List<KeyValuePair<object, GameObject>>();
+			new List<KeyValuePair<object, GameObject>>();
 			selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
 			{
 				if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter)
@@ -464,13 +435,12 @@ public class SandboxToolParameterMenu : KScreen
 				}
 			});
 			object[] options2 = selector.options;
-			for (int k = 0; k < options2.Length; k++)
+			for (int j = 0; j < options2.Length; j++)
 			{
-				object option = options2[k];
-				list = selector.optionButtons.FindAll((KeyValuePair<object, GameObject> match) => match.Key == option);
-				foreach (KeyValuePair<object, GameObject> keyValuePair in list)
+				object option = options2[j];
+				foreach (KeyValuePair<object, GameObject> keyValuePair in selector.optionButtons.FindAll((KeyValuePair<object, GameObject> match) => match.Key == option))
 				{
-					if (filterString == string.Empty)
+					if (filterString == "")
 					{
 						keyValuePair.Value.SetActive(false);
 					}
@@ -555,6 +525,7 @@ public class SandboxToolParameterMenu : KScreen
 			if (!e.Consumed)
 			{
 				e.Consumed = true;
+				return;
 			}
 		}
 		else
@@ -598,17 +569,17 @@ public class SandboxToolParameterMenu : KScreen
 
 	public SandboxToolParameterMenu.SelectorValue elementSelector;
 
-	public SandboxToolParameterMenu.SliderValue brushRadiusSlider = new SandboxToolParameterMenu.SliderValue(1f, 10f, "dash", "circle_hard", string.Empty, UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue brushRadiusSlider = new SandboxToolParameterMenu.SliderValue(1f, 10f, "dash", "circle_hard", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.TOOLTIP, delegate(float value)
 	{
 		SandboxToolParameterMenu.instance.settings.BrushSize = Mathf.RoundToInt(value);
 	});
 
-	public SandboxToolParameterMenu.SliderValue noiseScaleSlider = new SandboxToolParameterMenu.SliderValue(0f, 1f, "little", "lots", string.Empty, UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue noiseScaleSlider = new SandboxToolParameterMenu.SliderValue(0f, 1f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE.TOOLTIP, delegate(float value)
 	{
 		SandboxToolParameterMenu.instance.settings.NoiseScale = value;
 	});
 
-	public SandboxToolParameterMenu.SliderValue noiseDensitySlider = new SandboxToolParameterMenu.SliderValue(1f, 20f, "little", "lots", string.Empty, UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue noiseDensitySlider = new SandboxToolParameterMenu.SliderValue(1f, 20f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE.TOOLTIP, delegate(float value)
 	{
 		SandboxToolParameterMenu.instance.settings.NoiseDensity = value;
 	});
@@ -639,7 +610,7 @@ public class SandboxToolParameterMenu : KScreen
 
 	public class SelectorValue
 	{
-		public SelectorValue(object[] options, Action<object> onValueChanged, Func<object, string> getOptionName, Func<string, object, bool> filterOptionFunction, Func<object, Tuple<Sprite, Color>> getOptionSprite, SandboxToolParameterMenu.SelectorValue.SearchFilter[] filters = null)
+		public SelectorValue(object[] options, Action<object> onValueChanged, Func<object, string> getOptionName, Func<string, object, bool> filterOptionFunction, Func<object, global::Tuple<Sprite, Color>> getOptionSprite, SandboxToolParameterMenu.SelectorValue.SearchFilter[] filters = null)
 		{
 			this.options = options;
 			this.onValueChanged = onValueChanged;
@@ -668,7 +639,7 @@ public class SandboxToolParameterMenu : KScreen
 
 		public Func<string, object, bool> filterOptionFunction;
 
-		public Func<object, Tuple<Sprite, Color>> getOptionSprite;
+		public Func<object, global::Tuple<Sprite, Color>> getOptionSprite;
 
 		public SandboxToolParameterMenu.SelectorValue.SearchFilter[] filters;
 
@@ -678,7 +649,7 @@ public class SandboxToolParameterMenu : KScreen
 
 		public class SearchFilter
 		{
-			public SearchFilter(string Name, Func<object, bool> condition, SandboxToolParameterMenu.SelectorValue.SearchFilter parentFilter = null, Tuple<Sprite, Color> icon = null)
+			public SearchFilter(string Name, Func<object, bool> condition, SandboxToolParameterMenu.SelectorValue.SearchFilter parentFilter = null, global::Tuple<Sprite, Color> icon = null)
 			{
 				this.Name = Name;
 				this.condition = condition;
@@ -692,7 +663,7 @@ public class SandboxToolParameterMenu : KScreen
 
 			public SandboxToolParameterMenu.SelectorValue.SearchFilter parentFilter;
 
-			public Tuple<Sprite, Color> icon;
+			public global::Tuple<Sprite, Color> icon;
 		}
 	}
 

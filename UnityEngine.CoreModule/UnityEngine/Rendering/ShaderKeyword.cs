@@ -6,11 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Identifier of a specific code path in a shader.</para>
-	/// </summary>
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Shaders/ShaderKeywords.h")]
+	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ShaderKeyword
 	{
@@ -19,10 +16,6 @@ namespace UnityEngine.Rendering
 			this.m_KeywordIndex = keywordIndex;
 		}
 
-		/// <summary>
-		///   <para>Initializes a new instance of the ShaderKeyword class from a shader keyword name.</para>
-		/// </summary>
-		/// <param name="keywordName"></param>
 		public ShaderKeyword(string keywordName)
 		{
 			this.m_KeywordIndex = ShaderKeyword.GetShaderKeywordIndex(keywordName);
@@ -36,25 +29,34 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string GetShaderKeywordName(int keywordIndex);
 
-		/// <summary>
-		///   <para>Returns true if the keyword has been imported by Unity.</para>
-		/// </summary>
+		[NativeMethod("keywords::GetKeywordType", true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern ShaderKeywordType GetShaderKeywordType(int keywordIndex);
+
 		public bool IsValid()
 		{
 			return this.m_KeywordIndex >= 0 && this.m_KeywordIndex < 256 && this.m_KeywordIndex != -1;
 		}
 
-		/// <summary>
-		///   <para>Returns the string name of the keyword.</para>
-		/// </summary>
-		public string GetName()
+		public ShaderKeywordType GetKeywordType()
+		{
+			return ShaderKeyword.GetShaderKeywordType(this.m_KeywordIndex);
+		}
+
+		public string GetKeywordName()
 		{
 			return ShaderKeyword.GetShaderKeywordName(this.m_KeywordIndex);
 		}
 
-		internal int GetIndex()
+		internal int GetKeywordIndex()
 		{
 			return this.m_KeywordIndex;
+		}
+
+		[Obsolete("GetName() has been deprecated. Use GetKeywordName() instead (UnityUpgradable) -> GetKeywordName()")]
+		public string GetName()
+		{
+			return this.GetKeywordName();
 		}
 
 		internal const int k_MaxShaderKeywords = 256;

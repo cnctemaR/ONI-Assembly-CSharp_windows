@@ -6,14 +6,10 @@ public class ProtectEntityStates : GameStateMachine<ProtectEntityStates, Protect
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.protectEntity.moveToThreat;
-		GameStateMachine<ProtectEntityStates, ProtectEntityStates.Instance, IStateMachineTarget, ProtectEntityStates.Def>.State state = this.root.Enter("SetTarget", delegate(ProtectEntityStates.Instance smi)
+		this.root.Enter("SetTarget", delegate(ProtectEntityStates.Instance smi)
 		{
 			this.target.Set(smi.GetSMI<EntityThreatMonitor.Instance>().MainThreat, smi);
-		});
-		string text = CREATURES.STATUSITEMS.PROTECTINGENTITY.NAME;
-		string text2 = CREATURES.STATUSITEMS.PROTECTINGENTITY.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main);
+		}).ToggleStatusItem(CREATURES.STATUSITEMS.PROTECTINGENTITY.NAME, CREATURES.STATUSITEMS.PROTECTINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.protectEntity.DoNothing();
 		this.protectEntity.moveToThreat.InitializeStates(this.masterTarget, this.target, this.protectEntity.attackThreat, null, new CellOffset[]
 		{

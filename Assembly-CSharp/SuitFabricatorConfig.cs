@@ -56,8 +56,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Atmo_Suit".ToTag(), 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("SuitFabricator", array, array2);
-		AtmoSuitConfig.recipe = new ComplexRecipe(text, array, array2)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array, array2), array, array2)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC,
@@ -74,8 +73,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Atmo_Suit".ToTag(), 1f)
 		};
-		string text2 = ComplexRecipeManager.MakeRecipeID("SuitFabricator", array3, array4);
-		AtmoSuitConfig.recipe = new ComplexRecipe(text2, array3, array4)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array3, array4), array3, array4)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC,
@@ -92,8 +90,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Atmo_Suit".ToTag(), 1f)
 		};
-		string text3 = ComplexRecipeManager.MakeRecipeID("SuitFabricator", array5, array6);
-		AtmoSuitConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array5, array6), array5, array6)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC,
@@ -110,8 +107,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Jet_Suit".ToTag(), 1f)
 		};
-		string text4 = ComplexRecipeManager.MakeRecipeID("SuitFabricator", array7, array8);
-		JetSuitConfig.recipe = new ComplexRecipe(text4, array7, array8)
+		JetSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array7, array8), array7, array8)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.RECIPE_DESC,

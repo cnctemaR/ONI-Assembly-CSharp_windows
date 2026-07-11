@@ -6,13 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>Constrains the position of an object relative to the position of one or more source objects.</para>
-	/// </summary>
+	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Animation/Constraints/PositionConstraint.h")]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
-	[UsedByNativeCode]
 	public sealed class PositionConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private PositionConstraint()
@@ -23,9 +20,6 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] PositionConstraint self);
 
-		/// <summary>
-		///   <para>The weight of the constraint component.</para>
-		/// </summary>
 		public extern float weight
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -34,9 +28,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The translation used when the sources have a total weight of 0.</para>
-		/// </summary>
 		public Vector3 translationAtRest
 		{
 			get
@@ -51,9 +42,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>The offset from the constrained position.</para>
-		/// </summary>
 		public Vector3 translationOffset
 		{
 			get
@@ -68,9 +56,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>The axes affected by the PositionConstraint.</para>
-		/// </summary>
 		public extern Axis translationAxis
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -79,9 +64,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Activates or deactivates the constraint.</para>
-		/// </summary>
 		public extern bool constraintActive
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -90,9 +72,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Locks the offset and position at rest.</para>
-		/// </summary>
 		public extern bool locked
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -101,9 +80,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of sources set on the component (read-only).</para>
-		/// </summary>
 		public int sourceCount
 		{
 			get
@@ -114,7 +90,7 @@ namespace UnityEngine.Animations
 
 		[FreeFunction("ConstraintBindings::GetSourceCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSourceCountInternal(PositionConstraint self);
+		private static extern int GetSourceCountInternal([NotNull] PositionConstraint self);
 
 		[FreeFunction(Name = "ConstraintBindings::GetSources", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -131,24 +107,13 @@ namespace UnityEngine.Animations
 
 		[FreeFunction("ConstraintBindings::SetSources")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSourcesInternal(PositionConstraint self, List<ConstraintSource> sources);
+		private static extern void SetSourcesInternal([NotNull] PositionConstraint self, List<ConstraintSource> sources);
 
-		/// <summary>
-		///   <para>Adds a constraint source.</para>
-		/// </summary>
-		/// <param name="source">The source object and its weight.</param>
-		/// <returns>
-		///   <para>Returns the index of the added source.</para>
-		/// </returns>
 		public int AddSource(ConstraintSource source)
 		{
 			return this.AddSource_Injected(ref source);
 		}
 
-		/// <summary>
-		///   <para>Removes a source from the component.</para>
-		/// </summary>
-		/// <param name="index">The index of the source to remove.</param>
 		public void RemoveSource(int index)
 		{
 			this.ValidateSourceIndex(index);
@@ -159,13 +124,6 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void RemoveSourceInternal(int index);
 
-		/// <summary>
-		///   <para>Gets a constraint source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the source.</param>
-		/// <returns>
-		///   <para>The source object and its weight.</para>
-		/// </returns>
 		public ConstraintSource GetSource(int index)
 		{
 			this.ValidateSourceIndex(index);
@@ -180,11 +138,6 @@ namespace UnityEngine.Animations
 			return constraintSource;
 		}
 
-		/// <summary>
-		///   <para>Sets a source at a specified index.</para>
-		/// </summary>
-		/// <param name="index">The index of the source to set.</param>
-		/// <param name="source">The source object and its weight.</param>
 		public void SetSource(int index, ConstraintSource source)
 		{
 			this.ValidateSourceIndex(index);

@@ -4,17 +4,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>AnimationEvent lets you call a script function similar to SendMessage as part of playing back an animation.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AnimationEvent
 	{
-		/// <summary>
-		///   <para>Creates a new animation event.</para>
-		/// </summary>
 		public AnimationEvent()
 		{
 			this.m_Time = 0f;
@@ -41,9 +35,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>String parameter that is stored in the event and will be sent to the function.</para>
-		/// </summary>
 		public string stringParameter
 		{
 			get
@@ -56,9 +47,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Float parameter that is stored in the event and will be sent to the function.</para>
-		/// </summary>
 		public float floatParameter
 		{
 			get
@@ -71,9 +59,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Int parameter that is stored in the event and will be sent to the function.</para>
-		/// </summary>
 		public int intParameter
 		{
 			get
@@ -86,9 +71,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Object reference parameter that is stored in the event and will be sent to the function.</para>
-		/// </summary>
 		public Object objectReferenceParameter
 		{
 			get
@@ -101,9 +83,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The name of the function that will be called.</para>
-		/// </summary>
 		public string functionName
 		{
 			get
@@ -116,9 +95,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The time at which the event will be fired off.</para>
-		/// </summary>
 		public float time
 		{
 			get
@@ -131,9 +107,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Function call options.</para>
-		/// </summary>
 		public SendMessageOptions messageOptions
 		{
 			get
@@ -146,9 +119,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if this Animation event has been fired by an Animation component.</para>
-		/// </summary>
 		public bool isFiredByLegacy
 		{
 			get
@@ -157,9 +127,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if this Animation event has been fired by an Animator component.</para>
-		/// </summary>
 		public bool isFiredByAnimator
 		{
 			get
@@ -168,9 +135,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The animation state that fired this event (Read Only).</para>
-		/// </summary>
 		public AnimationState animationState
 		{
 			get
@@ -183,9 +147,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The animator state info related to this event (Read Only).</para>
-		/// </summary>
 		public AnimatorStateInfo animatorStateInfo
 		{
 			get
@@ -198,9 +159,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The animator clip info related to this event (Read Only).</para>
-		/// </summary>
 		public AnimatorClipInfo animatorClipInfo
 		{
 			get

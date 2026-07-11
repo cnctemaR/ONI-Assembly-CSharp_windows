@@ -2,14 +2,8 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Struct used to describe meshes to be combined using Mesh.CombineMeshes.</para>
-	/// </summary>
 	public struct CombineInstance
 	{
-		/// <summary>
-		///   <para>Mesh to combine.</para>
-		/// </summary>
 		public Mesh mesh
 		{
 			get
@@ -22,9 +16,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sub-Mesh index of the Mesh.</para>
-		/// </summary>
 		public int subMeshIndex
 		{
 			get
@@ -37,9 +28,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Matrix to transform the Mesh with before combining.</para>
-		/// </summary>
 		public Matrix4x4 transform
 		{
 			get
@@ -52,9 +40,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The baked lightmap UV scale and offset applied to the Mesh.</para>
-		/// </summary>
 		public Vector4 lightmapScaleOffset
 		{
 			get
@@ -67,9 +52,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The realtime lightmap UV scale and offset applied to the Mesh.</para>
-		/// </summary>
 		public Vector4 realtimeLightmapScaleOffset
 		{
 			get

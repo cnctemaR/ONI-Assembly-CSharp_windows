@@ -1,55 +1,20 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class DesignerTransaction : IDisposable
 	{
 		protected DesignerTransaction()
-			: this(string.Empty)
+			: this("")
 		{
 		}
 
 		protected DesignerTransaction(string description)
 		{
-			this.description = description;
-			this.committed = false;
-			this.canceled = false;
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			this.Cancel();
-			if (disposing)
-			{
-				GC.SuppressFinalize(true);
-			}
-		}
-
-		protected abstract void OnCancel();
-
-		protected abstract void OnCommit();
-
-		public void Cancel()
-		{
-			if (!this.Canceled && !this.Committed)
-			{
-				this.canceled = true;
-				this.OnCancel();
-			}
-		}
-
-		public void Commit()
-		{
-			if (!this.Canceled && !this.Committed)
-			{
-				this.committed = true;
-				this.OnCommit();
-			}
+			this.desc = description;
 		}
 
 		public bool Canceled
@@ -72,19 +37,61 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return this.description;
+				return this.desc;
 			}
 		}
+
+		public void Cancel()
+		{
+			if (!this.canceled && !this.committed)
+			{
+				this.canceled = true;
+				GC.SuppressFinalize(this);
+				this.suppressedFinalization = true;
+				this.OnCancel();
+			}
+		}
+
+		public void Commit()
+		{
+			if (!this.committed && !this.canceled)
+			{
+				this.committed = true;
+				GC.SuppressFinalize(this);
+				this.suppressedFinalization = true;
+				this.OnCommit();
+			}
+		}
+
+		protected abstract void OnCancel();
+
+		protected abstract void OnCommit();
 
 		~DesignerTransaction()
 		{
 			this.Dispose(false);
 		}
 
-		private string description;
+		void IDisposable.Dispose()
+		{
+			this.Dispose(true);
+			if (!this.suppressedFinalization)
+			{
+				GC.SuppressFinalize(this);
+			}
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			this.Cancel();
+		}
 
 		private bool committed;
 
 		private bool canceled;
+
+		private bool suppressedFinalization;
+
+		private string desc;
 	}
 }

@@ -7,6 +7,7 @@ namespace UnityEngine.Networking
 	[AddComponentMenu("Network/NetworkTransformVisualizer")]
 	[RequireComponent(typeof(NetworkTransform))]
 	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkTransformVisualizer : NetworkBehaviour
 	{
 		public GameObject visualizerPrefab

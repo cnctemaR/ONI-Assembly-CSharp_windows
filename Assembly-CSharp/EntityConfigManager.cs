@@ -61,8 +61,7 @@ public class EntityConfigManager : KMonoBehaviour
 
 	public void RegisterEntity(IEntityConfig config)
 	{
-		GameObject gameObject = config.CreatePrefab();
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		KPrefabID component = config.CreatePrefab().GetComponent<KPrefabID>();
 		component.prefabInitFn += config.OnPrefabInit;
 		component.prefabSpawnFn += config.OnSpawn;
 		Assets.AddPrefab(component);
@@ -70,8 +69,7 @@ public class EntityConfigManager : KMonoBehaviour
 
 	public void RegisterEntities(IMultiEntityConfig config)
 	{
-		List<GameObject> list = config.CreatePrefabs();
-		foreach (GameObject gameObject in list)
+		foreach (GameObject gameObject in config.CreatePrefabs())
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
 			component.prefabInitFn += config.OnPrefabInit;

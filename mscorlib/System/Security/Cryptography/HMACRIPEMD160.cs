@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -8,15 +7,17 @@ namespace System.Security.Cryptography
 	public class HMACRIPEMD160 : HMAC
 	{
 		public HMACRIPEMD160()
-			: this(KeyBuilder.Key(8))
+			: this(Utils.GenerateRandom(64))
 		{
 		}
 
 		public HMACRIPEMD160(byte[] key)
 		{
-			base.HashName = "RIPEMD160";
+			this.m_hashName = "RIPEMD160";
+			this.m_hash1 = new RIPEMD160Managed();
+			this.m_hash2 = new RIPEMD160Managed();
 			this.HashSizeValue = 160;
-			this.Key = key;
+			base.InitializeKey(key);
 		}
 	}
 }

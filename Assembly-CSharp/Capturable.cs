@@ -98,31 +98,14 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (!this.markedForCapture)
+		KIconButtonMenu.ButtonInfo buttonInfo = ((!this.markedForCapture) ? new KIconButtonMenu.ButtonInfo("action_capture", UI.USERMENUACTIONS.CAPTURE.NAME, delegate
 		{
-			string text = "action_capture";
-			string text2 = UI.USERMENUACTIONS.CAPTURE.NAME;
-			global::System.Action action = delegate
-			{
-				this.MarkForCapture(true);
-			};
-			string text3 = UI.USERMENUACTIONS.CAPTURE.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
+			this.MarkForCapture(true);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CAPTURE.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_capture", UI.USERMENUACTIONS.CANCELCAPTURE.NAME, delegate
 		{
-			string text3 = "action_capture";
-			string text2 = UI.USERMENUACTIONS.CANCELCAPTURE.NAME;
-			global::System.Action action = delegate
-			{
-				this.MarkForCapture(false);
-			};
-			string text = UI.USERMENUACTIONS.CANCELCAPTURE.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+			this.MarkForCapture(false);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELCAPTURE.TOOLTIP, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	private void UpdateStatusItem()
@@ -132,11 +115,9 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		if (this.markedForCapture)
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderCapture, this);
+			return;
 		}
-		else
-		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderCapture, false);
-		}
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderCapture, false);
 	}
 
 	private void UpdateChore()
@@ -144,8 +125,9 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		if (this.markedForCapture && this.chore == null)
 		{
 			this.chore = new WorkChore<Capturable>(Db.Get().ChoreTypes.Capture, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			return;
 		}
-		else if (!this.markedForCapture && this.chore != null)
+		if (!this.markedForCapture && this.chore != null)
 		{
 			this.chore.Cancel("not marked for capture");
 			this.chore = null;
@@ -154,14 +136,12 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 
 	protected override void OnStartWork(Worker worker)
 	{
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Stunned, false);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Stunned, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		component.RemoveTag(GameTags.Creatures.Stunned);
+		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Creatures.Stunned);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

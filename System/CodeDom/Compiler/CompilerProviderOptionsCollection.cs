@@ -36,7 +36,7 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				int count = this.Count;
+				int count = base.Count;
 				string[] array = new string[count];
 				for (int i = 0; i < count; i++)
 				{
@@ -66,7 +66,7 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				int count = this.Count;
+				int count = base.Count;
 				if (count == 0)
 				{
 					return null;

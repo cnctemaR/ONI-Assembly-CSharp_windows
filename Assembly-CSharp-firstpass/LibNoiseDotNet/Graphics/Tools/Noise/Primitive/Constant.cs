@@ -2,18 +2,8 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 {
-	public class Constant : PrimitiveModule, IModule4D, IModule3D, IModule2D, IModule1D, IModule
+	public class Constant : PrimitiveModule, IModule4D, IModule, IModule3D, IModule2D, IModule1D
 	{
-		public Constant()
-			: this(0.5f)
-		{
-		}
-
-		public Constant(float value)
-		{
-			this._constant = value;
-		}
-
 		public float ConstantValue
 		{
 			get
@@ -24,6 +14,16 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 			{
 				this._constant = value;
 			}
+		}
+
+		public Constant()
+			: this(0.5f)
+		{
+		}
+
+		public Constant(float value)
+		{
+			this._constant = value;
 		}
 
 		public float GetValue(float x, float y, float z, float t)

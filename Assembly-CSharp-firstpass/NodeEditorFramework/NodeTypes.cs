@@ -11,33 +11,27 @@ namespace NodeEditorFramework
 		public static void FetchNodes()
 		{
 			NodeTypes.nodes = new Dictionary<Node, NodeData>();
-			IEnumerable<Assembly> enumerable = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+			foreach (Assembly assembly2 in from assembly in AppDomain.CurrentDomain.GetAssemblies()
 				where assembly.FullName.Contains("Assembly")
-				select assembly;
-			foreach (Assembly assembly2 in enumerable)
+				select assembly)
 			{
 				foreach (Type type in from T in assembly2.GetTypes()
 					where T.IsClass && !T.IsAbstract && T.IsSubclassOf(typeof(Node))
 					select T)
 				{
-					object[] customAttributes = type.GetCustomAttributes(typeof(NodeAttribute), false);
-					NodeAttribute nodeAttribute = customAttributes[0] as NodeAttribute;
-					if (nodeAttribute != null)
+					NodeAttribute nodeAttribute = type.GetCustomAttributes(typeof(NodeAttribute), false)[0] as NodeAttribute;
+					if (nodeAttribute == null || !nodeAttribute.hide)
 					{
-						if (nodeAttribute.hide)
+						try
 						{
-							continue;
+							Node node = ScriptableObject.CreateInstance(type.Name) as Node;
+							node = node.Create(Vector2.zero);
+							NodeTypes.nodes.Add(node, new NodeData((nodeAttribute == null) ? node.name : nodeAttribute.contextText, nodeAttribute.typeOfNodeCanvas));
 						}
-					}
-					try
-					{
-						Node node = ScriptableObject.CreateInstance(type.Name) as Node;
-						node = node.Create(Vector2.zero);
-						NodeTypes.nodes.Add(node, new NodeData((nodeAttribute != null) ? nodeAttribute.contextText : node.name, nodeAttribute.typeOfNodeCanvas));
-					}
-					catch (Exception ex)
-					{
-						global::Debug.LogError(ex.Message + " " + type.Name);
+						catch (Exception ex)
+						{
+							global::Debug.LogError(ex.Message + " " + type.Name);
+						}
 					}
 				}
 			}

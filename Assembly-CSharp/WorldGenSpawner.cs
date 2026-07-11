@@ -137,6 +137,12 @@ public class WorldGenSpawner : KMonoBehaviour
 
 	private class Spawnable
 	{
+		public Prefab spawnInfo { get; private set; }
+
+		public bool isSpawned { get; private set; }
+
+		public int cell { get; private set; }
+
 		public Spawnable(Prefab spawn_info)
 		{
 			this.spawnInfo = spawn_info;
@@ -155,18 +161,10 @@ public class WorldGenSpawner : KMonoBehaviour
 			if (Grid.Spawnable[this.cell] > 0)
 			{
 				this.TrySpawn();
+				return;
 			}
-			else
-			{
-				this.fogOfWarPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnReveal", this, this.cell, GameScenePartitioner.Instance.fogOfWarChangedLayer, new Action<object>(this.OnReveal));
-			}
+			this.fogOfWarPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnReveal", this, this.cell, GameScenePartitioner.Instance.fogOfWarChangedLayer, new Action<object>(this.OnReveal));
 		}
-
-		public Prefab spawnInfo { get; private set; }
-
-		public bool isSpawned { get; private set; }
-
-		public int cell { get; private set; }
 
 		private void OnReveal(object data)
 		{
@@ -212,31 +210,27 @@ public class WorldGenSpawner : KMonoBehaviour
 			}
 			GameScenePartitioner.Instance.Free(ref this.fogOfWarPartitionerEntry);
 			GameObject prefab = Assets.GetPrefab(this.GetPrefabTag());
-			if (prefab != null)
-			{
-				bool flag = false;
-				if (prefab.GetComponent<Pickupable>() != null && !prefab.HasTag(GameTags.Creatures.Digger))
-				{
-					flag = true;
-				}
-				else if (prefab.GetDef<BurrowMonitor.Def>() != null)
-				{
-					flag = true;
-				}
-				if (flag && Grid.Solid[this.cell])
-				{
-					this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnSolidChanged", this, this.cell, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
-					Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(this.cell);
-				}
-				else
-				{
-					this.Spawn();
-				}
-			}
-			else
+			if (!(prefab != null))
 			{
 				this.Spawn();
+				return;
 			}
+			bool flag = false;
+			if (prefab.GetComponent<Pickupable>() != null && !prefab.HasTag(GameTags.Creatures.Digger))
+			{
+				flag = true;
+			}
+			else if (prefab.GetDef<BurrowMonitor.Def>() != null)
+			{
+				flag = true;
+			}
+			if (flag && Grid.Solid[this.cell])
+			{
+				this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnSolidChanged", this, this.cell, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+				Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(this.cell);
+				return;
+			}
+			this.Spawn();
 		}
 
 		private Tag GetPrefabTag()

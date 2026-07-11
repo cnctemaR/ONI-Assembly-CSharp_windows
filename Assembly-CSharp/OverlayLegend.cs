@@ -27,11 +27,11 @@ public class OverlayLegend : KScreen
 		foreach (OverlayLegend.OverlayInfo overlayInfo in this.overlayInfoList)
 		{
 			string text = overlayInfo.name;
-			text = text.Replace("NAME", string.Empty);
+			text = text.Replace("NAME", "");
 			for (int i = 0; i < overlayInfo.infoUnits.Count; i++)
 			{
 				string text2 = overlayInfo.infoUnits[i].description;
-				text2 = text2.Replace(text, string.Empty);
+				text2 = text2.Replace(text, "");
 				text2 = text + "TOOLTIPS." + text2;
 				overlayInfo.infoUnits[i].tooltip = text2;
 			}
@@ -104,11 +104,9 @@ public class OverlayLegend : KScreen
 		if (overlayInfo.isProgrammaticallyPopulated)
 		{
 			this.PopulateGeneratedLegend(overlayInfo, false);
+			return;
 		}
-		else
-		{
-			this.PopulateOverlayInfoUnits(overlayInfo, false);
-		}
+		this.PopulateOverlayInfoUnits(overlayInfo, false);
 	}
 
 	public void SetLegend(OverlayModes.Mode mode, bool refreshing = false)
@@ -182,62 +180,67 @@ public class OverlayLegend : KScreen
 		if (overlayInfo.infoUnits != null && overlayInfo.infoUnits.Count > 0)
 		{
 			this.activeUnitsParent.SetActive(true);
-			foreach (OverlayLegend.OverlayInfoUnit overlayInfoUnit in overlayInfo.infoUnits)
+			using (List<OverlayLegend.OverlayInfoUnit>.Enumerator enumerator = overlayInfo.infoUnits.GetEnumerator())
 			{
-				GameObject freeUnitObject = this.GetFreeUnitObject();
-				if (overlayInfoUnit.icon != null)
+				while (enumerator.MoveNext())
 				{
-					Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
-					component.gameObject.SetActive(true);
-					component.sprite = overlayInfoUnit.icon;
-					component.color = overlayInfoUnit.color;
-					component.enabled = true;
-					component.type = ((!overlayInfoUnit.sliceIcon) ? Image.Type.Simple : Image.Type.Sliced);
+					OverlayLegend.OverlayInfoUnit overlayInfoUnit = enumerator.Current;
+					GameObject freeUnitObject = this.GetFreeUnitObject();
+					if (overlayInfoUnit.icon != null)
+					{
+						Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
+						component.gameObject.SetActive(true);
+						component.sprite = overlayInfoUnit.icon;
+						component.color = overlayInfoUnit.color;
+						component.enabled = true;
+						component.type = (overlayInfoUnit.sliceIcon ? Image.Type.Sliced : Image.Type.Simple);
+					}
+					else
+					{
+						freeUnitObject.transform.Find("Icon").gameObject.SetActive(false);
+					}
+					if (!string.IsNullOrEmpty(overlayInfoUnit.description))
+					{
+						LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
+						componentInChildren.text = string.Format(overlayInfoUnit.description, overlayInfoUnit.formatData);
+						componentInChildren.color = overlayInfoUnit.fontColor;
+						componentInChildren.enabled = true;
+					}
+					ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
+					if (!string.IsNullOrEmpty(overlayInfoUnit.tooltip))
+					{
+						component2.toolTip = string.Format(overlayInfoUnit.tooltip, overlayInfoUnit.tooltipFormatData);
+						component2.enabled = true;
+					}
+					else
+					{
+						component2.enabled = false;
+					}
+					freeUnitObject.SetActive(true);
+					freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 				}
-				else
-				{
-					freeUnitObject.transform.Find("Icon").gameObject.SetActive(false);
-				}
-				if (!string.IsNullOrEmpty(overlayInfoUnit.description))
-				{
-					LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
-					componentInChildren.text = string.Format(overlayInfoUnit.description, overlayInfoUnit.formatData);
-					componentInChildren.color = overlayInfoUnit.fontColor;
-					componentInChildren.enabled = true;
-				}
-				ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
-				if (!string.IsNullOrEmpty(overlayInfoUnit.tooltip))
-				{
-					component2.toolTip = string.Format(overlayInfoUnit.tooltip, overlayInfoUnit.tooltipFormatData);
-					component2.enabled = true;
-				}
-				else
-				{
-					component2.enabled = false;
-				}
-				freeUnitObject.SetActive(true);
-				freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
+				goto IL_0180;
 			}
 		}
-		else
-		{
-			this.activeUnitsParent.SetActive(false);
-		}
+		this.activeUnitsParent.SetActive(false);
+		IL_0180:
 		if (!isRefresh)
 		{
 			if (overlayInfo.diagrams != null && overlayInfo.diagrams.Count > 0)
 			{
 				this.diagramsParent.SetActive(true);
-				foreach (GameObject gameObject in overlayInfo.diagrams)
+				using (List<GameObject>.Enumerator enumerator2 = overlayInfo.diagrams.GetEnumerator())
 				{
-					GameObject gameObject2 = Util.KInstantiateUI(gameObject, this.diagramsParent, false);
-					this.activeDiagrams.Add(gameObject2);
+					while (enumerator2.MoveNext())
+					{
+						GameObject gameObject = enumerator2.Current;
+						GameObject gameObject2 = Util.KInstantiateUI(gameObject, this.diagramsParent, false);
+						this.activeDiagrams.Add(gameObject2);
+					}
+					return;
 				}
 			}
-			else
-			{
-				this.diagramsParent.SetActive(false);
-			}
+			this.diagramsParent.SetActive(false);
 		}
 	}
 
@@ -255,30 +258,33 @@ public class OverlayLegend : KScreen
 		if (customLegendData != null)
 		{
 			this.activeUnitsParent.SetActive(true);
-			foreach (LegendEntry legendEntry in customLegendData)
+			using (List<LegendEntry>.Enumerator enumerator = customLegendData.GetEnumerator())
 			{
-				GameObject freeUnitObject = this.GetFreeUnitObject();
-				Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
-				component.gameObject.SetActive(true);
-				component.sprite = Assets.instance.LegendColourBox;
-				component.color = legendEntry.colour;
-				component.enabled = true;
-				component.type = Image.Type.Simple;
-				LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
-				componentInChildren.text = legendEntry.name;
-				componentInChildren.color = Color.white;
-				componentInChildren.enabled = true;
-				ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
-				component2.enabled = true;
-				component2.toolTip = legendEntry.desc;
-				freeUnitObject.SetActive(true);
-				freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
+				while (enumerator.MoveNext())
+				{
+					LegendEntry legendEntry = enumerator.Current;
+					GameObject freeUnitObject = this.GetFreeUnitObject();
+					Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
+					component.gameObject.SetActive(true);
+					component.sprite = Assets.instance.LegendColourBox;
+					component.color = legendEntry.colour;
+					component.enabled = true;
+					component.type = Image.Type.Simple;
+					LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
+					componentInChildren.text = legendEntry.name;
+					componentInChildren.color = Color.white;
+					componentInChildren.enabled = true;
+					ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
+					component2.enabled = true;
+					component2.toolTip = legendEntry.desc;
+					freeUnitObject.SetActive(true);
+					freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
+				}
+				goto IL_0128;
 			}
 		}
-		else
-		{
-			this.activeUnitsParent.SetActive(false);
-		}
+		this.activeUnitsParent.SetActive(false);
+		IL_0128:
 		if (!isRefresh && this.currentMode.legendFilters != null)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent, false);
@@ -321,7 +327,7 @@ public class OverlayLegend : KScreen
 			Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
 			component.gameObject.SetActive(true);
 			component.sprite = Assets.instance.LegendColourBox;
-			component.color = ((i != 0) ? Color.Lerp(dbColours[i * 2], dbColours[Mathf.Min(dbColours.Length - 1, i * 2 + 1)], 0.5f) : new Color(1f, 1f, 1f, 0.7f));
+			component.color = ((i == 0) ? new Color(1f, 1f, 1f, 0.7f) : Color.Lerp(dbColours[i * 2], dbColours[Mathf.Min(dbColours.Length - 1, i * 2 + 1)], 0.5f));
 			component.enabled = true;
 			component.type = Image.Type.Simple;
 			string text = names[i].ToUpper();

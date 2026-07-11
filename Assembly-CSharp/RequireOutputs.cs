@@ -11,24 +11,17 @@ public class RequireOutputs : KMonoBehaviour
 		Building component = base.GetComponent<Building>();
 		this.utilityCell = component.GetUtilityOutputCell();
 		this.conduitType = component.Def.OutputConduitType;
-		ConduitType outputConduitType = component.Def.OutputConduitType;
-		if (outputConduitType != ConduitType.Gas)
+		switch (component.Def.OutputConduitType)
 		{
-			if (outputConduitType != ConduitType.Liquid)
-			{
-				if (outputConduitType == ConduitType.Solid)
-				{
-					scenePartitionerLayer = GameScenePartitioner.Instance.solidConduitsLayer;
-				}
-			}
-			else
-			{
-				scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
-			}
-		}
-		else
-		{
+		case ConduitType.Gas:
 			scenePartitionerLayer = GameScenePartitioner.Instance.gasConduitsLayer;
+			break;
+		case ConduitType.Liquid:
+			scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
+			break;
+		case ConduitType.Solid:
+			scenePartitionerLayer = GameScenePartitioner.Instance.solidConduitsLayer;
+			break;
 		}
 		this.UpdateConnectionState(true);
 		this.UpdatePipeRoomState(true);
@@ -61,24 +54,17 @@ public class RequireOutputs : KMonoBehaviour
 			this.operational.SetFlag(RequireOutputs.outputConnectedFlag, this.connected);
 			this.previouslyConnected = this.connected;
 			StatusItem statusItem = null;
-			ConduitType conduitType = this.conduitType;
-			if (conduitType != ConduitType.Liquid)
+			switch (this.conduitType)
 			{
-				if (conduitType != ConduitType.Gas)
-				{
-					if (conduitType == ConduitType.Solid)
-					{
-						statusItem = Db.Get().BuildingStatusItems.NeedSolidOut;
-					}
-				}
-				else
-				{
-					statusItem = Db.Get().BuildingStatusItems.NeedGasOut;
-				}
-			}
-			else
-			{
+			case ConduitType.Gas:
+				statusItem = Db.Get().BuildingStatusItems.NeedGasOut;
+				break;
+			case ConduitType.Liquid:
 				statusItem = Db.Get().BuildingStatusItems.NeedLiquidOut;
+				break;
+			case ConduitType.Solid:
+				statusItem = Db.Get().BuildingStatusItems.NeedSolidOut;
+				break;
 			}
 			this.hasPipeGuid = this.selectable.ToggleStatusItem(statusItem, this.hasPipeGuid, !this.connected, this);
 		}
@@ -93,8 +79,7 @@ public class RequireOutputs : KMonoBehaviour
 		bool flag = true;
 		if (this.connected)
 		{
-			IConduitFlow conduitFlow = this.GetConduitFlow();
-			flag = conduitFlow.IsConduitEmpty(this.utilityCell);
+			flag = this.GetConduitFlow().IsConduitEmpty(this.utilityCell);
 		}
 		return flag;
 	}
@@ -140,23 +125,17 @@ public class RequireOutputs : KMonoBehaviour
 	public static bool IsConnected(int cell, ConduitType conduitType)
 	{
 		ObjectLayer objectLayer = ObjectLayer.NumLayers;
-		if (conduitType != ConduitType.Gas)
+		switch (conduitType)
 		{
-			if (conduitType != ConduitType.Liquid)
-			{
-				if (conduitType == ConduitType.Solid)
-				{
-					objectLayer = ObjectLayer.SolidConduit;
-				}
-			}
-			else
-			{
-				objectLayer = ObjectLayer.LiquidConduit;
-			}
-		}
-		else
-		{
+		case ConduitType.Gas:
 			objectLayer = ObjectLayer.GasConduit;
+			break;
+		case ConduitType.Liquid:
+			objectLayer = ObjectLayer.LiquidConduit;
+			break;
+		case ConduitType.Solid:
+			objectLayer = ObjectLayer.SolidConduit;
+			break;
 		}
 		GameObject gameObject = Grid.Objects[cell, (int)objectLayer];
 		return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;

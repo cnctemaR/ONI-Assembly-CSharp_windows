@@ -7,6 +7,14 @@ namespace Database
 {
 	public class AttributeConverters : ResourceSet<AttributeConverter>
 	{
+		public AttributeConverter Create(string id, string name, string description, Klei.AI.Attribute attribute, float multiplier, float base_value, IAttributeFormatter formatter)
+		{
+			AttributeConverter attributeConverter = new AttributeConverter(id, name, description, multiplier, base_value, attribute, formatter);
+			base.Add(attributeConverter);
+			attribute.converters.Add(attributeConverter);
+			return attributeConverter;
+		}
+
 		public AttributeConverters()
 		{
 			ToPercentAttributeFormatter toPercentAttributeFormatter = new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None);
@@ -26,19 +34,11 @@ namespace Database
 			this.TidyingSpeed = this.Create("TidyingSpeed", "Tidying Speed", DUPLICANTS.ATTRIBUTES.STRENGTH.SPEEDMODIFIER, Db.Get().Attributes.Strength, 0.25f, 0f, toPercentAttributeFormatter);
 			this.AttackDamage = this.Create("AttackDamage", "Attack Damage", DUPLICANTS.ATTRIBUTES.DIGGING.ATTACK_MODIFIER, Db.Get().Attributes.Digging, 0.05f, 0f, toPercentAttributeFormatter);
 			this.ImmuneLevelBoost = this.Create("ImmuneLevelBoost", "Immune Level Boost", DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_MODIFIER, Db.Get().Attributes.Immunity, 0.0016666667f, 0f, new ToPercentAttributeFormatter(100f, GameUtil.TimeSlice.PerCycle));
-			this.ToiletSpeed = this.Create("ToiletSpeed", "Toilet Speed", string.Empty, Db.Get().Attributes.ToiletEfficiency, 1f, -1f, toPercentAttributeFormatter);
+			this.ToiletSpeed = this.Create("ToiletSpeed", "Toilet Speed", "", Db.Get().Attributes.ToiletEfficiency, 1f, -1f, toPercentAttributeFormatter);
 			this.CarryAmountFromStrength = this.Create("CarryAmountFromStrength", "Carry Amount", DUPLICANTS.ATTRIBUTES.STRENGTH.CARRYMODIFIER, Db.Get().Attributes.Strength, 40f, 0f, standardAttributeFormatter);
 			this.TemperatureInsulation = this.Create("TemperatureInsulation", "Temperature Insulation", DUPLICANTS.ATTRIBUTES.INSULATION.SPEEDMODIFIER, Db.Get().Attributes.Insulation, 0.1f, 0f, toPercentAttributeFormatter);
 			this.SeedHarvestChance = this.Create("SeedHarvestChance", "Seed Harvest Chance", DUPLICANTS.ATTRIBUTES.BOTANIST.BONUS_SEEDS, Db.Get().Attributes.Botanist, 0.033f, 0f, toPercentAttributeFormatter);
 			this.RanchingEffectDuration = this.Create("RanchingEffectDuration", "Ranching Effect Duration", DUPLICANTS.ATTRIBUTES.RANCHING.EFFECTMODIFIER, Db.Get().Attributes.Ranching, 0.1f, 0f, toPercentAttributeFormatter);
-		}
-
-		public AttributeConverter Create(string id, string name, string description, Klei.AI.Attribute attribute, float multiplier, float base_value, IAttributeFormatter formatter)
-		{
-			AttributeConverter attributeConverter = new AttributeConverter(id, name, description, multiplier, base_value, attribute, formatter);
-			base.Add(attributeConverter);
-			attribute.converters.Add(attributeConverter);
-			return attributeConverter;
 		}
 
 		public List<AttributeConverter> GetConvertersForAttribute(Klei.AI.Attribute attrib)

@@ -21,11 +21,9 @@ public class ConfirmDialogScreen : KModalScreen
 		if (e.TryConsume(global::Action.Escape))
 		{
 			this.OnSelect_CANCEL();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string title_text = null, string confirm_text = null, string cancel_text = null, Sprite image_sprite = null, bool activateBlackBackground = true)
@@ -52,8 +50,8 @@ public class ConfirmDialogScreen : KModalScreen
 		{
 			num++;
 		}
-		this.confirmButton.GetComponentInChildren<LocText>().text = ((confirm_text != null) ? confirm_text : UI.CONFIRMDIALOG.OK.text);
-		this.cancelButton.GetComponentInChildren<LocText>().text = ((cancel_text != null) ? cancel_text : UI.CONFIRMDIALOG.CANCEL.text);
+		this.confirmButton.GetComponentInChildren<LocText>().text = ((confirm_text == null) ? UI.CONFIRMDIALOG.OK.text : confirm_text);
+		this.cancelButton.GetComponentInChildren<LocText>().text = ((cancel_text == null) ? UI.CONFIRMDIALOG.CANCEL.text : cancel_text);
 		this.confirmButton.GetComponent<KButton>().onClick += this.OnSelect_OK;
 		this.cancelButton.GetComponent<KButton>().onClick += this.OnSelect_CANCEL;
 		this.configurableButton.GetComponent<KButton>().onClick += this.OnSelect_third;
@@ -63,8 +61,7 @@ public class ConfirmDialogScreen : KModalScreen
 			this.configurableButton.SetActive(this.configurableAction != null);
 			if (configurable_text != null)
 			{
-				LocText componentInChildren = this.configurableButton.GetComponentInChildren<LocText>();
-				componentInChildren.text = configurable_text;
+				this.configurableButton.GetComponentInChildren<LocText>().text = configurable_text;
 			}
 		}
 		if (image_sprite != null)

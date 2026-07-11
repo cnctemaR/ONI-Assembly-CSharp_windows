@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class SymbolOverrideInfoGpuData
 {
+	private SymbolOverrideInfoGpuData.SymbolOverrideInfo[] symbolOverrideInfos
+	{
+		get
+		{
+			return this.symbolOverrideInfoConverter.symbolOverrideInfos;
+		}
+	}
+
+	public int version { get; private set; }
+
 	public SymbolOverrideInfoGpuData(int symbol_count)
 	{
 		this.symbolCount = symbol_count;
@@ -18,19 +28,10 @@ public class SymbolOverrideInfoGpuData
 		this.MarkDirty();
 	}
 
-	private SymbolOverrideInfoGpuData.SymbolOverrideInfo[] symbolOverrideInfos
-	{
-		get
-		{
-			return this.symbolOverrideInfoConverter.symbolOverrideInfos;
-		}
-	}
-
-	public int version { get; private set; }
-
 	private void MarkDirty()
 	{
-		this.version++;
+		int num = this.version + 1;
+		this.version = num;
 	}
 
 	public void SetSymbolOverrideInfo(int symbol_idx, KAnim.Build.SymbolFrameInstance symbol_frame_instance)

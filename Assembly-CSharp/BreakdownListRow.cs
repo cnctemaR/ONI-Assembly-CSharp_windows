@@ -33,25 +33,21 @@ public class BreakdownListRow : KMonoBehaviour
 
 	public void SetStatusColor(BreakdownListRow.Status dotColor)
 	{
-		this.checkmarkImage.gameObject.SetActive(dotColor != BreakdownListRow.Status.Default);
+		this.checkmarkImage.gameObject.SetActive(dotColor > BreakdownListRow.Status.Default);
 		this.checkmarkImage.color = BreakdownListRow.statusColour[(int)dotColor];
-		if (dotColor != BreakdownListRow.Status.Green)
+		switch (dotColor)
 		{
-			if (dotColor != BreakdownListRow.Status.Yellow)
-			{
-				if (dotColor == BreakdownListRow.Status.Red)
-				{
-					this.checkmarkImage.sprite = this.statusFailureIcon;
-				}
-			}
-			else
-			{
-				this.checkmarkImage.sprite = this.statusWarningIcon;
-			}
-		}
-		else
-		{
+		case BreakdownListRow.Status.Red:
+			this.checkmarkImage.sprite = this.statusFailureIcon;
+			return;
+		case BreakdownListRow.Status.Green:
 			this.checkmarkImage.sprite = this.statusSuccessIcon;
+			return;
+		case BreakdownListRow.Status.Yellow:
+			this.checkmarkImage.sprite = this.statusWarningIcon;
+			return;
+		default:
+			return;
 		}
 	}
 
@@ -87,25 +83,25 @@ public class BreakdownListRow : KMonoBehaviour
 		this.isHighlighted = highlighted;
 		Vector2 vector = Vector2.one * 0.8f;
 		this.dotOutlineImage.rectTransform.localScale.Set(vector.x, vector.y, 1f);
-		this.nameLabel.alpha = ((!this.isHighlighted) ? 0.5f : 0.9f);
-		this.valueLabel.alpha = ((!this.isHighlighted) ? 0.5f : 0.9f);
+		this.nameLabel.alpha = (this.isHighlighted ? 0.9f : 0.5f);
+		this.valueLabel.alpha = (this.isHighlighted ? 0.9f : 0.5f);
 	}
 
 	public void SetDisabled(bool disabled)
 	{
 		this.isDisabled = disabled;
-		this.nameLabel.alpha = ((!this.isDisabled) ? 0.5f : 0.4f);
-		this.valueLabel.alpha = ((!this.isDisabled) ? 0.5f : 0.4f);
+		this.nameLabel.alpha = (this.isDisabled ? 0.4f : 0.5f);
+		this.valueLabel.alpha = (this.isDisabled ? 0.4f : 0.5f);
 	}
 
 	public void SetImportant(bool important)
 	{
 		this.isImportant = important;
 		this.dotOutlineImage.rectTransform.localScale = Vector3.one;
-		this.nameLabel.alpha = ((!this.isImportant) ? 0.5f : 1f);
-		this.valueLabel.alpha = ((!this.isImportant) ? 0.5f : 1f);
-		this.nameLabel.fontStyle = ((!this.isImportant) ? FontStyles.Normal : FontStyles.Bold);
-		this.valueLabel.fontStyle = ((!this.isImportant) ? FontStyles.Normal : FontStyles.Bold);
+		this.nameLabel.alpha = (this.isImportant ? 1f : 0.5f);
+		this.valueLabel.alpha = (this.isImportant ? 1f : 0.5f);
+		this.nameLabel.fontStyle = (this.isImportant ? FontStyles.Bold : FontStyles.Normal);
+		this.valueLabel.fontStyle = (this.isImportant ? FontStyles.Bold : FontStyles.Normal);
 	}
 
 	public void HideIcon()

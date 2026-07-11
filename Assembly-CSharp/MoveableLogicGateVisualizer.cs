@@ -29,11 +29,9 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 		if (mode == OverlayModes.Logic.ID)
 		{
 			this.Register();
+			return;
 		}
-		else
-		{
-			this.Unregister();
-		}
+		this.Unregister();
 	}
 
 	private void OnRotated(object data)
@@ -62,7 +60,7 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 	{
 		GameObject gameObject = Util.KInstantiate(LogicGateBase.uiSrcData.prefab, Grid.CellToPosCCC(cell, Grid.SceneLayer.Front), Quaternion.identity, GameScreenManager.Instance.worldSpaceCanvas, null, true, 0);
 		Image component = gameObject.GetComponent<Image>();
-		component.sprite = ((!is_input) ? LogicGateBase.uiSrcData.outputSprite : LogicGateBase.uiSrcData.inputSprite);
+		component.sprite = (is_input ? LogicGateBase.uiSrcData.inputSprite : LogicGateBase.uiSrcData.outputSprite);
 		component.raycastTarget = false;
 		return gameObject;
 	}

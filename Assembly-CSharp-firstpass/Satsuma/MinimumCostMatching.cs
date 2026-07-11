@@ -6,16 +6,6 @@ namespace Satsuma
 {
 	public sealed class MinimumCostMatching
 	{
-		public MinimumCostMatching(IGraph graph, Func<Node, bool> isRed, Func<Arc, double> cost, int minimumMatchingSize = 0, int maximumMatchingSize = 2147483647)
-		{
-			this.Graph = graph;
-			this.IsRed = isRed;
-			this.Cost = cost;
-			this.MinimumMatchingSize = minimumMatchingSize;
-			this.MaximumMatchingSize = maximumMatchingSize;
-			this.Run();
-		}
-
 		public IGraph Graph { get; private set; }
 
 		public Func<Node, bool> IsRed { get; private set; }
@@ -28,10 +18,26 @@ namespace Satsuma
 
 		public IMatching Matching { get; private set; }
 
+		public MinimumCostMatching(IGraph graph, Func<Node, bool> isRed, Func<Arc, double> cost, int minimumMatchingSize = 0, int maximumMatchingSize = 2147483647)
+		{
+			this.Graph = graph;
+			this.IsRed = isRed;
+			this.Cost = cost;
+			this.MinimumMatchingSize = minimumMatchingSize;
+			this.MaximumMatchingSize = maximumMatchingSize;
+			this.Run();
+		}
+
 		private void Run()
 		{
-			RedirectedGraph redirectedGraph = new RedirectedGraph(this.Graph, (Arc x) => (!this.IsRed(this.Graph.U(x))) ? RedirectedGraph.Direction.Backward : RedirectedGraph.Direction.Forward);
-			Supergraph supergraph = new Supergraph(redirectedGraph);
+			Supergraph supergraph = new Supergraph(new RedirectedGraph(this.Graph, delegate(Arc x)
+			{
+				if (!this.IsRed(this.Graph.U(x)))
+				{
+					return RedirectedGraph.Direction.Backward;
+				}
+				return RedirectedGraph.Direction.Forward;
+			}));
 			Node node = supergraph.AddNode();
 			Node node2 = supergraph.AddNode();
 			foreach (Node node3 in this.Graph.Nodes())
@@ -46,7 +52,14 @@ namespace Satsuma
 				}
 			}
 			Arc reflow = supergraph.AddArc(node2, node, Directedness.Directed);
-			NetworkSimplex networkSimplex = new NetworkSimplex(supergraph, (Arc x) => (long)((!(x == reflow)) ? 0 : this.MinimumMatchingSize), (Arc x) => (long)((!(x == reflow)) ? 1 : this.MaximumMatchingSize), null, (Arc x) => (!this.Graph.HasArc(x)) ? 0.0 : this.Cost(x));
+			NetworkSimplex networkSimplex = new NetworkSimplex(supergraph, (Arc x) => (long)((x == reflow) ? this.MinimumMatchingSize : 0), (Arc x) => (long)((x == reflow) ? this.MaximumMatchingSize : 1), null, delegate(Arc x)
+			{
+				if (!this.Graph.HasArc(x))
+				{
+					return 0.0;
+				}
+				return this.Cost(x);
+			});
 			networkSimplex.Run();
 			if (networkSimplex.State == SimplexState.Optimal)
 			{

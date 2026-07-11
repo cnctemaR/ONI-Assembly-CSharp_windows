@@ -67,7 +67,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 		DisplayNodeEditor.DisplayType displayType = this.displayType;
 		if (displayType != DisplayNodeEditor.DisplayType.DefaultColour)
 		{
-			if (displayType == DisplayNodeEditor.DisplayType.ElementColourFeature || displayType == DisplayNodeEditor.DisplayType.ElementColourBiome)
+			if (displayType - DisplayNodeEditor.DisplayType.ElementColourBiome <= 1)
 			{
 				getColourDelegate = delegate(int cell)
 				{

@@ -39,8 +39,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_go.transform.parent = component.transform;
 		this.looping_sounds = this.arm_go.AddComponent<LoopingSounds>();
 		this.rotateSound = GlobalAssets.GetSound(this.rotateSound, false);
-		KPrefabID kprefabID = this.arm_go.AddComponent<KPrefabID>();
-		kprefabID.PrefabTag = new Tag(text);
+		this.arm_go.AddComponent<KPrefabID>().PrefabTag = new Tag(text);
 		this.arm_anim_ctrl = this.arm_go.AddComponent<KBatchedAnimController>();
 		this.arm_anim_ctrl.AnimFiles = new KAnimFile[] { component.AnimFiles[0] };
 		this.arm_anim_ctrl.initialAnim = "arm";
@@ -48,8 +47,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_anim_ctrl.sceneLayer = Grid.SceneLayer.TransferArm;
 		component.SetSymbolVisiblity("arm_target", false);
 		bool flag;
-		Vector4 column = component.GetSymbolTransform(new HashedString("arm_target"), out flag).GetColumn(3);
-		Vector3 vector = column;
+		Vector3 vector = component.GetSymbolTransform(new HashedString("arm_target"), out flag).GetColumn(3);
 		vector.z = Grid.GetLayerZ(Grid.SceneLayer.TransferArm);
 		this.arm_go.transform.SetPosition(vector);
 		this.arm_go.SetActive(true);
@@ -108,7 +106,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		for (int num3 = 0; num3 != num2; num3++)
 		{
 			int num4 = num3 * num;
-			int num5 = ((num3 != num2 - 1) ? (num4 + num) : batchUpdateContext.solid_transfer_arms.Count);
+			int num5 = ((num3 == num2 - 1) ? batchUpdateContext.solid_transfer_arms.Count : (num4 + num));
 			SolidTransferArm.batch_update_job.Add(new SolidTransferArm.BatchUpdateTask(num4, num5));
 		}
 		GlobalJobManager.Run(SolidTransferArm.batch_update_job);
@@ -148,12 +146,10 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		if (this.worker.workable && fetchAreaChore != null && this.rotation_complete)
 		{
 			this.StopRotateSound();
-			this.SetArmAnim((!fetchAreaChore.IsDelivering) ? SolidTransferArm.ArmAnim.Pickup : SolidTransferArm.ArmAnim.Drop);
+			this.SetArmAnim(fetchAreaChore.IsDelivering ? SolidTransferArm.ArmAnim.Drop : SolidTransferArm.ArmAnim.Pickup);
+			return;
 		}
-		else
-		{
-			this.SetArmAnim(SolidTransferArm.ArmAnim.Idle);
-		}
+		this.SetArmAnim(SolidTransferArm.ArmAnim.Idle);
 	}
 
 	private bool AsyncUpdate(int cell, HashSet<int> workspace, GameObject game_object)
@@ -182,8 +178,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.pickupables.Clear();
 		foreach (SolidTransferArm.CachedPickupable cachedPickupable in SolidTransferArm.cached_pickupables)
 		{
-			int cellRange = Grid.GetCellRange(cell, cachedPickupable.storage_cell);
-			if (cellRange <= this.pickupRange && this.IsPickupableRelevantToMyInterests(cachedPickupable.pickupable.KPrefabID, cachedPickupable.storage_cell) && cachedPickupable.pickupable.CouldBePickedUpByTransferArm(game_object))
+			if (Grid.GetCellRange(cell, cachedPickupable.storage_cell) <= this.pickupRange && this.IsPickupableRelevantToMyInterests(cachedPickupable.pickupable.KPrefabID, cachedPickupable.storage_cell) && cachedPickupable.pickupable.CouldBePickedUpByTransferArm(game_object))
 			{
 				this.pickupables.Add(cachedPickupable.pickupable);
 			}
@@ -234,24 +229,19 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			return;
 		}
 		this.arm_anim = new_anim;
-		SolidTransferArm.ArmAnim armAnim = this.arm_anim;
-		if (armAnim != SolidTransferArm.ArmAnim.Idle)
+		switch (this.arm_anim)
 		{
-			if (armAnim != SolidTransferArm.ArmAnim.Pickup)
-			{
-				if (armAnim == SolidTransferArm.ArmAnim.Drop)
-				{
-					this.arm_anim_ctrl.Play("arm_drop", KAnim.PlayMode.Loop, 1f, 0f);
-				}
-			}
-			else
-			{
-				this.arm_anim_ctrl.Play("arm_pickup", KAnim.PlayMode.Loop, 1f, 0f);
-			}
-		}
-		else
-		{
+		case SolidTransferArm.ArmAnim.Idle:
 			this.arm_anim_ctrl.Play("arm", KAnim.PlayMode.Loop, 1f, 0f);
+			return;
+		case SolidTransferArm.ArmAnim.Pickup:
+			this.arm_anim_ctrl.Play("arm_pickup", KAnim.PlayMode.Loop, 1f, 0f);
+			return;
+		case SolidTransferArm.ArmAnim.Drop:
+			this.arm_anim_ctrl.Play("arm_drop", KAnim.PlayMode.Loop, 1f, 0f);
+			return;
+		default:
+			return;
 		}
 	}
 
@@ -288,23 +278,22 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private void RotateArm(Vector3 target_dir, bool warp, float dt)
 	{
-		float num = MathUtil.AngleSigned(Vector3.up, target_dir, Vector3.forward);
-		float num2 = num - this.arm_rot;
-		if (num2 < -180f)
+		float num = MathUtil.AngleSigned(Vector3.up, target_dir, Vector3.forward) - this.arm_rot;
+		if (num < -180f)
 		{
-			num2 += 360f;
+			num += 360f;
 		}
-		if (num2 > 180f)
+		if (num > 180f)
 		{
-			num2 -= 360f;
+			num -= 360f;
 		}
 		if (!warp)
 		{
-			num2 = Mathf.Clamp(num2, -this.turn_rate * dt, this.turn_rate * dt);
+			num = Mathf.Clamp(num, -this.turn_rate * dt, this.turn_rate * dt);
 		}
-		this.arm_rot += num2;
+		this.arm_rot += num;
 		this.SetArmRotation(this.arm_rot);
-		this.rotation_complete = Mathf.Approximately(num2, 0f);
+		this.rotation_complete = Mathf.Approximately(num, 0f);
 		if (!warp && !this.rotation_complete)
 		{
 			if (!this.rotateSoundPlaying)
@@ -312,11 +301,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				this.StartRotateSound();
 			}
 			this.SetRotateSoundParameter(this.arm_rot);
+			return;
 		}
-		else
-		{
-			this.StopRotateSound();
-		}
+		this.StopRotateSound();
 	}
 
 	private void StartRotateSound()

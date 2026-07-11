@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("27FFF232-A7A8-40DD-8D4A-734AD59fCD41")]
+	[Guid("27FFF232-A7A8-40dd-8D4A-734AD59FCD41")]
 	[ComVisible(true)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface IAppDomainSetup
 	{
 		string ApplicationBase { get; set; }

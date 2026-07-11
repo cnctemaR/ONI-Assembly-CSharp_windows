@@ -4,9 +4,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>See: Playables.IPlayableOutput.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	public struct PlayableOutput : IPlayableOutput, IEquatable<PlayableOutput>
 	{
@@ -16,9 +13,6 @@ namespace UnityEngine.Playables
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Returns an invalid PlayableOutput.</para>
-		/// </summary>
 		public static PlayableOutput Null
 		{
 			get

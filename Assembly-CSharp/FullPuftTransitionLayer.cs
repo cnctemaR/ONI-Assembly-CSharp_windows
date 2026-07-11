@@ -13,7 +13,7 @@ public class FullPuftTransitionLayer : TransitionDriver.OverrideLayer
 		CreatureCalorieMonitor.Instance smi = navigator.GetSMI<CreatureCalorieMonitor.Instance>();
 		if (smi != null && smi.stomach.IsReadyToPoop())
 		{
-			KBatchedAnimController component = navigator.GetComponent<KBatchedAnimController>();
+			KAnimControllerBase component = navigator.GetComponent<KBatchedAnimController>();
 			string text = HashCache.Get().Get(transition.anim.HashValue) + "_full";
 			if (component.HasAnimation(text))
 			{

@@ -24,29 +24,24 @@ public class UnitConfigurationScreen
 
 	private void DisplayCurrentUnit()
 	{
-		int @int = KPlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey, 0);
-		GameUtil.TemperatureUnit temperatureUnit = (GameUtil.TemperatureUnit)@int;
-		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
-		{
-			if (temperatureUnit != GameUtil.TemperatureUnit.Kelvin)
-			{
-				this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
-				this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
-				this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
-			}
-			else
-			{
-				this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
-				this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
-				this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
-			}
-		}
-		else
+		GameUtil.TemperatureUnit @int = (GameUtil.TemperatureUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey, 0);
+		if (@int == GameUtil.TemperatureUnit.Celsius)
 		{
 			this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
 			this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
 			this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			return;
 		}
+		if (@int != GameUtil.TemperatureUnit.Kelvin)
+		{
+			this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
+			return;
+		}
+		this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+		this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
+		this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
 	}
 
 	private void OnCelsiusClicked()

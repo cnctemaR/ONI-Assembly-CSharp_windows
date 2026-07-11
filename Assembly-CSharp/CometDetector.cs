@@ -109,11 +109,10 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 				if (SaveGame.Instance.GetComponent<SeasonManager>().TimeUntilNextBombardment() <= detectTime)
 				{
 					component.AddTag(GameTags.Detecting, false);
+					return;
 				}
-				else
-				{
-					component.RemoveTag(GameTags.Detecting);
-				}
+				component.RemoveTag(GameTags.Detecting);
+				return;
 			}
 			else
 			{
@@ -122,15 +121,15 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 				{
 					this.targetCraft.Set(null);
 					component.RemoveTag(GameTags.Detecting);
+					return;
 				}
-				else if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Launching || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.WaitingToLand || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Landing || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && spacecraftFromLaunchConditionManager.GetTimeLeft() <= detectTime))
+				if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Launching || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.WaitingToLand || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Landing || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && spacecraftFromLaunchConditionManager.GetTimeLeft() <= detectTime))
 				{
 					component.AddTag(GameTags.Detecting, false);
+					return;
 				}
-				else
-				{
-					component.RemoveTag(GameTags.Detecting);
-				}
+				component.RemoveTag(GameTags.Detecting);
+				return;
 			}
 		}
 
@@ -141,7 +140,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 
 		public void SetLogicSignal(bool on)
 		{
-			base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!on) ? 0 : 1);
+			base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, on ? 1 : 0);
 		}
 
 		public float GetDetectTime()

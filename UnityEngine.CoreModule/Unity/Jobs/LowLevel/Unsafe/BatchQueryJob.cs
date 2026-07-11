@@ -3,9 +3,6 @@ using Unity.Collections;
 
 namespace Unity.Jobs.LowLevel.Unsafe
 {
-	/// <summary>
-	///   <para>Struct used to implement batch query jobs.</para>
-	/// </summary>
 	public struct BatchQueryJob<CommandT, ResultT> where CommandT : struct where ResultT : struct
 	{
 		public BatchQueryJob(NativeArray<CommandT> commands, NativeArray<ResultT> results)

@@ -65,7 +65,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			{
 				num += completed_by.GetAttributes().Get(Db.Get().Attributes.Botanist).GetTotalValue() * Db.Get().AttributeConverters.SeedHarvestChance.multiplier;
 			}
-			int num2 = (((float)global::UnityEngine.Random.Range(0, 100) > num) ? 0 : 1);
+			int num2 = (((float)global::UnityEngine.Random.Range(0, 100) <= num) ? 1 : 0);
 			this.ProduceSeed(this.seedInfo.seedId, num2);
 		}
 	}
@@ -73,10 +73,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		GameObject prefab = Assets.GetPrefab(new Tag(this.seedInfo.seedId));
-		if (prefab != null)
-		{
-		}
+		Assets.GetPrefab(new Tag(this.seedInfo.seedId)) != null;
 		switch (this.seedInfo.productionType)
 		{
 		default:

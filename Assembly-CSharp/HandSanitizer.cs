@@ -103,11 +103,6 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		this.RefreshMeters();
 	}
 
-	Transform IBasicBuilding.get_transform()
-	{
-		return base.transform;
-	}
-
 	public float massConsumedPerUse = 1f;
 
 	public SimHashes consumedElement = SimHashes.BleachStone;
@@ -220,11 +215,9 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 			if (smi.OutputFull())
 			{
 				smi.master.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, this);
+				return;
 			}
-			else
-			{
-				smi.master.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, false);
-			}
+			smi.master.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, false);
 		}
 
 		public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.State notready;
@@ -275,22 +268,21 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 				return true;
 			}
 			PrimaryElement component3 = worker.GetComponent<PrimaryElement>();
-			float num = component.massConsumedPerUse * dt / this.workTime;
-			float num2 = Mathf.Min(num, massAvailable);
-			int num3 = Math.Min((int)(dt / this.workTime * (float)component.diseaseRemovalCount), component3.DiseaseCount);
-			this.diseaseRemoved += num3;
+			float num = Mathf.Min(component.massConsumedPerUse * dt / this.workTime, massAvailable);
+			int num2 = Math.Min((int)(dt / this.workTime * (float)component.diseaseRemovalCount), component3.DiseaseCount);
+			this.diseaseRemoved += num2;
 			SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
 			invalid.idx = component3.DiseaseIdx;
-			invalid.count = num3;
-			component3.ModifyDiseaseCount(-num3, "HandSanitizer.OnWorkTick");
-			component.maxPossiblyRemoved += num3;
+			invalid.count = num2;
+			component3.ModifyDiseaseCount(-num2, "HandSanitizer.OnWorkTick");
+			component.maxPossiblyRemoved += num2;
 			SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
-			float num4;
-			component2.ConsumeAndGetDisease(ElementLoader.FindElementByHash(component.consumedElement).tag, num2, out diseaseInfo, out num4);
+			float num3;
+			component2.ConsumeAndGetDisease(ElementLoader.FindElementByHash(component.consumedElement).tag, num, out diseaseInfo, out num3);
 			if (component.outputElement != SimHashes.Vacuum)
 			{
 				diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(invalid, diseaseInfo);
-				component2.AddLiquid(component.outputElement, num2, num4, diseaseInfo.idx, diseaseInfo.count, false, true);
+				component2.AddLiquid(component.outputElement, num, num3, diseaseInfo.idx, diseaseInfo.count, false, true);
 			}
 			return this.diseaseRemoved > component.diseaseRemovalCount;
 		}

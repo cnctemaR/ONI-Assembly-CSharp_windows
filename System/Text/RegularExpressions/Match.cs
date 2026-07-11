@@ -1,75 +1,65 @@
 ﻿using System;
+using Unity;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class Match : Group
 	{
-		private Match()
-		{
-			this.regex = null;
-			this.machine = null;
-			this.text_length = 0;
-			this.groups = new GroupCollection(1, 1);
-			this.groups.SetValue(this, 0);
-		}
-
-		internal Match(Regex regex, IMachine machine, string text, int text_length, int n_groups, int index, int length)
-			: base(text, index, length)
-		{
-			this.regex = regex;
-			this.machine = machine;
-			this.text_length = text_length;
-		}
-
-		internal Match(Regex regex, IMachine machine, string text, int text_length, int n_groups, int index, int length, int n_caps)
-			: base(text, index, length, n_caps)
-		{
-			this.regex = regex;
-			this.machine = machine;
-			this.text_length = text_length;
-			this.groups = new GroupCollection(n_groups, regex.Gap);
-			this.groups.SetValue(this, 0);
-		}
-
 		public static Match Empty
 		{
 			get
 			{
-				return Match.empty;
+				return Match._empty;
 			}
 		}
 
-		[global::System.MonoTODO("not thread-safe")]
-		public static Match Synchronized(Match inner)
+		internal Match(Regex regex, int capcount, string text, int begpos, int len, int startpos)
+			: base(text, new int[2], 0, "0")
 		{
-			if (inner == null)
+			this._regex = regex;
+			this._matchcount = new int[capcount];
+			this._matches = new int[capcount][];
+			this._matches[0] = this._caps;
+			this._textbeg = begpos;
+			this._textend = begpos + len;
+			this._textstart = startpos;
+			this._balancing = false;
+		}
+
+		internal virtual void Reset(Regex regex, string text, int textbeg, int textend, int textstart)
+		{
+			this._regex = regex;
+			this._text = text;
+			this._textbeg = textbeg;
+			this._textend = textend;
+			this._textstart = textstart;
+			for (int i = 0; i < this._matchcount.Length; i++)
 			{
-				throw new ArgumentNullException("inner");
+				this._matchcount[i] = 0;
 			}
-			return inner;
+			this._balancing = false;
 		}
 
 		public virtual GroupCollection Groups
 		{
 			get
 			{
-				return this.groups;
+				if (this._groupcoll == null)
+				{
+					this._groupcoll = new GroupCollection(this, null);
+				}
+				return this._groupcoll;
 			}
 		}
 
 		public Match NextMatch()
 		{
-			if (this == Match.Empty)
+			if (this._regex == null)
 			{
-				return Match.Empty;
+				return this;
 			}
-			int num = ((!this.regex.RightToLeft) ? (base.Index + base.Length) : base.Index);
-			if (base.Length == 0)
-			{
-				num += ((!this.regex.RightToLeft) ? 1 : (-1));
-			}
-			return this.machine.Scan(this.regex, base.Text, num, this.text_length);
+			return this._regex.Run(false, this._length, this._text, this._textbeg, this._textend - this._textbeg, this._textpos);
 		}
 
 		public virtual string Result(string replacement)
@@ -78,29 +68,182 @@ namespace System.Text.RegularExpressions
 			{
 				throw new ArgumentNullException("replacement");
 			}
-			if (this.machine == null)
+			if (this._regex == null)
 			{
-				throw new NotSupportedException("Result cannot be called on failed Match.");
+				throw new NotSupportedException(global::SR.GetString("Result cannot be called on a failed Match."));
 			}
-			return this.machine.Result(replacement, this);
+			RegexReplacement regexReplacement = (RegexReplacement)this._regex.replref.Get();
+			if (regexReplacement == null || !regexReplacement.Pattern.Equals(replacement))
+			{
+				regexReplacement = RegexParser.ParseReplacement(replacement, this._regex.caps, this._regex.capsize, this._regex.capnames, this._regex.roptions);
+				this._regex.replref.Cache(regexReplacement);
+			}
+			return regexReplacement.Replacement(this);
 		}
 
-		internal Regex Regex
+		internal virtual string GroupToStringImpl(int groupnum)
 		{
-			get
+			int num = this._matchcount[groupnum];
+			if (num == 0)
 			{
-				return this.regex;
+				return string.Empty;
+			}
+			int[] array = this._matches[groupnum];
+			return this._text.Substring(array[(num - 1) * 2], array[num * 2 - 1]);
+		}
+
+		internal string LastGroupToStringImpl()
+		{
+			return this.GroupToStringImpl(this._matchcount.Length - 1);
+		}
+
+		public static Match Synchronized(Match inner)
+		{
+			if (inner == null)
+			{
+				throw new ArgumentNullException("inner");
+			}
+			int num = inner._matchcount.Length;
+			for (int i = 0; i < num; i++)
+			{
+				Group.Synchronized(inner.Groups[i]);
+			}
+			return inner;
+		}
+
+		internal virtual void AddMatch(int cap, int start, int len)
+		{
+			if (this._matches[cap] == null)
+			{
+				this._matches[cap] = new int[2];
+			}
+			int num = this._matchcount[cap];
+			if (num * 2 + 2 > this._matches[cap].Length)
+			{
+				int[] array = this._matches[cap];
+				int[] array2 = new int[num * 8];
+				for (int i = 0; i < num * 2; i++)
+				{
+					array2[i] = array[i];
+				}
+				this._matches[cap] = array2;
+			}
+			this._matches[cap][num * 2] = start;
+			this._matches[cap][num * 2 + 1] = len;
+			this._matchcount[cap] = num + 1;
+		}
+
+		internal virtual void BalanceMatch(int cap)
+		{
+			this._balancing = true;
+			int num = this._matchcount[cap] * 2 - 2;
+			if (this._matches[cap][num] < 0)
+			{
+				num = -3 - this._matches[cap][num];
+			}
+			num -= 2;
+			if (num >= 0 && this._matches[cap][num] < 0)
+			{
+				this.AddMatch(cap, this._matches[cap][num], this._matches[cap][num + 1]);
+				return;
+			}
+			this.AddMatch(cap, -3 - num, -4 - num);
+		}
+
+		internal virtual void RemoveMatch(int cap)
+		{
+			this._matchcount[cap]--;
+		}
+
+		internal virtual bool IsMatched(int cap)
+		{
+			return cap < this._matchcount.Length && this._matchcount[cap] > 0 && this._matches[cap][this._matchcount[cap] * 2 - 1] != -2;
+		}
+
+		internal virtual int MatchIndex(int cap)
+		{
+			int num = this._matches[cap][this._matchcount[cap] * 2 - 2];
+			if (num >= 0)
+			{
+				return num;
+			}
+			return this._matches[cap][-3 - num];
+		}
+
+		internal virtual int MatchLength(int cap)
+		{
+			int num = this._matches[cap][this._matchcount[cap] * 2 - 1];
+			if (num >= 0)
+			{
+				return num;
+			}
+			return this._matches[cap][-3 - num];
+		}
+
+		internal virtual void Tidy(int textpos)
+		{
+			int[] array = this._matches[0];
+			this._index = array[0];
+			this._length = array[1];
+			this._textpos = textpos;
+			this._capcount = this._matchcount[0];
+			if (this._balancing)
+			{
+				for (int i = 0; i < this._matchcount.Length; i++)
+				{
+					int num = this._matchcount[i] * 2;
+					int[] array2 = this._matches[i];
+					int j = 0;
+					while (j < num && array2[j] >= 0)
+					{
+						j++;
+					}
+					int num2 = j;
+					while (j < num)
+					{
+						if (array2[j] < 0)
+						{
+							num2--;
+						}
+						else
+						{
+							if (j != num2)
+							{
+								array2[num2] = array2[j];
+							}
+							num2++;
+						}
+						j++;
+					}
+					this._matchcount[i] = num2 / 2;
+				}
+				this._balancing = false;
 			}
 		}
 
-		private Regex regex;
+		internal Match()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
 
-		private IMachine machine;
+		internal static Match _empty = new Match(null, 1, string.Empty, 0, 0, 0);
 
-		private int text_length;
+		internal GroupCollection _groupcoll;
 
-		private GroupCollection groups;
+		internal Regex _regex;
 
-		private static Match empty = new Match();
+		internal int _textbeg;
+
+		internal int _textpos;
+
+		internal int _textend;
+
+		internal int _textstart;
+
+		internal int[][] _matches;
+
+		internal int[] _matchcount;
+
+		internal bool _balancing;
 	}
 }

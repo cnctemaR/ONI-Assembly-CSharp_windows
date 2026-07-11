@@ -2,15 +2,8 @@
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>A set of values used to override the render state. Note that it is not enough to set e.g. blendState, but that mask must also include RenderStateMask.Blend for the override to occur.</para>
-	/// </summary>
 	public struct RenderStateBlock
 	{
-		/// <summary>
-		///   <para>Creates a new render state block with the specified mask.</para>
-		/// </summary>
-		/// <param name="mask">Specifies which parts of the render state that is overriden.</param>
 		public RenderStateBlock(RenderStateMask mask)
 		{
 			this.m_BlendState = BlendState.Default;
@@ -21,9 +14,6 @@ namespace UnityEngine.Experimental.Rendering
 			this.m_Mask = mask;
 		}
 
-		/// <summary>
-		///   <para>Specifies the new blend state.</para>
-		/// </summary>
 		public BlendState blendState
 		{
 			get
@@ -36,9 +26,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies the new raster state.</para>
-		/// </summary>
 		public RasterState rasterState
 		{
 			get
@@ -51,9 +38,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies the new depth state.</para>
-		/// </summary>
 		public DepthState depthState
 		{
 			get
@@ -66,9 +50,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies the new stencil state.</para>
-		/// </summary>
 		public StencilState stencilState
 		{
 			get
@@ -81,9 +62,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The value to be compared against and/or the value to be written to the buffer based on the stencil state.</para>
-		/// </summary>
 		public int stencilReference
 		{
 			get
@@ -96,9 +74,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies which parts of the render state that is overriden.</para>
-		/// </summary>
 		public RenderStateMask mask
 		{
 			get

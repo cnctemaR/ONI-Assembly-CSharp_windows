@@ -52,11 +52,9 @@ public class DebugBaseTemplateButton : KScreen
 		if (this.editing)
 		{
 			e.Consumed = true;
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	protected override void OnSpawn()
@@ -138,7 +136,7 @@ public class DebugBaseTemplateButton : KScreen
 	private void OnClickClearSelection()
 	{
 		this.ClearSelection();
-		this.nameField.text = string.Empty;
+		this.nameField.text = "";
 	}
 
 	private void OnClickClear()
@@ -181,38 +179,37 @@ public class DebugBaseTemplateButton : KScreen
 		float num4 = num / (float)this.SelectedCells.Count;
 		float num5;
 		num2 = (num5 = num2 / (float)this.SelectedCells.Count);
-		int num6 = Grid.PosToCell(new Vector3(num4, num5, 0f));
+		int num6;
 		int num7;
-		int num8;
-		Grid.CellToXY(num6, out num7, out num8);
+		Grid.CellToXY(Grid.PosToCell(new Vector3(num4, num5, 0f)), out num6, out num7);
 		for (int i = 0; i < this.SelectedCells.Count; i++)
 		{
-			int num9 = this.SelectedCells[i];
+			int num8 = this.SelectedCells[i];
+			int num9;
 			int num10;
-			int num11;
-			Grid.CellToXY(this.SelectedCells[i], out num10, out num11);
-			Element element = ElementLoader.elements[(int)Grid.ElementIdx[num9]];
-			string text = ((Grid.DiseaseIdx[num9] == byte.MaxValue) ? null : Db.Get().Diseases[(int)Grid.DiseaseIdx[num9]].Id);
-			list.Add(new Cell(num10 - num7, num11 - num8, element.id, Grid.Temperature[num9], Grid.Mass[num9], text, Grid.DiseaseCount[num9], Grid.PreventFogOfWarReveal[this.SelectedCells[i]]));
+			Grid.CellToXY(this.SelectedCells[i], out num9, out num10);
+			Element element = ElementLoader.elements[(int)Grid.ElementIdx[num8]];
+			string text = ((Grid.DiseaseIdx[num8] != byte.MaxValue) ? Db.Get().Diseases[(int)Grid.DiseaseIdx[num8]].Id : null);
+			list.Add(new Cell(num9 - num6, num10 - num7, element.id, Grid.Temperature[num8], Grid.Mass[num8], text, Grid.DiseaseCount[num8], Grid.PreventFogOfWarReveal[this.SelectedCells[i]]));
 		}
 		for (int j = 0; j < Components.BuildingCompletes.Count; j++)
 		{
 			BuildingComplete buildingComplete = Components.BuildingCompletes[j];
 			if (!hashSet.Contains(buildingComplete.gameObject))
 			{
+				int num11;
 				int num12;
-				int num13;
-				Grid.CellToXY(Grid.PosToCell(buildingComplete), out num12, out num13);
+				Grid.CellToXY(Grid.PosToCell(buildingComplete), out num11, out num12);
 				if (this.SaveAllBuildings || this.SelectedCells.Contains(Grid.PosToCell(buildingComplete)))
 				{
 					string text2;
-					foreach (int num14 in buildingComplete.PlacementCells)
+					foreach (int num13 in buildingComplete.PlacementCells)
 					{
+						int num14;
 						int num15;
-						int num16;
-						Grid.CellToXY(num14, out num15, out num16);
-						text2 = ((Grid.DiseaseIdx[num14] == byte.MaxValue) ? null : Db.Get().Diseases[(int)Grid.DiseaseIdx[num14]].Id);
-						list.Add(new Cell(num15 - num7, num16 - num8, Grid.Element[num14].id, Grid.Temperature[num14], Grid.Mass[num14], text2, Grid.DiseaseCount[num14], false));
+						Grid.CellToXY(num13, out num14, out num15);
+						text2 = ((Grid.DiseaseIdx[num13] != byte.MaxValue) ? Db.Get().Diseases[(int)Grid.DiseaseIdx[num13]].Id : null);
+						list.Add(new Cell(num14 - num6, num15 - num7, Grid.Element[num13].id, Grid.Temperature[num13], Grid.Mass[num13], text2, Grid.DiseaseCount[num13], false));
 					}
 					Orientation orientation = Orientation.Neutral;
 					Rotatable component = buildingComplete.gameObject.GetComponent<Rotatable>();
@@ -221,16 +218,16 @@ public class DebugBaseTemplateButton : KScreen
 						orientation = component.GetOrientation();
 					}
 					SimHashes simHashes = SimHashes.Void;
-					float num17 = 280f;
+					float num16 = 280f;
 					text2 = null;
-					int num18 = 0;
+					int num17 = 0;
 					PrimaryElement component2 = buildingComplete.GetComponent<PrimaryElement>();
 					if (component2 != null)
 					{
 						simHashes = component2.ElementID;
-						num17 = component2.Temperature;
-						text2 = ((component2.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component2.DiseaseIdx].Id);
-						num18 = component2.DiseaseCount;
+						num16 = component2.Temperature;
+						text2 = ((component2.DiseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)component2.DiseaseIdx].Id : null);
+						num17 = component2.DiseaseCount;
 					}
 					List<Prefab.template_amount_value> list6 = new List<Prefab.template_amount_value>();
 					List<Prefab.template_amount_value> list7 = new List<Prefab.template_amount_value>();
@@ -247,54 +244,53 @@ public class DebugBaseTemplateButton : KScreen
 					Unsealable component4 = buildingComplete.GetComponent<Unsealable>();
 					if (component4 != null)
 					{
-						float num19 = (float)((!component4.facingRight) ? 0 : 1);
-						list7.Add(new Prefab.template_amount_value("sealedDoorDirection", num19));
+						float num18 = (float)(component4.facingRight ? 1 : 0);
+						list7.Add(new Prefab.template_amount_value("sealedDoorDirection", num18));
 					}
 					LogicSwitch component5 = buildingComplete.GetComponent<LogicSwitch>();
 					if (component5 != null)
 					{
-						float num20 = (float)((!component5.IsSwitchedOn) ? 0 : 1);
-						list7.Add(new Prefab.template_amount_value("switchSetting", num20));
+						float num19 = (float)(component5.IsSwitchedOn ? 1 : 0);
+						list7.Add(new Prefab.template_amount_value("switchSetting", num19));
 					}
+					num11 -= num6;
 					num12 -= num7;
-					num13 -= num8;
-					num17 = Mathf.Clamp(num17, 1f, 99999f);
-					Prefab prefab = new Prefab(buildingComplete.PrefabID().Name, Prefab.Type.Building, num12, num13, simHashes, num17, 0f, text2, num18, orientation, list6.ToArray(), list7.ToArray(), 0);
+					num16 = Mathf.Clamp(num16, 1f, 99999f);
+					Prefab prefab = new Prefab(buildingComplete.PrefabID().Name, Prefab.Type.Building, num11, num12, simHashes, num16, 0f, text2, num17, orientation, list6.ToArray(), list7.ToArray(), 0);
 					Storage component6 = buildingComplete.gameObject.GetComponent<Storage>();
 					if (component6 != null)
 					{
 						foreach (GameObject gameObject in component6.items)
 						{
-							float num21 = 0f;
+							float num20 = 0f;
 							SimHashes simHashes2 = SimHashes.Vacuum;
-							float num22 = 280f;
+							float num21 = 280f;
 							string text3 = null;
-							int num23 = 0;
+							int num22 = 0;
 							bool flag = false;
 							PrimaryElement component7 = gameObject.GetComponent<PrimaryElement>();
 							if (component7 != null)
 							{
-								num21 = component7.Units;
+								num20 = component7.Units;
 								simHashes2 = component7.ElementID;
-								num22 = component7.Temperature;
-								text3 = ((component7.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component7.DiseaseIdx].Id);
-								num23 = component7.DiseaseCount;
+								num21 = component7.Temperature;
+								text3 = ((component7.DiseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)component7.DiseaseIdx].Id : null);
+								num22 = component7.DiseaseCount;
 							}
-							float num24 = 0f;
+							float num23 = 0f;
 							global::Rottable.Instance smi = gameObject.gameObject.GetSMI<global::Rottable.Instance>();
 							if (smi != null)
 							{
-								num24 = smi.RotValue;
+								num23 = smi.RotValue;
 							}
-							ElementChunk component8 = gameObject.GetComponent<ElementChunk>();
-							if (component8 != null)
+							if (gameObject.GetComponent<ElementChunk>() != null)
 							{
 								flag = true;
 							}
-							StorageItem storageItem = new StorageItem(gameObject.PrefabID().Name, num21, num22, simHashes2, text3, num23, flag);
+							StorageItem storageItem = new StorageItem(gameObject.PrefabID().Name, num20, num21, simHashes2, text3, num22, flag);
 							if (smi != null)
 							{
-								storageItem.rottable.rotAmount = num24;
+								storageItem.rottable.rotAmount = num23;
 							}
 							prefab.AssignStorage(storageItem);
 							hashSet.Add(gameObject);
@@ -309,56 +305,108 @@ public class DebugBaseTemplateButton : KScreen
 		while (l < list2.Count)
 		{
 			Prefab prefab2 = list2[l];
-			int num25 = prefab2.location_x + num7;
-			int num26 = prefab2.location_y + num8;
-			int num27 = Grid.XYToCell(num25, num26);
+			int num24 = prefab2.location_x + num6;
+			int num25 = prefab2.location_y + num7;
+			int num26 = Grid.XYToCell(num24, num25);
 			string id = prefab2.id;
-			if (id == null)
+			uint num27 = <PrivateImplementationDetails>.ComputeStringHash(id);
+			if (num27 <= 1827504487U)
 			{
-				goto IL_07B3;
-			}
-			if (DebugBaseTemplateButton.<>f__switch$map2 == null)
-			{
-				DebugBaseTemplateButton.<>f__switch$map2 = new Dictionary<string, int>(8)
+				if (num27 <= 609727380U)
 				{
-					{ "Wire", 1 },
-					{ "InsulatedWire", 1 },
-					{ "HighWattageWire", 1 },
-					{ "GasConduit", 2 },
-					{ "InsulatedGasConduit", 2 },
-					{ "LiquidConduit", 3 },
-					{ "InsulatedLiquidConduit", 3 },
-					{ "LogicWire", 4 }
-				};
+					if (num27 != 379600269U)
+					{
+						if (num27 != 609727380U)
+						{
+							goto IL_0783;
+						}
+						if (!(id == "GasConduit"))
+						{
+							goto IL_0783;
+						}
+					}
+					else
+					{
+						if (!(id == "LiquidConduit"))
+						{
+							goto IL_0783;
+						}
+						goto IL_07C3;
+					}
+				}
+				else if (num27 != 848332507U)
+				{
+					if (num27 != 1827504487U)
+					{
+						goto IL_0783;
+					}
+					if (!(id == "InsulatedWire"))
+					{
+						goto IL_0783;
+					}
+					goto IL_078D;
+				}
+				else if (!(id == "InsulatedGasConduit"))
+				{
+					goto IL_0783;
+				}
+				prefab2.connections = (int)Game.Instance.gasConduitSystem.GetConnections(num26, true);
 			}
-			int num28;
-			if (!DebugBaseTemplateButton.<>f__switch$map2.TryGetValue(id, out num28))
+			else if (num27 <= 3228988836U)
 			{
-				goto IL_07B3;
+				if (num27 != 1938276536U)
+				{
+					if (num27 != 3228988836U)
+					{
+						goto IL_0783;
+					}
+					if (!(id == "LogicWire"))
+					{
+						goto IL_0783;
+					}
+					prefab2.connections = (int)Game.Instance.logicCircuitSystem.GetConnections(num26, true);
+				}
+				else
+				{
+					if (!(id == "Wire"))
+					{
+						goto IL_0783;
+					}
+					goto IL_078D;
+				}
 			}
-			switch (num28)
+			else if (num27 != 3711470516U)
 			{
-			default:
-				goto IL_07B3;
-			case 1:
-				prefab2.connections = (int)Game.Instance.electricalConduitSystem.GetConnections(num27, true);
-				break;
-			case 2:
-				prefab2.connections = (int)Game.Instance.gasConduitSystem.GetConnections(num27, true);
-				break;
-			case 3:
-				prefab2.connections = (int)Game.Instance.liquidConduitSystem.GetConnections(num27, true);
-				break;
-			case 4:
-				prefab2.connections = (int)Game.Instance.logicCircuitSystem.GetConnections(num27, true);
-				break;
+				if (num27 != 3716494409U)
+				{
+					goto IL_0783;
+				}
+				if (!(id == "HighWattageWire"))
+				{
+					goto IL_0783;
+				}
+				goto IL_078D;
 			}
-			IL_0838:
+			else
+			{
+				if (!(id == "InsulatedLiquidConduit"))
+				{
+					goto IL_0783;
+				}
+				goto IL_07C3;
+			}
+			IL_07F7:
 			l++;
 			continue;
-			IL_07B3:
+			IL_0783:
 			prefab2.connections = 0;
-			goto IL_0838;
+			goto IL_07F7;
+			IL_078D:
+			prefab2.connections = (int)Game.Instance.electricalConduitSystem.GetConnections(num26, true);
+			goto IL_07F7;
+			IL_07C3:
+			prefab2.connections = (int)Game.Instance.liquidConduitSystem.GetConnections(num26, true);
+			goto IL_07F7;
 		}
 		for (int m = 0; m < Components.Pickupables.Count; m++)
 		{
@@ -367,66 +415,62 @@ public class DebugBaseTemplateButton : KScreen
 				Pickupable pickupable = Components.Pickupables[m];
 				if (!hashSet.Contains(pickupable.gameObject))
 				{
-					int num29 = Grid.PosToCell(pickupable);
-					if (this.SaveAllPickups || this.SelectedCells.Contains(num29))
+					int num28 = Grid.PosToCell(pickupable);
+					if ((this.SaveAllPickups || this.SelectedCells.Contains(num28)) && !Components.Pickupables[m].gameObject.GetComponent<MinionBrain>())
 					{
-						if (!Components.Pickupables[m].gameObject.GetComponent<MinionBrain>())
+						int num29;
+						int num30;
+						Grid.CellToXY(num28, out num29, out num30);
+						num29 -= num6;
+						num30 -= num7;
+						SimHashes simHashes3 = SimHashes.Void;
+						float num31 = 280f;
+						float num32 = 1f;
+						string text4 = null;
+						int num33 = 0;
+						float num34 = 0f;
+						global::Rottable.Instance smi2 = pickupable.gameObject.GetSMI<global::Rottable.Instance>();
+						if (smi2 != null)
 						{
-							int num30;
-							int num31;
-							Grid.CellToXY(num29, out num30, out num31);
-							num30 -= num7;
-							num31 -= num8;
-							SimHashes simHashes3 = SimHashes.Void;
-							float num32 = 280f;
-							float num33 = 1f;
-							string text4 = null;
-							int num34 = 0;
-							float num35 = 0f;
-							global::Rottable.Instance smi2 = pickupable.gameObject.GetSMI<global::Rottable.Instance>();
-							if (smi2 != null)
-							{
-								num35 = smi2.RotValue;
-							}
-							PrimaryElement component9 = pickupable.gameObject.GetComponent<PrimaryElement>();
-							if (component9 != null)
-							{
-								simHashes3 = component9.ElementID;
-								num33 = component9.Units;
-								num32 = component9.Temperature;
-								text4 = ((component9.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component9.DiseaseIdx].Id);
-								num34 = component9.DiseaseCount;
-							}
-							ElementChunk component10 = pickupable.gameObject.GetComponent<ElementChunk>();
-							if (component10 != null)
-							{
-								Prefab prefab3 = new Prefab(pickupable.PrefabID().Name, Prefab.Type.Ore, num30, num31, simHashes3, num32, num33, text4, num34, Orientation.Neutral, null, null, 0);
-								list4.Add(prefab3);
-							}
-							else
-							{
-								list3.Add(new Prefab(pickupable.PrefabID().Name, Prefab.Type.Pickupable, num30, num31, simHashes3, num32, num33, text4, num34, Orientation.Neutral, null, null, 0)
-								{
-									rottable = new global::TemplateClasses.Rottable(),
-									rottable = 
-									{
-										rotAmount = num35
-									}
-								});
-							}
-							hashSet.Add(pickupable.gameObject);
+							num34 = smi2.RotValue;
 						}
+						PrimaryElement component8 = pickupable.gameObject.GetComponent<PrimaryElement>();
+						if (component8 != null)
+						{
+							simHashes3 = component8.ElementID;
+							num32 = component8.Units;
+							num31 = component8.Temperature;
+							text4 = ((component8.DiseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)component8.DiseaseIdx].Id : null);
+							num33 = component8.DiseaseCount;
+						}
+						if (pickupable.gameObject.GetComponent<ElementChunk>() != null)
+						{
+							Prefab prefab3 = new Prefab(pickupable.PrefabID().Name, Prefab.Type.Ore, num29, num30, simHashes3, num31, num32, text4, num33, Orientation.Neutral, null, null, 0);
+							list4.Add(prefab3);
+						}
+						else
+						{
+							list3.Add(new Prefab(pickupable.PrefabID().Name, Prefab.Type.Pickupable, num29, num30, simHashes3, num31, num32, text4, num33, Orientation.Neutral, null, null, 0)
+							{
+								rottable = new global::TemplateClasses.Rottable(),
+								rottable = 
+								{
+									rotAmount = num34
+								}
+							});
+						}
+						hashSet.Add(pickupable.gameObject);
 					}
 				}
 			}
 		}
-		this.GetEntities<Crop>(Components.Crops.Items, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Health>(Components.Health.Items, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Harvestable>(Components.Harvestables.Items, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Edible>(Components.Edibles.Items, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Geyser>(num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<OccupyArea>(num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<FogOfWarMask>(num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Crop>(Components.Crops.Items, num6, num7, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Health>(Components.Health.Items, num6, num7, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Harvestable>(Components.Harvestables.Items, num6, num7, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Edible>(Components.Edibles.Items, num6, num7, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Geyser>(num6, num7, ref list4, ref list5, ref hashSet);
+		this.GetEntities<OccupyArea>(num6, num7, ref list4, ref list5, ref hashSet);
+		this.GetEntities<FogOfWarMask>(num6, num7, ref list4, ref list5, ref hashSet);
 		TemplateContainer templateContainer = new TemplateContainer();
 		templateContainer.Init(list, list2, list3, list4, list5);
 		return templateContainer;
@@ -435,83 +479,57 @@ public class DebugBaseTemplateButton : KScreen
 	private void GetEntities<T>(int rootX, int rootY, ref List<Prefab> _primaryElementOres, ref List<Prefab> _otherEntities, ref HashSet<GameObject> _excludeEntities)
 	{
 		object[] array = global::UnityEngine.Object.FindObjectsOfType(typeof(T));
-		this.GetEntities<object>(array, rootX, rootY, ref _primaryElementOres, ref _otherEntities, ref _excludeEntities);
+		object[] array2 = array;
+		this.GetEntities<object>(array2, rootX, rootY, ref _primaryElementOres, ref _otherEntities, ref _excludeEntities);
 	}
 
 	private void GetEntities<T>(IEnumerable<T> component_collection, int rootX, int rootY, ref List<Prefab> _primaryElementOres, ref List<Prefab> _otherEntities, ref HashSet<GameObject> _excludeEntities)
 	{
 		foreach (T t in component_collection)
 		{
-			if (!_excludeEntities.Contains((t as KMonoBehaviour).gameObject))
+			if (!_excludeEntities.Contains((t as KMonoBehaviour).gameObject) && (t as KMonoBehaviour).gameObject.activeSelf)
 			{
-				if ((t as KMonoBehaviour).gameObject.activeSelf)
+				int num = Grid.PosToCell(t as KMonoBehaviour);
+				if (this.SelectedCells.Contains(num) && !(t as KMonoBehaviour).gameObject.GetComponent<MinionBrain>())
 				{
-					int num = Grid.PosToCell(t as KMonoBehaviour);
-					if (this.SelectedCells.Contains(num))
+					int num2;
+					int num3;
+					Grid.CellToXY(num, out num2, out num3);
+					num2 -= rootX;
+					num3 -= rootY;
+					SimHashes simHashes = SimHashes.Void;
+					float num4 = 280f;
+					float num5 = 1f;
+					string text = null;
+					int num6 = 0;
+					PrimaryElement component = (t as KMonoBehaviour).gameObject.GetComponent<PrimaryElement>();
+					if (component != null)
 					{
-						if (!(t as KMonoBehaviour).gameObject.GetComponent<MinionBrain>())
+						simHashes = component.ElementID;
+						num5 = component.Units;
+						num4 = component.Temperature;
+						text = ((component.DiseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)component.DiseaseIdx].Id : null);
+						num6 = component.DiseaseCount;
+					}
+					List<Prefab.template_amount_value> list = new List<Prefab.template_amount_value>();
+					if ((t as KMonoBehaviour).gameObject.GetAmounts() != null)
+					{
+						foreach (AmountInstance amountInstance in (t as KMonoBehaviour).gameObject.GetAmounts())
 						{
-							int num2;
-							int num3;
-							Grid.CellToXY(num, out num2, out num3);
-							num2 -= rootX;
-							num3 -= rootY;
-							SimHashes simHashes = SimHashes.Void;
-							float num4 = 280f;
-							float num5 = 1f;
-							string text = null;
-							int num6 = 0;
-							PrimaryElement component = (t as KMonoBehaviour).gameObject.GetComponent<PrimaryElement>();
-							if (component != null)
-							{
-								simHashes = component.ElementID;
-								num5 = component.Units;
-								num4 = component.Temperature;
-								text = ((component.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component.DiseaseIdx].Id);
-								num6 = component.DiseaseCount;
-							}
-							List<Prefab.template_amount_value> list = new List<Prefab.template_amount_value>();
-							if ((t as KMonoBehaviour).gameObject.GetAmounts() != null)
-							{
-								foreach (AmountInstance amountInstance in (t as KMonoBehaviour).gameObject.GetAmounts())
-								{
-									list.Add(new Prefab.template_amount_value(amountInstance.amount.Id, amountInstance.value));
-								}
-							}
-							ElementChunk component2 = (t as KMonoBehaviour).gameObject.GetComponent<ElementChunk>();
-							if (component2 != null)
-							{
-								string text2 = (t as KMonoBehaviour).PrefabID().Name;
-								Prefab.Type type = Prefab.Type.Ore;
-								int num7 = num2;
-								int num8 = num3;
-								SimHashes simHashes2 = simHashes;
-								float num9 = num4;
-								float num10 = num5;
-								string text3 = text;
-								int num11 = num6;
-								Prefab.template_amount_value[] array = list.ToArray();
-								Prefab prefab = new Prefab(text2, type, num7, num8, simHashes2, num9, num10, text3, num11, Orientation.Neutral, array, null, 0);
-								_primaryElementOres.Add(prefab);
-								_excludeEntities.Add((t as KMonoBehaviour).gameObject);
-							}
-							else
-							{
-								string text3 = (t as KMonoBehaviour).PrefabID().Name;
-								Prefab.Type type = Prefab.Type.Other;
-								int num11 = num2;
-								int num8 = num3;
-								SimHashes simHashes2 = simHashes;
-								float num10 = num4;
-								float num9 = num5;
-								string text2 = text;
-								int num7 = num6;
-								Prefab.template_amount_value[] array = list.ToArray();
-								Prefab prefab = new Prefab(text3, type, num11, num8, simHashes2, num10, num9, text2, num7, Orientation.Neutral, array, null, 0);
-								_otherEntities.Add(prefab);
-								_excludeEntities.Add((t as KMonoBehaviour).gameObject);
-							}
+							list.Add(new Prefab.template_amount_value(amountInstance.amount.Id, amountInstance.value));
 						}
+					}
+					if ((t as KMonoBehaviour).gameObject.GetComponent<ElementChunk>() != null)
+					{
+						Prefab prefab = new Prefab((t as KMonoBehaviour).PrefabID().Name, Prefab.Type.Ore, num2, num3, simHashes, num4, num5, text, num6, Orientation.Neutral, list.ToArray(), null, 0);
+						_primaryElementOres.Add(prefab);
+						_excludeEntities.Add((t as KMonoBehaviour).gameObject);
+					}
+					else
+					{
+						Prefab prefab = new Prefab((t as KMonoBehaviour).PrefabID().Name, Prefab.Type.Other, num2, num3, simHashes, num4, num5, text, num6, Orientation.Neutral, list.ToArray(), null, 0);
+						_otherEntities.Add(prefab);
+						_excludeEntities.Add((t as KMonoBehaviour).gameObject);
 					}
 				}
 			}
@@ -527,7 +545,7 @@ public class DebugBaseTemplateButton : KScreen
 			return;
 		}
 		this.SaveName = this.nameField.text;
-		if (this.SaveName == null || this.SaveName == string.Empty)
+		if (this.SaveName == null || this.SaveName == "")
 		{
 			global::Debug.LogWarning("Invalid save name. Please enter a name in the input field.");
 			return;

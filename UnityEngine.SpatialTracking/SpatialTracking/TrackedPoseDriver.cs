@@ -63,18 +63,18 @@ namespace UnityEngine.SpatialTracking
 			}
 		}
 
-		private bool TryGetPoseData(TrackedPoseDriver.DeviceType device, TrackedPoseDriver.TrackedPose poseSource, out Pose resultPose)
+		private PoseDataFlags GetPoseData(TrackedPoseDriver.DeviceType device, TrackedPoseDriver.TrackedPose poseSource, out Pose resultPose)
 		{
-			bool flag;
+			PoseDataFlags poseDataFlags;
 			if (this.m_PoseProviderComponent != null)
 			{
-				flag = this.m_PoseProviderComponent.TryGetPoseFromProvider(out resultPose);
+				poseDataFlags = ((!this.m_PoseProviderComponent.TryGetPoseFromProvider(out resultPose)) ? PoseDataFlags.NoData : (PoseDataFlags.Position | PoseDataFlags.Rotation));
 			}
 			else
 			{
-				flag = PoseDataSource.TryGetDataFromSource(poseSource, out resultPose);
+				poseDataFlags = PoseDataSource.GetDataFromSource(poseSource, out resultPose);
 			}
-			return flag;
+			return poseDataFlags;
 		}
 
 		public TrackedPoseDriver.TrackingType trackingType
@@ -133,7 +133,7 @@ namespace UnityEngine.SpatialTracking
 
 		private void ResetToCachedLocalPosition()
 		{
-			this.SetLocalTransform(this.m_OriginPose.position, this.m_OriginPose.rotation);
+			this.SetLocalTransform(this.m_OriginPose.position, this.m_OriginPose.rotation, PoseDataFlags.Position | PoseDataFlags.Rotation);
 		}
 
 		protected virtual void Awake()
@@ -187,13 +187,13 @@ namespace UnityEngine.SpatialTracking
 			}
 		}
 
-		protected virtual void SetLocalTransform(Vector3 newPosition, Quaternion newRotation)
+		protected virtual void SetLocalTransform(Vector3 newPosition, Quaternion newRotation, PoseDataFlags poseFlags)
 		{
-			if (this.m_TrackingType == TrackedPoseDriver.TrackingType.RotationAndPosition || this.m_TrackingType == TrackedPoseDriver.TrackingType.RotationOnly)
+			if ((this.m_TrackingType == TrackedPoseDriver.TrackingType.RotationAndPosition || this.m_TrackingType == TrackedPoseDriver.TrackingType.RotationOnly) && (poseFlags & PoseDataFlags.Rotation) > PoseDataFlags.NoData)
 			{
 				base.transform.localRotation = newRotation;
 			}
-			if (this.m_TrackingType == TrackedPoseDriver.TrackingType.RotationAndPosition || this.m_TrackingType == TrackedPoseDriver.TrackingType.PositionOnly)
+			if ((this.m_TrackingType == TrackedPoseDriver.TrackingType.RotationAndPosition || this.m_TrackingType == TrackedPoseDriver.TrackingType.PositionOnly) && (poseFlags & PoseDataFlags.Position) > PoseDataFlags.NoData)
 			{
 				base.transform.localPosition = newPosition;
 			}
@@ -225,10 +225,11 @@ namespace UnityEngine.SpatialTracking
 			{
 				Pose pose = default(Pose);
 				pose = Pose.identity;
-				if (this.TryGetPoseData(this.m_Device, this.m_PoseSource, out pose))
+				PoseDataFlags poseData = this.GetPoseData(this.m_Device, this.m_PoseSource, out pose);
+				if (poseData != PoseDataFlags.NoData)
 				{
 					Pose pose2 = this.TransformPoseByOriginIfNeeded(pose);
-					this.SetLocalTransform(pose2.position, pose2.rotation);
+					this.SetLocalTransform(pose2.position, pose2.rotation, poseData);
 				}
 			}
 		}
@@ -269,9 +270,9 @@ namespace UnityEngine.SpatialTracking
 			LeftPose,
 			RightPose,
 			ColorCamera,
-			DepthCamera,
-			FisheyeCamera,
-			Device,
+			DepthCameraDeprecated,
+			FisheyeCameraDeprecated,
+			DeviceDeprecated,
 			RemotePose
 		}
 

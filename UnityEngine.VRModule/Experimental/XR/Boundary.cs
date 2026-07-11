@@ -19,13 +19,13 @@ namespace UnityEngine.Experimental.XR
 			return Boundary.TryGetDimensionsInternal(out dimensionsOut, boundaryType);
 		}
 
-		[NativeName("TryGetBoundaryDimensions")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("TryGetBoundaryDimensions")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool TryGetDimensionsInternal(out Vector3 dimensionsOut, Boundary.Type boundaryType);
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("BoundaryVisible")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool visible
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -34,8 +34,8 @@ namespace UnityEngine.Experimental.XR
 			set;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("BoundaryConfigured")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool configured
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

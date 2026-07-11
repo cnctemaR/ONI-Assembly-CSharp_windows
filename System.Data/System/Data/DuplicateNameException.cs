@@ -6,20 +6,28 @@ namespace System.Data
 	[Serializable]
 	public class DuplicateNameException : DataException
 	{
-		public DuplicateNameException()
+		protected DuplicateNameException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
+			throw new PlatformNotSupportedException();
 		}
 
-		protected DuplicateNameException(SerializationInfo info, StreamingContext context)
+		public DuplicateNameException()
+			: base("Duplicate name not allowed.")
 		{
+			base.HResult = -2146232030;
 		}
 
 		public DuplicateNameException(string s)
+			: base(s)
 		{
+			base.HResult = -2146232030;
 		}
 
 		public DuplicateNameException(string message, Exception innerException)
+			: base(message, innerException)
 		{
+			base.HResult = -2146232030;
 		}
 	}
 }

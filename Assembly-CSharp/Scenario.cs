@@ -40,8 +40,7 @@ public class Scenario : KMonoBehaviour
 		{
 			for (int j = 0; j < height; j++)
 			{
-				int num = Grid.OffsetCell(this.RootCell, x + i, y + j);
-				SimMessages.ReplaceElement(num, SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 200f, -1f, byte.MaxValue, 0, -1);
+				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + i, y + j), SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 200f, -1f, byte.MaxValue, 0, -1);
 				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y + j), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + width, y + j), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 			}
@@ -581,8 +580,7 @@ public class Scenario : KMonoBehaviour
 	{
 		this.RunAfterNextUpdate(delegate
 		{
-			int num = Grid.OffsetCell(this.RootCell, x, y);
-			Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Ore);
+			Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(this.RootCell, x, y), Grid.SceneLayer.Ore);
 			vector.x += global::UnityEngine.Random.Range(-0.1f, 0.1f);
 			ElementLoader.FindElementByHash(element).substance.SpawnResource(vector, 4000f, 293f, byte.MaxValue, 0, false, false, false);
 		});
@@ -604,8 +602,7 @@ public class Scenario : KMonoBehaviour
 	public static GameObject SpawnPrefab(int RootCell, int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore)
 	{
 		int num = Grid.OffsetCell(RootCell, x, y);
-		Tag tag = TagManager.Create(name);
-		GameObject prefab = Assets.GetPrefab(tag);
+		GameObject prefab = Assets.GetPrefab(TagManager.Create(name));
 		if (prefab == null)
 		{
 			return null;
@@ -620,19 +617,17 @@ public class Scenario : KMonoBehaviour
 		Vector3 vector = Grid.CellToPosCCC(this.RootCell, Grid.SceneLayer.Background);
 		CameraController.Instance.SnapTo(vector);
 		this.Clear();
-		Scenario.RowLayout rowLayout = new Scenario.RowLayout(0, 0);
-		Scenario.Builder builder = rowLayout.NextRow();
+		Scenario.Builder builder = new Scenario.RowLayout(0, 0).NextRow();
 		HashSet<Element> elements = new HashSet<Element>();
 		int bot = builder.Bot;
-		List<Element> list = (from element in ElementLoader.elements
+		foreach (Element element5 in (from element in ElementLoader.elements
 			where element.IsSolid
 			orderby element.highTempTransitionTarget
-			select element).ToList<Element>();
-		foreach (Element element7 in list)
+			select element).ToList<Element>())
 		{
-			if (element7.IsSolid)
+			if (element5.IsSolid)
 			{
-				Element element2 = element7;
+				Element element2 = element5;
 				int left = builder.Left;
 				bool hasTransitionUp;
 				do
@@ -652,38 +647,34 @@ public class Scenario : KMonoBehaviour
 				builder = new Scenario.Builder(left + 3, bot, SimHashes.Copper);
 			}
 		}
-		List<Element> list2 = (from element in ElementLoader.elements
+		foreach (Element element3 in (from element in ElementLoader.elements
 			where element.IsLiquid && !elements.Contains(element)
 			orderby element.highTempTransitionTarget
-			select element).ToList<Element>();
-		foreach (Element element3 in list2)
+			select element).ToList<Element>())
 		{
-			Element element4 = element3;
 			int left2 = builder.Left;
 			bool hasTransitionUp2;
 			do
 			{
-				elements.Add(element4);
+				elements.Add(element3);
 				builder.Hole(2, 3);
-				builder.Fill(2, 2, element4.id);
+				builder.Fill(2, 2, element3.id);
 				builder.FinalizeRoom(SimHashes.Vacuum, SimHashes.Unobtanium);
 				builder = new Scenario.Builder(left2, builder.Bot + 4, SimHashes.Copper);
-				hasTransitionUp2 = element4.HasTransitionUp;
+				hasTransitionUp2 = element3.HasTransitionUp;
 				if (hasTransitionUp2)
 				{
-					element4 = element4.highTempTransition;
+					element3 = element3.highTempTransition;
 				}
 			}
 			while (hasTransitionUp2);
 			builder = new Scenario.Builder(left2 + 3, bot, SimHashes.Copper);
 		}
-		List<Element> list3 = ElementLoader.elements.Where<Element>((Element element) => element.state == Element.State.Gas && !elements.Contains(element)).ToList<Element>();
-		foreach (Element element5 in list3)
+		foreach (Element element4 in ElementLoader.elements.Where<Element>((Element element) => element.state == Element.State.Gas && !elements.Contains(element)).ToList<Element>())
 		{
-			Element element6 = element5;
 			int left3 = builder.Left;
 			builder.Hole(2, 3);
-			builder.Fill(2, 2, element6.id);
+			builder.Fill(2, 2, element4.id);
 			builder.FinalizeRoom(SimHashes.Vacuum, SimHashes.Unobtanium);
 			builder = new Scenario.Builder(left3, builder.Bot + 4, SimHashes.Copper);
 			builder = new Scenario.Builder(left3 + 3, bot, SimHashes.Copper);
@@ -709,18 +700,17 @@ public class Scenario : KMonoBehaviour
 				SimMessages.ReplaceElement(Grid.XYToCell(j, i), SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 100f, -1f, byte.MaxValue, 0, -1);
 			}
 		}
-		Scenario.RowLayout rowLayout = new Scenario.RowLayout(0, 0);
-		Scenario.Builder builder = rowLayout.NextRow();
+		Scenario.Builder builder = new Scenario.RowLayout(0, 0).NextRow();
 		for (int k = 0; k < 16; k++)
 		{
 			builder.Jump(0, 0);
-			builder.Fill(1, 1, ((k & 1) == 0) ? SimHashes.Diamond : SimHashes.Copper);
+			builder.Fill(1, 1, ((k & 1) != 0) ? SimHashes.Copper : SimHashes.Diamond);
 			builder.Jump(1, 0);
-			builder.Fill(1, 1, ((k & 2) == 0) ? SimHashes.Diamond : SimHashes.Copper);
+			builder.Fill(1, 1, ((k & 2) != 0) ? SimHashes.Copper : SimHashes.Diamond);
 			builder.Jump(-1, 1);
-			builder.Fill(1, 1, ((k & 4) == 0) ? SimHashes.Diamond : SimHashes.Copper);
+			builder.Fill(1, 1, ((k & 4) != 0) ? SimHashes.Copper : SimHashes.Diamond);
 			builder.Jump(1, 0);
-			builder.Fill(1, 1, ((k & 8) == 0) ? SimHashes.Diamond : SimHashes.Copper);
+			builder.Fill(1, 1, ((k & 8) != 0) ? SimHashes.Copper : SimHashes.Diamond);
 			builder.Jump(2, -1);
 		}
 	}
@@ -742,7 +732,7 @@ public class Scenario : KMonoBehaviour
 		{
 			for (int j = 0; j < num; j++)
 			{
-				SimHashes simHashes = ((i != 0) ? SimHashes.Oxygen : SimHashes.Unobtanium);
+				SimHashes simHashes = ((i == 0) ? SimHashes.Unobtanium : SimHashes.Oxygen);
 				SimMessages.ReplaceElement(Grid.XYToCell(j, i), simHashes, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 			}
 		}

@@ -133,11 +133,9 @@ public class FuelTank : Storage, IUserControlledCapacity
 		if (rocketEngine != null)
 		{
 			base.AddLiquid(ElementLoader.GetElementID(rocketEngine.fuelTag), this.targetFillMass - base.MassStored(), ElementLoader.GetElement(rocketEngine.fuelTag).defaultValues.temperature, 0, 0, false, true);
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("Fuel tank couldn't find rocket engine");
-		}
+		global::Debug.LogWarning("Fuel tank couldn't find rocket engine");
 	}
 
 	private void OnReturn(object data)
@@ -151,8 +149,7 @@ public class FuelTank : Storage, IUserControlledCapacity
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		FuelTank component = gameObject.GetComponent<FuelTank>();
+		FuelTank component = ((GameObject)data).GetComponent<FuelTank>();
 		if (component != null)
 		{
 			this.UserMaxCapacity = component.UserMaxCapacity;

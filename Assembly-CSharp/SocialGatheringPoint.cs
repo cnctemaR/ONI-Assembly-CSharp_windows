@@ -11,10 +11,8 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 		this.workables = new SocialGatheringPointWorkable[this.choreOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
-			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
-			GameObject gameObject = ChoreHelpers.CreateLocator("SocialGatheringPointWorkable", vector);
-			SocialGatheringPointWorkable socialGatheringPointWorkable = gameObject.AddOrGet<SocialGatheringPointWorkable>();
+			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]), Grid.SceneLayer.Move);
+			SocialGatheringPointWorkable socialGatheringPointWorkable = ChoreHelpers.CreateLocator("SocialGatheringPointWorkable", vector).AddOrGet<SocialGatheringPointWorkable>();
 			socialGatheringPointWorkable.basePriority = this.basePriority;
 			socialGatheringPointWorkable.specificEffect = this.socialEffect;
 			socialGatheringPointWorkable.OnWorkableEventCB = new Action<Workable.WorkableEvent>(this.OnWorkableEvent);
@@ -52,12 +50,16 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 	{
 		Workable workable = this.workables[i];
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
-		Workable workable2 = workable;
+		IStateMachineTarget stateMachineTarget = workable;
+		ChoreProvider choreProvider = null;
+		bool flag = true;
+		Action<Chore> action = null;
+		Action<Chore> action2 = null;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<SocialGatheringPointWorkable>(relax, workable2, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, false);
-		chore.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
-		return chore;
+		WorkChore<SocialGatheringPointWorkable> workChore = new WorkChore<SocialGatheringPointWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, false);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
+		return workChore;
 	}
 
 	private void OnSocialChoreEnd(Chore chore)
@@ -75,6 +77,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 			if (this.OnSocializeBeginCB != null)
 			{
 				this.OnSocializeBeginCB();
+				return;
 			}
 		}
 		else if (workable_event == Workable.WorkableEvent.WorkStopped && this.OnSocializeEndCB != null)

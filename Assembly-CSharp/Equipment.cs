@@ -10,8 +10,7 @@ public class Equipment : Assignables
 
 	private GameObject GetTargetGameObject()
 	{
-		IAssignableIdentity assignableIdentity = base.GetAssignableIdentity();
-		MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)assignableIdentity;
+		MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)base.GetAssignableIdentity();
 		if (minionAssignablesProxy)
 		{
 			return minionAssignablesProxy.GetTargetGameObject();
@@ -102,8 +101,7 @@ public class Equipment : Assignables
 
 	public void Unequip(Equippable equippable)
 	{
-		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
-		slot.Unassign(true);
+		base.GetSlot(equippable.slot).Unassign(true);
 		equippable.Trigger(-170173755, this);
 		GameObject targetGameObject = this.GetTargetGameObject();
 		if (!targetGameObject)
@@ -129,7 +127,10 @@ public class Equipment : Assignables
 			if (!equippable.def.IsBody)
 			{
 				SnapOn component2 = targetGameObject.GetComponent<SnapOn>();
-				component2.DetachSnapOnByName(equippable.def.SnapOn);
+				if (equippable.def.SnapOn != null)
+				{
+					component2.DetachSnapOnByName(equippable.def.SnapOn);
+				}
 				if (equippable.def.SnapOn1 != null)
 				{
 					component2.DetachSnapOnByName(equippable.def.SnapOn1);
@@ -160,7 +161,7 @@ public class Equipment : Assignables
 				Equipment instance = this;
 				this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 1f, delegate(object obj)
 				{
-					GameObject gameObject = ((!(instance != null)) ? null : instance.GetTargetGameObject());
+					GameObject gameObject = ((instance != null) ? instance.GetTargetGameObject() : null);
 					if (gameObject)
 					{
 						CreatureSimTemperatureTransfer component5 = gameObject.GetComponent<CreatureSimTemperatureTransfer>();

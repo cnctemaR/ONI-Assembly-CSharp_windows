@@ -7,21 +7,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.XR
 {
-	/// <summary>
-	///   <para>Provides access to depth data of the physical environment, such as a point cloud.</para>
-	/// </summary>
-	[NativeHeader("Modules/XR/XRPrefix.h")]
+	[NativeHeader("Modules/XR/Subsystems/Depth/XRDepthSubsystem.h")]
 	[UsedByNativeCode]
 	[NativeConditional("ENABLE_XR")]
-	[NativeHeader("Modules/XR/Subsystems/Depth/XRDepthSubsystem.h")]
-	public class XRDepthSubsystem : Subsystem<XRDepthSubsystemDescriptor>
+	[NativeHeader("Modules/XR/XRPrefix.h")]
+	public class XRDepthSubsystem : IntegratedSubsystem<XRDepthSubsystemDescriptor>
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<PointCloudUpdatedEventArgs> PointCloudUpdated;
 
-		/// <summary>
-		///   <para>The frame during which the point cloud was last updated.</para>
-		/// </summary>
 		public extern int LastUpdatedFrame
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

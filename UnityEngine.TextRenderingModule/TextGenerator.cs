@@ -7,27 +7,16 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Class that can be used to generate text for rendering.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[NativeHeader("Modules/TextRendering/TextGenerator.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TextGenerator : IDisposable
 	{
-		/// <summary>
-		///   <para>Create a TextGenerator.</para>
-		/// </summary>
-		/// <param name="initialCapacity"></param>
 		public TextGenerator()
 			: this(50)
 		{
 		}
 
-		/// <summary>
-		///   <para>Create a TextGenerator.</para>
-		/// </summary>
-		/// <param name="initialCapacity"></param>
 		public TextGenerator(int initialCapacity)
 		{
 			this.m_Ptr = TextGenerator.Internal_Create();
@@ -50,9 +39,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The number of characters that have been generated and are included in the visible lines.</para>
-		/// </summary>
 		public int characterCountVisible
 		{
 			[CompilerGenerated]
@@ -93,9 +79,6 @@ namespace UnityEngine
 			return textGenerationSettings;
 		}
 
-		/// <summary>
-		///   <para>Mark the text generator as invalid. This will force a full text generation the next time Populate is called.</para>
-		/// </summary>
 		public void Invalidate()
 		{
 			this.m_HasGenerated = false;
@@ -116,14 +99,6 @@ namespace UnityEngine
 			this.GetVerticesInternal(vertices);
 		}
 
-		/// <summary>
-		///   <para>Given a string and settings, returns the preferred width for a container that would hold this text.</para>
-		/// </summary>
-		/// <param name="str">Generation text.</param>
-		/// <param name="settings">Settings for generation.</param>
-		/// <returns>
-		///   <para>Preferred width.</para>
-		/// </returns>
 		public float GetPreferredWidth(string str, TextGenerationSettings settings)
 		{
 			settings.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -133,14 +108,6 @@ namespace UnityEngine
 			return this.rectExtents.width;
 		}
 
-		/// <summary>
-		///   <para>Given a string and settings, returns the preferred height for a container that would hold this text.</para>
-		/// </summary>
-		/// <param name="str">Generation text.</param>
-		/// <param name="settings">Settings for generation.</param>
-		/// <returns>
-		///   <para>Preferred height.</para>
-		/// </returns>
 		public float GetPreferredHeight(string str, TextGenerationSettings settings)
 		{
 			settings.verticalOverflow = VerticalWrapMode.Overflow;
@@ -149,15 +116,6 @@ namespace UnityEngine
 			return this.rectExtents.height;
 		}
 
-		/// <summary>
-		///   <para>Will generate the vertices and other data for the given string with the given settings.</para>
-		/// </summary>
-		/// <param name="str">String to generate.</param>
-		/// <param name="settings">Generation settings.</param>
-		/// <param name="context">The object used as context of the error log message, if necessary.</param>
-		/// <returns>
-		///   <para>True if the generation is a success, false otherwise.</para>
-		/// </returns>
 		public bool PopulateWithErrors(string str, TextGenerationSettings settings, GameObject context)
 		{
 			TextGenerationError textGenerationError = this.PopulateWithError(str, settings);
@@ -181,11 +139,6 @@ namespace UnityEngine
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Will generate the vertices and other data for the given string with the given settings.</para>
-		/// </summary>
-		/// <param name="str">String to generate.</param>
-		/// <param name="settings">Settings.</param>
 		public bool Populate(string str, TextGenerationSettings settings)
 		{
 			TextGenerationError textGenerationError = this.PopulateWithError(str, settings);
@@ -222,9 +175,6 @@ namespace UnityEngine
 			return textGenerationError;
 		}
 
-		/// <summary>
-		///   <para>Array of generated vertices.</para>
-		/// </summary>
 		public IList<UIVertex> verts
 		{
 			get
@@ -238,9 +188,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Array of generated characters.</para>
-		/// </summary>
 		public IList<UICharInfo> characters
 		{
 			get
@@ -254,9 +201,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Information about each generated text line.</para>
-		/// </summary>
 		public IList<UILineInfo> lines
 		{
 			get
@@ -270,9 +214,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Extents of the generated text in rect format.</para>
-		/// </summary>
 		public Rect rectExtents
 		{
 			get
@@ -283,36 +224,24 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Number of vertices generated.</para>
-		/// </summary>
 		public extern int vertexCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The number of characters that have been generated.</para>
-		/// </summary>
 		public extern int characterCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of text lines generated.</para>
-		/// </summary>
 		public extern int lineCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The size of the font that was found if using best fit mode.</para>
-		/// </summary>
 		[NativeProperty("FontSizeFoundForBestFit", false, TargetType.Function)]
 		public extern int fontSizeUsedForBestFit
 		{
@@ -351,30 +280,12 @@ namespace UnityEngine
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Returns the current UIVertex array.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Vertices.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern UIVertex[] GetVerticesArray();
 
-		/// <summary>
-		///   <para>Returns the current UICharInfo.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Character information.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern UICharInfo[] GetCharactersArray();
 
-		/// <summary>
-		///   <para>Returns the current UILineInfo.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Line information.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern UILineInfo[] GetLinesArray();
 

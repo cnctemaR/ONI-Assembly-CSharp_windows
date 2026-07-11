@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace System.Net.Configuration
 {
-	internal class NetConfigurationHandler : global::System.Configuration.IConfigurationSectionHandler
+	internal class NetConfigurationHandler : IConfigurationSectionHandler
 	{
 		public virtual object Create(object parent, object configContext, XmlNode section)
 		{
@@ -13,8 +13,7 @@ namespace System.Net.Configuration
 			{
 				HandlersUtil.ThrowException("Unrecognized attribute", section);
 			}
-			XmlNodeList childNodes = section.ChildNodes;
-			foreach (object obj in childNodes)
+			foreach (object obj in section.ChildNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;
@@ -41,33 +40,35 @@ namespace System.Net.Configuration
 							HandlersUtil.ThrowException("Invalid boolean value", xmlNode);
 						}
 					}
-					else if (name == "httpWebRequest")
-					{
-						string text2 = HandlersUtil.ExtractAttributeValue("maximumResponseHeadersLength", xmlNode, true);
-						HandlersUtil.ExtractAttributeValue("useUnsafeHeaderParsing", xmlNode, true);
-						if (xmlNode.Attributes != null && xmlNode.Attributes.Count != 0)
-						{
-							HandlersUtil.ThrowException("Unrecognized attribute", xmlNode);
-						}
-						try
-						{
-							if (text2 != null)
-							{
-								int num = int.Parse(text2.Trim());
-								if (num < -1)
-								{
-									HandlersUtil.ThrowException("Must be -1 or >= 0", xmlNode);
-								}
-								netConfig.MaxResponseHeadersLength = num;
-							}
-						}
-						catch
-						{
-							HandlersUtil.ThrowException("Invalid int value", xmlNode);
-						}
-					}
 					else
 					{
+						if (name == "httpWebRequest")
+						{
+							string text2 = HandlersUtil.ExtractAttributeValue("maximumResponseHeadersLength", xmlNode, true);
+							HandlersUtil.ExtractAttributeValue("useUnsafeHeaderParsing", xmlNode, true);
+							if (xmlNode.Attributes != null && xmlNode.Attributes.Count != 0)
+							{
+								HandlersUtil.ThrowException("Unrecognized attribute", xmlNode);
+							}
+							try
+							{
+								if (text2 != null)
+								{
+									int num = int.Parse(text2.Trim());
+									if (num < -1)
+									{
+										HandlersUtil.ThrowException("Must be -1 or >= 0", xmlNode);
+									}
+									netConfig.MaxResponseHeadersLength = num;
+								}
+								continue;
+							}
+							catch
+							{
+								HandlersUtil.ThrowException("Invalid int value", xmlNode);
+								continue;
+							}
+						}
 						HandlersUtil.ThrowException("Unexpected element", xmlNode);
 					}
 				}

@@ -4,676 +4,24 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
-using UnityEngine.Internal;
 using UnityEngine.Networking.Types;
-using UnityEngine.Scripting;
 
 namespace UnityEngine.Networking
 {
-	/// <summary>
-	///   <para>Transport Layer API.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Networking/UNETManager.h")]
 	[NativeHeader("Runtime/Networking/UNetTypes.h")]
 	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
 	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
+	[Obsolete("The UNET transport will be removed in the future as soon a replacement is ready.")]
 	public sealed class NetworkTransport
 	{
 		private NetworkTransport()
 		{
 		}
 
-		/// <summary>
-		///   <para>Initializes the NetworkTransport. Should be called before any other operations on the NetworkTransport are done.</para>
-		/// </summary>
-		public static void Init()
-		{
-			NetworkTransport.InitWithNoParameters();
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InitWithNoParameters();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InitWithParameters(GlobalConfigInternal config);
-
-		/// <summary>
-		///   <para>Shut down the NetworkTransport.</para>
-		/// </summary>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Shutdown();
-
-		/// <summary>
-		///   <para>The Unity Multiplayer spawning system uses assetIds to identify what remote objects to spawn. This function allows you to get the assetId for the prefab associated with an object.</para>
-		/// </summary>
-		/// <param name="go">Target GameObject to get assetId for.</param>
-		/// <returns>
-		///   <para>The assetId of the game object's prefab.</para>
-		/// </returns>
-		[Obsolete("This function has been deprecated. Use AssetDatabase utilities instead.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetAssetId(GameObject go);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void AddSceneId(int id);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetNextSceneId();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void ConnectAsNetworkHost(int hostId, string address, int port, NetworkID network, SourceID source, NodeID node, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DisconnectNetworkHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern NetworkEventType ReceiveRelayEventFromHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int ConnectToNetworkPeer(int hostId, string address, int port, int exceptionConnectionId, int relaySlotId, NetworkID network, SourceID source, NodeID node, int bytesPerSec, float bucketSizeFactor, out byte error);
-
-		public static int ConnectToNetworkPeer(int hostId, string address, int port, int exceptionConnectionId, int relaySlotId, NetworkID network, SourceID source, NodeID node, out byte error)
-		{
-			return NetworkTransport.ConnectToNetworkPeer(hostId, address, port, exceptionConnectionId, relaySlotId, network, source, node, 0, 0f, out error);
-		}
-
-		/// <summary>
-		///   <para>Returns the number of unread messages in the read-queue.</para>
-		/// </summary>
-		[GeneratedByOldBindingsGenerator]
-		[Obsolete("GetCurrentIncomingMessageAmount has been deprecated.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetCurrentIncomingMessageAmount();
-
-		/// <summary>
-		///   <para>Returns the total number of messages still in the write-queue.</para>
-		/// </summary>
-		[GeneratedByOldBindingsGenerator]
-		[Obsolete("GetCurrentOutgoingMessageAmount has been deprecated.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetCurrentOutgoingMessageAmount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetIncomingMessageQueueSize(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingMessageQueueSize(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetCurrentRTT(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[Obsolete("GetCurrentRtt() has been deprecated.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetCurrentRtt(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetIncomingPacketLossCount(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[Obsolete("GetNetworkLostPacketNum() has been deprecated.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetNetworkLostPacketNum(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetIncomingPacketCount(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingPacketNetworkLossPercent(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingPacketOverflowLossPercent(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetMaxAllowedBandwidth(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetAckBufferCount(int hostId, int connectionId, out byte error);
-
-		/// <summary>
-		///   <para>How many packets have been dropped due lack space in incoming queue (absolute value, countinf from start).</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Dropping packet count.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetIncomingPacketDropCountForAllHosts();
-
-		/// <summary>
-		///   <para>Returns how many packets have been received from start. (from Networking.NetworkTransport.Init call).</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Packets count received from start for all hosts.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetIncomingPacketCountForAllHosts();
-
-		/// <summary>
-		///   <para>Returns how many packets have been sent from start (from call Networking.NetworkTransport.Init) for all hosts.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Packets count sent from networking library start (from call Networking.NetworkTransport.Init)  for all hosts.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingPacketCount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingPacketCountForHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingPacketCountForConnection(int hostId, int connectionId, out byte error);
-
-		/// <summary>
-		///   <para>Returns how many messages have been sent from start (from Networking.NetworkTransport.Init call).</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Messages count sent from start (from call Networking.NetworkTransport.Init) for all hosts.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingMessageCount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingMessageCountForHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingMessageCountForConnection(int hostId, int connectionId, out byte error);
-
-		/// <summary>
-		///   <para>Returns how much payload (user) bytes have been sent from start (from Networking.NetworkTransport.Init call).</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Total payload (in bytes) sent from start for all hosts.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingUserBytesCount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingUserBytesCountForHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingUserBytesCountForConnection(int hostId, int connectionId, out byte error);
-
-		/// <summary>
-		///   <para>Returns how much user payload and protocol system headers (in bytes)  have been sent from start (from Networking.NetworkTransport.Init call).</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Total payload and protocol system headers (in bytes) sent from start for all hosts.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingSystemBytesCount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingSystemBytesCountForHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingSystemBytesCountForConnection(int hostId, int connectionId, out byte error);
-
-		/// <summary>
-		///   <para>Returns how much raw data (in bytes) have been sent from start for all hosts (from Networking.NetworkTransport.Init call).</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Total data (user payload, protocol specific data, ip and udp headers) (in bytes) sent from start for all hosts.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingFullBytesCount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingFullBytesCountForHost(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetOutgoingFullBytesCountForConnection(int hostId, int connectionId, out byte error);
-
-		[Obsolete("GetPacketSentRate has been deprecated.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetPacketSentRate(int hostId, int connectionId, out byte error);
-
-		[Obsolete("GetPacketReceivedRate has been deprecated.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetPacketReceivedRate(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[Obsolete("GetRemotePacketReceivedRate has been deprecated.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetRemotePacketReceivedRate(int hostId, int connectionId, out byte error);
-
-		/// <summary>
-		///   <para>Function returns time spent on network I/O operations in microseconds.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Time in micro seconds.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[Obsolete("GetNetIOTimeuS has been deprecated.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetNetIOTimeuS();
-
-		public static void GetConnectionInfo(int hostId, int connectionId, out string address, out int port, out NetworkID network, out NodeID dstNode, out byte error)
-		{
-			ulong num;
-			ushort num2;
-			address = NetworkTransport.GetConnectionInfo(hostId, connectionId, out port, out num, out num2, out error);
-			network = (NetworkID)num;
-			dstNode = (NodeID)num2;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetConnectionInfo(int hostId, int connectionId, out int port, out ulong network, out ushort dstNode, out byte error);
-
-		/// <summary>
-		///   <para>Get a network timestamp. Can be used in your messages to investigate network delays together with Networking.GetRemoteDelayTimeMS.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Timestamp.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetNetworkTimestamp();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetRemoteDelayTimeMS(int hostId, int connectionId, int remoteTime, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool StartSendMulticast(int hostId, int channelId, byte[] buffer, int size, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool SendMulticast(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool FinishSendMulticast(int hostId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetMaxPacketSize();
-
-		private static void CheckTopology(HostTopology topology)
-		{
-			int maxPacketSize = NetworkTransport.GetMaxPacketSize();
-			if ((int)topology.DefaultConfig.PacketSize > maxPacketSize)
-			{
-				throw new ArgumentOutOfRangeException("Default config: packet size should be less than packet size defined in global config: " + maxPacketSize.ToString());
-			}
-			for (int i = 0; i < topology.SpecialConnectionConfigs.Count; i++)
-			{
-				if ((int)topology.SpecialConnectionConfigs[i].PacketSize > maxPacketSize)
-				{
-					throw new ArgumentOutOfRangeException("Special config " + i.ToString() + ": packet size should be less than packet size defined in global config: " + maxPacketSize.ToString());
-				}
-			}
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int AddWsHostWrapper(HostTopologyInternal topologyInt, string ip, int port);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int AddWsHostWrapperWithoutIp(HostTopologyInternal topologyInt, int port);
-
-		private static bool IsPortOpen(string ip, int port)
-		{
-			TimeSpan timeSpan = TimeSpan.FromMilliseconds(500.0);
-			string text = ((ip != null) ? ip : "127.0.0.1");
-			try
-			{
-				using (TcpClient tcpClient = new TcpClient())
-				{
-					IAsyncResult asyncResult = tcpClient.BeginConnect(text, port, null, null);
-					if (!asyncResult.AsyncWaitHandle.WaitOne(timeSpan))
-					{
-						return false;
-					}
-					tcpClient.EndConnect(asyncResult);
-				}
-			}
-			catch
-			{
-				return false;
-			}
-			return true;
-		}
-
-		/// <summary>
-		///   <para>Created web socket host.</para>
-		/// </summary>
-		/// <param name="port">Port to bind to.</param>
-		/// <param name="topology">The Networking.HostTopology associated with the host.</param>
-		/// <param name="ip">IP address to bind to.</param>
-		/// <returns>
-		///   <para>Web socket host id.</para>
-		/// </returns>
-		[ExcludeFromDocs]
-		public static int AddWebsocketHost(HostTopology topology, int port)
-		{
-			string text = null;
-			return NetworkTransport.AddWebsocketHost(topology, port, text);
-		}
-
-		/// <summary>
-		///   <para>Created web socket host.</para>
-		/// </summary>
-		/// <param name="port">Port to bind to.</param>
-		/// <param name="topology">The Networking.HostTopology associated with the host.</param>
-		/// <param name="ip">IP address to bind to.</param>
-		/// <returns>
-		///   <para>Web socket host id.</para>
-		/// </returns>
-		public static int AddWebsocketHost(HostTopology topology, int port, [DefaultValue("null")] string ip)
-		{
-			if (port != 0)
-			{
-				if (NetworkTransport.IsPortOpen(ip, port))
-				{
-					throw new InvalidOperationException("Cannot open web socket on port " + port + " It has been already occupied.");
-				}
-			}
-			if (topology == null)
-			{
-				throw new NullReferenceException("topology is not defined");
-			}
-			NetworkTransport.CheckTopology(topology);
-			int num;
-			if (ip == null)
-			{
-				num = NetworkTransport.AddWsHostWrapperWithoutIp(new HostTopologyInternal(topology), port);
-			}
-			else
-			{
-				num = NetworkTransport.AddWsHostWrapper(new HostTopologyInternal(topology), ip, port);
-			}
-			return num;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int AddHostWrapper(HostTopologyInternal topologyInt, string ip, int port, int minTimeout, int maxTimeout);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int AddHostWrapperWithoutIp(HostTopologyInternal topologyInt, int port, int minTimeout, int maxTimeout);
-
-		[ExcludeFromDocs]
-		public static int AddHost(HostTopology topology, int port)
-		{
-			string text = null;
-			return NetworkTransport.AddHost(topology, port, text);
-		}
-
-		[ExcludeFromDocs]
-		public static int AddHost(HostTopology topology)
-		{
-			string text = null;
-			int num = 0;
-			return NetworkTransport.AddHost(topology, num, text);
-		}
-
-		/// <summary>
-		///   <para>Creates a host based on Networking.HostTopology.</para>
-		/// </summary>
-		/// <param name="topology">The Networking.HostTopology associated with the host.</param>
-		/// <param name="port">Port to bind to (when 0 is selected, the OS will choose a port at random).</param>
-		/// <param name="ip">IP address to bind to.</param>
-		/// <returns>
-		///   <para>Returns the ID of the host that was created.</para>
-		/// </returns>
-		public static int AddHost(HostTopology topology, [DefaultValue("0")] int port, [DefaultValue("null")] string ip)
-		{
-			if (topology == null)
-			{
-				throw new NullReferenceException("topology is not defined");
-			}
-			NetworkTransport.CheckTopology(topology);
-			int num;
-			if (ip == null)
-			{
-				num = NetworkTransport.AddHostWrapperWithoutIp(new HostTopologyInternal(topology), port, 0, 0);
-			}
-			else
-			{
-				num = NetworkTransport.AddHostWrapper(new HostTopologyInternal(topology), ip, port, 0, 0);
-			}
-			return num;
-		}
-
-		[ExcludeFromDocs]
-		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout, int port)
-		{
-			string text = null;
-			return NetworkTransport.AddHostWithSimulator(topology, minTimeout, maxTimeout, port, text);
-		}
-
-		[ExcludeFromDocs]
-		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout)
-		{
-			string text = null;
-			int num = 0;
-			return NetworkTransport.AddHostWithSimulator(topology, minTimeout, maxTimeout, num, text);
-		}
-
-		/// <summary>
-		///   <para>Create a host and configure them to simulate Internet latency (works on Editor and development build only).</para>
-		/// </summary>
-		/// <param name="topology">The Networking.HostTopology associated with the host.</param>
-		/// <param name="minTimeout">Minimum simulated delay in milliseconds.</param>
-		/// <param name="maxTimeout">Maximum simulated delay in milliseconds.</param>
-		/// <param name="port">Port to bind to (when 0 is selected, the OS will choose a port at random).</param>
-		/// <param name="ip">IP address to bind to.</param>
-		/// <returns>
-		///   <para>Returns host ID just created.</para>
-		/// </returns>
-		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout, [DefaultValue("0")] int port, [DefaultValue("null")] string ip)
-		{
-			if (topology == null)
-			{
-				throw new NullReferenceException("topology is not defined");
-			}
-			int num;
-			if (ip == null)
-			{
-				num = NetworkTransport.AddHostWrapperWithoutIp(new HostTopologyInternal(topology), port, minTimeout, maxTimeout);
-			}
-			else
-			{
-				num = NetworkTransport.AddHostWrapper(new HostTopologyInternal(topology), ip, port, minTimeout, maxTimeout);
-			}
-			return num;
-		}
-
-		/// <summary>
-		///   <para>Closes the opened socket, and closes all connections belonging to that socket.</para>
-		/// </summary>
-		/// <param name="hostId">Host ID to remove.</param>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool RemoveHost(int hostId);
-
-		/// <summary>
-		///   <para>Deprecated.</para>
-		/// </summary>
-		public static extern bool IsStarted
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int Connect(int hostId, string address, int port, int exeptionConnectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int Internal_ConnectEndPoint(int hostId, IntPtr sockAddrStorage, int sockAddrStorageLen, int exceptionConnectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int ConnectWithSimulator(int hostId, string address, int port, int exeptionConnectionId, out byte error, ConnectionSimulatorConfig conf);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool Disconnect(int hostId, int connectionId, out byte error);
-
-		public static bool Send(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error)
-		{
-			if (buffer == null)
-			{
-				throw new NullReferenceException("send buffer is not initialized");
-			}
-			return NetworkTransport.SendWrapper(hostId, connectionId, channelId, buffer, size, out error);
-		}
-
-		public static bool QueueMessageForSending(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error)
-		{
-			if (buffer == null)
-			{
-				throw new NullReferenceException("send buffer is not initialized");
-			}
-			return NetworkTransport.QueueMessageForSendingWrapper(hostId, connectionId, channelId, buffer, size, out error);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool SendQueuedMessages(int hostId, int connectionId, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SendWrapper(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool QueueMessageForSendingWrapper(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern NetworkEventType Receive(out int hostId, out int connectionId, out int channelId, byte[] buffer, int bufferSize, out int receivedSize, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern NetworkEventType ReceiveFromHost(int hostId, out int connectionId, out int channelId, byte[] buffer, int bufferSize, out int receivedSize, out byte error);
-
-		/// <summary>
-		///   <para>Used to inform the profiler of network packet statistics.</para>
-		/// </summary>
-		/// <param name="packetStatId">The ID of the message being reported.</param>
-		/// <param name="numMsgs">Number of messages being reported.</param>
-		/// <param name="numBytes">Number of bytes used by reported messages.</param>
-		/// <param name="direction">Whether the packet is outgoing (-1) or incoming (0).</param>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetPacketStat(int direction, int packetStatId, int numMsgs, int numBytes);
-
-		public static bool StartBroadcastDiscovery(int hostId, int broadcastPort, int key, int version, int subversion, byte[] buffer, int size, int timeout, out byte error)
-		{
-			if (buffer != null)
-			{
-				if (buffer.Length < size)
-				{
-					throw new ArgumentOutOfRangeException(string.Concat(new object[] { "Size: ", size, " > buffer.Length ", buffer.Length }));
-				}
-				if (size == 0)
-				{
-					throw new ArgumentOutOfRangeException("Size is zero while buffer exists, please pass null and 0 as buffer and size parameters");
-				}
-			}
-			bool flag;
-			if (buffer == null)
-			{
-				flag = NetworkTransport.StartBroadcastDiscoveryWithoutData(hostId, broadcastPort, key, version, subversion, timeout, out error);
-			}
-			else
-			{
-				flag = NetworkTransport.StartBroadcastDiscoveryWithData(hostId, broadcastPort, key, version, subversion, buffer, size, timeout, out error);
-			}
-			return flag;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool StartBroadcastDiscoveryWithoutData(int hostId, int broadcastPort, int key, int version, int subversion, int timeout, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool StartBroadcastDiscoveryWithData(int hostId, int broadcastPort, int key, int version, int subversion, byte[] buffer, int size, int timeout, out byte error);
-
-		/// <summary>
-		///   <para>Stop sending the broadcast discovery message.</para>
-		/// </summary>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void StopBroadcastDiscovery();
-
-		/// <summary>
-		///   <para>Check if the broadcast discovery sender is running.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>True if it is running. False if it is not running.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsBroadcastDiscoveryRunning();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetBroadcastCredentials(int hostId, int key, int version, int subversion, out byte error);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetBroadcastConnectionInfo(int hostId, out int port, out byte error);
-
-		public static void GetBroadcastConnectionInfo(int hostId, out string address, out int port, out byte error)
-		{
-			address = NetworkTransport.GetBroadcastConnectionInfo(hostId, out port, out error);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void GetBroadcastConnectionMessage(int hostId, byte[] buffer, int bufferSize, out int receivedSize, out byte error);
-
 		internal static bool DoesEndPointUsePlatformProtocols(EndPoint endPoint)
 		{
-			if (endPoint.GetType().FullName == "UnityEngine.PS4.SceEndPoint" || endPoint.GetType().FullName == "UnityEngine.PSVita.SceEndPoint")
+			if (endPoint.GetType().FullName == "UnityEngine.PS4.SceEndPoint")
 			{
 				SocketAddress socketAddress = endPoint.Serialize();
 				if (socketAddress[8] != 0 || socketAddress[9] != 0)
@@ -692,7 +40,7 @@ namespace UnityEngine.Networking
 			{
 				throw new NullReferenceException("Null EndPoint provided");
 			}
-			if (endPoint.GetType().FullName != "UnityEngine.XboxOne.XboxOneEndPoint" && endPoint.GetType().FullName != "UnityEngine.PS4.SceEndPoint" && endPoint.GetType().FullName != "UnityEngine.PSVita.SceEndPoint")
+			if (endPoint.GetType().FullName != "UnityEngine.XboxOne.XboxOneEndPoint" && endPoint.GetType().FullName != "UnityEngine.PS4.SceEndPoint")
 			{
 				throw new ArgumentException("Endpoint of type XboxOneEndPoint or SceEndPoint  required");
 			}
@@ -733,7 +81,7 @@ namespace UnityEngine.Networking
 				{
 					throw new ArgumentException("XboxOneEndPoint has corrupt or invalid SOCKET_STORAGE pointer");
 				}
-				num = NetworkTransport.Internal_ConnectEndPoint(hostId, intPtr, 128, exceptionConnectionId, out error);
+				num = NetworkTransport.Internal_ConnectEndPoint(hostId, array2, 128, exceptionConnectionId, out error);
 			}
 			else
 			{
@@ -755,13 +103,15 @@ namespace UnityEngine.Networking
 				{
 					array4[j] = socketAddress2[j];
 				}
-				IntPtr intPtr2 = Marshal.AllocHGlobal(array4.Length);
-				Marshal.Copy(array4, 0, intPtr2, array4.Length);
-				int num2 = NetworkTransport.Internal_ConnectEndPoint(hostId, intPtr2, 16, exceptionConnectionId, out error);
-				Marshal.FreeHGlobal(intPtr2);
+				int num2 = NetworkTransport.Internal_ConnectEndPoint(hostId, array4, 16, exceptionConnectionId, out error);
 				num = num2;
 			}
 			return num;
+		}
+
+		public static void Init()
+		{
+			NetworkTransport.InitializeClass();
 		}
 
 		public static void Init(GlobalConfig config)
@@ -774,16 +124,462 @@ namespace UnityEngine.Networking
 			{
 				NetworkTransport.SetConnectionReadyForSendCallback(config.ConnectionReadyForSend);
 			}
-			NetworkTransport.InitWithParameters(new GlobalConfigInternal(config));
+			NetworkTransport.InitializeClassWithConfig(new GlobalConfigInternal(config));
 		}
+
+		[FreeFunction("UNETManager::InitializeClass")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InitializeClass();
+
+		[FreeFunction("UNETManager::InitializeClassWithConfig")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InitializeClassWithConfig(GlobalConfigInternal config);
+
+		public static void Shutdown()
+		{
+			NetworkTransport.Cleanup();
+		}
+
+		[Obsolete("This function has been deprecated. Use AssetDatabase utilities instead.")]
+		public static string GetAssetId(GameObject go)
+		{
+			return "";
+		}
+
+		public static void AddSceneId(int id)
+		{
+			if (id > NetworkTransport.s_nextSceneId)
+			{
+				NetworkTransport.s_nextSceneId = id + 1;
+			}
+		}
+
+		public static int GetNextSceneId()
+		{
+			return NetworkTransport.s_nextSceneId++;
+		}
+
+		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout, int port, string ip)
+		{
+			if (topology == null)
+			{
+				throw new NullReferenceException("topology is not defined");
+			}
+			NetworkTransport.CheckTopology(topology);
+			return NetworkTransport.AddHostInternal(new HostTopologyInternal(topology), ip, port, minTimeout, maxTimeout);
+		}
+
+		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout, int port)
+		{
+			return NetworkTransport.AddHostWithSimulator(topology, minTimeout, maxTimeout, port, null);
+		}
+
+		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout)
+		{
+			return NetworkTransport.AddHostWithSimulator(topology, minTimeout, maxTimeout, 0, null);
+		}
+
+		public static int AddHost(HostTopology topology, int port, string ip)
+		{
+			return NetworkTransport.AddHostWithSimulator(topology, 0, 0, port, ip);
+		}
+
+		public static int AddHost(HostTopology topology, int port)
+		{
+			return NetworkTransport.AddHost(topology, port, null);
+		}
+
+		public static int AddHost(HostTopology topology)
+		{
+			return NetworkTransport.AddHost(topology, 0, null);
+		}
+
+		[FreeFunction("UNETManager::Get()->AddHost")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int AddHostInternal(HostTopologyInternal topologyInt, string ip, int port, int minTimeout, int maxTimeout);
+
+		public static int AddWebsocketHost(HostTopology topology, int port, string ip)
+		{
+			if (port != 0)
+			{
+				if (NetworkTransport.IsPortOpen(ip, port))
+				{
+					throw new InvalidOperationException("Cannot open web socket on port " + port + " It has been already occupied.");
+				}
+			}
+			if (topology == null)
+			{
+				throw new NullReferenceException("topology is not defined");
+			}
+			NetworkTransport.CheckTopology(topology);
+			return NetworkTransport.AddWsHostInternal(new HostTopologyInternal(topology), ip, port);
+		}
+
+		public static int AddWebsocketHost(HostTopology topology, int port)
+		{
+			return NetworkTransport.AddWebsocketHost(topology, port, null);
+		}
+
+		[FreeFunction("UNETManager::Get()->AddWsHost")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int AddWsHostInternal(HostTopologyInternal topologyInt, string ip, int port);
+
+		private static bool IsPortOpen(string ip, int port)
+		{
+			TimeSpan timeSpan = TimeSpan.FromMilliseconds(500.0);
+			string text = ((ip != null) ? ip : "127.0.0.1");
+			try
+			{
+				using (TcpClient tcpClient = new TcpClient())
+				{
+					IAsyncResult asyncResult = tcpClient.BeginConnect(text, port, null, null);
+					if (!asyncResult.AsyncWaitHandle.WaitOne(timeSpan))
+					{
+						return false;
+					}
+					tcpClient.EndConnect(asyncResult);
+				}
+			}
+			catch
+			{
+				return false;
+			}
+			return true;
+		}
+
+		public static void ConnectAsNetworkHost(int hostId, string address, int port, NetworkID network, SourceID source, NodeID node, out byte error)
+		{
+			NetworkTransport.ConnectAsNetworkHostInternal(hostId, address, port, (ulong)network, (ulong)source, (ushort)node, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->ConnectAsNetworkHost")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ConnectAsNetworkHostInternal(int hostId, string address, int port, ulong network, ulong source, ushort node, out byte error);
+
+		[FreeFunction("UNETManager::Get()->DisconnectNetworkHost")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void DisconnectNetworkHost(int hostId, out byte error);
+
+		public static NetworkEventType ReceiveRelayEventFromHost(int hostId, out byte error)
+		{
+			return (NetworkEventType)NetworkTransport.ReceiveRelayEventFromHostInternal(hostId, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->PopRelayHostData")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ReceiveRelayEventFromHostInternal(int hostId, out byte error);
+
+		public static int ConnectToNetworkPeer(int hostId, string address, int port, int exceptionConnectionId, int relaySlotId, NetworkID network, SourceID source, NodeID node, int bytesPerSec, float bucketSizeFactor, out byte error)
+		{
+			return NetworkTransport.ConnectToNetworkPeerInternal(hostId, address, port, exceptionConnectionId, relaySlotId, (ulong)network, (ulong)source, (ushort)node, bytesPerSec, bucketSizeFactor, out error);
+		}
+
+		public static int ConnectToNetworkPeer(int hostId, string address, int port, int exceptionConnectionId, int relaySlotId, NetworkID network, SourceID source, NodeID node, out byte error)
+		{
+			return NetworkTransport.ConnectToNetworkPeer(hostId, address, port, exceptionConnectionId, relaySlotId, network, source, node, 0, 0f, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->ConnectToNetworkPeer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ConnectToNetworkPeerInternal(int hostId, string address, int port, int exceptionConnectionId, int relaySlotId, ulong network, ulong source, ushort node, int bytesPerSec, float bucketSizeFactor, out byte error);
+
+		[Obsolete("GetCurrentIncomingMessageAmount has been deprecated.")]
+		public static int GetCurrentIncomingMessageAmount()
+		{
+			return 0;
+		}
+
+		[Obsolete("GetCurrentOutgoingMessageAmount has been deprecated.")]
+		public static int GetCurrentOutgoingMessageAmount()
+		{
+			return 0;
+		}
+
+		[FreeFunction("UNETManager::Get()->GetIncomingMessageQueueSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetIncomingMessageQueueSize(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingMessageQueueSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingMessageQueueSize(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetCurrentRTT")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetCurrentRTT(int hostId, int connectionId, out byte error);
+
+		[Obsolete("GetCurrentRtt() has been deprecated.")]
+		public static int GetCurrentRtt(int hostId, int connectionId, out byte error)
+		{
+			return NetworkTransport.GetCurrentRTT(hostId, connectionId, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->GetIncomingPacketLossCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetIncomingPacketLossCount(int hostId, int connectionId, out byte error);
+
+		[Obsolete("GetNetworkLostPacketNum() has been deprecated.")]
+		public static int GetNetworkLostPacketNum(int hostId, int connectionId, out byte error)
+		{
+			return NetworkTransport.GetIncomingPacketLossCount(hostId, connectionId, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->GetIncomingPacketCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetIncomingPacketCount(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingPacketNetworkLossPercent")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingPacketNetworkLossPercent(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingPacketOverflowLossPercent")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingPacketOverflowLossPercent(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetMaxAllowedBandwidth")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetMaxAllowedBandwidth(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetAckBufferCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetAckBufferCount(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetIncomingPacketDropCountForAllHosts")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetIncomingPacketDropCountForAllHosts();
+
+		[FreeFunction("UNETManager::Get()->GetIncomingPacketCountForAllHosts")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetIncomingPacketCountForAllHosts();
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingPacketCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingPacketCount();
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingPacketCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingPacketCountForHost(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingPacketCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingPacketCountForConnection(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingMessageCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingMessageCount();
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingMessageCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingMessageCountForHost(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingMessageCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingMessageCountForConnection(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingUserBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingUserBytesCount();
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingUserBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingUserBytesCountForHost(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingUserBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingUserBytesCountForConnection(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingSystemBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingSystemBytesCount();
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingSystemBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingSystemBytesCountForHost(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingSystemBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingSystemBytesCountForConnection(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingFullBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingFullBytesCount();
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingFullBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingFullBytesCountForHost(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetOutgoingFullBytesCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetOutgoingFullBytesCountForConnection(int hostId, int connectionId, out byte error);
+
+		[Obsolete("GetPacketSentRate has been deprecated.")]
+		public static int GetPacketSentRate(int hostId, int connectionId, out byte error)
+		{
+			error = 0;
+			return 0;
+		}
+
+		[Obsolete("GetPacketReceivedRate has been deprecated.")]
+		public static int GetPacketReceivedRate(int hostId, int connectionId, out byte error)
+		{
+			error = 0;
+			return 0;
+		}
+
+		[Obsolete("GetRemotePacketReceivedRate has been deprecated.")]
+		public static int GetRemotePacketReceivedRate(int hostId, int connectionId, out byte error)
+		{
+			error = 0;
+			return 0;
+		}
+
+		[Obsolete("GetNetIOTimeuS has been deprecated.")]
+		public static int GetNetIOTimeuS()
+		{
+			return 0;
+		}
+
+		[FreeFunction("UNETManager::Get()->GetConnectionInfo")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern string GetConnectionInfo(int hostId, int connectionId, out int port, out ulong network, out ushort dstNode, out byte error);
+
+		public static void GetConnectionInfo(int hostId, int connectionId, out string address, out int port, out NetworkID network, out NodeID dstNode, out byte error)
+		{
+			ulong num;
+			ushort num2;
+			address = NetworkTransport.GetConnectionInfo(hostId, connectionId, out port, out num, out num2, out error);
+			network = (NetworkID)num;
+			dstNode = (NodeID)num2;
+		}
+
+		[FreeFunction("UNETManager::Get()->GetNetworkTimestamp")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetNetworkTimestamp();
+
+		[FreeFunction("UNETManager::Get()->GetRemoteDelayTimeMS")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetRemoteDelayTimeMS(int hostId, int connectionId, int remoteTime, out byte error);
+
+		public static bool StartSendMulticast(int hostId, int channelId, byte[] buffer, int size, out byte error)
+		{
+			return NetworkTransport.StartSendMulticastInternal(hostId, channelId, buffer, size, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->StartSendMulticast")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool StartSendMulticastInternal(int hostId, int channelId, [Out] byte[] buffer, int size, out byte error);
+
+		[FreeFunction("UNETManager::Get()->SendMulticast")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool SendMulticast(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->FinishSendMulticast")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool FinishSendMulticast(int hostId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetMaxPacketSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxPacketSize();
+
+		[FreeFunction("UNETManager::Get()->RemoveHost")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool RemoveHost(int hostId);
+
+		public static bool IsStarted
+		{
+			get
+			{
+				return NetworkTransport.IsStartedInternal();
+			}
+		}
+
+		[FreeFunction("UNETManager::IsStarted")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsStartedInternal();
+
+		[FreeFunction("UNETManager::Get()->Connect")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int Connect(int hostId, string address, int port, int exeptionConnectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->ConnectWithSimulator")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ConnectWithSimulatorInternal(int hostId, string address, int port, int exeptionConnectionId, out byte error, ConnectionSimulatorConfigInternal conf);
+
+		public static int ConnectWithSimulator(int hostId, string address, int port, int exeptionConnectionId, out byte error, ConnectionSimulatorConfig conf)
+		{
+			return NetworkTransport.ConnectWithSimulatorInternal(hostId, address, port, exeptionConnectionId, out error, new ConnectionSimulatorConfigInternal(conf));
+		}
+
+		[FreeFunction("UNETManager::Get()->Disconnect")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool Disconnect(int hostId, int connectionId, out byte error);
+
+		[FreeFunction("UNETManager::Get()->ConnectSockAddr")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_ConnectEndPoint(int hostId, [Out] byte[] sockAddrStorage, int sockAddrStorageLen, int exceptionConnectionId, out byte error);
+
+		public static bool Send(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error)
+		{
+			if (buffer == null)
+			{
+				throw new NullReferenceException("send buffer is not initialized");
+			}
+			return NetworkTransport.SendWrapper(hostId, connectionId, channelId, buffer, size, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->Send")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SendWrapper(int hostId, int connectionId, int channelId, [Out] byte[] buffer, int size, out byte error);
+
+		public static bool QueueMessageForSending(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error)
+		{
+			if (buffer == null)
+			{
+				throw new NullReferenceException("send buffer is not initialized");
+			}
+			return NetworkTransport.QueueMessageForSendingWrapper(hostId, connectionId, channelId, buffer, size, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->QueueMessageForSending")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool QueueMessageForSendingWrapper(int hostId, int connectionId, int channelId, [Out] byte[] buffer, int size, out byte error);
+
+		[FreeFunction("UNETManager::Get()->SendQueuedMessages")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool SendQueuedMessages(int hostId, int connectionId, out byte error);
+
+		public static NetworkEventType Receive(out int hostId, out int connectionId, out int channelId, byte[] buffer, int bufferSize, out int receivedSize, out byte error)
+		{
+			return (NetworkEventType)NetworkTransport.PopData(out hostId, out connectionId, out channelId, buffer, bufferSize, out receivedSize, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->PopData")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopData(out int hostId, out int connectionId, out int channelId, [Out] byte[] buffer, int bufferSize, out int receivedSize, out byte error);
+
+		public static NetworkEventType ReceiveFromHost(int hostId, out int connectionId, out int channelId, byte[] buffer, int bufferSize, out int receivedSize, out byte error)
+		{
+			return (NetworkEventType)NetworkTransport.PopDataFromHost(hostId, out connectionId, out channelId, buffer, bufferSize, out receivedSize, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->PopDataFromHost")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopDataFromHost(int hostId, out int connectionId, out int channelId, [Out] byte[] buffer, int bufferSize, out int receivedSize, out byte error);
+
+		[FreeFunction("UNETManager::Get()->SetPacketStat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetPacketStat(int direction, int packetStatId, int numMsgs, int numBytes);
 
 		[NativeThrows]
 		[FreeFunction("UNETManager::SetNetworkEventAvailableCallback")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetNetworkEventAvailableCallback(Action<int> callback);
 
-		[FreeFunction("UNETManager::SetConnectionReadyForSendCallback")]
+		[FreeFunction("UNETManager::Cleanup")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Cleanup();
+
 		[NativeThrows]
+		[FreeFunction("UNETManager::SetConnectionReadyForSendCallback")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetConnectionReadyForSendCallback(Action<int, int> callback);
 
@@ -791,15 +587,89 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool NotifyWhenConnectionReadyForSend(int hostId, int connectionId, int notificationLevel, out byte error);
 
-		/// <summary>
-		///   <para>Returns the port number assigned to the host.</para>
-		/// </summary>
-		/// <param name="hostId">Host ID.</param>
-		/// <returns>
-		///   <para>The UDP port number, or -1 if an error occurred.</para>
-		/// </returns>
 		[FreeFunction("UNETManager::Get()->GetHostPort")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetHostPort(int hostId);
+
+		[FreeFunction("UNETManager::Get()->StartBroadcastDiscoveryWithData")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool StartBroadcastDiscoveryWithData(int hostId, int broadcastPort, int key, int version, int subversion, [Out] byte[] buffer, int size, int timeout, out byte error);
+
+		[FreeFunction("UNETManager::Get()->StartBroadcastDiscoveryWithoutData")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool StartBroadcastDiscoveryWithoutData(int hostId, int broadcastPort, int key, int version, int subversion, int timeout, out byte error);
+
+		public static bool StartBroadcastDiscovery(int hostId, int broadcastPort, int key, int version, int subversion, byte[] buffer, int size, int timeout, out byte error)
+		{
+			if (buffer != null)
+			{
+				if (buffer.Length < size)
+				{
+					throw new ArgumentOutOfRangeException(string.Concat(new object[] { "Size: ", size, " > buffer.Length ", buffer.Length }));
+				}
+				if (size == 0)
+				{
+					throw new ArgumentOutOfRangeException("Size is zero while buffer exists, please pass null and 0 as buffer and size parameters");
+				}
+			}
+			bool flag;
+			if (buffer == null)
+			{
+				flag = NetworkTransport.StartBroadcastDiscoveryWithoutData(hostId, broadcastPort, key, version, subversion, timeout, out error);
+			}
+			else
+			{
+				flag = NetworkTransport.StartBroadcastDiscoveryWithData(hostId, broadcastPort, key, version, subversion, buffer, size, timeout, out error);
+			}
+			return flag;
+		}
+
+		[FreeFunction("UNETManager::Get()->StopBroadcastDiscovery")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void StopBroadcastDiscovery();
+
+		[FreeFunction("UNETManager::Get()->IsBroadcastDiscoveryRunning")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsBroadcastDiscoveryRunning();
+
+		[FreeFunction("UNETManager::Get()->SetBroadcastCredentials")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetBroadcastCredentials(int hostId, int key, int version, int subversion, out byte error);
+
+		[FreeFunction("UNETManager::Get()->GetBroadcastConnectionInfoInternal")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern string GetBroadcastConnectionInfo(int hostId, out int port, out byte error);
+
+		public static void GetBroadcastConnectionInfo(int hostId, out string address, out int port, out byte error)
+		{
+			address = NetworkTransport.GetBroadcastConnectionInfo(hostId, out port, out error);
+		}
+
+		public static void GetBroadcastConnectionMessage(int hostId, byte[] buffer, int bufferSize, out int receivedSize, out byte error)
+		{
+			NetworkTransport.GetBroadcastConnectionMessageInternal(hostId, buffer, bufferSize, out receivedSize, out error);
+		}
+
+		[FreeFunction("UNETManager::Get()->GetBroadcastConnectionMessage")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBroadcastConnectionMessageInternal(int hostId, [Out] byte[] buffer, int bufferSize, out int receivedSize, out byte error);
+
+		private static void CheckTopology(HostTopology topology)
+		{
+			int maxPacketSize = NetworkTransport.GetMaxPacketSize();
+			if ((int)topology.DefaultConfig.PacketSize > maxPacketSize)
+			{
+				throw new ArgumentOutOfRangeException("Default config: packet size should be less than packet size defined in global config: " + maxPacketSize.ToString());
+			}
+			for (int i = 0; i < topology.SpecialConnectionConfigs.Count; i++)
+			{
+				if ((int)topology.SpecialConnectionConfigs[i].PacketSize > maxPacketSize)
+				{
+					throw new ArgumentOutOfRangeException("Special config " + i.ToString() + ": packet size should be less than packet size defined in global config: " + maxPacketSize.ToString());
+				}
+			}
+		}
+
+		private static int s_nextSceneId = 1;
 	}
 }

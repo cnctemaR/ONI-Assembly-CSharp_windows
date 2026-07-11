@@ -114,7 +114,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		if (!Assets.simpleSoundEventNames.TryGetValue(path, out text))
 		{
 			int num = path.LastIndexOf('/');
-			text = ((num == -1) ? path : path.Substring(num + 1));
+			text = ((num != -1) ? path.Substring(num + 1) : path);
 			Assets.simpleSoundEventNames[path] = text;
 		}
 		return text;
@@ -167,8 +167,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static VideoClip GetVideo(string name)
 	{
-		string text = "video_webm/" + name;
-		return Resources.Load<VideoClip>(text);
+		return Resources.Load<VideoClip>("video_webm/" + name);
 	}
 
 	public static Texture2D GetTexture(string name)
@@ -261,7 +260,11 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		KPrefabID kprefabID = null;
 		Assets.PrefabsByTag.TryGetValue(tag, out kprefabID);
-		return (!(kprefabID != null)) ? null : kprefabID.gameObject;
+		if (!(kprefabID != null))
+		{
+			return null;
+		}
+		return kprefabID.gameObject;
 	}
 
 	public static List<GameObject> GetPrefabsWithTag(Tag tag)
@@ -306,9 +309,9 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static Assets GetInstanceEditorOnly()
 	{
 		Assets[] array = (Assets[])Resources.FindObjectsOfTypeAll(typeof(Assets));
-		if (array == null || array.Length == 0)
+		if (array != null)
 		{
-			return array[0];
+			int num = array.Length;
 		}
 		return array[0];
 	}

@@ -96,11 +96,9 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			if (thought.showImmediately)
 			{
 				base.sm.thoughtsChangedImmediate.Trigger(base.smi);
+				return;
 			}
-			else
-			{
-				base.sm.thoughtsChanged.Trigger(base.smi);
-			}
+			base.sm.thoughtsChanged.Trigger(base.smi);
 		}
 
 		public void RemoveThought(Thought thought)
@@ -115,11 +113,15 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 
 		private int SortThoughts(Thought a, Thought b)
 		{
-			if (a.showImmediately != b.showImmediately)
+			if (a.showImmediately == b.showImmediately)
 			{
-				return (!a.showImmediately) ? 1 : (-1);
+				return b.priority.CompareTo(a.priority);
 			}
-			return b.priority.CompareTo(a.priority);
+			if (!a.showImmediately)
+			{
+				return 1;
+			}
+			return -1;
 		}
 
 		public void CreateBubble()

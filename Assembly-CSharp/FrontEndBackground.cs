@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FrontEndBackground : UIDupeRandomizer
@@ -12,8 +13,7 @@ public class FrontEndBackground : UIDupeRandomizer
 		for (int i = 0; i < this.anims.Length; i++)
 		{
 			int minionIndex = i;
-			KBatchedAnimController kbatchedAnimController = this.anims[i].minions[0];
-			kbatchedAnimController.onAnimComplete += delegate(HashedString name)
+			this.anims[i].minions[0].onAnimComplete += delegate(HashedString name)
 			{
 				this.WaitForABit(minionIndex, name);
 			};
@@ -50,10 +50,15 @@ public class FrontEndBackground : UIDupeRandomizer
 		this.anims[minion_idx].lastWaitTime = global::UnityEngine.Random.Range(this.anims[minion_idx].minSecondsBetweenAction, this.anims[minion_idx].maxSecondsBetweenAction);
 		yield return new WaitForSecondsRealtime(this.anims[minion_idx].lastWaitTime);
 		base.GetNewBody(minion_idx);
-		foreach (KBatchedAnimController kbatchedAnimController in this.anims[minion_idx].minions)
+		using (List<KBatchedAnimController>.Enumerator enumerator = this.anims[minion_idx].minions.GetEnumerator())
 		{
-			kbatchedAnimController.ClearQueue();
-			kbatchedAnimController.Play(this.anims[minion_idx].anim_name, KAnim.PlayMode.Once, 1f, 0f);
+			while (enumerator.MoveNext())
+			{
+				KBatchedAnimController kbatchedAnimController = enumerator.Current;
+				kbatchedAnimController.ClearQueue();
+				kbatchedAnimController.Play(this.anims[minion_idx].anim_name, KAnim.PlayMode.Once, 1f, 0f);
+			}
+			yield break;
 		}
 		yield break;
 	}

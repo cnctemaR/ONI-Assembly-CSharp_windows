@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -8,23 +7,20 @@ namespace System.Security.Cryptography.Xml
 	{
 		public EncryptionMethod()
 		{
-			this.KeyAlgorithm = null;
+			this._cachedXml = null;
 		}
 
-		public EncryptionMethod(string strAlgorithm)
+		public EncryptionMethod(string algorithm)
 		{
-			this.KeyAlgorithm = strAlgorithm;
+			this._algorithm = algorithm;
+			this._cachedXml = null;
 		}
 
-		public string KeyAlgorithm
+		private bool CacheValid
 		{
 			get
 			{
-				return this.algorithm;
-			}
-			set
-			{
-				this.algorithm = value;
+				return this._cachedXml != null;
 			}
 		}
 
@@ -32,35 +28,56 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this.keySize;
+				return this._keySize;
 			}
 			set
 			{
 				if (value <= 0)
 				{
-					throw new ArgumentOutOfRangeException("The key size should be a non negative integer.");
+					throw new ArgumentOutOfRangeException("value", "The key size should be a non negative integer.");
 				}
-				this.keySize = value;
+				this._keySize = value;
+				this._cachedXml = null;
+			}
+		}
+
+		public string KeyAlgorithm
+		{
+			get
+			{
+				return this._algorithm;
+			}
+			set
+			{
+				this._algorithm = value;
+				this._cachedXml = null;
 			}
 		}
 
 		public XmlElement GetXml()
 		{
-			return this.GetXml(new XmlDocument());
+			if (this.CacheValid)
+			{
+				return this._cachedXml;
+			}
+			return this.GetXml(new XmlDocument
+			{
+				PreserveWhitespace = true
+			});
 		}
 
 		internal XmlElement GetXml(XmlDocument document)
 		{
 			XmlElement xmlElement = document.CreateElement("EncryptionMethod", "http://www.w3.org/2001/04/xmlenc#");
-			if (this.KeySize != 0)
+			if (!string.IsNullOrEmpty(this._algorithm))
+			{
+				xmlElement.SetAttribute("Algorithm", this._algorithm);
+			}
+			if (this._keySize > 0)
 			{
 				XmlElement xmlElement2 = document.CreateElement("KeySize", "http://www.w3.org/2001/04/xmlenc#");
-				xmlElement2.InnerText = string.Format("{0}", this.keySize);
+				xmlElement2.AppendChild(document.CreateTextNode(this._keySize.ToString(null, null)));
 				xmlElement.AppendChild(xmlElement2);
-			}
-			if (this.KeyAlgorithm != null)
-			{
-				xmlElement.SetAttribute("Algorithm", this.KeyAlgorithm);
 			}
 			return xmlElement;
 		}
@@ -71,42 +88,21 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (value.LocalName != "EncryptionMethod" || value.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
+			XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(value.OwnerDocument.NameTable);
+			xmlNamespaceManager.AddNamespace("enc", "http://www.w3.org/2001/04/xmlenc#");
+			this._algorithm = Utils.GetAttribute(value, "Algorithm", "http://www.w3.org/2001/04/xmlenc#");
+			XmlNode xmlNode = value.SelectSingleNode("enc:KeySize", xmlNamespaceManager);
+			if (xmlNode != null)
 			{
-				throw new CryptographicException("Malformed EncryptionMethod element.");
+				this.KeySize = Convert.ToInt32(Utils.DiscardWhiteSpaces(xmlNode.InnerText), null);
 			}
-			this.KeyAlgorithm = null;
-			foreach (object obj in value.ChildNodes)
-			{
-				XmlNode xmlNode = (XmlNode)obj;
-				if (!(xmlNode is XmlWhitespace))
-				{
-					string localName = xmlNode.LocalName;
-					if (localName != null)
-					{
-						if (EncryptionMethod.<>f__switch$mapA == null)
-						{
-							EncryptionMethod.<>f__switch$mapA = new Dictionary<string, int>(1) { { "KeySize", 0 } };
-						}
-						int num;
-						if (EncryptionMethod.<>f__switch$mapA.TryGetValue(localName, out num))
-						{
-							if (num == 0)
-							{
-								this.KeySize = int.Parse(xmlNode.InnerText);
-							}
-						}
-					}
-				}
-			}
-			if (value.HasAttribute("Algorithm"))
-			{
-				this.KeyAlgorithm = value.Attributes["Algorithm"].Value;
-			}
+			this._cachedXml = value;
 		}
 
-		private string algorithm;
+		private XmlElement _cachedXml;
 
-		private int keySize;
+		private int _keySize;
+
+		private string _algorithm;
 	}
 }

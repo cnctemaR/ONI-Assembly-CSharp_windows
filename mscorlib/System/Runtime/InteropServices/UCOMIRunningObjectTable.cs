@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
+	[Obsolete]
 	[Guid("00000010-0000-0000-c000-000000000046")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Obsolete]
 	[ComImport]
 	public interface UCOMIRunningObjectTable
 	{

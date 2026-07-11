@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Steamworks
 {
 	public sealed class Callback<T> : IDisposable
 	{
-		public Callback(Callback<T>.DispatchDelegate func, bool bGameServer = false)
-		{
-			this.m_bGameServer = bGameServer;
-			this.BuildCCallbackBase();
-			this.Register(func);
-		}
-
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private event Callback<T>.DispatchDelegate m_Func;
 
 		public static Callback<T> Create(Callback<T>.DispatchDelegate func)
@@ -24,6 +15,13 @@ namespace Steamworks
 		public static Callback<T> CreateGameServer(Callback<T>.DispatchDelegate func)
 		{
 			return new Callback<T>(func, true);
+		}
+
+		public Callback(Callback<T>.DispatchDelegate func, bool bGameServer = false)
+		{
+			this.m_bGameServer = bGameServer;
+			this.BuildCCallbackBase();
+			this.Register(func);
 		}
 
 		~Callback()
@@ -117,7 +115,7 @@ namespace Steamworks
 				m_GetCallbackSizeBytes = new CCallbackBaseVTable.GetCallbackSizeBytesDel(this.OnGetCallbackSizeBytes)
 			};
 			this.m_pVTable = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CCallbackBaseVTable)));
-			Marshal.StructureToPtr(this.m_CallbackBaseVTable, this.m_pVTable, false);
+			Marshal.StructureToPtr<CCallbackBaseVTable>(this.m_CallbackBaseVTable, this.m_pVTable, false);
 			this.m_CCallbackBase = new CCallbackBase
 			{
 				m_vfptr = this.m_pVTable,

@@ -12,13 +12,11 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		{
 			return;
 		}
-		HoverTextScreen instance = HoverTextScreen.Instance;
-		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		HoverTextDrawer hoverTextDrawer = HoverTextScreen.Instance.BeginDrawing();
 		hoverTextDrawer.BeginShadowBar(false);
 		base.DrawTitle(HoverTextScreen.Instance, hoverTextDrawer);
 		base.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);
-		bool flag = !MoveToLocationTool.Instance.CanMoveTo(num);
-		if (flag)
+		if (!MoveToLocationTool.Instance.CanMoveTo(num))
 		{
 			hoverTextDrawer.NewLine(26);
 			hoverTextDrawer.DrawText(UI.TOOLS.MOVETOLOCATION.UNREACHABLE, this.HoverTextStyleSettings[1]);

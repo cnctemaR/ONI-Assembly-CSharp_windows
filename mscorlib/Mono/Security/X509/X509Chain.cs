@@ -54,7 +54,7 @@ namespace Mono.Security.X509
 				}
 				return this.roots;
 			}
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlPolicy)]
 			set
 			{
 				this.roots = value;
@@ -106,15 +106,12 @@ namespace Mono.Security.X509
 				{
 					if (this.IsParent(leaf, this._chain[0]))
 					{
-						int i;
-						for (i = 1; i < count; i++)
+						int num = 1;
+						while (num < count && this.IsParent(this._chain[num - 1], this._chain[num]))
 						{
-							if (!this.IsParent(this._chain[i - 1], this._chain[i]))
-							{
-								break;
-							}
+							num++;
 						}
-						if (i == count)
+						if (num == count)
 						{
 							this._root = this.FindCertificateRoot(this._chain[count - 1]);
 						}
@@ -147,7 +144,7 @@ namespace Mono.Security.X509
 					return false;
 				}
 			}
-			IL_01A6:
+			IL_0161:
 			return this._status == X509ChainStatusFlags.NoError;
 		}
 
@@ -227,8 +224,7 @@ namespace Mono.Security.X509
 				X509Extension x509Extension = parent.Extensions["2.5.29.19"];
 				if (x509Extension != null)
 				{
-					BasicConstraintsExtension basicConstraintsExtension = new BasicConstraintsExtension(x509Extension);
-					if (!basicConstraintsExtension.CertificateAuthority)
+					if (!new BasicConstraintsExtension(x509Extension).CertificateAuthority)
 					{
 						this._status = X509ChainStatusFlags.InvalidBasicConstraints;
 					}

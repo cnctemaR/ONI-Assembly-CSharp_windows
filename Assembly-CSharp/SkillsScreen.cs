@@ -105,186 +105,180 @@ public class SkillsScreen : KModalScreen
 		{
 			this.expectationsTooltip.SetSimpleTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, (this.currentlySelectedMinion as StoredMinionIdentity).GetStorageReason(), this.currentlySelectedMinion.GetProperName()));
 			this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, (this.currentlySelectedMinion as StoredMinionIdentity).GetStorageReason(), this.currentlySelectedMinion.GetProperName()));
-			this.EXPCount.text = string.Empty;
+			this.EXPCount.text = "";
 			this.duplicantLevelIndicator.text = UI.TABLESCREENS.NA;
+			return;
 		}
-		else
+		MinionResume component2 = minionIdentity.GetComponent<MinionResume>();
+		float num = MinionResume.CalculatePreviousExperienceBar(component2.TotalSkillPointsGained);
+		float num2 = MinionResume.CalculateNextExperienceBar(component2.TotalSkillPointsGained);
+		float num3 = (component2.TotalExperienceGained - num) / (num2 - num);
+		this.EXPCount.text = Mathf.RoundToInt(component2.TotalExperienceGained - num) + " / " + Mathf.RoundToInt(num2 - num);
+		this.duplicantLevelIndicator.text = component2.AvailableSkillpoints.ToString();
+		this.experienceProgressFill.fillAmount = num3;
+		this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.SKILLS_SCREEN.EXPERIENCE_TOOLTIP, Mathf.RoundToInt(num2 - num) - Mathf.RoundToInt(component2.TotalExperienceGained - num)));
+		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component2);
+		AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component2);
+		float num4 = 0f;
+		float num5 = 0f;
+		if (!string.IsNullOrEmpty(this.hoveredSkillID) && !component2.HasMasteredSkill(this.hoveredSkillID))
 		{
-			MinionResume component2 = minionIdentity.GetComponent<MinionResume>();
-			float num = MinionResume.CalculatePreviousExperienceBar(component2.TotalSkillPointsGained);
-			float num2 = MinionResume.CalculateNextExperienceBar(component2.TotalSkillPointsGained);
-			float num3 = (component2.TotalExperienceGained - num) / (num2 - num);
-			this.EXPCount.text = Mathf.RoundToInt(component2.TotalExperienceGained - num) + " / " + Mathf.RoundToInt(num2 - num);
-			this.duplicantLevelIndicator.text = component2.AvailableSkillpoints.ToString();
-			this.experienceProgressFill.fillAmount = num3;
-			this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.SKILLS_SCREEN.EXPERIENCE_TOOLTIP, Mathf.RoundToInt(num2 - num) - Mathf.RoundToInt(component2.TotalExperienceGained - num)));
-			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component2);
-			AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component2);
-			float num4 = 0f;
-			float num5 = 0f;
-			if (!string.IsNullOrEmpty(this.hoveredSkillID) && !component2.HasMasteredSkill(this.hoveredSkillID))
+			List<string> list = new List<string>();
+			List<string> list2 = new List<string>();
+			list.Add(this.hoveredSkillID);
+			while (list.Count > 0)
 			{
-				List<string> list = new List<string>();
-				List<string> list2 = new List<string>();
-				list.Add(this.hoveredSkillID);
-				while (list.Count > 0)
+				for (int i = list.Count - 1; i >= 0; i--)
 				{
-					for (int i = list.Count - 1; i >= 0; i--)
+					if (!component2.HasMasteredSkill(list[i]))
 					{
-						if (!component2.HasMasteredSkill(list[i]))
+						num4 += (float)(Db.Get().Skills.Get(list[i]).tier + 1);
+						if (component2.AptitudeBySkillGroup.ContainsKey(Db.Get().Skills.Get(list[i]).skillGroup) && component2.AptitudeBySkillGroup[Db.Get().Skills.Get(list[i]).skillGroup] > 0f)
 						{
-							num4 += (float)(Db.Get().Skills.Get(list[i]).tier + 1);
-							if (component2.AptitudeBySkillGroup.ContainsKey(Db.Get().Skills.Get(list[i]).skillGroup) && component2.AptitudeBySkillGroup[Db.Get().Skills.Get(list[i]).skillGroup] > 0f)
-							{
-								num5 += 1f;
-							}
-							foreach (string text in Db.Get().Skills.Get(list[i]).priorSkills)
-							{
-								list2.Add(text);
-							}
+							num5 += 1f;
+						}
+						foreach (string text in Db.Get().Skills.Get(list[i]).priorSkills)
+						{
+							list2.Add(text);
 						}
 					}
-					list.Clear();
-					list.AddRange(list2);
-					list2.Clear();
 				}
+				list.Clear();
+				list.AddRange(list2);
+				list2.Clear();
 			}
-			float num6 = attributeInstance.GetTotalValue() + num5 / (attributeInstance2.GetTotalValue() + num4);
-			float num7 = Mathf.Max(attributeInstance.GetTotalValue() + num5, attributeInstance2.GetTotalValue() + num4);
-			while (this.moraleNotches.Count < Mathf.RoundToInt(num7))
+		}
+		float num6 = attributeInstance.GetTotalValue() + num5 / (attributeInstance2.GetTotalValue() + num4);
+		float num7 = Mathf.Max(attributeInstance.GetTotalValue() + num5, attributeInstance2.GetTotalValue() + num4);
+		while (this.moraleNotches.Count < Mathf.RoundToInt(num7))
+		{
+			GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.moraleNotch, this.moraleNotch.transform.parent);
+			gameObject.SetActive(true);
+			this.moraleNotches.Add(gameObject);
+		}
+		while (this.moraleNotches.Count > Mathf.RoundToInt(num7))
+		{
+			GameObject gameObject2 = this.moraleNotches[this.moraleNotches.Count - 1];
+			this.moraleNotches.Remove(gameObject2);
+			global::UnityEngine.Object.Destroy(gameObject2);
+		}
+		for (int j = 0; j < this.moraleNotches.Count; j++)
+		{
+			if ((float)j < attributeInstance.GetTotalValue() + num5)
 			{
-				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.moraleNotch, this.moraleNotch.transform.parent);
-				gameObject.SetActive(true);
-				this.moraleNotches.Add(gameObject);
-			}
-			while (this.moraleNotches.Count > Mathf.RoundToInt(num7))
-			{
-				GameObject gameObject2 = this.moraleNotches[this.moraleNotches.Count - 1];
-				this.moraleNotches.Remove(gameObject2);
-				global::UnityEngine.Object.Destroy(gameObject2);
-			}
-			for (int j = 0; j < this.moraleNotches.Count; j++)
-			{
-				if ((float)j < attributeInstance.GetTotalValue() + num5)
-				{
-					this.moraleNotches[j].GetComponentsInChildren<Image>()[1].color = this.moraleNotchColor;
-				}
-				else
-				{
-					this.moraleNotches[j].GetComponentsInChildren<Image>()[1].color = Color.clear;
-				}
-			}
-			this.moraleProgressLabel.text = UI.SKILLS_SCREEN.MORALE + ": " + attributeInstance.GetTotalValue().ToString();
-			if (num5 > 0f)
-			{
-				LocText locText = this.moraleProgressLabel;
-				locText.text = locText.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(this.moraleNotchColor, num5.ToString()));
-			}
-			while (this.expectationNotches.Count < Mathf.RoundToInt(num7))
-			{
-				GameObject gameObject3 = global::UnityEngine.Object.Instantiate<GameObject>(this.expectationNotch, this.expectationNotch.transform.parent);
-				gameObject3.SetActive(true);
-				this.expectationNotches.Add(gameObject3);
-			}
-			while (this.expectationNotches.Count > Mathf.RoundToInt(num7))
-			{
-				GameObject gameObject4 = this.expectationNotches[this.expectationNotches.Count - 1];
-				this.expectationNotches.Remove(gameObject4);
-				global::UnityEngine.Object.Destroy(gameObject4);
-			}
-			for (int k = 0; k < this.expectationNotches.Count; k++)
-			{
-				if ((float)k < attributeInstance2.GetTotalValue() + num4)
-				{
-					if ((float)k < attributeInstance2.GetTotalValue())
-					{
-						this.expectationNotches[k].GetComponentsInChildren<Image>()[1].color = this.expectationNotchColor;
-					}
-					else
-					{
-						this.expectationNotches[k].GetComponentsInChildren<Image>()[1].color = this.expectationNotchProspectColor;
-					}
-				}
-				else
-				{
-					this.expectationNotches[k].GetComponentsInChildren<Image>()[1].color = Color.clear;
-				}
-			}
-			this.expectationsProgressLabel.text = UI.SKILLS_SCREEN.MORALE_EXPECTATION + ": " + attributeInstance2.GetTotalValue().ToString();
-			if (num4 > 0f)
-			{
-				LocText locText2 = this.expectationsProgressLabel;
-				locText2.text = locText2.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(this.expectationNotchColor, num4.ToString()));
-			}
-			if (num6 < 1f)
-			{
-				this.expectationWarning.SetActive(true);
-				this.moraleWarning.SetActive(false);
+				this.moraleNotches[j].GetComponentsInChildren<Image>()[1].color = this.moraleNotchColor;
 			}
 			else
 			{
-				this.expectationWarning.SetActive(false);
-				this.moraleWarning.SetActive(true);
+				this.moraleNotches[j].GetComponentsInChildren<Image>()[1].color = Color.clear;
 			}
-			string text2 = string.Empty;
-			Dictionary<string, float> dictionary = new Dictionary<string, float>();
-			string text3 = text2;
-			text2 = string.Concat(new object[]
-			{
-				text3,
-				GameUtil.ApplyBoldString(UI.SKILLS_SCREEN.MORALE),
-				": ",
-				attributeInstance.GetTotalValue(),
-				"\n"
-			});
-			for (int l = 0; l < attributeInstance.Modifiers.Count; l++)
-			{
-				dictionary.Add(attributeInstance.Modifiers[l].GetDescription(), attributeInstance.Modifiers[l].Value);
-			}
-			List<KeyValuePair<string, float>> list3 = dictionary.ToList<KeyValuePair<string, float>>();
-			list3.Sort((KeyValuePair<string, float> pair1, KeyValuePair<string, float> pair2) => pair2.Value.CompareTo(pair1.Value));
-			foreach (KeyValuePair<string, float> keyValuePair in list3)
-			{
-				text3 = text2;
-				text2 = string.Concat(new string[]
-				{
-					text3,
-					"    • ",
-					keyValuePair.Key,
-					": ",
-					(keyValuePair.Value <= 0f) ? UIConstants.ColorPrefixRed : UIConstants.ColorPrefixGreen,
-					keyValuePair.Value.ToString(),
-					UIConstants.ColorSuffix,
-					"\n"
-				});
-			}
-			text2 += "\n";
-			text3 = text2;
-			text2 = string.Concat(new object[]
-			{
-				text3,
-				GameUtil.ApplyBoldString(UI.SKILLS_SCREEN.MORALE_EXPECTATION),
-				": ",
-				attributeInstance2.GetTotalValue(),
-				"\n"
-			});
-			for (int m = 0; m < attributeInstance2.Modifiers.Count; m++)
-			{
-				text3 = text2;
-				text2 = string.Concat(new string[]
-				{
-					text3,
-					"    • ",
-					attributeInstance2.Modifiers[m].GetDescription(),
-					": ",
-					(attributeInstance2.Modifiers[m].Value <= 0f) ? UIConstants.ColorPrefixGreen : UIConstants.ColorPrefixRed,
-					attributeInstance2.Modifiers[m].GetFormattedString(component2.gameObject),
-					UIConstants.ColorSuffix,
-					"\n"
-				});
-			}
-			this.expectationsTooltip.SetSimpleTooltip(text2);
 		}
+		this.moraleProgressLabel.text = UI.SKILLS_SCREEN.MORALE + ": " + attributeInstance.GetTotalValue().ToString();
+		if (num5 > 0f)
+		{
+			LocText locText = this.moraleProgressLabel;
+			locText.text = locText.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(this.moraleNotchColor, num5.ToString()));
+		}
+		while (this.expectationNotches.Count < Mathf.RoundToInt(num7))
+		{
+			GameObject gameObject3 = global::UnityEngine.Object.Instantiate<GameObject>(this.expectationNotch, this.expectationNotch.transform.parent);
+			gameObject3.SetActive(true);
+			this.expectationNotches.Add(gameObject3);
+		}
+		while (this.expectationNotches.Count > Mathf.RoundToInt(num7))
+		{
+			GameObject gameObject4 = this.expectationNotches[this.expectationNotches.Count - 1];
+			this.expectationNotches.Remove(gameObject4);
+			global::UnityEngine.Object.Destroy(gameObject4);
+		}
+		for (int k = 0; k < this.expectationNotches.Count; k++)
+		{
+			if ((float)k < attributeInstance2.GetTotalValue() + num4)
+			{
+				if ((float)k < attributeInstance2.GetTotalValue())
+				{
+					this.expectationNotches[k].GetComponentsInChildren<Image>()[1].color = this.expectationNotchColor;
+				}
+				else
+				{
+					this.expectationNotches[k].GetComponentsInChildren<Image>()[1].color = this.expectationNotchProspectColor;
+				}
+			}
+			else
+			{
+				this.expectationNotches[k].GetComponentsInChildren<Image>()[1].color = Color.clear;
+			}
+		}
+		this.expectationsProgressLabel.text = UI.SKILLS_SCREEN.MORALE_EXPECTATION + ": " + attributeInstance2.GetTotalValue().ToString();
+		if (num4 > 0f)
+		{
+			LocText locText2 = this.expectationsProgressLabel;
+			locText2.text = locText2.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(this.expectationNotchColor, num4.ToString()));
+		}
+		if (num6 < 1f)
+		{
+			this.expectationWarning.SetActive(true);
+			this.moraleWarning.SetActive(false);
+		}
+		else
+		{
+			this.expectationWarning.SetActive(false);
+			this.moraleWarning.SetActive(true);
+		}
+		string text2 = "";
+		Dictionary<string, float> dictionary = new Dictionary<string, float>();
+		text2 = string.Concat(new object[]
+		{
+			text2,
+			GameUtil.ApplyBoldString(UI.SKILLS_SCREEN.MORALE),
+			": ",
+			attributeInstance.GetTotalValue(),
+			"\n"
+		});
+		for (int l = 0; l < attributeInstance.Modifiers.Count; l++)
+		{
+			dictionary.Add(attributeInstance.Modifiers[l].GetDescription(), attributeInstance.Modifiers[l].Value);
+		}
+		List<KeyValuePair<string, float>> list3 = dictionary.ToList<KeyValuePair<string, float>>();
+		list3.Sort((KeyValuePair<string, float> pair1, KeyValuePair<string, float> pair2) => pair2.Value.CompareTo(pair1.Value));
+		foreach (KeyValuePair<string, float> keyValuePair in list3)
+		{
+			text2 = string.Concat(new string[]
+			{
+				text2,
+				"    • ",
+				keyValuePair.Key,
+				": ",
+				(keyValuePair.Value > 0f) ? UIConstants.ColorPrefixGreen : UIConstants.ColorPrefixRed,
+				keyValuePair.Value.ToString(),
+				UIConstants.ColorSuffix,
+				"\n"
+			});
+		}
+		text2 += "\n";
+		text2 = string.Concat(new object[]
+		{
+			text2,
+			GameUtil.ApplyBoldString(UI.SKILLS_SCREEN.MORALE_EXPECTATION),
+			": ",
+			attributeInstance2.GetTotalValue(),
+			"\n"
+		});
+		for (int m = 0; m < attributeInstance2.Modifiers.Count; m++)
+		{
+			text2 = string.Concat(new string[]
+			{
+				text2,
+				"    • ",
+				attributeInstance2.Modifiers[m].GetDescription(),
+				": ",
+				(attributeInstance2.Modifiers[m].Value > 0f) ? UIConstants.ColorPrefixRed : UIConstants.ColorPrefixGreen,
+				attributeInstance2.Modifiers[m].GetFormattedString(component2.gameObject),
+				UIConstants.ColorSuffix,
+				"\n"
+			});
+		}
+		this.expectationsTooltip.SetSimpleTooltip(text2);
 	}
 
 	private void RefreshHat()
@@ -294,12 +288,12 @@ public class SkillsScreen : KModalScreen
 			return;
 		}
 		List<IListableOption> list = new List<IListableOption>();
-		string text = string.Empty;
+		string text = "";
 		MinionIdentity minionIdentity = this.currentlySelectedMinion as MinionIdentity;
 		if (minionIdentity != null)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
-			text = ((!string.IsNullOrEmpty(component.TargetHat)) ? component.TargetHat : component.CurrentHat);
+			text = (string.IsNullOrEmpty(component.TargetHat) ? component.CurrentHat : component.TargetHat);
 			foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
 			{
 				if (keyValuePair.Value)
@@ -312,11 +306,11 @@ public class SkillsScreen : KModalScreen
 		else
 		{
 			StoredMinionIdentity storedMinionIdentity = this.currentlySelectedMinion as StoredMinionIdentity;
-			text = ((!string.IsNullOrEmpty(storedMinionIdentity.targetHat)) ? storedMinionIdentity.targetHat : storedMinionIdentity.currentHat);
+			text = (string.IsNullOrEmpty(storedMinionIdentity.targetHat) ? storedMinionIdentity.currentHat : storedMinionIdentity.targetHat);
 		}
 		this.hatDropDown.openButton.enabled = minionIdentity != null;
 		this.selectedHat.transform.Find("Arrow").gameObject.SetActive(minionIdentity != null);
-		this.selectedHat.sprite = Assets.GetSprite((!string.IsNullOrEmpty(text)) ? text : "hat_role_none");
+		this.selectedHat.sprite = Assets.GetSprite(string.IsNullOrEmpty(text) ? "hat_role_none" : text);
 	}
 
 	private void OnHatDropEntryClick(IListableOption skill, object data)
@@ -461,11 +455,9 @@ public class SkillsScreen : KModalScreen
 		if (string.IsNullOrEmpty(this.hoveredSkillID))
 		{
 			this.delayRefreshRoutine = base.StartCoroutine(this.DelayRefreshProgressBars());
+			return;
 		}
-		else
-		{
-			this.RefreshProgressBars();
-		}
+		this.RefreshProgressBars();
 	}
 
 	private IEnumerator DelayRefreshProgressBars()
@@ -583,7 +575,7 @@ public class SkillsScreen : KModalScreen
 			}
 			this.activeSortToggle = toggle;
 		}
-		this.activeSortToggle.ChangeState((!this.sortReversed) ? 1 : 2);
+		this.activeSortToggle.ChangeState(this.sortReversed ? 2 : 1);
 	}
 
 	private void SortByMorale()
@@ -686,7 +678,7 @@ public class SkillsScreen : KModalScreen
 			ScreenResize instance = ScreenResize.Instance;
 			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
 		}
-		string text = string.Empty;
+		string text = "";
 		Accessorizer component = this.animController.GetComponent<Accessorizer>();
 		for (int i = component.GetAccessories().Count - 1; i >= 0; i--)
 		{
@@ -851,7 +843,7 @@ public class SkillsScreen : KModalScreen
 
 	private List<SkillMinionWidget> minionWidgets = new List<SkillMinionWidget>();
 
-	private string hoveredSkillID = string.Empty;
+	private string hoveredSkillID = "";
 
 	private Dictionary<string, GameObject> skillWidgets = new Dictionary<string, GameObject>();
 

@@ -160,7 +160,7 @@ namespace UnityEngine.EventSystems
 				currentPointerData.hovered.Clear();
 				if (newEnterTarget == null)
 				{
-					currentPointerData.pointerEnter = newEnterTarget;
+					currentPointerData.pointerEnter = null;
 					return;
 				}
 			}

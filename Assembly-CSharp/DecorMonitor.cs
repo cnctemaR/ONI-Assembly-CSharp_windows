@@ -69,9 +69,7 @@ public class DecorMonitor : GameStateMachine<DecorMonitor, DecorMonitor.Instance
 		{
 			this.yesterdaysTotalDecor = this.cycleTotalDecor;
 			this.cycleTotalDecor = 0f;
-			Attributes attributes = base.gameObject.GetAttributes();
-			AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.DecorExpectation);
-			float totalValue = attributeInstance.GetTotalValue();
+			float totalValue = base.gameObject.GetAttributes().Add(Db.Get().Attributes.DecorExpectation).GetTotalValue();
 			float num = this.yesterdaysTotalDecor / 600f;
 			num += totalValue;
 			Effects component = base.gameObject.GetComponent<Effects>();

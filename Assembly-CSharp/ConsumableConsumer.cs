@@ -10,11 +10,9 @@ public class ConsumableConsumer : KMonoBehaviour
 		if (ConsumerManager.instance != null)
 		{
 			this.forbiddenTags = ConsumerManager.instance.DefaultForbiddenTagsList.ToArray();
+			return;
 		}
-		else
-		{
-			this.forbiddenTags = new Tag[0];
-		}
+		this.forbiddenTags = new Tag[0];
 	}
 
 	public bool IsPermitted(string consumable_id)

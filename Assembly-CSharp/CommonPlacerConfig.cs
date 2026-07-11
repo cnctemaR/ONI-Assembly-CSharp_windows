@@ -10,8 +10,7 @@ public class CommonPlacerConfig
 		gameObject.layer = LayerMask.NameToLayer("PlaceWithDepth");
 		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<StateMachineController>();
-		Prioritizable prioritizable = gameObject.AddOrGet<Prioritizable>();
-		prioritizable.iconOffset = new Vector2(0.3f, 0.32f);
+		gameObject.AddOrGet<Prioritizable>().iconOffset = new Vector2(0.3f, 0.32f);
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 		kboxCollider2D.offset = new Vector2(0f, 0.5f);
 		kboxCollider2D.size = new Vector2(1f, 1f);
@@ -20,8 +19,7 @@ public class CommonPlacerConfig
 		gameObject2.transform.parent = gameObject.transform;
 		gameObject2.transform.SetLocalPosition(new Vector3(0f, 0.5f, -3.537f));
 		gameObject2.transform.eulerAngles = new Vector3(0f, 180f, 0f);
-		MeshFilter meshFilter = gameObject2.AddComponent<MeshFilter>();
-		meshFilter.sharedMesh = Assets.instance.commonPlacerAssets.mesh;
+		gameObject2.AddComponent<MeshFilter>().sharedMesh = Assets.instance.commonPlacerAssets.mesh;
 		MeshRenderer meshRenderer = gameObject2.AddComponent<MeshRenderer>();
 		meshRenderer.lightProbeUsage = LightProbeUsage.Off;
 		meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;

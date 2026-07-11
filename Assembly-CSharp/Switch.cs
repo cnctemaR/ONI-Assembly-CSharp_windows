@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -15,7 +14,6 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<bool> OnToggle;
 
 	protected override void OnPrefabInit()
@@ -33,7 +31,7 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 		}
 		if (this.manuallyControlled)
 		{
-			base.Subscribe<global::Switch>(493375141, global::Switch.OnRefreshUserMenuDelegate);
+			base.Subscribe<Switch>(493375141, Switch.OnRefreshUserMenuDelegate);
 		}
 		this.UpdateSwitchStatus();
 	}
@@ -53,11 +51,9 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 		if (!DebugHandler.InstantBuildMode)
 		{
 			this.openSwitch.Toggle(this.openToggleIndex);
+			return;
 		}
-		else
-		{
-			this.Toggle();
-		}
+		this.Toggle();
 	}
 
 	protected virtual void Toggle()
@@ -84,21 +80,14 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 
 	protected virtual void OnRefreshUserMenu(object data)
 	{
-		LocString locString = ((!this.switchedOn) ? BUILDINGS.PREFABS.SWITCH.TURN_ON : BUILDINGS.PREFABS.SWITCH.TURN_OFF);
-		LocString locString2 = ((!this.switchedOn) ? BUILDINGS.PREFABS.SWITCH.TURN_ON_TOOLTIP : BUILDINGS.PREFABS.SWITCH.TURN_OFF_TOOLTIP);
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "action_power";
-		string text2 = locString;
-		global::System.Action action = new global::System.Action(this.OnMinionToggle);
-		global::Action action2 = global::Action.ToggleEnabled;
-		string text3 = locString2;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
+		LocString locString = (this.switchedOn ? BUILDINGS.PREFABS.SWITCH.TURN_OFF : BUILDINGS.PREFABS.SWITCH.TURN_ON);
+		LocString locString2 = (this.switchedOn ? BUILDINGS.PREFABS.SWITCH.TURN_OFF_TOOLTIP : BUILDINGS.PREFABS.SWITCH.TURN_ON_TOOLTIP);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_power", locString, new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, locString2, true), 1f);
 	}
 
 	protected virtual void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.SwitchStatusInactive : Db.Get().BuildingStatusItems.SwitchStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.SwitchStatusActive : Db.Get().BuildingStatusItems.SwitchStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 
@@ -116,7 +105,7 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 
 	private int openToggleIndex;
 
-	private static readonly EventSystem.IntraObjectHandler<global::Switch> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<global::Switch>(delegate(global::Switch component, object data)
+	private static readonly EventSystem.IntraObjectHandler<Switch> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Switch>(delegate(Switch component, object data)
 	{
 		component.OnRefreshUserMenu(data);
 	});

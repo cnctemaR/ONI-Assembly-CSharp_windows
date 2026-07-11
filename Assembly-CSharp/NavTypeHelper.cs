@@ -47,8 +47,11 @@ public static class NavTypeHelper
 			case NavType.Ceiling:
 				num = Grid.CellAbove(cell);
 				break;
-			case NavType.Solid:
-				num = cell;
+			default:
+				if (nav_type == NavType.Solid)
+				{
+					num = cell;
+				}
 				break;
 			}
 		}

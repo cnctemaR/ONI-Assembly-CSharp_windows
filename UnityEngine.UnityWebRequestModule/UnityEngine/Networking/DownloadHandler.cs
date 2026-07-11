@@ -7,9 +7,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Networking
 {
-	/// <summary>
-	///   <para>Manage and process HTTP response body data received from a remote server.</para>
-	/// </summary>
 	[NativeHeader("Modules/UnityWebRequest/Public/DownloadHandler/DownloadHandler.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class DownloadHandler : IDisposable
@@ -28,9 +25,6 @@ namespace UnityEngine.Networking
 			this.Dispose();
 		}
 
-		/// <summary>
-		///   <para>Signals that this DownloadHandler is no longer being used, and should clean up any resources it is using.</para>
-		/// </summary>
 		public void Dispose()
 		{
 			if (this.m_Ptr != IntPtr.Zero)
@@ -40,9 +34,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if this DownloadHandler has been informed by its parent UnityWebRequest that all data has been received, and this DownloadHandler has completed any necessary post-download processing. (Read Only)</para>
-		/// </summary>
 		public bool isDone
 		{
 			get
@@ -54,9 +45,6 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool IsDone();
 
-		/// <summary>
-		///   <para>Returns the raw bytes downloaded from the remote server, or null. (Read Only)</para>
-		/// </summary>
 		public byte[] data
 		{
 			get
@@ -65,9 +53,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Convenience property. Returns the bytes from data interpreted as a UTF8 string. (Read Only)</para>
-		/// </summary>
 		public string text
 		{
 			get
@@ -76,23 +61,11 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Callback, invoked when the data property is accessed.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Byte array to return as the value of the data property.</para>
-		/// </returns>
 		protected virtual byte[] GetData()
 		{
 			return null;
 		}
 
-		/// <summary>
-		///   <para>Callback, invoked when the text property is accessed.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>String to return as the return value of the text property.</para>
-		/// </returns>
 		protected virtual string GetText()
 		{
 			byte[] data = this.GetData();
@@ -143,43 +116,22 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string GetContentType();
 
-		/// <summary>
-		///   <para>Callback, invoked as data is received from the remote server.</para>
-		/// </summary>
-		/// <param name="data">A buffer containing unprocessed data, received from the remote server.</param>
-		/// <param name="dataLength">The number of bytes in data which are new.</param>
-		/// <returns>
-		///   <para>True if the download should continue, false to abort.</para>
-		/// </returns>
 		[UsedByNativeCode]
 		protected virtual bool ReceiveData(byte[] data, int dataLength)
 		{
 			return true;
 		}
 
-		/// <summary>
-		///   <para>Callback, invoked with a Content-Length header is received.</para>
-		/// </summary>
-		/// <param name="contentLength">The value of the received Content-Length header.</param>
 		[UsedByNativeCode]
 		protected virtual void ReceiveContentLength(int contentLength)
 		{
 		}
 
-		/// <summary>
-		///   <para>Callback, invoked when all data has been received from the remote server.</para>
-		/// </summary>
 		[UsedByNativeCode]
 		protected virtual void CompleteContent()
 		{
 		}
 
-		/// <summary>
-		///   <para>Callback, invoked when UnityWebRequest.downloadProgress is accessed.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The return value for UnityWebRequest.downloadProgress.</para>
-		/// </returns>
 		[UsedByNativeCode]
 		protected virtual float GetProgress()
 		{
@@ -203,8 +155,8 @@ namespace UnityEngine.Networking
 			return (T)((object)www.downloadHandler);
 		}
 
-		[NativeThrows]
 		[VisibleToOtherModules]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern byte[] InternalGetByteArray(DownloadHandler dh);
 

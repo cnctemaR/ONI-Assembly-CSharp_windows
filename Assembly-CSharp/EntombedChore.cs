@@ -19,9 +19,8 @@ public class EntombedChore : Chore<EntombedChore.StatesInstance>
 
 		public void UpdateFaceEntombed()
 		{
-			int num = Grid.PosToCell(base.transform.GetPosition());
-			int num2 = Grid.CellAbove(num);
-			base.sm.isFaceEntombed.Set(Grid.IsValidCell(num2) && Grid.Solid[num2], base.smi);
+			int num = Grid.CellAbove(Grid.PosToCell(base.transform.GetPosition()));
+			base.sm.isFaceEntombed.Set(Grid.IsValidCell(num) && Grid.Solid[num], base.smi);
 		}
 	}
 

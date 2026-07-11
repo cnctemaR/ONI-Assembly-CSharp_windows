@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
 {
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -104,8 +104,9 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 		{
 			this.SetMouseOver();
 			this.hoverLink = true;
+			return;
 		}
-		else if (TextLinkHandler.hoveredText == this)
+		if (TextLinkHandler.hoveredText == this)
 		{
 			this.hoverLink = false;
 		}

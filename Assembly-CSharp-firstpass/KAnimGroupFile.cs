@@ -91,8 +91,7 @@ public class KAnimGroupFile : ScriptableObject
 			group.commandDirectory = akf.directory;
 			group.maxGroupSize = akf.MaxGroupSize;
 			group.renderType = akf.RendererType;
-			int num2 = this.groups.FindIndex((KAnimGroupFile.Group t) => t.commandDirectory == group.commandDirectory);
-			if (num2 == -1)
+			if (this.groups.FindIndex((KAnimGroupFile.Group t) => t.commandDirectory == group.commandDirectory) == -1)
 			{
 				if (flag)
 				{
@@ -193,18 +192,18 @@ public class KAnimGroupFile : ScriptableObject
 			HashedString hashedString = this.groups[i].id;
 			if (this.groups[i].renderType != KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				goto IL_012E;
+				goto IL_0118;
 			}
 			if (this.groups[i].swapTarget.IsValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget);
 				hashedString = this.groups[i].swapTarget;
-				goto IL_012E;
+				goto IL_0118;
 			}
-			IL_0250:
+			IL_0233:
 			i++;
 			continue;
-			IL_012E:
+			IL_0118:
 			for (int j = 0; j < this.groups[i].files.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].files[j];
@@ -226,7 +225,7 @@ public class KAnimGroupFile : ScriptableObject
 					}
 				}
 			}
-			goto IL_0250;
+			goto IL_0233;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -242,30 +241,27 @@ public class KAnimGroupFile : ScriptableObject
 						for (int m = 0; m < build.symbols.Length; m++)
 						{
 							KAnim.Build.Symbol symbol = build.symbols[m];
-							if (symbol != null)
+							if (symbol != null && symbol.hash.IsValid() && batchGroupData2.GetFirstIndex(symbol.hash) == -1)
 							{
-								if (symbol.hash.IsValid() && batchGroupData2.GetFirstIndex(symbol.hash) == -1)
+								KAnim.Build.Symbol symbol2 = new KAnim.Build.Symbol();
+								symbol2.build = build;
+								symbol2.hash = symbol.hash;
+								symbol2.path = symbol.path;
+								symbol2.colourChannel = symbol.colourChannel;
+								symbol2.flags = symbol.flags;
+								symbol2.firstFrameIdx = batchGroupData2.symbolFrameInstances.Count;
+								symbol2.numFrames = symbol.numFrames;
+								symbol2.symbolIndexInSourceBuild = batchGroupData2.frameElementSymbols.Count;
+								for (int n = 0; n < symbol2.numFrames; n++)
 								{
-									KAnim.Build.Symbol symbol2 = new KAnim.Build.Symbol();
-									symbol2.build = build;
-									symbol2.hash = symbol.hash;
-									symbol2.path = symbol.path;
-									symbol2.colourChannel = symbol.colourChannel;
-									symbol2.flags = symbol.flags;
-									symbol2.firstFrameIdx = batchGroupData2.symbolFrameInstances.Count;
-									symbol2.numFrames = symbol.numFrames;
-									symbol2.symbolIndexInSourceBuild = batchGroupData2.frameElementSymbols.Count;
-									for (int n = 0; n < symbol2.numFrames; n++)
-									{
-										KAnim.Build.SymbolFrameInstance symbolFrameInstance = batchGroupData.GetSymbolFrameInstance(n + symbol.firstFrameIdx);
-										KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = default(KAnim.Build.SymbolFrameInstance);
-										symbolFrameInstance2.symbolFrame = symbolFrameInstance.symbolFrame;
-										symbolFrameInstance2.buildImageIdx = -1;
-										symbolFrameInstance2.symbolIdx = batchGroupData2.GetSymbolCount();
-										batchGroupData2.symbolFrameInstances.Add(symbolFrameInstance2);
-									}
-									batchGroupData2.AddBuildSymbol(symbol2);
+									KAnim.Build.SymbolFrameInstance symbolFrameInstance = batchGroupData.GetSymbolFrameInstance(n + symbol.firstFrameIdx);
+									KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = default(KAnim.Build.SymbolFrameInstance);
+									symbolFrameInstance2.symbolFrame = symbolFrameInstance.symbolFrame;
+									symbolFrameInstance2.buildImageIdx = -1;
+									symbolFrameInstance2.symbolIdx = batchGroupData2.GetSymbolCount();
+									batchGroupData2.symbolFrameInstances.Add(symbolFrameInstance2);
 								}
+								batchGroupData2.AddBuildSymbol(symbol2);
 							}
 						}
 					}
@@ -409,7 +405,7 @@ public class KAnimGroupFile : ScriptableObject
 		public HashedString id;
 
 		[SerializeField]
-		public string commandDirectory = string.Empty;
+		public string commandDirectory = "";
 
 		[SerializeField]
 		public List<KAnimFile> files = new List<KAnimFile>();

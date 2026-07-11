@@ -1,34 +1,29 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
 using System.Threading;
 
 namespace System.Diagnostics
 {
 	public class TraceEventCache
 	{
-		public TraceEventCache()
+		internal Guid ActivityId
 		{
-			this.started = DateTime.Now;
-			this.manager = Trace.CorrelationManager;
-			this.callstack = Environment.StackTrace;
-			this.timestamp = Stopwatch.GetTimestamp();
-			this.thread = Thread.CurrentThread.Name;
-			this.process = Process.GetCurrentProcess().Id;
+			get
+			{
+				return Trace.CorrelationManager.ActivityId;
+			}
 		}
 
 		public string Callstack
 		{
 			get
 			{
-				return this.callstack;
-			}
-		}
-
-		public DateTime DateTime
-		{
-			get
-			{
-				return this.started;
+				if (this.stackTrace == null)
+				{
+					this.stackTrace = Environment.StackTrace;
+				}
+				return this.stackTrace;
 			}
 		}
 
@@ -36,7 +31,19 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.manager.LogicalOperationStack;
+				return Trace.CorrelationManager.LogicalOperationStack;
+			}
+		}
+
+		public DateTime DateTime
+		{
+			get
+			{
+				if (this.dateTime == DateTime.MinValue)
+				{
+					this.dateTime = DateTime.UtcNow;
+				}
+				return this.dateTime;
 			}
 		}
 
@@ -44,7 +51,7 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.process;
+				return TraceEventCache.GetProcessId();
 			}
 		}
 
@@ -52,7 +59,7 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.thread;
+				return TraceEventCache.GetThreadId().ToString(CultureInfo.InvariantCulture);
 			}
 		}
 
@@ -60,20 +67,56 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.timestamp;
+				if (this.timeStamp == -1L)
+				{
+					this.timeStamp = Stopwatch.GetTimestamp();
+				}
+				return this.timeStamp;
 			}
 		}
 
-		private DateTime started;
+		private static void InitProcessInfo()
+		{
+			if (TraceEventCache.processName == null)
+			{
+				Process currentProcess = Process.GetCurrentProcess();
+				try
+				{
+					TraceEventCache.processId = currentProcess.Id;
+					TraceEventCache.processName = currentProcess.ProcessName;
+				}
+				finally
+				{
+					currentProcess.Dispose();
+				}
+			}
+		}
 
-		private CorrelationManager manager;
+		internal static int GetProcessId()
+		{
+			TraceEventCache.InitProcessInfo();
+			return TraceEventCache.processId;
+		}
 
-		private string callstack;
+		internal static string GetProcessName()
+		{
+			TraceEventCache.InitProcessInfo();
+			return TraceEventCache.processName;
+		}
 
-		private string thread;
+		internal static int GetThreadId()
+		{
+			return Thread.CurrentThread.ManagedThreadId;
+		}
 
-		private int process;
+		private static volatile int processId;
 
-		private long timestamp;
+		private static volatile string processName;
+
+		private long timeStamp = -1L;
+
+		private DateTime dateTime = DateTime.MinValue;
+
+		private string stackTrace;
 	}
 }

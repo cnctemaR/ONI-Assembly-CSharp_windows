@@ -6,20 +6,28 @@ namespace System.Data
 	[Serializable]
 	public class DeletedRowInaccessibleException : DataException
 	{
-		public DeletedRowInaccessibleException()
+		protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
+			throw new PlatformNotSupportedException();
 		}
 
-		protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context)
+		public DeletedRowInaccessibleException()
+			: base("Deleted rows inaccessible.")
 		{
+			base.HResult = -2146232031;
 		}
 
 		public DeletedRowInaccessibleException(string s)
+			: base(s)
 		{
+			base.HResult = -2146232031;
 		}
 
 		public DeletedRowInaccessibleException(string message, Exception innerException)
+			: base(message, innerException)
 		{
+			base.HResult = -2146232031;
 		}
 	}
 }

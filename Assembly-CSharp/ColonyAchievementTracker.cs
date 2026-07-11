@@ -100,11 +100,9 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			if (SteamAchievementService.Instance)
 			{
 				SteamAchievementService.Instance.Unlock(colonyAchievement.steamAchievementId);
+				return;
 			}
-			else
-			{
-				global::Debug.LogWarningFormat("Steam achievement [{0}] was achieved, but achievement service was null", new object[] { colonyAchievement.steamAchievementId });
-			}
+			global::Debug.LogWarningFormat("Steam achievement [{0}] was achieved, but achievement service was null", new object[] { colonyAchievement.steamAchievementId });
 		}
 	}
 
@@ -131,8 +129,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		component.body = string.Format(COLONY_ACHIEVEMENTS.PRE_VICTORY_MESSAGE_BODY, "<b>" + Db.Get().ColonyAchievements.Get(achievementID).Name + "</b>\n" + Db.Get().ColonyAchievements.Get(achievementID).description);
 		component.Show(true);
 		CameraController.Instance.SetWorldInteractive(false);
-		StoryMessageScreen storyMessageScreen = component;
-		storyMessageScreen.OnClose = (global::System.Action)Delegate.Combine(storyMessageScreen.OnClose, new global::System.Action(delegate
+		component.OnClose = (global::System.Action)Delegate.Combine(component.OnClose, new global::System.Action(delegate
 		{
 			SpeedControlScreen.Instance.SetSpeed(1);
 			if (!SpeedControlScreen.Instance.IsPaused)
@@ -252,9 +249,10 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			{
 				dictionary.Add(cycle, 0);
 			}
-			Dictionary<int, int> dictionary2;
-			int num;
-			(dictionary2 = dictionary)[num = cycle] = dictionary2[num] + 1;
+			Dictionary<int, int> dictionary2 = dictionary;
+			int num = cycle;
+			int num2 = dictionary2[num];
+			dictionary2[num] = num2 + 1;
 		}
 	}
 
@@ -265,11 +263,9 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			return;
 		}
 		bool flag = false;
-		Equipment equipment = driver.GetComponent<MinionIdentity>().GetEquipment();
-		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
+		foreach (AssignableSlotInstance assignableSlotInstance in driver.GetComponent<MinionIdentity>().GetEquipment().Slots)
 		{
-			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
-			Equippable equippable = equipmentSlotInstance.assignable as Equippable;
+			Equippable equippable = ((EquipmentSlotInstance)assignableSlotInstance).assignable as Equippable;
 			if (equippable)
 			{
 				KPrefabID component = equippable.GetComponent<KPrefabID>();
@@ -287,8 +283,9 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			if (!this.dupesCompleteChoresInSuits.ContainsKey(cycle))
 			{
 				this.dupesCompleteChoresInSuits.Add(cycle, new List<int> { instanceID });
+				return;
 			}
-			else if (!this.dupesCompleteChoresInSuits[cycle].Contains(instanceID))
+			if (!this.dupesCompleteChoresInSuits[cycle].Contains(instanceID))
 			{
 				this.dupesCompleteChoresInSuits[cycle].Add(instanceID);
 			}

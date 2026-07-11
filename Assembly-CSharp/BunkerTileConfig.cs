@@ -46,18 +46,15 @@ public class BunkerTileConfig : IBuildingConfig
 		simCellOccupier.strengthMultiplier = 10f;
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
-		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
-		kanimGridTileVisualizer.blockTileConnectorID = BunkerTileConfig.BlockTileConnectorID;
-		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
-		buildingHP.destroyOnDamaged = true;
+		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = BunkerTileConfig.BlockTileConnectorID;
+		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RemoveLoopingSounds(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.FloorTiles, false);
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Bunker, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Bunker, false);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

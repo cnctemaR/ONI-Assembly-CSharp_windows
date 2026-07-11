@@ -16,9 +16,23 @@ namespace YamlDotNet.Serialization
 		public SerializerBuilder()
 		{
 			this.typeInspectorFactories.Add(typeof(CachedTypeInspector), (ITypeInspector inner) => new CachedTypeInspector(inner));
-			this.typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), (ITypeInspector inner) => (this.namingConvention == null) ? inner : new NamingConventionTypeInspector(inner, this.namingConvention));
+			this.typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), delegate(ITypeInspector inner)
+			{
+				if (this.namingConvention == null)
+				{
+					return inner;
+				}
+				return new NamingConventionTypeInspector(inner, this.namingConvention);
+			});
 			this.typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), (ITypeInspector inner) => new YamlAttributesTypeInspector(inner));
-			this.typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), (ITypeInspector inner) => (this.overrides == null) ? inner : new YamlAttributeOverridesInspector(inner, this.overrides.Clone()));
+			this.typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), delegate(ITypeInspector inner)
+			{
+				if (this.overrides == null)
+				{
+					return inner;
+				}
+				return new YamlAttributeOverridesInspector(inner, this.overrides.Clone());
+			});
 			this.preProcessingPhaseObjectGraphVisitorFactories = new LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>>();
 			this.preProcessingPhaseObjectGraphVisitorFactories.Add(typeof(AnchorAssigner), (IEnumerable<IYamlTypeConverter> typeConverters) => new AnchorAssigner(typeConverters));
 			this.emissionPhaseObjectGraphVisitorFactories = new LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>>();
@@ -26,9 +40,10 @@ namespace YamlDotNet.Serialization
 			this.emissionPhaseObjectGraphVisitorFactories.Add(typeof(AnchorAssigningObjectGraphVisitor), (EmissionPhaseObjectGraphVisitorArgs args) => new AnchorAssigningObjectGraphVisitor(args.InnerVisitor, args.EventEmitter, args.GetPreProcessingPhaseObjectGraphVisitor<AnchorAssigner>()));
 			this.emissionPhaseObjectGraphVisitorFactories.Add(typeof(DefaultExclusiveObjectGraphVisitor), (EmissionPhaseObjectGraphVisitorArgs args) => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor));
 			this.eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>();
-			this.eventEmitterFactories.Add(typeof(TypeAssigningEventEmitter), (IEventEmitter inner) => new TypeAssigningEventEmitter(inner, false, this.tagMappings));
+			this.eventEmitterFactories.Add(typeof(TypeAssigningEventEmitter), (IEventEmitter inner) => new TypeAssigningEventEmitter(inner, false));
 			this.objectGraphTraversalStrategyFactory = (ITypeInspector typeInspector, ITypeResolver typeResolver, IEnumerable<IYamlTypeConverter> typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, 50, this.namingConvention ?? new NullNamingConvention());
 			base.WithTypeResolver(new DynamicTypeResolver());
+			this.WithEventEmitter<CustomTagEventEmitter>((IEventEmitter inner) => new CustomTagEventEmitter(inner, this.tagMappings));
 		}
 
 		protected override SerializerBuilder Self
@@ -125,7 +140,7 @@ namespace YamlDotNet.Serialization
 		public SerializerBuilder EnsureRoundtrip()
 		{
 			this.objectGraphTraversalStrategyFactory = (ITypeInspector typeInspector, ITypeResolver typeResolver, IEnumerable<IYamlTypeConverter> typeConverters) => new RoundtripObjectGraphTraversalStrategy(typeConverters, typeInspector, typeResolver, 50);
-			this.WithEventEmitter<TypeAssigningEventEmitter>((IEventEmitter inner) => new TypeAssigningEventEmitter(inner, true, this.tagMappings), delegate(IRegistrationLocationSelectionSyntax<IEventEmitter> loc)
+			this.WithEventEmitter<TypeAssigningEventEmitter>((IEventEmitter inner) => new TypeAssigningEventEmitter(inner, true), delegate(IRegistrationLocationSelectionSyntax<IEventEmitter> loc)
 			{
 				loc.InsteadOf<TypeAssigningEventEmitter>();
 			});
@@ -298,7 +313,7 @@ namespace YamlDotNet.Serialization
 
 			public void SerializeValue(IEmitter emitter, object value, Type type)
 			{
-				Type type2 = ((type == null) ? ((value == null) ? typeof(object) : value.GetType()) : type);
+				Type type2 = ((type != null) ? type : ((value != null) ? value.GetType() : typeof(object)));
 				Type type3 = type ?? typeof(object);
 				ObjectDescriptor objectDescriptor = new ObjectDescriptor(value, type2, type3);
 				List<IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitors = this.preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(this.typeConverters);

@@ -2,12 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
 	[DisallowMultipleComponent]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	public abstract class LayoutGroup : UIBehaviour, ILayoutElement, ILayoutGroup, ILayoutController
 	{
@@ -295,7 +294,6 @@ namespace UnityEngine.UI
 		[SerializeField]
 		protected RectOffset m_Padding = new RectOffset();
 
-		[FormerlySerializedAs("m_Alignment")]
 		[SerializeField]
 		protected TextAnchor m_ChildAlignment = TextAnchor.UpperLeft;
 

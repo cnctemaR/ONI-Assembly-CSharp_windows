@@ -7,7 +7,11 @@ public class WidgetTransition : MonoBehaviour
 	{
 		get
 		{
-			return (!(this.canvasGroup == null)) ? this.canvasGroup : (this.canvasGroup = base.gameObject.FindOrAddUnityComponent<CanvasGroup>());
+			if (!(this.canvasGroup == null))
+			{
+				return this.canvasGroup;
+			}
+			return this.canvasGroup = base.gameObject.FindOrAddUnityComponent<CanvasGroup>();
 		}
 	}
 

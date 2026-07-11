@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
@@ -13,9 +14,8 @@ namespace System.IO
 			{
 				throw new ArgumentNullException("s");
 			}
-			this.source = s;
-			this.nextChar = 0;
-			this.sourceLength = s.Length;
+			this._s = s;
+			this._length = ((s == null) ? 0 : s.Length);
 		}
 
 		public override void Close()
@@ -25,106 +25,177 @@ namespace System.IO
 
 		protected override void Dispose(bool disposing)
 		{
-			this.source = null;
+			this._s = null;
+			this._pos = 0;
+			this._length = 0;
 			base.Dispose(disposing);
 		}
 
 		public override int Peek()
 		{
-			this.CheckObjectDisposedException();
-			if (this.nextChar >= this.sourceLength)
+			if (this._s == null)
+			{
+				__Error.ReaderClosed();
+			}
+			if (this._pos == this._length)
 			{
 				return -1;
 			}
-			return (int)this.source[this.nextChar];
+			return (int)this._s[this._pos];
 		}
 
 		public override int Read()
 		{
-			this.CheckObjectDisposedException();
-			if (this.nextChar >= this.sourceLength)
+			if (this._s == null)
+			{
+				__Error.ReaderClosed();
+			}
+			if (this._pos == this._length)
 			{
 				return -1;
 			}
-			return (int)this.source[this.nextChar++];
+			string s = this._s;
+			int pos = this._pos;
+			this._pos = pos + 1;
+			return (int)s[pos];
 		}
 
 		public override int Read([In] [Out] char[] buffer, int index, int count)
 		{
-			this.CheckObjectDisposedException();
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer");
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (buffer.Length - index < count)
 			{
-				throw new ArgumentException();
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			if (index < 0 || count < 0)
+			if (this._s == null)
 			{
-				throw new ArgumentOutOfRangeException();
+				__Error.ReaderClosed();
 			}
-			int num;
-			if (this.nextChar > this.sourceLength - count)
+			int num = this._length - this._pos;
+			if (num > 0)
 			{
-				num = this.sourceLength - this.nextChar;
+				if (num > count)
+				{
+					num = count;
+				}
+				this._s.CopyTo(this._pos, buffer, index, num);
+				this._pos += num;
+			}
+			return num;
+		}
+
+		public override string ReadToEnd()
+		{
+			if (this._s == null)
+			{
+				__Error.ReaderClosed();
+			}
+			string text;
+			if (this._pos == 0)
+			{
+				text = this._s;
 			}
 			else
 			{
-				num = count;
+				text = this._s.Substring(this._pos, this._length - this._pos);
 			}
-			this.source.CopyTo(this.nextChar, buffer, index, num);
-			this.nextChar += num;
-			return num;
+			this._pos = this._length;
+			return text;
 		}
 
 		public override string ReadLine()
 		{
-			this.CheckObjectDisposedException();
-			int i;
-			for (i = this.nextChar; i < this.sourceLength; i++)
+			if (this._s == null)
 			{
-				char c = this.source[i];
+				__Error.ReaderClosed();
+			}
+			int i;
+			for (i = this._pos; i < this._length; i++)
+			{
+				char c = this._s[i];
 				if (c == '\r' || c == '\n')
 				{
-					string text = this.source.Substring(this.nextChar, i - this.nextChar);
-					this.nextChar = i + 1;
-					if (c == '\r' && this.nextChar < this.sourceLength && this.source[this.nextChar] == '\n')
+					string text = this._s.Substring(this._pos, i - this._pos);
+					this._pos = i + 1;
+					if (c == '\r' && this._pos < this._length && this._s[this._pos] == '\n')
 					{
-						this.nextChar++;
+						this._pos++;
 					}
 					return text;
 				}
 			}
-			if (i > this.nextChar)
+			if (i > this._pos)
 			{
-				string text2 = this.source.Substring(this.nextChar, i - this.nextChar);
-				this.nextChar = i;
+				string text2 = this._s.Substring(this._pos, i - this._pos);
+				this._pos = i;
 				return text2;
 			}
 			return null;
 		}
 
-		public override string ReadToEnd()
+		[ComVisible(false)]
+		public override Task<string> ReadLineAsync()
 		{
-			this.CheckObjectDisposedException();
-			string text = this.source.Substring(this.nextChar, this.sourceLength - this.nextChar);
-			this.nextChar = this.sourceLength;
-			return text;
+			return Task.FromResult<string>(this.ReadLine());
 		}
 
-		private void CheckObjectDisposedException()
+		[ComVisible(false)]
+		public override Task<string> ReadToEndAsync()
 		{
-			if (this.source == null)
+			return Task.FromResult<string>(this.ReadToEnd());
+		}
+
+		[ComVisible(false)]
+		public override Task<int> ReadBlockAsync(char[] buffer, int index, int count)
+		{
+			if (buffer == null)
 			{
-				throw new ObjectDisposedException("StringReader", Locale.GetText("Cannot read from a closed StringReader"));
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
 			}
+			if (index < 0 || count < 0)
+			{
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			return Task.FromResult<int>(this.ReadBlock(buffer, index, count));
 		}
 
-		private string source;
+		[ComVisible(false)]
+		public override Task<int> ReadAsync(char[] buffer, int index, int count)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0 || count < 0)
+			{
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			return Task.FromResult<int>(this.Read(buffer, index, count));
+		}
 
-		private int nextChar;
+		private string _s;
 
-		private int sourceLength;
+		private int _pos;
+
+		private int _length;
 	}
 }

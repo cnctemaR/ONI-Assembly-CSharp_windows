@@ -57,8 +57,7 @@ public class KSnap : MonoBehaviour
 		{
 			return;
 		}
-		RectTransform rectTransform = base.transform.rectTransform();
-		rectTransform.GetWorldCorners(this.corners);
+		base.transform.rectTransform().GetWorldCorners(this.corners);
 		Vector3 zero = Vector3.zero;
 		foreach (Vector3 vector in this.corners)
 		{

@@ -1,52 +1,295 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
 	[ComVisible(true)]
-	public class EventDescriptorCollection : IList, ICollection, IEnumerable
+	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
+	public class EventDescriptorCollection : ICollection, IEnumerable, IList
 	{
-		private EventDescriptorCollection()
-		{
-		}
-
-		internal EventDescriptorCollection(ArrayList list)
-		{
-			this.eventList = list;
-		}
-
 		public EventDescriptorCollection(EventDescriptor[] events)
-			: this(events, false)
 		{
+			this.events = events;
+			if (events == null)
+			{
+				this.events = new EventDescriptor[0];
+				this.eventCount = 0;
+			}
+			else
+			{
+				this.eventCount = this.events.Length;
+			}
+			this.eventsOwned = true;
 		}
 
 		public EventDescriptorCollection(EventDescriptor[] events, bool readOnly)
+			: this(events)
 		{
-			this.isReadOnly = readOnly;
-			if (events == null)
+			this.readOnly = readOnly;
+		}
+
+		private EventDescriptorCollection(EventDescriptor[] events, int eventCount, string[] namedSort, IComparer comparer)
+		{
+			this.eventsOwned = false;
+			if (namedSort != null)
+			{
+				this.namedSort = (string[])namedSort.Clone();
+			}
+			this.comparer = comparer;
+			this.events = events;
+			this.eventCount = eventCount;
+			this.needSort = true;
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this.eventCount;
+			}
+		}
+
+		public virtual EventDescriptor this[int index]
+		{
+			get
+			{
+				if (index >= this.eventCount)
+				{
+					throw new IndexOutOfRangeException();
+				}
+				this.EnsureEventsOwned();
+				return this.events[index];
+			}
+		}
+
+		public virtual EventDescriptor this[string name]
+		{
+			get
+			{
+				return this.Find(name, false);
+			}
+		}
+
+		public int Add(EventDescriptor value)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			this.EnsureSize(this.eventCount + 1);
+			EventDescriptor[] array = this.events;
+			int num = this.eventCount;
+			this.eventCount = num + 1;
+			array[num] = value;
+			return this.eventCount - 1;
+		}
+
+		public void Clear()
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			this.eventCount = 0;
+		}
+
+		public bool Contains(EventDescriptor value)
+		{
+			return this.IndexOf(value) >= 0;
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this.EnsureEventsOwned();
+			Array.Copy(this.events, 0, array, index, this.Count);
+		}
+
+		private void EnsureEventsOwned()
+		{
+			if (!this.eventsOwned)
+			{
+				this.eventsOwned = true;
+				if (this.events != null)
+				{
+					EventDescriptor[] array = new EventDescriptor[this.Count];
+					Array.Copy(this.events, 0, array, 0, this.Count);
+					this.events = array;
+				}
+			}
+			if (this.needSort)
+			{
+				this.needSort = false;
+				this.InternalSort(this.namedSort);
+			}
+		}
+
+		private void EnsureSize(int sizeNeeded)
+		{
+			if (sizeNeeded <= this.events.Length)
 			{
 				return;
 			}
-			for (int i = 0; i < events.Length; i++)
+			if (this.events == null || this.events.Length == 0)
 			{
-				this.Add(events[i]);
+				this.eventCount = 0;
+				this.events = new EventDescriptor[sizeNeeded];
+				return;
+			}
+			this.EnsureEventsOwned();
+			EventDescriptor[] array = new EventDescriptor[Math.Max(sizeNeeded, this.events.Length * 2)];
+			Array.Copy(this.events, 0, array, 0, this.eventCount);
+			this.events = array;
+		}
+
+		public virtual EventDescriptor Find(string name, bool ignoreCase)
+		{
+			EventDescriptor eventDescriptor = null;
+			if (ignoreCase)
+			{
+				for (int i = 0; i < this.Count; i++)
+				{
+					if (string.Equals(this.events[i].Name, name, StringComparison.OrdinalIgnoreCase))
+					{
+						eventDescriptor = this.events[i];
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (int j = 0; j < this.Count; j++)
+				{
+					if (string.Equals(this.events[j].Name, name, StringComparison.Ordinal))
+					{
+						eventDescriptor = this.events[j];
+						break;
+					}
+				}
+			}
+			return eventDescriptor;
+		}
+
+		public int IndexOf(EventDescriptor value)
+		{
+			return Array.IndexOf<EventDescriptor>(this.events, value, 0, this.eventCount);
+		}
+
+		public void Insert(int index, EventDescriptor value)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			this.EnsureSize(this.eventCount + 1);
+			if (index < this.eventCount)
+			{
+				Array.Copy(this.events, index, this.events, index + 1, this.eventCount - index);
+			}
+			this.events[index] = value;
+			this.eventCount++;
+		}
+
+		public void Remove(EventDescriptor value)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			int num = this.IndexOf(value);
+			if (num != -1)
+			{
+				this.RemoveAt(num);
 			}
 		}
 
-		void IList.Clear()
+		public void RemoveAt(int index)
 		{
-			this.Clear();
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			if (index < this.eventCount - 1)
+			{
+				Array.Copy(this.events, index + 1, this.events, index, this.eventCount - index - 1);
+			}
+			this.events[this.eventCount - 1] = null;
+			this.eventCount--;
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
+		public IEnumerator GetEnumerator()
 		{
-			return this.GetEnumerator();
+			if (this.events.Length == this.eventCount)
+			{
+				return this.events.GetEnumerator();
+			}
+			return new ArraySubsetEnumerator(this.events, this.eventCount);
 		}
 
-		void IList.RemoveAt(int index)
+		public virtual EventDescriptorCollection Sort()
 		{
-			this.RemoveAt(index);
+			return new EventDescriptorCollection(this.events, this.eventCount, this.namedSort, this.comparer);
+		}
+
+		public virtual EventDescriptorCollection Sort(string[] names)
+		{
+			return new EventDescriptorCollection(this.events, this.eventCount, names, this.comparer);
+		}
+
+		public virtual EventDescriptorCollection Sort(string[] names, IComparer comparer)
+		{
+			return new EventDescriptorCollection(this.events, this.eventCount, names, comparer);
+		}
+
+		public virtual EventDescriptorCollection Sort(IComparer comparer)
+		{
+			return new EventDescriptorCollection(this.events, this.eventCount, this.namedSort, comparer);
+		}
+
+		protected void InternalSort(string[] names)
+		{
+			if (this.events == null || this.events.Length == 0)
+			{
+				return;
+			}
+			this.InternalSort(this.comparer);
+			if (names != null && names.Length != 0)
+			{
+				ArrayList arrayList = new ArrayList(this.events);
+				int num = 0;
+				int num2 = this.events.Length;
+				for (int i = 0; i < names.Length; i++)
+				{
+					for (int j = 0; j < num2; j++)
+					{
+						EventDescriptor eventDescriptor = (EventDescriptor)arrayList[j];
+						if (eventDescriptor != null && eventDescriptor.Name.Equals(names[i]))
+						{
+							this.events[num++] = eventDescriptor;
+							arrayList[j] = null;
+							break;
+						}
+					}
+				}
+				for (int k = 0; k < num2; k++)
+				{
+					if (arrayList[k] != null)
+					{
+						this.events[num++] = (EventDescriptor)arrayList[k];
+					}
+				}
+			}
+		}
+
+		protected void InternalSort(IComparer sorter)
+		{
+			if (sorter == null)
+			{
+				TypeDescriptor.SortDescriptorArray(this);
+				return;
+			}
+			Array.Sort(this.events, sorter);
 		}
 
 		int ICollection.Count
@@ -57,9 +300,56 @@ namespace System.ComponentModel
 			}
 		}
 
+		bool ICollection.IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return null;
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				return this[index];
+			}
+			set
+			{
+				if (this.readOnly)
+				{
+					throw new NotSupportedException();
+				}
+				if (index >= this.eventCount)
+				{
+					throw new IndexOutOfRangeException();
+				}
+				this.EnsureEventsOwned();
+				this.events[index] = (EventDescriptor)value;
+			}
+		}
+
 		int IList.Add(object value)
 		{
 			return this.Add((EventDescriptor)value);
+		}
+
+		void IList.Clear()
+		{
+			this.Clear();
 		}
 
 		bool IList.Contains(object value)
@@ -82,275 +372,40 @@ namespace System.ComponentModel
 			this.Remove((EventDescriptor)value);
 		}
 
-		bool IList.IsFixedSize
+		void IList.RemoveAt(int index)
 		{
-			get
-			{
-				return this.isReadOnly;
-			}
+			this.RemoveAt(index);
 		}
 
 		bool IList.IsReadOnly
 		{
 			get
 			{
-				return this.isReadOnly;
+				return this.readOnly;
 			}
 		}
 
-		object IList.this[int index]
+		bool IList.IsFixedSize
 		{
 			get
 			{
-				return this.eventList[index];
-			}
-			set
-			{
-				if (this.isReadOnly)
-				{
-					throw new NotSupportedException("The collection is read-only");
-				}
-				this.eventList[index] = value;
+				return this.readOnly;
 			}
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.eventList.CopyTo(array, index);
-		}
+		private EventDescriptor[] events;
 
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return false;
-			}
-		}
+		private string[] namedSort;
 
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return null;
-			}
-		}
+		private IComparer comparer;
 
-		public int Add(EventDescriptor value)
-		{
-			if (this.isReadOnly)
-			{
-				throw new NotSupportedException("The collection is read-only");
-			}
-			return this.eventList.Add(value);
-		}
+		private bool eventsOwned = true;
 
-		public void Clear()
-		{
-			if (this.isReadOnly)
-			{
-				throw new NotSupportedException("The collection is read-only");
-			}
-			this.eventList.Clear();
-		}
+		private bool needSort;
 
-		public bool Contains(EventDescriptor value)
-		{
-			return this.eventList.Contains(value);
-		}
+		private int eventCount;
 
-		public virtual EventDescriptor Find(string name, bool ignoreCase)
-		{
-			foreach (object obj in this.eventList)
-			{
-				EventDescriptor eventDescriptor = (EventDescriptor)obj;
-				if (ignoreCase)
-				{
-					if (string.Compare(name, eventDescriptor.Name, StringComparison.OrdinalIgnoreCase) == 0)
-					{
-						return eventDescriptor;
-					}
-				}
-				else if (string.Compare(name, eventDescriptor.Name, StringComparison.Ordinal) == 0)
-				{
-					return eventDescriptor;
-				}
-			}
-			return null;
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.eventList.GetEnumerator();
-		}
-
-		public int IndexOf(EventDescriptor value)
-		{
-			return this.eventList.IndexOf(value);
-		}
-
-		public void Insert(int index, EventDescriptor value)
-		{
-			if (this.isReadOnly)
-			{
-				throw new NotSupportedException("The collection is read-only");
-			}
-			this.eventList.Insert(index, value);
-		}
-
-		public void Remove(EventDescriptor value)
-		{
-			if (this.isReadOnly)
-			{
-				throw new NotSupportedException("The collection is read-only");
-			}
-			this.eventList.Remove(value);
-		}
-
-		public void RemoveAt(int index)
-		{
-			if (this.isReadOnly)
-			{
-				throw new NotSupportedException("The collection is read-only");
-			}
-			this.eventList.RemoveAt(index);
-		}
-
-		public virtual EventDescriptorCollection Sort()
-		{
-			EventDescriptorCollection eventDescriptorCollection = this.CloneCollection();
-			eventDescriptorCollection.InternalSort(null);
-			return eventDescriptorCollection;
-		}
-
-		public virtual EventDescriptorCollection Sort(IComparer comparer)
-		{
-			EventDescriptorCollection eventDescriptorCollection = this.CloneCollection();
-			eventDescriptorCollection.InternalSort(comparer);
-			return eventDescriptorCollection;
-		}
-
-		public virtual EventDescriptorCollection Sort(string[] order)
-		{
-			EventDescriptorCollection eventDescriptorCollection = this.CloneCollection();
-			eventDescriptorCollection.InternalSort(order);
-			return eventDescriptorCollection;
-		}
-
-		public virtual EventDescriptorCollection Sort(string[] order, IComparer comparer)
-		{
-			EventDescriptorCollection eventDescriptorCollection = this.CloneCollection();
-			if (order != null)
-			{
-				ArrayList arrayList = eventDescriptorCollection.ExtractItems(order);
-				eventDescriptorCollection.InternalSort(comparer);
-				arrayList.AddRange(eventDescriptorCollection.eventList);
-				eventDescriptorCollection.eventList = arrayList;
-			}
-			else
-			{
-				eventDescriptorCollection.InternalSort(comparer);
-			}
-			return eventDescriptorCollection;
-		}
-
-		protected void InternalSort(IComparer comparer)
-		{
-			if (comparer == null)
-			{
-				comparer = MemberDescriptor.DefaultComparer;
-			}
-			this.eventList.Sort(comparer);
-		}
-
-		protected void InternalSort(string[] order)
-		{
-			if (order != null)
-			{
-				ArrayList arrayList = this.ExtractItems(order);
-				this.InternalSort(null);
-				arrayList.AddRange(this.eventList);
-				this.eventList = arrayList;
-			}
-			else
-			{
-				this.InternalSort(null);
-			}
-		}
-
-		private ArrayList ExtractItems(string[] names)
-		{
-			ArrayList arrayList = new ArrayList(this.eventList.Count);
-			object[] array = new object[names.Length];
-			for (int i = 0; i < this.eventList.Count; i++)
-			{
-				EventDescriptor eventDescriptor = (EventDescriptor)this.eventList[i];
-				int num = Array.IndexOf<string>(names, eventDescriptor.Name);
-				if (num != -1)
-				{
-					array[num] = eventDescriptor;
-					this.eventList.RemoveAt(i);
-					i--;
-				}
-			}
-			foreach (object obj in array)
-			{
-				if (obj != null)
-				{
-					arrayList.Add(obj);
-				}
-			}
-			return arrayList;
-		}
-
-		private EventDescriptorCollection CloneCollection()
-		{
-			return new EventDescriptorCollection
-			{
-				eventList = (ArrayList)this.eventList.Clone()
-			};
-		}
-
-		internal EventDescriptorCollection Filter(Attribute[] attributes)
-		{
-			EventDescriptorCollection eventDescriptorCollection = new EventDescriptorCollection();
-			foreach (object obj in this.eventList)
-			{
-				EventDescriptor eventDescriptor = (EventDescriptor)obj;
-				if (eventDescriptor.Attributes.Contains(attributes))
-				{
-					eventDescriptorCollection.eventList.Add(eventDescriptor);
-				}
-			}
-			return eventDescriptorCollection;
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.eventList.Count;
-			}
-		}
-
-		public virtual EventDescriptor this[string name]
-		{
-			get
-			{
-				return this.Find(name, false);
-			}
-		}
-
-		public virtual EventDescriptor this[int index]
-		{
-			get
-			{
-				return (EventDescriptor)this.eventList[index];
-			}
-		}
-
-		private ArrayList eventList = new ArrayList();
-
-		private bool isReadOnly;
+		private bool readOnly;
 
 		public static readonly EventDescriptorCollection Empty = new EventDescriptorCollection(null, true);
 	}

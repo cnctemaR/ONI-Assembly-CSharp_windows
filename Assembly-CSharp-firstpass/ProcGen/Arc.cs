@@ -7,6 +7,8 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Arc
 	{
+		public Arc arc { get; private set; }
+
 		public Arc()
 		{
 		}
@@ -22,10 +24,8 @@ namespace ProcGen
 			this.type = type;
 		}
 
-		public Arc arc { get; private set; }
-
 		[Serialize]
-		public string type = string.Empty;
+		public string type = "";
 
 		[Serialize]
 		public TagSet tags;

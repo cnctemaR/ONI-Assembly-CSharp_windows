@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML string attribute.</para>
-	/// </summary>
 	public class UxmlStringAttributeDescription : UxmlAttributeDescription
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public UxmlStringAttributeDescription()
 		{
 			base.type = "string";
@@ -17,14 +11,8 @@ namespace UnityEngine.Experimental.UIElements
 			this.defaultValue = "";
 		}
 
-		/// <summary>
-		///   <para>The default value for the attribute.</para>
-		/// </summary>
 		public string defaultValue { get; set; }
 
-		/// <summary>
-		///   <para>The default value for the attribute, as a string.</para>
-		/// </summary>
 		public override string defaultValueAsString
 		{
 			get
@@ -33,16 +21,20 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieves the value of this attribute from the attribute bag. Returns it if it is found, otherwise return defaultValue.</para>
-		/// </summary>
-		/// <param name="bag">The bag of attributes.</param>
-		/// <returns>
-		///   <para>The value of the attribute.</para>
-		/// </returns>
+		[Obsolete("Pass a creation context to the method.")]
 		public string GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyString(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public string GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<string>(bag, cc, new Func<string, string, string>(UxmlStringAttributeDescription.ConvertValueToString), this.defaultValue);
+		}
+
+		private static string ConvertValueToString(string v, string defaultValue)
+		{
+			return v;
 		}
 	}
 }

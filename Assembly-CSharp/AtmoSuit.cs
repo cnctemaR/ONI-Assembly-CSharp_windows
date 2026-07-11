@@ -13,8 +13,7 @@ public class AtmoSuit : KMonoBehaviour
 	private void RefreshStatusEffects(object data)
 	{
 		Equippable component = base.GetComponent<Equippable>();
-		Storage component2 = base.GetComponent<Storage>();
-		bool flag = component2.Has(GameTags.AnyWater);
+		bool flag = base.GetComponent<Storage>().Has(GameTags.AnyWater);
 		if (component.assignee != null && flag)
 		{
 			Ownables soleOwner = component.assignee.GetSoleOwner();
@@ -23,10 +22,10 @@ public class AtmoSuit : KMonoBehaviour
 				GameObject targetGameObject = soleOwner.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
 				if (targetGameObject)
 				{
-					Effects component3 = targetGameObject.GetComponent<Effects>();
-					if (!component3.HasEffect("SoiledSuit"))
+					Effects component2 = targetGameObject.GetComponent<Effects>();
+					if (!component2.HasEffect("SoiledSuit"))
 					{
-						component3.Add("SoiledSuit", true);
+						component2.Add("SoiledSuit", true);
 					}
 				}
 			}

@@ -5,11 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>Navigation mesh builder interface.</para>
-	/// </summary>
-	[StaticAccessor("NavMeshBuilderBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/AI/Builder/NavMeshBuilder.bindings.h")]
+	[StaticAccessor("NavMeshBuilderBindings", StaticAccessorType.DoubleColon)]
 	public static class NavMeshBuilder
 	{
 		public static void CollectSources(Bounds includedWorldBounds, int includedLayerMask, NavMeshCollectGeometry geometry, int defaultArea, List<NavMeshBuildMarkup> markups, List<NavMeshBuildSource> results)
@@ -54,9 +51,11 @@ namespace UnityEngine.AI
 			{
 				throw new ArgumentNullException("sources");
 			}
-			NavMeshData navMeshData = new NavMeshData(buildSettings.agentTypeID);
-			navMeshData.position = position;
-			navMeshData.rotation = rotation;
+			NavMeshData navMeshData = new NavMeshData(buildSettings.agentTypeID)
+			{
+				position = position,
+				rotation = rotation
+			};
 			NavMeshBuilder.UpdateNavMeshDataListInternal(navMeshData, buildSettings, sources, localBounds);
 			return navMeshData;
 		}
@@ -92,13 +91,9 @@ namespace UnityEngine.AI
 			return NavMeshBuilder.UpdateNavMeshDataAsyncListInternal(data, buildSettings, sources, localBounds);
 		}
 
-		/// <summary>
-		///   <para>Cancels an asynchronous update of the specified NavMesh data. See Also: UpdateNavMeshDataAsync.</para>
-		/// </summary>
-		/// <param name="data">The data associated with asynchronous updating.</param>
+		[StaticAccessor("GetNavMeshManager().GetNavMeshBuildManager()", StaticAccessorType.Arrow)]
 		[NativeHeader("Modules/AI/NavMeshManager.h")]
 		[NativeMethod("Purge")]
-		[StaticAccessor("GetNavMeshManager().GetNavMeshBuildManager()", StaticAccessorType.Arrow)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Cancel(NavMeshData data);
 

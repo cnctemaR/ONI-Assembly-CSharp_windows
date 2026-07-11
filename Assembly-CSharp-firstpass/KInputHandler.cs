@@ -64,7 +64,7 @@ public class KInputHandler
 				if (this.mChildren[i].handler == handler)
 				{
 					this.mChildren.RemoveAt(i);
-					break;
+					return;
 				}
 			}
 		}
@@ -97,8 +97,9 @@ public class KInputHandler
 		if (e.Type == InputEventType.KeyDown)
 		{
 			this.HandleKeyDown((KButtonEvent)e);
+			return;
 		}
-		else if (e.Type == InputEventType.KeyUp)
+		if (InputEventType.KeyUp == e.Type)
 		{
 			this.HandleKeyUp((KButtonEvent)e);
 		}
@@ -163,9 +164,10 @@ public class KInputHandler
 
 	public static void Add(IInputHandler parent, GameObject child)
 	{
-		foreach (Component component in child.GetComponents<Component>())
+		Component[] components = child.GetComponents<Component>();
+		for (int i = 0; i < components.Length; i++)
 		{
-			IInputHandler inputHandler = component as IInputHandler;
+			IInputHandler inputHandler = components[i] as IInputHandler;
 			if (inputHandler != null)
 			{
 				KInputHandler.Add(parent, inputHandler, 0);

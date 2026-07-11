@@ -11,6 +11,15 @@ namespace VoronoiTree
 {
 	public class PowerDiagram
 	{
+		public VoronoiMesh<PowerDiagram.DualSite2d, Site, VoronoiEdge<PowerDiagram.DualSite2d, Site>> voronoiMesh { get; private set; }
+
+		public List<Site> GetSites()
+		{
+			return this.sites;
+		}
+
+		public int completedIterations { get; set; }
+
 		public PowerDiagram(Polygon polyBounds, IEnumerable<Site> newSites)
 		{
 			this.bounds = polyBounds;
@@ -39,19 +48,16 @@ namespace VoronoiTree
 			for (int i = 0; i < this.bounds.Vertices.Count; i++)
 			{
 				Vector2 vector2 = this.bounds.Vertices[i];
-				Vector2 vector3 = this.bounds.Vertices[(i >= this.bounds.Vertices.Count - 1) ? 0 : (i + 1)];
+				Vector2 vector3 = this.bounds.Vertices[(i < this.bounds.Vertices.Count - 1) ? (i + 1) : 0];
 				Vector2 vector4 = (vector2 - vector).normalized * 1000f;
-				Vector2 vector5 = vector2 + vector4;
-				Site site = new Site(vector5);
+				Site site = new Site(vector2 + vector4);
 				site.dummy = true;
 				this.externalEdgePoints.Add(site);
 				site.weight = Mathf.Epsilon;
 				site.currentWeight = Mathf.Epsilon;
 				this.dualSites.Add(new PowerDiagram.DualSite2d(site));
-				Vector2 vector6 = (vector3 - vector2) * 0.5f + vector3;
-				Vector2 vector7 = (vector6 - vector).normalized * 1000f;
-				Vector2 vector8 = vector3 + vector7;
-				Site site2 = new Site(vector8);
+				Vector2 vector5 = ((vector3 - vector2) * 0.5f + vector3 - vector).normalized * 1000f;
+				Site site2 = new Site(vector3 + vector5);
 				site2.dummy = true;
 				site2.weight = Mathf.Epsilon;
 				site2.currentWeight = Mathf.Epsilon;
@@ -59,15 +65,6 @@ namespace VoronoiTree
 				this.dualSites.Add(new PowerDiagram.DualSite2d(site2));
 			}
 		}
-
-		public VoronoiMesh<PowerDiagram.DualSite2d, Site, VoronoiEdge<PowerDiagram.DualSite2d, Site>> voronoiMesh { get; private set; }
-
-		public List<Site> GetSites()
-		{
-			return this.sites;
-		}
-
-		public int completedIterations { get; set; }
 
 		public void ComputePowerDiagram(int maxIterations, float threashold = 1f)
 		{
@@ -96,16 +93,17 @@ namespace VoronoiTree
 				num = 0f;
 				foreach (Site site2 in this.sites)
 				{
-					float num2 = ((site2.poly != null) ? site2.poly.Area() : 0.1f);
+					float num2 = ((site2.poly == null) ? 0.1f : site2.poly.Area());
 					float num3 = site2.weight / this.weightSum * this.bounds.Area();
 					num = Mathf.Max(Mathf.Abs(num2 - num3) / num3, num);
 				}
 				if (num < threashold)
 				{
 					this.completedIterations = i;
-					break;
+					return;
 				}
-				this.completedIterations++;
+				int completedIterations = this.completedIterations;
+				this.completedIterations = completedIterations + 1;
 			}
 		}
 
@@ -167,11 +165,10 @@ namespace VoronoiTree
 			{
 				list.Add(this.externalEdgePoints[i].ToDualSite());
 			}
-			VoronoiMesh<PowerDiagram.DualSite3d, PowerDiagram.TriangulationCellExt<PowerDiagram.DualSite3d>, VoronoiEdge<PowerDiagram.DualSite3d, PowerDiagram.TriangulationCellExt<PowerDiagram.DualSite3d>>> voronoiMesh = VoronoiMesh.Create<PowerDiagram.DualSite3d, PowerDiagram.TriangulationCellExt<PowerDiagram.DualSite3d>>(list);
-			foreach (PowerDiagram.TriangulationCellExt<PowerDiagram.DualSite3d> triangulationCellExt in voronoiMesh.Vertices)
+			foreach (ConvexFace<PowerDiagram.DualSite3d, PowerDiagram.TriangulationCellExt<PowerDiagram.DualSite3d>> convexFace in VoronoiMesh.Create<PowerDiagram.DualSite3d, PowerDiagram.TriangulationCellExt<PowerDiagram.DualSite3d>>(list).Vertices)
 			{
 				Vector3 vector = Vector3.zero;
-				foreach (PowerDiagram.DualSite3d dualSite3d in triangulationCellExt.Vertices)
+				foreach (PowerDiagram.DualSite3d dualSite3d in convexFace.Vertices)
 				{
 					vector += dualSite3d.coord;
 				}
@@ -244,18 +241,10 @@ namespace VoronoiTree
 							Vector2 zero = Vector2.zero;
 							Vector2 zero2 = Vector2.zero;
 							bool flag = site.poly.ClipSegment(lineSegment, ref lineSegment2, ref zero, ref zero2);
-							Vector2? p = lineSegment2.p0;
-							if (p != null)
+							if (lineSegment2.p0 != null && lineSegment2.p1 != null && flag)
 							{
-								Vector2? p2 = lineSegment2.p1;
-								if (p2 != null)
-								{
-									if (flag)
-									{
-										edge.corner0.SetPosition(lineSegment2.p0.Value);
-										edge.corner1.SetPosition(lineSegment2.p1.Value);
-									}
-								}
+								edge.corner0.SetPosition(lineSegment2.p0.Value);
+								edge.corner1.SetPosition(lineSegment2.p1.Value);
 							}
 						}
 					}
@@ -364,7 +353,7 @@ namespace VoronoiTree
 					if (this.ContainsVert(convexFaceExt.Adjacency[i], dualSite) && !list2.Contains(convexFaceExt.Adjacency[i]))
 					{
 						PowerDiagram.Edge edge = this.GetEdge(convexFaceExt, convexFaceExt.Adjacency[i]);
-						PowerDiagram.DualSite3d dualSite3d = ((edge.First != dualSite) ? edge.First : edge.Second);
+						PowerDiagram.DualSite3d dualSite3d = ((edge.First == dualSite) ? edge.Second : edge.First);
 						global::Debug.Assert(dualSite3d != dualSite, "We're our own neighbour??");
 						global::Debug.Assert(dualSite3d.site.id == -1 || !list.Contains(dualSite3d.site), "Tried adding a site twice!");
 						list.Add(dualSite3d.site);
@@ -394,31 +383,28 @@ namespace VoronoiTree
 				{
 					foreach (PowerDiagram.DualSite3d dualSite3d in convexFaceExt.Vertices)
 					{
-						if (!dualSite3d.site.dummy)
+						if (!dualSite3d.site.dummy && !dualSite3d.visited)
 						{
-							if (!dualSite3d.visited)
+							dualSite3d.visited = true;
+							List<Vector2> list2 = new List<Vector2>();
+							List<PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>> list3 = this.TouchingFaces(dualSite3d, convexFaceExt);
+							dualSite3d.site.neighbours = this.GenerateNeighbors(dualSite3d, convexFaceExt);
+							foreach (PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> convexFaceExt2 in list3)
 							{
-								dualSite3d.visited = true;
-								List<Vector2> list2 = new List<Vector2>();
-								List<PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>> list3 = this.TouchingFaces(dualSite3d, convexFaceExt);
-								dualSite3d.site.neighbours = this.GenerateNeighbors(dualSite3d, convexFaceExt);
-								foreach (PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> convexFaceExt2 in list3)
-								{
-									Vector2 dualPoint = convexFaceExt2.GetDualPoint();
-									list2.Add(dualPoint);
-								}
-								Polygon polygon = PowerDiagram.PolyForRandomPoints(list2);
-								Polygon polygon2 = polygon.Clip(this.bounds, ClipType.ctIntersection);
-								if (polygon2 == null)
-								{
-									polygon.DebugDraw(Color.yellow, false, 1f, 0f);
-									dualSite3d.site.poly.DebugDraw(Color.black, false, 1f, 2f);
-									DebugExtension.DebugCircle2d(dualSite3d.site.position, Color.magenta, 5f, 0f, true, 20f);
-								}
-								else
-								{
-									dualSite3d.site.poly = polygon2;
-								}
+								Vector2 dualPoint = convexFaceExt2.GetDualPoint();
+								list2.Add(dualPoint);
+							}
+							Polygon polygon = PowerDiagram.PolyForRandomPoints(list2);
+							Polygon polygon2 = polygon.Clip(this.bounds, ClipType.ctIntersection);
+							if (polygon2 == null)
+							{
+								polygon.DebugDraw(Color.yellow, false, 1f, 0f);
+								dualSite3d.site.poly.DebugDraw(Color.black, false, 1f, 2f);
+								DebugExtension.DebugCircle2d(dualSite3d.site.position, Color.magenta, 5f, 0f, true, 20f);
+							}
+							else
+							{
+								dualSite3d.site.poly = polygon2;
 							}
 						}
 					}
@@ -441,7 +427,7 @@ namespace VoronoiTree
 			float num = 0f;
 			foreach (Site site2 in sites)
 			{
-				float num2 = ((site2.poly != null) ? site2.poly.Area() : 0.1f);
+				float num2 = ((site2.poly == null) ? 0.1f : site2.poly.Area());
 				float num3 = site2.weight / this.weightSum * this.bounds.Area();
 				float num4 = Mathf.Sqrt(num2 / 3.1415927f);
 				float num5 = Mathf.Sqrt(num3 / 3.1415927f);
@@ -527,12 +513,9 @@ namespace VoronoiTree
 					global::Debug.Assert(dual3dSites[i].site.currentWeight != 0f);
 					for (int j = i + 1; j < dual3dSites.Count; j++)
 					{
-						if (!dual3dSites[j].site.dummy)
+						if (!dual3dSites[j].site.dummy && dual3dSites[i].coord == dual3dSites[j].coord)
 						{
-							if (dual3dSites[i].coord == dual3dSites[j].coord)
-							{
-								dual3dSites[j].coord += new Vector3(global::UnityEngine.Random.value, global::UnityEngine.Random.value, 0f);
-							}
+							dual3dSites[j].coord += new Vector3(global::UnityEngine.Random.value, global::UnityEngine.Random.value, 0f);
 						}
 					}
 				}
@@ -550,8 +533,7 @@ namespace VoronoiTree
 					(double)verts[i].y
 				};
 			}
-			ConvexHull<DefaultVertex, DefaultConvexFace<DefaultVertex>> convexHull = ConvexHull.Create(array, 1E-10);
-			double[][] array2 = convexHull.Points.Select<DefaultVertex, double[]>((DefaultVertex p) => p.Position).ToArray<double[]>();
+			double[][] array2 = ConvexHull.Create(array, 1E-10).Points.Select<DefaultVertex, double[]>((DefaultVertex p) => p.Position).ToArray<double[]>();
 			Polygon polygon = new Polygon();
 			for (int j = 0; j < array2.Length; j++)
 			{
@@ -646,24 +628,24 @@ namespace VoronoiTree
 			{
 				if (this.dualPoint.x == 0f && this.dualPoint.y == 0f)
 				{
-					TVertex vertex = this.vertex0;
-					float num = (float)vertex.Position[0];
-					TVertex vertex2 = this.vertex0;
-					float num2 = (float)vertex2.Position[1];
-					TVertex vertex3 = this.vertex0;
-					Vector3 vector = new Vector3(num, num2, (float)vertex3.Position[2]);
-					TVertex vertex4 = this.vertex1;
-					float num3 = (float)vertex4.Position[0];
-					TVertex vertex5 = this.vertex1;
-					float num4 = (float)vertex5.Position[1];
-					TVertex vertex6 = this.vertex1;
-					Vector3 vector2 = new Vector3(num3, num4, (float)vertex6.Position[2]);
-					TVertex vertex7 = this.vertex2;
-					float num5 = (float)vertex7.Position[0];
-					TVertex vertex8 = this.vertex2;
-					float num6 = (float)vertex8.Position[1];
-					TVertex vertex9 = this.vertex2;
-					Vector3 vector3 = new Vector3(num5, num6, (float)vertex9.Position[2]);
+					TVertex tvertex = this.vertex0;
+					float num = (float)tvertex.Position[0];
+					tvertex = this.vertex0;
+					float num2 = (float)tvertex.Position[1];
+					tvertex = this.vertex0;
+					Vector3 vector = new Vector3(num, num2, (float)tvertex.Position[2]);
+					tvertex = this.vertex1;
+					float num3 = (float)tvertex.Position[0];
+					tvertex = this.vertex1;
+					float num4 = (float)tvertex.Position[1];
+					tvertex = this.vertex1;
+					Vector3 vector2 = new Vector3(num3, num4, (float)tvertex.Position[2]);
+					tvertex = this.vertex2;
+					float num5 = (float)tvertex.Position[0];
+					tvertex = this.vertex2;
+					float num6 = (float)tvertex.Position[1];
+					tvertex = this.vertex2;
+					Vector3 vector3 = new Vector3(num5, num6, (float)tvertex.Position[2]);
 					double num7 = (double)(vector.y * (vector2.z - vector3.z) + vector2.y * (vector3.z - vector.z) + vector3.y * (vector.z - vector2.z));
 					double num8 = (double)(vector.z * (vector2.x - vector3.x) + vector2.z * (vector3.x - vector.x) + vector3.z * (vector.x - vector2.x));
 					double num9 = -0.5 / (double)(vector.x * (vector2.y - vector3.y) + vector2.x * (vector3.y - vector.y) + vector3.x * (vector.y - vector2.y));
@@ -716,8 +698,7 @@ namespace VoronoiTree
 			{
 				get
 				{
-					Vector2? vector = this.circumCenter;
-					this.circumCenter = new Vector2?((vector == null) ? this.GetCircumcenter() : vector.Value);
+					this.circumCenter = new Vector2?(this.circumCenter ?? this.GetCircumcenter());
 					return this.circumCenter.Value;
 				}
 			}
@@ -782,12 +763,6 @@ namespace VoronoiTree
 
 		public class DualSite2d : IVertex
 		{
-			public DualSite2d(Site site)
-			{
-				this.site = site;
-				this.visited = false;
-			}
-
 			public double[] Position
 			{
 				get
@@ -803,10 +778,35 @@ namespace VoronoiTree
 			public Site site { get; set; }
 
 			public bool visited { get; set; }
+
+			public DualSite2d(Site site)
+			{
+				this.site = site;
+				this.visited = false;
+			}
 		}
 
 		public class DualSite3d : IVertex
 		{
+			public double[] Position
+			{
+				get
+				{
+					return new double[]
+					{
+						(double)this.coord[0],
+						(double)this.coord[1],
+						(double)this.coord[2]
+					};
+				}
+			}
+
+			public Vector3 coord { get; set; }
+
+			public Site site { get; set; }
+
+			public bool visited { get; set; }
+
 			public DualSite3d()
 				: this(0.0, 0.0, 0.0)
 			{
@@ -830,25 +830,6 @@ namespace VoronoiTree
 				this.site = _originalSite;
 				this.visited = false;
 			}
-
-			public double[] Position
-			{
-				get
-				{
-					return new double[]
-					{
-						(double)this.coord[0],
-						(double)this.coord[1],
-						(double)this.coord[2]
-					};
-				}
-			}
-
-			public Vector3 coord { get; set; }
-
-			public Site site { get; set; }
-
-			public bool visited { get; set; }
 		}
 	}
 }

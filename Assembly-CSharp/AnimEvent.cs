@@ -4,21 +4,6 @@ using UnityEngine;
 [Serializable]
 public class AnimEvent
 {
-	public AnimEvent()
-	{
-	}
-
-	public AnimEvent(string file, string name, int frame)
-	{
-		this.file = ((!(file == string.Empty)) ? file : null);
-		if (this.file != null)
-		{
-			this.fileHash = new KAnimHashedString(this.file);
-		}
-		this.name = name;
-		this.frame = frame;
-	}
-
 	[SerializeField]
 	public string name { get; private set; }
 
@@ -27,6 +12,21 @@ public class AnimEvent
 
 	[SerializeField]
 	public int frame { get; private set; }
+
+	public AnimEvent()
+	{
+	}
+
+	public AnimEvent(string file, string name, int frame)
+	{
+		this.file = ((file == "") ? null : file);
+		if (this.file != null)
+		{
+			this.fileHash = new KAnimHashedString(this.file);
+		}
+		this.name = name;
+		this.frame = frame;
+	}
 
 	public void Play(AnimEventManager.EventPlayerData behaviour)
 	{
@@ -39,6 +39,7 @@ public class AnimEvent
 			if (behaviour.previousFrame < this.frame && behaviour.currentFrame >= this.frame)
 			{
 				this.OnPlay(behaviour);
+				return;
 			}
 		}
 		else if (behaviour.previousFrame > behaviour.currentFrame && (behaviour.previousFrame < this.frame || this.frame <= behaviour.currentFrame))

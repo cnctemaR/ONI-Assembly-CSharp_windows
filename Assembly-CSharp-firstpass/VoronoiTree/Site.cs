@@ -12,6 +12,8 @@ namespace VoronoiTree
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Site : TriangulationCell<PowerDiagram.DualSite2d, Site>
 	{
+		public bool dummy { get; set; }
+
 		public Site()
 		{
 			this.dummy = true;
@@ -39,8 +41,6 @@ namespace VoronoiTree
 			this.weight = siteWeight;
 			this.currentWeight = this.weight;
 		}
-
-		public bool dummy { get; set; }
 
 		[OnDeserializing]
 		internal void OnDeserializingMethod()
@@ -102,8 +102,7 @@ namespace VoronoiTree
 		{
 			get
 			{
-				Vector2? vector = this.circumCenter;
-				this.circumCenter = new Vector2?((vector == null) ? this.GetCircumcenter() : vector.Value);
+				this.circumCenter = new Vector2?(this.circumCenter ?? this.GetCircumcenter());
 				return this.circumCenter.Value;
 			}
 		}
@@ -116,8 +115,7 @@ namespace VoronoiTree
 				{
 					return this.poly.Centroid();
 				}
-				Vector2? vector = this.centroid;
-				this.centroid = new Vector2?((vector == null) ? this.GetCentroid() : vector.Value);
+				this.centroid = new Vector2?(this.centroid ?? this.GetCentroid());
 				return this.centroid.Value;
 			}
 		}

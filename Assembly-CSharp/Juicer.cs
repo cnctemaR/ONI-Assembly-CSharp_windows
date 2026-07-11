@@ -24,8 +24,7 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 	{
 		string text = tag.ProperName();
 		Descriptor descriptor = default(Descriptor);
-		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
-		string text2 = ((foodInfo == null) ? GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}") : GameUtil.GetFormattedCaloriesForItem(tag, mass, GameUtil.TimeSlice.None, true));
+		string text2 = ((EdiblesManager.GetFoodInfo(tag.Name) != null) ? GameUtil.GetFormattedCaloriesForItem(tag, mass, GameUtil.TimeSlice.None, true) : GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
 		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, text2), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, text2), Descriptor.DescriptorType.Requirement);
 		descs.Add(descriptor);
 	}
@@ -73,12 +72,9 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 		private Chore CreateChore(Juicer.StatesInstance smi)
 		{
 			Workable component = smi.master.GetComponent<JuicerWorkable>();
-			ChoreType relax = Db.Get().ChoreTypes.Relax;
-			Workable workable = component;
-			ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-			Chore chore = new WorkChore<JuicerWorkable>(relax, workable, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-			chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
-			return chore;
+			WorkChore<JuicerWorkable> workChore = new WorkChore<JuicerWorkable>(Db.Get().ChoreTypes.Relax, component, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
+			return workChore;
 		}
 
 		private bool IsReady(Juicer.StatesInstance smi)
@@ -94,8 +90,7 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 			}
 			for (int i = 0; i < smi.master.ingredientTags.Length; i++)
 			{
-				float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(smi.master.ingredientTags[i]);
-				if (amountAvailable < smi.master.ingredientMassesPerUse[i])
+				if (smi.GetComponent<Storage>().GetAmountAvailable(smi.master.ingredientTags[i]) < smi.master.ingredientMassesPerUse[i])
 				{
 					return false;
 				}

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -8,80 +8,6 @@ namespace Mono.Globalization.Unicode
 {
 	internal class MSCompatUnicodeTable
 	{
-		unsafe static MSCompatUnicodeTable()
-		{
-			IntPtr intPtr = MSCompatUnicodeTable.GetResource("collation.core.bin");
-			if (intPtr == IntPtr.Zero)
-			{
-				return;
-			}
-			byte* ptr = (byte*)(void*)intPtr;
-			intPtr = MSCompatUnicodeTable.GetResource("collation.tailoring.bin");
-			if (intPtr == IntPtr.Zero)
-			{
-				return;
-			}
-			byte* ptr2 = (byte*)(void*)intPtr;
-			if (ptr == null || ptr2 == null)
-			{
-				return;
-			}
-			if (*ptr != 3 || *ptr2 != 3)
-			{
-				return;
-			}
-			uint num = 1U;
-			uint num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
-			num += 4U;
-			MSCompatUnicodeTable.ignorableFlags = ptr + num;
-			num += num2;
-			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
-			num += 4U;
-			MSCompatUnicodeTable.categories = ptr + num;
-			num += num2;
-			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
-			num += 4U;
-			MSCompatUnicodeTable.level1 = ptr + num;
-			num += num2;
-			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
-			num += 4U;
-			MSCompatUnicodeTable.level2 = ptr + num;
-			num += num2;
-			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
-			num += 4U;
-			MSCompatUnicodeTable.level3 = ptr + num;
-			num += num2;
-			num = 1U;
-			uint num3 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
-			num += 4U;
-			MSCompatUnicodeTable.tailoringInfos = new TailoringInfo[num3];
-			int num4 = 0;
-			while ((long)num4 < (long)((ulong)num3))
-			{
-				int num5 = (int)MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
-				num += 4U;
-				int num6 = (int)MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
-				num += 4U;
-				int num7 = (int)MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
-				num += 4U;
-				TailoringInfo tailoringInfo = new TailoringInfo(num5, num6, num7, ptr2[(UIntPtr)(num++)] != 0);
-				MSCompatUnicodeTable.tailoringInfos[num4] = tailoringInfo;
-				num4++;
-			}
-			num += 2U;
-			num3 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
-			num += 4U;
-			MSCompatUnicodeTable.tailoringArr = new char[num3];
-			int num8 = 0;
-			while ((long)num8 < (long)((ulong)num3))
-			{
-				MSCompatUnicodeTable.tailoringArr[num8] = (char)((int)ptr2[num] + ((int)ptr2[num + 1U] << 8));
-				num8++;
-				num += 2U;
-			}
-			MSCompatUnicodeTable.isReady = true;
-		}
-
 		public static TailoringInfo GetTailoringInfo(int lcid)
 		{
 			for (int i = 0; i < MSCompatUnicodeTable.tailoringInfos.Length; i++)
@@ -96,97 +22,113 @@ namespace Mono.Globalization.Unicode
 
 		public unsafe static void BuildTailoringTables(CultureInfo culture, TailoringInfo t, ref Contraction[] contractions, ref Level2Map[] diacriticals)
 		{
-			ArrayList arrayList = new ArrayList();
-			ArrayList arrayList2 = new ArrayList();
-			fixed (char* ptr = (ref MSCompatUnicodeTable.tailoringArr != null && MSCompatUnicodeTable.tailoringArr.Length != 0 ? ref MSCompatUnicodeTable.tailoringArr[0] : ref *null))
+			List<Contraction> list = new List<Contraction>();
+			List<Level2Map> list2 = new List<Level2Map>();
+			int num = 0;
+			char[] array;
+			char* ptr;
+			if ((array = MSCompatUnicodeTable.tailoringArr) == null || array.Length == 0)
 			{
-				int i = t.TailoringIndex;
-				int num = i + t.TailoringCount;
-				while (i < num)
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array[0];
+			}
+			int i = t.TailoringIndex;
+			int num2 = i + t.TailoringCount;
+			while (i < num2)
+			{
+				int num3 = i + 1;
+				switch (ptr[i])
 				{
-					int num2 = i + 1;
-					switch (ptr[i])
+				case '\u0001':
+				{
+					i++;
+					while (ptr[num3] != '\0')
 					{
-					case '\u0001':
+						num3++;
+					}
+					char[] array2 = new char[num3 - i];
+					Marshal.Copy((IntPtr)((void*)(ptr + i)), array2, 0, num3 - i);
+					byte[] array3 = new byte[4];
+					for (int j = 0; j < 4; j++)
 					{
-						i++;
-						while (ptr[num2] != '\0')
-						{
-							num2++;
-						}
-						char[] array = new char[num2 - i];
-						Marshal.Copy((IntPtr)((void*)(ptr + i)), array, 0, num2 - i);
-						byte[] array2 = new byte[4];
-						for (int j = 0; j < 4; j++)
-						{
-							array2[j] = (byte)ptr[num2 + 1 + j];
-						}
-						arrayList.Add(new Contraction(array, null, array2));
-						i = num2 + 6;
-						break;
+						array3[j] = (byte)ptr[num3 + 1 + j];
 					}
-					case '\u0002':
-						arrayList2.Add(new Level2Map((byte)ptr[i + 1], (byte)ptr[i + 2]));
-						i += 3;
-						break;
-					case '\u0003':
+					list.Add(new Contraction(num, array2, null, array3));
+					i = num3 + 6;
+					num++;
+					break;
+				}
+				case '\u0002':
+					list2.Add(new Level2Map((byte)ptr[i + 1], (byte)ptr[i + 2]));
+					i += 3;
+					break;
+				case '\u0003':
+				{
+					i++;
+					while (ptr[num3] != '\0')
 					{
-						i++;
-						while (ptr[num2] != '\0')
-						{
-							num2++;
-						}
-						char[] array = new char[num2 - i];
-						Marshal.Copy((IntPtr)((void*)(ptr + i)), array, 0, num2 - i);
-						num2++;
-						int num3 = num2;
-						while (ptr[num3] != '\0')
-						{
-							num3++;
-						}
-						string text = new string(ptr, num2, num3 - num2);
-						arrayList.Add(new Contraction(array, text, null));
-						i = num3 + 1;
-						break;
+						num3++;
 					}
-					default:
-						throw new NotImplementedException(string.Format("Mono INTERNAL ERROR (Should not happen): Collation tailoring table is broken for culture {0} ({1}) at 0x{2:X}", culture.LCID, culture.Name, i));
+					char[] array2 = new char[num3 - i];
+					Marshal.Copy((IntPtr)((void*)(ptr + i)), array2, 0, num3 - i);
+					num3++;
+					int num4 = num3;
+					while (ptr[num4] != '\0')
+					{
+						num4++;
 					}
+					string text = new string(ptr, num3, num4 - num3);
+					list.Add(new Contraction(num, array2, text, null));
+					i = num4 + 1;
+					num++;
+					break;
+				}
+				default:
+					throw new NotImplementedException(string.Format("Mono INTERNAL ERROR (Should not happen): Collation tailoring table is broken for culture {0} ({1}) at 0x{2:X}", culture.LCID, culture.Name, i));
 				}
 			}
-			arrayList.Sort(ContractionComparer.Instance);
-			arrayList2.Sort(Level2MapComparer.Instance);
-			contractions = arrayList.ToArray(typeof(Contraction)) as Contraction[];
-			diacriticals = arrayList2.ToArray(typeof(Level2Map)) as Level2Map[];
+			array = null;
+			list.Sort(ContractionComparer.Instance);
+			list2.Sort((Level2Map a, Level2Map b) => (int)(a.Source - b.Source));
+			contractions = list.ToArray();
+			diacriticals = list2.ToArray();
 		}
 
 		private unsafe static void SetCJKReferences(string name, ref CodePointIndexer cjkIndexer, ref byte* catTable, ref byte* lv1Table, ref CodePointIndexer lv2Indexer, ref byte* lv2Table)
 		{
-			switch (name)
+			if (name == "zh-CHS")
 			{
-			case "zh-CHS":
 				catTable = MSCompatUnicodeTable.cjkCHScategory;
 				lv1Table = MSCompatUnicodeTable.cjkCHSlv1;
 				cjkIndexer = MSCompatUnicodeTableUtil.CjkCHS;
-				break;
-			case "zh-CHT":
+				return;
+			}
+			if (name == "zh-CHT")
+			{
 				catTable = MSCompatUnicodeTable.cjkCHTcategory;
 				lv1Table = MSCompatUnicodeTable.cjkCHTlv1;
 				cjkIndexer = MSCompatUnicodeTableUtil.Cjk;
-				break;
-			case "ja":
+				return;
+			}
+			if (name == "ja")
+			{
 				catTable = MSCompatUnicodeTable.cjkJAcategory;
 				lv1Table = MSCompatUnicodeTable.cjkJAlv1;
 				cjkIndexer = MSCompatUnicodeTableUtil.Cjk;
-				break;
-			case "ko":
-				catTable = MSCompatUnicodeTable.cjkKOcategory;
-				lv1Table = MSCompatUnicodeTable.cjkKOlv1;
-				lv2Table = MSCompatUnicodeTable.cjkKOlv2;
-				cjkIndexer = MSCompatUnicodeTableUtil.Cjk;
-				lv2Indexer = MSCompatUnicodeTableUtil.Cjk;
-				break;
+				return;
 			}
+			if (!(name == "ko"))
+			{
+				return;
+			}
+			catTable = MSCompatUnicodeTable.cjkKOcategory;
+			lv1Table = MSCompatUnicodeTable.cjkKOlv1;
+			lv2Table = MSCompatUnicodeTable.cjkKOlv2;
+			cjkIndexer = MSCompatUnicodeTableUtil.Cjk;
+			lv2Indexer = MSCompatUnicodeTableUtil.Cjk;
 		}
 
 		public unsafe static byte Category(int cp)
@@ -211,9 +153,9 @@ namespace Mono.Globalization.Unicode
 
 		public static bool IsSortable(string s)
 		{
-			foreach (char c in s)
+			for (int i = 0; i < s.Length; i++)
 			{
-				if (!MSCompatUnicodeTable.IsSortable((int)c))
+				if (!MSCompatUnicodeTable.IsSortable((int)s[i]))
 				{
 					return false;
 				}
@@ -223,7 +165,7 @@ namespace Mono.Globalization.Unicode
 
 		public static bool IsSortable(int cp)
 		{
-			return !MSCompatUnicodeTable.IsIgnorable(cp) || cp == 0 || cp == 1600 || cp == 65279 || (6155 <= cp && cp <= 6158) || (8204 <= cp && cp <= 8207) || (8234 <= cp && cp <= 8238) || (8298 <= cp && cp <= 8303) || (8204 <= cp && cp <= 8207) || (65529 <= cp && cp <= 65533);
+			return !MSCompatUnicodeTable.IsIgnorable(cp) || (cp == 0 || cp == 1600 || cp == 65279) || (6155 <= cp && cp <= 6158) || (8204 <= cp && cp <= 8207) || (8234 <= cp && cp <= 8238) || (8298 <= cp && cp <= 8303) || (8204 <= cp && cp <= 8207) || (65529 <= cp && cp <= 65533);
 		}
 
 		public static bool IsIgnorable(int cp)
@@ -235,12 +177,11 @@ namespace Mono.Globalization.Unicode
 		{
 			if (cp == 0)
 			{
-				return false;
+				return true;
 			}
 			if ((flag & 1) != 0)
 			{
-				UnicodeCategory unicodeCategory = char.GetUnicodeCategory((char)cp);
-				if (unicodeCategory == UnicodeCategory.OtherNotAssigned)
+				if (char.GetUnicodeCategory((char)cp) == UnicodeCategory.OtherNotAssigned)
 				{
 					return true;
 				}
@@ -250,7 +191,7 @@ namespace Mono.Globalization.Unicode
 				}
 			}
 			int num = MSCompatUnicodeTableUtil.Ignorable.ToIndex(cp);
-			return num >= 0 && (MSCompatUnicodeTable.ignorableFlags[num] & flag) != 0;
+			return num >= 0 && (MSCompatUnicodeTable.ignorableFlags[num] & flag) > 0;
 		}
 
 		public static bool IsIgnorableSymbol(int cp)
@@ -265,7 +206,11 @@ namespace Mono.Globalization.Unicode
 
 		public static int ToKanaTypeInsensitive(int i)
 		{
-			return (12353 > i || i > 12436) ? i : (i + 96);
+			if (12353 > i || i > 12436)
+			{
+				return i;
+			}
+			return i + 96;
 		}
 
 		public static int ToWidthCompat(int i)
@@ -334,42 +279,46 @@ namespace Mono.Globalization.Unicode
 				}
 				if (i < 12593)
 				{
-					switch (i)
+					if (i <= 12300)
 					{
-					case 12288:
-						return 32;
-					case 12289:
-						return 65380;
-					case 12290:
-						return 65377;
-					default:
-						if (i == 12300)
+						switch (i)
 						{
-							return 65378;
+						case 12288:
+							return 32;
+						case 12289:
+							return 65380;
+						case 12290:
+							return 65377;
+						default:
+							if (i == 12300)
+							{
+								return 65378;
+							}
+							break;
 						}
+					}
+					else
+					{
 						if (i == 12301)
 						{
 							return 65379;
 						}
-						if (i != 12539)
+						if (i == 12539)
 						{
-							return i;
+							return 65381;
 						}
-						return 65381;
-					}
-				}
-				else
-				{
-					if (i < 12644)
-					{
-						return i - 12592 + 65440;
-					}
-					if (i == 12644)
-					{
-						return 65440;
 					}
 					return i;
 				}
+				if (i < 12644)
+				{
+					return i - 12592 + 65440;
+				}
+				if (i == 12644)
+				{
+					return 65440;
+				}
+				return i;
 			}
 		}
 
@@ -400,19 +349,29 @@ namespace Mono.Globalization.Unicode
 
 		public static byte GetJapaneseDashType(char c)
 		{
-			switch (c)
+			if (c <= 'ゞ')
 			{
-			case 'ー':
-				return 5;
-			case 'ヽ':
-			case 'ヾ':
-				break;
-			default:
-				if (c != 'ゝ' && c != 'ゞ' && c != 'ｰ')
+				if (c != 'ゝ' && c != 'ゞ')
 				{
 					return 3;
 				}
-				break;
+			}
+			else
+			{
+				switch (c)
+				{
+				case 'ー':
+					return 5;
+				case 'ヽ':
+				case 'ヾ':
+					break;
+				default:
+					if (c != 'ｰ')
+					{
+						return 3;
+					}
+					break;
+				}
 			}
 			return 4;
 		}
@@ -435,49 +394,87 @@ namespace Mono.Globalization.Unicode
 			}
 			if ('\u3040' < c && c < 'ヺ')
 			{
-				switch (c)
+				if (c <= 'ォ')
 				{
-				case 'ぁ':
-				case 'ぃ':
-				case 'ぅ':
-				case 'ぇ':
-				case 'ぉ':
-					break;
-				default:
-					switch (c)
+					if (c <= 'っ')
 					{
-					case 'ァ':
-					case 'ィ':
-					case 'ゥ':
-					case 'ェ':
-					case 'ォ':
-						break;
-					default:
+						switch (c)
+						{
+						case 'ぁ':
+						case 'ぃ':
+						case 'ぅ':
+						case 'ぇ':
+						case 'ぉ':
+							break;
+						case 'あ':
+						case 'い':
+						case 'う':
+						case 'え':
+							return false;
+						default:
+							if (c != 'っ')
+							{
+								return false;
+							}
+							break;
+						}
+					}
+					else
+					{
 						switch (c)
 						{
 						case 'ゃ':
 						case 'ゅ':
 						case 'ょ':
 							break;
+						case 'や':
+						case 'ゆ':
+							return false;
 						default:
-							switch (c)
+							if (c != 'ゎ')
 							{
-							case 'ャ':
-							case 'ュ':
-							case 'ョ':
-								break;
-							default:
-								if (c != 'ヵ' && c != 'ヶ' && c != 'っ' && c != 'ゎ' && c != 'ッ' && c != 'ヮ')
+								switch (c)
 								{
+								case 'ァ':
+								case 'ィ':
+								case 'ゥ':
+								case 'ェ':
+								case 'ォ':
+									break;
+								case 'ア':
+								case 'イ':
+								case 'ウ':
+								case 'エ':
+									return false;
+								default:
 									return false;
 								}
-								break;
 							}
 							break;
 						}
-						break;
 					}
-					break;
+				}
+				else if (c <= 'ョ')
+				{
+					if (c != 'ッ')
+					{
+						switch (c)
+						{
+						case 'ャ':
+						case 'ュ':
+						case 'ョ':
+							break;
+						case 'ヤ':
+						case 'ユ':
+							return false;
+						default:
+							return false;
+						}
+					}
+				}
+				else if (c != 'ヮ' && c != 'ヵ' && c != 'ヶ')
+				{
+					return false;
 				}
 				return true;
 			}
@@ -504,6 +501,80 @@ namespace Mono.Globalization.Unicode
 			return (uint)((int)raw[idx] + ((int)raw[idx + 1U] << 8) + ((int)raw[idx + 2U] << 16) + ((int)raw[idx + 3U] << 24));
 		}
 
+		unsafe static MSCompatUnicodeTable()
+		{
+			IntPtr intPtr = MSCompatUnicodeTable.GetResource("collation.core.bin");
+			if (intPtr == IntPtr.Zero)
+			{
+				return;
+			}
+			byte* ptr = (byte*)(void*)intPtr;
+			intPtr = MSCompatUnicodeTable.GetResource("collation.tailoring.bin");
+			if (intPtr == IntPtr.Zero)
+			{
+				return;
+			}
+			byte* ptr2 = (byte*)(void*)intPtr;
+			if (ptr == null || ptr2 == null)
+			{
+				return;
+			}
+			if (*ptr != 3 || *ptr2 != 3)
+			{
+				return;
+			}
+			uint num = 1U;
+			uint num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
+			num += 4U;
+			MSCompatUnicodeTable.ignorableFlags = ptr + num;
+			num += num2;
+			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
+			num += 4U;
+			MSCompatUnicodeTable.categories = ptr + num;
+			num += num2;
+			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
+			num += 4U;
+			MSCompatUnicodeTable.level1 = ptr + num;
+			num += num2;
+			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
+			num += 4U;
+			MSCompatUnicodeTable.level2 = ptr + num;
+			num += num2;
+			num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
+			num += 4U;
+			MSCompatUnicodeTable.level3 = ptr + num;
+			num += num2;
+			num = 1U;
+			uint num3 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
+			num += 4U;
+			MSCompatUnicodeTable.tailoringInfos = new TailoringInfo[num3];
+			int num4 = 0;
+			while ((long)num4 < (long)((ulong)num3))
+			{
+				int num5 = (int)MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
+				num += 4U;
+				int num6 = (int)MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
+				num += 4U;
+				int num7 = (int)MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
+				num += 4U;
+				TailoringInfo tailoringInfo = new TailoringInfo(num5, num6, num7, ptr2[(UIntPtr)(num++)] > 0);
+				MSCompatUnicodeTable.tailoringInfos[num4] = tailoringInfo;
+				num4++;
+			}
+			num += 2U;
+			num3 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr2, num);
+			num += 4U;
+			MSCompatUnicodeTable.tailoringArr = new char[num3];
+			int num8 = 0;
+			while ((long)num8 < (long)((ulong)num3))
+			{
+				MSCompatUnicodeTable.tailoringArr[num8] = (char)((int)ptr2[num] + ((int)ptr2[num + 1U] << 8));
+				num8++;
+				num += 2U;
+			}
+			MSCompatUnicodeTable.isReady = true;
+		}
+
 		public unsafe static void FillCJK(string culture, ref CodePointIndexer cjkIndexer, ref byte* catTable, ref byte* lv1Table, ref CodePointIndexer lv2Indexer, ref byte* lv2Table)
 		{
 			object obj = MSCompatUnicodeTable.forLock;
@@ -521,64 +592,83 @@ namespace Mono.Globalization.Unicode
 				return;
 			}
 			string text = null;
-			switch (culture)
+			if (!(culture == "zh-CHS"))
 			{
-			case "zh-CHS":
+				if (!(culture == "zh-CHT"))
+				{
+					if (!(culture == "ja"))
+					{
+						if (culture == "ko")
+						{
+							text = "cjkKO";
+							catTable = MSCompatUnicodeTable.cjkKOcategory;
+							lv1Table = MSCompatUnicodeTable.cjkKOlv1;
+						}
+					}
+					else
+					{
+						text = "cjkJA";
+						catTable = MSCompatUnicodeTable.cjkJAcategory;
+						lv1Table = MSCompatUnicodeTable.cjkJAlv1;
+					}
+				}
+				else
+				{
+					text = "cjkCHT";
+					catTable = MSCompatUnicodeTable.cjkCHTcategory;
+					lv1Table = MSCompatUnicodeTable.cjkCHTlv1;
+				}
+			}
+			else
+			{
 				text = "cjkCHS";
 				catTable = MSCompatUnicodeTable.cjkCHScategory;
 				lv1Table = MSCompatUnicodeTable.cjkCHSlv1;
-				break;
-			case "zh-CHT":
-				text = "cjkCHT";
-				catTable = MSCompatUnicodeTable.cjkCHTcategory;
-				lv1Table = MSCompatUnicodeTable.cjkCHTlv1;
-				break;
-			case "ja":
-				text = "cjkJA";
-				catTable = MSCompatUnicodeTable.cjkJAcategory;
-				lv1Table = MSCompatUnicodeTable.cjkJAlv1;
-				break;
-			case "ko":
-				text = "cjkKO";
-				catTable = MSCompatUnicodeTable.cjkKOcategory;
-				lv1Table = MSCompatUnicodeTable.cjkKOlv1;
-				break;
 			}
-			if (text == null || lv1Table != 0)
+			if (text == null || lv1Table != (IntPtr)((UIntPtr)0))
 			{
 				return;
 			}
-			uint num2 = 0U;
-			string text2 = string.Format("collation.{0}.bin", text);
-			IntPtr intPtr = MSCompatUnicodeTable.GetResource(text2);
+			uint num = 0U;
+			IntPtr intPtr = MSCompatUnicodeTable.GetResource(string.Format("collation.{0}.bin", text));
 			if (intPtr == IntPtr.Zero)
 			{
 				return;
 			}
 			byte* ptr = (byte*)(void*)intPtr;
-			num2 += 1U;
-			uint num3 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num2);
-			num2 += 4U;
-			catTable = ptr + num2;
-			lv1Table = ptr + num2 + num3;
-			switch (culture)
+			num += 1U;
+			uint num2 = MSCompatUnicodeTable.UInt32FromBytePtr(ptr, num);
+			num += 4U;
+			catTable = ptr + num;
+			lv1Table = ptr + num + num2;
+			if (!(culture == "zh-CHS"))
 			{
-			case "zh-CHS":
+				if (!(culture == "zh-CHT"))
+				{
+					if (!(culture == "ja"))
+					{
+						if (culture == "ko")
+						{
+							MSCompatUnicodeTable.cjkKOcategory = catTable;
+							MSCompatUnicodeTable.cjkKOlv1 = lv1Table;
+						}
+					}
+					else
+					{
+						MSCompatUnicodeTable.cjkJAcategory = catTable;
+						MSCompatUnicodeTable.cjkJAlv1 = lv1Table;
+					}
+				}
+				else
+				{
+					MSCompatUnicodeTable.cjkCHTcategory = catTable;
+					MSCompatUnicodeTable.cjkCHTlv1 = lv1Table;
+				}
+			}
+			else
+			{
 				MSCompatUnicodeTable.cjkCHScategory = catTable;
 				MSCompatUnicodeTable.cjkCHSlv1 = lv1Table;
-				break;
-			case "zh-CHT":
-				MSCompatUnicodeTable.cjkCHTcategory = catTable;
-				MSCompatUnicodeTable.cjkCHTlv1 = lv1Table;
-				break;
-			case "ja":
-				MSCompatUnicodeTable.cjkJAcategory = catTable;
-				MSCompatUnicodeTable.cjkJAlv1 = lv1Table;
-				break;
-			case "ko":
-				MSCompatUnicodeTable.cjkKOcategory = catTable;
-				MSCompatUnicodeTable.cjkKOlv1 = lv1Table;
-				break;
 			}
 			if (text != "cjkKO")
 			{
@@ -590,12 +680,10 @@ namespace Mono.Globalization.Unicode
 				return;
 			}
 			ptr = (byte*)(void*)intPtr;
-			num2 = 5U;
-			MSCompatUnicodeTable.cjkKOlv2 = ptr + num2;
+			num = 5U;
+			MSCompatUnicodeTable.cjkKOlv2 = ptr + num;
 			lv2Table = MSCompatUnicodeTable.cjkKOlv2;
 		}
-
-		private const int ResourceVersionSize = 1;
 
 		public static int MaxExpansionLength = 3;
 
@@ -626,6 +714,8 @@ namespace Mono.Globalization.Unicode
 		private unsafe static byte* cjkKOlv1;
 
 		private unsafe static byte* cjkKOlv2;
+
+		private const int ResourceVersionSize = 1;
 
 		private static readonly char[] tailoringArr;
 

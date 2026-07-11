@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class SculptingSoundEvent : SoundEvent
 {
+	private static string BaseSoundName(string sound_name)
+	{
+		int num = sound_name.IndexOf(":");
+		if (num > 0)
+		{
+			return sound_name.Substring(0, num);
+		}
+		return sound_name;
+	}
+
 	public SculptingSoundEvent(string file_name, string sound_name, int frame, bool do_load, bool is_looping, float min_interval, bool is_dynamic)
 		: base(file_name, SculptingSoundEvent.BaseSoundName(sound_name), frame, do_load, is_looping, min_interval, is_dynamic)
 	{
@@ -31,33 +41,21 @@ public class SculptingSoundEvent : SoundEvent
 			{
 				this.ParseParameter(array[i]);
 			}
+			return;
 		}
-		else
+		DebugUtil.LogErrorArgs(new object[]
 		{
-			DebugUtil.LogErrorArgs(new object[]
+			"CountedSoundEvent for",
+			string.Concat(new string[]
 			{
-				"CountedSoundEvent for",
-				string.Concat(new string[]
-				{
-					file_name,
-					".",
-					sound_name,
-					".",
-					frame.ToString()
-				}),
-				" - Must specify max number of steps on event: '" + sound_name + "'"
-			});
-		}
-	}
-
-	private static string BaseSoundName(string sound_name)
-	{
-		int num = sound_name.IndexOf(":");
-		if (num > 0)
-		{
-			return sound_name.Substring(0, num);
-		}
-		return sound_name;
+				file_name,
+				".",
+				sound_name,
+				".",
+				frame.ToString()
+			}),
+			" - Must specify max number of steps on event: '" + sound_name + "'"
+		});
 	}
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
@@ -78,8 +76,8 @@ public class SculptingSoundEvent : SoundEvent
 				{
 					handle = GameComps.WhiteBoards.Add(gameObject);
 				}
-				num = ((!GameComps.WhiteBoards.HasValue(handle, base.soundHash)) ? 0 : ((int)GameComps.WhiteBoards.GetValue(handle, base.soundHash)));
-				int num2 = ((this.counterModulus != -1) ? ((num + 1) % this.counterModulus) : 0);
+				num = (GameComps.WhiteBoards.HasValue(handle, base.soundHash) ? ((int)GameComps.WhiteBoards.GetValue(handle, base.soundHash)) : 0);
+				int num2 = ((this.counterModulus == -1) ? 0 : ((num + 1) % this.counterModulus));
 				GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
 			}
 			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
@@ -103,21 +101,17 @@ public class SculptingSoundEvent : SoundEvent
 					Building component2 = workable.GetComponent<Building>();
 					if (component2 != null)
 					{
-						BuildingDef def = component2.Def;
-						string name = def.name;
-						if (name != null)
+						string name = component2.Def.name;
+						if (!(name == "MetalSculpture"))
 						{
-							if (!(name == "MetalSculpture"))
+							if (name == "MarbleSculpture")
 							{
-								if (name == "MarbleSculpture")
-								{
-									text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
-								}
+								text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
 							}
-							else
-							{
-								text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
-							}
+						}
+						else
+						{
+							text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
 						}
 					}
 				}

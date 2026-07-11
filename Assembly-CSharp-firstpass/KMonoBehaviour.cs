@@ -54,15 +54,14 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			}
 			catch (Exception ex)
 			{
-				string text = string.Concat(new string[]
+				throw new Exception(string.Concat(new string[]
 				{
 					"Error in ",
 					base.name,
 					".",
 					base.GetType().Name,
 					".OnPrefabInit"
-				});
-				throw new Exception(text, ex);
+				}), ex);
 			}
 		}
 	}
@@ -142,15 +141,14 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		}
 		catch (Exception ex)
 		{
-			string text = string.Concat(new string[]
+			throw new Exception(string.Concat(new string[]
 			{
 				"Error in ",
 				base.name,
 				".",
 				base.GetType().Name,
 				".OnSpawn"
-			});
-			throw new Exception(text, ex);
+			}), ex);
 		}
 	}
 

@@ -11,30 +11,8 @@ namespace YamlDotNet.RepresentationModel
 {
 	[DebuggerDisplay("Count = {children.Count}")]
 	[Serializable]
-	public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible, IEnumerable
+	public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IEnumerable, IYamlConvertible
 	{
-		internal YamlSequenceNode(IParser parser, DocumentLoadingState state)
-		{
-			this.Load(parser, state);
-		}
-
-		public YamlSequenceNode()
-		{
-		}
-
-		public YamlSequenceNode(params YamlNode[] children)
-			: this(children)
-		{
-		}
-
-		public YamlSequenceNode(IEnumerable<YamlNode> children)
-		{
-			foreach (YamlNode yamlNode in children)
-			{
-				this.children.Add(yamlNode);
-			}
-		}
-
 		public IList<YamlNode> Children
 		{
 			get
@@ -44,6 +22,11 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		public SequenceStyle Style { get; set; }
+
+		internal YamlSequenceNode(IParser parser, DocumentLoadingState state)
+		{
+			this.Load(parser, state);
+		}
 
 		private void Load(IParser parser, DocumentLoadingState state)
 		{
@@ -62,6 +45,23 @@ namespace YamlDotNet.RepresentationModel
 				state.AddNodeWithUnresolvedAliases(this);
 			}
 			parser.Expect<SequenceEnd>();
+		}
+
+		public YamlSequenceNode()
+		{
+		}
+
+		public YamlSequenceNode(params YamlNode[] children)
+			: this(children)
+		{
+		}
+
+		public YamlSequenceNode(IEnumerable<YamlNode> children)
+		{
+			foreach (YamlNode yamlNode in children)
+			{
+				this.children.Add(yamlNode);
+			}
 		}
 
 		public void Add(YamlNode child)
@@ -131,14 +131,17 @@ namespace YamlDotNet.RepresentationModel
 		{
 			level.Increment();
 			yield return this;
-			foreach (YamlNode child in this.children)
+			foreach (YamlNode yamlNode in this.children)
 			{
-				foreach (YamlNode node in child.SafeAllNodes(level))
+				foreach (YamlNode yamlNode2 in yamlNode.SafeAllNodes(level))
 				{
-					yield return node;
+					yield return yamlNode2;
 				}
+				IEnumerator<YamlNode> enumerator2 = null;
 			}
+			IEnumerator<YamlNode> enumerator = null;
 			level.Decrement();
+			yield break;
 			yield break;
 		}
 

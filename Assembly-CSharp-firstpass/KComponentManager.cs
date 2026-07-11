@@ -3,22 +3,17 @@ using System.Collections.Generic;
 
 public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentManager where T : new()
 {
+	public string Name { get; set; }
+
 	public KComponentManager()
 		: base(0)
 	{
 		this.Name = base.GetType().Name;
 	}
 
-	public string Name { get; set; }
-
 	public bool Has(object go)
 	{
-		if (this.cleanupList.Exists((KComponentManager<T>.CleanupInfo x) => x.instance == go))
-		{
-			return false;
-		}
-		HandleVector<int>.Handle handle = this.GetHandle(go);
-		return !(handle == HandleVector<int>.InvalidHandle);
+		return !this.cleanupList.Exists((KComponentManager<T>.CleanupInfo x) => x.instance == go) && !(this.GetHandle(go) == HandleVector<int>.InvalidHandle);
 	}
 
 	protected HandleVector<int>.Handle InternalAddComponent(object instance, T cmp_values)
@@ -133,7 +128,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 			{
 				this.cleanupList[i] = this.cleanupList[this.cleanupList.Count - 1];
 				this.cleanupList.RemoveAt(this.cleanupList.Count - 1);
-				break;
+				return;
 			}
 		}
 	}
@@ -158,11 +153,6 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 
 	protected virtual void OnCleanUp(HandleVector<int>.Handle h)
 	{
-	}
-
-	int IComponentManager.get_Count()
-	{
-		return base.Count;
 	}
 
 	protected Dictionary<object, HandleVector<int>.Handle> instanceHandleMap = new Dictionary<object, HandleVector<int>.Handle>();

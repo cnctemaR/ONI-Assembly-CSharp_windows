@@ -2,11 +2,12 @@
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public class MethodReturnMessageWrapper : InternalMessageWrapper, IMessage, IMethodMessage, IMethodReturnMessage
+	public class MethodReturnMessageWrapper : InternalMessageWrapper, IMethodReturnMessage, IMethodMessage, IMessage
 	{
 		public MethodReturnMessageWrapper(IMethodReturnMessage msg)
 			: base(msg)
@@ -15,20 +16,19 @@ namespace System.Runtime.Remoting.Messaging
 			{
 				this._exception = msg.Exception;
 				this._args = new object[0];
+				return;
 			}
-			else
+			this._args = msg.Args;
+			this._return = msg.ReturnValue;
+			if (msg.MethodBase != null)
 			{
-				this._args = msg.Args;
-				this._return = msg.ReturnValue;
-				if (msg.MethodBase != null)
-				{
-					this._outArgInfo = new ArgInfo(msg.MethodBase, ArgInfoType.Out);
-				}
+				this._outArgInfo = new ArgInfo(msg.MethodBase, ArgInfoType.Out);
 			}
 		}
 
 		public virtual int ArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args.Length;
@@ -37,6 +37,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual object[] Args
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args;
@@ -49,6 +50,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual Exception Exception
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._exception;
@@ -61,6 +63,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual bool HasVarArgs
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).HasVarArgs;
@@ -69,6 +72,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual LogicalCallContext LogicalCallContext
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).LogicalCallContext;
@@ -77,6 +81,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual MethodBase MethodBase
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).MethodBase;
@@ -85,6 +90,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual string MethodName
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).MethodName;
@@ -93,6 +99,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual object MethodSignature
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).MethodSignature;
@@ -101,22 +108,33 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual int OutArgCount
 		{
+			[SecurityCritical]
 			get
 			{
-				return (this._outArgInfo == null) ? 0 : this._outArgInfo.GetInOutArgCount();
+				if (this._outArgInfo == null)
+				{
+					return 0;
+				}
+				return this._outArgInfo.GetInOutArgCount();
 			}
 		}
 
 		public virtual object[] OutArgs
 		{
+			[SecurityCritical]
 			get
 			{
-				return (this._outArgInfo == null) ? this._args : this._outArgInfo.GetInOutArgs(this._args);
+				if (this._outArgInfo == null)
+				{
+					return this._args;
+				}
+				return this._outArgInfo.GetInOutArgs(this._args);
 			}
 		}
 
 		public virtual IDictionary Properties
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._properties == null)
@@ -129,6 +147,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual object ReturnValue
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._return;
@@ -141,6 +160,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual string TypeName
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).TypeName;
@@ -149,6 +169,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string Uri
 		{
+			[SecurityCritical]
 			get
 			{
 				return ((IMethodReturnMessage)this.WrappedMessage).Uri;
@@ -159,21 +180,25 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		[SecurityCritical]
 		public virtual object GetArg(int argNum)
 		{
 			return this._args[argNum];
 		}
 
+		[SecurityCritical]
 		public virtual string GetArgName(int index)
 		{
 			return ((IMethodReturnMessage)this.WrappedMessage).GetArgName(index);
 		}
 
+		[SecurityCritical]
 		public virtual object GetOutArg(int argNum)
 		{
 			return this._args[this._outArgInfo.GetInOutArgIndex(argNum)];
 		}
 
+		[SecurityCritical]
 		public virtual string GetOutArgName(int index)
 		{
 			return this._outArgInfo.GetInOutArgName(index);
@@ -208,15 +233,14 @@ namespace System.Runtime.Remoting.Messaging
 				if (key == "__Args")
 				{
 					((MethodReturnMessageWrapper)this._message)._args = (object[])value;
+					return;
 				}
-				else if (key == "__Return")
+				if (key == "__Return")
 				{
 					((MethodReturnMessageWrapper)this._message)._return = value;
+					return;
 				}
-				else
-				{
-					base.SetMethodProperty(key, value);
-				}
+				base.SetMethodProperty(key, value);
 			}
 
 			protected override object GetMethodProperty(string key)

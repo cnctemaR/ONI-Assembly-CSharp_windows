@@ -87,17 +87,6 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 
 	public class BucketGroup
 	{
-		public BucketGroup(int frame_count, float seconds_per_sub_tick, UpdateRate update_rate)
-		{
-			for (int i = 0; i < frame_count; i++)
-			{
-				this.bucketFrames.Add(new List<StateMachineUpdater.BaseUpdateBucket>());
-			}
-			this.secondsPerSubTick = seconds_per_sub_tick;
-			this.updateRate = update_rate;
-			this.name = "BucketGroup-" + update_rate.ToString();
-		}
-
 		public float secondsPerSubTick { get; private set; }
 
 		public UpdateRate updateRate { get; private set; }
@@ -108,6 +97,17 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 			{
 				return this.bucketFrames.Count;
 			}
+		}
+
+		public BucketGroup(int frame_count, float seconds_per_sub_tick, UpdateRate update_rate)
+		{
+			for (int i = 0; i < frame_count; i++)
+			{
+				this.bucketFrames.Add(new List<StateMachineUpdater.BaseUpdateBucket>());
+			}
+			this.secondsPerSubTick = seconds_per_sub_tick;
+			this.updateRate = update_rate;
+			this.name = "BucketGroup-" + update_rate.ToString();
 		}
 
 		private void InternalAdvance(float dt)
@@ -150,13 +150,12 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 
 		public float GetFrameTime(int frame)
 		{
-			int num = this.nextUpdateIndex - 1;
-			int num2 = num - frame;
-			if (num2 <= 0)
+			int num = this.nextUpdateIndex - 1 - frame;
+			if (num <= 0)
 			{
-				num2 += this.bucketFrames.Count;
+				num += this.bucketFrames.Count;
 			}
-			return (float)num2 * this.secondsPerSubTick;
+			return (float)num * this.secondsPerSubTick;
 		}
 
 		private List<List<StateMachineUpdater.BaseUpdateBucket>> bucketFrames = new List<List<StateMachineUpdater.BaseUpdateBucket>>();
@@ -173,14 +172,14 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 	[DebuggerDisplay("{name}")]
 	public abstract class BaseUpdateBucket
 	{
+		public string name { get; private set; }
+
+		public abstract int count { get; }
+
 		public BaseUpdateBucket(string name)
 		{
 			this.name = name;
 		}
-
-		public string name { get; private set; }
-
-		public abstract int count { get; }
 
 		public abstract void Update(float dt);
 

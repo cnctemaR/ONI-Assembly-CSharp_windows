@@ -33,8 +33,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_CURE,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
-			return takeMedicineChore.medicine.CanBeTakenBy(context.consumerState.gameObject);
+			return ((TakeMedicineChore)data).medicine.CanBeTakenBy(context.consumerState.gameObject);
 		}
 	};
 
@@ -44,9 +43,9 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CONSUMPTION_PERMITTED,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			TakeMedicineChore takeMedicineChore2 = (TakeMedicineChore)data;
+			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
 			ConsumableConsumer consumableConsumer = context.consumerState.consumableConsumer;
-			return consumableConsumer == null || consumableConsumer.IsPermitted(takeMedicineChore2.medicine.PrefabID().Name);
+			return consumableConsumer == null || consumableConsumer.IsPermitted(takeMedicineChore.medicine.PrefabID().Name);
 		}
 	};
 
@@ -68,8 +67,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f).ToggleTag(GameTags.TakingMedicine).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
 			{
 				MedicinalPill medicinalPill = this.chunk.Get<MedicinalPill>(smi);
-				Worker worker = this.eater.Get<Worker>(smi);
-				worker.StartWork(new Worker.StartWorkInfo(medicinalPill));
+				this.eater.Get<Worker>(smi).StartWork(new Worker.StartWorkInfo(medicinalPill));
 			}, (TakeMedicineChore.StatesInstance smi) => this.chunk.Get<MedicinalPill>(smi) != null, null, null);
 		}
 

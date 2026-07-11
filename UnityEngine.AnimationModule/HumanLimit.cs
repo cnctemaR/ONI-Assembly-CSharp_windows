@@ -3,17 +3,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>This class stores the rotation limits that define the muscle for a single human bone.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
 	[NativeType(CodegenOptions.Custom, "MonoHumanLimit")]
+	[NativeHeader("Runtime/Animation/HumanDescription.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
 	public struct HumanLimit
 	{
-		/// <summary>
-		///   <para>Should this limit use the default values?</para>
-		/// </summary>
 		public bool useDefaultValues
 		{
 			get
@@ -26,9 +20,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximum negative rotation away from the initial value that this muscle can apply.</para>
-		/// </summary>
 		public Vector3 min
 		{
 			get
@@ -41,9 +32,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximum rotation away from the initial value that this muscle can apply.</para>
-		/// </summary>
 		public Vector3 max
 		{
 			get
@@ -56,9 +44,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The default orientation of a bone when no muscle action is applied.</para>
-		/// </summary>
 		public Vector3 center
 		{
 			get
@@ -71,9 +56,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Length of the bone to which the limit is applied.</para>
-		/// </summary>
 		public float axisLength
 		{
 			get

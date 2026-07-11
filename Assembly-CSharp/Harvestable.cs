@@ -5,11 +5,6 @@ using TUNING;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Harvestable : Workable
 {
-	protected Harvestable()
-	{
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-	}
-
 	public Worker completed_by { get; protected set; }
 
 	public bool CanBeHarvested
@@ -18,6 +13,11 @@ public class Harvestable : Workable
 		{
 			return this.canBeHarvested;
 		}
+	}
+
+	protected Harvestable()
+	{
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
 	protected override void OnPrefabInit()
@@ -108,8 +108,7 @@ public class Harvestable : Workable
 		{
 			this.chore.Cancel("Cancel harvest");
 			this.chore = null;
-			KSelectable component = base.GetComponent<KSelectable>();
-			component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 			this.harvestDesignatable.SetHarvestWhenReady(false);
 		}
 		this.harvestDesignatable.MarkedForHarvest = false;
@@ -123,8 +122,7 @@ public class Harvestable : Workable
 	public virtual void ForceCancelHarvest(object data = null)
 	{
 		this.OnCancel(null);
-		KSelectable component = base.GetComponent<KSelectable>();
-		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
@@ -137,8 +135,7 @@ public class Harvestable : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		KSelectable component = base.GetComponent<KSelectable>();
-		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 	}
 
 	public HarvestDesignatable harvestDesignatable;

@@ -3,14 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Render Pipeline manager.</para>
-	/// </summary>
 	public static class RenderPipelineManager
 	{
-		/// <summary>
-		///   <para>Returns the instance of the currently used Render Pipeline.</para>
-		/// </summary>
 		public static IRenderPipeline currentPipeline { get; private set; }
 
 		[RequiredByNativeCode]
@@ -19,10 +13,10 @@ namespace UnityEngine.Experimental.Rendering
 			if (RenderPipelineManager.s_CurrentPipelineAsset != null)
 			{
 				RenderPipelineManager.s_CurrentPipelineAsset.DestroyCreatedInstances();
+				RenderPipelineManager.s_CurrentPipelineAsset = null;
+				RenderPipelineManager.currentPipeline = null;
+				SupportedRenderingFeatures.active = new SupportedRenderingFeatures();
 			}
-			RenderPipelineManager.s_CurrentPipelineAsset = null;
-			RenderPipelineManager.currentPipeline = null;
-			SupportedRenderingFeatures.active = new SupportedRenderingFeatures();
 		}
 
 		[RequiredByNativeCode]

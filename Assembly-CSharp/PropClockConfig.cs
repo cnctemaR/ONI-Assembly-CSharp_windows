@@ -7,12 +7,17 @@ public class PropClockConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropClock", global::STRINGS.BUILDINGS.PREFABS.PROPCLOCK.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPCLOCK.DESC, 50f, Assets.GetAnim("clock_poi_kanim"), "off", Grid.SceneLayer.Building, 1, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		string text = "PropClock";
+		string text2 = global::STRINGS.BUILDINGS.PREFABS.PROPCLOCK.NAME;
+		string text3 = global::STRINGS.BUILDINGS.PREFABS.PROPCLOCK.DESC;
+		float num = 50f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("clock_poi_kanim"), "off", Grid.SceneLayer.Building, 1, 2, tier, tier2, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
-		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
-		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		return gameObject;
 	}
 

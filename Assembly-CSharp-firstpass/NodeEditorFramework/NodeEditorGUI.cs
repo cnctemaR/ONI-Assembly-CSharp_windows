@@ -64,7 +64,7 @@ namespace NodeEditorFramework
 
 		public static void DrawConnection(Vector2 startPos, Vector2 endPos, Color col)
 		{
-			Vector2 vector = ((startPos.x > endPos.x) ? Vector2.left : Vector2.right);
+			Vector2 vector = ((startPos.x <= endPos.x) ? Vector2.right : Vector2.left);
 			NodeEditorGUI.DrawConnection(startPos, vector, endPos, -vector, col);
 		}
 
@@ -79,8 +79,9 @@ namespace NodeEditorFramework
 			{
 				float num = 80f;
 				RTEditorGUI.DrawBezier(startPos, endPos, startPos + startDir * num, endPos + endDir * num, col * Color.gray, null, 3f);
+				return;
 			}
-			else if (drawMethod == ConnectionDrawMethod.StraightLine)
+			if (drawMethod == ConnectionDrawMethod.StraightLine)
 			{
 				RTEditorGUI.DrawLine(startPos, endPos, col * Color.gray, null, 3f);
 			}
@@ -90,13 +91,24 @@ namespace NodeEditorFramework
 		{
 			if (firstVector.x != 0f && firstVector.y == 0f)
 			{
-				return (startPos.x > endPos.x) ? firstVector : (-firstVector);
+				if (startPos.x > endPos.x)
+				{
+					return firstVector;
+				}
+				return -firstVector;
 			}
-			if (firstVector.y != 0f && firstVector.x == 0f)
+			else
 			{
-				return (startPos.y > endPos.y) ? firstVector : (-firstVector);
+				if (firstVector.y == 0f || firstVector.x != 0f)
+				{
+					return -firstVector;
+				}
+				if (startPos.y > endPos.y)
+				{
+					return firstVector;
+				}
+				return -firstVector;
 			}
-			return -firstVector;
 		}
 
 		public static int knobSize = 16;

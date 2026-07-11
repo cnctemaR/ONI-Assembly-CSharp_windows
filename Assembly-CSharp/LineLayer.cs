@@ -9,7 +9,7 @@ public class LineLayer : GraphLayer
 		base.OnPrefabInit();
 	}
 
-	public GraphedLine NewLine(Tuple<float, float>[] points, string ID = "")
+	public GraphedLine NewLine(global::Tuple<float, float>[] points, string ID = "")
 	{
 		Vector2[] array = new Vector2[points.Length];
 		for (int i = 0; i < points.Length; i++)
@@ -22,7 +22,7 @@ public class LineLayer : GraphLayer
 	public GraphedLine NewLine(Vector2[] points, string ID = "", int compressDataToPointCount = 128, LineLayer.DataScalingType compressType = LineLayer.DataScalingType.DropValues)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.prefab_line, this.line_container, true);
-		if (ID == string.Empty)
+		if (ID == "")
 		{
 			ID = this.lines.Count.ToString();
 		}
@@ -63,23 +63,23 @@ public class LineLayer : GraphLayer
 					if (j > 0)
 					{
 						float num6 = 0f;
-						if (compressType != LineLayer.DataScalingType.Max)
+						if (compressType != LineLayer.DataScalingType.Average)
 						{
-							if (compressType == LineLayer.DataScalingType.Average)
+							if (compressType == LineLayer.DataScalingType.Max)
 							{
 								for (int k = 0; k < num5; k++)
 								{
-									num6 += points[j * num5 - k].y;
+									num6 = Mathf.Max(num6, points[j * num5 - k].y);
 								}
-								num6 /= (float)num5;
 							}
 						}
 						else
 						{
 							for (int l = 0; l < num5; l++)
 							{
-								num6 = Mathf.Max(num6, points[j * num5 - l].y);
+								num6 += points[j * num5 - l].y;
 							}
+							num6 /= (float)num5;
 						}
 						array[j] = new Vector2(points[j * num5].x, num6);
 					}

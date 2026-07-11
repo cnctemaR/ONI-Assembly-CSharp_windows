@@ -58,8 +58,9 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			if (component.CurrentNavType != NavType.Solid && Grid.IsSolidCell(num))
 			{
 				component.SetCurrentNavType(NavType.Solid);
+				return;
 			}
-			else if (component.CurrentNavType == NavType.Solid && !Grid.IsSolidCell(num))
+			if (component.CurrentNavType == NavType.Solid && !Grid.IsSolidCell(num))
 			{
 				component.SetCurrentNavType(NavType.Floor);
 				base.gameObject.AddTag(GameTags.Creatures.Falling);
@@ -74,8 +75,7 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 		public bool CanTunnel()
 		{
 			int num = Grid.PosToCell(this);
-			SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num);
-			if (subWorldZoneType == SubWorld.ZoneType.Space)
+			if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num) == SubWorld.ZoneType.Space)
 			{
 				int num2 = num;
 				while (Grid.IsValidCell(num2) && !Grid.Solid[num2])

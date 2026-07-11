@@ -62,12 +62,10 @@ public class Disinfectable : Workable
 		if (this.isMarkedForDisinfect)
 		{
 			this.CancelDisinfection();
+			return;
 		}
-		else
-		{
-			base.SetWorkTime(10f);
-			this.MarkForDisinfect(false);
-		}
+		base.SetWorkTime(10f);
+		this.MarkForDisinfect(false);
 	}
 
 	private void CancelDisinfection()

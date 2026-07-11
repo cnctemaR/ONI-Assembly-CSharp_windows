@@ -27,8 +27,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescr
 		this.chores = new Chore[this.choreOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
-			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
+			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]), Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("HotTubWorkable", vector);
 			KSelectable kselectable = gameObject.AddOrGet<KSelectable>();
 			kselectable.SetName(this.GetProperName());
@@ -68,11 +67,15 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescr
 	{
 		Workable workable = this.workables[i];
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
-		Workable workable2 = workable;
+		IStateMachineTarget stateMachineTarget = workable;
+		ChoreProvider choreProvider = null;
+		bool flag = true;
+		Action<Chore> action = null;
+		Action<Chore> action2 = null;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<HotTubWorkable>(relax, workable2, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
-		return chore;
+		WorkChore<HotTubWorkable> workChore = new WorkChore<HotTubWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
+		return workChore;
 	}
 
 	private void OnSocialChoreEnd(Chore chore)
@@ -105,8 +108,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescr
 
 	public void OnWorkableEvent(int player, Workable.WorkableEvent ev)
 	{
-		bool flag = ev == Workable.WorkableEvent.WorkStarted;
-		if (flag)
+		if (ev == Workable.WorkableEvent.WorkStarted)
 		{
 			this.occupants.Add(player);
 		}
@@ -322,27 +324,22 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescr
 
 		public void TestWaterTemperature()
 		{
-			Storage waterStorage = base.smi.master.waterStorage;
-			GameObject gameObject = waterStorage.FindFirst(new Tag(1836671383));
+			GameObject gameObject = base.smi.master.waterStorage.FindFirst(new Tag(1836671383));
 			float num = 0f;
-			if (gameObject)
-			{
-				num = gameObject.GetComponent<PrimaryElement>().Temperature;
-				this.UpdateTemperatureMeter(num);
-				if (num < base.smi.master.minimumWaterTemperature)
-				{
-					base.smi.sm.waterTooCold.Set(true, base.smi);
-				}
-				else
-				{
-					base.smi.sm.waterTooCold.Set(false, base.smi);
-				}
-			}
-			else
+			if (!gameObject)
 			{
 				this.UpdateTemperatureMeter(num);
 				base.smi.sm.waterTooCold.Set(false, base.smi);
+				return;
 			}
+			num = gameObject.GetComponent<PrimaryElement>().Temperature;
+			this.UpdateTemperatureMeter(num);
+			if (num < base.smi.master.minimumWaterTemperature)
+			{
+				base.smi.sm.waterTooCold.Set(true, base.smi);
+				return;
+			}
+			base.smi.sm.waterTooCold.Set(false, base.smi);
 		}
 
 		public bool IsTubTooHot()
@@ -352,8 +349,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescr
 
 		public bool HasBleachStone()
 		{
-			Storage waterStorage = base.smi.master.waterStorage;
-			GameObject gameObject = waterStorage.FindFirst(new Tag(-839728230));
+			GameObject gameObject = base.smi.master.waterStorage.FindFirst(new Tag(-839728230));
 			return gameObject != null && gameObject.GetComponent<PrimaryElement>().Mass > 0f;
 		}
 

@@ -13,12 +13,16 @@ public class GasVentHighPressureConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		string[] array = new string[] { "RefinedMetal", "Plastic" };
-		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
+		float[] array2 = new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
-		}, array, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		};
+		string[] array3 = array;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -42,8 +46,7 @@ public class GasVentHighPressureConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.ignoreMinMassCheck = true;
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.showInUI = true;
+		BuildingTemplates.CreateDefaultStorage(go, false).showInUI = true;
 		go.AddOrGet<SimpleVent>();
 	}
 

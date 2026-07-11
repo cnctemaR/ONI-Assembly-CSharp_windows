@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using FMOD.Studio;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,16 +6,12 @@ using UnityEngine.UI;
 
 public class KSlider : Slider
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onReleaseHandle;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDrag;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerDown;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onMove;
 
 	private new void Awake()
@@ -160,7 +155,7 @@ public class KSlider : Slider
 		{
 			this.lastMoveTime = Time.unscaledTime;
 			this.lastMoveValue = num2;
-			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
+			EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
 			eventInstance.setParameterValue("sliderValue", num2);
 			eventInstance.setParameterValue("timeSinceLast", num);
 			KFMOD.EndOneShot(eventInstance);
@@ -180,7 +175,7 @@ public class KSlider : Slider
 		string text = this.currentSounds[2];
 		if (text != null && text.Length > 0)
 		{
-			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
+			EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
 			eventInstance.setParameterValue("sliderValue", this.value);
 			KFMOD.EndOneShot(eventInstance);
 		}

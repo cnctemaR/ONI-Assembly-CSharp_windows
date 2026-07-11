@@ -6,7 +6,7 @@ namespace System.Net.Configuration
 	[ConfigurationCollection(typeof(ConnectionManagementElement), CollectionType = ConfigurationElementCollectionType.AddRemoveClearMap)]
 	public sealed class ConnectionManagementElementCollection : ConfigurationElementCollection
 	{
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public ConnectionManagementElement this[int index]
 		{
 			get

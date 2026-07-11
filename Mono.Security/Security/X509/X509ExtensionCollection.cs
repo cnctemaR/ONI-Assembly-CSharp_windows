@@ -28,11 +28,6 @@ namespace Mono.Security.X509
 			}
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return base.InnerList.GetEnumerator();
-		}
-
 		public int Add(X509Extension extension)
 		{
 			if (extension == null)
@@ -105,8 +100,7 @@ namespace Mono.Security.X509
 			}
 			for (int i = 0; i < base.InnerList.Count; i++)
 			{
-				X509Extension x509Extension = (X509Extension)base.InnerList[i];
-				if (x509Extension.Equals(extension))
+				if (((X509Extension)base.InnerList[i]).Equals(extension))
 				{
 					return i;
 				}
@@ -122,8 +116,7 @@ namespace Mono.Security.X509
 			}
 			for (int i = 0; i < base.InnerList.Count; i++)
 			{
-				X509Extension x509Extension = (X509Extension)base.InnerList[i];
-				if (x509Extension.Oid == oid)
+				if (((X509Extension)base.InnerList[i]).Oid == oid)
 				{
 					return i;
 				}
@@ -160,6 +153,11 @@ namespace Mono.Security.X509
 			{
 				base.InnerList.RemoveAt(num);
 			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return base.InnerList.GetEnumerator();
 		}
 
 		public X509Extension this[int index]

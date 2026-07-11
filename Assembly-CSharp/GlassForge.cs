@@ -14,22 +14,17 @@ public class GlassForge : ComplexFabricator
 		KSelectable component = base.GetComponent<KSelectable>();
 		int num = Grid.OffsetCell(Grid.PosToCell(this), GlassForgeConfig.outPipeOffset);
 		GameObject gameObject = Grid.Objects[num, 16];
-		if (gameObject != null)
-		{
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			if (component2.Element.highTemp > ElementLoader.FindElementByHash(SimHashes.MoltenGlass).lowTemp)
-			{
-				component.RemoveStatusItem(this.statusHandle, false);
-			}
-			else
-			{
-				this.statusHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.PipeMayMelt, null);
-			}
-		}
-		else
+		if (!(gameObject != null))
 		{
 			component.RemoveStatusItem(this.statusHandle, false);
+			return;
 		}
+		if (gameObject.GetComponent<PrimaryElement>().Element.highTemp > ElementLoader.FindElementByHash(SimHashes.MoltenGlass).lowTemp)
+		{
+			component.RemoveStatusItem(this.statusHandle, false);
+			return;
+		}
+		this.statusHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.PipeMayMelt, null);
 	}
 
 	private Guid statusHandle;

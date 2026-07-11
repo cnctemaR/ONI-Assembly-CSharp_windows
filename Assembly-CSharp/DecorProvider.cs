@@ -104,8 +104,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 	private void OnCollectDecorProviders(object data)
 	{
-		List<DecorProvider> list = (List<DecorProvider>)data;
-		list.Add(this);
+		((List<DecorProvider>)data).Add(this);
 	}
 
 	public string GetName()
@@ -138,8 +137,8 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		{
 			float totalValue = this.decor.GetTotalValue();
 			float totalValue2 = this.decorRadius.GetTotalValue();
-			string text = ((this.baseDecor <= 0f) ? "consumed" : "produced");
-			string text2 = ((this.baseDecor <= 0f) ? UI.BUILDINGEFFECTS.TOOLTIPS.DECORDECREASED : UI.BUILDINGEFFECTS.TOOLTIPS.DECORPROVIDED);
+			string text = ((this.baseDecor > 0f) ? "produced" : "consumed");
+			string text2 = ((this.baseDecor > 0f) ? UI.BUILDINGEFFECTS.TOOLTIPS.DECORPROVIDED : UI.BUILDINGEFFECTS.TOOLTIPS.DECORDECREASED);
 			text2 = text2 + "\n\n" + this.decor.GetAttributeValueTooltip();
 			string text3 = GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f);
 			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.DECORPROVIDED, text, text3, totalValue2), string.Format(text2, text3, totalValue2), Descriptor.DescriptorType.Effect, false);
@@ -147,8 +146,8 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		}
 		else if (this.baseDecor != 0f)
 		{
-			string text4 = ((this.baseDecor < 0f) ? "consumed" : "produced");
-			string text5 = ((this.baseDecor < 0f) ? UI.BUILDINGEFFECTS.TOOLTIPS.DECORDECREASED : UI.BUILDINGEFFECTS.TOOLTIPS.DECORPROVIDED);
+			string text4 = ((this.baseDecor >= 0f) ? "produced" : "consumed");
+			string text5 = ((this.baseDecor >= 0f) ? UI.BUILDINGEFFECTS.TOOLTIPS.DECORPROVIDED : UI.BUILDINGEFFECTS.TOOLTIPS.DECORDECREASED);
 			string text6 = GameUtil.AddPositiveSign(this.baseDecor.ToString(), this.baseDecor > 0f);
 			Descriptor descriptor2 = new Descriptor(string.Format(UI.BUILDINGEFFECTS.DECORPROVIDED, text4, text6, this.baseRadius), string.Format(text5, text6, this.baseRadius), Descriptor.DescriptorType.Effect, false);
 			list.Add(descriptor2);
@@ -230,6 +229,8 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 	private struct Splat
 	{
+		public float decor { get; private set; }
+
 		public Splat(DecorProvider provider)
 		{
 			this = default(DecorProvider.Splat);
@@ -280,8 +281,6 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			this.AddDecor();
 		}
 
-		public float decor { get; private set; }
-
 		public void Clear()
 		{
 			if (this.decor == 0f)
@@ -319,7 +318,11 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 							Grid.Decor[num8] += this.decor;
 							if (this.provider.cellCount >= 0 && this.provider.cellCount < this.provider.cells.Length)
 							{
-								this.provider.cells[this.provider.cellCount++] = num8;
+								int[] cells = this.provider.cells;
+								DecorProvider decorProvider = this.provider;
+								int cellCount = decorProvider.cellCount;
+								decorProvider.cellCount = cellCount + 1;
+								cells[cellCount] = num8;
 							}
 						}
 					}

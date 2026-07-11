@@ -101,31 +101,34 @@ public struct TagBits
 		if (num < 64)
 		{
 			this.bits0 |= 1UL << num;
+			return;
 		}
-		else if (num < 128)
+		if (num < 128)
 		{
 			this.bits1 |= 1UL << num;
+			return;
 		}
-		else if (num < 192)
+		if (num < 192)
 		{
 			this.bits2 |= 1UL << num;
+			return;
 		}
-		else if (num < 256)
+		if (num < 256)
 		{
 			this.bits3 |= 1UL << num;
+			return;
 		}
-		else if (num < 320)
+		if (num < 320)
 		{
 			this.bits4 |= 1UL << num;
+			return;
 		}
-		else if (num < 384)
+		if (num < 384)
 		{
 			this.bits5 |= 1UL << num;
+			return;
 		}
-		else
-		{
-			Debug.LogError("Out of bits!");
-		}
+		Debug.LogError("Out of bits!");
 	}
 
 	public void Clear(Tag tag)
@@ -134,31 +137,34 @@ public struct TagBits
 		if (num < 64)
 		{
 			this.bits0 &= ~(1UL << num);
+			return;
 		}
-		else if (num < 128)
+		if (num < 128)
 		{
 			this.bits1 &= ~(1UL << num);
+			return;
 		}
-		else if (num < 192)
+		if (num < 192)
 		{
 			this.bits2 &= ~(1UL << num);
+			return;
 		}
-		else if (num < 256)
+		if (num < 256)
 		{
 			this.bits3 &= ~(1UL << num);
+			return;
 		}
-		else if (num < 320)
+		if (num < 320)
 		{
 			this.bits4 &= ~(1UL << num);
+			return;
 		}
-		else if (num < 384)
+		if (num < 384)
 		{
 			this.bits5 &= ~(1UL << num);
+			return;
 		}
-		else
-		{
-			Debug.LogError("Out of bits!");
-		}
+		Debug.LogError("Out of bits!");
 	}
 
 	public void ClearAll()
@@ -178,7 +184,7 @@ public struct TagBits
 
 	public bool HasAny(ref TagBits tag_bits)
 	{
-		return ((this.bits0 & tag_bits.bits0) | (this.bits1 & tag_bits.bits1) | (this.bits2 & tag_bits.bits2) | (this.bits3 & tag_bits.bits3) | (this.bits4 & tag_bits.bits4) | (this.bits5 & tag_bits.bits5)) != 0UL;
+		return ((this.bits0 & tag_bits.bits0) | (this.bits1 & tag_bits.bits1) | (this.bits2 & tag_bits.bits2) | (this.bits3 & tag_bits.bits3) | (this.bits4 & tag_bits.bits4) | (this.bits5 & tag_bits.bits5)) > 0UL;
 	}
 
 	public bool AreEqual(ref TagBits tag_bits)

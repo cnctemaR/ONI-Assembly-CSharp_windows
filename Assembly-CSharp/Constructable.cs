@@ -75,7 +75,7 @@ public class Constructable : Workable, ISaveLoadable
 			this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
 		}
 		KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
-		UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
+		UtilityConnections connections = ((component2 == null) ? ((UtilityConnections)0) : component2.Connections);
 		bool flag2 = true;
 		if (this.IsReplacementTile)
 		{
@@ -100,8 +100,7 @@ public class Constructable : Workable, ISaveLoadable
 					Conduit component4 = replacementCandidate.GetComponent<Conduit>();
 					if (component4 != null)
 					{
-						ConduitFlow flowManager = component4.GetFlowManager();
-						flowManager.MarkForReplacement(num3);
+						component4.GetFlowManager().MarkForReplacement(num3);
 					}
 					BuildingComplete component5 = replacementCandidate.GetComponent<BuildingComplete>();
 					if (component5 != null)
@@ -143,17 +142,10 @@ public class Constructable : Workable, ISaveLoadable
 	private void FinishConstruction(UtilityConnections connections)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
-		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
+		Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
 		int num = Grid.PosToCell(base.transform.GetLocalPosition());
 		this.UnmarkArea();
-		BuildingDef def = this.building.Def;
-		int num2 = num;
-		Orientation orientation2 = orientation;
-		Storage storage = this.storage;
-		Tag[] array = this.selectedElementsTags;
-		float num3 = this.initialTemperature;
-		float time = GameClock.Instance.GetTime();
-		GameObject gameObject = def.Build(num2, orientation2, storage, array, num3, true, time);
+		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, true, GameClock.Instance.GetTime());
 		gameObject.transform.rotation = base.transform.rotation;
 		Rotatable component2 = gameObject.GetComponent<Rotatable>();
 		if (component2 != null)
@@ -163,14 +155,13 @@ public class Constructable : Workable, ISaveLoadable
 		KAnimGraphTileVisualizer component3 = base.GetComponent<KAnimGraphTileVisualizer>();
 		if (component3 != null)
 		{
-			KAnimGraphTileVisualizer component4 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-			component4.Connections = connections;
+			gameObject.GetComponent<KAnimGraphTileVisualizer>().Connections = connections;
 			component3.skipCleanup = true;
 		}
-		KSelectable component5 = base.GetComponent<KSelectable>();
-		if (component5 != null && component5.IsSelected && gameObject.GetComponent<KSelectable>() != null)
+		KSelectable component4 = base.GetComponent<KSelectable>();
+		if (component4 != null && component4.IsSelected && gameObject.GetComponent<KSelectable>() != null)
 		{
-			component5.Unselect();
+			component4.Unselect();
 			if (PlayerController.Instance.ActiveTool.name == "SelectTool")
 			{
 				((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
@@ -227,16 +218,10 @@ public class Constructable : Workable, ISaveLoadable
 		Element element = ElementLoader.GetElement(this.SelectedElementsTags[0]);
 		global::Debug.Assert(element != null, "Missing primary element for Constructable");
 		component.ElementID = element.id;
-		PrimaryElement primaryElement = component;
-		float num = 293.15f;
-		component.Temperature = num;
-		primaryElement.Temperature = num;
+		component.Temperature = (component.Temperature = 293.15f);
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElementsTags))
 		{
-			FetchList2 fetchList = this.fetchList;
-			Tag tag = ingredient.tag;
-			num = ingredient.amount;
-			fetchList.Add(tag, null, null, num, FetchOrder2.OperationalRequirement.None);
+			this.fetchList.Add(ingredient.tag, null, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
 			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, ingredient.amount);
 		}
 		if (!this.building.Def.IsTilePiece)
@@ -256,17 +241,17 @@ public class Constructable : Workable, ISaveLoadable
 		});
 		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
-			int num2 = Grid.PosToCell(base.transform.GetPosition());
-			GameObject gameObject = Grid.Objects[num2, (int)this.building.Def.ReplacementLayer];
+			int num = Grid.PosToCell(base.transform.GetPosition());
+			GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
 			if (gameObject == null || gameObject == base.gameObject)
 			{
-				Grid.Objects[num2, (int)this.building.Def.ReplacementLayer] = base.gameObject;
+				Grid.Objects[num, (int)this.building.Def.ReplacementLayer] = base.gameObject;
 				if (base.gameObject.GetComponent<SimCellOccupier>() != null)
 				{
-					int num3 = LayerMask.NameToLayer("Overlay");
-					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, this.IsReplacementTile, SimHashes.Void, num2);
+					int num2 = LayerMask.NameToLayer("Overlay");
+					World.Instance.blockTileRenderer.AddBlock(num2, this.building.Def, this.IsReplacementTile, SimHashes.Void, num);
 				}
-				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
+				TileVisualizer.RefreshCell(num, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
 			}
 			else
 			{
@@ -278,19 +263,17 @@ public class Constructable : Workable, ISaveLoadable
 		this.waitForFetchesBeforeDigging = flag || this.building.Def.BuildingComplete.GetComponent<SimCellOccupier>() || this.building.Def.BuildingComplete.GetComponent<Door>() || this.building.Def.BuildingComplete.GetComponent<LiquidPumpingStation>();
 		if (flag)
 		{
+			int num3 = 0;
 			int num4 = 0;
-			int num5 = 0;
-			int num6 = Grid.PosToCell(this);
-			Grid.CellToXY(num6, out num4, out num5);
-			int num7 = num5 - 3;
-			this.ladderDetectionExtents = new Extents(num4, num7, 1, 5);
+			Grid.CellToXY(Grid.PosToCell(this), out num3, out num4);
+			int num5 = num4 - 3;
+			this.ladderDetectionExtents = new Extents(num3, num5, 1, 5);
 			this.ladderParititonerEntry = GameScenePartitioner.Instance.Add("Constructable.OnNearbyBuildingLayerChanged", base.gameObject, this.ladderDetectionExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNearbyBuildingLayerChanged));
 			this.OnNearbyBuildingLayerChanged(null);
 		}
 		this.fetchList.Submit(new global::System.Action(this.OnFetchListComplete), true);
 		this.PlaceDiggables();
-		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
-		instance.StartSM();
+		new ReachabilityMonitor.Instance(this).StartSM();
 		base.Subscribe<Constructable>(493375141, Constructable.OnRefreshUserMenuDelegate);
 		Prioritizable component2 = base.GetComponent<Prioritizable>();
 		Prioritizable prioritizable = component2;
@@ -315,12 +298,11 @@ public class Constructable : Workable, ISaveLoadable
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingDef def = this.building.Def;
 		Orientation orientation = this.building.Orientation;
-		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? def.ObjectLayer : def.ReplacementLayer);
+		ObjectLayer objectLayer = (this.IsReplacementTile ? def.ReplacementLayer : def.ObjectLayer);
 		def.MarkArea(num, orientation, objectLayer, base.gameObject);
 		if (def.IsTilePiece)
 		{
-			GameObject gameObject = Grid.Objects[num, (int)def.TileLayer];
-			if (gameObject == null)
+			if (Grid.Objects[num, (int)def.TileLayer] == null)
 			{
 				def.MarkArea(num, orientation, def.TileLayer, base.gameObject);
 				def.RunOnArea(num, orientation, delegate(int c)
@@ -341,7 +323,7 @@ public class Constructable : Workable, ISaveLoadable
 		this.unmarked = true;
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingDef def = this.building.Def;
-		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? this.building.Def.ObjectLayer : this.building.Def.ReplacementLayer);
+		ObjectLayer objectLayer = (this.IsReplacementTile ? this.building.Def.ReplacementLayer : this.building.Def.ObjectLayer);
 		def.UnmarkArea(num, this.building.Orientation, objectLayer, base.gameObject);
 		if (def.IsTilePiece)
 		{
@@ -362,7 +344,7 @@ public class Constructable : Workable, ISaveLoadable
 				if (gameObject != null && gameObject.GetComponent<Ladder>() != null)
 				{
 					this.hasLadderNearby = true;
-					break;
+					return;
 				}
 			}
 		}
@@ -387,19 +369,15 @@ public class Constructable : Workable, ISaveLoadable
 			if (building != null)
 			{
 				bool flag = this.IsWire();
-				int num2 = ((!flag) ? building.GetUtilityInputCell() : building.GetPowerInputCell());
-				int num3 = ((!flag) ? building.GetUtilityOutputCell() : num2);
+				int num2 = (flag ? building.GetPowerInputCell() : building.GetUtilityInputCell());
+				int num3 = (flag ? num2 : building.GetUtilityOutputCell());
 				if (num == num2 || num == num3)
 				{
 					BuildingCellVisualizer component = building.gameObject.GetComponent<BuildingCellVisualizer>();
-					if (component != null)
+					if (component != null && (flag ? component.RequiresPower : component.RequiresUtilityConnection))
 					{
-						bool flag2 = ((!flag) ? component.RequiresUtilityConnection : component.RequiresPower);
-						if (flag2)
-						{
-							component.ConnectedEventWithDelay(delay, connectionCount, num, soundName);
-							return true;
-						}
+						component.ConnectedEventWithDelay(delay, connectionCount, num, soundName);
+						return true;
 					}
 				}
 			}
@@ -431,9 +409,10 @@ public class Constructable : Workable, ISaveLoadable
 			this.fetchList.Cancel("Constructable destroyed");
 		}
 		this.UnmarkArea();
-		foreach (int num2 in this.building.PlacementCells)
+		int[] placementCells = this.building.PlacementCells;
+		for (int i = 0; i < placementCells.Length; i++)
 		{
-			Diggable diggable = Diggable.GetDiggable(num2);
+			Diggable diggable = Diggable.GetDiggable(placementCells[i]);
 			if (diggable != null)
 			{
 				diggable.gameObject.DeleteObject();
@@ -453,10 +432,12 @@ public class Constructable : Workable, ISaveLoadable
 				Diggable diggable = Diggable.GetDiggable(offset_cell);
 				if (diggable != null)
 				{
-					diggable_count++;
+					int num = diggable_count + 1;
+					diggable_count = num;
 					if (!diggable.GetComponent<KPrefabID>().HasTag(GameTags.Reachable))
 					{
-						unreachable_count++;
+						num = unreachable_count + 1;
+						unreachable_count = num;
 					}
 				}
 			});
@@ -531,7 +512,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		else
 		{
-			this.notifier.Add(this.invalidLocation, string.Empty);
+			this.notifier.Add(this.invalidLocation, "");
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.InvalidBuildingLocation, !flag, this);
 		bool flag2 = digs_complete && flag && this.fetchList == null;
@@ -539,8 +520,9 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			this.buildChore = new WorkChore<Constructable>(Db.Get().ChoreTypes.Build, this, null, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.UpdateBuildState(this.buildChore);
+			return;
 		}
-		else if (!flag2 && this.buildChore != null)
+		if (!flag2 && this.buildChore != null)
 		{
 			this.buildChore.Cancel("Need to dig");
 			this.buildChore = null;
@@ -582,11 +564,9 @@ public class Constructable : Workable, ISaveLoadable
 		if (chore.InProgress())
 		{
 			component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstruction, null);
+			return;
 		}
-		else
-		{
-			component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstructionNoWorker, null);
-		}
+		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstructionNoWorker, null);
 	}
 
 	[OnDeserialized]
@@ -618,13 +598,13 @@ public class Constructable : Workable, ISaveLoadable
 	private void OnReachableChanged(object data)
 	{
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		bool flag = (bool)data;
-		if (flag)
+		if ((bool)data)
 		{
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ConstructionUnreachable, false);
 			if (component != null)
 			{
 				component.TintColour = Game.Instance.uiColours.Build.validLocation;
+				return;
 			}
 		}
 		else
@@ -639,13 +619,7 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "action_cancel";
-		string text2 = UI.USERMENUACTIONS.CANCELCONSTRUCTION.NAME;
-		global::System.Action action = new global::System.Action(this.OnPressCancel);
-		string text3 = UI.USERMENUACTIONS.CANCELCONSTRUCTION.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_cancel", UI.USERMENUACTIONS.CANCELCONSTRUCTION.NAME, new global::System.Action(this.OnPressCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELCONSTRUCTION.TOOLTIP, true), 1f);
 	}
 
 	private void OnPressCancel()

@@ -1445,8 +1445,7 @@ namespace TMPro
 		{
 			Material material = new Material(source);
 			material.shaderKeywords = source.shaderKeywords;
-			Material material2 = material;
-			material2.name += " (Instance)";
+			material.name += " (Instance)";
 			return material;
 		}
 
@@ -1618,24 +1617,17 @@ namespace TMPro
 					{
 						num = (int)(text[i + 3] - '0');
 					}
-					int num3 = (int)(text[i + 1] - '0');
-					if (num3 != 0)
+					switch (text[i + 1])
 					{
-						if (num3 != 1)
-						{
-							if (num3 == 2)
-							{
-								this.AddFloatToCharArray(arg2, ref num2, num);
-							}
-						}
-						else
-						{
-							this.AddFloatToCharArray(arg1, ref num2, num);
-						}
-					}
-					else
-					{
+					case '0':
 						this.AddFloatToCharArray(arg0, ref num2, num);
+						break;
+					case '1':
+						this.AddFloatToCharArray(arg1, ref num2, num);
+						break;
+					case '2':
+						this.AddFloatToCharArray(arg2, ref num2, num);
+						break;
 					}
 					if (text[i + 2] == ':')
 					{
@@ -1690,7 +1682,7 @@ namespace TMPro
 			{
 				if (sourceText[i] != '\\' || i >= sourceText.Length - 1)
 				{
-					goto IL_0105;
+					goto IL_00E9;
 				}
 				int num2 = (int)sourceText[i + 1];
 				if (num2 != 110)
@@ -1699,7 +1691,7 @@ namespace TMPro
 					{
 						if (num2 != 116)
 						{
-							goto IL_0105;
+							goto IL_00E9;
 						}
 						if (num == this.m_char_buffer.Length)
 						{
@@ -1730,10 +1722,10 @@ namespace TMPro
 					i++;
 					num++;
 				}
-				IL_01E3:
+				IL_01A7:
 				i++;
 				continue;
-				IL_0105:
+				IL_00E9:
 				if (sourceText[i] == '<')
 				{
 					if (this.IsTagName(ref sourceText, "<BR>", i))
@@ -1745,7 +1737,7 @@ namespace TMPro
 						this.m_char_buffer[num] = 10;
 						num++;
 						i += 3;
-						goto IL_01E3;
+						goto IL_01A7;
 					}
 					if (this.IsTagName(ref sourceText, "<STYLE=", i))
 					{
@@ -1753,14 +1745,14 @@ namespace TMPro
 						if (this.ReplaceOpeningStyleTag(ref sourceText, i, out num3, ref this.m_char_buffer, ref num))
 						{
 							i = num3;
-							goto IL_01E3;
+							goto IL_01A7;
 						}
 					}
 					else if (this.IsTagName(ref sourceText, "</STYLE>", i))
 					{
 						this.ReplaceClosingStyleTag(ref sourceText, i, ref this.m_char_buffer, ref num);
 						i += 7;
-						goto IL_01E3;
+						goto IL_01A7;
 					}
 				}
 				if (num == this.m_char_buffer.Length)
@@ -1769,7 +1761,7 @@ namespace TMPro
 				}
 				this.m_char_buffer[num] = (int)sourceText[i];
 				num++;
-				goto IL_01E3;
+				goto IL_01A7;
 			}
 			if (num == this.m_char_buffer.Length)
 			{
@@ -1802,7 +1794,7 @@ namespace TMPro
 			{
 				if (sourceText[i] != '\\' || i >= length - 1)
 				{
-					goto IL_010D;
+					goto IL_00EE;
 				}
 				int num3 = (int)sourceText[i + 1];
 				if (num3 != 110)
@@ -1811,7 +1803,7 @@ namespace TMPro
 					{
 						if (num3 != 116)
 						{
-							goto IL_010D;
+							goto IL_00EE;
 						}
 						if (num == this.m_char_buffer.Length)
 						{
@@ -1842,10 +1834,10 @@ namespace TMPro
 					i++;
 					num++;
 				}
-				IL_01ED:
+				IL_01AE:
 				i++;
 				continue;
-				IL_010D:
+				IL_00EE:
 				if (sourceText[i] == '<')
 				{
 					if (this.IsTagName(ref sourceText, "<BR>", i))
@@ -1857,7 +1849,7 @@ namespace TMPro
 						this.m_char_buffer[num] = 10;
 						num++;
 						i += 3;
-						goto IL_01ED;
+						goto IL_01AE;
 					}
 					if (this.IsTagName(ref sourceText, "<STYLE=", i))
 					{
@@ -1865,14 +1857,14 @@ namespace TMPro
 						if (this.ReplaceOpeningStyleTag(ref sourceText, i, out num4, ref this.m_char_buffer, ref num))
 						{
 							i = num4;
-							goto IL_01ED;
+							goto IL_01AE;
 						}
 					}
 					else if (this.IsTagName(ref sourceText, "</STYLE>", i))
 					{
 						this.ReplaceClosingStyleTag(ref sourceText, i, ref this.m_char_buffer, ref num);
 						i += 7;
-						goto IL_01ED;
+						goto IL_01AE;
 					}
 				}
 				if (num == this.m_char_buffer.Length)
@@ -1881,7 +1873,7 @@ namespace TMPro
 				}
 				this.m_char_buffer[num] = (int)sourceText[i];
 				num++;
-				goto IL_01ED;
+				goto IL_01AE;
 			}
 			if (num == this.m_char_buffer.Length)
 			{
@@ -1914,7 +1906,7 @@ namespace TMPro
 			{
 				if (sourceText[i] != 92 || i >= length - 1)
 				{
-					goto IL_010D;
+					goto IL_00EE;
 				}
 				int num3 = sourceText[i + 1];
 				if (num3 != 110)
@@ -1923,7 +1915,7 @@ namespace TMPro
 					{
 						if (num3 != 116)
 						{
-							goto IL_010D;
+							goto IL_00EE;
 						}
 						if (num == this.m_char_buffer.Length)
 						{
@@ -1954,10 +1946,10 @@ namespace TMPro
 					i++;
 					num++;
 				}
-				IL_01ED:
+				IL_01AE:
 				i++;
 				continue;
-				IL_010D:
+				IL_00EE:
 				if (sourceText[i] == 60)
 				{
 					if (this.IsTagName(ref sourceText, "<BR>", i))
@@ -1969,7 +1961,7 @@ namespace TMPro
 						this.m_char_buffer[num] = 10;
 						num++;
 						i += 3;
-						goto IL_01ED;
+						goto IL_01AE;
 					}
 					if (this.IsTagName(ref sourceText, "<STYLE=", i))
 					{
@@ -1977,14 +1969,14 @@ namespace TMPro
 						if (this.ReplaceOpeningStyleTag(ref sourceText, i, out num4, ref this.m_char_buffer, ref num))
 						{
 							i = num4;
-							goto IL_01ED;
+							goto IL_01AE;
 						}
 					}
 					else if (this.IsTagName(ref sourceText, "</STYLE>", i))
 					{
 						this.ReplaceClosingStyleTag(ref sourceText, i, ref this.m_char_buffer, ref num);
 						i += 7;
-						goto IL_01ED;
+						goto IL_01AE;
 					}
 				}
 				if (num == this.m_char_buffer.Length)
@@ -1993,7 +1985,7 @@ namespace TMPro
 				}
 				this.m_char_buffer[num] = sourceText[i];
 				num++;
-				goto IL_01ED;
+				goto IL_01AE;
 			}
 			if (num == this.m_char_buffer.Length)
 			{
@@ -2045,7 +2037,7 @@ namespace TMPro
 							charBuffer[num] = 10;
 							num++;
 							i += 3;
-							goto IL_013A;
+							goto IL_0105;
 						}
 						if (this.IsTagName(ref sourceText, "<STYLE=", i))
 						{
@@ -2053,14 +2045,14 @@ namespace TMPro
 							if (this.ReplaceOpeningStyleTag(ref sourceText, i, out num2, ref charBuffer, ref num))
 							{
 								i = num2;
-								goto IL_013A;
+								goto IL_0105;
 							}
 						}
 						else if (this.IsTagName(ref sourceText, "</STYLE>", i))
 						{
 							this.ReplaceClosingStyleTag(ref sourceText, i, ref charBuffer, ref num);
 							i += 7;
-							goto IL_013A;
+							goto IL_0105;
 						}
 					}
 					if (num == charBuffer.Length)
@@ -2070,7 +2062,7 @@ namespace TMPro
 					charBuffer[num] = (int)sourceText[i];
 					num++;
 				}
-				IL_013A:;
+				IL_0105:;
 			}
 			if (num == charBuffer.Length)
 			{
@@ -2097,70 +2089,35 @@ namespace TMPro
 			{
 				if (this.m_inputSource != TMP_Text.TextInputSources.Text || sourceText[i] != '\\' || sourceText.Length <= i + 1)
 				{
-					goto IL_0213;
+					goto IL_01D3;
 				}
 				int num2 = (int)sourceText[i + 1];
-				switch (num2)
+				if (num2 <= 92)
 				{
-				case 114:
-					if (!this.m_parseCtrlCharacters)
-					{
-						goto IL_0213;
-					}
-					if (num == charBuffer.Length)
-					{
-						this.ResizeInternalArray<int>(ref charBuffer);
-					}
-					charBuffer[num] = 13;
-					i++;
-					num++;
-					break;
-				default:
 					if (num2 != 85)
 					{
 						if (num2 != 92)
 						{
-							if (num2 != 110)
-							{
-								goto IL_0213;
-							}
-							if (!this.m_parseCtrlCharacters)
-							{
-								goto IL_0213;
-							}
-							if (num == charBuffer.Length)
-							{
-								this.ResizeInternalArray<int>(ref charBuffer);
-							}
-							charBuffer[num] = 10;
-							i++;
-							num++;
+							goto IL_01D3;
 						}
-						else
+						if (!this.m_parseCtrlCharacters || sourceText.Length <= i + 2)
 						{
-							if (!this.m_parseCtrlCharacters)
-							{
-								goto IL_0213;
-							}
-							if (sourceText.Length <= i + 2)
-							{
-								goto IL_0213;
-							}
-							if (num + 2 > charBuffer.Length)
-							{
-								this.ResizeInternalArray<int>(ref charBuffer);
-							}
-							charBuffer[num] = (int)sourceText[i + 1];
-							charBuffer[num + 1] = (int)sourceText[i + 2];
-							i += 2;
-							num += 2;
+							goto IL_01D3;
 						}
+						if (num + 2 > charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = (int)sourceText[i + 1];
+						charBuffer[num + 1] = (int)sourceText[i + 2];
+						i += 2;
+						num += 2;
 					}
 					else
 					{
 						if (sourceText.Length <= i + 9)
 						{
-							goto IL_0213;
+							goto IL_01D3;
 						}
 						if (num == charBuffer.Length)
 						{
@@ -2170,38 +2127,74 @@ namespace TMPro
 						i += 9;
 						num++;
 					}
-					break;
-				case 116:
+				}
+				else if (num2 != 110)
+				{
+					switch (num2)
+					{
+					case 114:
+						if (!this.m_parseCtrlCharacters)
+						{
+							goto IL_01D3;
+						}
+						if (num == charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = 13;
+						i++;
+						num++;
+						break;
+					case 115:
+						goto IL_01D3;
+					case 116:
+						if (!this.m_parseCtrlCharacters)
+						{
+							goto IL_01D3;
+						}
+						if (num == charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = 9;
+						i++;
+						num++;
+						break;
+					case 117:
+						if (sourceText.Length <= i + 5)
+						{
+							goto IL_01D3;
+						}
+						if (num == charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = (int)((ushort)this.GetUTF16(sourceText, i + 2));
+						i += 5;
+						num++;
+						break;
+					default:
+						goto IL_01D3;
+					}
+				}
+				else
+				{
 					if (!this.m_parseCtrlCharacters)
 					{
-						goto IL_0213;
+						goto IL_01D3;
 					}
 					if (num == charBuffer.Length)
 					{
 						this.ResizeInternalArray<int>(ref charBuffer);
 					}
-					charBuffer[num] = 9;
+					charBuffer[num] = 10;
 					i++;
 					num++;
-					break;
-				case 117:
-					if (sourceText.Length <= i + 5)
-					{
-						goto IL_0213;
-					}
-					if (num == charBuffer.Length)
-					{
-						this.ResizeInternalArray<int>(ref charBuffer);
-					}
-					charBuffer[num] = (int)((ushort)this.GetUTF16(sourceText, i + 2));
-					i += 5;
-					num++;
-					break;
 				}
-				IL_033B:
+				IL_02CC:
 				i++;
 				continue;
-				IL_0213:
+				IL_01D3:
 				if (char.IsHighSurrogate(sourceText[i]) && char.IsLowSurrogate(sourceText[i + 1]))
 				{
 					if (num == charBuffer.Length)
@@ -2211,7 +2204,7 @@ namespace TMPro
 					charBuffer[num] = char.ConvertToUtf32(sourceText[i], sourceText[i + 1]);
 					i++;
 					num++;
-					goto IL_033B;
+					goto IL_02CC;
 				}
 				if (sourceText[i] == '<' && this.m_isRichText)
 				{
@@ -2224,7 +2217,7 @@ namespace TMPro
 						charBuffer[num] = 10;
 						num++;
 						i += 3;
-						goto IL_033B;
+						goto IL_02CC;
 					}
 					if (this.IsTagName(ref sourceText, "<STYLE=", i))
 					{
@@ -2232,14 +2225,14 @@ namespace TMPro
 						if (this.ReplaceOpeningStyleTag(ref sourceText, i, out num3, ref charBuffer, ref num))
 						{
 							i = num3;
-							goto IL_033B;
+							goto IL_02CC;
 						}
 					}
 					else if (this.IsTagName(ref sourceText, "</STYLE>", i))
 					{
 						this.ReplaceClosingStyleTag(ref sourceText, i, ref charBuffer, ref num);
 						i += 7;
-						goto IL_033B;
+						goto IL_02CC;
 					}
 				}
 				if (num == charBuffer.Length)
@@ -2248,7 +2241,7 @@ namespace TMPro
 				}
 				charBuffer[num] = (int)sourceText[i];
 				num++;
-				goto IL_033B;
+				goto IL_02CC;
 			}
 			if (num == charBuffer.Length)
 			{
@@ -2275,58 +2268,35 @@ namespace TMPro
 			{
 				if (!this.m_parseCtrlCharacters || sourceText[i] != '\\' || sourceText.Length <= i + 1)
 				{
-					goto IL_01D2;
+					goto IL_01AC;
 				}
 				int num2 = (int)sourceText[i + 1];
-				switch (num2)
+				if (num2 <= 92)
 				{
-				case 114:
-					if (num == charBuffer.Length)
-					{
-						this.ResizeInternalArray<int>(ref charBuffer);
-					}
-					charBuffer[num] = 13;
-					i++;
-					num++;
-					break;
-				default:
 					if (num2 != 85)
 					{
 						if (num2 != 92)
 						{
-							if (num2 != 110)
-							{
-								goto IL_01D2;
-							}
-							if (num == charBuffer.Length)
-							{
-								this.ResizeInternalArray<int>(ref charBuffer);
-							}
-							charBuffer[num] = 10;
-							i++;
-							num++;
+							goto IL_01AC;
 						}
-						else
+						if (sourceText.Length <= i + 2)
 						{
-							if (sourceText.Length <= i + 2)
-							{
-								goto IL_01D2;
-							}
-							if (num + 2 > charBuffer.Length)
-							{
-								this.ResizeInternalArray<int>(ref charBuffer);
-							}
-							charBuffer[num] = (int)sourceText[i + 1];
-							charBuffer[num + 1] = (int)sourceText[i + 2];
-							i += 2;
-							num += 2;
+							goto IL_01AC;
 						}
+						if (num + 2 > charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = (int)sourceText[i + 1];
+						charBuffer[num + 1] = (int)sourceText[i + 2];
+						i += 2;
+						num += 2;
 					}
 					else
 					{
 						if (sourceText.Length <= i + 9)
 						{
-							goto IL_01D2;
+							goto IL_01AC;
 						}
 						if (num == charBuffer.Length)
 						{
@@ -2336,34 +2306,62 @@ namespace TMPro
 						i += 9;
 						num++;
 					}
-					break;
-				case 116:
+				}
+				else if (num2 != 110)
+				{
+					switch (num2)
+					{
+					case 114:
+						if (num == charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = 13;
+						i++;
+						num++;
+						break;
+					case 115:
+						goto IL_01AC;
+					case 116:
+						if (num == charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = 9;
+						i++;
+						num++;
+						break;
+					case 117:
+						if (sourceText.Length <= i + 5)
+						{
+							goto IL_01AC;
+						}
+						if (num == charBuffer.Length)
+						{
+							this.ResizeInternalArray<int>(ref charBuffer);
+						}
+						charBuffer[num] = (int)((ushort)this.GetUTF16(sourceText, i + 2));
+						i += 5;
+						num++;
+						break;
+					default:
+						goto IL_01AC;
+					}
+				}
+				else
+				{
 					if (num == charBuffer.Length)
 					{
 						this.ResizeInternalArray<int>(ref charBuffer);
 					}
-					charBuffer[num] = 9;
+					charBuffer[num] = 10;
 					i++;
 					num++;
-					break;
-				case 117:
-					if (sourceText.Length <= i + 5)
-					{
-						goto IL_01D2;
-					}
-					if (num == charBuffer.Length)
-					{
-						this.ResizeInternalArray<int>(ref charBuffer);
-					}
-					charBuffer[num] = (int)((ushort)this.GetUTF16(sourceText, i + 2));
-					i += 5;
-					num++;
-					break;
 				}
-				IL_02EF:
+				IL_029D:
 				i++;
 				continue;
-				IL_01D2:
+				IL_01AC:
 				if (char.IsHighSurrogate(sourceText[i]) && char.IsLowSurrogate(sourceText[i + 1]))
 				{
 					if (num == charBuffer.Length)
@@ -2373,7 +2371,7 @@ namespace TMPro
 					charBuffer[num] = char.ConvertToUtf32(sourceText[i], sourceText[i + 1]);
 					i++;
 					num++;
-					goto IL_02EF;
+					goto IL_029D;
 				}
 				if (sourceText[i] == '<')
 				{
@@ -2386,7 +2384,7 @@ namespace TMPro
 						charBuffer[num] = 10;
 						num++;
 						i += 3;
-						goto IL_02EF;
+						goto IL_029D;
 					}
 					if (this.IsTagName(ref sourceText, "<STYLE=", i))
 					{
@@ -2394,14 +2392,14 @@ namespace TMPro
 						if (this.ReplaceOpeningStyleTag(ref sourceText, i, out num3, ref charBuffer, ref num))
 						{
 							i = num3;
-							goto IL_02EF;
+							goto IL_029D;
 						}
 					}
 					else if (this.IsTagName(ref sourceText, "</STYLE>", i))
 					{
 						this.ReplaceClosingStyleTag(ref sourceText, i, ref charBuffer, ref num);
 						i += 7;
-						goto IL_02EF;
+						goto IL_029D;
 					}
 				}
 				if (num == charBuffer.Length)
@@ -2410,7 +2408,7 @@ namespace TMPro
 				}
 				charBuffer[num] = (int)sourceText[i];
 				num++;
-				goto IL_02EF;
+				goto IL_029D;
 			}
 			if (num == charBuffer.Length)
 			{
@@ -2421,8 +2419,7 @@ namespace TMPro
 
 		private bool ReplaceOpeningStyleTag(ref string sourceText, int srcIndex, out int srcOffset, ref int[] charBuffer, ref int writeIndex)
 		{
-			int tagHashCode = this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset);
-			TMP_Style style = TMP_StyleSheet.GetStyle(tagHashCode);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset));
 			if (style == null || srcOffset == 0)
 			{
 				return false;
@@ -2436,7 +2433,7 @@ namespace TMPro
 				int num2 = styleOpeningTagArray[i];
 				if (num2 != 60)
 				{
-					goto IL_0107;
+					goto IL_00D6;
 				}
 				if (this.IsTagName(ref styleOpeningTagArray, "<BR>", i))
 				{
@@ -2453,7 +2450,7 @@ namespace TMPro
 					int num3 = 0;
 					if (!this.ReplaceOpeningStyleTag(ref styleOpeningTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					i = num3;
 				}
@@ -2461,30 +2458,29 @@ namespace TMPro
 				{
 					if (!this.IsTagName(ref styleOpeningTagArray, "</STYLE>", i))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					this.ReplaceClosingStyleTag(ref styleOpeningTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_012D:
+				IL_00F9:
 				i++;
 				continue;
-				IL_0107:
+				IL_00D6:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
 				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_012D;
+				goto IL_00F9;
 			}
 			return true;
 		}
 
 		private bool ReplaceOpeningStyleTag(ref int[] sourceText, int srcIndex, out int srcOffset, ref int[] charBuffer, ref int writeIndex)
 		{
-			int tagHashCode = this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset);
-			TMP_Style style = TMP_StyleSheet.GetStyle(tagHashCode);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset));
 			if (style == null || srcOffset == 0)
 			{
 				return false;
@@ -2498,7 +2494,7 @@ namespace TMPro
 				int num2 = styleOpeningTagArray[i];
 				if (num2 != 60)
 				{
-					goto IL_0107;
+					goto IL_00D6;
 				}
 				if (this.IsTagName(ref styleOpeningTagArray, "<BR>", i))
 				{
@@ -2515,7 +2511,7 @@ namespace TMPro
 					int num3 = 0;
 					if (!this.ReplaceOpeningStyleTag(ref styleOpeningTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					i = num3;
 				}
@@ -2523,30 +2519,29 @@ namespace TMPro
 				{
 					if (!this.IsTagName(ref styleOpeningTagArray, "</STYLE>", i))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					this.ReplaceClosingStyleTag(ref styleOpeningTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_012D:
+				IL_00F9:
 				i++;
 				continue;
-				IL_0107:
+				IL_00D6:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
 				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_012D;
+				goto IL_00F9;
 			}
 			return true;
 		}
 
 		private bool ReplaceOpeningStyleTag(ref char[] sourceText, int srcIndex, out int srcOffset, ref int[] charBuffer, ref int writeIndex)
 		{
-			int tagHashCode = this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset);
-			TMP_Style style = TMP_StyleSheet.GetStyle(tagHashCode);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset));
 			if (style == null || srcOffset == 0)
 			{
 				return false;
@@ -2560,7 +2555,7 @@ namespace TMPro
 				int num2 = styleOpeningTagArray[i];
 				if (num2 != 60)
 				{
-					goto IL_0107;
+					goto IL_00D6;
 				}
 				if (this.IsTagName(ref styleOpeningTagArray, "<BR>", i))
 				{
@@ -2577,7 +2572,7 @@ namespace TMPro
 					int num3 = 0;
 					if (!this.ReplaceOpeningStyleTag(ref styleOpeningTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					i = num3;
 				}
@@ -2585,30 +2580,29 @@ namespace TMPro
 				{
 					if (!this.IsTagName(ref styleOpeningTagArray, "</STYLE>", i))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					this.ReplaceClosingStyleTag(ref styleOpeningTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_012D:
+				IL_00F9:
 				i++;
 				continue;
-				IL_0107:
+				IL_00D6:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
 				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_012D;
+				goto IL_00F9;
 			}
 			return true;
 		}
 
 		private bool ReplaceOpeningStyleTag(ref StringBuilder sourceText, int srcIndex, out int srcOffset, ref int[] charBuffer, ref int writeIndex)
 		{
-			int tagHashCode = this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset);
-			TMP_Style style = TMP_StyleSheet.GetStyle(tagHashCode);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.GetTagHashCode(ref sourceText, srcIndex + 7, out srcOffset));
 			if (style == null || srcOffset == 0)
 			{
 				return false;
@@ -2622,7 +2616,7 @@ namespace TMPro
 				int num2 = styleOpeningTagArray[i];
 				if (num2 != 60)
 				{
-					goto IL_0107;
+					goto IL_00D6;
 				}
 				if (this.IsTagName(ref styleOpeningTagArray, "<BR>", i))
 				{
@@ -2639,7 +2633,7 @@ namespace TMPro
 					int num3 = 0;
 					if (!this.ReplaceOpeningStyleTag(ref styleOpeningTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					i = num3;
 				}
@@ -2647,44 +2641,43 @@ namespace TMPro
 				{
 					if (!this.IsTagName(ref styleOpeningTagArray, "</STYLE>", i))
 					{
-						goto IL_0107;
+						goto IL_00D6;
 					}
 					this.ReplaceClosingStyleTag(ref styleOpeningTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_012D:
+				IL_00F9:
 				i++;
 				continue;
-				IL_0107:
+				IL_00D6:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
 				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_012D;
+				goto IL_00F9;
 			}
 			return true;
 		}
 
 		private bool ReplaceClosingStyleTag(ref string sourceText, int srcIndex, ref int[] charBuffer, ref int writeIndex)
 		{
-			int num = this.m_styleStack.CurrentItem();
-			TMP_Style style = TMP_StyleSheet.GetStyle(num);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.m_styleStack.CurrentItem());
 			this.m_styleStack.Remove();
 			if (style == null)
 			{
 				return false;
 			}
-			int num2 = style.styleClosingTagArray.Length;
+			int num = style.styleClosingTagArray.Length;
 			int[] styleClosingTagArray = style.styleClosingTagArray;
 			int i = 0;
-			while (i < num2)
+			while (i < num)
 			{
-				int num3 = styleClosingTagArray[i];
-				if (num3 != 60)
+				int num2 = styleClosingTagArray[i];
+				if (num2 != 60)
 				{
-					goto IL_00F6;
+					goto IL_00C8;
 				}
 				if (this.IsTagName(ref styleClosingTagArray, "<BR>", i))
 				{
@@ -2698,55 +2691,54 @@ namespace TMPro
 				}
 				else if (this.IsTagName(ref styleClosingTagArray, "<STYLE=", i))
 				{
-					int num4 = 0;
-					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num4, ref charBuffer, ref writeIndex))
+					int num3 = 0;
+					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
-					i = num4;
+					i = num3;
 				}
 				else
 				{
 					if (!this.IsTagName(ref styleClosingTagArray, "</STYLE>", i))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
 					this.ReplaceClosingStyleTag(ref styleClosingTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_0119:
+				IL_00E8:
 				i++;
 				continue;
-				IL_00F6:
+				IL_00C8:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
-				charBuffer[writeIndex] = num3;
+				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_0119;
+				goto IL_00E8;
 			}
 			return true;
 		}
 
 		private bool ReplaceClosingStyleTag(ref int[] sourceText, int srcIndex, ref int[] charBuffer, ref int writeIndex)
 		{
-			int num = this.m_styleStack.CurrentItem();
-			TMP_Style style = TMP_StyleSheet.GetStyle(num);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.m_styleStack.CurrentItem());
 			this.m_styleStack.Remove();
 			if (style == null)
 			{
 				return false;
 			}
-			int num2 = style.styleClosingTagArray.Length;
+			int num = style.styleClosingTagArray.Length;
 			int[] styleClosingTagArray = style.styleClosingTagArray;
 			int i = 0;
-			while (i < num2)
+			while (i < num)
 			{
-				int num3 = styleClosingTagArray[i];
-				if (num3 != 60)
+				int num2 = styleClosingTagArray[i];
+				if (num2 != 60)
 				{
-					goto IL_00F6;
+					goto IL_00C8;
 				}
 				if (this.IsTagName(ref styleClosingTagArray, "<BR>", i))
 				{
@@ -2760,55 +2752,54 @@ namespace TMPro
 				}
 				else if (this.IsTagName(ref styleClosingTagArray, "<STYLE=", i))
 				{
-					int num4 = 0;
-					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num4, ref charBuffer, ref writeIndex))
+					int num3 = 0;
+					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
-					i = num4;
+					i = num3;
 				}
 				else
 				{
 					if (!this.IsTagName(ref styleClosingTagArray, "</STYLE>", i))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
 					this.ReplaceClosingStyleTag(ref styleClosingTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_0119:
+				IL_00E8:
 				i++;
 				continue;
-				IL_00F6:
+				IL_00C8:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
-				charBuffer[writeIndex] = num3;
+				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_0119;
+				goto IL_00E8;
 			}
 			return true;
 		}
 
 		private bool ReplaceClosingStyleTag(ref char[] sourceText, int srcIndex, ref int[] charBuffer, ref int writeIndex)
 		{
-			int num = this.m_styleStack.CurrentItem();
-			TMP_Style style = TMP_StyleSheet.GetStyle(num);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.m_styleStack.CurrentItem());
 			this.m_styleStack.Remove();
 			if (style == null)
 			{
 				return false;
 			}
-			int num2 = style.styleClosingTagArray.Length;
+			int num = style.styleClosingTagArray.Length;
 			int[] styleClosingTagArray = style.styleClosingTagArray;
 			int i = 0;
-			while (i < num2)
+			while (i < num)
 			{
-				int num3 = styleClosingTagArray[i];
-				if (num3 != 60)
+				int num2 = styleClosingTagArray[i];
+				if (num2 != 60)
 				{
-					goto IL_00F6;
+					goto IL_00C8;
 				}
 				if (this.IsTagName(ref styleClosingTagArray, "<BR>", i))
 				{
@@ -2822,55 +2813,54 @@ namespace TMPro
 				}
 				else if (this.IsTagName(ref styleClosingTagArray, "<STYLE=", i))
 				{
-					int num4 = 0;
-					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num4, ref charBuffer, ref writeIndex))
+					int num3 = 0;
+					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
-					i = num4;
+					i = num3;
 				}
 				else
 				{
 					if (!this.IsTagName(ref styleClosingTagArray, "</STYLE>", i))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
 					this.ReplaceClosingStyleTag(ref styleClosingTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_0119:
+				IL_00E8:
 				i++;
 				continue;
-				IL_00F6:
+				IL_00C8:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
-				charBuffer[writeIndex] = num3;
+				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_0119;
+				goto IL_00E8;
 			}
 			return true;
 		}
 
 		private bool ReplaceClosingStyleTag(ref StringBuilder sourceText, int srcIndex, ref int[] charBuffer, ref int writeIndex)
 		{
-			int num = this.m_styleStack.CurrentItem();
-			TMP_Style style = TMP_StyleSheet.GetStyle(num);
+			TMP_Style style = TMP_StyleSheet.GetStyle(this.m_styleStack.CurrentItem());
 			this.m_styleStack.Remove();
 			if (style == null)
 			{
 				return false;
 			}
-			int num2 = style.styleClosingTagArray.Length;
+			int num = style.styleClosingTagArray.Length;
 			int[] styleClosingTagArray = style.styleClosingTagArray;
 			int i = 0;
-			while (i < num2)
+			while (i < num)
 			{
-				int num3 = styleClosingTagArray[i];
-				if (num3 != 60)
+				int num2 = styleClosingTagArray[i];
+				if (num2 != 60)
 				{
-					goto IL_00F6;
+					goto IL_00C8;
 				}
 				if (this.IsTagName(ref styleClosingTagArray, "<BR>", i))
 				{
@@ -2884,33 +2874,33 @@ namespace TMPro
 				}
 				else if (this.IsTagName(ref styleClosingTagArray, "<STYLE=", i))
 				{
-					int num4 = 0;
-					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num4, ref charBuffer, ref writeIndex))
+					int num3 = 0;
+					if (!this.ReplaceOpeningStyleTag(ref styleClosingTagArray, i, out num3, ref charBuffer, ref writeIndex))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
-					i = num4;
+					i = num3;
 				}
 				else
 				{
 					if (!this.IsTagName(ref styleClosingTagArray, "</STYLE>", i))
 					{
-						goto IL_00F6;
+						goto IL_00C8;
 					}
 					this.ReplaceClosingStyleTag(ref styleClosingTagArray, i, ref charBuffer, ref writeIndex);
 					i += 7;
 				}
-				IL_0119:
+				IL_00E8:
 				i++;
 				continue;
-				IL_00F6:
+				IL_00C8:
 				if (writeIndex == charBuffer.Length)
 				{
 					this.ResizeInternalArray<int>(ref charBuffer);
 				}
-				charBuffer[writeIndex] = num3;
+				charBuffer[writeIndex] = num2;
 				writeIndex++;
-				goto IL_0119;
+				goto IL_00E8;
 			}
 			return true;
 		}
@@ -3065,22 +3055,31 @@ namespace TMPro
 		{
 			if (number < 0f)
 			{
-				this.m_input_CharArray[index++] = '-';
+				char[] input_CharArray = this.m_input_CharArray;
+				int num = index;
+				index = num + 1;
+				input_CharArray[num] = 45;
 				number = -number;
 			}
 			number += this.k_Power[Mathf.Min(9, precision)];
-			int num = (int)number;
-			this.AddIntToCharArray(num, ref index, precision);
+			int num2 = (int)number;
+			this.AddIntToCharArray(num2, ref index, precision);
 			if (precision > 0)
 			{
-				this.m_input_CharArray[index++] = '.';
-				number -= (float)num;
+				char[] input_CharArray2 = this.m_input_CharArray;
+				int num = index;
+				index = num + 1;
+				input_CharArray2[num] = 46;
+				number -= (float)num2;
 				for (int i = 0; i < precision; i++)
 				{
 					number *= 10f;
-					int num2 = (int)number;
-					this.m_input_CharArray[index++] = (char)(num2 + 48);
-					number -= (float)num2;
+					int num3 = (int)number;
+					char[] input_CharArray3 = this.m_input_CharArray;
+					num = index;
+					index = num + 1;
+					input_CharArray3[num] = (ushort)(num3 + 48);
+					number -= (float)num3;
 				}
 			}
 		}
@@ -3089,26 +3088,29 @@ namespace TMPro
 		{
 			if (number < 0)
 			{
-				this.m_input_CharArray[index++] = '-';
+				char[] input_CharArray = this.m_input_CharArray;
+				int num = index;
+				index = num + 1;
+				input_CharArray[num] = 45;
 				number = -number;
 			}
-			int num = index;
+			int num2 = index;
 			do
 			{
-				this.m_input_CharArray[num++] = (char)(number % 10 + 48);
+				this.m_input_CharArray[num2++] = (char)(number % 10 + 48);
 				number /= 10;
 			}
 			while (number > 0);
-			int num2 = num;
-			while (index + 1 < num)
+			int num3 = num2;
+			while (index + 1 < num2)
 			{
-				num--;
+				num2--;
 				char c = this.m_input_CharArray[index];
-				this.m_input_CharArray[index] = this.m_input_CharArray[num];
-				this.m_input_CharArray[num] = c;
+				this.m_input_CharArray[index] = this.m_input_CharArray[num2];
+				this.m_input_CharArray[num2] = c;
 				index++;
 			}
-			index = num2;
+			index = num3;
 		}
 
 		protected virtual int SetArraySizes(int[] chars)
@@ -3173,7 +3175,7 @@ namespace TMPro
 			{
 				return 0f;
 			}
-			float num = ((!this.m_enableAutoSizing) ? this.m_fontSize : this.m_fontSizeMax);
+			float num = (this.m_enableAutoSizing ? this.m_fontSizeMax : this.m_fontSize);
 			this.m_minFontSize = this.m_fontSizeMin;
 			this.m_maxFontSize = this.m_fontSizeMax;
 			this.m_charWidthAdjDelta = 0f;
@@ -3191,7 +3193,7 @@ namespace TMPro
 
 		protected float GetPreferredWidth(Vector2 margin)
 		{
-			float num = ((!this.m_enableAutoSizing) ? this.m_fontSize : this.m_fontSizeMax);
+			float num = (this.m_enableAutoSizing ? this.m_fontSizeMax : this.m_fontSize);
 			this.m_minFontSize = this.m_fontSizeMin;
 			this.m_maxFontSize = this.m_fontSizeMax;
 			this.m_charWidthAdjDelta = 0f;
@@ -3205,11 +3207,11 @@ namespace TMPro
 			{
 				return 0f;
 			}
-			float num = ((!this.m_enableAutoSizing) ? this.m_fontSize : this.m_fontSizeMax);
+			float num = (this.m_enableAutoSizing ? this.m_fontSizeMax : this.m_fontSize);
 			this.m_minFontSize = this.m_fontSizeMin;
 			this.m_maxFontSize = this.m_fontSizeMax;
 			this.m_charWidthAdjDelta = 0f;
-			Vector2 vector = new Vector2((this.m_marginWidth == 0f) ? TMP_Text.k_LargePositiveFloat : this.m_marginWidth, TMP_Text.k_LargePositiveFloat);
+			Vector2 vector = new Vector2((this.m_marginWidth != 0f) ? this.m_marginWidth : TMP_Text.k_LargePositiveFloat, TMP_Text.k_LargePositiveFloat);
 			if (this.m_isInputParsingRequired || this.m_isTextTruncated)
 			{
 				this.m_isCalculatingPreferredValues = true;
@@ -3223,7 +3225,7 @@ namespace TMPro
 
 		protected float GetPreferredHeight(Vector2 margin)
 		{
-			float num = ((!this.m_enableAutoSizing) ? this.m_fontSize : this.m_fontSizeMax);
+			float num = (this.m_enableAutoSizing ? this.m_fontSizeMax : this.m_fontSize);
 			this.m_minFontSize = this.m_fontSizeMin;
 			this.m_maxFontSize = this.m_fontSizeMax;
 			this.m_charWidthAdjDelta = 0f;
@@ -3279,9 +3281,9 @@ namespace TMPro
 			int totalCharacterCount = this.m_totalCharacterCount;
 			if (this.m_internalCharacterInfo == null || totalCharacterCount > this.m_internalCharacterInfo.Length)
 			{
-				this.m_internalCharacterInfo = new TMP_CharacterInfo[(totalCharacterCount <= 1024) ? Mathf.NextPowerOfTwo(totalCharacterCount) : (totalCharacterCount + 256)];
+				this.m_internalCharacterInfo = new TMP_CharacterInfo[(totalCharacterCount > 1024) ? (totalCharacterCount + 256) : Mathf.NextPowerOfTwo(totalCharacterCount)];
 			}
-			float num = (this.m_fontScale = defaultFontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f));
+			float num = (this.m_fontScale = defaultFontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f));
 			float num2 = num;
 			this.m_fontScaleMultiplier = 1f;
 			this.m_currentFontSize = defaultFontSize;
@@ -3329,28 +3331,28 @@ namespace TMPro
 			while (this.m_char_buffer[num10] != 0)
 			{
 				int num11 = this.m_char_buffer[num10];
-				if (this.m_isRichText && num11 == 60)
+				if (!this.m_isRichText || num11 != 60)
 				{
-					this.m_isParsingText = true;
-					this.m_textElementType = TMP_TextElementType.Character;
-					if (this.ValidateHtmlTag(this.m_char_buffer, num10 + 1, out num9))
-					{
-						num10 = num9;
-						if (this.m_textElementType == TMP_TextElementType.Character)
-						{
-							goto IL_1560;
-						}
-					}
-					goto IL_03DD;
+					this.m_textElementType = this.m_textInfo.characterInfo[this.m_characterCount].elementType;
+					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
+					this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
+					goto IL_03AA;
 				}
-				this.m_textElementType = this.m_textInfo.characterInfo[this.m_characterCount].elementType;
-				this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
-				this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
-				goto IL_03DD;
-				IL_1560:
+				this.m_isParsingText = true;
+				this.m_textElementType = TMP_TextElementType.Character;
+				if (!this.ValidateHtmlTag(this.m_char_buffer, num10 + 1, out num9))
+				{
+					goto IL_03AA;
+				}
+				num10 = num9;
+				if (this.m_textElementType != TMP_TextElementType.Character)
+				{
+					goto IL_03AA;
+				}
+				IL_13B0:
 				num10++;
 				continue;
-				IL_03DD:
+				IL_03AA:
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				bool isUsingAlternateTypeface = this.m_textInfo.characterInfo[this.m_characterCount].isUsingAlternateTypeface;
 				this.m_isParsingText = false;
@@ -3384,14 +3386,14 @@ namespace TMPro
 					TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
 					if (tmp_Sprite == null)
 					{
-						goto IL_1560;
+						goto IL_13B0;
 					}
 					if (num11 == 60)
 					{
 						num11 = 57344 + this.m_spriteIndex;
 					}
 					this.m_currentFontAsset = this.m_fontAsset;
-					float num13 = this.m_currentFontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+					float num13 = this.m_currentFontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
 					num2 = this.m_fontAsset.fontInfo.Ascender / tmp_Sprite.height * tmp_Sprite.scale * num13;
 					this.m_cached_TextElement = tmp_Sprite;
 					this.m_internalCharacterInfo[this.m_characterCount].elementType = TMP_TextElementType.Sprite;
@@ -3403,10 +3405,10 @@ namespace TMPro
 					this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
 					if (this.m_cached_TextElement == null)
 					{
-						goto IL_1560;
+						goto IL_13B0;
 					}
 					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
-					this.m_fontScale = this.m_currentFontSize * num12 / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+					this.m_fontScale = this.m_currentFontSize * num12 / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
 					num2 = this.m_fontScale * this.m_fontScaleMultiplier * this.m_cached_TextElement.scale;
 					this.m_internalCharacterInfo[this.m_characterCount].elementType = TMP_TextElementType.Character;
 				}
@@ -3457,31 +3459,31 @@ namespace TMPro
 					num16 = 1f;
 				}
 				this.m_internalCharacterInfo[this.m_characterCount].baseLine = 0f - this.m_lineOffset + this.m_baselineOffset;
-				float num17 = this.m_currentFontAsset.fontInfo.Ascender * ((this.m_textElementType != TMP_TextElementType.Character) ? this.m_internalCharacterInfo[this.m_characterCount].scale : (num2 / num12)) + this.m_baselineOffset;
+				float num17 = this.m_currentFontAsset.fontInfo.Ascender * ((this.m_textElementType == TMP_TextElementType.Character) ? (num2 / num12) : this.m_internalCharacterInfo[this.m_characterCount].scale) + this.m_baselineOffset;
 				this.m_internalCharacterInfo[this.m_characterCount].ascender = num17 - this.m_lineOffset;
-				this.m_maxLineAscender = ((num17 <= this.m_maxLineAscender) ? this.m_maxLineAscender : num17);
-				float num18 = this.m_currentFontAsset.fontInfo.Descender * ((this.m_textElementType != TMP_TextElementType.Character) ? this.m_internalCharacterInfo[this.m_characterCount].scale : (num2 / num12)) + this.m_baselineOffset;
+				this.m_maxLineAscender = ((num17 > this.m_maxLineAscender) ? num17 : this.m_maxLineAscender);
+				float num18 = this.m_currentFontAsset.fontInfo.Descender * ((this.m_textElementType == TMP_TextElementType.Character) ? (num2 / num12) : this.m_internalCharacterInfo[this.m_characterCount].scale) + this.m_baselineOffset;
 				float num19 = (this.m_internalCharacterInfo[this.m_characterCount].descender = num18 - this.m_lineOffset);
-				this.m_maxLineDescender = ((num18 >= this.m_maxLineDescender) ? this.m_maxLineDescender : num18);
+				this.m_maxLineDescender = ((num18 < this.m_maxLineDescender) ? num18 : this.m_maxLineDescender);
 				if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript || (this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
 				{
 					float num20 = (num17 - this.m_baselineOffset) / this.m_currentFontAsset.fontInfo.SubSize;
 					num17 = this.m_maxLineAscender;
-					this.m_maxLineAscender = ((num20 <= this.m_maxLineAscender) ? this.m_maxLineAscender : num20);
+					this.m_maxLineAscender = ((num20 > this.m_maxLineAscender) ? num20 : this.m_maxLineAscender);
 					float num21 = (num18 - this.m_baselineOffset) / this.m_currentFontAsset.fontInfo.SubSize;
 					num18 = this.m_maxLineDescender;
-					this.m_maxLineDescender = ((num21 >= this.m_maxLineDescender) ? this.m_maxLineDescender : num21);
+					this.m_maxLineDescender = ((num21 < this.m_maxLineDescender) ? num21 : this.m_maxLineDescender);
 				}
 				if (this.m_lineNumber == 0)
 				{
-					this.m_maxAscender = ((this.m_maxAscender <= num17) ? num17 : this.m_maxAscender);
+					this.m_maxAscender = ((this.m_maxAscender > num17) ? this.m_maxAscender : num17);
 				}
 				if (num11 == 9 || num11 == 160 || num11 == 8199 || (!char.IsWhiteSpace((char)num11) && num11 != 8203) || this.m_textElementType == TMP_TextElementType.Sprite)
 				{
-					float num22 = ((this.m_width == -1f) ? (x + 0.0001f - this.m_marginLeft - this.m_marginRight) : Mathf.Min(x + 0.0001f - this.m_marginLeft - this.m_marginRight, this.m_width));
+					float num22 = ((this.m_width != -1f) ? Mathf.Min(x + 0.0001f - this.m_marginLeft - this.m_marginRight, this.m_width) : (x + 0.0001f - this.m_marginLeft - this.m_marginRight));
 					bool flag3 = (this.m_lineJustification & (TextAlignmentOptions)16) == (TextAlignmentOptions)16 || (this.m_lineJustification & (TextAlignmentOptions)8) == (TextAlignmentOptions)8;
-					num7 = this.m_xAdvance + this.m_cached_TextElement.xAdvance * (1f - this.m_charWidthAdjDelta) * ((num11 == 173) ? num14 : num2);
-					if (num7 > num22 * ((!flag3) ? 1f : 1.05f))
+					num7 = this.m_xAdvance + this.m_cached_TextElement.xAdvance * (1f - this.m_charWidthAdjDelta) * ((num11 != 173) ? num2 : num14);
+					if (num7 > num22 * (flag3 ? 1.05f : 1f))
 					{
 						if (this.enableWordWrapping && this.m_characterCount != this.m_firstCharacterOfLine)
 						{
@@ -3530,7 +3532,7 @@ namespace TMPro
 							}
 							float num24 = this.m_maxLineAscender - this.m_lineOffset;
 							float num25 = this.m_maxLineDescender - this.m_lineOffset;
-							this.m_maxDescender = ((this.m_maxDescender >= num25) ? num25 : this.m_maxDescender);
+							this.m_maxDescender = ((this.m_maxDescender < num25) ? this.m_maxDescender : num25);
 							this.m_firstCharacterOfLine = this.m_characterCount;
 							num5 += this.m_xAdvance;
 							if (this.m_enableWordWrapping)
@@ -3556,8 +3558,8 @@ namespace TMPro
 							}
 							this.m_maxLineAscender = TMP_Text.k_LargeNegativeFloat;
 							this.m_maxLineDescender = TMP_Text.k_LargePositiveFloat;
-							this.m_xAdvance = this.tag_Indent;
-							goto IL_1560;
+							this.m_xAdvance = 0f + this.tag_Indent;
+							goto IL_13B0;
 						}
 						else if (!ignoreTextAutoSizing && defaultFontSize > this.m_fontSizeMin)
 						{
@@ -3591,7 +3593,7 @@ namespace TMPro
 				{
 					float num29 = this.m_currentFontAsset.fontInfo.TabWidth * num2;
 					float num30 = Mathf.Ceil(this.m_xAdvance / num29) * num29;
-					this.m_xAdvance = ((num30 <= this.m_xAdvance) ? (this.m_xAdvance + num29) : num30);
+					this.m_xAdvance = ((num30 > this.m_xAdvance) ? num30 : (this.m_xAdvance + num29));
 				}
 				else if (this.m_monoSpacing != 0f)
 				{
@@ -3613,7 +3615,7 @@ namespace TMPro
 				{
 					num4 = Mathf.Max(num4, num5 + this.m_xAdvance);
 					num5 = 0f;
-					this.m_xAdvance = this.tag_Indent;
+					this.m_xAdvance = 0f + this.tag_Indent;
 				}
 				if (num11 == 10 || this.m_characterCount == totalCharacterCount - 1)
 				{
@@ -3624,7 +3626,7 @@ namespace TMPro
 						this.m_lineOffset += num31;
 					}
 					float num32 = this.m_maxLineDescender - this.m_lineOffset;
-					this.m_maxDescender = ((this.m_maxDescender >= num32) ? num32 : this.m_maxDescender);
+					this.m_maxDescender = ((this.m_maxDescender < num32) ? this.m_maxDescender : num32);
 					this.m_firstCharacterOfLine = this.m_characterCount + 1;
 					if (num11 == 10 && this.m_characterCount != totalCharacterCount - 1)
 					{
@@ -3653,9 +3655,9 @@ namespace TMPro
 						this.m_maxLineAscender = TMP_Text.k_LargeNegativeFloat;
 						this.m_maxLineDescender = TMP_Text.k_LargePositiveFloat;
 						this.m_startOfLineAscender = num17;
-						this.m_xAdvance = this.tag_LineIndent + this.tag_Indent;
+						this.m_xAdvance = 0f + this.tag_LineIndent + this.tag_Indent;
 						this.m_characterCount++;
-						goto IL_1560;
+						goto IL_13B0;
 					}
 				}
 				if (this.m_enableWordWrapping || this.m_overflowMode == TextOverflowModes.Truncate || this.m_overflowMode == TextOverflowModes.Ellipsis)
@@ -3681,17 +3683,17 @@ namespace TMPro
 					}
 				}
 				this.m_characterCount++;
-				goto IL_1560;
+				goto IL_13B0;
 			}
 			float num33 = this.m_maxFontSize - this.m_minFontSize;
 			if (this.m_isCharacterWrappingEnabled || ignoreTextAutoSizing || num33 <= 0.051f || defaultFontSize >= this.m_fontSizeMax)
 			{
 				this.m_isCharacterWrappingEnabled = false;
 				this.m_isCalculatingPreferredValues = false;
-				num5 += ((this.m_margin.x <= 0f) ? 0f : this.m_margin.x);
-				num5 += ((this.m_margin.z <= 0f) ? 0f : this.m_margin.z);
-				num6 += ((this.m_margin.y <= 0f) ? 0f : this.m_margin.y);
-				num6 += ((this.m_margin.w <= 0f) ? 0f : this.m_margin.w);
+				num5 += ((this.m_margin.x > 0f) ? this.m_margin.x : 0f);
+				num5 += ((this.m_margin.z > 0f) ? this.m_margin.z : 0f);
+				num6 += ((this.m_margin.y > 0f) ? this.m_margin.y : 0f);
+				num6 += ((this.m_margin.w > 0f) ? this.m_margin.w : 0f);
 				num5 = (float)((int)(num5 * 100f + 1f)) / 100f;
 				num6 = (float)((int)(num6 * 100f + 1f)) / 100f;
 				return new Vector2(num5, num6);
@@ -3733,8 +3735,7 @@ namespace TMPro
 			Vector2 vector;
 			vector.x = extents.max.x - extents.min.x;
 			vector.y = extents.max.y - extents.min.y;
-			Vector3 vector2 = (extents.min + extents.max) / 2f;
-			return new Bounds(vector2, vector);
+			return new Bounds((extents.min + extents.max) / 2f, vector);
 		}
 
 		protected Bounds GetTextBounds(bool onlyVisibleCharacters)
@@ -3744,25 +3745,22 @@ namespace TMPro
 				return default(Bounds);
 			}
 			Extents extents = new Extents(TMP_Text.k_LargePositiveVector2, TMP_Text.k_LargeNegativeVector2);
-			for (int i = 0; i < this.m_textInfo.characterCount; i++)
+			int num = 0;
+			while (num < this.m_textInfo.characterCount && ((num <= this.maxVisibleCharacters && this.m_textInfo.characterInfo[num].lineNumber <= this.m_maxVisibleLines) || !onlyVisibleCharacters))
 			{
-				if ((i > this.maxVisibleCharacters || this.m_textInfo.characterInfo[i].lineNumber > this.m_maxVisibleLines) && onlyVisibleCharacters)
+				if (!onlyVisibleCharacters || this.m_textInfo.characterInfo[num].isVisible)
 				{
-					break;
+					extents.min.x = Mathf.Min(extents.min.x, this.m_textInfo.characterInfo[num].origin);
+					extents.min.y = Mathf.Min(extents.min.y, this.m_textInfo.characterInfo[num].descender);
+					extents.max.x = Mathf.Max(extents.max.x, this.m_textInfo.characterInfo[num].xAdvance);
+					extents.max.y = Mathf.Max(extents.max.y, this.m_textInfo.characterInfo[num].ascender);
 				}
-				if (!onlyVisibleCharacters || this.m_textInfo.characterInfo[i].isVisible)
-				{
-					extents.min.x = Mathf.Min(extents.min.x, this.m_textInfo.characterInfo[i].origin);
-					extents.min.y = Mathf.Min(extents.min.y, this.m_textInfo.characterInfo[i].descender);
-					extents.max.x = Mathf.Max(extents.max.x, this.m_textInfo.characterInfo[i].xAdvance);
-					extents.max.y = Mathf.Max(extents.max.y, this.m_textInfo.characterInfo[i].ascender);
-				}
+				num++;
 			}
 			Vector2 vector;
 			vector.x = extents.max.x - extents.min.x;
 			vector.y = extents.max.y - extents.min.y;
-			Vector2 vector2 = (extents.min + extents.max) / 2f;
-			return new Bounds(vector2, vector);
+			return new Bounds((extents.min + extents.max) / 2f, vector);
 		}
 
 		protected virtual void AdjustLineOffset(int startIndex, int endIndex, float offset)
@@ -3771,7 +3769,7 @@ namespace TMPro
 
 		protected void ResizeLineExtents(int size)
 		{
-			size = ((size <= 1024) ? Mathf.NextPowerOfTwo(size + 1) : (size + 256));
+			size = ((size > 1024) ? (size + 256) : Mathf.NextPowerOfTwo(size + 1));
 			TMP_LineInfo[] array = new TMP_LineInfo[size];
 			for (int i = 0; i < size; i++)
 			{
@@ -3920,7 +3918,7 @@ namespace TMPro
 			this.m_textInfo.characterInfo[this.m_characterCount].vertex_TL.position = this.m_textInfo.characterInfo[this.m_characterCount].topLeft;
 			this.m_textInfo.characterInfo[this.m_characterCount].vertex_TR.position = this.m_textInfo.characterInfo[this.m_characterCount].topRight;
 			this.m_textInfo.characterInfo[this.m_characterCount].vertex_BR.position = this.m_textInfo.characterInfo[this.m_characterCount].bottomRight;
-			vertexColor.a = ((this.m_fontColor32.a >= vertexColor.a) ? vertexColor.a : this.m_fontColor32.a);
+			vertexColor.a = ((this.m_fontColor32.a < vertexColor.a) ? this.m_fontColor32.a : vertexColor.a);
 			if (!this.m_enableVertexGradient)
 			{
 				this.m_textInfo.characterInfo[this.m_characterCount].vertex_BL.color = vertexColor;
@@ -3997,8 +3995,8 @@ namespace TMPro
 			{
 				this.m_tintSprite = true;
 			}
-			Color32 color = ((!this.m_tintSprite) ? this.m_spriteColor : this.m_spriteColor.Multiply(vertexColor));
-			color.a = ((color.a >= this.m_fontColor32.a) ? this.m_fontColor32.a : (color.a = ((color.a >= vertexColor.a) ? vertexColor.a : color.a)));
+			Color32 color = (this.m_tintSprite ? this.m_spriteColor.Multiply(vertexColor) : this.m_spriteColor);
+			color.a = ((color.a < this.m_fontColor32.a) ? (color.a = ((color.a < vertexColor.a) ? color.a : vertexColor.a)) : this.m_fontColor32.a);
 			Color32 color2 = color;
 			Color32 color3 = color;
 			Color32 color4 = color;
@@ -4007,25 +4005,25 @@ namespace TMPro
 			{
 				if (this.m_fontColorGradientPreset != null)
 				{
-					color2 = ((!this.m_tintSprite) ? color2 : color2.Multiply(this.m_fontColorGradientPreset.bottomLeft));
-					color3 = ((!this.m_tintSprite) ? color3 : color3.Multiply(this.m_fontColorGradientPreset.topLeft));
-					color4 = ((!this.m_tintSprite) ? color4 : color4.Multiply(this.m_fontColorGradientPreset.topRight));
-					color5 = ((!this.m_tintSprite) ? color5 : color5.Multiply(this.m_fontColorGradientPreset.bottomRight));
+					color2 = (this.m_tintSprite ? color2.Multiply(this.m_fontColorGradientPreset.bottomLeft) : color2);
+					color3 = (this.m_tintSprite ? color3.Multiply(this.m_fontColorGradientPreset.topLeft) : color3);
+					color4 = (this.m_tintSprite ? color4.Multiply(this.m_fontColorGradientPreset.topRight) : color4);
+					color5 = (this.m_tintSprite ? color5.Multiply(this.m_fontColorGradientPreset.bottomRight) : color5);
 				}
 				else
 				{
-					color2 = ((!this.m_tintSprite) ? color2 : color2.Multiply(this.m_fontColorGradient.bottomLeft));
-					color3 = ((!this.m_tintSprite) ? color3 : color3.Multiply(this.m_fontColorGradient.topLeft));
-					color4 = ((!this.m_tintSprite) ? color4 : color4.Multiply(this.m_fontColorGradient.topRight));
-					color5 = ((!this.m_tintSprite) ? color5 : color5.Multiply(this.m_fontColorGradient.bottomRight));
+					color2 = (this.m_tintSprite ? color2.Multiply(this.m_fontColorGradient.bottomLeft) : color2);
+					color3 = (this.m_tintSprite ? color3.Multiply(this.m_fontColorGradient.topLeft) : color3);
+					color4 = (this.m_tintSprite ? color4.Multiply(this.m_fontColorGradient.topRight) : color4);
+					color5 = (this.m_tintSprite ? color5.Multiply(this.m_fontColorGradient.bottomRight) : color5);
 				}
 			}
 			if (this.m_colorGradientPreset != null)
 			{
-				color2 = ((!this.m_tintSprite) ? color2 : color2.Multiply(this.m_colorGradientPreset.bottomLeft));
-				color3 = ((!this.m_tintSprite) ? color3 : color3.Multiply(this.m_colorGradientPreset.topLeft));
-				color4 = ((!this.m_tintSprite) ? color4 : color4.Multiply(this.m_colorGradientPreset.topRight));
-				color5 = ((!this.m_tintSprite) ? color5 : color5.Multiply(this.m_colorGradientPreset.bottomRight));
+				color2 = (this.m_tintSprite ? color2.Multiply(this.m_colorGradientPreset.bottomLeft) : color2);
+				color3 = (this.m_tintSprite ? color3.Multiply(this.m_colorGradientPreset.topLeft) : color3);
+				color4 = (this.m_tintSprite ? color4.Multiply(this.m_colorGradientPreset.topRight) : color4);
+				color5 = (this.m_tintSprite ? color5.Multiply(this.m_colorGradientPreset.bottomRight) : color5);
 			}
 			this.m_textInfo.characterInfo[this.m_characterCount].vertex_BL.color = color2;
 			this.m_textInfo.characterInfo[this.m_characterCount].vertex_TL.color = color3;
@@ -4118,7 +4116,7 @@ namespace TMPro
 				this.m_textInfo.meshInfo[materialReferenceIndex].colors32[6 + index_X4] = color;
 				this.m_textInfo.meshInfo[materialReferenceIndex].colors32[7 + index_X4] = color;
 			}
-			this.m_textInfo.meshInfo[materialReferenceIndex].vertexCount = index_X4 + (isVolumetric ? 8 : 4);
+			this.m_textInfo.meshInfo[materialReferenceIndex].vertexCount = index_X4 + ((!isVolumetric) ? 4 : 8);
 		}
 
 		protected virtual void FillSpriteVertexBuffers(int i, int index_X4)
@@ -4224,7 +4222,7 @@ namespace TMPro
 			uvs2[9 + index] = this.PackUV(num7, 1f, num6);
 			uvs2[10 + index] = this.PackUV(1f, 1f, num6);
 			uvs2[11 + index] = this.PackUV(1f, 0f, num6);
-			underlineColor.a = ((this.m_fontColor32.a >= underlineColor.a) ? underlineColor.a : this.m_fontColor32.a);
+			underlineColor.a = ((this.m_fontColor32.a < underlineColor.a) ? this.m_fontColor32.a : underlineColor.a);
 			Color32[] colors = this.m_textInfo.meshInfo[0].colors32;
 			colors[index] = underlineColor;
 			colors[1 + index] = underlineColor;
@@ -4273,7 +4271,7 @@ namespace TMPro
 			uvs2[1 + index] = vector2;
 			uvs2[2 + index] = vector2;
 			uvs2[3 + index] = vector2;
-			highlightColor.a = ((this.m_fontColor32.a >= highlightColor.a) ? highlightColor.a : this.m_fontColor32.a);
+			highlightColor.a = ((this.m_fontColor32.a < highlightColor.a) ? this.m_fontColor32.a : highlightColor.a);
 			Color32[] colors = this.m_textInfo.meshInfo[0].colors32;
 			colors[index] = highlightColor;
 			colors[1 + index] = highlightColor;
@@ -4312,8 +4310,9 @@ namespace TMPro
 				this.m_fontSizeMax = this.m_fontSize * TMP_Settings.defaultTextAutoSizingMaxRatio;
 				this.m_isAlignmentEnumConverted = true;
 				this.m_isWaitingOnResourceLoad = false;
+				return;
 			}
-			else if (!this.m_isAlignmentEnumConverted)
+			if (!this.m_isAlignmentEnumConverted)
 			{
 				this.m_isAlignmentEnumConverted = true;
 				this.m_textAlignment = TMP_Compatibility.ConvertTextAlignmentEnumValues(this.m_textAlignment);
@@ -4322,12 +4321,8 @@ namespace TMPro
 
 		protected void GetSpecialCharacters(TMP_FontAsset fontAsset)
 		{
-			if (!fontAsset.characterDictionary.TryGetValue(95, out this.m_cached_Underline_GlyphInfo))
-			{
-			}
-			if (!fontAsset.characterDictionary.TryGetValue(8230, out this.m_cached_Ellipsis_GlyphInfo))
-			{
-			}
+			fontAsset.characterDictionary.TryGetValue(95, out this.m_cached_Underline_GlyphInfo);
+			fontAsset.characterDictionary.TryGetValue(8230, out this.m_cached_Ellipsis_GlyphInfo);
 		}
 
 		protected void ReplaceTagWithCharacter(int[] chars, int insertionIndex, int tagLength, char c)
@@ -4400,9 +4395,9 @@ namespace TMPro
 
 		protected float PackUV(float x, float y)
 		{
-			double num = (double)((int)(x * 511f));
+			float num = (float)((double)((int)(x * 511f)));
 			double num2 = (double)((int)(y * 511f));
-			return (float)(num * 4096.0 + num2);
+			return (float)((double)num * 4096.0 + num2);
 		}
 
 		protected int HexToInt(char hex)
@@ -4429,6 +4424,26 @@ namespace TMPro
 				return 8;
 			case '9':
 				return 9;
+			case ':':
+			case ';':
+			case '<':
+			case '=':
+			case '>':
+			case '?':
+			case '@':
+				break;
+			case 'A':
+				return 10;
+			case 'B':
+				return 11;
+			case 'C':
+				return 12;
+			case 'D':
+				return 13;
+			case 'E':
+				return 14;
+			case 'F':
+				return 15;
 			default:
 				switch (hex)
 				{
@@ -4444,67 +4459,30 @@ namespace TMPro
 					return 14;
 				case 'f':
 					return 15;
-				default:
-					return 15;
 				}
 				break;
-			case 'A':
-				return 10;
-			case 'B':
-				return 11;
-			case 'C':
-				return 12;
-			case 'D':
-				return 13;
-			case 'E':
-				return 14;
-			case 'F':
-				return 15;
 			}
+			return 15;
 		}
 
 		protected int GetUTF16(string text, int i)
 		{
-			int num = 0;
-			num += this.HexToInt(text[i]) << 12;
-			num += this.HexToInt(text[i + 1]) << 8;
-			num += this.HexToInt(text[i + 2]) << 4;
-			return num + this.HexToInt(text[i + 3]);
+			return 0 + (this.HexToInt(text[i]) << 12) + (this.HexToInt(text[i + 1]) << 8) + (this.HexToInt(text[i + 2]) << 4) + this.HexToInt(text[i + 3]);
 		}
 
 		protected int GetUTF16(StringBuilder text, int i)
 		{
-			int num = 0;
-			num += this.HexToInt(text[i]) << 12;
-			num += this.HexToInt(text[i + 1]) << 8;
-			num += this.HexToInt(text[i + 2]) << 4;
-			return num + this.HexToInt(text[i + 3]);
+			return 0 + (this.HexToInt(text[i]) << 12) + (this.HexToInt(text[i + 1]) << 8) + (this.HexToInt(text[i + 2]) << 4) + this.HexToInt(text[i + 3]);
 		}
 
 		protected int GetUTF32(string text, int i)
 		{
-			int num = 0;
-			num += this.HexToInt(text[i]) << 30;
-			num += this.HexToInt(text[i + 1]) << 24;
-			num += this.HexToInt(text[i + 2]) << 20;
-			num += this.HexToInt(text[i + 3]) << 16;
-			num += this.HexToInt(text[i + 4]) << 12;
-			num += this.HexToInt(text[i + 5]) << 8;
-			num += this.HexToInt(text[i + 6]) << 4;
-			return num + this.HexToInt(text[i + 7]);
+			return 0 + (this.HexToInt(text[i]) << 30) + (this.HexToInt(text[i + 1]) << 24) + (this.HexToInt(text[i + 2]) << 20) + (this.HexToInt(text[i + 3]) << 16) + (this.HexToInt(text[i + 4]) << 12) + (this.HexToInt(text[i + 5]) << 8) + (this.HexToInt(text[i + 6]) << 4) + this.HexToInt(text[i + 7]);
 		}
 
 		protected int GetUTF32(StringBuilder text, int i)
 		{
-			int num = 0;
-			num += this.HexToInt(text[i]) << 30;
-			num += this.HexToInt(text[i + 1]) << 24;
-			num += this.HexToInt(text[i + 2]) << 20;
-			num += this.HexToInt(text[i + 3]) << 16;
-			num += this.HexToInt(text[i + 4]) << 12;
-			num += this.HexToInt(text[i + 5]) << 8;
-			num += this.HexToInt(text[i + 6]) << 4;
-			return num + this.HexToInt(text[i + 7]);
+			return 0 + (this.HexToInt(text[i]) << 30) + (this.HexToInt(text[i + 1]) << 24) + (this.HexToInt(text[i + 2]) << 20) + (this.HexToInt(text[i + 3]) << 16) + (this.HexToInt(text[i + 4]) << 12) + (this.HexToInt(text[i + 5]) << 8) + (this.HexToInt(text[i + 6]) << 4) + this.HexToInt(text[i + 7]);
 		}
 
 		protected Color32 HexCharsToColor(char[] hexChars, int tagCount)
@@ -4878,1658 +4856,71 @@ namespace TMPro
 				this.m_colorStack.Add(this.m_htmlColor);
 				return true;
 			}
-			int nameHashCode = this.m_xmlAttribute[0].nameHashCode;
-			switch (nameHashCode)
+			int num10 = this.m_xmlAttribute[0].nameHashCode;
+			float num13;
+			if (num10 <= 186622)
 			{
-			case 83:
-				break;
-			default:
-				switch (nameHashCode)
+				if (num10 <= 2963)
 				{
-				case 115:
-					break;
-				default:
-					switch (nameHashCode)
+					if (num10 > 98)
 					{
-					case 412:
-						break;
-					default:
-						if (nameHashCode != 426)
+						if (num10 <= 434)
 						{
-							if (nameHashCode != 427)
+							if (num10 <= 402)
 							{
-								switch (nameHashCode)
+								if (num10 <= 115)
 								{
-								case 444:
-									goto IL_10CB;
-								default:
-									if (nameHashCode != -1885698441)
+									if (num10 == 105)
 									{
-										if (nameHashCode != -1883544150)
-										{
-											if (nameHashCode != -1847322671)
-											{
-												if (nameHashCode != -1831660941)
-												{
-													float num11;
-													if (nameHashCode != -1690034531)
-													{
-														if (nameHashCode == -1668324918)
-														{
-															goto IL_313E;
-														}
-														if (nameHashCode == -1632103439)
-														{
-															goto IL_31C1;
-														}
-														if (nameHashCode == -1616441709)
-														{
-															goto IL_317F;
-														}
-														if (nameHashCode != -884817987)
-														{
-															if (nameHashCode != -855002522)
-															{
-																if (nameHashCode != -842693512)
-																{
-																	if (nameHashCode != -842656867)
-																	{
-																		if (nameHashCode != -445573839)
-																		{
-																			if (nameHashCode != -445537194)
-																			{
-																				if (nameHashCode != -330774850)
-																				{
-																					if (nameHashCode != 66)
-																					{
-																						if (nameHashCode != 73)
-																						{
-																							if (nameHashCode == 98)
-																							{
-																								goto IL_0F27;
-																							}
-																							if (nameHashCode != 105)
-																							{
-																								if (nameHashCode == 395)
-																								{
-																									break;
-																								}
-																								if (nameHashCode != 402 && nameHashCode != 434)
-																								{
-																									if (nameHashCode != 656)
-																									{
-																										if (nameHashCode != 660)
-																										{
-																											if (nameHashCode != 670)
-																											{
-																												if (nameHashCode == 912)
-																												{
-																													goto IL_3876;
-																												}
-																												if (nameHashCode == 916)
-																												{
-																													return true;
-																												}
-																												if (nameHashCode != 926)
-																												{
-																													if (nameHashCode != 2959)
-																													{
-																														if (nameHashCode != 2963)
-																														{
-																															if (nameHashCode != 2973)
-																															{
-																																if (nameHashCode == 3215)
-																																{
-																																	return true;
-																																}
-																																if (nameHashCode == 3219)
-																																{
-																																	return true;
-																																}
-																																if (nameHashCode != 3229)
-																																{
-																																	if (nameHashCode != 4556)
-																																	{
-																																		if (nameHashCode != 4728)
-																																		{
-																																			if (nameHashCode != 4742)
-																																			{
-																																				if (nameHashCode == 6380)
-																																				{
-																																					goto IL_175A;
-																																				}
-																																				if (nameHashCode == 6552)
-																																				{
-																																					goto IL_1324;
-																																				}
-																																				if (nameHashCode != 6566)
-																																				{
-																																					if (nameHashCode != 20677)
-																																					{
-																																						if (nameHashCode != 20849)
-																																						{
-																																							if (nameHashCode != 20863)
-																																							{
-																																								if (nameHashCode == 22501)
-																																								{
-																																									goto IL_1803;
-																																								}
-																																								if (nameHashCode == 22673)
-																																								{
-																																									goto IL_13C6;
-																																								}
-																																								if (nameHashCode != 22687)
-																																								{
-																																									int num10;
-																																									if (nameHashCode != 28511)
-																																									{
-																																										if (nameHashCode != 30245)
-																																										{
-																																											if (nameHashCode != 30266)
-																																											{
-																																												if (nameHashCode != 31169)
-																																												{
-																																													if (nameHashCode != 31191)
-																																													{
-																																														if (nameHashCode != 32745)
-																																														{
-																																															if (nameHashCode == 41311)
-																																															{
-																																																goto IL_1BDC;
-																																															}
-																																															if (nameHashCode == 43045)
-																																															{
-																																																goto IL_1229;
-																																															}
-																																															if (nameHashCode == 43066)
-																																															{
-																																																goto IL_21FA;
-																																															}
-																																															if (nameHashCode == 43969)
-																																															{
-																																																goto IL_18E1;
-																																															}
-																																															if (nameHashCode == 43991)
-																																															{
-																																																goto IL_18A0;
-																																															}
-																																															if (nameHashCode != 45545)
-																																															{
-																																																if (nameHashCode != 141358)
-																																																{
-																																																	if (nameHashCode != 143092)
-																																																	{
-																																																		if (nameHashCode != 143113)
-																																																		{
-																																																			if (nameHashCode != 144016)
-																																																			{
-																																																				if (nameHashCode != 145592)
-																																																				{
-																																																					if (nameHashCode == 154158)
-																																																					{
-																																																						goto IL_1EFB;
-																																																					}
-																																																					if (nameHashCode == 155892)
-																																																					{
-																																																						goto IL_12D4;
-																																																					}
-																																																					if (nameHashCode == 155913)
-																																																					{
-																																																						goto IL_2337;
-																																																					}
-																																																					if (nameHashCode == 156816)
-																																																					{
-																																																						goto IL_18EA;
-																																																					}
-																																																					if (nameHashCode != 158392)
-																																																					{
-																																																						if (nameHashCode != 186285)
-																																																						{
-																																																							if (nameHashCode != 186622)
-																																																							{
-																																																								if (nameHashCode != 192323)
-																																																								{
-																																																									if (nameHashCode != 226050)
-																																																									{
-																																																										if (nameHashCode != 227814)
-																																																										{
-																																																											if (nameHashCode != 230446)
-																																																											{
-																																																												if (nameHashCode != 237918)
-																																																												{
-																																																													if (nameHashCode == 275917)
-																																																													{
-																																																														goto IL_23C6;
-																																																													}
-																																																													if (nameHashCode == 276254)
-																																																													{
-																																																														goto IL_21AF;
-																																																													}
-																																																													if (nameHashCode == 280416)
-																																																													{
-																																																														return false;
-																																																													}
-																																																													if (nameHashCode == 281955)
-																																																													{
-																																																														goto IL_2554;
-																																																													}
-																																																													if (nameHashCode == 315682)
-																																																													{
-																																																														goto IL_36AC;
-																																																													}
-																																																													if (nameHashCode == 317446)
-																																																													{
-																																																														goto IL_3798;
-																																																													}
-																																																													if (nameHashCode == 320078)
-																																																													{
-																																																														goto IL_210D;
-																																																													}
-																																																													if (nameHashCode != 327550)
-																																																													{
-																																																														if (nameHashCode != 976214)
-																																																														{
-																																																															if (nameHashCode != 982252)
-																																																															{
-																																																																if (nameHashCode != 1015979)
-																																																																{
-																																																																	if (nameHashCode != 1017743)
-																																																																	{
-																																																																		if (nameHashCode != 1027847)
-																																																																		{
-																																																																			if (nameHashCode == 1065846)
-																																																																			{
-																																																																				goto IL_24B2;
-																																																																			}
-																																																																			if (nameHashCode == 1071884)
-																																																																			{
-																																																																				goto IL_2A67;
-																																																																			}
-																																																																			if (nameHashCode == 1105611)
-																																																																			{
-																																																																				goto IL_3719;
-																																																																			}
-																																																																			if (nameHashCode == 1107375)
-																																																																			{
-																																																																				return true;
-																																																																			}
-																																																																			if (nameHashCode != 1117479)
-																																																																			{
-																																																																				if (nameHashCode != 1286342)
-																																																																				{
-																																																																					if (nameHashCode != 1356515)
-																																																																					{
-																																																																						if (nameHashCode != 1441524)
-																																																																						{
-																																																																							if (nameHashCode != 1482398)
-																																																																							{
-																																																																								if (nameHashCode != 1524585)
-																																																																								{
-																																																																									if (nameHashCode != 1600507)
-																																																																									{
-																																																																										if (nameHashCode != 1619421)
-																																																																										{
-																																																																											if (nameHashCode == 1750458)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																											if (nameHashCode == 1913798)
-																																																																											{
-																																																																												goto IL_35EB;
-																																																																											}
-																																																																											if (nameHashCode == 1983971)
-																																																																											{
-																																																																												goto IL_28B0;
-																																																																											}
-																																																																											if (nameHashCode == 2068980)
-																																																																											{
-																																																																												goto IL_2A7A;
-																																																																											}
-																																																																											if (nameHashCode == 2109854)
-																																																																											{
-																																																																												goto IL_31E4;
-																																																																											}
-																																																																											if (nameHashCode == 2152041)
-																																																																											{
-																																																																												goto IL_29B2;
-																																																																											}
-																																																																											if (nameHashCode == 2227963)
-																																																																											{
-																																																																												goto IL_3722;
-																																																																											}
-																																																																											if (nameHashCode != 2246877)
-																																																																											{
-																																																																												if (nameHashCode != 6815845)
-																																																																												{
-																																																																													if (nameHashCode != 6886018)
-																																																																													{
-																																																																														if (nameHashCode != 6971027)
-																																																																														{
-																																																																															if (nameHashCode != 7011901)
-																																																																															{
-																																																																																if (nameHashCode != 7054088)
-																																																																																{
-																																																																																	if (nameHashCode != 7130010)
-																																																																																	{
-																																																																																		if (nameHashCode == 7443301)
-																																																																																		{
-																																																																																			goto IL_3650;
-																																																																																		}
-																																																																																		if (nameHashCode == 7513474)
-																																																																																		{
-																																																																																			goto IL_2956;
-																																																																																		}
-																																																																																		if (nameHashCode == 7598483)
-																																																																																		{
-																																																																																			goto IL_2B55;
-																																																																																		}
-																																																																																		if (nameHashCode == 7639357)
-																																																																																		{
-																																																																																			goto IL_32F1;
-																																																																																		}
-																																																																																		if (nameHashCode == 7681544)
-																																																																																		{
-																																																																																			goto IL_2A58;
-																																																																																		}
-																																																																																		if (nameHashCode != 7757466)
-																																																																																		{
-																																																																																			if (nameHashCode != 9133802)
-																																																																																			{
-																																																																																				if (nameHashCode != 10723418)
-																																																																																				{
-																																																																																					if (nameHashCode != 11642281)
-																																																																																					{
-																																																																																						if (nameHashCode == 13526026)
-																																																																																						{
-																																																																																							goto IL_3160;
-																																																																																						}
-																																																																																						if (nameHashCode == 15115642)
-																																																																																						{
-																																																																																							goto IL_35E2;
-																																																																																						}
-																																																																																						if (nameHashCode != 16034505)
-																																																																																						{
-																																																																																							if (nameHashCode != 47840323)
-																																																																																							{
-																																																																																								if (nameHashCode != 50348802)
-																																																																																								{
-																																																																																									if (nameHashCode == 52232547)
-																																																																																									{
-																																																																																										goto IL_317F;
-																																																																																									}
-																																																																																									if (nameHashCode != 54741026)
-																																																																																									{
-																																																																																										if (nameHashCode != 69403544)
-																																																																																										{
-																																																																																											if (nameHashCode != 72669687)
-																																																																																											{
-																																																																																												if (nameHashCode == 100149144)
-																																																																																												{
-																																																																																													goto IL_27F1;
-																																																																																												}
-																																																																																												if (nameHashCode != 103415287)
-																																																																																												{
-																																																																																													if (nameHashCode != 340349191)
-																																																																																													{
-																																																																																														if (nameHashCode != 343615334)
-																																																																																														{
-																																																																																															if (nameHashCode == 371094791)
-																																																																																															{
-																																																																																																goto IL_289D;
-																																																																																															}
-																																																																																															if (nameHashCode != 374360934)
-																																																																																															{
-																																																																																																if (nameHashCode != 457225591)
-																																																																																																{
-																																																																																																	if (nameHashCode != 514803617)
-																																																																																																	{
-																																																																																																		if (nameHashCode != 551025096)
-																																																																																																		{
-																																																																																																			if (nameHashCode == 566686826)
-																																																																																																			{
-																																																																																																				goto IL_3160;
-																																																																																																			}
-																																																																																																			if (nameHashCode == 730022849)
-																																																																																																			{
-																																																																																																				goto IL_3121;
-																																																																																																			}
-																																																																																																			if (nameHashCode != 766244328)
-																																																																																																			{
-																																																																																																				if (nameHashCode == 781906058)
-																																																																																																				{
-																																																																																																					goto IL_3160;
-																																																																																																				}
-																																																																																																				if (nameHashCode == 1100728678)
-																																																																																																				{
-																																																																																																					goto IL_3309;
-																																																																																																				}
-																																																																																																				if (nameHashCode == 1109349752)
-																																																																																																				{
-																																																																																																					goto IL_350B;
-																																																																																																				}
-																																																																																																				if (nameHashCode == 1109386397)
-																																																																																																				{
-																																																																																																					goto IL_2B68;
-																																																																																																				}
-																																																																																																				if (nameHashCode == 1897350193)
-																																																																																																				{
-																																																																																																					goto IL_35D5;
-																																																																																																				}
-																																																																																																				if (nameHashCode == 1897386838)
-																																																																																																				{
-																																																																																																					goto IL_2C39;
-																																																																																																				}
-																																																																																																				if (nameHashCode != 2012149182)
-																																																																																																				{
-																																																																																																					return false;
-																																																																																																				}
-																																																																																																				goto IL_15AA;
-																																																																																																			}
-																																																																																																		}
-																																																																																																		this.m_style |= FontStyles.SmallCaps;
-																																																																																																		this.m_fontStyleStack.Add(FontStyles.SmallCaps);
-																																																																																																		return true;
-																																																																																																	}
-																																																																																																	IL_3121:
-																																																																																																	this.m_style |= FontStyles.LowerCase;
-																																																																																																	this.m_fontStyleStack.Add(FontStyles.LowerCase);
-																																																																																																	return true;
-																																																																																																}
-																																																																																																goto IL_1728;
-																																																																																															}
-																																																																																														}
-																																																																																														MaterialReference materialReference = this.m_materialReferenceStack.Remove();
-																																																																																														this.m_currentMaterial = materialReference.material;
-																																																																																														this.m_currentMaterialIndex = materialReference.index;
-																																																																																														return true;
-																																																																																													}
-																																																																																													IL_289D:
-																																																																																													this.m_colorGradientPreset = this.m_colorGradientStack.Remove();
-																																																																																													return true;
-																																																																																												}
-																																																																																											}
-																																																																																											num10 = this.m_xmlAttribute[0].valueHashCode;
-																																																																																											if (num10 == 764638571 || num10 == 523367755)
-																																																																																											{
-																																																																																												this.m_currentMaterial = this.m_materialReferences[0].material;
-																																																																																												this.m_currentMaterialIndex = 0;
-																																																																																												this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
-																																																																																												return true;
-																																																																																											}
-																																																																																											Material material;
-																																																																																											if (MaterialReferenceManager.TryGetMaterial(num10, out material))
-																																																																																											{
-																																																																																												this.m_currentMaterial = material;
-																																																																																												this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																																																												this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																																																											}
-																																																																																											else
-																																																																																											{
-																																																																																												material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																																																												if (material == null)
-																																																																																												{
-																																																																																													return false;
-																																																																																												}
-																																																																																												MaterialReferenceManager.AddFontMaterial(num10, material);
-																																																																																												this.m_currentMaterial = material;
-																																																																																												this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																																																												this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																																																											}
-																																																																																											return true;
-																																																																																										}
-																																																																																										IL_27F1:
-																																																																																										int valueHashCode = this.m_xmlAttribute[0].valueHashCode;
-																																																																																										TMP_ColorGradient tmp_ColorGradient;
-																																																																																										if (MaterialReferenceManager.TryGetColorGradientPreset(valueHashCode, out tmp_ColorGradient))
-																																																																																										{
-																																																																																											this.m_colorGradientPreset = tmp_ColorGradient;
-																																																																																										}
-																																																																																										else
-																																																																																										{
-																																																																																											if (tmp_ColorGradient == null)
-																																																																																											{
-																																																																																												tmp_ColorGradient = Resources.Load<TMP_ColorGradient>(TMP_Settings.defaultColorGradientPresetsPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																																																											}
-																																																																																											if (tmp_ColorGradient == null)
-																																																																																											{
-																																																																																												return false;
-																																																																																											}
-																																																																																											MaterialReferenceManager.AddColorGradientPreset(valueHashCode, tmp_ColorGradient);
-																																																																																											this.m_colorGradientPreset = tmp_ColorGradient;
-																																																																																										}
-																																																																																										this.m_colorGradientStack.Add(this.m_colorGradientPreset);
-																																																																																										return true;
-																																																																																									}
-																																																																																								}
-																																																																																								this.m_baselineOffset = 0f;
-																																																																																								return true;
-																																																																																							}
-																																																																																							goto IL_317F;
-																																																																																						}
-																																																																																					}
-																																																																																					num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																					if (num11 == -9999f)
-																																																																																					{
-																																																																																						return false;
-																																																																																					}
-																																																																																					if (tagUnits == TagUnits.Pixels)
-																																																																																					{
-																																																																																						this.m_baselineOffset = num11;
-																																																																																						return true;
-																																																																																					}
-																																																																																					if (tagUnits != TagUnits.FontUnits)
-																																																																																					{
-																																																																																						return tagUnits != TagUnits.Percentage && false;
-																																																																																					}
-																																																																																					this.m_baselineOffset = num11 * this.m_fontScale * this.m_fontAsset.fontInfo.Ascender;
-																																																																																					return true;
-																																																																																				}
-																																																																																				IL_35E2:
-																																																																																				this.tag_NoParsing = true;
-																																																																																				return true;
-																																																																																			}
-																																																																																			IL_3160:
-																																																																																			this.m_style |= FontStyles.UpperCase;
-																																																																																			this.m_fontStyleStack.Add(FontStyles.UpperCase);
-																																																																																			return true;
-																																																																																		}
-																																																																																	}
-																																																																																	this.m_isFXMatrixSet = false;
-																																																																																	return true;
-																																																																																}
-																																																																																IL_2A58:
-																																																																																this.m_monoSpacing = 0f;
-																																																																																return true;
-																																																																															}
-																																																																															IL_32F1:
-																																																																															this.m_marginLeft = 0f;
-																																																																															this.m_marginRight = 0f;
-																																																																															return true;
-																																																																														}
-																																																																														IL_2B55:
-																																																																														this.tag_Indent = this.m_indentStack.Remove();
-																																																																														return true;
-																																																																													}
-																																																																													IL_2956:
-																																																																													if (!this.m_isParsingText)
-																																																																													{
-																																																																														return true;
-																																																																													}
-																																																																													if (this.m_characterCount > 0)
-																																																																													{
-																																																																														this.m_xAdvance -= this.m_cSpacing;
-																																																																														this.m_textInfo.characterInfo[this.m_characterCount - 1].xAdvance = this.m_xAdvance;
-																																																																													}
-																																																																													this.m_cSpacing = 0f;
-																																																																													return true;
-																																																																												}
-																																																																												IL_3650:
-																																																																												if (this.m_isParsingText)
-																																																																												{
-																																																																													Debug.Log(string.Concat(new object[]
-																																																																													{
-																																																																														"Action ID: [",
-																																																																														this.m_actionStack.CurrentItem(),
-																																																																														"] Last character index: ",
-																																																																														this.m_characterCount - 1
-																																																																													}));
-																																																																												}
-																																																																												this.m_actionStack.Remove();
-																																																																												return true;
-																																																																											}
-																																																																										}
-																																																																										int valueHashCode2 = this.m_xmlAttribute[0].valueHashCode;
-																																																																										this.m_spriteIndex = -1;
-																																																																										TMP_SpriteAsset tmp_SpriteAsset;
-																																																																										if (this.m_xmlAttribute[0].valueType == TagType.None || this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
-																																																																										{
-																																																																											if (this.m_spriteAsset != null)
-																																																																											{
-																																																																												this.m_currentSpriteAsset = this.m_spriteAsset;
-																																																																											}
-																																																																											else if (this.m_defaultSpriteAsset != null)
-																																																																											{
-																																																																												this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
-																																																																											}
-																																																																											else if (this.m_defaultSpriteAsset == null)
-																																																																											{
-																																																																												if (TMP_Settings.defaultSpriteAsset != null)
-																																																																												{
-																																																																													this.m_defaultSpriteAsset = TMP_Settings.defaultSpriteAsset;
-																																																																												}
-																																																																												else
-																																																																												{
-																																																																													this.m_defaultSpriteAsset = Resources.Load<TMP_SpriteAsset>("Sprite Assets/Default Sprite Asset");
-																																																																												}
-																																																																												this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
-																																																																											}
-																																																																											if (this.m_currentSpriteAsset == null)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																										}
-																																																																										else if (MaterialReferenceManager.TryGetSpriteAsset(valueHashCode2, out tmp_SpriteAsset))
-																																																																										{
-																																																																											this.m_currentSpriteAsset = tmp_SpriteAsset;
-																																																																										}
-																																																																										else
-																																																																										{
-																																																																											if (tmp_SpriteAsset == null)
-																																																																											{
-																																																																												tmp_SpriteAsset = Resources.Load<TMP_SpriteAsset>(TMP_Settings.defaultSpriteAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																																											}
-																																																																											if (tmp_SpriteAsset == null)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																											MaterialReferenceManager.AddSpriteAsset(valueHashCode2, tmp_SpriteAsset);
-																																																																											this.m_currentSpriteAsset = tmp_SpriteAsset;
-																																																																										}
-																																																																										if (this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
-																																																																										{
-																																																																											int num12 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																											if (num12 == -9999)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																											if (num12 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																											this.m_spriteIndex = num12;
-																																																																										}
-																																																																										this.m_spriteColor = TMP_Text.s_colorWhite;
-																																																																										this.m_tintSprite = false;
-																																																																										int num13 = 0;
-																																																																										while (num13 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num13].nameHashCode != 0)
-																																																																										{
-																																																																											int nameHashCode2 = this.m_xmlAttribute[num13].nameHashCode;
-																																																																											int num14 = 0;
-																																																																											if (nameHashCode2 == 26705)
-																																																																											{
-																																																																												goto IL_3007;
-																																																																											}
-																																																																											if (nameHashCode2 != 30547)
-																																																																											{
-																																																																												if (nameHashCode2 != 33019)
-																																																																												{
-																																																																													if (nameHashCode2 == 39505)
-																																																																													{
-																																																																														goto IL_3007;
-																																																																													}
-																																																																													if (nameHashCode2 == 43347)
-																																																																													{
-																																																																														goto IL_2EE3;
-																																																																													}
-																																																																													if (nameHashCode2 != 45819)
-																																																																													{
-																																																																														if (nameHashCode2 != 192323)
-																																																																														{
-																																																																															if (nameHashCode2 != 205930)
-																																																																															{
-																																																																																if (nameHashCode2 == 281955)
-																																																																																{
-																																																																																	goto IL_2FCC;
-																																																																																}
-																																																																																if (nameHashCode2 != 295562)
-																																																																																{
-																																																																																	if (nameHashCode2 != 2246877 && nameHashCode2 != 1619421)
-																																																																																	{
-																																																																																		return false;
-																																																																																	}
-																																																																																	goto IL_30B6;
-																																																																																}
-																																																																															}
-																																																																															num14 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
-																																																																															if (num14 == -9999)
-																																																																															{
-																																																																																return false;
-																																																																															}
-																																																																															if (num14 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
-																																																																															{
-																																																																																return false;
-																																																																															}
-																																																																															this.m_spriteIndex = num14;
-																																																																															goto IL_30B6;
-																																																																														}
-																																																																														IL_2FCC:
-																																																																														this.m_spriteColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength);
-																																																																														goto IL_30B6;
-																																																																													}
-																																																																												}
-																																																																												this.m_tintSprite = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength) != 0f;
-																																																																												goto IL_30B6;
-																																																																											}
-																																																																											IL_2EE3:
-																																																																											this.m_currentSpriteAsset = TMP_SpriteAsset.SearchForSpriteByHashCode(this.m_currentSpriteAsset, this.m_xmlAttribute[num13].valueHashCode, true, out num14);
-																																																																											if (num14 == -1)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																											this.m_spriteIndex = num14;
-																																																																											IL_30B6:
-																																																																											num13++;
-																																																																											continue;
-																																																																											IL_3007:
-																																																																											int attributeParameters = this.GetAttributeParameters(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength, ref this.m_attributeParameterValues);
-																																																																											if (attributeParameters != 3)
-																																																																											{
-																																																																												return false;
-																																																																											}
-																																																																											this.m_spriteIndex = (int)this.m_attributeParameterValues[0];
-																																																																											if (this.m_isParsingText)
-																																																																											{
-																																																																												this.spriteAnimator.DoSpriteAnimation(this.m_characterCount, this.m_currentSpriteAsset, this.m_spriteIndex, (int)this.m_attributeParameterValues[1], (int)this.m_attributeParameterValues[2]);
-																																																																											}
-																																																																											goto IL_30B6;
-																																																																										}
-																																																																										if (this.m_spriteIndex == -1)
-																																																																										{
-																																																																											return false;
-																																																																										}
-																																																																										this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentSpriteAsset.material, this.m_currentSpriteAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																																										this.m_textElementType = TMP_TextElementType.Sprite;
-																																																																										return true;
-																																																																									}
-																																																																									IL_3722:
-																																																																									num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																									if (num11 == -9999f)
-																																																																									{
-																																																																										return false;
-																																																																									}
-																																																																									this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, num11), Vector3.one);
-																																																																									this.m_isFXMatrixSet = true;
-																																																																									return true;
-																																																																								}
-																																																																								IL_29B2:
-																																																																								num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																								if (num11 == -9999f)
-																																																																								{
-																																																																									return false;
-																																																																								}
-																																																																								if (tagUnits != TagUnits.Pixels)
-																																																																								{
-																																																																									if (tagUnits != TagUnits.FontUnits)
-																																																																									{
-																																																																										if (tagUnits == TagUnits.Percentage)
-																																																																										{
-																																																																											return false;
-																																																																										}
-																																																																									}
-																																																																									else
-																																																																									{
-																																																																										this.m_monoSpacing = num11;
-																																																																										this.m_monoSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																									}
-																																																																								}
-																																																																								else
-																																																																								{
-																																																																									this.m_monoSpacing = num11;
-																																																																								}
-																																																																								return true;
-																																																																							}
-																																																																							IL_31E4:
-																																																																							num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																							if (num11 == -9999f)
-																																																																							{
-																																																																								return false;
-																																																																							}
-																																																																							this.m_marginLeft = num11;
-																																																																							if (tagUnits != TagUnits.Pixels)
-																																																																							{
-																																																																								if (tagUnits != TagUnits.FontUnits)
-																																																																								{
-																																																																									if (tagUnits == TagUnits.Percentage)
-																																																																									{
-																																																																										this.m_marginLeft = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginLeft / 100f;
-																																																																									}
-																																																																								}
-																																																																								else
-																																																																								{
-																																																																									this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																								}
-																																																																							}
-																																																																							this.m_marginLeft = ((this.m_marginLeft < 0f) ? 0f : this.m_marginLeft);
-																																																																							this.m_marginRight = this.m_marginLeft;
-																																																																							return true;
-																																																																						}
-																																																																						IL_2A7A:
-																																																																						num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																						if (num11 == -9999f)
-																																																																						{
-																																																																							return false;
-																																																																						}
-																																																																						if (tagUnits != TagUnits.Pixels)
-																																																																						{
-																																																																							if (tagUnits != TagUnits.FontUnits)
-																																																																							{
-																																																																								if (tagUnits == TagUnits.Percentage)
-																																																																								{
-																																																																									this.tag_Indent = this.m_marginWidth * num11 / 100f;
-																																																																								}
-																																																																							}
-																																																																							else
-																																																																							{
-																																																																								this.tag_Indent = num11;
-																																																																								this.tag_Indent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																							}
-																																																																						}
-																																																																						else
-																																																																						{
-																																																																							this.tag_Indent = num11;
-																																																																						}
-																																																																						this.m_indentStack.Add(this.tag_Indent);
-																																																																						this.m_xAdvance = this.tag_Indent;
-																																																																						return true;
-																																																																					}
-																																																																					IL_28B0:
-																																																																					num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																					if (num11 == -9999f)
-																																																																					{
-																																																																						return false;
-																																																																					}
-																																																																					if (tagUnits != TagUnits.Pixels)
-																																																																					{
-																																																																						if (tagUnits != TagUnits.FontUnits)
-																																																																						{
-																																																																							if (tagUnits == TagUnits.Percentage)
-																																																																							{
-																																																																								return false;
-																																																																							}
-																																																																						}
-																																																																						else
-																																																																						{
-																																																																							this.m_cSpacing = num11;
-																																																																							this.m_cSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																						}
-																																																																					}
-																																																																					else
-																																																																					{
-																																																																						this.m_cSpacing = num11;
-																																																																					}
-																																																																					return true;
-																																																																				}
-																																																																				IL_35EB:
-																																																																				int valueHashCode3 = this.m_xmlAttribute[0].valueHashCode;
-																																																																				if (this.m_isParsingText)
-																																																																				{
-																																																																					this.m_actionStack.Add(valueHashCode3);
-																																																																					Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode3, "] First character index: ", this.m_characterCount }));
-																																																																				}
-																																																																				return true;
-																																																																			}
-																																																																		}
-																																																																		this.m_width = -1f;
-																																																																		return true;
-																																																																	}
-																																																																	return true;
-																																																																}
-																																																																IL_3719:
-																																																																this.m_isFXMatrixSet = false;
-																																																																return true;
-																																																															}
-																																																															IL_2A67:
-																																																															this.m_htmlColor = this.m_colorStack.Remove();
-																																																															return true;
-																																																														}
-																																																														IL_24B2:
-																																																														this.m_lineJustification = this.m_lineJustificationStack.Remove();
-																																																														return true;
-																																																													}
-																																																												}
-																																																												num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																												if (num11 == -9999f)
-																																																												{
-																																																													return false;
-																																																												}
-																																																												if (tagUnits != TagUnits.Pixels)
-																																																												{
-																																																													if (tagUnits == TagUnits.FontUnits)
-																																																													{
-																																																														return false;
-																																																													}
-																																																													if (tagUnits == TagUnits.Percentage)
-																																																													{
-																																																														this.m_width = this.m_marginWidth * num11 / 100f;
-																																																													}
-																																																												}
-																																																												else
-																																																												{
-																																																													this.m_width = num11;
-																																																												}
-																																																												return true;
-																																																											}
-																																																											IL_210D:
-																																																											num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																											if (num11 == -9999f)
-																																																											{
-																																																												return false;
-																																																											}
-																																																											if (tagUnits == TagUnits.Pixels)
-																																																											{
-																																																												this.m_xAdvance += num11;
-																																																												return true;
-																																																											}
-																																																											if (tagUnits != TagUnits.FontUnits)
-																																																											{
-																																																												return tagUnits != TagUnits.Percentage && false;
-																																																											}
-																																																											this.m_xAdvance += num11 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																											return true;
-																																																										}
-																																																										IL_3798:
-																																																										int nameHashCode3 = this.m_xmlAttribute[1].nameHashCode;
-																																																										if (nameHashCode3 == 327550)
-																																																										{
-																																																											float num15 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
-																																																											if (tagUnits != TagUnits.Pixels)
-																																																											{
-																																																												if (tagUnits != TagUnits.FontUnits)
-																																																												{
-																																																													if (tagUnits == TagUnits.Percentage)
-																																																													{
-																																																														Debug.Log("Table width = " + num15 + "%.");
-																																																													}
-																																																												}
-																																																												else
-																																																												{
-																																																													Debug.Log("Table width = " + num15 + "em.");
-																																																												}
-																																																											}
-																																																											else
-																																																											{
-																																																												Debug.Log("Table width = " + num15 + "px.");
-																																																											}
-																																																										}
-																																																										return true;
-																																																									}
-																																																									IL_36AC:
-																																																									num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																									if (num11 == -9999f)
-																																																									{
-																																																										return false;
-																																																									}
-																																																									this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(num11, 1f, 1f));
-																																																									this.m_isFXMatrixSet = true;
-																																																									return true;
-																																																								}
-																																																								IL_2554:
-																																																								if (this.m_htmlTag[6] == '#' && num == 10)
-																																																								{
-																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (this.m_htmlTag[6] == '#' && num == 11)
-																																																								{
-																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (this.m_htmlTag[6] == '#' && num == 13)
-																																																								{
-																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (this.m_htmlTag[6] == '#' && num == 15)
-																																																								{
-																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								int valueHashCode4 = this.m_xmlAttribute[0].valueHashCode;
-																																																								if (valueHashCode4 == -36881330)
-																																																								{
-																																																									this.m_htmlColor = new Color32(160, 32, 240, byte.MaxValue);
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 == 125395)
-																																																								{
-																																																									this.m_htmlColor = Color.red;
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 == 3573310)
-																																																								{
-																																																									this.m_htmlColor = Color.blue;
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 == 26556144)
-																																																								{
-																																																									this.m_htmlColor = new Color32(byte.MaxValue, 128, 0, byte.MaxValue);
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 == 117905991)
-																																																								{
-																																																									this.m_htmlColor = Color.black;
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 == 121463835)
-																																																								{
-																																																									this.m_htmlColor = Color.green;
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 == 140357351)
-																																																								{
-																																																									this.m_htmlColor = Color.white;
-																																																									this.m_colorStack.Add(this.m_htmlColor);
-																																																									return true;
-																																																								}
-																																																								if (valueHashCode4 != 554054276)
-																																																								{
-																																																									return false;
-																																																								}
-																																																								this.m_htmlColor = Color.yellow;
-																																																								this.m_colorStack.Add(this.m_htmlColor);
-																																																								return true;
-																																																							}
-																																																							IL_21AF:
-																																																							if (this.m_xmlAttribute[0].valueLength != 3)
-																																																							{
-																																																								return false;
-																																																							}
-																																																							this.m_htmlColor.a = (byte)(this.HexToInt(this.m_htmlTag[7]) * 16 + this.HexToInt(this.m_htmlTag[8]));
-																																																							return true;
-																																																						}
-																																																						IL_23C6:
-																																																						int valueHashCode5 = this.m_xmlAttribute[0].valueHashCode;
-																																																						if (valueHashCode5 == -523808257)
-																																																						{
-																																																							this.m_lineJustification = TextAlignmentOptions.Justified;
-																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																							return true;
-																																																						}
-																																																						if (valueHashCode5 == -458210101)
-																																																						{
-																																																							this.m_lineJustification = TextAlignmentOptions.Center;
-																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																							return true;
-																																																						}
-																																																						if (valueHashCode5 == 3774683)
-																																																						{
-																																																							this.m_lineJustification = TextAlignmentOptions.Left;
-																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																							return true;
-																																																						}
-																																																						if (valueHashCode5 == 122383428)
-																																																						{
-																																																							this.m_lineJustification = TextAlignmentOptions.Flush;
-																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																							return true;
-																																																						}
-																																																						if (valueHashCode5 != 136703040)
-																																																						{
-																																																							return false;
-																																																						}
-																																																						this.m_lineJustification = TextAlignmentOptions.Right;
-																																																						this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																						return true;
-																																																					}
-																																																				}
-																																																				this.m_currentFontSize = this.m_sizeStack.Remove();
-																																																				this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																				return true;
-																																																			}
-																																																			IL_18EA:
-																																																			this.m_isNonBreakingSpace = false;
-																																																			return true;
-																																																		}
-																																																		IL_2337:
-																																																		if (this.m_isParsingText && !this.m_isCalculatingPreferredValues && this.m_textInfo.linkCount < this.m_textInfo.linkInfo.Length)
-																																																		{
-																																																			this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextLength = this.m_characterCount - this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextfirstCharacterIndex;
-																																																			this.m_textInfo.linkCount++;
-																																																		}
-																																																		return true;
-																																																	}
-																																																	IL_12D4:
-																																																	if ((this.m_fontStyle & FontStyles.Highlight) != FontStyles.Highlight)
-																																																	{
-																																																		this.m_highlightColor = this.m_highlightColorStack.Remove();
-																																																		if (this.m_fontStyleStack.Remove(FontStyles.Highlight) == 0)
-																																																		{
-																																																			this.m_style &= (FontStyles)(-513);
-																																																		}
-																																																	}
-																																																	return true;
-																																																}
-																																																IL_1EFB:
-																																																MaterialReference materialReference2 = this.m_materialReferenceStack.Remove();
-																																																this.m_currentFontAsset = materialReference2.fontAsset;
-																																																this.m_currentMaterial = materialReference2.material;
-																																																this.m_currentMaterialIndex = materialReference2.index;
-																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																return true;
-																																															}
-																																														}
-																																														num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																														if (num11 == -9999f)
-																																														{
-																																															return false;
-																																														}
-																																														if (tagUnits != TagUnits.Pixels)
-																																														{
-																																															if (tagUnits == TagUnits.FontUnits)
-																																															{
-																																																this.m_currentFontSize = this.m_fontSize * num11;
-																																																this.m_sizeStack.Add(this.m_currentFontSize);
-																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																return true;
-																																															}
-																																															if (tagUnits != TagUnits.Percentage)
-																																															{
-																																																return false;
-																																															}
-																																															this.m_currentFontSize = this.m_fontSize * num11 / 100f;
-																																															this.m_sizeStack.Add(this.m_currentFontSize);
-																																															this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																															return true;
-																																														}
-																																														else
-																																														{
-																																															if (this.m_htmlTag[5] == '+')
-																																															{
-																																																this.m_currentFontSize = this.m_fontSize + num11;
-																																																this.m_sizeStack.Add(this.m_currentFontSize);
-																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																return true;
-																																															}
-																																															if (this.m_htmlTag[5] == '-')
-																																															{
-																																																this.m_currentFontSize = this.m_fontSize + num11;
-																																																this.m_sizeStack.Add(this.m_currentFontSize);
-																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																return true;
-																																															}
-																																															this.m_currentFontSize = num11;
-																																															this.m_sizeStack.Add(this.m_currentFontSize);
-																																															this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																															return true;
-																																														}
-																																													}
-																																													IL_18A0:
-																																													if (this.m_overflowMode == TextOverflowModes.Page)
-																																													{
-																																														this.m_xAdvance = this.tag_LineIndent + this.tag_Indent;
-																																														this.m_lineOffset = 0f;
-																																														this.m_pageNumber++;
-																																														this.m_isNewPage = true;
-																																													}
-																																													return true;
-																																												}
-																																												IL_18E1:
-																																												this.m_isNonBreakingSpace = true;
-																																												return true;
-																																											}
-																																											IL_21FA:
-																																											if (this.m_isParsingText && !this.m_isCalculatingPreferredValues)
-																																											{
-																																												int linkCount = this.m_textInfo.linkCount;
-																																												if (linkCount + 1 > this.m_textInfo.linkInfo.Length)
-																																												{
-																																													TMP_TextInfo.Resize<TMP_LinkInfo>(ref this.m_textInfo.linkInfo, linkCount + 1);
-																																												}
-																																												this.m_textInfo.linkInfo[linkCount].textComponent = this;
-																																												this.m_textInfo.linkInfo[linkCount].hashCode = this.m_xmlAttribute[0].valueHashCode;
-																																												this.m_textInfo.linkInfo[linkCount].linkTextfirstCharacterIndex = this.m_characterCount;
-																																												this.m_textInfo.linkInfo[linkCount].linkIdFirstCharacterIndex = startIndex + this.m_xmlAttribute[0].valueStartIndex;
-																																												this.m_textInfo.linkInfo[linkCount].linkIdLength = this.m_xmlAttribute[0].valueLength;
-																																												this.m_textInfo.linkInfo[linkCount].SetLinkID(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																											}
-																																											return true;
-																																										}
-																																										IL_1229:
-																																										this.m_style |= FontStyles.Highlight;
-																																										this.m_fontStyleStack.Add(FontStyles.Highlight);
-																																										this.m_highlightColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																										this.m_highlightColor.a = ((this.m_htmlColor.a >= this.m_highlightColor.a) ? this.m_highlightColor.a : this.m_htmlColor.a);
-																																										this.m_highlightColorStack.Add(this.m_highlightColor);
-																																										return true;
-																																									}
-																																									IL_1BDC:
-																																									int valueHashCode6 = this.m_xmlAttribute[0].valueHashCode;
-																																									int nameHashCode4 = this.m_xmlAttribute[1].nameHashCode;
-																																									num10 = this.m_xmlAttribute[1].valueHashCode;
-																																									if (valueHashCode6 == 764638571 || valueHashCode6 == 523367755)
-																																									{
-																																										this.m_currentFontAsset = this.m_materialReferences[0].fontAsset;
-																																										this.m_currentMaterial = this.m_materialReferences[0].material;
-																																										this.m_currentMaterialIndex = 0;
-																																										this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																										this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
-																																										return true;
-																																									}
-																																									TMP_FontAsset tmp_FontAsset;
-																																									if (!MaterialReferenceManager.TryGetFontAsset(valueHashCode6, out tmp_FontAsset))
-																																									{
-																																										tmp_FontAsset = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																										if (tmp_FontAsset == null)
-																																										{
-																																											return false;
-																																										}
-																																										MaterialReferenceManager.AddFontAsset(tmp_FontAsset);
-																																									}
-																																									if (nameHashCode4 == 0 && num10 == 0)
-																																									{
-																																										this.m_currentMaterial = tmp_FontAsset.material;
-																																										this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																										this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																									}
-																																									else
-																																									{
-																																										if (nameHashCode4 != 103415287 && nameHashCode4 != 72669687)
-																																										{
-																																											return false;
-																																										}
-																																										Material material;
-																																										if (MaterialReferenceManager.TryGetMaterial(num10, out material))
-																																										{
-																																											this.m_currentMaterial = material;
-																																											this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																											this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																										}
-																																										else
-																																										{
-																																											material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength));
-																																											if (material == null)
-																																											{
-																																												return false;
-																																											}
-																																											MaterialReferenceManager.AddFontMaterial(num10, material);
-																																											this.m_currentMaterial = material;
-																																											this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																											this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																										}
-																																									}
-																																									this.m_currentFontAsset = tmp_FontAsset;
-																																									this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																									return true;
-																																								}
-																																							}
-																																							if ((this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
-																																							{
-																																								if (this.m_fontScaleMultiplier < 1f)
-																																								{
-																																									this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
-																																									this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																								}
-																																								if (this.m_fontStyleStack.Remove(FontStyles.Superscript) == 0)
-																																								{
-																																									this.m_style &= (FontStyles)(-129);
-																																								}
-																																							}
-																																							return true;
-																																						}
-																																						IL_13C6:
-																																						if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript)
-																																						{
-																																							if (this.m_fontScaleMultiplier < 1f)
-																																							{
-																																								this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
-																																								this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																							}
-																																							if (this.m_fontStyleStack.Remove(FontStyles.Subscript) == 0)
-																																							{
-																																								this.m_style &= (FontStyles)(-257);
-																																							}
-																																						}
-																																						return true;
-																																					}
-																																					IL_1803:
-																																					this.m_isIgnoringAlignment = false;
-																																					return true;
-																																				}
-																																			}
-																																			this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																			this.m_baselineOffsetStack.Push(this.m_baselineOffset);
-																																			this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SuperscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
-																																			this.m_fontStyleStack.Add(FontStyles.Superscript);
-																																			this.m_style |= FontStyles.Superscript;
-																																			return true;
-																																		}
-																																		IL_1324:
-																																		this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																		this.m_baselineOffsetStack.Push(this.m_baselineOffset);
-																																		this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SubscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
-																																		this.m_fontStyleStack.Add(FontStyles.Subscript);
-																																		this.m_style |= FontStyles.Subscript;
-																																		return true;
-																																	}
-																																	IL_175A:
-																																	num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																	if (num11 == -9999f)
-																																	{
-																																		return false;
-																																	}
-																																	if (tagUnits == TagUnits.Pixels)
-																																	{
-																																		this.m_xAdvance = num11;
-																																		return true;
-																																	}
-																																	if (tagUnits == TagUnits.FontUnits)
-																																	{
-																																		this.m_xAdvance = num11 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																		return true;
-																																	}
-																																	if (tagUnits != TagUnits.Percentage)
-																																	{
-																																		return false;
-																																	}
-																																	this.m_xAdvance = this.m_marginWidth * num11 / 100f;
-																																	return true;
-																																}
-																															}
-																															return true;
-																														}
-																														return true;
-																													}
-																													return true;
-																												}
-																											}
-																											return true;
-																										}
-																										return true;
-																									}
-																									IL_3876:
-																									int num16 = 1;
-																									while (num16 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num16].nameHashCode != 0)
-																									{
-																										int nameHashCode5 = this.m_xmlAttribute[num16].nameHashCode;
-																										if (nameHashCode5 != 327550)
-																										{
-																											if (nameHashCode5 == 275917)
-																											{
-																												int valueHashCode7 = this.m_xmlAttribute[num16].valueHashCode;
-																												if (valueHashCode7 != -523808257)
-																												{
-																													if (valueHashCode7 != -458210101)
-																													{
-																														if (valueHashCode7 != 3774683)
-																														{
-																															if (valueHashCode7 == 136703040)
-																															{
-																																Debug.Log("TD align=\"right\".");
-																															}
-																														}
-																														else
-																														{
-																															Debug.Log("TD align=\"left\".");
-																														}
-																													}
-																													else
-																													{
-																														Debug.Log("TD align=\"center\".");
-																													}
-																												}
-																												else
-																												{
-																													Debug.Log("TD align=\"justified\".");
-																												}
-																											}
-																										}
-																										else
-																										{
-																											float num17 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num16].valueStartIndex, this.m_xmlAttribute[num16].valueLength);
-																											if (tagUnits != TagUnits.Pixels)
-																											{
-																												if (tagUnits != TagUnits.FontUnits)
-																												{
-																													if (tagUnits == TagUnits.Percentage)
-																													{
-																														Debug.Log("Table width = " + num17 + "%.");
-																													}
-																												}
-																												else
-																												{
-																													Debug.Log("Table width = " + num17 + "em.");
-																												}
-																											}
-																											else
-																											{
-																												Debug.Log("Table width = " + num17 + "px.");
-																											}
-																										}
-																										num16++;
-																									}
-																									return true;
-																								}
-																								if (this.m_fontStyleStack.Remove(FontStyles.Italic) == 0)
-																								{
-																									this.m_style &= (FontStyles)(-3);
-																								}
-																								return true;
-																							}
-																						}
-																						this.m_style |= FontStyles.Italic;
-																						this.m_fontStyleStack.Add(FontStyles.Italic);
-																						return true;
-																					}
-																					IL_0F27:
-																					this.m_style |= FontStyles.Bold;
-																					this.m_fontStyleStack.Add(FontStyles.Bold);
-																					this.m_fontWeightInternal = 700;
-																					this.m_fontWeightStack.Add(700);
-																					return true;
-																				}
-																				IL_15AA:
-																				num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																				if (num11 == -9999f)
-																				{
-																					return false;
-																				}
-																				if ((this.m_fontStyle & FontStyles.Bold) == FontStyles.Bold)
-																				{
-																					return true;
-																				}
-																				this.m_style &= (FontStyles)(-2);
-																				int num18 = (int)num11;
-																				if (num18 != 100)
-																				{
-																					if (num18 != 200)
-																					{
-																						if (num18 != 300)
-																						{
-																							if (num18 != 400)
-																							{
-																								if (num18 != 500)
-																								{
-																									if (num18 != 600)
-																									{
-																										if (num18 != 700)
-																										{
-																											if (num18 != 800)
-																											{
-																												if (num18 == 900)
-																												{
-																													this.m_fontWeightInternal = 900;
-																												}
-																											}
-																											else
-																											{
-																												this.m_fontWeightInternal = 800;
-																											}
-																										}
-																										else
-																										{
-																											this.m_fontWeightInternal = 700;
-																											this.m_style |= FontStyles.Bold;
-																										}
-																									}
-																									else
-																									{
-																										this.m_fontWeightInternal = 600;
-																									}
-																								}
-																								else
-																								{
-																									this.m_fontWeightInternal = 500;
-																								}
-																							}
-																							else
-																							{
-																								this.m_fontWeightInternal = 400;
-																							}
-																						}
-																						else
-																						{
-																							this.m_fontWeightInternal = 300;
-																						}
-																					}
-																					else
-																					{
-																						this.m_fontWeightInternal = 200;
-																					}
-																				}
-																				else
-																				{
-																					this.m_fontWeightInternal = 100;
-																				}
-																				this.m_fontWeightStack.Add(this.m_fontWeightInternal);
-																				return true;
-																			}
-																			IL_2C39:
-																			this.tag_LineIndent = 0f;
-																			return true;
-																		}
-																		IL_35D5:
-																		this.m_lineHeight = -32767f;
-																		return true;
-																	}
-																	IL_2B68:
-																	num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																	if (num11 == -9999f)
-																	{
-																		return false;
-																	}
-																	if (tagUnits != TagUnits.Pixels)
-																	{
-																		if (tagUnits != TagUnits.FontUnits)
-																		{
-																			if (tagUnits == TagUnits.Percentage)
-																			{
-																				this.tag_LineIndent = this.m_marginWidth * num11 / 100f;
-																			}
-																		}
-																		else
-																		{
-																			this.tag_LineIndent = num11;
-																			this.tag_LineIndent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																		}
-																	}
-																	else
-																	{
-																		this.tag_LineIndent = num11;
-																	}
-																	this.m_xAdvance += this.tag_LineIndent;
-																	return true;
-																}
-																IL_350B:
-																num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																if (num11 == -9999f || num11 == 0f)
-																{
-																	return false;
-																}
-																this.m_lineHeight = num11;
-																if (tagUnits != TagUnits.Pixels)
-																{
-																	if (tagUnits != TagUnits.FontUnits)
-																	{
-																		if (tagUnits == TagUnits.Percentage)
-																		{
-																			this.m_lineHeight = this.m_fontAsset.fontInfo.LineHeight * this.m_lineHeight / 100f * this.m_fontScale;
-																		}
-																	}
-																	else
-																	{
-																		this.m_lineHeight *= this.m_fontAsset.fontInfo.LineHeight * this.m_fontScale;
-																	}
-																}
-																return true;
-															}
-															IL_3309:
-															num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-															if (num11 == -9999f)
-															{
-																return false;
-															}
-															this.m_marginLeft = num11;
-															if (tagUnits != TagUnits.Pixels)
-															{
-																if (tagUnits != TagUnits.FontUnits)
-																{
-																	if (tagUnits == TagUnits.Percentage)
-																	{
-																		this.m_marginLeft = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginLeft / 100f;
-																	}
-																}
-																else
-																{
-																	this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																}
-															}
-															this.m_marginLeft = ((this.m_marginLeft < 0f) ? 0f : this.m_marginLeft);
-															return true;
-														}
-													}
-													num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-													if (num11 == -9999f)
-													{
-														return false;
-													}
-													this.m_marginRight = num11;
-													if (tagUnits != TagUnits.Pixels)
-													{
-														if (tagUnits != TagUnits.FontUnits)
-														{
-															if (tagUnits == TagUnits.Percentage)
-															{
-																this.m_marginRight = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginRight / 100f;
-															}
-														}
-														else
-														{
-															this.m_marginRight *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-														}
-													}
-													this.m_marginRight = ((this.m_marginRight < 0f) ? 0f : this.m_marginRight);
-													return true;
-												}
-												IL_317F:
-												if (this.m_fontStyleStack.Remove(FontStyles.UpperCase) == 0)
-												{
-													this.m_style &= (FontStyles)(-17);
-												}
-												return true;
-											}
-											IL_31C1:
-											if (this.m_fontStyleStack.Remove(FontStyles.SmallCaps) == 0)
-											{
-												this.m_style &= (FontStyles)(-33);
-											}
-											return true;
-										}
-										IL_313E:
-										if (this.m_fontStyleStack.Remove(FontStyles.LowerCase) == 0)
-										{
-											this.m_style &= (FontStyles)(-9);
-										}
-										return true;
+										goto IL_129F;
 									}
-									IL_1728:
-									this.m_fontWeightInternal = this.m_fontWeightStack.Remove();
-									if (this.m_fontWeightInternal == 400)
+									if (num10 != 115)
 									{
-										this.m_style &= (FontStyles)(-2);
+										return false;
 									}
+									goto IL_12DB;
+								}
+								else
+								{
+									if (num10 == 117)
+									{
+										goto IL_13E5;
+									}
+									if (num10 != 395)
+									{
+										if (num10 != 402)
+										{
+											return false;
+										}
+										goto IL_12BC;
+									}
+								}
+							}
+							else if (num10 <= 414)
+							{
+								if (num10 == 412)
+								{
+									goto IL_13B8;
+								}
+								if (num10 != 414)
+								{
+									return false;
+								}
+								goto IL_14C0;
+							}
+							else
+							{
+								if (num10 == 426)
+								{
 									return true;
-								case 446:
-									goto IL_11E8;
+								}
+								if (num10 != 427)
+								{
+									if (num10 != 434)
+									{
+										return false;
+									}
+									goto IL_12BC;
 								}
 							}
 							if ((this.m_fontStyle & FontStyles.Bold) != FontStyles.Bold)
@@ -6541,60 +4932,2013 @@ namespace TMPro
 								}
 							}
 							return true;
+							IL_12BC:
+							if (this.m_fontStyleStack.Remove(FontStyles.Italic) == 0)
+							{
+								this.m_style &= (FontStyles)(-3);
+							}
+							return true;
+						}
+						if (num10 <= 670)
+						{
+							if (num10 <= 446)
+							{
+								if (num10 == 444)
+								{
+									goto IL_13B8;
+								}
+								if (num10 != 446)
+								{
+									return false;
+								}
+								goto IL_14C0;
+							}
+							else
+							{
+								if (num10 == 656)
+								{
+									goto IL_3906;
+								}
+								if (num10 == 660)
+								{
+									return true;
+								}
+								if (num10 != 670)
+								{
+									return false;
+								}
+							}
+						}
+						else if (num10 <= 916)
+						{
+							if (num10 == 912)
+							{
+								goto IL_3906;
+							}
+							if (num10 != 916)
+							{
+								return false;
+							}
+							return true;
+						}
+						else if (num10 != 926)
+						{
+							if (num10 == 2959)
+							{
+								return true;
+							}
+							if (num10 != 2963)
+							{
+								return false;
+							}
+							return true;
 						}
 						return true;
-					case 414:
-						goto IL_11E8;
+						IL_3906:
+						int num11 = 1;
+						while (num11 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num11].nameHashCode != 0)
+						{
+							num10 = this.m_xmlAttribute[num11].nameHashCode;
+							if (num10 != 275917)
+							{
+								if (num10 == 327550)
+								{
+									float num12 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num11].valueStartIndex, this.m_xmlAttribute[num11].valueLength);
+									switch (tagUnits)
+									{
+									case TagUnits.Pixels:
+										Debug.Log("Table width = " + num12 + "px.");
+										break;
+									case TagUnits.FontUnits:
+										Debug.Log("Table width = " + num12 + "em.");
+										break;
+									case TagUnits.Percentage:
+										Debug.Log("Table width = " + num12 + "%.");
+										break;
+									}
+								}
+							}
+							else
+							{
+								num10 = this.m_xmlAttribute[num11].valueHashCode;
+								if (num10 <= -458210101)
+								{
+									if (num10 != -523808257)
+									{
+										if (num10 == -458210101)
+										{
+											Debug.Log("TD align=\"center\".");
+										}
+									}
+									else
+									{
+										Debug.Log("TD align=\"justified\".");
+									}
+								}
+								else if (num10 != 3774683)
+								{
+									if (num10 == 136703040)
+									{
+										Debug.Log("TD align=\"right\".");
+									}
+								}
+								else
+								{
+									Debug.Log("TD align=\"left\".");
+								}
+							}
+							num11++;
+						}
+						return true;
+						IL_13B8:
+						if ((this.m_fontStyle & FontStyles.Strikethrough) != FontStyles.Strikethrough && this.m_fontStyleStack.Remove(FontStyles.Strikethrough) == 0)
+						{
+							this.m_style &= (FontStyles)(-65);
+						}
+						return true;
+						IL_14C0:
+						if ((this.m_fontStyle & FontStyles.Underline) != FontStyles.Underline)
+						{
+							this.m_underlineColor = this.m_underlineColorStack.Remove();
+							if (this.m_fontStyleStack.Remove(FontStyles.Underline) == 0)
+							{
+								this.m_style &= (FontStyles)(-5);
+							}
+						}
+						return true;
 					}
-					IL_10CB:
-					if ((this.m_fontStyle & FontStyles.Strikethrough) != FontStyles.Strikethrough && this.m_fontStyleStack.Remove(FontStyles.Strikethrough) == 0)
+					if (num10 <= -855002522)
 					{
-						this.m_style &= (FontStyles)(-65);
+						if (num10 <= -1690034531)
+						{
+							if (num10 <= -1883544150)
+							{
+								if (num10 == -1885698441)
+								{
+									goto IL_19AD;
+								}
+								if (num10 != -1883544150)
+								{
+									return false;
+								}
+							}
+							else
+							{
+								if (num10 == -1847322671)
+								{
+									goto IL_32F5;
+								}
+								if (num10 == -1831660941)
+								{
+									goto IL_32B6;
+								}
+								if (num10 != -1690034531)
+								{
+									return false;
+								}
+								goto IL_34F9;
+							}
+						}
+						else if (num10 <= -1632103439)
+						{
+							if (num10 != -1668324918)
+							{
+								if (num10 != -1632103439)
+								{
+									return false;
+								}
+								goto IL_32F5;
+							}
+						}
+						else
+						{
+							if (num10 == -1616441709)
+							{
+								goto IL_32B6;
+							}
+							if (num10 == -884817987)
+							{
+								goto IL_34F9;
+							}
+							if (num10 != -855002522)
+							{
+								return false;
+							}
+							goto IL_3419;
+						}
+						if (this.m_fontStyleStack.Remove(FontStyles.LowerCase) == 0)
+						{
+							this.m_style &= (FontStyles)(-9);
+						}
+						return true;
+						IL_32F5:
+						if (this.m_fontStyleStack.Remove(FontStyles.SmallCaps) == 0)
+						{
+							this.m_style &= (FontStyles)(-33);
+						}
+						return true;
+						IL_34F9:
+						num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+						if (num13 == -9999f)
+						{
+							return false;
+						}
+						this.m_marginRight = num13;
+						switch (tagUnits)
+						{
+						case TagUnits.FontUnits:
+							this.m_marginRight *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+							break;
+						case TagUnits.Percentage:
+							this.m_marginRight = (this.m_marginWidth - ((this.m_width != -1f) ? this.m_width : 0f)) * this.m_marginRight / 100f;
+							break;
+						}
+						this.m_marginRight = ((this.m_marginRight >= 0f) ? this.m_marginRight : 0f);
+						return true;
+					}
+					else
+					{
+						if (num10 > -330774850)
+						{
+							if (num10 <= 73)
+							{
+								if (num10 != 66)
+								{
+									if (num10 != 73)
+									{
+										return false;
+									}
+									goto IL_129F;
+								}
+							}
+							else
+							{
+								if (num10 == 83)
+								{
+									goto IL_12DB;
+								}
+								if (num10 == 85)
+								{
+									goto IL_13E5;
+								}
+								if (num10 != 98)
+								{
+									return false;
+								}
+							}
+							this.m_style |= FontStyles.Bold;
+							this.m_fontStyleStack.Add(FontStyles.Bold);
+							this.m_fontWeightInternal = 700;
+							this.m_fontWeightStack.Add(700);
+							return true;
+						}
+						if (num10 <= -842656867)
+						{
+							if (num10 == -842693512)
+							{
+								goto IL_35D9;
+							}
+							if (num10 != -842656867)
+							{
+								return false;
+							}
+							goto IL_2CF3;
+						}
+						else
+						{
+							if (num10 == -445573839)
+							{
+								goto IL_368B;
+							}
+							if (num10 == -445537194)
+							{
+								goto IL_2DB1;
+							}
+							if (num10 != -330774850)
+							{
+								return false;
+							}
+							goto IL_1846;
+						}
+					}
+					IL_129F:
+					this.m_style |= FontStyles.Italic;
+					this.m_fontStyleStack.Add(FontStyles.Italic);
+					return true;
+					IL_12DB:
+					this.m_style |= FontStyles.Strikethrough;
+					this.m_fontStyleStack.Add(FontStyles.Strikethrough);
+					if (this.m_xmlAttribute[1].nameHashCode == 281955 || this.m_xmlAttribute[1].nameHashCode == 192323)
+					{
+						this.m_strikethroughColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
+						this.m_strikethroughColor.a = ((this.m_htmlColor.a < this.m_strikethroughColor.a) ? this.m_htmlColor.a : this.m_strikethroughColor.a);
+					}
+					else
+					{
+						this.m_strikethroughColor = this.m_htmlColor;
+					}
+					this.m_strikethroughColorStack.Add(this.m_strikethroughColor);
+					return true;
+					IL_13E5:
+					this.m_style |= FontStyles.Underline;
+					this.m_fontStyleStack.Add(FontStyles.Underline);
+					if (this.m_xmlAttribute[1].nameHashCode == 281955 || this.m_xmlAttribute[1].nameHashCode == 192323)
+					{
+						this.m_underlineColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
+						this.m_underlineColor.a = ((this.m_htmlColor.a < this.m_underlineColor.a) ? this.m_htmlColor.a : this.m_underlineColor.a);
+					}
+					else
+					{
+						this.m_underlineColor = this.m_htmlColor;
+					}
+					this.m_underlineColorStack.Add(this.m_underlineColor);
+					return true;
+				}
+				if (num10 > 31169)
+				{
+					if (num10 > 143092)
+					{
+						if (num10 <= 155892)
+						{
+							if (num10 <= 144016)
+							{
+								if (num10 == 143113)
+								{
+									goto IL_250E;
+								}
+								if (num10 != 144016)
+								{
+									return false;
+								}
+							}
+							else
+							{
+								if (num10 == 145592)
+								{
+									goto IL_1DCC;
+								}
+								if (num10 == 154158)
+								{
+									goto IL_2101;
+								}
+								if (num10 != 155892)
+								{
+									return false;
+								}
+								goto IL_15A0;
+							}
+						}
+						else if (num10 <= 156816)
+						{
+							if (num10 == 155913)
+							{
+								goto IL_250E;
+							}
+							if (num10 != 156816)
+							{
+								return false;
+							}
+						}
+						else
+						{
+							if (num10 == 158392)
+							{
+								goto IL_1DCC;
+							}
+							if (num10 == 186285)
+							{
+								goto IL_2594;
+							}
+							if (num10 != 186622)
+							{
+								return false;
+							}
+							goto IL_238C;
+						}
+						this.m_isNonBreakingSpace = false;
+						return true;
+						IL_1DCC:
+						this.m_currentFontSize = this.m_sizeStack.Remove();
+						this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+						return true;
+						IL_250E:
+						if (this.m_isParsingText && !this.m_isCalculatingPreferredValues && this.m_textInfo.linkCount < this.m_textInfo.linkInfo.Length)
+						{
+							this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextLength = this.m_characterCount - this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextfirstCharacterIndex;
+							this.m_textInfo.linkCount++;
+						}
+						return true;
+					}
+					if (num10 <= 43066)
+					{
+						if (num10 <= 32745)
+						{
+							if (num10 != 31191)
+							{
+								if (num10 != 32745)
+								{
+									return false;
+								}
+								goto IL_1B68;
+							}
+						}
+						else
+						{
+							if (num10 == 41311)
+							{
+								goto IL_1E22;
+							}
+							if (num10 == 43045)
+							{
+								goto IL_14FB;
+							}
+							if (num10 != 43066)
+							{
+								return false;
+							}
+							goto IL_23D4;
+						}
+					}
+					else if (num10 <= 43991)
+					{
+						if (num10 == 43969)
+						{
+							goto IL_1B56;
+						}
+						if (num10 != 43991)
+						{
+							return false;
+						}
+					}
+					else
+					{
+						if (num10 == 45545)
+						{
+							goto IL_1B68;
+						}
+						if (num10 == 141358)
+						{
+							goto IL_2101;
+						}
+						if (num10 != 143092)
+						{
+							return false;
+						}
+						goto IL_15A0;
+					}
+					if (this.m_overflowMode == TextOverflowModes.Page)
+					{
+						this.m_xAdvance = 0f + this.tag_LineIndent + this.tag_Indent;
+						this.m_lineOffset = 0f;
+						this.m_pageNumber++;
+						this.m_isNewPage = true;
 					}
 					return true;
-					IL_11E8:
-					if ((this.m_fontStyle & FontStyles.Underline) != FontStyles.Underline)
+					IL_1B68:
+					num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+					if (num13 == -9999f)
 					{
-						this.m_underlineColor = this.m_underlineColorStack.Remove();
-						if (this.m_fontStyleStack.Remove(FontStyles.Underline) == 0)
+						return false;
+					}
+					switch (tagUnits)
+					{
+					case TagUnits.Pixels:
+						if (this.m_htmlTag[5] == '+')
 						{
-							this.m_style &= (FontStyles)(-5);
+							this.m_currentFontSize = this.m_fontSize + num13;
+							this.m_sizeStack.Add(this.m_currentFontSize);
+							this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+							return true;
+						}
+						if (this.m_htmlTag[5] == '-')
+						{
+							this.m_currentFontSize = this.m_fontSize + num13;
+							this.m_sizeStack.Add(this.m_currentFontSize);
+							this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+							return true;
+						}
+						this.m_currentFontSize = num13;
+						this.m_sizeStack.Add(this.m_currentFontSize);
+						this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+						return true;
+					case TagUnits.FontUnits:
+						this.m_currentFontSize = this.m_fontSize * num13;
+						this.m_sizeStack.Add(this.m_currentFontSize);
+						this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+						return true;
+					case TagUnits.Percentage:
+						this.m_currentFontSize = this.m_fontSize * num13 / 100f;
+						this.m_sizeStack.Add(this.m_currentFontSize);
+						this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+						return true;
+					default:
+						return false;
+					}
+					IL_15A0:
+					if ((this.m_fontStyle & FontStyles.Highlight) != FontStyles.Highlight)
+					{
+						this.m_highlightColor = this.m_highlightColorStack.Remove();
+						if (this.m_fontStyleStack.Remove(FontStyles.Highlight) == 0)
+						{
+							this.m_style &= (FontStyles)(-513);
 						}
 					}
 					return true;
-				case 117:
-					goto IL_10FE;
+					IL_2101:
+					MaterialReference materialReference = this.m_materialReferenceStack.Remove();
+					this.m_currentFontAsset = materialReference.fontAsset;
+					this.m_currentMaterial = materialReference.material;
+					this.m_currentMaterialIndex = materialReference.index;
+					this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+					return true;
 				}
-				break;
-			case 85:
-				goto IL_10FE;
+				if (num10 > 6566)
+				{
+					if (num10 <= 22673)
+					{
+						if (num10 <= 20849)
+						{
+							if (num10 == 20677)
+							{
+								goto IL_1A7D;
+							}
+							if (num10 != 20849)
+							{
+								return false;
+							}
+						}
+						else
+						{
+							if (num10 == 20863)
+							{
+								goto IL_17B4;
+							}
+							if (num10 == 22501)
+							{
+								goto IL_1A7D;
+							}
+							if (num10 != 22673)
+							{
+								return false;
+							}
+						}
+						if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript)
+						{
+							if (this.m_fontScaleMultiplier < 1f)
+							{
+								this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
+								this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize > 0f) ? this.m_currentFontAsset.fontInfo.SubSize : 1f);
+							}
+							if (this.m_fontStyleStack.Remove(FontStyles.Subscript) == 0)
+							{
+								this.m_style &= (FontStyles)(-257);
+							}
+						}
+						return true;
+						IL_1A7D:
+						this.m_isIgnoringAlignment = false;
+						return true;
+					}
+					if (num10 <= 28511)
+					{
+						if (num10 != 22687)
+						{
+							if (num10 != 28511)
+							{
+								return false;
+							}
+							goto IL_1E22;
+						}
+					}
+					else
+					{
+						if (num10 == 30245)
+						{
+							goto IL_14FB;
+						}
+						if (num10 == 30266)
+						{
+							goto IL_23D4;
+						}
+						if (num10 != 31169)
+						{
+							return false;
+						}
+						goto IL_1B56;
+					}
+					IL_17B4:
+					if ((this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
+					{
+						if (this.m_fontScaleMultiplier < 1f)
+						{
+							this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
+							this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize > 0f) ? this.m_currentFontAsset.fontInfo.SubSize : 1f);
+						}
+						if (this.m_fontStyleStack.Remove(FontStyles.Superscript) == 0)
+						{
+							this.m_style &= (FontStyles)(-129);
+						}
+					}
+					return true;
+				}
+				if (num10 <= 4556)
+				{
+					if (num10 <= 3215)
+					{
+						if (num10 != 2973)
+						{
+							if (num10 != 3215)
+							{
+								return false;
+							}
+							return true;
+						}
+					}
+					else
+					{
+						if (num10 == 3219)
+						{
+							return true;
+						}
+						if (num10 != 3229)
+						{
+							if (num10 != 4556)
+							{
+								return false;
+							}
+							goto IL_19DC;
+						}
+					}
+					return true;
+				}
+				if (num10 <= 4742)
+				{
+					if (num10 != 4728)
+					{
+						if (num10 != 4742)
+						{
+							return false;
+						}
+						goto IL_1718;
+					}
+				}
+				else
+				{
+					if (num10 == 6380)
+					{
+						goto IL_19DC;
+					}
+					if (num10 != 6552)
+					{
+						if (num10 != 6566)
+						{
+							return false;
+						}
+						goto IL_1718;
+					}
+				}
+				this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize > 0f) ? this.m_currentFontAsset.fontInfo.SubSize : 1f);
+				this.m_baselineOffsetStack.Push(this.m_baselineOffset);
+				this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SubscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
+				this.m_fontStyleStack.Add(FontStyles.Subscript);
+				this.m_style |= FontStyles.Subscript;
+				return true;
+				IL_1718:
+				this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize > 0f) ? this.m_currentFontAsset.fontInfo.SubSize : 1f);
+				this.m_baselineOffsetStack.Push(this.m_baselineOffset);
+				this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SuperscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
+				this.m_fontStyleStack.Add(FontStyles.Superscript);
+				this.m_style |= FontStyles.Superscript;
+				return true;
+				IL_19DC:
+				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				if (num13 == -9999f)
+				{
+					return false;
+				}
+				switch (tagUnits)
+				{
+				case TagUnits.Pixels:
+					this.m_xAdvance = num13;
+					return true;
+				case TagUnits.FontUnits:
+					this.m_xAdvance = num13 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+					return true;
+				case TagUnits.Percentage:
+					this.m_xAdvance = this.m_marginWidth * num13 / 100f;
+					return true;
+				default:
+					return false;
+				}
+				IL_14FB:
+				this.m_style |= FontStyles.Highlight;
+				this.m_fontStyleStack.Add(FontStyles.Highlight);
+				this.m_highlightColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				this.m_highlightColor.a = ((this.m_htmlColor.a < this.m_highlightColor.a) ? this.m_htmlColor.a : this.m_highlightColor.a);
+				this.m_highlightColorStack.Add(this.m_highlightColor);
+				return true;
+				IL_1B56:
+				this.m_isNonBreakingSpace = true;
+				return true;
+				IL_1E22:
+				int valueHashCode = this.m_xmlAttribute[0].valueHashCode;
+				int nameHashCode = this.m_xmlAttribute[1].nameHashCode;
+				int num14 = this.m_xmlAttribute[1].valueHashCode;
+				if (valueHashCode == 764638571 || valueHashCode == 523367755)
+				{
+					this.m_currentFontAsset = this.m_materialReferences[0].fontAsset;
+					this.m_currentMaterial = this.m_materialReferences[0].material;
+					this.m_currentMaterialIndex = 0;
+					this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+					this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
+					return true;
+				}
+				TMP_FontAsset tmp_FontAsset;
+				if (!MaterialReferenceManager.TryGetFontAsset(valueHashCode, out tmp_FontAsset))
+				{
+					tmp_FontAsset = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+					if (tmp_FontAsset == null)
+					{
+						return false;
+					}
+					MaterialReferenceManager.AddFontAsset(tmp_FontAsset);
+				}
+				if (nameHashCode == 0 && num14 == 0)
+				{
+					this.m_currentMaterial = tmp_FontAsset.material;
+					this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+					this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+				}
+				else
+				{
+					if (nameHashCode != 103415287 && nameHashCode != 72669687)
+					{
+						return false;
+					}
+					Material material;
+					if (MaterialReferenceManager.TryGetMaterial(num14, out material))
+					{
+						this.m_currentMaterial = material;
+						this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+						this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+					}
+					else
+					{
+						material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength));
+						if (material == null)
+						{
+							return false;
+						}
+						MaterialReferenceManager.AddFontMaterial(num14, material);
+						this.m_currentMaterial = material;
+						this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+						this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+					}
+				}
+				this.m_currentFontAsset = tmp_FontAsset;
+				this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
+				return true;
+				IL_23D4:
+				if (this.m_isParsingText && !this.m_isCalculatingPreferredValues)
+				{
+					int linkCount = this.m_textInfo.linkCount;
+					if (linkCount + 1 > this.m_textInfo.linkInfo.Length)
+					{
+						TMP_TextInfo.Resize<TMP_LinkInfo>(ref this.m_textInfo.linkInfo, linkCount + 1);
+					}
+					this.m_textInfo.linkInfo[linkCount].textComponent = this;
+					this.m_textInfo.linkInfo[linkCount].hashCode = this.m_xmlAttribute[0].valueHashCode;
+					this.m_textInfo.linkInfo[linkCount].linkTextfirstCharacterIndex = this.m_characterCount;
+					this.m_textInfo.linkInfo[linkCount].linkIdFirstCharacterIndex = startIndex + this.m_xmlAttribute[0].valueStartIndex;
+					this.m_textInfo.linkInfo[linkCount].linkIdLength = this.m_xmlAttribute[0].valueLength;
+					this.m_textInfo.linkInfo[linkCount].SetLinkID(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				}
+				return true;
 			}
-			this.m_style |= FontStyles.Strikethrough;
-			this.m_fontStyleStack.Add(FontStyles.Strikethrough);
-			if (this.m_xmlAttribute[1].nameHashCode == 281955 || this.m_xmlAttribute[1].nameHashCode == 192323)
+			if (num10 <= 6886018)
 			{
-				this.m_strikethroughColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
-				this.m_strikethroughColor.a = ((this.m_htmlColor.a >= this.m_strikethroughColor.a) ? this.m_strikethroughColor.a : this.m_htmlColor.a);
+				if (num10 <= 1071884)
+				{
+					if (num10 > 315682)
+					{
+						if (num10 <= 982252)
+						{
+							if (num10 <= 320078)
+							{
+								if (num10 == 317446)
+								{
+									goto IL_3842;
+								}
+								if (num10 != 320078)
+								{
+									return false;
+								}
+								goto IL_22F2;
+							}
+							else
+							{
+								if (num10 == 327550)
+								{
+									goto IL_2698;
+								}
+								if (num10 != 976214)
+								{
+									if (num10 != 982252)
+									{
+										return false;
+									}
+									goto IL_2C05;
+								}
+							}
+						}
+						else if (num10 <= 1017743)
+						{
+							if (num10 == 1015979)
+							{
+								goto IL_37C6;
+							}
+							if (num10 != 1017743)
+							{
+								return false;
+							}
+							return true;
+						}
+						else
+						{
+							if (num10 == 1027847)
+							{
+								goto IL_270A;
+							}
+							if (num10 != 1065846)
+							{
+								if (num10 != 1071884)
+								{
+									return false;
+								}
+								goto IL_2C05;
+							}
+						}
+						this.m_lineJustification = this.m_lineJustificationStack.Remove();
+						return true;
+						IL_2C05:
+						this.m_htmlColor = this.m_colorStack.Remove();
+						return true;
+					}
+					if (num10 <= 237918)
+					{
+						if (num10 <= 226050)
+						{
+							if (num10 != 192323)
+							{
+								if (num10 != 226050)
+								{
+									return false;
+								}
+								goto IL_375C;
+							}
+						}
+						else
+						{
+							if (num10 == 227814)
+							{
+								goto IL_3842;
+							}
+							if (num10 == 230446)
+							{
+								goto IL_22F2;
+							}
+							if (num10 != 237918)
+							{
+								return false;
+							}
+							goto IL_2698;
+						}
+					}
+					else if (num10 <= 276254)
+					{
+						if (num10 == 275917)
+						{
+							goto IL_2594;
+						}
+						if (num10 != 276254)
+						{
+							return false;
+						}
+						goto IL_238C;
+					}
+					else
+					{
+						if (num10 == 280416)
+						{
+							return false;
+						}
+						if (num10 != 281955)
+						{
+							if (num10 != 315682)
+							{
+								return false;
+							}
+							goto IL_375C;
+						}
+					}
+					if (this.m_htmlTag[6] == '#' && num == 10)
+					{
+						this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+						this.m_colorStack.Add(this.m_htmlColor);
+						return true;
+					}
+					if (this.m_htmlTag[6] == '#' && num == 11)
+					{
+						this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+						this.m_colorStack.Add(this.m_htmlColor);
+						return true;
+					}
+					if (this.m_htmlTag[6] == '#' && num == 13)
+					{
+						this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+						this.m_colorStack.Add(this.m_htmlColor);
+						return true;
+					}
+					if (this.m_htmlTag[6] == '#' && num == 15)
+					{
+						this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+						this.m_colorStack.Add(this.m_htmlColor);
+						return true;
+					}
+					num10 = this.m_xmlAttribute[0].valueHashCode;
+					if (num10 <= 26556144)
+					{
+						if (num10 <= 125395)
+						{
+							if (num10 == -36881330)
+							{
+								this.m_htmlColor = new Color32(160, 32, 240, byte.MaxValue);
+								this.m_colorStack.Add(this.m_htmlColor);
+								return true;
+							}
+							if (num10 == 125395)
+							{
+								this.m_htmlColor = Color.red;
+								this.m_colorStack.Add(this.m_htmlColor);
+								return true;
+							}
+						}
+						else
+						{
+							if (num10 == 3573310)
+							{
+								this.m_htmlColor = Color.blue;
+								this.m_colorStack.Add(this.m_htmlColor);
+								return true;
+							}
+							if (num10 == 26556144)
+							{
+								this.m_htmlColor = new Color32(byte.MaxValue, 128, 0, byte.MaxValue);
+								this.m_colorStack.Add(this.m_htmlColor);
+								return true;
+							}
+						}
+					}
+					else if (num10 <= 121463835)
+					{
+						if (num10 == 117905991)
+						{
+							this.m_htmlColor = Color.black;
+							this.m_colorStack.Add(this.m_htmlColor);
+							return true;
+						}
+						if (num10 == 121463835)
+						{
+							this.m_htmlColor = Color.green;
+							this.m_colorStack.Add(this.m_htmlColor);
+							return true;
+						}
+					}
+					else
+					{
+						if (num10 == 140357351)
+						{
+							this.m_htmlColor = Color.white;
+							this.m_colorStack.Add(this.m_htmlColor);
+							return true;
+						}
+						if (num10 == 554054276)
+						{
+							this.m_htmlColor = Color.yellow;
+							this.m_colorStack.Add(this.m_htmlColor);
+							return true;
+						}
+					}
+					return false;
+					IL_375C:
+					num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+					if (num13 == -9999f)
+					{
+						return false;
+					}
+					this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(num13, 1f, 1f));
+					this.m_isFXMatrixSet = true;
+					return true;
+					IL_22F2:
+					num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+					if (num13 == -9999f)
+					{
+						return false;
+					}
+					switch (tagUnits)
+					{
+					case TagUnits.Pixels:
+						this.m_xAdvance += num13;
+						return true;
+					case TagUnits.FontUnits:
+						this.m_xAdvance += num13 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+						return true;
+					case TagUnits.Percentage:
+						return false;
+					default:
+						return false;
+					}
+					IL_2698:
+					num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+					if (num13 == -9999f)
+					{
+						return false;
+					}
+					switch (tagUnits)
+					{
+					case TagUnits.Pixels:
+						this.m_width = num13;
+						break;
+					case TagUnits.FontUnits:
+						return false;
+					case TagUnits.Percentage:
+						this.m_width = this.m_marginWidth * num13 / 100f;
+						break;
+					}
+					return true;
+					IL_3842:
+					num10 = this.m_xmlAttribute[1].nameHashCode;
+					if (num10 == 327550)
+					{
+						float num15 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
+						switch (tagUnits)
+						{
+						case TagUnits.Pixels:
+							Debug.Log("Table width = " + num15 + "px.");
+							break;
+						case TagUnits.FontUnits:
+							Debug.Log("Table width = " + num15 + "em.");
+							break;
+						case TagUnits.Percentage:
+							Debug.Log("Table width = " + num15 + "%.");
+							break;
+						}
+					}
+					return true;
+				}
+				if (num10 <= 1619421)
+				{
+					if (num10 <= 1356515)
+					{
+						if (num10 <= 1107375)
+						{
+							if (num10 == 1105611)
+							{
+								goto IL_37C6;
+							}
+							if (num10 != 1107375)
+							{
+								return false;
+							}
+							return true;
+						}
+						else
+						{
+							if (num10 == 1117479)
+							{
+								goto IL_270A;
+							}
+							if (num10 == 1286342)
+							{
+								goto IL_36A1;
+							}
+							if (num10 != 1356515)
+							{
+								return false;
+							}
+						}
+					}
+					else if (num10 <= 1482398)
+					{
+						if (num10 == 1441524)
+						{
+							goto IL_2C18;
+						}
+						if (num10 != 1482398)
+						{
+							return false;
+						}
+						goto IL_3315;
+					}
+					else
+					{
+						if (num10 == 1524585)
+						{
+							goto IL_2B5E;
+						}
+						if (num10 == 1600507)
+						{
+							goto IL_37CF;
+						}
+						if (num10 != 1619421)
+						{
+							return false;
+						}
+						goto IL_2DBE;
+					}
+				}
+				else if (num10 <= 2109854)
+				{
+					if (num10 <= 1913798)
+					{
+						if (num10 == 1750458)
+						{
+							return false;
+						}
+						if (num10 != 1913798)
+						{
+							return false;
+						}
+						goto IL_36A1;
+					}
+					else if (num10 != 1983971)
+					{
+						if (num10 == 2068980)
+						{
+							goto IL_2C18;
+						}
+						if (num10 != 2109854)
+						{
+							return false;
+						}
+						goto IL_3315;
+					}
+				}
+				else if (num10 <= 2227963)
+				{
+					if (num10 == 2152041)
+					{
+						goto IL_2B5E;
+					}
+					if (num10 != 2227963)
+					{
+						return false;
+					}
+					goto IL_37CF;
+				}
+				else
+				{
+					if (num10 == 2246877)
+					{
+						goto IL_2DBE;
+					}
+					if (num10 == 6815845)
+					{
+						goto IL_3703;
+					}
+					if (num10 != 6886018)
+					{
+						return false;
+					}
+					goto IL_2B08;
+				}
+				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				if (num13 == -9999f)
+				{
+					return false;
+				}
+				switch (tagUnits)
+				{
+				case TagUnits.Pixels:
+					this.m_cSpacing = num13;
+					break;
+				case TagUnits.FontUnits:
+					this.m_cSpacing = num13;
+					this.m_cSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+					break;
+				case TagUnits.Percentage:
+					return false;
+				}
+				return true;
+				IL_2B5E:
+				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				if (num13 == -9999f)
+				{
+					return false;
+				}
+				switch (tagUnits)
+				{
+				case TagUnits.Pixels:
+					this.m_monoSpacing = num13;
+					break;
+				case TagUnits.FontUnits:
+					this.m_monoSpacing = num13;
+					this.m_monoSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+					break;
+				case TagUnits.Percentage:
+					return false;
+				}
+				return true;
+				IL_2C18:
+				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				if (num13 == -9999f)
+				{
+					return false;
+				}
+				switch (tagUnits)
+				{
+				case TagUnits.Pixels:
+					this.tag_Indent = num13;
+					break;
+				case TagUnits.FontUnits:
+					this.tag_Indent = num13;
+					this.tag_Indent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+					break;
+				case TagUnits.Percentage:
+					this.tag_Indent = this.m_marginWidth * num13 / 100f;
+					break;
+				}
+				this.m_indentStack.Add(this.tag_Indent);
+				this.m_xAdvance = this.tag_Indent;
+				return true;
+				IL_2DBE:
+				int valueHashCode2 = this.m_xmlAttribute[0].valueHashCode;
+				this.m_spriteIndex = -1;
+				TMP_SpriteAsset tmp_SpriteAsset;
+				if (this.m_xmlAttribute[0].valueType == TagType.None || this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
+				{
+					if (this.m_spriteAsset != null)
+					{
+						this.m_currentSpriteAsset = this.m_spriteAsset;
+					}
+					else if (this.m_defaultSpriteAsset != null)
+					{
+						this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
+					}
+					else if (this.m_defaultSpriteAsset == null)
+					{
+						if (TMP_Settings.defaultSpriteAsset != null)
+						{
+							this.m_defaultSpriteAsset = TMP_Settings.defaultSpriteAsset;
+						}
+						else
+						{
+							this.m_defaultSpriteAsset = Resources.Load<TMP_SpriteAsset>("Sprite Assets/Default Sprite Asset");
+						}
+						this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
+					}
+					if (this.m_currentSpriteAsset == null)
+					{
+						return false;
+					}
+				}
+				else if (MaterialReferenceManager.TryGetSpriteAsset(valueHashCode2, out tmp_SpriteAsset))
+				{
+					this.m_currentSpriteAsset = tmp_SpriteAsset;
+				}
+				else
+				{
+					if (tmp_SpriteAsset == null)
+					{
+						tmp_SpriteAsset = Resources.Load<TMP_SpriteAsset>(TMP_Settings.defaultSpriteAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+					}
+					if (tmp_SpriteAsset == null)
+					{
+						return false;
+					}
+					MaterialReferenceManager.AddSpriteAsset(valueHashCode2, tmp_SpriteAsset);
+					this.m_currentSpriteAsset = tmp_SpriteAsset;
+				}
+				if (this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
+				{
+					int num16 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+					if (num16 == -9999)
+					{
+						return false;
+					}
+					if (num16 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
+					{
+						return false;
+					}
+					this.m_spriteIndex = num16;
+				}
+				this.m_spriteColor = TMP_Text.s_colorWhite;
+				this.m_tintSprite = false;
+				int num17 = 0;
+				while (num17 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num17].nameHashCode != 0)
+				{
+					int nameHashCode2 = this.m_xmlAttribute[num17].nameHashCode;
+					int num18 = 0;
+					if (nameHashCode2 <= 43347)
+					{
+						if (nameHashCode2 <= 30547)
+						{
+							if (nameHashCode2 == 26705)
+							{
+								goto IL_315F;
+							}
+							if (nameHashCode2 != 30547)
+							{
+								goto IL_31E2;
+							}
+						}
+						else
+						{
+							if (nameHashCode2 == 33019)
+							{
+								goto IL_30DF;
+							}
+							if (nameHashCode2 == 39505)
+							{
+								goto IL_315F;
+							}
+							if (nameHashCode2 != 43347)
+							{
+								goto IL_31E2;
+							}
+						}
+						this.m_currentSpriteAsset = TMP_SpriteAsset.SearchForSpriteByHashCode(this.m_currentSpriteAsset, this.m_xmlAttribute[num17].valueHashCode, true, out num18);
+						if (num18 == -1)
+						{
+							return false;
+						}
+						this.m_spriteIndex = num18;
+						goto IL_31F6;
+						IL_315F:
+						if (this.GetAttributeParameters(this.m_htmlTag, this.m_xmlAttribute[num17].valueStartIndex, this.m_xmlAttribute[num17].valueLength, ref this.m_attributeParameterValues) != 3)
+						{
+							return false;
+						}
+						this.m_spriteIndex = (int)this.m_attributeParameterValues[0];
+						if (this.m_isParsingText)
+						{
+							this.spriteAnimator.DoSpriteAnimation(this.m_characterCount, this.m_currentSpriteAsset, this.m_spriteIndex, (int)this.m_attributeParameterValues[1], (int)this.m_attributeParameterValues[2]);
+						}
+					}
+					else
+					{
+						if (nameHashCode2 <= 192323)
+						{
+							if (nameHashCode2 == 45819)
+							{
+								goto IL_30DF;
+							}
+							if (nameHashCode2 != 192323)
+							{
+								goto IL_31E2;
+							}
+						}
+						else
+						{
+							if (nameHashCode2 != 205930)
+							{
+								if (nameHashCode2 == 281955)
+								{
+									goto IL_3124;
+								}
+								if (nameHashCode2 != 295562)
+								{
+									goto IL_31E2;
+								}
+							}
+							num18 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
+							if (num18 == -9999)
+							{
+								return false;
+							}
+							if (num18 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
+							{
+								return false;
+							}
+							this.m_spriteIndex = num18;
+							goto IL_31F6;
+						}
+						IL_3124:
+						this.m_spriteColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[num17].valueStartIndex, this.m_xmlAttribute[num17].valueLength);
+					}
+					IL_31F6:
+					num17++;
+					continue;
+					IL_30DF:
+					this.m_tintSprite = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num17].valueStartIndex, this.m_xmlAttribute[num17].valueLength) != 0f;
+					goto IL_31F6;
+					IL_31E2:
+					if (nameHashCode2 != 2246877 && nameHashCode2 != 1619421)
+					{
+						return false;
+					}
+					goto IL_31F6;
+				}
+				if (this.m_spriteIndex == -1)
+				{
+					return false;
+				}
+				this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentSpriteAsset.material, this.m_currentSpriteAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+				this.m_textElementType = TMP_TextElementType.Sprite;
+				return true;
+				IL_3315:
+				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				if (num13 == -9999f)
+				{
+					return false;
+				}
+				this.m_marginLeft = num13;
+				switch (tagUnits)
+				{
+				case TagUnits.FontUnits:
+					this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+					break;
+				case TagUnits.Percentage:
+					this.m_marginLeft = (this.m_marginWidth - ((this.m_width != -1f) ? this.m_width : 0f)) * this.m_marginLeft / 100f;
+					break;
+				}
+				this.m_marginLeft = ((this.m_marginLeft >= 0f) ? this.m_marginLeft : 0f);
+				this.m_marginRight = this.m_marginLeft;
+				return true;
+				IL_36A1:
+				int valueHashCode3 = this.m_xmlAttribute[0].valueHashCode;
+				if (this.m_isParsingText)
+				{
+					this.m_actionStack.Add(valueHashCode3);
+					Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode3, "] First character index: ", this.m_characterCount }));
+				}
+				return true;
+				IL_37CF:
+				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+				if (num13 == -9999f)
+				{
+					return false;
+				}
+				this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, num13), Vector3.one);
+				this.m_isFXMatrixSet = true;
+				return true;
+				IL_270A:
+				this.m_width = -1f;
+				return true;
+				IL_37C6:
+				this.m_isFXMatrixSet = false;
+				return true;
 			}
-			else
+			if (num10 > 54741026)
 			{
-				this.m_strikethroughColor = this.m_htmlColor;
+				if (num10 <= 514803617)
+				{
+					if (num10 <= 340349191)
+					{
+						if (num10 <= 72669687)
+						{
+							if (num10 == 69403544)
+							{
+								goto IL_29BD;
+							}
+							if (num10 != 72669687)
+							{
+								return false;
+							}
+						}
+						else
+						{
+							if (num10 == 100149144)
+							{
+								goto IL_29BD;
+							}
+							if (num10 != 103415287)
+							{
+								if (num10 != 340349191)
+								{
+									return false;
+								}
+								goto IL_2A5D;
+							}
+						}
+						int num14 = this.m_xmlAttribute[0].valueHashCode;
+						if (num14 == 764638571 || num14 == 523367755)
+						{
+							this.m_currentMaterial = this.m_materialReferences[0].material;
+							this.m_currentMaterialIndex = 0;
+							this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
+							return true;
+						}
+						Material material;
+						if (MaterialReferenceManager.TryGetMaterial(num14, out material))
+						{
+							this.m_currentMaterial = material;
+							this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+							this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+						}
+						else
+						{
+							material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+							if (material == null)
+							{
+								return false;
+							}
+							MaterialReferenceManager.AddFontMaterial(num14, material);
+							this.m_currentMaterial = material;
+							this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+							this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+						}
+						return true;
+						IL_29BD:
+						int valueHashCode4 = this.m_xmlAttribute[0].valueHashCode;
+						TMP_ColorGradient tmp_ColorGradient;
+						if (MaterialReferenceManager.TryGetColorGradientPreset(valueHashCode4, out tmp_ColorGradient))
+						{
+							this.m_colorGradientPreset = tmp_ColorGradient;
+						}
+						else
+						{
+							if (tmp_ColorGradient == null)
+							{
+								tmp_ColorGradient = Resources.Load<TMP_ColorGradient>(TMP_Settings.defaultColorGradientPresetsPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+							}
+							if (tmp_ColorGradient == null)
+							{
+								return false;
+							}
+							MaterialReferenceManager.AddColorGradientPreset(valueHashCode4, tmp_ColorGradient);
+							this.m_colorGradientPreset = tmp_ColorGradient;
+						}
+						this.m_colorGradientStack.Add(this.m_colorGradientPreset);
+						return true;
+					}
+					if (num10 <= 371094791)
+					{
+						if (num10 != 343615334)
+						{
+							if (num10 != 371094791)
+							{
+								return false;
+							}
+							goto IL_2A5D;
+						}
+					}
+					else if (num10 != 374360934)
+					{
+						if (num10 == 457225591)
+						{
+							goto IL_19AD;
+						}
+						if (num10 != 514803617)
+						{
+							return false;
+						}
+						goto IL_325B;
+					}
+					MaterialReference materialReference2 = this.m_materialReferenceStack.Remove();
+					this.m_currentMaterial = materialReference2.material;
+					this.m_currentMaterialIndex = materialReference2.index;
+					return true;
+					IL_2A5D:
+					this.m_colorGradientPreset = this.m_colorGradientStack.Remove();
+					return true;
+				}
+				if (num10 <= 781906058)
+				{
+					if (num10 <= 566686826)
+					{
+						if (num10 != 551025096)
+						{
+							if (num10 != 566686826)
+							{
+								return false;
+							}
+							goto IL_3297;
+						}
+					}
+					else
+					{
+						if (num10 == 730022849)
+						{
+							goto IL_325B;
+						}
+						if (num10 != 766244328)
+						{
+							if (num10 != 781906058)
+							{
+								return false;
+							}
+							goto IL_3297;
+						}
+					}
+					this.m_style |= FontStyles.SmallCaps;
+					this.m_fontStyleStack.Add(FontStyles.SmallCaps);
+					return true;
+				}
+				if (num10 <= 1109386397)
+				{
+					if (num10 == 1100728678)
+					{
+						goto IL_3419;
+					}
+					if (num10 == 1109349752)
+					{
+						goto IL_35D9;
+					}
+					if (num10 != 1109386397)
+					{
+						return false;
+					}
+					goto IL_2CF3;
+				}
+				else
+				{
+					if (num10 == 1897350193)
+					{
+						goto IL_368B;
+					}
+					if (num10 == 1897386838)
+					{
+						goto IL_2DB1;
+					}
+					if (num10 != 2012149182)
+					{
+						return false;
+					}
+					goto IL_1846;
+				}
+				IL_325B:
+				this.m_style |= FontStyles.LowerCase;
+				this.m_fontStyleStack.Add(FontStyles.LowerCase);
+				return true;
 			}
-			this.m_strikethroughColorStack.Add(this.m_strikethroughColor);
+			if (num10 <= 7757466)
+			{
+				if (num10 <= 7443301)
+				{
+					if (num10 <= 7011901)
+					{
+						if (num10 == 6971027)
+						{
+							goto IL_2CE0;
+						}
+						if (num10 != 7011901)
+						{
+							return false;
+						}
+						goto IL_3401;
+					}
+					else if (num10 != 7054088)
+					{
+						if (num10 == 7130010)
+						{
+							goto IL_3839;
+						}
+						if (num10 != 7443301)
+						{
+							return false;
+						}
+						goto IL_3703;
+					}
+				}
+				else if (num10 <= 7598483)
+				{
+					if (num10 == 7513474)
+					{
+						goto IL_2B08;
+					}
+					if (num10 != 7598483)
+					{
+						return false;
+					}
+					goto IL_2CE0;
+				}
+				else
+				{
+					if (num10 == 7639357)
+					{
+						goto IL_3401;
+					}
+					if (num10 != 7681544)
+					{
+						if (num10 != 7757466)
+						{
+							return false;
+						}
+						goto IL_3839;
+					}
+				}
+				this.m_monoSpacing = 0f;
+				return true;
+				IL_2CE0:
+				this.tag_Indent = this.m_indentStack.Remove();
+				return true;
+				IL_3401:
+				this.m_marginLeft = 0f;
+				this.m_marginRight = 0f;
+				return true;
+				IL_3839:
+				this.m_isFXMatrixSet = false;
+				return true;
+			}
+			if (num10 <= 15115642)
+			{
+				if (num10 <= 10723418)
+				{
+					if (num10 == 9133802)
+					{
+						goto IL_3297;
+					}
+					if (num10 != 10723418)
+					{
+						return false;
+					}
+				}
+				else
+				{
+					if (num10 == 11642281)
+					{
+						goto IL_1A86;
+					}
+					if (num10 == 13526026)
+					{
+						goto IL_3297;
+					}
+					if (num10 != 15115642)
+					{
+						return false;
+					}
+				}
+				this.tag_NoParsing = true;
+				return true;
+			}
+			if (num10 > 47840323)
+			{
+				if (num10 != 50348802)
+				{
+					if (num10 == 52232547)
+					{
+						goto IL_32B6;
+					}
+					if (num10 != 54741026)
+					{
+						return false;
+					}
+				}
+				this.m_baselineOffset = 0f;
+				return true;
+			}
+			if (num10 != 16034505)
+			{
+				if (num10 != 47840323)
+				{
+					return false;
+				}
+				goto IL_32B6;
+			}
+			IL_1A86:
+			num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+			if (num13 == -9999f)
+			{
+				return false;
+			}
+			switch (tagUnits)
+			{
+			case TagUnits.Pixels:
+				this.m_baselineOffset = num13;
+				return true;
+			case TagUnits.FontUnits:
+				this.m_baselineOffset = num13 * this.m_fontScale * this.m_fontAsset.fontInfo.Ascender;
+				return true;
+			case TagUnits.Percentage:
+				return false;
+			default:
+				return false;
+			}
+			IL_3297:
+			this.m_style |= FontStyles.UpperCase;
+			this.m_fontStyleStack.Add(FontStyles.UpperCase);
 			return true;
-			IL_10FE:
-			this.m_style |= FontStyles.Underline;
-			this.m_fontStyleStack.Add(FontStyles.Underline);
-			if (this.m_xmlAttribute[1].nameHashCode == 281955 || this.m_xmlAttribute[1].nameHashCode == 192323)
+			IL_2B08:
+			if (!this.m_isParsingText)
 			{
-				this.m_underlineColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
-				this.m_underlineColor.a = ((this.m_htmlColor.a >= this.m_underlineColor.a) ? this.m_underlineColor.a : this.m_htmlColor.a);
+				return true;
+			}
+			if (this.m_characterCount > 0)
+			{
+				this.m_xAdvance -= this.m_cSpacing;
+				this.m_textInfo.characterInfo[this.m_characterCount - 1].xAdvance = this.m_xAdvance;
+			}
+			this.m_cSpacing = 0f;
+			return true;
+			IL_3703:
+			if (this.m_isParsingText)
+			{
+				Debug.Log(string.Concat(new object[]
+				{
+					"Action ID: [",
+					this.m_actionStack.CurrentItem(),
+					"] Last character index: ",
+					this.m_characterCount - 1
+				}));
+			}
+			this.m_actionStack.Remove();
+			return true;
+			IL_1846:
+			num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+			if (num13 == -9999f)
+			{
+				return false;
+			}
+			if ((this.m_fontStyle & FontStyles.Bold) == FontStyles.Bold)
+			{
+				return true;
+			}
+			this.m_style &= (FontStyles)(-2);
+			num10 = (int)num13;
+			if (num10 <= 400)
+			{
+				if (num10 <= 200)
+				{
+					if (num10 != 100)
+					{
+						if (num10 == 200)
+						{
+							this.m_fontWeightInternal = 200;
+						}
+					}
+					else
+					{
+						this.m_fontWeightInternal = 100;
+					}
+				}
+				else if (num10 != 300)
+				{
+					if (num10 == 400)
+					{
+						this.m_fontWeightInternal = 400;
+					}
+				}
+				else
+				{
+					this.m_fontWeightInternal = 300;
+				}
+			}
+			else if (num10 <= 600)
+			{
+				if (num10 != 500)
+				{
+					if (num10 == 600)
+					{
+						this.m_fontWeightInternal = 600;
+					}
+				}
+				else
+				{
+					this.m_fontWeightInternal = 500;
+				}
+			}
+			else if (num10 != 700)
+			{
+				if (num10 != 800)
+				{
+					if (num10 == 900)
+					{
+						this.m_fontWeightInternal = 900;
+					}
+				}
+				else
+				{
+					this.m_fontWeightInternal = 800;
+				}
 			}
 			else
 			{
-				this.m_underlineColor = this.m_htmlColor;
+				this.m_fontWeightInternal = 700;
+				this.m_style |= FontStyles.Bold;
 			}
-			this.m_underlineColorStack.Add(this.m_underlineColor);
+			this.m_fontWeightStack.Add(this.m_fontWeightInternal);
+			return true;
+			IL_19AD:
+			this.m_fontWeightInternal = this.m_fontWeightStack.Remove();
+			if (this.m_fontWeightInternal == 400)
+			{
+				this.m_style &= (FontStyles)(-2);
+			}
+			return true;
+			IL_238C:
+			if (this.m_xmlAttribute[0].valueLength != 3)
+			{
+				return false;
+			}
+			this.m_htmlColor.a = (byte)(this.HexToInt(this.m_htmlTag[7]) * 16 + this.HexToInt(this.m_htmlTag[8]));
+			return true;
+			IL_2594:
+			num10 = this.m_xmlAttribute[0].valueHashCode;
+			if (num10 <= -458210101)
+			{
+				if (num10 == -523808257)
+				{
+					this.m_lineJustification = TextAlignmentOptions.Justified;
+					this.m_lineJustificationStack.Add(this.m_lineJustification);
+					return true;
+				}
+				if (num10 == -458210101)
+				{
+					this.m_lineJustification = TextAlignmentOptions.Center;
+					this.m_lineJustificationStack.Add(this.m_lineJustification);
+					return true;
+				}
+			}
+			else
+			{
+				if (num10 == 3774683)
+				{
+					this.m_lineJustification = TextAlignmentOptions.Left;
+					this.m_lineJustificationStack.Add(this.m_lineJustification);
+					return true;
+				}
+				if (num10 == 122383428)
+				{
+					this.m_lineJustification = TextAlignmentOptions.Flush;
+					this.m_lineJustificationStack.Add(this.m_lineJustification);
+					return true;
+				}
+				if (num10 == 136703040)
+				{
+					this.m_lineJustification = TextAlignmentOptions.Right;
+					this.m_lineJustificationStack.Add(this.m_lineJustification);
+					return true;
+				}
+			}
+			return false;
+			IL_2CF3:
+			num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+			if (num13 == -9999f)
+			{
+				return false;
+			}
+			switch (tagUnits)
+			{
+			case TagUnits.Pixels:
+				this.tag_LineIndent = num13;
+				break;
+			case TagUnits.FontUnits:
+				this.tag_LineIndent = num13;
+				this.tag_LineIndent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+				break;
+			case TagUnits.Percentage:
+				this.tag_LineIndent = this.m_marginWidth * num13 / 100f;
+				break;
+			}
+			this.m_xAdvance += this.tag_LineIndent;
+			return true;
+			IL_2DB1:
+			this.tag_LineIndent = 0f;
+			return true;
+			IL_32B6:
+			if (this.m_fontStyleStack.Remove(FontStyles.UpperCase) == 0)
+			{
+				this.m_style &= (FontStyles)(-17);
+			}
+			return true;
+			IL_3419:
+			num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+			if (num13 == -9999f)
+			{
+				return false;
+			}
+			this.m_marginLeft = num13;
+			switch (tagUnits)
+			{
+			case TagUnits.FontUnits:
+				this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+				break;
+			case TagUnits.Percentage:
+				this.m_marginLeft = (this.m_marginWidth - ((this.m_width != -1f) ? this.m_width : 0f)) * this.m_marginLeft / 100f;
+				break;
+			}
+			this.m_marginLeft = ((this.m_marginLeft >= 0f) ? this.m_marginLeft : 0f);
+			return true;
+			IL_35D9:
+			num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+			if (num13 == -9999f || num13 == 0f)
+			{
+				return false;
+			}
+			this.m_lineHeight = num13;
+			switch (tagUnits)
+			{
+			case TagUnits.FontUnits:
+				this.m_lineHeight *= this.m_fontAsset.fontInfo.LineHeight * this.m_fontScale;
+				break;
+			case TagUnits.Percentage:
+				this.m_lineHeight = this.m_fontAsset.fontInfo.LineHeight * this.m_lineHeight / 100f * this.m_fontScale;
+				break;
+			}
+			return true;
+			IL_368B:
+			this.m_lineHeight = -32767f;
 			return true;
 		}
 
@@ -6968,9 +7312,9 @@ namespace TMPro
 
 		protected int m_totalCharacterCount;
 
-		protected WordWrapState m_SavedWordWrapState = default(WordWrapState);
+		protected WordWrapState m_SavedWordWrapState;
 
-		protected WordWrapState m_SavedLineState = default(WordWrapState);
+		protected WordWrapState m_SavedLineState;
 
 		protected int m_characterCount;
 

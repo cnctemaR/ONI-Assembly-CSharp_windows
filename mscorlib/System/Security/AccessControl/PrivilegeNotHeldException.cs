@@ -29,6 +29,7 @@ namespace System.Security.AccessControl
 		}
 
 		[MonoTODO]
+		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			throw new NotImplementedException();

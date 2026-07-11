@@ -18,14 +18,10 @@ public class FilteredDragTool : DragTool
 		bool flag = false;
 		foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> keyValuePair in this.currentFilterTargets)
 		{
-			if (keyValuePair.Value == ToolParameterMenu.ToggleState.On)
+			if (keyValuePair.Value == ToolParameterMenu.ToggleState.On && this.GetObjectLayerFromFilterLayer(keyValuePair.Key) == layer)
 			{
-				ObjectLayer objectLayerFromFilterLayer = this.GetObjectLayerFromFilterLayer(keyValuePair.Key);
-				if (objectLayerFromFilterLayer == layer)
-				{
-					flag = true;
-					break;
-				}
+				flag = true;
+				break;
 			}
 		}
 		return flag;
@@ -114,109 +110,134 @@ public class FilteredDragTool : DragTool
 
 	public string GetFilterLayerFromObjectLayer(ObjectLayer gamer_layer)
 	{
-		switch (gamer_layer)
+		if (gamer_layer <= ObjectLayer.Backwall)
 		{
-		case ObjectLayer.GasConduitConnection:
-			goto IL_008C;
-		case ObjectLayer.LiquidConduit:
-		case ObjectLayer.LiquidConduitConnection:
-			return "LiquidPipes";
-		default:
-			switch (gamer_layer)
+			if (gamer_layer == ObjectLayer.Building)
 			{
-			case ObjectLayer.WireConnectors:
-				break;
-			case ObjectLayer.LogicGates:
-			case ObjectLayer.LogicWires:
-				return "Logic";
-			default:
-				if (gamer_layer == ObjectLayer.Building)
-				{
-					return "Buildings";
-				}
-				if (gamer_layer != ObjectLayer.Backwall)
-				{
-					switch (gamer_layer)
-					{
-					case ObjectLayer.FoundationTile:
-						return "Tiles";
-					case ObjectLayer.GasConduit:
-						goto IL_008C;
-					}
-					return "Default";
-				}
+				return "Buildings";
+			}
+			if (gamer_layer == ObjectLayer.Backwall)
+			{
 				return "BackWall";
 			}
-			break;
-		case ObjectLayer.SolidConduit:
-		case ObjectLayer.SolidConduitConnection:
-			return "SolidConduits";
-		case ObjectLayer.Wire:
-			break;
 		}
-		return "Wires";
-		IL_008C:
-		return "GasPipes";
+		else
+		{
+			if (gamer_layer != ObjectLayer.FoundationTile)
+			{
+				switch (gamer_layer)
+				{
+				case ObjectLayer.GasConduit:
+				case ObjectLayer.GasConduitConnection:
+					return "GasPipes";
+				case ObjectLayer.GasConduitTile:
+				case ObjectLayer.ReplacementGasConduit:
+				case ObjectLayer.LiquidConduitTile:
+				case ObjectLayer.ReplacementLiquidConduit:
+					goto IL_00A5;
+				case ObjectLayer.LiquidConduit:
+				case ObjectLayer.LiquidConduitConnection:
+					return "LiquidPipes";
+				case ObjectLayer.SolidConduit:
+					break;
+				default:
+					switch (gamer_layer)
+					{
+					case ObjectLayer.SolidConduitConnection:
+						break;
+					case ObjectLayer.LadderTile:
+					case ObjectLayer.ReplacementLadder:
+					case ObjectLayer.WireTile:
+					case ObjectLayer.ReplacementWire:
+						goto IL_00A5;
+					case ObjectLayer.Wire:
+					case ObjectLayer.WireConnectors:
+						return "Wires";
+					case ObjectLayer.LogicGates:
+					case ObjectLayer.LogicWires:
+						return "Logic";
+					default:
+						goto IL_00A5;
+					}
+					break;
+				}
+				return "SolidConduits";
+			}
+			return "Tiles";
+		}
+		IL_00A5:
+		return "Default";
 	}
 
 	private ObjectLayer GetObjectLayerFromFilterLayer(string filter_layer)
 	{
 		string text = filter_layer.ToLower();
-		if (text != null)
+		uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
+		if (num <= 2200975418U)
 		{
-			if (FilteredDragTool.<>f__switch$map0 == null)
+			if (num <= 388608975U)
 			{
-				FilteredDragTool.<>f__switch$map0 = new Dictionary<string, int>(8)
+				if (num != 25076977U)
 				{
-					{ "buildings", 0 },
-					{ "wires", 1 },
-					{ "liquidpipes", 2 },
-					{ "gaspipes", 3 },
-					{ "solidconduits", 4 },
-					{ "tiles", 5 },
-					{ "logic", 6 },
-					{ "backwall", 7 }
-				};
-			}
-			int num;
-			if (FilteredDragTool.<>f__switch$map0.TryGetValue(text, out num))
-			{
-				ObjectLayer objectLayer;
-				switch (num)
-				{
-				case 0:
-					objectLayer = ObjectLayer.Building;
-					break;
-				case 1:
-					objectLayer = ObjectLayer.Wire;
-					break;
-				case 2:
-					objectLayer = ObjectLayer.LiquidConduit;
-					break;
-				case 3:
-					objectLayer = ObjectLayer.GasConduit;
-					break;
-				case 4:
-					objectLayer = ObjectLayer.SolidConduit;
-					break;
-				case 5:
-					objectLayer = ObjectLayer.FoundationTile;
-					break;
-				case 6:
-					objectLayer = ObjectLayer.LogicWires;
-					break;
-				case 7:
-					objectLayer = ObjectLayer.Backwall;
-					break;
-				case 8:
-					goto IL_0106;
-				default:
-					goto IL_0106;
+					if (num == 388608975U)
+					{
+						if (text == "solidconduits")
+						{
+							return ObjectLayer.SolidConduit;
+						}
+					}
 				}
-				return objectLayer;
+				else if (text == "wires")
+				{
+					return ObjectLayer.Wire;
+				}
+			}
+			else if (num != 614364310U)
+			{
+				if (num == 2200975418U)
+				{
+					if (text == "backwall")
+					{
+						return ObjectLayer.Backwall;
+					}
+				}
+			}
+			else if (text == "liquidpipes")
+			{
+				return ObjectLayer.LiquidConduit;
 			}
 		}
-		IL_0106:
+		else if (num <= 2875565775U)
+		{
+			if (num != 2366751346U)
+			{
+				if (num == 2875565775U)
+				{
+					if (text == "gaspipes")
+					{
+						return ObjectLayer.GasConduit;
+					}
+				}
+			}
+			else if (text == "buildings")
+			{
+				return ObjectLayer.Building;
+			}
+		}
+		else if (num != 3464443665U)
+		{
+			if (num == 4178729166U)
+			{
+				if (text == "tiles")
+				{
+					return ObjectLayer.FoundationTile;
+				}
+			}
+		}
+		else if (text == "logic")
+		{
+			return ObjectLayer.LogicWires;
+		}
 		throw new ArgumentException("Invalid filter layer: " + filter_layer);
 	}
 
@@ -250,24 +271,26 @@ public class FilteredDragTool : DragTool
 		this.currentFilterTargets = this.filterTargets;
 		if (text != null)
 		{
-			List<string> list = new List<string>(this.filterTargets.Keys);
-			foreach (string text2 in list)
+			using (List<string>.Enumerator enumerator = new List<string>(this.filterTargets.Keys).GetEnumerator())
 			{
-				this.filterTargets[text2] = ToolParameterMenu.ToggleState.Disabled;
-				if (text2 == text)
+				while (enumerator.MoveNext())
 				{
-					this.filterTargets[text2] = ToolParameterMenu.ToggleState.On;
+					string text2 = enumerator.Current;
+					this.filterTargets[text2] = ToolParameterMenu.ToggleState.Disabled;
+					if (text2 == text)
+					{
+						this.filterTargets[text2] = ToolParameterMenu.ToggleState.On;
+					}
 				}
+				goto IL_0102;
 			}
 		}
-		else
+		if (this.overlayFilterTargets.Count == 0)
 		{
-			if (this.overlayFilterTargets.Count == 0)
-			{
-				this.ResetFilter(this.overlayFilterTargets);
-			}
-			this.currentFilterTargets = this.overlayFilterTargets;
+			this.ResetFilter(this.overlayFilterTargets);
 		}
+		this.currentFilterTargets = this.overlayFilterTargets;
+		IL_0102:
 		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilterTargets);
 	}
 

@@ -5,6 +5,12 @@ namespace Satsuma
 {
 	public sealed class TopologicalOrder
 	{
+		public IGraph Graph { get; private set; }
+
+		public bool Acyclic { get; private set; }
+
+		public List<Node> Order { get; private set; }
+
 		public TopologicalOrder(IGraph graph, TopologicalOrder.Flags flags = TopologicalOrder.Flags.None)
 		{
 			this.Graph = graph;
@@ -17,12 +23,6 @@ namespace Satsuma
 				Parent = this
 			}.Run(graph, null);
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public bool Acyclic { get; private set; }
-
-		public List<Node> Order { get; private set; }
 
 		[Flags]
 		public enum Flags
@@ -78,11 +78,9 @@ namespace Satsuma
 					if (this.Parent.Acyclic)
 					{
 						this.Parent.Order.Reverse();
+						return;
 					}
-					else
-					{
-						this.Parent.Order.Clear();
-					}
+					this.Parent.Order.Clear();
 				}
 			}
 

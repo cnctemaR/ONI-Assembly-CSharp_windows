@@ -53,7 +53,7 @@ public class Unlocks : KMonoBehaviour
 			MessageNotification messageNotification = this.GenerateCodexUnlockNotification(unlockID);
 			if (messageNotification != null)
 			{
-				base.GetComponent<Notifier>().Add(messageNotification, string.Empty);
+				base.GetComponent<Notifier>().Add(messageNotification, "");
 			}
 		}
 	}
@@ -75,8 +75,7 @@ public class Unlocks : KMonoBehaviour
 				using (FileStream fileStream = File.Open(Unlocks.UnlocksFilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
 				{
 					flag = true;
-					ASCIIEncoding asciiencoding = new ASCIIEncoding();
-					byte[] bytes = asciiencoding.GetBytes(text);
+					byte[] bytes = new ASCIIEncoding().GetBytes(text);
 					fileStream.Write(bytes, 0, bytes.Length);
 				}
 			}
@@ -99,7 +98,7 @@ public class Unlocks : KMonoBehaviour
 		{
 			return;
 		}
-		string text = string.Empty;
+		string text = "";
 		bool flag = false;
 		int num = 0;
 		while (!flag && num < 5)
@@ -134,15 +133,11 @@ public class Unlocks : KMonoBehaviour
 		}
 		try
 		{
-			string[] array2 = JsonConvert.DeserializeObject<string[]>(text);
-			foreach (string text2 in array2)
+			foreach (string text2 in JsonConvert.DeserializeObject<string[]>(text))
 			{
-				if (!string.IsNullOrEmpty(text2))
+				if (!string.IsNullOrEmpty(text2) && !this.unlocked.Contains(text2))
 				{
-					if (!this.unlocked.Contains(text2))
-					{
-						this.unlocked.Add(text2);
-					}
+					this.unlocked.Add(text2);
 				}
 			}
 		}
@@ -208,8 +203,7 @@ public class Unlocks : KMonoBehaviour
 					}
 				}
 			}
-			CodexUnlockedMessage codexUnlockedMessage = new CodexUnlockedMessage(lockID, text2);
-			return new MessageNotification(codexUnlockedMessage);
+			return new MessageNotification(new CodexUnlockedMessage(lockID, text2));
 		}
 		return null;
 	}
@@ -298,8 +292,7 @@ public class Unlocks : KMonoBehaviour
 				{
 					break;
 				}
-				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num9);
-				if (subWorldZoneType == SubWorld.ZoneType.Space)
+				if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num9) == SubWorld.ZoneType.Space)
 				{
 					this.Unlock("nearingsurface");
 					break;
@@ -317,11 +310,10 @@ public class Unlocks : KMonoBehaviour
 				{
 					break;
 				}
-				SubWorld.ZoneType subWorldZoneType2 = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num11);
-				if (subWorldZoneType2 == SubWorld.ZoneType.ToxicJungle && Grid.Element[num11].id == SimHashes.Magma)
+				if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num11) == SubWorld.ZoneType.ToxicJungle && Grid.Element[num11].id == SimHashes.Magma)
 				{
 					this.Unlock("nearingmagma");
-					break;
+					return;
 				}
 			}
 		}

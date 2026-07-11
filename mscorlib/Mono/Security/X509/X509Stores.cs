@@ -5,9 +5,10 @@ namespace Mono.Security.X509
 {
 	internal class X509Stores
 	{
-		internal X509Stores(string path)
+		internal X509Stores(string path, bool newFormat)
 		{
 			this._storePath = path;
+			this._newFormat = newFormat;
 		}
 
 		public X509Store Personal
@@ -17,7 +18,7 @@ namespace Mono.Security.X509
 				if (this._personal == null)
 				{
 					string text = Path.Combine(this._storePath, "My");
-					this._personal = new X509Store(text, false);
+					this._personal = new X509Store(text, false, false);
 				}
 				return this._personal;
 			}
@@ -30,7 +31,7 @@ namespace Mono.Security.X509
 				if (this._other == null)
 				{
 					string text = Path.Combine(this._storePath, "AddressBook");
-					this._other = new X509Store(text, false);
+					this._other = new X509Store(text, false, false);
 				}
 				return this._other;
 			}
@@ -43,7 +44,7 @@ namespace Mono.Security.X509
 				if (this._intermediate == null)
 				{
 					string text = Path.Combine(this._storePath, "CA");
-					this._intermediate = new X509Store(text, true);
+					this._intermediate = new X509Store(text, true, this._newFormat);
 				}
 				return this._intermediate;
 			}
@@ -56,7 +57,7 @@ namespace Mono.Security.X509
 				if (this._trusted == null)
 				{
 					string text = Path.Combine(this._storePath, "Trust");
-					this._trusted = new X509Store(text, true);
+					this._trusted = new X509Store(text, true, this._newFormat);
 				}
 				return this._trusted;
 			}
@@ -69,7 +70,7 @@ namespace Mono.Security.X509
 				if (this._untrusted == null)
 				{
 					string text = Path.Combine(this._storePath, "Disallowed");
-					this._untrusted = new X509Store(text, false);
+					this._untrusted = new X509Store(text, false, this._newFormat);
 				}
 				return this._untrusted;
 			}
@@ -115,10 +116,12 @@ namespace Mono.Security.X509
 			{
 				return null;
 			}
-			return new X509Store(text, true);
+			return new X509Store(text, true, false);
 		}
 
 		private string _storePath;
+
+		private bool _newFormat;
 
 		private X509Store _personal;
 

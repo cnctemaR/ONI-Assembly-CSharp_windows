@@ -5,16 +5,16 @@ namespace Satsuma.IO.GraphML
 {
 	public abstract class GraphMLProperty
 	{
-		protected GraphMLProperty()
-		{
-			this.Domain = PropertyDomain.All;
-		}
-
 		public string Name { get; set; }
 
 		public PropertyDomain Domain { get; set; }
 
 		public string Id { get; set; }
+
+		protected GraphMLProperty()
+		{
+			this.Domain = PropertyDomain.All;
+		}
 
 		protected static string DomainToGraphML(PropertyDomain domain)
 		{
@@ -33,28 +33,25 @@ namespace Satsuma.IO.GraphML
 
 		protected static PropertyDomain ParseDomain(string s)
 		{
-			if (s != null)
+			if (s == "node")
 			{
-				if (s == "node")
-				{
-					return PropertyDomain.Node;
-				}
-				if (s == "edge")
-				{
-					return PropertyDomain.Arc;
-				}
-				if (s == "graph")
-				{
-					return PropertyDomain.Graph;
-				}
+				return PropertyDomain.Node;
 			}
-			return PropertyDomain.All;
+			if (s == "edge")
+			{
+				return PropertyDomain.Arc;
+			}
+			if (!(s == "graph"))
+			{
+				return PropertyDomain.All;
+			}
+			return PropertyDomain.Graph;
 		}
 
 		protected virtual void LoadFromKeyElement(XElement xKey)
 		{
 			XAttribute xattribute = xKey.Attribute("attr.name");
-			this.Name = ((xattribute != null) ? xattribute.Value : null);
+			this.Name = ((xattribute == null) ? null : xattribute.Value);
 			this.Domain = GraphMLProperty.ParseDomain(xKey.Attribute("for").Value);
 			this.Id = xKey.Attribute("id").Value;
 			XElement xelement = Utils.ElementLocal(xKey, "default");

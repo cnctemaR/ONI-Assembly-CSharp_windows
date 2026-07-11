@@ -28,12 +28,19 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 			Type typeFromEvent = this.GetTypeFromEvent(nodeEvent, expectedType);
 			try
 			{
+				Func<IParser, Type, object> <>9__0;
 				foreach (INodeDeserializer nodeDeserializer in this.deserializers)
 				{
-					object obj;
-					if (nodeDeserializer.Deserialize(parser, typeFromEvent, (IParser r, Type t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out obj))
+					Type type = typeFromEvent;
+					Func<IParser, Type, object> func;
+					if ((func = <>9__0) == null)
 					{
-						return TypeConverter.ChangeType(obj, expectedType);
+						func = (<>9__0 = (IParser r, Type t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer));
+					}
+					object obj;
+					if (nodeDeserializer.Deserialize(parser, type, func, out obj))
+					{
+						return obj;
 					}
 				}
 			}
@@ -50,11 +57,14 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
 		private Type GetTypeFromEvent(NodeEvent nodeEvent, Type currentType)
 		{
-			foreach (INodeTypeResolver nodeTypeResolver in this.typeResolvers)
+			using (IEnumerator<INodeTypeResolver> enumerator = this.typeResolvers.GetEnumerator())
 			{
-				if (nodeTypeResolver.Resolve(nodeEvent, ref currentType))
+				while (enumerator.MoveNext())
 				{
-					break;
+					if (enumerator.Current.Resolve(nodeEvent, ref currentType))
+					{
+						break;
+					}
 				}
 			}
 			return currentType;

@@ -8,7 +8,7 @@ namespace System.Net
 		{
 		}
 
-		public WebRequest Create(global::System.Uri uri)
+		public WebRequest Create(Uri uri)
 		{
 			return new HttpWebRequest(uri);
 		}

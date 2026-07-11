@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace UnityEngine.VR
 {
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	[Obsolete("VRNodeState has been moved and renamed.  Use UnityEngine.XR.XRNodeState instead (UnityUpgradable) -> UnityEngine.XR.XRNodeState", true)]
 	public struct VRNodeState
 	{

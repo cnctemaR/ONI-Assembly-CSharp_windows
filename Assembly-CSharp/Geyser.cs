@@ -16,13 +16,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		}
 		this.emitter.emitRange = 2;
 		this.emitter.maxPressure = this.configuration.GetMaxPressure();
-		ElementEmitter elementEmitter = this.emitter;
-		float emitRate = this.configuration.GetEmitRate();
-		SimHashes element = this.configuration.GetElement();
-		float temperature = this.configuration.GetTemperature();
-		float num = (float)this.outputOffset.x;
-		float num2 = (float)this.outputOffset.y;
-		elementEmitter.outputElement = new ElementConverter.OutputElement(emitRate, element, temperature, false, false, num, num2, 1f, this.configuration.GetDiseaseIdx(), Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate()));
+		this.emitter.outputElement = new ElementConverter.OutputElement(this.configuration.GetEmitRate(), this.configuration.GetElement(), this.configuration.GetTemperature(), false, false, (float)this.outputOffset.x, (float)this.outputOffset.y, 1f, this.configuration.GetDiseaseIdx(), Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate()));
 		base.smi.StartSM();
 		Workable component = base.GetComponent<Studyable>();
 		if (component != null)
@@ -47,7 +41,11 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 			num3 = Mathf.Max(onDuration + offDuration - num2, 0f);
 			phase = Geyser.Phase.Off;
 		}
-		return (expectedPhase != Geyser.Phase.Any && phase != expectedPhase) ? 0f : num3;
+		if (expectedPhase != Geyser.Phase.Any && phase != expectedPhase)
+		{
+			return 0f;
+		}
+		return num3;
 	}
 
 	public float RemainingPhaseTimeFrom4(float onDuration, float pstDuration, float offDuration, float preDuration, float time, Geyser.Phase expectedPhase)
@@ -76,12 +74,16 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 			num3 = onDuration + pstDuration + offDuration + preDuration - num2;
 			phase = Geyser.Phase.Pre;
 		}
-		return (expectedPhase != Geyser.Phase.Any && phase != expectedPhase) ? 0f : num3;
+		if (expectedPhase != Geyser.Phase.Any && phase != expectedPhase)
+		{
+			return 0f;
+		}
+		return num3;
 	}
 
 	private float IdleDuration()
 	{
-		return this.configuration.GetOffDuration() * 0.85f;
+		return this.configuration.GetOffDuration() * 0.84999996f;
 	}
 
 	private float PreDuration()
@@ -142,8 +144,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Element element = ElementLoader.FindElementByHash(this.configuration.GetElement());
-		string text = element.tag.ProperName();
+		string text = ElementLoader.FindElementByHash(this.configuration.GetElement()).tag.ProperName();
 		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.GEYSER_PRODUCTION, text, GameUtil.GetFormattedMass(this.configuration.GetEmitRate(), GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), GameUtil.GetFormattedTemperature(this.configuration.GetTemperature(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.GEYSER_PRODUCTION, this.configuration.GetElement().ToString(), GameUtil.GetFormattedMass(this.configuration.GetEmitRate(), GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), GameUtil.GetFormattedTemperature(this.configuration.GetTemperature(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect, false));
 		if (this.configuration.GetDiseaseIdx() != 255)
 		{
@@ -153,7 +154,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		Studyable component = base.GetComponent<Studyable>();
 		if (component && !component.Studied)
 		{
-			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.GEYSER_YEAR_UNSTUDIED, new object[0]), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.GEYSER_YEAR_UNSTUDIED, new object[0]), Descriptor.DescriptorType.Effect, false));
+			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.GEYSER_YEAR_UNSTUDIED, Array.Empty<object>()), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.GEYSER_YEAR_UNSTUDIED, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
 		}
 		else
 		{

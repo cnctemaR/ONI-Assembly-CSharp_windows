@@ -5,17 +5,6 @@ using TUNING;
 
 public class Uprootable : Workable
 {
-	protected Uprootable()
-	{
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-		this.buttonLabel = UI.USERMENUACTIONS.UPROOT.NAME;
-		this.buttonTooltip = UI.USERMENUACTIONS.UPROOT.TOOLTIP;
-		this.cancelButtonLabel = UI.USERMENUACTIONS.CANCELUPROOT.NAME;
-		this.cancelButtonTooltip = UI.USERMENUACTIONS.CANCELUPROOT.TOOLTIP;
-		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
-		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
-	}
-
 	public bool IsMarkedForUproot
 	{
 		get
@@ -30,6 +19,17 @@ public class Uprootable : Workable
 		{
 			return this.planterStorage;
 		}
+	}
+
+	protected Uprootable()
+	{
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.buttonLabel = UI.USERMENUACTIONS.UPROOT.NAME;
+		this.buttonTooltip = UI.USERMENUACTIONS.UPROOT.TOOLTIP;
+		this.cancelButtonLabel = UI.USERMENUACTIONS.CANCELUPROOT.NAME;
+		this.cancelButtonTooltip = UI.USERMENUACTIONS.CANCELUPROOT.TOOLTIP;
+		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
 	}
 
 	protected override void OnPrefabInit()
@@ -184,25 +184,8 @@ public class Uprootable : Workable
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (this.chore != null)
-		{
-			string text = "action_uproot";
-			string text2 = this.cancelButtonLabel;
-			global::System.Action action = new global::System.Action(this.OnClickCancelUproot);
-			string text3 = this.cancelButtonTooltip;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_uproot";
-			string text2 = this.buttonLabel;
-			global::System.Action action = new global::System.Action(this.OnClickUproot);
-			string text = this.buttonTooltip;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore != null) ? new KIconButtonMenu.ButtonInfo("action_uproot", this.cancelButtonLabel, new global::System.Action(this.OnClickCancelUproot), global::Action.NumActions, null, null, null, this.cancelButtonTooltip, true) : new KIconButtonMenu.ButtonInfo("action_uproot", this.buttonLabel, new global::System.Action(this.OnClickUproot), global::Action.NumActions, null, null, null, this.buttonTooltip, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	protected override void OnCleanUp()

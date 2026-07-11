@@ -5,7 +5,7 @@ namespace UnityEngine.UI
 {
 	[AddComponentMenu("Layout/Layout Element", 140)]
 	[RequireComponent(typeof(RectTransform))]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	public class LayoutElement : UIBehaviour, ILayoutElement, ILayoutIgnorer
 	{
 		protected LayoutElement()

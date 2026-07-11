@@ -210,7 +210,7 @@ namespace FMODUnity
 		{
 			if (this.instance.isValid())
 			{
-				this.instance.stop((!this.AllowFadeout) ? STOP_MODE.IMMEDIATE : STOP_MODE.ALLOWFADEOUT);
+				this.instance.stop(this.AllowFadeout ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE);
 				this.instance.release();
 				this.instance.clearHandle();
 			}
@@ -236,13 +236,13 @@ namespace FMODUnity
 		}
 
 		[EventRef]
-		public string Event = string.Empty;
+		public string Event = "";
 
 		public EmitterGameEvent PlayEvent;
 
 		public EmitterGameEvent StopEvent;
 
-		public string CollisionTag = string.Empty;
+		public string CollisionTag = "";
 
 		public bool AllowFadeout = true;
 

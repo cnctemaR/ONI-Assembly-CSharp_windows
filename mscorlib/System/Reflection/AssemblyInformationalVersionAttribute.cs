@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class AssemblyInformationalVersionAttribute : Attribute
 	{
 		public AssemblyInformationalVersionAttribute(string informationalVersion)
 		{
-			this.name = informationalVersion;
+			this.m_informationalVersion = informationalVersion;
 		}
 
 		public string InformationalVersion
 		{
 			get
 			{
-				return this.name;
+				return this.m_informationalVersion;
 			}
 		}
 
-		private string name;
+		private string m_informationalVersion;
 	}
 }

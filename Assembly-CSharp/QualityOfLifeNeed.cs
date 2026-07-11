@@ -83,16 +83,15 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		{
 			this.stressPenalty.modifier.SetValue(Mathf.Min(num3 * num, num2));
 			base.SetModifier(this.stressPenalty);
+			return;
 		}
-		else if (totalValue > totalValue2)
+		if (totalValue > totalValue2)
 		{
 			this.stressBonus.modifier.SetValue(Mathf.Max(-num3 * -0.016666668f, -0.033333335f));
 			base.SetModifier(this.stressBonus);
+			return;
 		}
-		else
-		{
-			base.SetModifier(this.stressNeutral);
-		}
+		base.SetModifier(this.stressNeutral);
 	}
 
 	private void OnScheduleBlocksTick(object data)
@@ -106,11 +105,14 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		if (flag && !flag2)
 		{
 			int num = 0;
-			foreach (bool flag3 in this.breakBlocks)
+			using (List<bool>.Enumerator enumerator = this.breakBlocks.GetEnumerator())
 			{
-				if (flag3)
+				while (enumerator.MoveNext())
 				{
-					num++;
+					if (enumerator.Current)
+					{
+						num++;
+					}
 				}
 			}
 			this.ApplyBreakBonus(num);
@@ -122,8 +124,7 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		string breakBonus = QualityOfLifeNeed.GetBreakBonus(numBlocks);
 		if (breakBonus != null)
 		{
-			Effects component = base.GetComponent<Effects>();
-			component.Add(breakBonus, true);
+			base.GetComponent<Effects>().Add(breakBonus, true);
 		}
 	}
 

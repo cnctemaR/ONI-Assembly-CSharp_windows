@@ -147,7 +147,7 @@ namespace UnityEngine.UI
 									break;
 								}
 							}
-							return rectMask2D;
+							break;
 						}
 						rectMask2D = null;
 					}

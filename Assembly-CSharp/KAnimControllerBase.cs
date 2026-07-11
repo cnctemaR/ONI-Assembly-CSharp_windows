@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
 public abstract class KAnimControllerBase : MonoBehaviour
@@ -21,7 +20,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public KAnim.Build curBuild { get; protected set; }
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Color32> OnOverlayColourChanged;
 
 	public new bool enabled
@@ -40,11 +38,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			if (this._enabled)
 			{
 				this.Enable();
+				return;
 			}
-			else
-			{
-				this.Disable();
-			}
+			this.Disable();
 		}
 	}
 
@@ -120,13 +116,10 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KAnimControllerBase.KAnimEvent onAnimEnter;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KAnimControllerBase.KAnimEvent onAnimComplete;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<int> onLayerChanged;
 
 	public int previousFrame { get; protected set; }
@@ -304,7 +297,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		int num = -1;
 		if (this.curAnim != null)
 		{
-			num = this.curAnim.GetFrameIdx(this.mode, time) + ((!absolute) ? 0 : this.curAnim.firstFrameIdx);
+			num = this.curAnim.GetFrameIdx(this.mode, time) + (absolute ? this.curAnim.firstFrameIdx : 0);
 		}
 		return num;
 	}
@@ -343,19 +336,17 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public static string GetModeString(KAnim.PlayMode mode)
 	{
-		if (mode == KAnim.PlayMode.Once)
+		switch (mode)
 		{
-			return "Once";
-		}
-		if (mode == KAnim.PlayMode.Loop)
-		{
+		case KAnim.PlayMode.Loop:
 			return "Loop";
-		}
-		if (mode != KAnim.PlayMode.Paused)
-		{
+		case KAnim.PlayMode.Once:
+			return "Once";
+		case KAnim.PlayMode.Paused:
+			return "Paused";
+		default:
 			return "Unknown";
 		}
-		return "Paused";
 	}
 
 	public float GetPlaySpeed()
@@ -507,7 +498,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			speed = speed,
 			timeOffset = time_offset
 		});
-		this.mode = ((mode != KAnim.PlayMode.Paused) ? KAnim.PlayMode.Once : KAnim.PlayMode.Paused);
+		this.mode = ((mode == KAnim.PlayMode.Paused) ? KAnim.PlayMode.Paused : KAnim.PlayMode.Once);
 		if (this.aem != null)
 		{
 			this.aem.SetMode(this.eventManagerHandle, this.mode);
@@ -631,7 +622,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	public void AddAnimOverrides(KAnimFile kanim_file, float priority = 0f)
 	{
 		global::Debug.Assert(kanim_file != null);
-		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
+		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length != 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
 			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
@@ -649,7 +640,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	public void RemoveAnimOverrides(KAnimFile kanim_file)
 	{
 		global::Debug.Assert(kanim_file != null);
-		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
+		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length != 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
 			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
@@ -702,7 +693,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public bool HasAnimation(HashedString anim_name)
 	{
-		return this.anims.ContainsKey(anim_name);
+		return this.anims.ContainsKey(anim_name) || this.overrideAnims.ContainsKey(anim_name);
 	}
 
 	public void AddAnims(KAnimFile anim_file)
@@ -731,10 +722,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				animIndex = anim.index
 			};
 		}
-		if (this.usingNewSymbolOverrideSystem && data.buildIndex != -1 && data.build.symbols != null && data.build.symbols.Length > 0)
+		if (this.usingNewSymbolOverrideSystem && data.buildIndex != -1 && data.build.symbols != null && data.build.symbols.Length != 0)
 		{
-			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-			component.AddBuildOverride(anim_file.GetData(), -1);
+			base.GetComponent<SymbolOverrideController>().AddBuildOverride(anim_file.GetData(), -1);
 		}
 	}
 
@@ -746,7 +736,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 		set
 		{
-			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.");
+			DebugUtil.Assert(value.Length != 0, "Controller has no anim files.");
 			DebugUtil.Assert(value[0].buildBytes != null, "First anim file needs to be the build file.");
 			for (int i = 0; i < value.Length; i++)
 			{
@@ -770,7 +760,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.stopped = true;
 		if (this.onAnimComplete != null)
 		{
-			this.onAnimComplete((this.curAnim != null) ? this.curAnim.hash : HashedString.Invalid);
+			this.onAnimComplete((this.curAnim == null) ? HashedString.Invalid : this.curAnim.hash);
 		}
 		this.OnStop();
 	}
@@ -844,11 +834,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (this.onDestroySelf != null)
 		{
 			this.onDestroySelf(base.gameObject);
+			return;
 		}
-		else
-		{
-			Util.KDestroyGameObject(base.gameObject);
-		}
+		Util.KDestroyGameObject(base.gameObject);
 	}
 
 	[NonSerialized]

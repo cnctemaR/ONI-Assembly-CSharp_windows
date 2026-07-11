@@ -52,14 +52,13 @@ public abstract class StateMachine
 
 	public void CreateStates(object state_machine)
 	{
-		Type type = state_machine.GetType();
-		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-		foreach (FieldInfo fieldInfo in fields)
+		foreach (FieldInfo fieldInfo in state_machine.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
 		{
 			bool flag = false;
-			foreach (object obj in fieldInfo.GetCustomAttributes(false))
+			object[] customAttributes = fieldInfo.GetCustomAttributes(false);
+			for (int j = 0; j < customAttributes.Length; j++)
 			{
-				if (obj.GetType() == typeof(StateMachine.DoNotAutoCreate))
+				if (customAttributes[j].GetType() == typeof(StateMachine.DoNotAutoCreate))
 				{
 					flag = true;
 					break;
@@ -164,13 +163,6 @@ public abstract class StateMachine
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public abstract class Instance
 	{
-		public Instance(StateMachine state_machine, IStateMachineTarget master)
-		{
-			this.stateMachine = state_machine;
-			this.CreateParameterContexts();
-			this.log = new LoggerFSSSS(this.stateMachine.name, 35);
-		}
-
 		public abstract StateMachine.BaseState GetCurrentState();
 
 		public abstract void GoTo(StateMachine.BaseState state);
@@ -194,6 +186,13 @@ public abstract class StateMachine
 			this.parameterContexts = null;
 			this.dataTable = null;
 			this.updateTable = null;
+		}
+
+		public Instance(StateMachine state_machine, IStateMachineTarget master)
+		{
+			this.stateMachine = state_machine;
+			this.CreateParameterContexts();
+			this.log = new LoggerFSSSS(this.stateMachine.name, 35);
 		}
 
 		public bool IsRunning()
@@ -269,7 +268,7 @@ public abstract class StateMachine
 
 		public override string ToString()
 		{
-			string text = string.Empty;
+			string text = "";
 			if (this.GetCurrentState() != null)
 			{
 				text = this.GetCurrentState().name;

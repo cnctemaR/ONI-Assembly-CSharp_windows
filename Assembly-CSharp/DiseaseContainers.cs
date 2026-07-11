@@ -84,11 +84,10 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 		float num = 0f;
 		ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[element_idx];
 		num += elemGrowthInfo.CalculateDiseaseCountDelta(disease_count, mass, dt);
-		float num2 = Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives);
-		float num3 = Disease.HalfLifeToGrowthRate(num2, dt);
+		float num2 = Disease.HalfLifeToGrowthRate(Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives), dt);
+		num += (float)disease_count * num2 - (float)disease_count;
+		float num3 = Mathf.Pow(tags_multiplier_base, dt);
 		num += (float)disease_count * num3 - (float)disease_count;
-		float num4 = Mathf.Pow(tags_multiplier_base, dt);
-		num += (float)disease_count * num4 - (float)disease_count;
 		if (Grid.IsValidCell(environment_cell))
 		{
 			byte b = Grid.ElementIdx[environment_cell];
@@ -144,18 +143,16 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 		{
 			disease_idx = (int)header.diseaseIdx;
 			disease_count = header.diseaseCount;
+			return;
 		}
-		else
+		disease_idx = 255;
+		disease_count = 0;
+		HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(payload.visualDiseaseProvider);
+		if (handle != HandleVector<int>.InvalidHandle)
 		{
-			disease_idx = 255;
-			disease_count = 0;
-			HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(payload.visualDiseaseProvider);
-			if (handle != HandleVector<int>.InvalidHandle)
-			{
-				DiseaseHeader header2 = GameComps.DiseaseContainers.GetHeader(handle);
-				disease_idx = (int)header2.diseaseIdx;
-				disease_count = header2.diseaseCount;
-			}
+			DiseaseHeader header2 = GameComps.DiseaseContainers.GetHeader(handle);
+			disease_idx = (int)header2.diseaseIdx;
+			disease_count = header2.diseaseCount;
 		}
 	}
 
@@ -186,8 +183,7 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 					}
 					if (diseaseContainer.isContainer)
 					{
-						Storage component = diseaseHeader.primaryElement.GetComponent<Storage>();
-						List<GameObject> items = component.items;
+						List<GameObject> items = diseaseHeader.primaryElement.GetComponent<Storage>().items;
 						for (int j = 0; j < items.Count; j++)
 						{
 							GameObject gameObject = items[j];

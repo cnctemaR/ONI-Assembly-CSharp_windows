@@ -47,35 +47,28 @@ public class KRectStretcher : KMonoBehaviour
 		Vector2 zero = Vector2.zero;
 		if (!this.PreserveAspectRatio)
 		{
-			zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
+			zero = new Vector2(this.StretchX ? vector.x : this.rect.sizeDelta.x, this.StretchY ? vector.y : this.rect.sizeDelta.y);
 		}
 		else
 		{
-			KRectStretcher.aspectFitOption aspectFitOption = this.AspectFitOption;
-			if (aspectFitOption != KRectStretcher.aspectFitOption.WidthDictatesHeight)
+			switch (this.AspectFitOption)
 			{
-				if (aspectFitOption != KRectStretcher.aspectFitOption.HeightDictatesWidth)
+			case KRectStretcher.aspectFitOption.WidthDictatesHeight:
+				zero = new Vector2(this.StretchX ? vector.x : this.rect.sizeDelta.x, this.StretchY ? (vector.x / this.aspectRatioToPreserve) : this.rect.sizeDelta.y);
+				break;
+			case KRectStretcher.aspectFitOption.HeightDictatesWidth:
+				zero = new Vector2(this.StretchX ? (vector.y * this.aspectRatioToPreserve) : this.rect.sizeDelta.x, this.StretchY ? vector.y : this.rect.sizeDelta.y);
+				break;
+			case KRectStretcher.aspectFitOption.EnvelopeParent:
+				if (rectTransform.sizeDelta.x / rectTransform.sizeDelta.y > this.aspectRatioToPreserve)
 				{
-					if (aspectFitOption == KRectStretcher.aspectFitOption.EnvelopeParent)
-					{
-						if (rectTransform.sizeDelta.x / rectTransform.sizeDelta.y > this.aspectRatioToPreserve)
-						{
-							zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : (vector.x / this.aspectRatioToPreserve));
-						}
-						else
-						{
-							zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : (vector.y * this.aspectRatioToPreserve), (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
-						}
-					}
+					zero = new Vector2(this.StretchX ? vector.x : this.rect.sizeDelta.x, this.StretchY ? (vector.x / this.aspectRatioToPreserve) : this.rect.sizeDelta.y);
 				}
 				else
 				{
-					zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : (vector.y * this.aspectRatioToPreserve), (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
+					zero = new Vector2(this.StretchX ? (vector.y * this.aspectRatioToPreserve) : this.rect.sizeDelta.x, this.StretchY ? vector.y : this.rect.sizeDelta.y);
 				}
-			}
-			else
-			{
-				zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : (vector.x / this.aspectRatioToPreserve));
+				break;
 			}
 		}
 		if (this.StretchX)

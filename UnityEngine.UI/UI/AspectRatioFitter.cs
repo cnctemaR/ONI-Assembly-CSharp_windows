@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("Layout/Aspect Ratio Fitter", 142)]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	[DisallowMultipleComponent]
 	public class AspectRatioFitter : UIBehaviour, ILayoutSelfController, ILayoutController
@@ -58,7 +58,7 @@ namespace UnityEngine.UI
 		protected override void OnEnable()
 		{
 			base.OnEnable();
-			this.m_DelayedSetDirty = true;
+			this.SetDirty();
 		}
 
 		protected override void OnDisable()

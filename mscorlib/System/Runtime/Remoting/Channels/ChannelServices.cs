@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Contexts;
@@ -30,8 +31,7 @@ namespace System.Runtime.Remoting.Channels
 			{
 				foreach (object obj in ChannelServices.registeredChannels)
 				{
-					IChannel channel = (IChannel)obj;
-					IChannelSender channelSender = channel as IChannelSender;
+					IChannelSender channelSender = ((IChannel)obj) as IChannelSender;
 					if (channelSender != null)
 					{
 						IMessageSink messageSink = ChannelServices.CreateClientChannelSinkChain(channelSender, url, array, out objectUri);
@@ -92,16 +92,16 @@ namespace System.Runtime.Remoting.Channels
 				IChannel[] array;
 				lock (syncRoot)
 				{
-					ArrayList arrayList = new ArrayList();
+					List<IChannel> list = new List<IChannel>();
 					for (int i = 0; i < ChannelServices.registeredChannels.Count; i++)
 					{
 						IChannel channel = (IChannel)ChannelServices.registeredChannels[i];
 						if (!(channel is CrossAppDomainChannel))
 						{
-							arrayList.Add(channel);
+							list.Add(channel);
 						}
 					}
-					array = (IChannel[])arrayList.ToArray(typeof(IChannel));
+					array = list.ToArray();
 				}
 				return array;
 			}
@@ -157,9 +157,8 @@ namespace System.Runtime.Remoting.Channels
 			{
 				throw new ArgumentException("obj must be a proxy", "obj");
 			}
-			ClientIdentity clientIdentity = (ClientIdentity)RemotingServices.GetRealProxy(obj).ObjectIdentity;
-			IMessageSink messageSink = clientIdentity.ChannelSink;
-			ArrayList arrayList = new ArrayList();
+			IMessageSink messageSink = ((ClientIdentity)RemotingServices.GetRealProxy(obj).ObjectIdentity).ChannelSink;
+			List<IDictionary> list = new List<IDictionary>();
 			while (messageSink != null && !(messageSink is IClientChannelSink))
 			{
 				messageSink = messageSink.NextSink;
@@ -170,10 +169,9 @@ namespace System.Runtime.Remoting.Channels
 			}
 			for (IClientChannelSink clientChannelSink = messageSink as IClientChannelSink; clientChannelSink != null; clientChannelSink = clientChannelSink.NextChannelSink)
 			{
-				arrayList.Add(clientChannelSink.Properties);
+				list.Add(clientChannelSink.Properties);
 			}
-			IDictionary[] array = (IDictionary[])arrayList.ToArray(typeof(IDictionary[]));
-			return new AggregateDictionary(array);
+			return new AggregateDictionary(list.ToArray());
 		}
 
 		public static string[] GetUrlsForObject(MarshalByRefObject obj)
@@ -183,7 +181,7 @@ namespace System.Runtime.Remoting.Channels
 			{
 				return new string[0];
 			}
-			ArrayList arrayList = new ArrayList();
+			List<string> list = new List<string>();
 			object syncRoot = ChannelServices.registeredChannels.SyncRoot;
 			lock (syncRoot)
 			{
@@ -194,12 +192,12 @@ namespace System.Runtime.Remoting.Channels
 						IChannelReceiver channelReceiver = obj2 as IChannelReceiver;
 						if (channelReceiver != null)
 						{
-							arrayList.AddRange(channelReceiver.GetUrlsForUri(objectUri));
+							list.AddRange(channelReceiver.GetUrlsForUri(objectUri));
 						}
 					}
 				}
 			}
-			return (string[])arrayList.ToArray(typeof(string));
+			return list.ToArray();
 		}
 
 		[Obsolete("Use RegisterChannel(IChannel,Boolean)")]
@@ -230,7 +228,7 @@ namespace System.Runtime.Remoting.Channels
 				for (int i = 0; i < ChannelServices.registeredChannels.Count; i++)
 				{
 					IChannel channel = (IChannel)ChannelServices.registeredChannels[i];
-					if (channel.ChannelName == chnl.ChannelName && chnl.ChannelName != string.Empty)
+					if (channel.ChannelName == chnl.ChannelName && chnl.ChannelName != "")
 					{
 						throw new RemotingException("Channel " + channel.ChannelName + " already registered");
 					}
@@ -261,15 +259,13 @@ namespace System.Runtime.Remoting.Channels
 			IClientChannelSinkProvider clientChannelSinkProvider = null;
 			for (int i = channel.ServerProviders.Count - 1; i >= 0; i--)
 			{
-				ProviderData providerData = channel.ServerProviders[i] as ProviderData;
-				IServerChannelSinkProvider serverChannelSinkProvider2 = (IServerChannelSinkProvider)ChannelServices.CreateProvider(providerData);
+				IServerChannelSinkProvider serverChannelSinkProvider2 = (IServerChannelSinkProvider)ChannelServices.CreateProvider(channel.ServerProviders[i] as ProviderData);
 				serverChannelSinkProvider2.Next = serverChannelSinkProvider;
 				serverChannelSinkProvider = serverChannelSinkProvider2;
 			}
 			for (int j = channel.ClientProviders.Count - 1; j >= 0; j--)
 			{
-				ProviderData providerData2 = channel.ClientProviders[j] as ProviderData;
-				IClientChannelSinkProvider clientChannelSinkProvider2 = (IClientChannelSinkProvider)ChannelServices.CreateProvider(providerData2);
+				IClientChannelSinkProvider clientChannelSinkProvider2 = (IClientChannelSinkProvider)ChannelServices.CreateProvider(channel.ClientProviders[j] as ProviderData);
 				clientChannelSinkProvider2.Next = clientChannelSinkProvider;
 				clientChannelSinkProvider = clientChannelSinkProvider2;
 			}
@@ -409,8 +405,7 @@ namespace System.Runtime.Remoting.Channels
 			IMethodReturnMessage methodReturnMessage = retMsg as IMethodReturnMessage;
 			if (methodReturnMessage != null && methodReturnMessage.Exception != null && RemotingConfiguration.CustomErrorsEnabled(ChannelServices.IsLocalCall(callMsg)))
 			{
-				Exception ex = new Exception("Server encountered an internal error. For more information, turn off customErrors in the server's .config file.");
-				retMsg = new MethodResponse(ex, (IMethodCallMessage)callMsg);
+				retMsg = new MethodResponse(new Exception("Server encountered an internal error. For more information, turn off customErrors in the server's .config file."), (IMethodCallMessage)callMsg);
 			}
 			return retMsg;
 		}
@@ -448,7 +443,7 @@ namespace System.Runtime.Remoting.Channels
 
 		internal static object[] GetCurrentChannelInfo()
 		{
-			ArrayList arrayList = new ArrayList();
+			List<object> list = new List<object>();
 			object syncRoot = ChannelServices.registeredChannels.SyncRoot;
 			lock (syncRoot)
 			{
@@ -460,12 +455,12 @@ namespace System.Runtime.Remoting.Channels
 						object channelData = channelReceiver.ChannelData;
 						if (channelData != null)
 						{
-							arrayList.Add(channelData);
+							list.Add(channelData);
 						}
 					}
 				}
 			}
-			return arrayList.ToArray();
+			return list.ToArray();
 		}
 
 		private static ArrayList registeredChannels = new ArrayList();

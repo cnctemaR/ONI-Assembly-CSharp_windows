@@ -6,17 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Gradient used for animating colors.</para>
-	/// </summary>
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Gradient.bindings.h")]
+	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
-	public class Gradient
+	public class Gradient : IEquatable<Gradient>
 	{
-		/// <summary>
-		///   <para>Create a new Gradient object.</para>
-		/// </summary>
 		[RequiredByNativeCode]
 		public Gradient()
 		{
@@ -31,15 +25,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Cleanup();
 
+		[FreeFunction("Gradient_Bindings::Internal_Equals", IsThreadSafe = true, HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool Internal_Equals(IntPtr other);
+
 		~Gradient()
 		{
 			this.Cleanup();
 		}
 
-		/// <summary>
-		///   <para>Calculate color at a given time.</para>
-		/// </summary>
-		/// <param name="time">Time of the key (0 - 1).</param>
 		[FreeFunction(Name = "Gradient_Bindings::Evaluate", IsThreadSafe = true, HasExplicitThis = true)]
 		public Color Evaluate(float time)
 		{
@@ -48,9 +42,6 @@ namespace UnityEngine
 			return color;
 		}
 
-		/// <summary>
-		///   <para>All color keys defined in the gradient.</para>
-		/// </summary>
 		public extern GradientColorKey[] colorKeys
 		{
 			[FreeFunction("Gradient_Bindings::GetColorKeys", IsThreadSafe = true, HasExplicitThis = true)]
@@ -61,9 +52,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>All alpha keys defined in the gradient.</para>
-		/// </summary>
 		public extern GradientAlphaKey[] alphaKeys
 		{
 			[FreeFunction("Gradient_Bindings::GetAlphaKeys", IsThreadSafe = true, HasExplicitThis = true)]
@@ -74,9 +62,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Control how the gradient is evaluated.</para>
-		/// </summary>
 		public extern GradientMode mode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -85,14 +70,24 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Setup Gradient with an array of color keys and alpha keys.</para>
-		/// </summary>
-		/// <param name="colorKeys">Color keys of the gradient (maximum 8 color keys).</param>
-		/// <param name="alphaKeys">Alpha keys of the gradient (maximum 8 alpha keys).</param>
 		[FreeFunction(Name = "Gradient_Bindings::SetKeys", IsThreadSafe = true, HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetKeys(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys);
+
+		public override bool Equals(object o)
+		{
+			return !object.ReferenceEquals(null, o) && (object.ReferenceEquals(this, o) || (o.GetType() == base.GetType() && this.Equals((Gradient)o)));
+		}
+
+		public bool Equals(Gradient other)
+		{
+			return !object.ReferenceEquals(null, other) && (object.ReferenceEquals(this, other) || this.m_Ptr.Equals(other.m_Ptr) || this.Internal_Equals(other.m_Ptr));
+		}
+
+		public override int GetHashCode()
+		{
+			return this.m_Ptr.GetHashCode();
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Evaluate_Injected(float time, out Color ret);

@@ -5,16 +5,13 @@ namespace System.Data
 	public enum DbType
 	{
 		AnsiString,
-		AnsiStringFixedLength = 22,
-		Binary = 1,
-		Boolean = 3,
-		Byte = 2,
-		Currency = 4,
+		Binary,
+		Byte,
+		Boolean,
+		Currency,
 		Date,
 		DateTime,
-		DateTime2 = 26,
-		DateTimeOffset,
-		Decimal = 7,
+		Decimal,
 		Double,
 		Guid,
 		Int16,
@@ -24,12 +21,15 @@ namespace System.Data
 		SByte,
 		Single,
 		String,
-		StringFixedLength = 23,
-		Time = 17,
+		Time,
 		UInt16,
 		UInt32,
 		UInt64,
 		VarNumeric,
-		Xml = 25
+		AnsiStringFixedLength,
+		StringFixedLength,
+		Xml = 25,
+		DateTime2,
+		DateTimeOffset
 	}
 }

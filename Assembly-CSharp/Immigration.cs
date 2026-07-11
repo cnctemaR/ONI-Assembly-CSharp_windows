@@ -198,7 +198,7 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		bool advancedPersonalPriorities = Game.Instance.advancedPersonalPriorities;
 		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
-			this.defaultPersonalPriorities[choreGroup.IdHash] = ((!advancedPersonalPriorities) ? 3 : choreGroup.DefaultPersonalPriority);
+			this.defaultPersonalPriorities[choreGroup.IdHash] = (advancedPersonalPriorities ? choreGroup.DefaultPersonalPriority : 3);
 		}
 	}
 

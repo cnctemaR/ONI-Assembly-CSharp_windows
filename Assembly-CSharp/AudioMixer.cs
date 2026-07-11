@@ -108,11 +108,9 @@ public class AudioMixer
 		if (this.activeSnapshots.TryGetValue(snapshot_name, out eventInstance))
 		{
 			eventInstance.setParameterValue(parameter_name, parameter_value);
+			return;
 		}
-		else
-		{
-			this.Log(string.Concat(new object[] { "Tried to set [", parameter_name, "] to [", parameter_value, "] but [", snapshot_name, "] is not active." }));
-		}
+		this.Log(string.Concat(new object[] { "Tried to set [", parameter_name, "] to [", parameter_value, "] but [", snapshot_name, "] is not active." }));
 	}
 
 	public void StartPersistentSnapshots()
@@ -197,8 +195,7 @@ public class AudioMixer
 				}
 				else
 				{
-					Worker component2 = Components.LiveMinionIdentities[i].GetComponent<Worker>();
-					StaminaMonitor.Instance smi = component2.GetSMI<StaminaMonitor.Instance>();
+					StaminaMonitor.Instance smi = Components.LiveMinionIdentities[i].GetComponent<Worker>().GetSMI<StaminaMonitor.Instance>();
 					if (smi != null && smi.IsSleeping())
 					{
 						num3++;

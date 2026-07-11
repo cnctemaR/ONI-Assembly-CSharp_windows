@@ -39,7 +39,7 @@ namespace KMod
 					file_system_items.Add(new FileSystemItem
 					{
 						name = text,
-						type = ((1 >= array.Length) ? FileSystemItem.ItemType.File : FileSystemItem.ItemType.Directory)
+						type = ((1 < array.Length) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
 					});
 				}
 			}

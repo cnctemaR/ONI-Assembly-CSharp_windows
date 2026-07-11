@@ -102,13 +102,7 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 				if (onComplete != null)
 				{
 					HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(onComplete, false));
-					int num2 = num;
-					SimHashes simHashes = SimHashes.Vacuum;
-					CellElementEvent simCellOccupierDestroySelf = CellEventLogger.Instance.SimCellOccupierDestroySelf;
-					float num3 = 0f;
-					float num4 = -1f;
-					int index = handle2.index;
-					SimMessages.ReplaceElement(num2, simHashes, simCellOccupierDestroySelf, num3, num4, byte.MaxValue, 0, index);
+					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, byte.MaxValue, 0, handle2.index);
 				}
 				else
 				{

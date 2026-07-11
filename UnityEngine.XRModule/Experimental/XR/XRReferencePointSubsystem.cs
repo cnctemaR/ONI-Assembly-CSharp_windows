@@ -7,21 +7,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.XR
 {
-	/// <summary>
-	///   <para>Provides methods and properties that allow for querying, creating, and removing of reference points. These reference points are cues to the XRSessionSubsystem that indicate areas of interest in the environment which helps assure that tracking of these points remains accurate.</para>
-	/// </summary>
-	[NativeConditional("ENABLE_XR")]
-	[NativeHeader("Modules/XR/Subsystems/ReferencePoints/XRReferencePointSubsystem.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/XR/Subsystems/ReferencePoints/XRReferencePointSubsystem.h")]
 	[NativeHeader("Modules/XR/XRPrefix.h")]
-	public class XRReferencePointSubsystem : Subsystem<XRReferencePointSubsystemDescriptor>
+	[NativeConditional("ENABLE_XR")]
+	public class XRReferencePointSubsystem : IntegratedSubsystem<XRReferencePointSubsystemDescriptor>
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<ReferencePointUpdatedEventArgs> ReferencePointUpdated;
 
-		/// <summary>
-		///   <para>The frame during which the reference points were last updated.</para>
-		/// </summary>
 		public extern int LastUpdatedFrame
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -38,13 +32,6 @@ namespace UnityEngine.Experimental.XR
 			return this.TryAddReferencePoint(pose.position, pose.rotation, out referencePointId);
 		}
 
-		/// <summary>
-		///   <para>Attempt to remove a ReferencePoint getting tracked by the device.</para>
-		/// </summary>
-		/// <param name="referencePointId">ID of the ReferencePoint you wish to remove so the device no longer tries to track it.</param>
-		/// <returns>
-		///   <para>If the ReferencePoint was removed successfully, this method returns true. Otherwise, it returns false.</para>
-		/// </returns>
 		public bool TryRemoveReferencePoint(TrackableId referencePointId)
 		{
 			return this.TryRemoveReferencePoint_Injected(ref referencePointId);

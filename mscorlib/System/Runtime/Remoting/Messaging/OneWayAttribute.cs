@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[AttributeUsage(AttributeTargets.Method)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public class OneWayAttribute : Attribute
 	{
 	}

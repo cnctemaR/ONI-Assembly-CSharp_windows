@@ -473,7 +473,7 @@ namespace STRINGS
 
 				public static LocString STATUS = "Recovering breath";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "";
 			}
 
 			public class MOVETOQUARANTINE
@@ -3942,7 +3942,6 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					string.Empty,
 					UI.PRE_KEYWORD,
 					"Metabolism",
 					UI.PST_KEYWORD,
@@ -4571,6 +4570,13 @@ namespace STRINGS
 				public static LocString NAME = "Played Video Games";
 
 				public static LocString TOOLTIP = "This Duplicant recently got to play some fun video games!";
+			}
+
+			public class DANCING
+			{
+				public static LocString NAME = "Dancing";
+
+				public static LocString TOOLTIP = "This Duplicant is showing off their best moves.";
 			}
 
 			public class DANCED
@@ -5235,9 +5241,9 @@ namespace STRINGS
 
 			public class BANHI
 			{
-				public static LocString NAME = string.Empty;
+				public static LocString NAME = "";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class STINKY
@@ -6781,21 +6787,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stamina";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class TOXICITYDELTA
 			{
 				public static LocString NAME = "Toxicity";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class IMMUNELEVELDELTA
 			{
 				public static LocString NAME = "Immunity";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class TOILETEFFICIENCY
@@ -6839,14 +6845,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Underwater Movement";
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Determines a Duplicant's runspeed when submerged in ",
-					UI.PRE_KEYWORD,
-					"Liquid",
-					UI.PST_KEYWORD,
-					string.Empty
-				});
+				public static LocString DESC = ("Determines a Duplicant's runspeed when submerged in " + UI.PRE_KEYWORD + "Liquid" + UI.PST_KEYWORD) ?? "";
 			}
 
 			public class OVERHEATTEMPERATURE
@@ -6907,14 +6906,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Incubation Rate";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class HAPPINESS
 			{
 				public static LocString NAME = "Happiness";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class SCALEGROWTHDELTA
@@ -6935,7 +6934,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Viability Loss Rate";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 		}
 

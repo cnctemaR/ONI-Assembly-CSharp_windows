@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security;
 
 namespace System.Runtime.Remoting.Channels
 {
@@ -17,6 +18,7 @@ namespace System.Runtime.Remoting.Channels
 			this._replySink = replySink;
 		}
 
+		[SecurityCritical]
 		public void AsyncProcessResponse(ITransportHeaders headers, Stream stream)
 		{
 			if (this._sinkStack == null)
@@ -28,11 +30,13 @@ namespace System.Runtime.Remoting.Channels
 			((IClientChannelSink)sinkStack.Sink).AsyncProcessResponse(this, sinkStack.State, headers, stream);
 		}
 
+		[SecurityCritical]
 		public void DispatchException(Exception e)
 		{
 			this.DispatchReplyMessage(new ReturnMessage(e, null));
 		}
 
+		[SecurityCritical]
 		public void DispatchReplyMessage(IMessage msg)
 		{
 			if (this._replySink != null)
@@ -41,6 +45,7 @@ namespace System.Runtime.Remoting.Channels
 			}
 		}
 
+		[SecurityCritical]
 		public object Pop(IClientChannelSink sink)
 		{
 			while (this._sinkStack != null)
@@ -55,6 +60,7 @@ namespace System.Runtime.Remoting.Channels
 			throw new RemotingException("The current sink stack is empty, or the specified sink was never pushed onto the current stack");
 		}
 
+		[SecurityCritical]
 		public void Push(IClientChannelSink sink, object state)
 		{
 			this._sinkStack = new ChanelSinkStackEntry(sink, state, this._sinkStack);

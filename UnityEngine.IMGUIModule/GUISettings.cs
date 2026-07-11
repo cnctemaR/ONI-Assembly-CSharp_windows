@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>General settings for how the GUI behaves.</para>
-	/// </summary>
 	[NativeHeader("Modules/IMGUI/GUISkin.bindings.h")]
 	[Serializable]
 	public sealed class GUISettings
@@ -14,9 +11,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float Internal_GetCursorFlashSpeed();
 
-		/// <summary>
-		///   <para>Should double-clicking select words in text fields.</para>
-		/// </summary>
 		public bool doubleClickSelectsWord
 		{
 			get
@@ -29,9 +23,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Should triple-clicking select whole text in text fields.</para>
-		/// </summary>
 		public bool tripleClickSelectsLine
 		{
 			get
@@ -44,9 +35,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The color of the cursor in text fields.</para>
-		/// </summary>
 		public Color cursorColor
 		{
 			get
@@ -59,9 +47,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The speed of text field cursor flashes.</para>
-		/// </summary>
 		public float cursorFlashSpeed
 		{
 			get
@@ -83,9 +68,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The color of the selection rect in text fields.</para>
-		/// </summary>
 		public Color selectionColor
 		{
 			get

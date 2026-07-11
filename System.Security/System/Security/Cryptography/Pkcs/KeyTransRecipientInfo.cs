@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity;
 
 namespace System.Security.Cryptography.Pkcs
 {
@@ -43,6 +44,11 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				return this._version;
 			}
+		}
+
+		internal KeyTransRecipientInfo()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private byte[] _encryptedKey;

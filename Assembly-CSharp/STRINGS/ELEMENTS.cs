@@ -51,14 +51,7 @@ namespace STRINGS
 
 				public static LocString DECOR = "This material will add <b>{0}</b> to the finished building's " + UI.PRE_KEYWORD + "Decor" + UI.PST_KEYWORD;
 
-				public static LocString OVERHEATTEMPERATURE = string.Concat(new string[]
-				{
-					"This material will add <b>{0}</b> to the finished building's ",
-					UI.PRE_KEYWORD,
-					"Overheat Temperature",
-					UI.PST_KEYWORD,
-					string.Empty
-				});
+				public static LocString OVERHEATTEMPERATURE = ("This material will add <b>{0}</b> to the finished building's " + UI.PRE_KEYWORD + "Overheat Temperature" + UI.PST_KEYWORD) ?? "";
 
 				public static LocString HIGH_THERMAL_CONDUCTIVITY = string.Concat(new string[]
 				{
@@ -149,7 +142,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Aerogel", "AEROGEL");
 
-			public static LocString DESC = string.Empty;
+			public static LocString DESC = "";
 		}
 
 		public class ALGAE
@@ -1212,7 +1205,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Sand Cement", "SANDCEMENT");
 
-			public static LocString DESC = string.Empty;
+			public static LocString DESC = "";
 		}
 
 		public class SANDSTONE
@@ -1275,7 +1268,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Crude Oil", "SOLIDCRUDEOIL");
 
-			public static LocString DESC = string.Empty;
+			public static LocString DESC = "";
 		}
 
 		public class SOLIDHYDROGEN

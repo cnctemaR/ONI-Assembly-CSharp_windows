@@ -52,7 +52,8 @@ public class InspectSaveScreen : KModalScreen
 		this.currentPath = path;
 		List<string> list = (from filename in Directory.GetFiles(path)
 			where Path.GetExtension(filename).ToLower() == ".sav"
-			select filename).OrderByDescending<string, global::System.DateTime>(new Func<string, global::System.DateTime>(File.GetLastWriteTime)).ToList<string>();
+			orderby File.GetLastWriteTime(filename) descending
+			select filename).ToList<string>();
 		string text = list[0];
 		if (File.Exists(text))
 		{
@@ -96,9 +97,9 @@ public class InspectSaveScreen : KModalScreen
 		this.ConfirmDoAction(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, delegate
 		{
 			string[] files = Directory.GetFiles(this.currentPath);
-			foreach (string text in files)
+			for (int i = 0; i < files.Length; i++)
 			{
-				File.Delete(text);
+				File.Delete(files[i]);
 			}
 			Directory.Delete(this.currentPath);
 			this.CloseScreen();
@@ -133,11 +134,9 @@ public class InspectSaveScreen : KModalScreen
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.CloseScreen();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	[SerializeField]
@@ -161,5 +160,5 @@ public class InspectSaveScreen : KModalScreen
 
 	private ConfirmDialogScreen confirmScreen;
 
-	private string currentPath = string.Empty;
+	private string currentPath = "";
 }

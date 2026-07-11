@@ -3,21 +3,8 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Values for the blend state.</para>
-	/// </summary>
 	public struct RenderTargetBlendState
 	{
-		/// <summary>
-		///   <para>Creates a new blend state with the given values.</para>
-		/// </summary>
-		/// <param name="writeMask">Specifies which color components will get written into the target framebuffer.</param>
-		/// <param name="sourceColorBlendMode">Blend factor used for the color (RGB) channel of the source.</param>
-		/// <param name="destinationColorBlendMode">Blend factor used for the color (RGB) channel of the destination.</param>
-		/// <param name="sourceAlphaBlendMode">Blend factor used for the alpha (A) channel of the source.</param>
-		/// <param name="destinationAlphaBlendMode">Blend factor used for the alpha (A) channel of the destination.</param>
-		/// <param name="colorBlendOperation">Operation used for blending the color (RGB) channel.</param>
-		/// <param name="alphaBlendOperation">Operation used for blending the alpha (A) channel.</param>
 		public RenderTargetBlendState(ColorWriteMask writeMask = ColorWriteMask.All, BlendMode sourceColorBlendMode = BlendMode.One, BlendMode destinationColorBlendMode = BlendMode.Zero, BlendMode sourceAlphaBlendMode = BlendMode.One, BlendMode destinationAlphaBlendMode = BlendMode.Zero, BlendOp colorBlendOperation = BlendOp.Add, BlendOp alphaBlendOperation = BlendOp.Add)
 		{
 			this.m_WriteMask = (byte)writeMask;
@@ -30,9 +17,6 @@ namespace UnityEngine.Experimental.Rendering
 			this.m_Padding = 0;
 		}
 
-		/// <summary>
-		///   <para>Default values for the blend state.</para>
-		/// </summary>
 		public static RenderTargetBlendState Default
 		{
 			get
@@ -41,9 +25,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies which color components will get written into the target framebuffer.</para>
-		/// </summary>
 		public ColorWriteMask writeMask
 		{
 			get
@@ -56,9 +37,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend factor used for the color (RGB) channel of the source.</para>
-		/// </summary>
 		public BlendMode sourceColorBlendMode
 		{
 			get
@@ -71,9 +49,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend factor used for the color (RGB) channel of the destination.</para>
-		/// </summary>
 		public BlendMode destinationColorBlendMode
 		{
 			get
@@ -86,9 +61,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend factor used for the alpha (A) channel of the source.</para>
-		/// </summary>
 		public BlendMode sourceAlphaBlendMode
 		{
 			get
@@ -101,9 +73,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend factor used for the alpha (A) channel of the destination.</para>
-		/// </summary>
 		public BlendMode destinationAlphaBlendMode
 		{
 			get
@@ -116,9 +85,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Operation used for blending the color (RGB) channel.</para>
-		/// </summary>
 		public BlendOp colorBlendOperation
 		{
 			get
@@ -131,9 +97,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Operation used for blending the alpha (A) channel.</para>
-		/// </summary>
 		public BlendOp alphaBlendOperation
 		{
 			get

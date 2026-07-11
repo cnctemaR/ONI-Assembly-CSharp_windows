@@ -50,9 +50,9 @@ namespace ProcGen
 				{
 					this.world.globalFeatureTemplates[keyValuePair.Key] = 0;
 				}
-				Dictionary<string, int> dictionary;
-				string key;
-				(dictionary = this.world.globalFeatureTemplates)[key = keyValuePair.Key] = dictionary[key] + keyValuePair.Value;
+				Dictionary<string, int> dictionary = this.world.globalFeatureTemplates;
+				string text = keyValuePair.Key;
+				dictionary[text] += keyValuePair.Value;
 			}
 			foreach (KeyValuePair<string, int> keyValuePair2 in trait.globalFeatureMods)
 			{
@@ -60,9 +60,9 @@ namespace ProcGen
 				{
 					this.world.globalFeatures[keyValuePair2.Key] = 0;
 				}
-				Dictionary<string, int> dictionary;
-				string key2;
-				(dictionary = this.world.globalFeatures)[key2 = keyValuePair2.Key] = dictionary[key2] + keyValuePair2.Value;
+				Dictionary<string, int> dictionary = this.world.globalFeatures;
+				string text = keyValuePair2.Key;
+				dictionary[text] += keyValuePair2.Value;
 			}
 			foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair3 in this.biomes.BiomeBackgroundElementBandConfigurations)
 			{

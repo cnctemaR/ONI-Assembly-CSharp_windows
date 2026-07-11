@@ -43,16 +43,18 @@ public class KImage : Image
 			{
 			case KImage.ColorSelector.Active:
 				this.color = this.colorStyleSetting.activeColor;
-				break;
+				return;
 			case KImage.ColorSelector.Inactive:
 				this.color = this.colorStyleSetting.inactiveColor;
-				break;
+				return;
 			case KImage.ColorSelector.Disabled:
 				this.color = this.colorStyleSetting.disabledColor;
-				break;
+				return;
 			case KImage.ColorSelector.Hover:
 				this.color = this.colorStyleSetting.hoverColor;
 				break;
+			default:
+				return;
 			}
 		}
 	}

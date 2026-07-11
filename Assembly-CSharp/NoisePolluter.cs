@@ -85,7 +85,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 				this.splat.Clear();
 			}
 			KSelectable component = base.GetComponent<KSelectable>();
-			string text = ((!(component != null)) ? base.name : component.GetName());
+			string text = ((component != null) ? component.GetName() : base.name);
 			GameObject gameObject = base.GetComponent<KMonoBehaviour>().gameObject;
 			this.splat = AudioEventManager.Get().CreateNoiseSplat(this.GetPosition(), this.noise, this.radius, text, gameObject);
 		}
@@ -178,8 +178,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	private void OnCollectNoisePolluters(object data)
 	{
-		List<NoisePolluter> list = (List<NoisePolluter>)data;
-		list.Add(this);
+		((List<NoisePolluter>)data).Add(this);
 	}
 
 	public string GetName()
@@ -227,7 +226,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		{
 			float totalValue = this.dB.GetTotalValue();
 			float totalValue2 = this.dBRadius.GetTotalValue();
-			string text = ((this.noise <= 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
+			string text = ((this.noise > 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE);
 			text = text + "\n\n" + this.dB.GetAttributeValueTooltip();
 			string text2 = GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f);
 			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text2, totalValue2), string.Format(text, text2, totalValue2), Descriptor.DescriptorType.Effect, false);
@@ -235,7 +234,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 		else if (this.noise != 0)
 		{
-			string text3 = ((this.noise < 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
+			string text3 = ((this.noise >= 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE);
 			string text4 = GameUtil.AddPositiveSign(this.noise.ToString(), this.noise > 0);
 			Descriptor descriptor2 = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text4, this.radius), string.Format(text3, text4, this.radius), Descriptor.DescriptorType.Effect, false);
 			list.Add(descriptor2);

@@ -13,67 +13,35 @@ namespace System.Net
 		{
 		}
 
-		public string Accept
-		{
-			get
-			{
-				if (this.m_accept == null)
-				{
-					return null;
-				}
-				return (this.m_accept as WebPermissionInfo).Info;
-			}
-			set
-			{
-				if (this.m_accept != null)
-				{
-					this.AlreadySet("Accept", "Accept");
-				}
-				this.m_accept = new WebPermissionInfo(WebPermissionInfoType.InfoString, value);
-			}
-		}
-
-		public string AcceptPattern
-		{
-			get
-			{
-				if (this.m_accept == null)
-				{
-					return null;
-				}
-				return (this.m_accept as WebPermissionInfo).Info;
-			}
-			set
-			{
-				if (this.m_accept != null)
-				{
-					this.AlreadySet("Accept", "AcceptPattern");
-				}
-				if (value == null)
-				{
-					throw new ArgumentNullException("AcceptPattern");
-				}
-				this.m_accept = new WebPermissionInfo(WebPermissionInfoType.InfoUnexecutedRegex, value);
-			}
-		}
-
 		public string Connect
 		{
 			get
 			{
-				if (this.m_connect == null)
-				{
-					return null;
-				}
-				return (this.m_connect as WebPermissionInfo).Info;
+				return this.m_connect as string;
 			}
 			set
 			{
 				if (this.m_connect != null)
 				{
-					this.AlreadySet("Connect", "Connect");
+					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "Connect", value }), "value");
 				}
-				this.m_connect = new WebPermissionInfo(WebPermissionInfoType.InfoString, value);
+				this.m_connect = value;
+			}
+		}
+
+		public string Accept
+		{
+			get
+			{
+				return this.m_accept as string;
+			}
+			set
+			{
+				if (this.m_accept != null)
+				{
+					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "Accept", value }), "value");
+				}
+				this.m_accept = value;
 			}
 		}
 
@@ -81,48 +49,111 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.m_connect == null)
+				if (this.m_connect is DelayedRegex)
+				{
+					return this.m_connect.ToString();
+				}
+				if (!(this.m_connect is bool) || !(bool)this.m_connect)
 				{
 					return null;
 				}
-				return (this.m_connect as WebPermissionInfo).Info;
+				return ".*";
 			}
 			set
 			{
 				if (this.m_connect != null)
 				{
-					this.AlreadySet("Connect", "ConnectConnectPattern");
+					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "ConnectPatern", value }), "value");
 				}
-				if (value == null)
+				if (value == ".*")
 				{
-					throw new ArgumentNullException("ConnectPattern");
+					this.m_connect = true;
+					return;
 				}
-				this.m_connect = new WebPermissionInfo(WebPermissionInfoType.InfoUnexecutedRegex, value);
+				this.m_connect = new DelayedRegex(value);
+			}
+		}
+
+		public string AcceptPattern
+		{
+			get
+			{
+				if (this.m_accept is DelayedRegex)
+				{
+					return this.m_accept.ToString();
+				}
+				if (!(this.m_accept is bool) || !(bool)this.m_accept)
+				{
+					return null;
+				}
+				return ".*";
+			}
+			set
+			{
+				if (this.m_accept != null)
+				{
+					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "AcceptPattern", value }), "value");
+				}
+				if (value == ".*")
+				{
+					this.m_accept = true;
+					return;
+				}
+				this.m_accept = new DelayedRegex(value);
 			}
 		}
 
 		public override IPermission CreatePermission()
 		{
+			WebPermission webPermission;
 			if (base.Unrestricted)
 			{
-				return new WebPermission(PermissionState.Unrestricted);
+				webPermission = new WebPermission(PermissionState.Unrestricted);
 			}
-			WebPermission webPermission = new WebPermission();
-			if (this.m_accept != null)
+			else
 			{
-				webPermission.AddPermission(NetworkAccess.Accept, (WebPermissionInfo)this.m_accept);
-			}
-			if (this.m_connect != null)
-			{
-				webPermission.AddPermission(NetworkAccess.Connect, (WebPermissionInfo)this.m_connect);
+				NetworkAccess networkAccess = (NetworkAccess)0;
+				if (this.m_connect is bool)
+				{
+					if ((bool)this.m_connect)
+					{
+						networkAccess |= NetworkAccess.Connect;
+					}
+					this.m_connect = null;
+				}
+				if (this.m_accept is bool)
+				{
+					if ((bool)this.m_accept)
+					{
+						networkAccess |= NetworkAccess.Accept;
+					}
+					this.m_accept = null;
+				}
+				webPermission = new WebPermission(networkAccess);
+				if (this.m_accept != null)
+				{
+					if (this.m_accept is DelayedRegex)
+					{
+						webPermission.AddAsPattern(NetworkAccess.Accept, (DelayedRegex)this.m_accept);
+					}
+					else
+					{
+						webPermission.AddPermission(NetworkAccess.Accept, (string)this.m_accept);
+					}
+				}
+				if (this.m_connect != null)
+				{
+					if (this.m_connect is DelayedRegex)
+					{
+						webPermission.AddAsPattern(NetworkAccess.Connect, (DelayedRegex)this.m_connect);
+					}
+					else
+					{
+						webPermission.AddPermission(NetworkAccess.Connect, (string)this.m_connect);
+					}
+				}
 			}
 			return webPermission;
-		}
-
-		internal void AlreadySet(string parameter, string property)
-		{
-			string text = global::Locale.GetText("The parameter '{0}' can be set only once.");
-			throw new ArgumentException(string.Format(text, parameter), property);
 		}
 
 		private object m_accept;

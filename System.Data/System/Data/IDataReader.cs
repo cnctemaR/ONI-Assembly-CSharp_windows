@@ -2,7 +2,7 @@
 
 namespace System.Data
 {
-	public interface IDataReader : IDataRecord, IDisposable
+	public interface IDataReader : IDisposable, IDataRecord
 	{
 		int Depth { get; }
 

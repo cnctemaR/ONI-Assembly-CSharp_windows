@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [Serializable]
-public class TagSet : ICollection<Tag>, ICollection, IEnumerable<Tag>, IEnumerable
+public class TagSet : ICollection<Tag>, IEnumerable<Tag>, IEnumerable, ICollection
 {
 	public TagSet()
 	{
@@ -172,7 +172,7 @@ public class TagSet : ICollection<Tag>, ICollection, IEnumerable<Tag>, IEnumerab
 			}
 			return stringBuilder.ToString();
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public string GetTagDescription()
@@ -188,7 +188,7 @@ public class TagSet : ICollection<Tag>, ICollection, IEnumerable<Tag>, IEnumerab
 			}
 			return stringBuilder.ToString();
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public bool IsSynchronized

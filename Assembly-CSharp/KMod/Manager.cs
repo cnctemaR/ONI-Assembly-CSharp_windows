@@ -11,6 +11,11 @@ namespace KMod
 {
 	public class Manager
 	{
+		public static string GetDirectory()
+		{
+			return Path.Combine(Util.RootFolder(), "mods/");
+		}
+
 		public Manager()
 		{
 			string filename = this.GetFilename();
@@ -18,8 +23,7 @@ namespace KMod
 			{
 				if (FileUtil.FileExists(filename, 0))
 				{
-					string text = File.ReadAllText(filename);
-					Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(text);
+					Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(File.ReadAllText(filename));
 					this.mods = persistentData.mods;
 				}
 			}
@@ -101,12 +105,6 @@ namespace KMod
 			}
 		}
 
-		public static string GetDirectory()
-		{
-			string text = Util.RootFolder();
-			return Path.Combine(text, "mods/");
-		}
-
 		public void Shutdown()
 		{
 			foreach (Mod mod in this.mods)
@@ -173,21 +171,19 @@ namespace KMod
 					event_type = EventType.Installed,
 					mod = mod.label
 				});
+				return;
 			}
-			else
+			global::Debug.Log("\tFailed install. Will install on restart.");
+			this.events.Add(new Event
 			{
-				global::Debug.Log("\tFailed install. Will install on restart.");
-				this.events.Add(new Event
-				{
-					event_type = EventType.InstallFailed,
-					mod = mod.label
-				});
-				this.events.Add(new Event
-				{
-					event_type = EventType.RestartRequested,
-					mod = mod.label
-				});
-			}
+				event_type = EventType.InstallFailed,
+				mod = mod.label
+			});
+			this.events.Add(new Event
+			{
+				event_type = EventType.RestartRequested,
+				mod = mod.label
+			});
 		}
 
 		private void Uninstall(Mod mod)
@@ -339,7 +335,7 @@ namespace KMod
 			}
 			if (num == this.mods.Count)
 			{
-				global::Debug.LogFormat("\t...not found", new object[0]);
+				global::Debug.LogFormat("\t...not found", Array.Empty<object>());
 				return;
 			}
 			Mod mod2 = this.mods[num];
@@ -392,7 +388,7 @@ namespace KMod
 
 		public void Load(Content content)
 		{
-			if ((byte)(content & Content.DLL) != 0 && this.load_user_mod_loader_dll)
+			if ((content & Content.DLL) != (Content)0 && this.load_user_mod_loader_dll)
 			{
 				if (!DLLLoader.LoadUserModLoaderDLL())
 				{
@@ -483,27 +479,31 @@ namespace KMod
 						Mod mod3 = this.mods[num2];
 						num = num2;
 						Content content = mod3.available_content & relevant_content;
-						bool flag5 = content != (Content)0;
+						bool flag5 = content > (Content)0;
 						if (is_match(label, mod3))
 						{
 							if (flag5)
 							{
 								if (!mod3.enabled)
 								{
-									this.events.Add(new Event
+									List<Event> list = this.events;
+									Event @event = new Event
 									{
 										event_type = EventType.ExpectedActive,
 										mod = label
-									});
+									};
+									list.Add(@event);
 									flag = false;
 								}
 								else if (!mod3.AllActive(content))
 								{
-									this.events.Add(new Event
+									List<Event> list2 = this.events;
+									Event @event = new Event
 									{
 										event_type = EventType.LoadError,
 										mod = label
-									});
+									};
+									list2.Add(@event);
 								}
 							}
 							flag4 = true;
@@ -511,21 +511,25 @@ namespace KMod
 						}
 						if (flag5 && mod3.enabled)
 						{
-							this.events.Add(new Event
+							List<Event> list3 = this.events;
+							Event @event = new Event
 							{
 								event_type = EventType.ExpectedInactive,
 								mod = mod3.label
-							});
+							};
+							list3.Add(@event);
 							flag3 = true;
 						}
 					}
 					if (!flag4)
 					{
-						this.events.Add(new Event
+						List<Event> list4 = this.events;
+						Event @event = new Event
 						{
-							event_type = ((!this.mods.Exists((Mod candidate) => is_match(label, candidate))) ? EventType.NotFound : EventType.OutOfOrder),
+							event_type = (this.mods.Exists((Mod candidate) => is_match(label, candidate)) ? EventType.OutOfOrder : EventType.NotFound),
 							mod = label
-						});
+						};
+						list4.Add(@event);
 						flag2 = false;
 					}
 				}
@@ -533,14 +537,15 @@ namespace KMod
 			for (int num3 = num + 1; num3 != this.mods.Count; num3++)
 			{
 				Mod mod2 = this.mods[num3];
-				bool flag6 = (byte)(mod2.available_content & relevant_content) != 0;
-				if (flag6 && mod2.enabled)
+				if ((mod2.available_content & relevant_content) > (Content)0 && mod2.enabled)
 				{
-					this.events.Add(new Event
+					List<Event> list5 = this.events;
+					Event @event = new Event
 					{
 						event_type = EventType.ExpectedInactive,
 						mod = mod2.label
-					});
+					};
+					list5.Add(@event);
 					flag3 = true;
 				}
 			}
@@ -554,8 +559,7 @@ namespace KMod
 
 		public static void Dialog(GameObject parent = null, string title = null, string text = null, string confirm_text = null, global::System.Action on_confirm = null, string cancel_text = null, global::System.Action on_cancel = null, string configurable_text = null, global::System.Action on_configurable_clicked = null, Sprite image_sprite = null, bool activateBlackBackground = true)
 		{
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent ?? Global.Instance.globalCanvas);
-			confirmDialogScreen.PopupConfirmDialog(text, on_confirm, on_cancel, configurable_text, on_configurable_clicked, title, confirm_text, cancel_text, image_sprite, activateBlackBackground);
+			((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent ?? Global.Instance.globalCanvas)).PopupConfirmDialog(text, on_confirm, on_cancel, configurable_text, on_configurable_clicked, title, confirm_text, cancel_text, image_sprite, activateBlackBackground);
 		}
 
 		private static string MakeModList(List<Event> events, EventType event_type)
@@ -637,12 +641,9 @@ namespace KMod
 				{
 					foreach (Mod mod in this.mods)
 					{
-						if (mod.label.distribution_platform != Label.DistributionPlatform.Local && mod.label.distribution_platform != Label.DistributionPlatform.Dev)
+						if (mod.label.distribution_platform != Label.DistributionPlatform.Local && mod.label.distribution_platform != Label.DistributionPlatform.Dev && mod.label.Match(@event.mod))
 						{
-							if (mod.label.Match(@event.mod))
-							{
-								mod.status = Mod.Status.ReinstallPending;
-							}
+							mod.status = Mod.Status.ReinstallPending;
 						}
 					}
 				}
@@ -667,11 +668,7 @@ namespace KMod
 			}
 			if (is_crash)
 			{
-				string text = UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.TITLE;
-				string text2 = string.Format(UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.DEV_MESSAGE, Manager.MakeEventList(this.events));
-				string text3 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
-				string text4 = UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
-				Manager.Dialog(parent, text, text2, text3, delegate
+				Manager.Dialog(parent, UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.TITLE, string.Format(UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.DEV_MESSAGE, Manager.MakeEventList(this.events)), UI.FRONTEND.MOD_DIALOGS.RESTART.OK, delegate
 				{
 					foreach (Mod mod in this.mods)
 					{
@@ -680,20 +677,16 @@ namespace KMod
 					this.dirty = true;
 					this.Update(this);
 					App.instance.Restart();
-				}, text4, delegate
+				}, UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL, delegate
 				{
 				}, null, null, null, true);
 			}
 			else
 			{
-				string text4 = UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE;
-				string text3 = string.Format(UI.FRONTEND.MOD_DIALOGS.RESTART.DEV_MESSAGE, Manager.MakeEventList(this.events));
-				string text2 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
-				string text = UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
-				Manager.Dialog(parent, text4, text3, text2, delegate
+				Manager.Dialog(parent, UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, string.Format(UI.FRONTEND.MOD_DIALOGS.RESTART.DEV_MESSAGE, Manager.MakeEventList(this.events)), UI.FRONTEND.MOD_DIALOGS.RESTART.OK, delegate
 				{
 					App.instance.Restart();
-				}, text, delegate
+				}, UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL, delegate
 				{
 				}, null, null, null, true);
 			}
@@ -706,7 +699,7 @@ namespace KMod
 			{
 				return;
 			}
-			string text = string.Format(message_format, (!with_details) ? Manager.MakeModList(this.events) : Manager.MakeEventList(this.events));
+			string text = string.Format(message_format, with_details ? Manager.MakeEventList(this.events) : Manager.MakeModList(this.events));
 			string text2 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
 			string text3 = cancel_text ?? UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
 			Manager.Dialog(parent, title, text, text2, new global::System.Action(App.instance.Restart), text3, on_cancel, null, null, null, true);
@@ -757,27 +750,21 @@ namespace KMod
 			ListPool<Mod, Manager>.PooledList pooledList = ListPool<Mod, Manager>.Allocate();
 			foreach (YamlIO.Error error in world_gen_errors)
 			{
-				string text2 = ((error.file.source == null) ? string.Empty : FileSystem.Normalize(error.file.source.GetRoot()));
+				string text2 = ((error.file.source != null) ? FileSystem.Normalize(error.file.source.GetRoot()) : string.Empty);
 				YamlIO.LogError(error, text2.Contains(text));
-				if (error.severity != YamlIO.Error.Severity.Recoverable)
+				if (error.severity != YamlIO.Error.Severity.Recoverable && text2.Contains(text))
 				{
-					if (text2.Contains(text))
+					foreach (Mod mod in this.mods)
 					{
-						foreach (Mod mod in this.mods)
+						if (mod.enabled && text2.Contains(mod.label.install_path))
 						{
-							if (mod.enabled)
+							this.events.Add(new Event
 							{
-								if (text2.Contains(mod.label.install_path))
-								{
-									this.events.Add(new Event
-									{
-										event_type = EventType.BadWorldGen,
-										mod = mod.label,
-										details = Path.GetFileName(error.file.full_path)
-									});
-									break;
-								}
-							}
+								event_type = EventType.BadWorldGen,
+								mod = mod.label,
+								details = Path.GetFileName(error.file.full_path)
+							});
+							break;
 						}
 					}
 				}
@@ -823,12 +810,8 @@ namespace KMod
 			foreach (Event event2 in this.events)
 			{
 				EventType event_type = event2.event_type;
-				switch (event_type)
+				if (event_type <= EventType.ActiveDuringCrash)
 				{
-				case EventType.RestartRequested:
-					flag3 = true;
-					break;
-				default:
 					if (event_type != EventType.LoadError)
 					{
 						if (event_type == EventType.ActiveDuringCrash)
@@ -840,13 +823,20 @@ namespace KMod
 					{
 						flag2 = true;
 					}
-					break;
-				case EventType.Deactivated:
-					if ((byte)(this.FindMod(event2.mod).available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
+				}
+				else if (event_type != EventType.RestartRequested)
+				{
+					if (event_type == EventType.Deactivated)
 					{
-						flag3 = true;
+						if ((this.FindMod(event2.mod).available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != (Content)0)
+						{
+							flag3 = true;
+						}
 					}
-					break;
+				}
+				else
+				{
+					flag3 = true;
 				}
 			}
 			flag3 = flag || flag2 || flag3;
@@ -854,23 +844,24 @@ namespace KMod
 			if (flag3 && flag4)
 			{
 				this.DevRestartDialog(parent, flag);
+				return;
 			}
-			else if (flag2)
+			if (flag2)
 			{
 				this.LoadFailureDialog(parent);
+				return;
 			}
-			else if (flag)
+			if (flag)
 			{
 				this.RestartDialog(UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.TITLE, UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.MESSAGE, null, false, parent, null);
+				return;
 			}
-			else if (flag3)
+			if (flag3)
 			{
 				this.RestartDialog(UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, UI.FRONTEND.MOD_DIALOGS.RESTART.MESSAGE, null, true, parent, null);
+				return;
 			}
-			else
-			{
-				this.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, (!flag4) ? UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.MESSAGE : UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.DEV_MESSAGE, parent);
-			}
+			this.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, flag4 ? UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.DEV_MESSAGE : UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.MESSAGE, parent);
 		}
 
 		public bool Save()

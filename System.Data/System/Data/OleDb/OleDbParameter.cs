@@ -1,59 +1,27 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	[TypeConverter("System.Data.OleDb.OleDbParameter+OleDbParameterConverter, System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbParameter : DbParameter, IDataParameter, IDbDataParameter, ICloneable
 	{
-		public OleDbParameter()
-		{
-		}
-
-		public OleDbParameter(string name, OleDbType dataType)
-		{
-		}
-
-		public OleDbParameter(string name, OleDbType dataType, int size)
-		{
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		public OleDbParameter(string parameterName, OleDbType dbType, int size, ParameterDirection direction, bool isNullable, byte precision, byte scale, string srcColumn, DataRowVersion srcVersion, object value)
-		{
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		public OleDbParameter(string parameterName, OleDbType dbType, int size, ParameterDirection direction, byte precision, byte scale, string sourceColumn, DataRowVersion sourceVersion, bool sourceColumnNullMapping, object value)
-		{
-		}
-
-		public OleDbParameter(string name, OleDbType dataType, int size, string srcColumn)
-		{
-		}
-
-		public OleDbParameter(string name, object value)
-		{
-		}
-
 		public override DbType DbType
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[RefreshProperties(RefreshProperties.All)]
 		public override ParameterDirection Direction
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -64,20 +32,29 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[RefreshProperties(RefreshProperties.All)]
-		[DbProviderSpecificTypeProperty(true)]
+		public int Offset
+		{
+			get
+			{
+				throw ADP.OleDb();
+			}
+			set
+			{
+			}
+		}
+
 		public OleDbType OleDbType
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -88,31 +65,29 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[DefaultValue(0)]
-		public byte Precision
+		public new byte Precision
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[DefaultValue(0)]
-		public byte Scale
+		public new byte Scale
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -123,7 +98,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -134,7 +109,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -145,7 +120,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -156,43 +131,76 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[RefreshProperties(RefreshProperties.All)]
-		[TypeConverter(typeof(StringConverter))]
 		public override object Value
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
+		public OleDbParameter()
+		{
+		}
+
+		public OleDbParameter(string name, OleDbType dataType)
+		{
+			throw ADP.OleDb();
+		}
+
+		public OleDbParameter(string name, OleDbType dataType, int size)
+		{
+			throw ADP.OleDb();
+		}
+
+		public OleDbParameter(string parameterName, OleDbType dbType, int size, ParameterDirection direction, bool isNullable, byte precision, byte scale, string srcColumn, DataRowVersion srcVersion, object value)
+		{
+			throw ADP.OleDb();
+		}
+
+		public OleDbParameter(string parameterName, OleDbType dbType, int size, ParameterDirection direction, byte precision, byte scale, string sourceColumn, DataRowVersion sourceVersion, bool sourceColumnNullMapping, object value)
+		{
+			throw ADP.OleDb();
+		}
+
+		public OleDbParameter(string name, OleDbType dataType, int size, string srcColumn)
+		{
+			throw ADP.OleDb();
+		}
+
+		public OleDbParameter(string name, object value)
+		{
+			throw ADP.OleDb();
+		}
+
 		public override void ResetDbType()
 		{
-		}
-
-		public void ResetOleDbType()
-		{
-		}
-
-		[MonoTODO]
-		object ICloneable.Clone()
-		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override string ToString()
 		{
-			throw null;
+			throw ADP.OleDb();
+		}
+
+		object ICloneable.Clone()
+		{
+			throw ADP.OleDb();
+		}
+
+		public void ResetOleDbType()
+		{
+			throw ADP.OleDb();
 		}
 	}
 }

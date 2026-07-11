@@ -6,9 +6,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Offsets for rectangles, borders, etc.</para>
-	/// </summary>
 	[NativeHeader("Modules/IMGUI/GUIStyle.h")]
 	[NativeHeader("Runtime/Camera/RenderLayers/GUILayer.h")]
 	[UsedByNativeCode]
@@ -16,13 +13,6 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class RectOffset
 	{
-		/// <summary>
-		///   <para>Creates a new rectangle with offsets.</para>
-		/// </summary>
-		/// <param name="left"></param>
-		/// <param name="right"></param>
-		/// <param name="top"></param>
-		/// <param name="bottom"></param>
 		public RectOffset()
 		{
 			this.m_Ptr = RectOffset.InternalCreate();
@@ -35,13 +25,6 @@ namespace UnityEngine
 			this.m_Ptr = source;
 		}
 
-		/// <summary>
-		///   <para>Creates a new rectangle with offsets.</para>
-		/// </summary>
-		/// <param name="left"></param>
-		/// <param name="right"></param>
-		/// <param name="top"></param>
-		/// <param name="bottom"></param>
 		public RectOffset(int left, int right, int top, int bottom)
 		{
 			this.m_Ptr = RectOffset.InternalCreate();
@@ -59,9 +42,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroy(IntPtr ptr);
 
-		/// <summary>
-		///   <para>Left edge size.</para>
-		/// </summary>
 		[NativeProperty("left", false, TargetType.Field)]
 		public extern int left
 		{
@@ -71,9 +51,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Right edge size.</para>
-		/// </summary>
 		[NativeProperty("right", false, TargetType.Field)]
 		public extern int right
 		{
@@ -83,9 +60,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Top edge size.</para>
-		/// </summary>
 		[NativeProperty("top", false, TargetType.Field)]
 		public extern int top
 		{
@@ -95,9 +69,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Bottom edge size.</para>
-		/// </summary>
 		[NativeProperty("bottom", false, TargetType.Field)]
 		public extern int bottom
 		{
@@ -107,28 +78,18 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Shortcut for left + right. (Read Only)</para>
-		/// </summary>
 		public extern int horizontal
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Shortcut for top + bottom. (Read Only)</para>
-		/// </summary>
 		public extern int vertical
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Add the border offsets to a rect.</para>
-		/// </summary>
-		/// <param name="rect"></param>
 		public Rect Add(Rect rect)
 		{
 			Rect rect2;
@@ -136,10 +97,6 @@ namespace UnityEngine
 			return rect2;
 		}
 
-		/// <summary>
-		///   <para>Remove the border offsets from a rect.</para>
-		/// </summary>
-		/// <param name="rect"></param>
 		public Rect Remove(Rect rect)
 		{
 			Rect rect2;
@@ -151,7 +108,7 @@ namespace UnityEngine
 		{
 			if (this.m_SourceStyle == null)
 			{
-				this.Dispose();
+				this.Destroy();
 			}
 		}
 
@@ -160,14 +117,13 @@ namespace UnityEngine
 			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[] { this.left, this.right, this.top, this.bottom });
 		}
 
-		private void Dispose()
+		private void Destroy()
 		{
 			if (this.m_Ptr != IntPtr.Zero)
 			{
 				RectOffset.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
 			}
-			GC.SuppressFinalize(this);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

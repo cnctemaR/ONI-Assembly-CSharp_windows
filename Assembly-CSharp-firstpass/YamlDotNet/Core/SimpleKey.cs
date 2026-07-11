@@ -5,19 +5,6 @@ namespace YamlDotNet.Core
 	[Serializable]
 	internal class SimpleKey
 	{
-		public SimpleKey()
-		{
-			this.cursor = new Cursor();
-		}
-
-		public SimpleKey(bool isPossible, bool isRequired, int tokenNumber, Cursor cursor)
-		{
-			this.IsPossible = isPossible;
-			this.IsRequired = isRequired;
-			this.TokenNumber = tokenNumber;
-			this.cursor = new Cursor(cursor);
-		}
-
 		public bool IsPossible { get; set; }
 
 		public bool IsRequired { get; private set; }
@@ -54,6 +41,19 @@ namespace YamlDotNet.Core
 			{
 				return this.cursor.Mark();
 			}
+		}
+
+		public SimpleKey()
+		{
+			this.cursor = new Cursor();
+		}
+
+		public SimpleKey(bool isPossible, bool isRequired, int tokenNumber, Cursor cursor)
+		{
+			this.IsPossible = isPossible;
+			this.IsRequired = isRequired;
+			this.TokenNumber = tokenNumber;
+			this.cursor = new Cursor(cursor);
 		}
 
 		private readonly Cursor cursor;

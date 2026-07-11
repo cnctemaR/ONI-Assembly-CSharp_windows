@@ -26,8 +26,7 @@ public class RoomProber : ISim1000ms
 
 	private void OnBuildingsChanged(int cell, object building)
 	{
-		CavityInfo cavityForCell = this.GetCavityForCell(cell);
-		if (cavityForCell != null)
+		if (this.GetCavityForCell(cell) != null)
 		{
 			this.solidChanges.Add(cell);
 			this.dirty = true;
@@ -53,7 +52,7 @@ public class RoomProber : ISim1000ms
 
 	private unsafe void ProcessSolidChanges()
 	{
-		int* ptr = stackalloc int[checked(5 * 4)];
+		int* ptr = stackalloc int[(UIntPtr)20];
 		*ptr = 0;
 		ptr[1] = -Grid.WidthInCells;
 		ptr[2] = -1;
@@ -383,7 +382,7 @@ public class RoomProber : ISim1000ms
 
 		private static bool IsWall(int cell)
 		{
-			return (byte)(Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) != 0 || Grid.HasDoor[cell];
+			return (Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) != (Grid.BuildFlags)0 || Grid.HasDoor[cell];
 		}
 
 		public bool ShouldContinue(int flood_cell)

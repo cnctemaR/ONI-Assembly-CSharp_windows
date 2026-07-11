@@ -9,8 +9,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 {
 	public void ResetTemperature()
 	{
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		component.Temperature = 293.15f;
+		base.GetComponent<PrimaryElement>().Temperature = 293.15f;
 	}
 
 	protected override void OnPrefabInit()
@@ -38,14 +37,10 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		base.OnSpawn();
 		this.InitializeModifiers();
 		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
-		if (handle.IsValid())
+		if (handle.IsValid() && GameComps.StructureTemperatures.IsEnabled(handle))
 		{
-			bool flag = GameComps.StructureTemperatures.IsEnabled(handle);
-			if (flag)
-			{
-				GameComps.StructureTemperatures.Disable(handle);
-				GameComps.StructureTemperatures.Enable(handle);
-			}
+			GameComps.StructureTemperatures.Disable(handle);
+			GameComps.StructureTemperatures.Enable(handle);
 		}
 		base.smi.StartSM();
 	}
@@ -55,7 +50,11 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		get
 		{
 			this.InitializeModifiers();
-			return (this.overheatTemp == null) ? 10000f : this.overheatTemp.GetTotalValue();
+			if (this.overheatTemp == null)
+			{
+				return 10000f;
+			}
+			return this.overheatTemp.GetTotalValue();
 		}
 	}
 
@@ -67,7 +66,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < notificationList.Count; i++)
 		{
 			Notification notification = notificationList[i];

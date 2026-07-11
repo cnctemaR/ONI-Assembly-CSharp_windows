@@ -7,7 +7,13 @@ public class PropFacilityGlobeDroorsConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityGlobeDroors", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYGLOBEDROORS.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYGLOBEDROORS.DESC, 50f, Assets.GetAnim("gravitas_globe_kanim"), "off", Grid.SceneLayer.Building, 1, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		string text = "PropFacilityGlobeDroors";
+		string text2 = global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYGLOBEDROORS.NAME;
+		string text3 = global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYGLOBEDROORS.DESC;
+		float num = 50f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("gravitas_globe_kanim"), "off", Grid.SceneLayer.Building, 1, 3, tier, tier2, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Granite);
 		component.Temperature = 294.15f;

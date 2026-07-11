@@ -19,7 +19,7 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 
 	private void CreateRenderTarget()
 	{
-		RenderBuffer[] array = new RenderBuffer[(!this.colouredOverlayBufferEnabled) ? 2 : 3];
+		RenderBuffer[] array = new RenderBuffer[this.colouredOverlayBufferEnabled ? 3 : 2];
 		this.Textures[0] = this.RecreateRT(this.Textures[0], 24, RenderTextureFormat.ARGB32);
 		this.Textures[0].filterMode = FilterMode.Point;
 		this.Textures[0].name = "MRT0";
@@ -35,8 +35,7 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 			this.Textures[2].name = "MRT2";
 			array[2] = this.Textures[2].colorBuffer;
 		}
-		Camera component = base.GetComponent<Camera>();
-		component.SetTargetBuffers(array, this.Textures[0].depthBuffer);
+		base.GetComponent<Camera>().SetTargetBuffers(array, this.Textures[0].depthBuffer);
 		this.OnShadersReloaded();
 	}
 

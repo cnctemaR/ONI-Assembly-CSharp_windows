@@ -21,16 +21,6 @@ namespace System.Diagnostics.SymbolStore
 			return obj.GetToken() == this._val;
 		}
 
-		public override int GetHashCode()
-		{
-			return this._val.GetHashCode();
-		}
-
-		public int GetToken()
-		{
-			return this._val;
-		}
-
 		public static bool operator ==(SymbolToken a, SymbolToken b)
 		{
 			return a.Equals(b);
@@ -39,6 +29,16 @@ namespace System.Diagnostics.SymbolStore
 		public static bool operator !=(SymbolToken a, SymbolToken b)
 		{
 			return !a.Equals(b);
+		}
+
+		public override int GetHashCode()
+		{
+			return this._val.GetHashCode();
+		}
+
+		public int GetToken()
+		{
+			return this._val;
 		}
 
 		private int _val;

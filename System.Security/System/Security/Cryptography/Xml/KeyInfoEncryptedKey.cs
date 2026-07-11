@@ -9,43 +9,47 @@ namespace System.Security.Cryptography.Xml
 		{
 		}
 
-		public KeyInfoEncryptedKey(EncryptedKey ek)
+		public KeyInfoEncryptedKey(EncryptedKey encryptedKey)
 		{
-			this.EncryptedKey = ek;
+			this._encryptedKey = encryptedKey;
 		}
 
 		public EncryptedKey EncryptedKey
 		{
 			get
 			{
-				return this.encryptedKey;
+				return this._encryptedKey;
 			}
 			set
 			{
-				this.encryptedKey = value;
+				this._encryptedKey = value;
 			}
 		}
 
 		public override XmlElement GetXml()
 		{
-			return this.GetXml(new XmlDocument());
+			if (this._encryptedKey == null)
+			{
+				throw new CryptographicException("Malformed element {0}.", "KeyInfoEncryptedKey");
+			}
+			return this._encryptedKey.GetXml();
 		}
 
-		internal XmlElement GetXml(XmlDocument document)
+		internal override XmlElement GetXml(XmlDocument xmlDocument)
 		{
-			if (this.encryptedKey != null)
+			if (this._encryptedKey == null)
 			{
-				return this.encryptedKey.GetXml(document);
+				throw new CryptographicException("Malformed element {0}.", "KeyInfoEncryptedKey");
 			}
-			return null;
+			return this._encryptedKey.GetXml(xmlDocument);
 		}
 
 		public override void LoadXml(XmlElement value)
 		{
-			this.EncryptedKey = new EncryptedKey();
-			this.EncryptedKey.LoadXml(value);
+			this._encryptedKey = new EncryptedKey();
+			this._encryptedKey.LoadXml(value);
 		}
 
-		private EncryptedKey encryptedKey;
+		private EncryptedKey _encryptedKey;
 	}
 }

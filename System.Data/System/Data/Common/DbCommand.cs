@@ -1,31 +1,46 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Data.Common
 {
 	public abstract class DbCommand : Component, IDbCommand, IDisposable
 	{
-		[DefaultValue("")]
 		[RefreshProperties(RefreshProperties.All)]
+		[DefaultValue("")]
 		public abstract string CommandText { get; set; }
 
 		public abstract int CommandTimeout { get; set; }
 
-		[DefaultValue(CommandType.Text)]
 		[RefreshProperties(RefreshProperties.All)]
+		[DefaultValue(CommandType.Text)]
 		public abstract CommandType CommandType { get; set; }
 
-		[Browsable(false)]
 		[DefaultValue(null)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DbConnection Connection
 		{
 			get
 			{
-				throw null;
+				return this.DbConnection;
 			}
 			set
 			{
+				this.DbConnection = value;
+			}
+		}
+
+		IDbConnection IDbCommand.Connection
+		{
+			get
+			{
+				return this.DbConnection;
+			}
+			set
+			{
+				this.DbConnection = (DbConnection)value;
 			}
 		}
 
@@ -36,29 +51,18 @@ namespace System.Data.Common
 		protected abstract DbTransaction DbTransaction { get; set; }
 
 		[Browsable(false)]
-		[DefaultValue(true)]
-		[DesignOnly(true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignOnly(true)]
+		[DefaultValue(true)]
 		public abstract bool DesignTimeVisible { get; set; }
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DbParameterCollection Parameters
 		{
 			get
 			{
-				throw null;
-			}
-		}
-
-		IDbConnection IDbCommand.Connection
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
+				return this.DbParameterCollection;
 			}
 		}
 
@@ -66,7 +70,22 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this.DbParameterCollection;
+			}
+		}
+
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[DefaultValue(null)]
+		public DbTransaction Transaction
+		{
+			get
+			{
+				return this.DbTransaction;
+			}
+			set
+			{
+				this.DbTransaction = value;
 			}
 		}
 
@@ -74,38 +93,41 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this.DbTransaction;
 			}
 			set
 			{
-			}
-		}
-
-		[Browsable(false)]
-		[DefaultValue(null)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public DbTransaction Transaction
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
+				this.DbTransaction = (DbTransaction)value;
 			}
 		}
 
 		[DefaultValue(UpdateRowSource.Both)]
 		public abstract UpdateRowSource UpdatedRowSource { get; set; }
 
-		public abstract void Cancel();
+		internal void CancelIgnoreFailure()
+		{
+			try
+			{
+				this.Cancel();
+			}
+			catch (Exception)
+			{
+			}
+		}
 
-		protected abstract DbParameter CreateDbParameter();
+		public abstract void Cancel();
 
 		public DbParameter CreateParameter()
 		{
-			throw null;
+			return this.CreateDbParameter();
 		}
+
+		IDbDataParameter IDbCommand.CreateParameter()
+		{
+			return this.CreateDbParameter();
+		}
+
+		protected abstract DbParameter CreateDbParameter();
 
 		protected abstract DbDataReader ExecuteDbDataReader(CommandBehavior behavior);
 
@@ -113,31 +135,146 @@ namespace System.Data.Common
 
 		public DbDataReader ExecuteReader()
 		{
-			throw null;
+			return this.ExecuteDbDataReader(CommandBehavior.Default);
+		}
+
+		IDataReader IDbCommand.ExecuteReader()
+		{
+			return this.ExecuteDbDataReader(CommandBehavior.Default);
 		}
 
 		public DbDataReader ExecuteReader(CommandBehavior behavior)
 		{
-			throw null;
+			return this.ExecuteDbDataReader(behavior);
+		}
+
+		IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior)
+		{
+			return this.ExecuteDbDataReader(behavior);
+		}
+
+		public Task<int> ExecuteNonQueryAsync()
+		{
+			return this.ExecuteNonQueryAsync(CancellationToken.None);
+		}
+
+		public virtual Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return ADP.CreatedTaskWithCancellation<int>();
+			}
+			CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
+			if (cancellationToken.CanBeCanceled)
+			{
+				cancellationTokenRegistration = cancellationToken.Register(delegate(object s)
+				{
+					((DbCommand)s).CancelIgnoreFailure();
+				}, this);
+			}
+			Task<int> task;
+			try
+			{
+				task = Task.FromResult<int>(this.ExecuteNonQuery());
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException<int>(ex);
+			}
+			finally
+			{
+				cancellationTokenRegistration.Dispose();
+			}
+			return task;
+		}
+
+		public Task<DbDataReader> ExecuteReaderAsync()
+		{
+			return this.ExecuteReaderAsync(CommandBehavior.Default, CancellationToken.None);
+		}
+
+		public Task<DbDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
+		{
+			return this.ExecuteReaderAsync(CommandBehavior.Default, cancellationToken);
+		}
+
+		public Task<DbDataReader> ExecuteReaderAsync(CommandBehavior behavior)
+		{
+			return this.ExecuteReaderAsync(behavior, CancellationToken.None);
+		}
+
+		public Task<DbDataReader> ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+		{
+			return this.ExecuteDbDataReaderAsync(behavior, cancellationToken);
+		}
+
+		protected virtual Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return ADP.CreatedTaskWithCancellation<DbDataReader>();
+			}
+			CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
+			if (cancellationToken.CanBeCanceled)
+			{
+				cancellationTokenRegistration = cancellationToken.Register(delegate(object s)
+				{
+					((DbCommand)s).CancelIgnoreFailure();
+				}, this);
+			}
+			Task<DbDataReader> task;
+			try
+			{
+				task = Task.FromResult<DbDataReader>(this.ExecuteReader(behavior));
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException<DbDataReader>(ex);
+			}
+			finally
+			{
+				cancellationTokenRegistration.Dispose();
+			}
+			return task;
+		}
+
+		public Task<object> ExecuteScalarAsync()
+		{
+			return this.ExecuteScalarAsync(CancellationToken.None);
+		}
+
+		public virtual Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return ADP.CreatedTaskWithCancellation<object>();
+			}
+			CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
+			if (cancellationToken.CanBeCanceled)
+			{
+				cancellationTokenRegistration = cancellationToken.Register(delegate(object s)
+				{
+					((DbCommand)s).CancelIgnoreFailure();
+				}, this);
+			}
+			Task<object> task;
+			try
+			{
+				task = Task.FromResult<object>(this.ExecuteScalar());
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException<object>(ex);
+			}
+			finally
+			{
+				cancellationTokenRegistration.Dispose();
+			}
+			return task;
 		}
 
 		public abstract object ExecuteScalar();
 
 		public abstract void Prepare();
-
-		IDbDataParameter IDbCommand.CreateParameter()
-		{
-			throw null;
-		}
-
-		IDataReader IDbCommand.ExecuteReader()
-		{
-			throw null;
-		}
-
-		IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior)
-		{
-			throw null;
-		}
 	}
 }

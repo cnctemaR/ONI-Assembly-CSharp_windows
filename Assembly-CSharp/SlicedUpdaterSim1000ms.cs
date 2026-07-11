@@ -24,8 +24,7 @@ public abstract class SlicedUpdaterSim1000ms<T> : KMonoBehaviour, ISim200ms wher
 
 	private int GetSliceIdx(T toBeUpdated)
 	{
-		KPrefabID component = toBeUpdated.GetComponent<KPrefabID>();
-		return component.InstanceID % this.m_slices.Count;
+		return toBeUpdated.GetComponent<KPrefabID>().InstanceID % this.m_slices.Count;
 	}
 
 	public void RegisterUpdate1000ms(T toBeUpdated)
@@ -83,11 +82,9 @@ public abstract class SlicedUpdaterSim1000ms<T> : KMonoBehaviour, ISim200ms wher
 			if (this.m_timeSinceLastUpdate == 0f)
 			{
 				this.m_updateList.Add(toBeUpdated);
+				return;
 			}
-			else
-			{
-				this.m_recentlyAdded[toBeUpdated] = 0f;
-			}
+			this.m_recentlyAdded[toBeUpdated] = 0f;
 		}
 
 		public void Unregister(T toBeUpdated)
@@ -122,8 +119,7 @@ public abstract class SlicedUpdaterSim1000ms<T> : KMonoBehaviour, ISim200ms wher
 			}
 			foreach (KeyValuePair<T, float> keyValuePair in this.m_recentlyAdded)
 			{
-				T key = keyValuePair.Key;
-				key.SlicedSim1000ms(keyValuePair.Value);
+				keyValuePair.Key.SlicedSim1000ms(keyValuePair.Value);
 				this.m_updateList.Add(keyValuePair.Key);
 			}
 			this.m_recentlyAdded.Clear();
@@ -135,12 +131,11 @@ public abstract class SlicedUpdaterSim1000ms<T> : KMonoBehaviour, ISim200ms wher
 			this.m_timeSinceLastUpdate += dt;
 			if (this.m_recentlyAdded.Count > 0)
 			{
-				List<T> list = new List<T>(this.m_recentlyAdded.Keys);
-				foreach (T t in list)
+				foreach (T t in new List<T>(this.m_recentlyAdded.Keys))
 				{
-					Dictionary<T, float> recentlyAdded;
-					T t2;
-					(recentlyAdded = this.m_recentlyAdded)[t2 = t] = recentlyAdded[t2] + dt;
+					Dictionary<T, float> recentlyAdded = this.m_recentlyAdded;
+					T t2 = t;
+					recentlyAdded[t2] += dt;
 				}
 			}
 		}

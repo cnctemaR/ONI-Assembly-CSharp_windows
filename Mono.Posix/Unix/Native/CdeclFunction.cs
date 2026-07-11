@@ -29,8 +29,7 @@ namespace Mono.Unix.Native
 		public object Invoke(object[] parameters)
 		{
 			Type[] parameterTypes = CdeclFunction.GetParameterTypes(parameters);
-			MethodInfo methodInfo = this.CreateMethod(parameterTypes);
-			return methodInfo.Invoke(null, parameters);
+			return this.CreateMethod(parameterTypes).Invoke(null, parameters);
 		}
 
 		private MethodInfo CreateMethod(Type[] parameterTypes)
@@ -94,7 +93,7 @@ namespace Mono.Unix.Native
 			stringBuilder.Append("[").Append(this.library).Append("] ")
 				.Append(this.method);
 			stringBuilder.Append("(");
-			if (parameterTypes.Length > 0)
+			if (parameterTypes.Length != 0)
 			{
 				stringBuilder.Append(parameterTypes[0]);
 			}

@@ -6,22 +6,6 @@ namespace Delaunay
 {
 	internal sealed class EdgeList : Delaunay.Utils.IDisposable
 	{
-		public EdgeList(float xmin, float deltax, int sqrt_nsites)
-		{
-			this._xmin = xmin;
-			this._deltax = deltax;
-			this._hashsize = 2 * sqrt_nsites;
-			this._hash = new Halfedge[this._hashsize];
-			this._leftEnd = Halfedge.CreateDummy();
-			this._rightEnd = Halfedge.CreateDummy();
-			this._leftEnd.edgeListLeftNeighbor = null;
-			this._leftEnd.edgeListRightNeighbor = this._rightEnd;
-			this._rightEnd.edgeListLeftNeighbor = this._leftEnd;
-			this._rightEnd.edgeListRightNeighbor = null;
-			this._hash[0] = this._leftEnd;
-			this._hash[this._hashsize - 1] = this._rightEnd;
-		}
-
 		public Halfedge leftEnd
 		{
 			get
@@ -57,6 +41,22 @@ namespace Delaunay
 			this._hash = null;
 		}
 
+		public EdgeList(float xmin, float deltax, int sqrt_nsites)
+		{
+			this._xmin = xmin;
+			this._deltax = deltax;
+			this._hashsize = 2 * sqrt_nsites;
+			this._hash = new Halfedge[this._hashsize];
+			this._leftEnd = Halfedge.CreateDummy();
+			this._rightEnd = Halfedge.CreateDummy();
+			this._leftEnd.edgeListLeftNeighbor = null;
+			this._leftEnd.edgeListRightNeighbor = this._rightEnd;
+			this._rightEnd.edgeListLeftNeighbor = this._leftEnd;
+			this._rightEnd.edgeListRightNeighbor = null;
+			this._hash[0] = this._leftEnd;
+			this._hash[this._hashsize - 1] = this._rightEnd;
+		}
+
 		public void Insert(Halfedge lb, Halfedge newHalfedge)
 		{
 			newHalfedge.edgeListLeftNeighbor = lb;
@@ -88,12 +88,8 @@ namespace Delaunay
 			if (halfedge == null)
 			{
 				int num2 = 1;
-				while ((halfedge = this.GetHash(num - num2)) == null)
+				while ((halfedge = this.GetHash(num - num2)) == null && (halfedge = this.GetHash(num + num2)) == null)
 				{
-					if ((halfedge = this.GetHash(num + num2)) != null)
-					{
-						break;
-					}
 					num2++;
 				}
 			}

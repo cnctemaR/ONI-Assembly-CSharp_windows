@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.Data
 {
-	public interface ITableMappingCollection : ICollection, IEnumerable, IList
+	public interface ITableMappingCollection : IList, ICollection, IEnumerable
 	{
 		object this[string index] { get; set; }
 

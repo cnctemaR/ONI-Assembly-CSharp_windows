@@ -22,7 +22,7 @@ namespace Database
 
 		public virtual string GetProgress(bool complete)
 		{
-			return string.Empty;
+			return "";
 		}
 	}
 }

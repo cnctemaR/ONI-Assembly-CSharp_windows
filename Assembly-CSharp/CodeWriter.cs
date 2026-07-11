@@ -70,11 +70,9 @@ public class CodeWriter
 		if (!last_item)
 		{
 			this.Line("},");
+			return;
 		}
-		else
-		{
-			this.Line("}");
-		}
+		this.Line("}");
 	}
 
 	public void BeginArraArrayInitialization(string array_type, string array_name)
@@ -90,11 +88,9 @@ public class CodeWriter
 		if (last_item)
 		{
 			this.Line("}");
+			return;
 		}
-		else
-		{
-			this.Line("},");
-		}
+		this.Line("},");
 	}
 
 	public void BeginConstructor(string name)
@@ -185,7 +181,7 @@ public class CodeWriter
 
 	private void InternalNamedParameter(string name, string value, bool last_parameter)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (!last_parameter)
 		{
 			text = ",";

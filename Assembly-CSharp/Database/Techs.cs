@@ -13,11 +13,9 @@ namespace Database
 
 		public void Load(TextAsset tree_file)
 		{
-			ResourceTreeLoader<ResourceTreeNode> resourceTreeLoader = new ResourceTreeLoader<ResourceTreeNode>(tree_file);
-			foreach (ResourceTreeNode resourceTreeNode in resourceTreeLoader)
+			foreach (ResourceTreeNode resourceTreeNode in new ResourceTreeLoader<ResourceTreeNode>(tree_file))
 			{
-				string text = resourceTreeNode.Id.Substring(0, 1);
-				if (!string.Equals(text, "_"))
+				if (!string.Equals(resourceTreeNode.Id.Substring(0, 1), "_"))
 				{
 					Tech tech = base.TryGet(resourceTreeNode.Id);
 					if (tech == null)
@@ -40,8 +38,7 @@ namespace Database
 			foreach (Tech tech3 in this.resources)
 			{
 				tech3.tier = this.GetTier(tech3);
-				List<Tuple<string, float>> list = this.TECH_TIERS[tech3.tier];
-				foreach (Tuple<string, float> tuple in list)
+				foreach (global::Tuple<string, float> tuple in this.TECH_TIERS[tech3.tier])
 				{
 					tech3.costsByResearchTypeID.Add(tuple.first, tuple.second);
 				}
@@ -77,11 +74,14 @@ namespace Database
 		{
 			foreach (Tech tech in this.resources)
 			{
-				foreach (TechItem techItem in tech.unlockedItems)
+				using (List<TechItem>.Enumerator enumerator2 = tech.unlockedItems.GetEnumerator())
 				{
-					if (techItem.Id == id)
+					while (enumerator2.MoveNext())
 					{
-						return tech.IsComplete();
+						if (enumerator2.Current.Id == id)
+						{
+							return tech.IsComplete();
+						}
 					}
 				}
 			}
@@ -464,64 +464,64 @@ namespace Database
 			}
 		};
 
-		private readonly List<List<Tuple<string, float>>> TECH_TIERS = new List<List<Tuple<string, float>>>
+		private readonly List<List<global::Tuple<string, float>>> TECH_TIERS = new List<List<global::Tuple<string, float>>>
 		{
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 15f)
+				new global::Tuple<string, float>("alpha", 15f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 20f)
+				new global::Tuple<string, float>("alpha", 20f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 30f),
-				new Tuple<string, float>("beta", 20f)
+				new global::Tuple<string, float>("alpha", 30f),
+				new global::Tuple<string, float>("beta", 20f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 35f),
-				new Tuple<string, float>("beta", 30f)
+				new global::Tuple<string, float>("alpha", 35f),
+				new global::Tuple<string, float>("beta", 30f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 40f),
-				new Tuple<string, float>("beta", 50f)
+				new global::Tuple<string, float>("alpha", 40f),
+				new global::Tuple<string, float>("beta", 50f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 50f),
-				new Tuple<string, float>("beta", 70f)
+				new global::Tuple<string, float>("alpha", 50f),
+				new global::Tuple<string, float>("beta", 70f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 70f),
-				new Tuple<string, float>("beta", 100f)
+				new global::Tuple<string, float>("alpha", 70f),
+				new global::Tuple<string, float>("beta", 100f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 70f),
-				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 200f)
+				new global::Tuple<string, float>("alpha", 70f),
+				new global::Tuple<string, float>("beta", 100f),
+				new global::Tuple<string, float>("gamma", 200f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 70f),
-				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 400f)
+				new global::Tuple<string, float>("alpha", 70f),
+				new global::Tuple<string, float>("beta", 100f),
+				new global::Tuple<string, float>("gamma", 400f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 70f),
-				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 800f)
+				new global::Tuple<string, float>("alpha", 70f),
+				new global::Tuple<string, float>("beta", 100f),
+				new global::Tuple<string, float>("gamma", 800f)
 			},
-			new List<Tuple<string, float>>
+			new List<global::Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 70f),
-				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 1600f)
+				new global::Tuple<string, float>("alpha", 70f),
+				new global::Tuple<string, float>("beta", 100f),
+				new global::Tuple<string, float>("gamma", 1600f)
 			}
 		};
 	}

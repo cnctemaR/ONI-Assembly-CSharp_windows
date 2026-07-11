@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A capsule-shaped primitive collider.</para>
-	/// </summary>
 	[NativeHeader("Modules/Physics2D/Public/CapsuleCollider2D.h")]
 	public sealed class CapsuleCollider2D : Collider2D
 	{
-		/// <summary>
-		///   <para>The width and height of the capsule area.</para>
-		/// </summary>
 		public Vector2 size
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The direction that the capsule sides can extend.</para>
-		/// </summary>
 		public extern CapsuleDirection2D direction
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

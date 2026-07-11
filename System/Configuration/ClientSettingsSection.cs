@@ -28,6 +28,6 @@ namespace System.Configuration
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 
-		private static ConfigurationProperty settings_prop = new ConfigurationProperty(string.Empty, typeof(SettingElementCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);
+		private static ConfigurationProperty settings_prop = new ConfigurationProperty("", typeof(SettingElementCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);
 	}
 }

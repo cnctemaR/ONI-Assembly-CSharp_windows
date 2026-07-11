@@ -2,9 +2,6 @@
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	/// <summary>
-	///   <para>NativeArray Unsafe Utility.</para>
-	/// </summary>
 	public static class NativeArrayUnsafeUtility
 	{
 		public unsafe static NativeArray<T> ConvertExistingDataToNativeArray<T>(void* dataPointer, int length, Allocator allocator) where T : struct

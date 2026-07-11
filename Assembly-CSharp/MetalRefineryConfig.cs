@@ -43,7 +43,7 @@ public class MetalRefineryConfig : IBuildingConfig
 		liquidCooledRefinery.keepExcessLiquids = true;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
-		ComplexFabricatorWorkable complexFabricatorWorkable = go.AddOrGet<ComplexFabricatorWorkable>();
+		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, liquidCooledRefinery);
 		liquidCooledRefinery.coolantTag = MetalRefineryConfig.COOLANT_TAG;
 		liquidCooledRefinery.minCoolantMass = 400f;
@@ -53,9 +53,8 @@ public class MetalRefineryConfig : IBuildingConfig
 		liquidCooledRefinery.buildStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
 		liquidCooledRefinery.outStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
 		liquidCooledRefinery.outputOffset = new Vector3(1f, 0.5f);
-		complexFabricatorWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
-		RequireOutputs requireOutputs = go.AddOrGet<RequireOutputs>();
-		requireOutputs.ignoreFullPipe = true;
+		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
+		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.capacityTag = GameTags.Liquid;
 		conduitConsumer.capacityKG = 800f;
@@ -67,12 +66,9 @@ public class MetalRefineryConfig : IBuildingConfig
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.elementFilter = null;
 		conduitDispenser.alwaysDispense = true;
-		List<Element> list = ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal));
-		ComplexRecipe complexRecipe;
-		foreach (Element element in list)
+		foreach (Element element in ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal)))
 		{
-			Element highTempTransition = element.highTempTransition;
-			Element lowTempTransition = highTempTransition.lowTempTransition;
+			Element lowTempTransition = element.highTempTransition.lowTempTransition;
 			if (lowTempTransition != element)
 			{
 				ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
@@ -85,7 +81,7 @@ public class MetalRefineryConfig : IBuildingConfig
 				};
 				string text = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element.tag);
 				string text2 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array, array2);
-				complexRecipe = new ComplexRecipe(text2, array, array2);
+				ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 				complexRecipe.time = 40f;
 				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name);
 				complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
@@ -106,11 +102,11 @@ public class MetalRefineryConfig : IBuildingConfig
 		};
 		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element2.tag);
 		string text4 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array3, array4);
-		complexRecipe = new ComplexRecipe(text4, array3, array4);
-		complexRecipe.time = 40f;
-		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
-		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Steel).name, ElementLoader.FindElementByHash(SimHashes.Iron).name);
-		complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
+		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
+		complexRecipe2.time = 40f;
+		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
+		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Steel).name, ElementLoader.FindElementByHash(SimHashes.Iron).name);
+		complexRecipe2.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
 		Prioritizable.AddRef(go);
 	}

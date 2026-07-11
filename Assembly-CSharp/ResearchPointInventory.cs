@@ -19,8 +19,8 @@ public class ResearchPointInventory
 			Debug.LogWarning("Research inventory is missing research point key " + researchTypeID);
 			return;
 		}
-		Dictionary<string, float> pointsByTypeID;
-		(pointsByTypeID = this.PointsByTypeID)[researchTypeID] = pointsByTypeID[researchTypeID] + points;
+		Dictionary<string, float> pointsByTypeID = this.PointsByTypeID;
+		pointsByTypeID[researchTypeID] += points;
 	}
 
 	public void RemoveResearchPoints(string researchTypeID, float points)

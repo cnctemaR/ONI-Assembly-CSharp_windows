@@ -42,6 +42,8 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 
 	public new class Instance : GameStateMachine<SuitSuffocationMonitor, SuitSuffocationMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
+		public SuitTank suitTank { get; private set; }
+
 		public Instance(IStateMachineTarget master, SuitTank suit_tank)
 			: base(master)
 		{
@@ -52,8 +54,6 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false, true);
 			this.suitTank = suit_tank;
 		}
-
-		public SuitTank suitTank { get; private set; }
 
 		public bool IsTankEmpty()
 		{
@@ -67,7 +67,7 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 
 		public bool IsSuffocating()
 		{
-			return this.breath.value <= 45.454544f;
+			return this.breath.value <= 45.454548f;
 		}
 
 		public void Kill()

@@ -50,11 +50,9 @@ public class UserMenuScreen : KIconButtonMenu
 				prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
 				this.priorityScreen.gameObject.SetActive(true);
 				this.priorityScreen.SetScreenPriority(component.GetMasterPriority(), false);
+				return;
 			}
-			else
-			{
-				this.priorityScreen.gameObject.SetActive(false);
-			}
+			this.priorityScreen.gameObject.SetActive(false);
 		}
 	}
 
@@ -75,11 +73,9 @@ public class UserMenuScreen : KIconButtonMenu
 		if ((this.sliders == null || this.sliders.Count == 0) && (this.buttonInfos == null || this.buttonInfos.Count == 0) && !this.priorityScreen.gameObject.activeSelf)
 		{
 			base.transform.parent.gameObject.SetActive(false);
+			return;
 		}
-		else
-		{
-			base.transform.parent.gameObject.SetActive(true);
-		}
+		base.transform.parent.gameObject.SetActive(true);
 	}
 
 	public void AddSliders(IList<UserMenu.SliderInfo> sliders)
@@ -118,7 +114,7 @@ public class UserMenuScreen : KIconButtonMenu
 			this.slidersInfos[j].sliderGO = gameObject;
 			MinMaxSlider component = gameObject.GetComponent<MinMaxSlider>();
 			this.sliders.Add(component);
-			Transform transform = ((!(this.sliderParent != null)) ? base.transform : this.sliderParent.transform);
+			Transform transform = ((this.sliderParent != null) ? this.sliderParent.transform : base.transform);
 			gameObject.transform.SetParent(transform, false);
 			gameObject.SetActive(true);
 			gameObject.name = "Slider";

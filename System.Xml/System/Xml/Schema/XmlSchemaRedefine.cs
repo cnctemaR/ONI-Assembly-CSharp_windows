@@ -7,16 +7,13 @@ namespace System.Xml.Schema
 	{
 		public XmlSchemaRedefine()
 		{
-			this.attributeGroups = new XmlSchemaObjectTable();
-			this.groups = new XmlSchemaObjectTable();
-			this.items = new XmlSchemaObjectCollection(this);
-			this.schemaTypes = new XmlSchemaObjectTable();
+			base.Compositor = Compositor.Redefine;
 		}
 
-		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
 		[XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
-		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
 		[XmlElement("attributeGroup", typeof(XmlSchemaAttributeGroup))]
+		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
+		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
 		[XmlElement("group", typeof(XmlSchemaGroup))]
 		public XmlSchemaObjectCollection Items
 		{
@@ -40,7 +37,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.schemaTypes;
+				return this.types;
 			}
 		}
 
@@ -53,120 +50,17 @@ namespace System.Xml.Schema
 			}
 		}
 
-		internal override void SetParent(XmlSchemaObject parent)
+		internal override void AddAnnotation(XmlSchemaAnnotation annotation)
 		{
-			base.SetParent(parent);
-			foreach (XmlSchemaObject xmlSchemaObject in this.Items)
-			{
-				xmlSchemaObject.SetParent(this);
-				xmlSchemaObject.isRedefinedComponent = true;
-				xmlSchemaObject.isRedefineChild = true;
-			}
+			this.items.Add(annotation);
 		}
 
-		internal static XmlSchemaRedefine Read(XmlSchemaReader reader, ValidationEventHandler h)
-		{
-			XmlSchemaRedefine xmlSchemaRedefine = new XmlSchemaRedefine();
-			reader.MoveToElement();
-			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "redefine")
-			{
-				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaRedefine.Read, name=" + reader.Name, null);
-				reader.Skip();
-				return null;
-			}
-			xmlSchemaRedefine.LineNumber = reader.LineNumber;
-			xmlSchemaRedefine.LinePosition = reader.LinePosition;
-			xmlSchemaRedefine.SourceUri = reader.BaseURI;
-			while (reader.MoveToNextAttribute())
-			{
-				if (reader.Name == "id")
-				{
-					xmlSchemaRedefine.Id = reader.Value;
-				}
-				else if (reader.Name == "schemaLocation")
-				{
-					xmlSchemaRedefine.SchemaLocation = reader.Value;
-				}
-				else if ((reader.NamespaceURI == string.Empty && reader.Name != "xmlns") || reader.NamespaceURI == "http://www.w3.org/2001/XMLSchema")
-				{
-					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for redefine", null);
-				}
-				else
-				{
-					XmlSchemaUtil.ReadUnhandledAttribute(reader, xmlSchemaRedefine);
-				}
-			}
-			reader.MoveToElement();
-			if (reader.IsEmptyElement)
-			{
-				return xmlSchemaRedefine;
-			}
-			while (reader.ReadNextElement())
-			{
-				if (reader.NodeType == XmlNodeType.EndElement)
-				{
-					if (reader.LocalName != "redefine")
-					{
-						XmlSchemaObject.error(h, "Should not happen :2: XmlSchemaRedefine.Read, name=" + reader.Name, null);
-					}
-					break;
-				}
-				if (reader.LocalName == "annotation")
-				{
-					XmlSchemaAnnotation xmlSchemaAnnotation = XmlSchemaAnnotation.Read(reader, h);
-					if (xmlSchemaAnnotation != null)
-					{
-						xmlSchemaRedefine.items.Add(xmlSchemaAnnotation);
-					}
-				}
-				else if (reader.LocalName == "simpleType")
-				{
-					XmlSchemaSimpleType xmlSchemaSimpleType = XmlSchemaSimpleType.Read(reader, h);
-					if (xmlSchemaSimpleType != null)
-					{
-						xmlSchemaRedefine.items.Add(xmlSchemaSimpleType);
-					}
-				}
-				else if (reader.LocalName == "complexType")
-				{
-					XmlSchemaComplexType xmlSchemaComplexType = XmlSchemaComplexType.Read(reader, h);
-					if (xmlSchemaComplexType != null)
-					{
-						xmlSchemaRedefine.items.Add(xmlSchemaComplexType);
-					}
-				}
-				else if (reader.LocalName == "group")
-				{
-					XmlSchemaGroup xmlSchemaGroup = XmlSchemaGroup.Read(reader, h);
-					if (xmlSchemaGroup != null)
-					{
-						xmlSchemaRedefine.items.Add(xmlSchemaGroup);
-					}
-				}
-				else if (reader.LocalName == "attributeGroup")
-				{
-					XmlSchemaAttributeGroup xmlSchemaAttributeGroup = XmlSchemaAttributeGroup.Read(reader, h);
-					if (xmlSchemaAttributeGroup != null)
-					{
-						xmlSchemaRedefine.items.Add(xmlSchemaAttributeGroup);
-					}
-				}
-				else
-				{
-					reader.RaiseInvalidElementError();
-				}
-			}
-			return xmlSchemaRedefine;
-		}
+		private XmlSchemaObjectCollection items = new XmlSchemaObjectCollection();
 
-		private const string xmlname = "redefine";
+		private XmlSchemaObjectTable attributeGroups = new XmlSchemaObjectTable();
 
-		private XmlSchemaObjectTable attributeGroups;
+		private XmlSchemaObjectTable types = new XmlSchemaObjectTable();
 
-		private XmlSchemaObjectTable groups;
-
-		private XmlSchemaObjectCollection items;
-
-		private XmlSchemaObjectTable schemaTypes;
+		private XmlSchemaObjectTable groups = new XmlSchemaObjectTable();
 	}
 }

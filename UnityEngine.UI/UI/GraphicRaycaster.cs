@@ -210,7 +210,7 @@ namespace UnityEngine.UI
 									num7 = Vector3.Dot(forward, transform.position - ray.origin) / Vector3.Dot(forward, ray.direction);
 									if (num7 < 0f)
 									{
-										goto IL_04EA;
+										goto IL_04F2;
 									}
 								}
 								if (num7 < num5)
@@ -221,6 +221,7 @@ namespace UnityEngine.UI
 										module = this,
 										distance = num7,
 										screenPosition = vector,
+										displayIndex = num,
 										index = (float)resultAppendList.Count,
 										depth = this.m_RaycastResults[i].depth,
 										sortingLayer = this.canvas.sortingLayerID,
@@ -229,10 +230,10 @@ namespace UnityEngine.UI
 									resultAppendList.Add(raycastResult);
 								}
 							}
-							IL_04EA:
+							IL_04F2:
 							i++;
 							continue;
-							goto IL_04EA;
+							goto IL_04F2;
 						}
 					}
 				}

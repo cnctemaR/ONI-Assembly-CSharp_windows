@@ -92,8 +92,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 
 		public void PickedUp(object data = null)
 		{
-			bool flag = data is Storage || (data != null && (bool)data);
-			if (flag)
+			if (data is Storage || (data != null && (bool)data))
 			{
 				base.smi.GoTo(base.sm.dead.carried);
 			}

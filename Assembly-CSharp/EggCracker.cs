@@ -33,11 +33,12 @@ public class EggCracker : KMonoBehaviour
 			if (currentWorkingOrder != null)
 			{
 				ComplexRecipe.RecipeElement[] ingredients = currentWorkingOrder.ingredients;
-				if (ingredients.Length > 0)
+				if (ingredients.Length != 0)
 				{
 					ComplexRecipe.RecipeElement recipeElement = ingredients[0];
 					this.display_egg = this.refinery.buildStorage.FindFirst(recipeElement.material);
 					this.PositionActiveEgg();
+					return;
 				}
 			}
 		}
@@ -45,8 +46,8 @@ public class EggCracker : KMonoBehaviour
 		{
 			if (this.display_egg)
 			{
-				KBatchedAnimController component = this.display_egg.GetComponent<KBatchedAnimController>();
-				component.Play("hatching_pst", KAnim.PlayMode.Once, 1f, 0f);
+				this.display_egg.GetComponent<KBatchedAnimController>().Play("hatching_pst", KAnim.PlayMode.Once, 1f, 0f);
+				return;
 			}
 		}
 		else if (e == Workable.WorkableEvent.WorkStopped)

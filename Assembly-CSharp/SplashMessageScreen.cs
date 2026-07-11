@@ -26,28 +26,28 @@ public class SplashMessageScreen : KMonoBehaviour
 			component.minHeight = 128f;
 			this.bodyText.minWidth = 840f;
 			componentInChildren.fontSizeMax = 24f;
+			return;
 		}
-		else if (Screen.width > 1920)
+		if (Screen.width > 1920)
 		{
 			component.minWidth = 720f;
 			component.minHeight = 128f;
 			this.bodyText.minWidth = 700f;
 			componentInChildren.fontSizeMax = 24f;
+			return;
 		}
-		else if (Screen.width > 1280)
+		if (Screen.width > 1280)
 		{
 			component.minWidth = 440f;
 			component.minHeight = 64f;
 			this.bodyText.minWidth = 480f;
 			componentInChildren.fontSizeMax = 18f;
+			return;
 		}
-		else
-		{
-			component.minWidth = 300f;
-			component.minHeight = 48f;
-			this.bodyText.minWidth = 300f;
-			componentInChildren.fontSizeMax = 16f;
-		}
+		component.minWidth = 300f;
+		component.minHeight = 48f;
+		this.bodyText.minWidth = 300f;
+		componentInChildren.fontSizeMax = 16f;
 	}
 
 	protected override void OnSpawn()

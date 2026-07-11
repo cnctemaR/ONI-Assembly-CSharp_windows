@@ -5,22 +5,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 {
 	public class GradientColor
 	{
-		public GradientColor()
-		{
-		}
-
-		public GradientColor(IColor color)
-		{
-			this.AddGradientPoint(-1f, color);
-			this.AddGradientPoint(1f, color);
-		}
-
-		public GradientColor(IColor start, IColor end)
-		{
-			this.AddGradientPoint(-1f, start);
-			this.AddGradientPoint(1f, end);
-		}
-
 		public static GradientColor GRAYSCALE
 		{
 			get
@@ -60,6 +44,22 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 			}
 		}
 
+		public GradientColor()
+		{
+		}
+
+		public GradientColor(IColor color)
+		{
+			this.AddGradientPoint(-1f, color);
+			this.AddGradientPoint(1f, color);
+		}
+
+		public GradientColor(IColor start, IColor end)
+		{
+			this.AddGradientPoint(-1f, start);
+			this.AddGradientPoint(1f, end);
+		}
+
 		public void AddGradientPoint(float position, IColor color)
 		{
 			this.AddGradientPoint(new GradientPoint(position, color));
@@ -93,24 +93,21 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 
 		public IColor GetColor(float position)
 		{
-			int i;
-			for (i = 0; i < this._gradientPoints.Count; i++)
+			int num = 0;
+			while (num < this._gradientPoints.Count && position >= this._gradientPoints[num].Position)
 			{
-				if (position < this._gradientPoints[i].Position)
-				{
-					break;
-				}
+				num++;
 			}
-			int num = Libnoise.Clamp(i - 1, 0, this._gradientPoints.Count - 1);
-			int num2 = Libnoise.Clamp(i, 0, this._gradientPoints.Count - 1);
-			if (num == num2)
+			int num2 = Libnoise.Clamp(num - 1, 0, this._gradientPoints.Count - 1);
+			int num3 = Libnoise.Clamp(num, 0, this._gradientPoints.Count - 1);
+			if (num2 == num3)
 			{
-				return this._gradientPoints[num2].Color;
+				return this._gradientPoints[num3].Color;
 			}
-			float position2 = this._gradientPoints[num].Position;
-			float position3 = this._gradientPoints[num2].Position;
-			float num3 = (position - position2) / (position3 - position2);
-			return Color.Lerp(this._gradientPoints[num].Color, this._gradientPoints[num2].Color, num3);
+			float position2 = this._gradientPoints[num2].Position;
+			float position3 = this._gradientPoints[num3].Position;
+			float num4 = (position - position2) / (position3 - position2);
+			return Color.Lerp(this._gradientPoints[num2].Color, this._gradientPoints[num3].Color, num4);
 		}
 
 		public int CountGradientPoints()

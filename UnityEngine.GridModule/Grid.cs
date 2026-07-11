@@ -4,41 +4,21 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Grid is the base class for plotting a layout of uniformly spaced points and lines.</para>
-	/// </summary>
-	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	[NativeType(Header = "Modules/Grid/Public/Grid.h")]
 	public sealed class Grid : GridLayout
 	{
-		/// <summary>
-		///   <para>Get the logical center coordinate of a grid cell in local space.</para>
-		/// </summary>
-		/// <param name="position">Grid cell position.</param>
-		/// <returns>
-		///   <para>Center of the cell transformed into local space coordinates.</para>
-		/// </returns>
 		public Vector3 GetCellCenterLocal(Vector3Int position)
 		{
 			return base.CellToLocalInterpolated(position + base.GetLayoutCellCenter());
 		}
 
-		/// <summary>
-		///   <para>Get the logical center coordinate of a grid cell in world space.</para>
-		/// </summary>
-		/// <param name="position">Grid cell position.</param>
-		/// <returns>
-		///   <para>Center of the cell transformed into world space coordinates.</para>
-		/// </returns>
 		public Vector3 GetCellCenterWorld(Vector3Int position)
 		{
 			return base.LocalToWorld(base.CellToLocalInterpolated(position + base.GetLayoutCellCenter()));
 		}
 
-		/// <summary>
-		///   <para>The size of each cell in the Grid.</para>
-		/// </summary>
 		public new Vector3 cellSize
 		{
 			[FreeFunction("GridBindings::GetCellSize", HasExplicitThis = true)]
@@ -55,9 +35,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The size of the gap between each cell in the Grid.</para>
-		/// </summary>
 		public new Vector3 cellGap
 		{
 			[FreeFunction("GridBindings::GetCellGap", HasExplicitThis = true)]
@@ -74,9 +51,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The layout of the cells in the Grid.</para>
-		/// </summary>
 		public new extern GridLayout.CellLayout cellLayout
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -85,9 +59,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The cell swizzle for the Grid.</para>
-		/// </summary>
 		public new extern GridLayout.CellSwizzle cellSwizzle
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

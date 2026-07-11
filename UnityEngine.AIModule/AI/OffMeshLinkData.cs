@@ -5,15 +5,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>State of OffMeshLink.</para>
-	/// </summary>
 	[MovedFrom("UnityEngine")]
 	public struct OffMeshLinkData
 	{
-		/// <summary>
-		///   <para>Is link valid (Read Only).</para>
-		/// </summary>
 		public bool valid
 		{
 			get
@@ -22,9 +16,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Is link active (Read Only).</para>
-		/// </summary>
 		public bool activated
 		{
 			get
@@ -33,9 +24,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Link type specifier (Read Only).</para>
-		/// </summary>
 		public OffMeshLinkType linkType
 		{
 			get
@@ -44,9 +32,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Link start world position (Read Only).</para>
-		/// </summary>
 		public Vector3 startPos
 		{
 			get
@@ -55,9 +40,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Link end world position (Read Only).</para>
-		/// </summary>
 		public Vector3 endPos
 		{
 			get
@@ -66,9 +48,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The OffMeshLink if the link type is a manually placed Offmeshlink (Read Only).</para>
-		/// </summary>
 		public OffMeshLink offMeshLink
 		{
 			get

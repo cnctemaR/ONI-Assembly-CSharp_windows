@@ -33,8 +33,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 		this.surfaceArea = 1f;
 		this.thickness = 0.002f;
 		this.groundTransferScale = 0f;
-		Attributes attributes = base.gameObject.GetAttributes();
-		AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.ThermalConductivityBarrier);
+		AttributeInstance attributeInstance = base.gameObject.GetAttributes().Add(Db.Get().Attributes.ThermalConductivityBarrier);
 		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Attributes.ThermalConductivityBarrier.Id, this.thickness, DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, false, false, true);
 		attributeInstance.Add(attributeModifier);
 		this.averageTemperatureTransferPerSecond = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.TEMPEXCHANGE.NAME, false, true, false);
@@ -60,8 +59,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 	public void RefreshRegistration()
 	{
 		base.SimUnregister();
-		Attributes attributes = base.gameObject.GetAttributes();
-		AttributeInstance attributeInstance = attributes.Get("ThermalConductivityBarrier");
+		AttributeInstance attributeInstance = base.gameObject.GetAttributes().Get("ThermalConductivityBarrier");
 		this.thickness = attributeInstance.GetTotalValue();
 		this.simHandle = -1;
 		base.SimRegister();

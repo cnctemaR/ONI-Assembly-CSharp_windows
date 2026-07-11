@@ -22,7 +22,7 @@ public static class RadiationGridManager
 
 	public static void DestroyPreview()
 	{
-		foreach (Tuple<int, int> tuple in RadiationGridManager.previewLightCells)
+		foreach (global::Tuple<int, int> tuple in RadiationGridManager.previewLightCells)
 		{
 			RadiationGridManager.previewLux[tuple.first] = 0;
 		}
@@ -40,14 +40,14 @@ public static class RadiationGridManager
 			if (Grid.IsValidCell(num))
 			{
 				int num2 = lux / RadiationGridManager.CalculateFalloff(0.5f, num, origin_cell);
-				RadiationGridManager.previewLightCells.Add(new Tuple<int, int>(num, num2));
+				RadiationGridManager.previewLightCells.Add(new global::Tuple<int, int>(num, num2));
 				RadiationGridManager.previewLux[num] = num2;
 			}
 		}
 		pooledList.Recycle();
 	}
 
-	public static List<Tuple<int, int>> previewLightCells = new List<Tuple<int, int>>();
+	public static List<global::Tuple<int, int>> previewLightCells = new List<global::Tuple<int, int>>();
 
 	public static int[] previewLux;
 }

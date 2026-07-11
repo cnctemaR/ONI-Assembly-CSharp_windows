@@ -6,16 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>A IPlayableOutput implementation that connects the PlayableGraph to an Animator in the scene.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationPlayableOutput.h")]
-	[NativeHeader("Runtime/Animation/Animator.h")]
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
 	[StaticAccessor("AnimationPlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Animation/Animator.h")]
+	[NativeHeader("Runtime/Animation/Director/AnimationPlayableOutput.h")]
 	public struct AnimationPlayableOutput : IPlayableOutput
 	{
 		internal AnimationPlayableOutput(PlayableOutputHandle handle)
@@ -30,15 +27,6 @@ namespace UnityEngine.Animations
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates an AnimationPlayableOutput in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph that will contain the AnimationPlayableOutput.</param>
-		/// <param name="name">The name of the output.</param>
-		/// <param name="target">The Animator that will process the PlayableGraph.</param>
-		/// <returns>
-		///   <para>A new AnimationPlayableOutput attached to the PlayableGraph.</para>
-		/// </returns>
 		public static AnimationPlayableOutput Create(PlayableGraph graph, string name, Animator target)
 		{
 			PlayableOutputHandle playableOutputHandle;
@@ -79,29 +67,21 @@ namespace UnityEngine.Animations
 			return new AnimationPlayableOutput(output.GetHandle());
 		}
 
-		/// <summary>
-		///   <para>Returns the Animator that plays the animation graph.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The targeted Animator.</para>
-		/// </returns>
 		public Animator GetTarget()
 		{
 			return AnimationPlayableOutput.InternalGetTarget(ref this.m_Handle);
 		}
 
-		/// <summary>
-		///   <para>Sets the Animator that plays the animation graph.</para>
-		/// </summary>
-		/// <param name="value">The targeted Animator.</param>
 		public void SetTarget(Animator value)
 		{
 			AnimationPlayableOutput.InternalSetTarget(ref this.m_Handle, value);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Animator InternalGetTarget(ref PlayableOutputHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalSetTarget(ref PlayableOutputHandle handle, Animator target);
 

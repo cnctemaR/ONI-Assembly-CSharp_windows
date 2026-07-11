@@ -6,13 +6,12 @@ namespace System.Security.AccessControl
 	public sealed class CryptoKeyAuditRule : AuditRule
 	{
 		public CryptoKeyAuditRule(IdentityReference identity, CryptoKeyRights cryptoKeyRights, AuditFlags flags)
-			: base(identity, 0, false, InheritanceFlags.None, PropagationFlags.None, flags)
+			: base(identity, (int)cryptoKeyRights, false, InheritanceFlags.None, PropagationFlags.None, flags)
 		{
-			this.rights = cryptoKeyRights;
 		}
 
 		public CryptoKeyAuditRule(string identity, CryptoKeyRights cryptoKeyRights, AuditFlags flags)
-			: this(new SecurityIdentifier(identity), cryptoKeyRights, flags)
+			: this(new NTAccount(identity), cryptoKeyRights, flags)
 		{
 		}
 
@@ -20,10 +19,8 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.rights;
+				return (CryptoKeyRights)base.AccessMask;
 			}
 		}
-
-		private CryptoKeyRights rights;
 	}
 }

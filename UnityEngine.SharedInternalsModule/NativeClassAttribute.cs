@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
 	internal sealed class NativeClassAttribute : Attribute
 	{
 		public NativeClassAttribute(string qualifiedCppName)

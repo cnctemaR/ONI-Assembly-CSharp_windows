@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
@@ -7,40 +8,19 @@ namespace System.Security.Cryptography
 	{
 		public OidCollection()
 		{
-			this._list = new ArrayList();
+			this.m_list = new ArrayList();
 		}
 
-		void ICollection.CopyTo(Array array, int index)
+		public int Add(Oid oid)
 		{
-			this._list.CopyTo(array, index);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new OidEnumerator(this);
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this._list.Count;
-			}
-		}
-
-		public bool IsSynchronized
-		{
-			get
-			{
-				return this._list.IsSynchronized;
-			}
+			return this.m_list.Add(oid);
 		}
 
 		public Oid this[int index]
 		{
 			get
 			{
-				return (Oid)this._list[index];
+				return this.m_list[index] as Oid;
 			}
 		}
 
@@ -48,10 +28,15 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				foreach (object obj in this._list)
+				string text = X509Utils.FindOidInfoWithFallback(2U, oid, OidGroup.All);
+				if (text == null)
+				{
+					text = oid;
+				}
+				foreach (object obj in this.m_list)
 				{
 					Oid oid2 = (Oid)obj;
-					if (oid2.Value == oid)
+					if (oid2.Value == text)
 					{
 						return oid2;
 					}
@@ -60,22 +45,12 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		public object SyncRoot
+		public int Count
 		{
 			get
 			{
-				return this._list.SyncRoot;
+				return this.m_list.Count;
 			}
-		}
-
-		public int Add(Oid oid)
-		{
-			return (!this._readOnly) ? this._list.Add(oid) : 0;
-		}
-
-		public void CopyTo(Oid[] array, int index)
-		{
-			this._list.CopyTo(array, index);
 		}
 
 		public OidEnumerator GetEnumerator()
@@ -83,32 +58,57 @@ namespace System.Security.Cryptography
 			return new OidEnumerator(this);
 		}
 
-		internal bool ReadOnly
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new OidEnumerator(this);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException(global::SR.GetString("Only single dimensional arrays are supported for the requested action."));
+			}
+			if (index < 0 || index >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", global::SR.GetString("Index was out of range. Must be non-negative and less than the size of the collection."));
+			}
+			if (index + this.Count > array.Length)
+			{
+				throw new ArgumentException(global::SR.GetString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			for (int i = 0; i < this.Count; i++)
+			{
+				array.SetValue(this[i], index);
+				index++;
+			}
+		}
+
+		public void CopyTo(Oid[] array, int index)
+		{
+			((ICollection)this).CopyTo(array, index);
+		}
+
+		public bool IsSynchronized
 		{
 			get
 			{
-				return this._readOnly;
-			}
-			set
-			{
-				this._readOnly = value;
+				return false;
 			}
 		}
 
-		internal OidCollection ReadOnlyCopy()
+		public object SyncRoot
 		{
-			OidCollection oidCollection = new OidCollection();
-			foreach (object obj in this._list)
+			get
 			{
-				Oid oid = (Oid)obj;
-				oidCollection.Add(oid);
+				return this;
 			}
-			oidCollection._readOnly = true;
-			return oidCollection;
 		}
 
-		private ArrayList _list;
-
-		private bool _readOnly;
+		private ArrayList m_list;
 	}
 }

@@ -4,14 +4,9 @@ using UnityEngine;
 
 public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 {
-	public PlantElementAbsorbers()
-		: base(0)
-	{
-	}
-
 	public HandleVector<int>.Handle Add(Storage storage, PlantElementAbsorber.ConsumeInfo[] consumed_elements)
 	{
-		if (consumed_elements == null || consumed_elements.Length <= 0)
+		if (consumed_elements == null || consumed_elements.Length == 0)
 		{
 			return HandleVector<int>.InvalidHandle;
 		}
@@ -129,6 +124,11 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 		}
 		this.data.Clear();
 		this.handles.Clear();
+	}
+
+	public PlantElementAbsorbers()
+		: base(0)
+	{
 	}
 
 	private bool updating;

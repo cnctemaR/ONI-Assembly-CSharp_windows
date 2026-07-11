@@ -54,10 +54,9 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public static Vector3 GetCursorPos(Vector3 mouse_pos)
 	{
-		Ray ray = Camera.main.ScreenPointToRay(mouse_pos);
 		RaycastHit raycastHit;
 		Vector3 vector;
-		if (Physics.Raycast(ray, out raycastHit, float.PositiveInfinity, Game.BlockSelectionLayerMask))
+		if (Physics.Raycast(Camera.main.ScreenPointToRay(mouse_pos), out raycastHit, float.PositiveInfinity, Game.BlockSelectionLayerMask))
 		{
 			vector = raycastHit.point;
 		}
@@ -236,20 +235,20 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		{
 			this.StartDrag(global::Action.MouseLeft);
 			this.activeTool.OnLeftClickDown(this.GetCursorPos());
+			return;
 		}
-		else if (e.IsAction(global::Action.MouseRight))
+		if (e.IsAction(global::Action.MouseRight))
 		{
 			this.StartDrag(global::Action.MouseRight);
 			this.activeTool.OnRightClickDown(this.GetCursorPos(), e);
+			return;
 		}
-		else if (e.IsAction(global::Action.MouseMiddle))
+		if (e.IsAction(global::Action.MouseMiddle))
 		{
 			this.StartDrag(global::Action.MouseMiddle);
+			return;
 		}
-		else
-		{
-			this.activeTool.OnKeyDown(e);
-		}
+		this.activeTool.OnKeyDown(e);
 	}
 
 	public void OnKeyUp(KButtonEvent e)
@@ -277,15 +276,14 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
 		{
 			this.activeTool.OnLeftClickUp(this.GetCursorPos());
+			return;
 		}
-		else if (e.IsAction(global::Action.MouseRight))
+		if (e.IsAction(global::Action.MouseRight))
 		{
 			this.activeTool.OnRightClickUp(this.GetCursorPos());
+			return;
 		}
-		else
-		{
-			this.activeTool.OnKeyUp(e);
-		}
+		this.activeTool.OnKeyUp(e);
 	}
 
 	public bool ConsumeIfNotDragging(KButtonEvent e, global::Action action)
@@ -295,7 +293,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public bool IsDragging()
 	{
-		return this.dragAction != global::Action.Invalid;
+		return this.dragAction > global::Action.Invalid;
 	}
 
 	public void AllowDragging(bool allow)

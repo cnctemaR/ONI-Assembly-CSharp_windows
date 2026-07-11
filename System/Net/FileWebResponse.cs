@@ -1,46 +1,63 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.Net
 {
 	[Serializable]
-	public class FileWebResponse : WebResponse, IDisposable, ISerializable
+	public class FileWebResponse : WebResponse, ISerializable, ICloseEx
 	{
-		internal FileWebResponse(global::System.Uri responseUri, FileStream fileStream)
+		internal FileWebResponse(FileWebRequest request, Uri uri, FileAccess access, bool asyncHint)
 		{
 			try
 			{
-				this.responseUri = responseUri;
-				this.fileStream = fileStream;
-				this.contentLength = fileStream.Length;
-				this.webHeaders = new WebHeaderCollection();
-				this.webHeaders.Add("Content-Length", Convert.ToString(this.contentLength));
-				this.webHeaders.Add("Content-Type", "application/octet-stream");
+				this.m_fileAccess = access;
+				if (access == FileAccess.Write)
+				{
+					this.m_stream = Stream.Null;
+				}
+				else
+				{
+					this.m_stream = new FileWebStream(request, uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, 8192, asyncHint);
+					this.m_contentLength = this.m_stream.Length;
+				}
+				this.m_headers = new WebHeaderCollection(WebHeaderCollectionType.FileWebResponse);
+				this.m_headers.AddInternal("Content-Length", this.m_contentLength.ToString(NumberFormatInfo.InvariantInfo));
+				this.m_headers.AddInternal("Content-Type", "application/octet-stream");
+				this.m_uri = uri;
 			}
 			catch (Exception ex)
 			{
-				throw new WebException(ex.Message, ex);
+				throw new WebException(ex.Message, ex, WebExceptionStatus.ConnectFailure, null);
 			}
 		}
 
-		[Obsolete("Serialization is obsoleted for this type", false)]
+		[Obsolete("Serialization is obsoleted for this type. http://go.microsoft.com/fwlink/?linkid=14202")]
 		protected FileWebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
 		{
-			this.responseUri = (global::System.Uri)serializationInfo.GetValue("responseUri", typeof(global::System.Uri));
-			this.contentLength = serializationInfo.GetInt64("contentLength");
-			this.webHeaders = (WebHeaderCollection)serializationInfo.GetValue("webHeaders", typeof(WebHeaderCollection));
+			this.m_headers = (WebHeaderCollection)serializationInfo.GetValue("headers", typeof(WebHeaderCollection));
+			this.m_uri = (Uri)serializationInfo.GetValue("uri", typeof(Uri));
+			this.m_contentLength = serializationInfo.GetInt64("contentLength");
+			this.m_fileAccess = (FileAccess)serializationInfo.GetInt32("fileAccess");
 		}
 
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter, SerializationFormatter = true)]
 		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 			this.GetObjectData(serializationInfo, streamingContext);
 		}
 
-		void IDisposable.Dispose()
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+		protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
+			serializationInfo.AddValue("headers", this.m_headers, typeof(WebHeaderCollection));
+			serializationInfo.AddValue("uri", this.m_uri, typeof(Uri));
+			serializationInfo.AddValue("contentLength", this.m_contentLength);
+			serializationInfo.AddValue("fileAccess", this.m_fileAccess);
+			base.GetObjectData(serializationInfo, streamingContext);
 		}
 
 		public override long ContentLength
@@ -48,7 +65,7 @@ namespace System.Net
 			get
 			{
 				this.CheckDisposed();
-				return this.contentLength;
+				return this.m_contentLength;
 			}
 		}
 
@@ -66,78 +83,93 @@ namespace System.Net
 			get
 			{
 				this.CheckDisposed();
-				return this.webHeaders;
+				return this.m_headers;
 			}
 		}
 
-		public override global::System.Uri ResponseUri
+		public override bool SupportsHeaders
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public override Uri ResponseUri
 		{
 			get
 			{
 				this.CheckDisposed();
-				return this.responseUri;
-			}
-		}
-
-		protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-			serializationInfo.AddValue("responseUri", this.responseUri, typeof(global::System.Uri));
-			serializationInfo.AddValue("contentLength", this.contentLength);
-			serializationInfo.AddValue("webHeaders", this.webHeaders, typeof(WebHeaderCollection));
-		}
-
-		public override Stream GetResponseStream()
-		{
-			this.CheckDisposed();
-			return this.fileStream;
-		}
-
-		~FileWebResponse()
-		{
-			this.Dispose(false);
-		}
-
-		public override void Close()
-		{
-			((IDisposable)this).Dispose();
-		}
-
-		private void Dispose(bool disposing)
-		{
-			if (this.disposed)
-			{
-				return;
-			}
-			this.disposed = true;
-			if (disposing)
-			{
-				this.responseUri = null;
-				this.webHeaders = null;
-			}
-			FileStream fileStream = this.fileStream;
-			this.fileStream = null;
-			if (fileStream != null)
-			{
-				fileStream.Close();
+				return this.m_uri;
 			}
 		}
 
 		private void CheckDisposed()
 		{
-			if (this.disposed)
+			if (this.m_closed)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
 		}
 
-		private global::System.Uri responseUri;
+		public override void Close()
+		{
+			((ICloseEx)this).CloseEx(CloseExState.Normal);
+		}
 
-		private FileStream fileStream;
+		void ICloseEx.CloseEx(CloseExState closeState)
+		{
+			try
+			{
+				if (!this.m_closed)
+				{
+					this.m_closed = true;
+					Stream stream = this.m_stream;
+					if (stream != null)
+					{
+						if (stream is ICloseEx)
+						{
+							((ICloseEx)stream).CloseEx(closeState);
+						}
+						else
+						{
+							stream.Close();
+						}
+						this.m_stream = null;
+					}
+				}
+			}
+			finally
+			{
+			}
+		}
 
-		private long contentLength;
+		public override Stream GetResponseStream()
+		{
+			try
+			{
+				this.CheckDisposed();
+			}
+			finally
+			{
+			}
+			return this.m_stream;
+		}
 
-		private WebHeaderCollection webHeaders;
+		private const int DefaultFileStreamBufferSize = 8192;
 
-		private bool disposed;
+		private const string DefaultFileContentType = "application/octet-stream";
+
+		private bool m_closed;
+
+		private long m_contentLength;
+
+		private FileAccess m_fileAccess;
+
+		private WebHeaderCollection m_headers;
+
+		private Stream m_stream;
+
+		private Uri m_uri;
 	}
 }

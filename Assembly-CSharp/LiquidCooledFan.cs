@@ -52,6 +52,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 			if (!component.HasStatusItem(Db.Get().BuildingStatusItems.UnderPressure))
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.UnderPressure, null);
+				return;
 			}
 		}
 		else if (component.HasStatusItem(Db.Get().BuildingStatusItems.UnderPressure))
@@ -83,15 +84,14 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 			return;
 		}
 		float num = 0.1f;
-		float num2 = num;
 		PrimaryElement primaryElement = null;
 		for (int i = 0; i < this.gasStorage.items.Count; i++)
 		{
 			PrimaryElement component = this.gasStorage.items[i].GetComponent<PrimaryElement>();
-			if (component.Mass > num2 && component.Element.IsGas)
+			if (component.Mass > num && component.Element.IsGas)
 			{
 				primaryElement = component;
-				num2 = primaryElement.Mass;
+				num = primaryElement.Mass;
 			}
 		}
 		if (primaryElement != null)

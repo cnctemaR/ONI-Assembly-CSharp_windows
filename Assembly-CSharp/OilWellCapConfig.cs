@@ -37,8 +37,7 @@ public class OilWellCapConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.showInUI = true;
+		BuildingTemplates.CreateDefaultStorage(go, false).showInUI = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 1f;

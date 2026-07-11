@@ -62,11 +62,9 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 		{
 			this.MarkDirty(false);
 			SimAndRenderScheduler.instance.Add(this, false);
+			return;
 		}
-		else
-		{
-			SimAndRenderScheduler.instance.Remove(this);
-		}
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	private static void OnMovementStateChanged(Transform transform, bool is_moving)

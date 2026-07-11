@@ -155,34 +155,37 @@ namespace NodeEditorFramework
 					NodeEditorSaveManager.AddClonedSOs(allSOs, clonedSOs, nodeKnob.GetScriptableObjects());
 				}
 			}
+			Func<ScriptableObject, ScriptableObject> <>9__0;
+			Func<ScriptableObject, ScriptableObject> <>9__1;
 			for (int j = 0; j < nodeCanvas.nodes.Count; j++)
 			{
 				Node node3 = nodeCanvas.nodes[j];
-				Node node4 = NodeEditorSaveManager.ReplaceSO<Node>(allSOs, clonedSOs, node3);
-				nodeCanvas.nodes[j] = node4;
+				Node node4 = (nodeCanvas.nodes[j] = NodeEditorSaveManager.ReplaceSO<Node>(allSOs, clonedSOs, node3));
 				Node node5 = node4;
-				node5.CopyScriptableObjects((ScriptableObject so) => NodeEditorSaveManager.ReplaceSO<ScriptableObject>(allSOs, clonedSOs, so));
-				for (int k = 0; k < node5.nodeKnobs.Count; k++)
+				Func<ScriptableObject, ScriptableObject> func;
+				if ((func = <>9__0) == null)
 				{
-					NodeKnob nodeKnob2 = NodeEditorSaveManager.ReplaceSO<NodeKnob>(allSOs, clonedSOs, node5.nodeKnobs[k]);
-					node5.nodeKnobs[k] = nodeKnob2;
-					NodeKnob nodeKnob3 = nodeKnob2;
-					nodeKnob3.body = node5;
-					nodeKnob3.CopyScriptableObjects((ScriptableObject so) => NodeEditorSaveManager.ReplaceSO<ScriptableObject>(allSOs, clonedSOs, so));
+					func = (<>9__0 = (ScriptableObject so) => NodeEditorSaveManager.ReplaceSO<ScriptableObject>(allSOs, clonedSOs, so));
 				}
-				for (int l = 0; l < node5.Inputs.Count; l++)
+				node5.CopyScriptableObjects(func);
+				for (int k = 0; k < node4.nodeKnobs.Count; k++)
 				{
-					NodeInput nodeInput = NodeEditorSaveManager.ReplaceSO<NodeInput>(allSOs, clonedSOs, node5.Inputs[l]);
-					node5.Inputs[l] = nodeInput;
-					NodeInput nodeInput2 = nodeInput;
-					nodeInput2.body = node5;
+					NodeKnob nodeKnob2 = (node4.nodeKnobs[k] = NodeEditorSaveManager.ReplaceSO<NodeKnob>(allSOs, clonedSOs, node4.nodeKnobs[k]));
+					nodeKnob2.body = node4;
+					Func<ScriptableObject, ScriptableObject> func2;
+					if ((func2 = <>9__1) == null)
+					{
+						func2 = (<>9__1 = (ScriptableObject so) => NodeEditorSaveManager.ReplaceSO<ScriptableObject>(allSOs, clonedSOs, so));
+					}
+					nodeKnob2.CopyScriptableObjects(func2);
 				}
-				for (int m = 0; m < node5.Outputs.Count; m++)
+				for (int l = 0; l < node4.Inputs.Count; l++)
 				{
-					NodeOutput nodeOutput = NodeEditorSaveManager.ReplaceSO<NodeOutput>(allSOs, clonedSOs, node5.Outputs[m]);
-					node5.Outputs[m] = nodeOutput;
-					NodeOutput nodeOutput2 = nodeOutput;
-					nodeOutput2.body = node5;
+					(node4.Inputs[l] = NodeEditorSaveManager.ReplaceSO<NodeInput>(allSOs, clonedSOs, node4.Inputs[l])).body = node4;
+				}
+				for (int m = 0; m < node4.Outputs.Count; m++)
+				{
+					(node4.Outputs[m] = NodeEditorSaveManager.ReplaceSO<NodeOutput>(allSOs, clonedSOs, node4.Outputs[m])).body = node4;
 				}
 			}
 			if (editorStates)
@@ -195,9 +198,10 @@ namespace NodeEditorFramework
 			}
 			else
 			{
-				foreach (NodeEditorState nodeEditorState2 in nodeCanvas.editorStates)
+				NodeEditorState[] array = nodeCanvas.editorStates;
+				for (int n = 0; n < array.Length; n++)
 				{
-					nodeEditorState2.selectedNode = null;
+					array[n].selectedNode = null;
 				}
 			}
 			return nodeCanvas;
@@ -240,14 +244,14 @@ namespace NodeEditorFramework
 		private static void AddClonedSOs(List<ScriptableObject> scriptableObjects, List<ScriptableObject> clonedScriptableObjects, ScriptableObject[] initialSOs)
 		{
 			scriptableObjects.AddRange(initialSOs);
-			clonedScriptableObjects.AddRange(initialSOs.Select<ScriptableObject, ScriptableObject>(new Func<ScriptableObject, ScriptableObject>(NodeEditorSaveManager.Clone<ScriptableObject>)));
+			clonedScriptableObjects.AddRange(initialSOs.Select<ScriptableObject, ScriptableObject>((ScriptableObject so) => NodeEditorSaveManager.Clone<ScriptableObject>(so)));
 		}
 
 		private static T AddClonedSO<T>(List<ScriptableObject> scriptableObjects, List<ScriptableObject> clonedScriptableObjects, T initialSO) where T : ScriptableObject
 		{
 			if (initialSO == null)
 			{
-				return (T)((object)null);
+				return default(T);
 			}
 			scriptableObjects.Add(initialSO);
 			T t = NodeEditorSaveManager.Clone<T>(initialSO);
@@ -259,20 +263,24 @@ namespace NodeEditorFramework
 		{
 			if (initialSO == null)
 			{
-				return (T)((object)null);
+				return default(T);
 			}
 			int num = scriptableObjects.IndexOf(initialSO);
 			if (num == -1)
 			{
 				global::Debug.LogError("GetWorkingCopy: ScriptableObject " + initialSO.name + " was not copied before! It will be null!");
 			}
-			return (num != -1) ? ((T)((object)clonedScriptableObjects[num])) : ((T)((object)null));
+			if (num != -1)
+			{
+				return (T)((object)clonedScriptableObjects[num]);
+			}
+			return default(T);
 		}
 
 		public static NodeEditorState ExtractEditorState(NodeCanvas canvas, string stateName)
 		{
 			NodeEditorState nodeEditorState = null;
-			if (canvas.editorStates.Length > 0)
+			if (canvas.editorStates.Length != 0)
 			{
 				nodeEditorState = canvas.editorStates.First<NodeEditorState>((NodeEditorState s) => s.name == stateName);
 				if (nodeEditorState == null)

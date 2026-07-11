@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace Mono.Globalization.Unicode
 {
-	internal class ContractionComparer : IComparer
+	internal class ContractionComparer : IComparer<Contraction>
 	{
-		public int Compare(object o1, object o2)
+		public int Compare(Contraction c1, Contraction c2)
 		{
-			Contraction contraction = (Contraction)o1;
-			Contraction contraction2 = (Contraction)o2;
-			char[] source = contraction.Source;
-			char[] source2 = contraction2.Source;
-			int num = ((source.Length <= source2.Length) ? source.Length : source2.Length);
+			char[] source = c1.Source;
+			char[] source2 = c2.Source;
+			int num = ((source.Length > source2.Length) ? source2.Length : source.Length);
 			for (int i = 0; i < num; i++)
 			{
 				if (source[i] != source2[i])
@@ -19,7 +17,11 @@ namespace Mono.Globalization.Unicode
 					return (int)(source[i] - source2[i]);
 				}
 			}
-			return source.Length - source2.Length;
+			if (source.Length != source2.Length)
+			{
+				return source.Length - source2.Length;
+			}
+			return c1.Index - c2.Index;
 		}
 
 		public static readonly ContractionComparer Instance = new ContractionComparer();

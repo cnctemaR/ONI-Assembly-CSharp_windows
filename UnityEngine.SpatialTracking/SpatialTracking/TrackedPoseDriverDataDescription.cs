@@ -9,7 +9,7 @@ namespace UnityEngine.SpatialTracking
 		{
 			new TrackedPoseDriverDataDescription.PoseData
 			{
-				PoseNames = new List<string> { "Left Eye", " Right Eye", "Center Eye", "Head", "Color Camera" },
+				PoseNames = new List<string> { "Left Eye", "Right Eye", "Center Eye", "Head", "Color Camera" },
 				Poses = new List<TrackedPoseDriver.TrackedPose>
 				{
 					TrackedPoseDriver.TrackedPose.LeftEye,
@@ -21,7 +21,7 @@ namespace UnityEngine.SpatialTracking
 			},
 			new TrackedPoseDriverDataDescription.PoseData
 			{
-				PoseNames = new List<string> { "Left Controller", " Right Controller" },
+				PoseNames = new List<string> { "Left Controller", "Right Controller" },
 				Poses = new List<TrackedPoseDriver.TrackedPose>
 				{
 					TrackedPoseDriver.TrackedPose.LeftPose,

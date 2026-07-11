@@ -3,11 +3,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[TypeLibImportClass(typeof(EventInfo))]
-	[CLSCompliant(false)]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("9DE59C64-D889-35A1-B897-587D74469E5B")]
 	[ComVisible(true)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[TypeLibImportClass(typeof(EventInfo))]
+	[CLSCompliant(false)]
 	public interface _EventInfo
 	{
 		void AddEventHandler(object target, Delegate handler);

@@ -4,20 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 {
 	public abstract class FilterModule : IModule
 	{
-		protected FilterModule()
-			: this(1f, 2f, 0.9f, 6f)
-		{
-		}
-
-		protected FilterModule(float frequency, float lacunarity, float exponent, float octaveCount)
-		{
-			this._frequency = frequency;
-			this._lacunarity = lacunarity;
-			this._spectralExponent = exponent;
-			this._octaveCount = octaveCount;
-			this.ComputeSpectralWeights();
-		}
-
 		public float Frequency
 		{
 			get
@@ -138,6 +124,20 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 			{
 				this._source1D = value;
 			}
+		}
+
+		protected FilterModule()
+			: this(1f, 2f, 0.9f, 6f)
+		{
+		}
+
+		protected FilterModule(float frequency, float lacunarity, float exponent, float octaveCount)
+		{
+			this._frequency = frequency;
+			this._lacunarity = lacunarity;
+			this._spectralExponent = exponent;
+			this._octaveCount = octaveCount;
+			this.ComputeSpectralWeights();
 		}
 
 		protected void ComputeSpectralWeights()

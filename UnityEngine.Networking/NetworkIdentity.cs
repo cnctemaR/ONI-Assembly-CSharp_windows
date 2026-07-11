@@ -8,6 +8,7 @@ namespace UnityEngine.Networking
 	[ExecuteInEditMode]
 	[DisallowMultipleComponent]
 	[AddComponentMenu("Network/NetworkIdentity")]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public sealed class NetworkIdentity : MonoBehaviour
 	{
 		public bool isClient
@@ -22,7 +23,7 @@ namespace UnityEngine.Networking
 		{
 			get
 			{
-				return this.m_IsServer && NetworkServer.active && this.m_IsServer;
+				return this.m_IsServer && NetworkServer.active;
 			}
 		}
 
@@ -622,35 +623,29 @@ namespace UnityEngine.Networking
 						NetworkIdentity.s_UpdateWriter.StartMessage(8);
 						NetworkIdentity.s_UpdateWriter.Write(this.netId);
 						bool flag = false;
-						for (int k = 0; k < this.m_NetworkBehaviours.Length; k++)
+						NetworkBehaviour[] behavioursOfSameChannel = this.GetBehavioursOfSameChannel(j, false);
+						for (int k = 0; k < behavioursOfSameChannel.Length; k++)
 						{
 							short position = NetworkIdentity.s_UpdateWriter.Position;
-							NetworkBehaviour networkBehaviour2 = this.m_NetworkBehaviours[k];
-							if (networkBehaviour2.GetDirtyChannel() != j)
+							NetworkBehaviour networkBehaviour2 = behavioursOfSameChannel[k];
+							if (networkBehaviour2.OnSerialize(NetworkIdentity.s_UpdateWriter, false))
 							{
-								networkBehaviour2.OnSerialize(NetworkIdentity.s_UpdateWriter, false);
+								networkBehaviour2.ClearAllDirtyBits();
+								flag = true;
 							}
-							else
+							if (NetworkIdentity.s_UpdateWriter.Position - position > (short)NetworkServer.maxPacketSize)
 							{
-								if (networkBehaviour2.OnSerialize(NetworkIdentity.s_UpdateWriter, false))
+								if (LogFilter.logWarn)
 								{
-									networkBehaviour2.ClearAllDirtyBits();
-									flag = true;
-								}
-								if (NetworkIdentity.s_UpdateWriter.Position - position > (short)NetworkServer.maxPacketSize)
-								{
-									if (LogFilter.logWarn)
+									Debug.LogWarning(string.Concat(new object[]
 									{
-										Debug.LogWarning(string.Concat(new object[]
-										{
-											"Large state update of ",
-											(int)(NetworkIdentity.s_UpdateWriter.Position - position),
-											" bytes for netId:",
-											this.netId,
-											" from script:",
-											networkBehaviour2
-										}));
-									}
+										"Large state update of ",
+										(int)(NetworkIdentity.s_UpdateWriter.Position - position),
+										" bytes for netId:",
+										this.netId,
+										" from script:",
+										networkBehaviour2
+									}));
 								}
 							}
 						}
@@ -660,27 +655,43 @@ namespace UnityEngine.Networking
 							NetworkServer.SendWriterToReady(base.gameObject, NetworkIdentity.s_UpdateWriter, j);
 						}
 					}
-					IL_0197:
+					IL_0178:
 					j++;
 					continue;
-					goto IL_0197;
+					goto IL_0178;
 				}
 			}
 		}
 
-		internal void OnUpdateVars(NetworkReader reader, bool initialState, NetworkMessage netMsg)
+		private NetworkBehaviour[] GetBehavioursOfSameChannel(int channelId, bool initialState)
 		{
+			List<NetworkBehaviour> list = new List<NetworkBehaviour>();
+			NetworkBehaviour[] array;
 			if (initialState && this.m_NetworkBehaviours == null)
 			{
 				this.m_NetworkBehaviours = base.GetComponents<NetworkBehaviour>();
+				array = this.m_NetworkBehaviours;
 			}
-			for (int i = 0; i < this.m_NetworkBehaviours.Length; i++)
+			else
 			{
-				NetworkBehaviour networkBehaviour = this.m_NetworkBehaviours[i];
-				if (netMsg.channelId.Equals(networkBehaviour.GetNetworkChannel()))
+				for (int i = 0; i < this.m_NetworkBehaviours.Length; i++)
 				{
-					networkBehaviour.OnDeserialize(reader, initialState);
+					NetworkBehaviour networkBehaviour = this.m_NetworkBehaviours[i];
+					if (networkBehaviour.GetNetworkChannel() == channelId)
+					{
+						list.Add(networkBehaviour);
+					}
 				}
+				array = list.ToArray();
+			}
+			return array;
+		}
+
+		internal void OnUpdateVars(NetworkReader reader, bool initialState, NetworkMessage netMsg)
+		{
+			foreach (NetworkBehaviour networkBehaviour in this.GetBehavioursOfSameChannel(netMsg.channelId, initialState))
+			{
+				networkBehaviour.OnDeserialize(reader, initialState);
 			}
 		}
 

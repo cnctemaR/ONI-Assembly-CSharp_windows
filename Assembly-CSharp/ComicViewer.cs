@@ -22,14 +22,12 @@ public class ComicViewer : KScreen
 				this.Stop();
 				base.Show(false);
 			};
+			return;
 		}
-		else
+		this.closeButton.onClick += delegate
 		{
-			this.closeButton.onClick += delegate
-			{
-				this.Stop();
-			};
-		}
+			this.Stop();
+		};
 	}
 
 	public void Stop()

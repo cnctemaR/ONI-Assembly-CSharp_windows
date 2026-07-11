@@ -15,11 +15,9 @@ namespace FMODUnity
 				this.rigidBody2D = base.gameObject.GetComponent<Rigidbody2D>();
 				RuntimeManager.HasListener[this.ListenerNumber] = true;
 				this.SetListenerLocation();
+				return;
 			}
-			else
-			{
-				base.enabled = false;
-			}
+			base.enabled = false;
 		}
 
 		private void OnDisable()
@@ -37,11 +35,9 @@ namespace FMODUnity
 			if (this.rigidBody)
 			{
 				RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody);
+				return;
 			}
-			else
-			{
-				RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody2D);
-			}
+			RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody2D);
 		}
 
 		private Rigidbody rigidBody;

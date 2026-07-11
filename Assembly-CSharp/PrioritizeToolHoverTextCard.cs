@@ -17,8 +17,7 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 		base.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);
 		hoverTextDrawer.NewLine(26);
 		hoverTextDrawer.DrawText(string.Format(UI.TOOLS.PRIORITIZE.SPECIFIC_PRIORITY, ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority().priority_value.ToString()), this.Styles_Title.Standard);
-		ToolParameterMenu toolParameterMenu = ToolMenu.Instance.toolParameterMenu;
-		string lastEnabledFilter = toolParameterMenu.GetLastEnabledFilter();
+		string lastEnabledFilter = ToolMenu.Instance.toolParameterMenu.GetLastEnabledFilter();
 		if (lastEnabledFilter != null && lastEnabledFilter != "ALL")
 		{
 			this.ConfigureTitle(instance);
@@ -29,8 +28,7 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 
 	protected override void ConfigureTitle(HoverTextScreen screen)
 	{
-		ToolParameterMenu toolParameterMenu = ToolMenu.Instance.toolParameterMenu;
-		string lastEnabledFilter = toolParameterMenu.GetLastEnabledFilter();
+		string lastEnabledFilter = ToolMenu.Instance.toolParameterMenu.GetLastEnabledFilter();
 		if (string.IsNullOrEmpty(this.ToolName) || lastEnabledFilter == "ALL")
 		{
 			this.ToolName = Strings.Get(this.ToolNameStringKey).String.ToUpper();

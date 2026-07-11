@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using Unity;
 
 namespace System.Net.Configuration
 {
@@ -70,6 +71,32 @@ namespace System.Net.Configuration
 			}
 		}
 
+		[ConfigurationProperty("targetName", DefaultValue = null)]
+		public string TargetName
+		{
+			get
+			{
+				return (string)base["targetName"];
+			}
+			set
+			{
+				base["targetName"] = value;
+			}
+		}
+
+		[ConfigurationProperty("enableSsl", DefaultValue = false)]
+		public bool EnableSsl
+		{
+			get
+			{
+				return (bool)base["enableSsl"];
+			}
+			set
+			{
+				base["enableSsl"] = value;
+			}
+		}
+
 		protected override ConfigurationPropertyCollection Properties
 		{
 			get
@@ -80,6 +107,19 @@ namespace System.Net.Configuration
 
 		protected override void PostDeserialize()
 		{
+		}
+
+		public string ClientDomain
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+			set
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+			}
 		}
 	}
 }

@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System
 {
-	internal class MonoCustomAttrs
+	internal static class MonoCustomAttrs
 	{
 		private static bool IsUserCattrProvider(object obj)
 		{
 			Type type = obj as Type;
-			if (type is MonoType || type is TypeBuilder)
+			if (type is RuntimeType || type is TypeBuilder)
 			{
 				return false;
 			}
@@ -47,7 +47,7 @@ namespace System
 			}
 			else if (obj is Type)
 			{
-				array = ((Type)obj).GetPseudoCustomAttributes();
+				array = MonoCustomAttrs.GetPseudoCustomAttributes((Type)obj);
 			}
 			if (attributeType != null && array != null)
 			{
@@ -67,12 +67,41 @@ namespace System
 						i++;
 					}
 				}
-				return new object[0];
+				return EmptyArray<object>.Value;
 			}
 			return array;
 		}
 
-		internal static object[] GetCustomAttributesBase(ICustomAttributeProvider obj, Type attributeType)
+		private static object[] GetPseudoCustomAttributes(Type type)
+		{
+			int num = 0;
+			TypeAttributes attributes = type.Attributes;
+			if ((attributes & TypeAttributes.Serializable) != TypeAttributes.NotPublic)
+			{
+				num++;
+			}
+			if ((attributes & TypeAttributes.Import) != TypeAttributes.NotPublic)
+			{
+				num++;
+			}
+			if (num == 0)
+			{
+				return null;
+			}
+			object[] array = new object[num];
+			num = 0;
+			if ((attributes & TypeAttributes.Serializable) != TypeAttributes.NotPublic)
+			{
+				array[num++] = new SerializableAttribute();
+			}
+			if ((attributes & TypeAttributes.Import) != TypeAttributes.NotPublic)
+			{
+				array[num++] = new ComImportAttribute();
+			}
+			return array;
+		}
+
+		internal static object[] GetCustomAttributesBase(ICustomAttributeProvider obj, Type attributeType, bool inheritedOnly)
 		{
 			object[] array;
 			if (MonoCustomAttrs.IsUserCattrProvider(obj))
@@ -83,31 +112,18 @@ namespace System
 			{
 				array = MonoCustomAttrs.GetCustomAttributesInternal(obj, attributeType, false);
 			}
-			object[] pseudoCustomAttributes = MonoCustomAttrs.GetPseudoCustomAttributes(obj, attributeType);
-			if (pseudoCustomAttributes != null)
+			if (!inheritedOnly)
 			{
-				object[] array2 = new object[array.Length + pseudoCustomAttributes.Length];
-				Array.Copy(array, array2, array.Length);
-				Array.Copy(pseudoCustomAttributes, 0, array2, array.Length, pseudoCustomAttributes.Length);
-				return array2;
+				object[] pseudoCustomAttributes = MonoCustomAttrs.GetPseudoCustomAttributes(obj, attributeType);
+				if (pseudoCustomAttributes != null)
+				{
+					object[] array2 = new object[array.Length + pseudoCustomAttributes.Length];
+					Array.Copy(array, array2, array.Length);
+					Array.Copy(pseudoCustomAttributes, 0, array2, array.Length, pseudoCustomAttributes.Length);
+					return array2;
+				}
 			}
 			return array;
-		}
-
-		internal static Attribute GetCustomAttribute(ICustomAttributeProvider obj, Type attributeType, bool inherit)
-		{
-			object[] customAttributes = MonoCustomAttrs.GetCustomAttributes(obj, attributeType, inherit);
-			if (customAttributes.Length == 0)
-			{
-				return null;
-			}
-			if (customAttributes.Length > 1)
-			{
-				string text = "'{0}' has more than one attribute of type '{1}";
-				text = string.Format(text, obj, attributeType);
-				throw new AmbiguousMatchException(text);
-			}
-			return (Attribute)customAttributes[0];
 		}
 
 		internal static object[] GetCustomAttributes(ICustomAttributeProvider obj, Type attributeType, bool inherit)
@@ -124,9 +140,13 @@ namespace System
 			{
 				attributeType = null;
 			}
-			object[] array = MonoCustomAttrs.GetCustomAttributesBase(obj, attributeType);
+			object[] array = MonoCustomAttrs.GetCustomAttributesBase(obj, attributeType, false);
 			if (!inherit && array.Length == 1)
 			{
+				if (array[0] == null)
+				{
+					throw new CustomAttributeFormatException("Invalid custom attribute format");
+				}
 				object[] array2;
 				if (attributeType != null)
 				{
@@ -147,64 +167,118 @@ namespace System
 				}
 				return array2;
 			}
-			if (attributeType != null && attributeType.IsSealed && inherit)
+			else
 			{
-				AttributeUsageAttribute attributeUsageAttribute = MonoCustomAttrs.RetrieveAttributeUsage(attributeType);
-				if (!attributeUsageAttribute.Inherited)
+				if (inherit && MonoCustomAttrs.GetBase(obj) == null)
 				{
 					inherit = false;
 				}
-			}
-			int num = ((array.Length >= 16) ? 16 : array.Length);
-			Hashtable hashtable = new Hashtable(num);
-			ArrayList arrayList = new ArrayList(num);
-			ICustomAttributeProvider customAttributeProvider = obj;
-			int num2 = 0;
-			do
-			{
-				foreach (object obj2 in array)
+				if (attributeType != null && attributeType.IsSealed && inherit && !MonoCustomAttrs.RetrieveAttributeUsage(attributeType).Inherited)
 				{
-					Type type = obj2.GetType();
-					if (attributeType == null || attributeType.IsAssignableFrom(type))
+					inherit = false;
+				}
+				int num = Math.Max(array.Length, 16);
+				ICustomAttributeProvider customAttributeProvider = obj;
+				List<object> list;
+				object[] array4;
+				if (inherit)
+				{
+					Dictionary<Type, MonoCustomAttrs.AttributeInfo> dictionary = new Dictionary<Type, MonoCustomAttrs.AttributeInfo>(num);
+					int num2 = 0;
+					list = new List<object>(num);
+					for (;;)
 					{
-						MonoCustomAttrs.AttributeInfo attributeInfo = (MonoCustomAttrs.AttributeInfo)hashtable[type];
-						AttributeUsageAttribute attributeUsageAttribute2;
-						if (attributeInfo != null)
+						foreach (object obj2 in array)
 						{
-							attributeUsageAttribute2 = attributeInfo.Usage;
+							if (obj2 == null)
+							{
+								goto Block_22;
+							}
+							Type type = obj2.GetType();
+							if (!(attributeType != null) || attributeType.IsAssignableFrom(type))
+							{
+								MonoCustomAttrs.AttributeInfo attributeInfo;
+								AttributeUsageAttribute attributeUsageAttribute;
+								if (dictionary.TryGetValue(type, out attributeInfo))
+								{
+									attributeUsageAttribute = attributeInfo.Usage;
+								}
+								else
+								{
+									attributeUsageAttribute = MonoCustomAttrs.RetrieveAttributeUsage(type);
+								}
+								if ((num2 == 0 || attributeUsageAttribute.Inherited) && (attributeUsageAttribute.AllowMultiple || attributeInfo == null || (attributeInfo != null && attributeInfo.InheritanceLevel == num2)))
+								{
+									list.Add(obj2);
+								}
+								if (attributeInfo == null)
+								{
+									dictionary.Add(type, new MonoCustomAttrs.AttributeInfo(attributeUsageAttribute, num2));
+								}
+							}
 						}
-						else
+						if ((customAttributeProvider = MonoCustomAttrs.GetBase(customAttributeProvider)) != null)
 						{
-							attributeUsageAttribute2 = MonoCustomAttrs.RetrieveAttributeUsage(type);
+							num2++;
+							array = MonoCustomAttrs.GetCustomAttributesBase(customAttributeProvider, attributeType, true);
 						}
-						if ((num2 == 0 || attributeUsageAttribute2.Inherited) && (attributeUsageAttribute2.AllowMultiple || attributeInfo == null || (attributeInfo != null && attributeInfo.InheritanceLevel == num2)))
+						if (!inherit || customAttributeProvider == null)
 						{
-							arrayList.Add(obj2);
-						}
-						if (attributeInfo == null)
-						{
-							hashtable.Add(type, new MonoCustomAttrs.AttributeInfo(attributeUsageAttribute2, num2));
+							goto IL_02C7;
 						}
 					}
+					Block_22:
+					throw new CustomAttributeFormatException("Invalid custom attribute format");
+					IL_02C7:
+					if (attributeType == null || attributeType.IsValueType)
+					{
+						array4 = new Attribute[list.Count];
+					}
+					else
+					{
+						array4 = Array.CreateInstance(attributeType, list.Count) as object[];
+					}
+					list.CopyTo(array4, 0);
+					return array4;
 				}
-				if ((customAttributeProvider = MonoCustomAttrs.GetBase(customAttributeProvider)) != null)
+				if (attributeType == null)
 				{
-					num2++;
-					array = MonoCustomAttrs.GetCustomAttributesBase(customAttributeProvider, attributeType);
+					object[] array3 = array;
+					for (int i = 0; i < array3.Length; i++)
+					{
+						if (array3[i] == null)
+						{
+							throw new CustomAttributeFormatException("Invalid custom attribute format");
+						}
+					}
+					Attribute[] array5 = new Attribute[array.Length];
+					array.CopyTo(array5, 0);
+					return array5;
 				}
+				list = new List<object>(num);
+				foreach (object obj3 in array)
+				{
+					if (obj3 == null)
+					{
+						throw new CustomAttributeFormatException("Invalid custom attribute format");
+					}
+					Type type2 = obj3.GetType();
+					if (!(attributeType != null) || attributeType.IsAssignableFrom(type2))
+					{
+						list.Add(obj3);
+					}
+				}
+				if (attributeType == null || attributeType.IsValueType)
+				{
+					array4 = new Attribute[list.Count];
+				}
+				else
+				{
+					array4 = Array.CreateInstance(attributeType, list.Count) as object[];
+				}
+				list.CopyTo(array4, 0);
+				return array4;
 			}
-			while (inherit && customAttributeProvider != null);
-			object[] array4;
-			if (attributeType == null || attributeType.IsValueType)
-			{
-				array4 = (object[])Array.CreateInstance(typeof(Attribute), arrayList.Count);
-			}
-			else
-			{
-				array4 = Array.CreateInstance(attributeType, arrayList.Count) as object[];
-			}
-			arrayList.CopyTo(array4, 0);
-			return array4;
 		}
 
 		internal static object[] GetCustomAttributes(ICustomAttributeProvider obj, bool inherit)
@@ -215,7 +289,7 @@ namespace System
 			}
 			if (!inherit)
 			{
-				return (object[])MonoCustomAttrs.GetCustomAttributesBase(obj, null).Clone();
+				return (object[])MonoCustomAttrs.GetCustomAttributesBase(obj, null, false).Clone();
 			}
 			return MonoCustomAttrs.GetCustomAttributes(obj, typeof(MonoCustomAttrs), inherit);
 		}
@@ -229,8 +303,7 @@ namespace System
 			{
 				throw new ArgumentNullException("obj");
 			}
-			CustomAttributeData[] customAttributesDataInternal = MonoCustomAttrs.GetCustomAttributesDataInternal(obj);
-			return Array.AsReadOnly<CustomAttributeData>(customAttributesDataInternal);
+			return Array.AsReadOnly<CustomAttributeData>(MonoCustomAttrs.GetCustomAttributesDataInternal(obj));
 		}
 
 		internal static bool IsDefined(ICustomAttributeProvider obj, Type attributeType, bool inherit)
@@ -239,33 +312,49 @@ namespace System
 			{
 				throw new ArgumentNullException("attributeType");
 			}
-			if (MonoCustomAttrs.IsUserCattrProvider(obj))
+			AttributeUsageAttribute attributeUsageAttribute = null;
+			while (!MonoCustomAttrs.IsUserCattrProvider(obj))
 			{
-				return obj.IsDefined(attributeType, inherit);
-			}
-			if (MonoCustomAttrs.IsDefinedInternal(obj, attributeType))
-			{
-				return true;
-			}
-			object[] pseudoCustomAttributes = MonoCustomAttrs.GetPseudoCustomAttributes(obj, attributeType);
-			if (pseudoCustomAttributes != null)
-			{
-				for (int i = 0; i < pseudoCustomAttributes.Length; i++)
+				if (MonoCustomAttrs.IsDefinedInternal(obj, attributeType))
 				{
-					if (attributeType.IsAssignableFrom(pseudoCustomAttributes[i].GetType()))
+					return true;
+				}
+				object[] pseudoCustomAttributes = MonoCustomAttrs.GetPseudoCustomAttributes(obj, attributeType);
+				if (pseudoCustomAttributes != null)
+				{
+					for (int i = 0; i < pseudoCustomAttributes.Length; i++)
 					{
-						return true;
+						if (attributeType.IsAssignableFrom(pseudoCustomAttributes[i].GetType()))
+						{
+							return true;
+						}
 					}
 				}
+				if (attributeUsageAttribute == null)
+				{
+					if (!inherit)
+					{
+						return false;
+					}
+					attributeUsageAttribute = MonoCustomAttrs.RetrieveAttributeUsage(attributeType);
+					if (!attributeUsageAttribute.Inherited)
+					{
+						return false;
+					}
+				}
+				obj = MonoCustomAttrs.GetBase(obj);
+				if (obj == null)
+				{
+					return false;
+				}
 			}
-			ICustomAttributeProvider @base;
-			return inherit && (@base = MonoCustomAttrs.GetBase(obj)) != null && MonoCustomAttrs.IsDefined(@base, attributeType, inherit);
+			return obj.IsDefined(attributeType, inherit);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool IsDefinedInternal(ICustomAttributeProvider obj, Type AttributeType);
 
-		private static PropertyInfo GetBasePropertyDefinition(PropertyInfo property)
+		private static PropertyInfo GetBasePropertyDefinition(MonoProperty property)
 		{
 			MethodInfo methodInfo = property.GetGetMethod(true);
 			if (methodInfo == null || !methodInfo.IsVirtual)
@@ -276,22 +365,47 @@ namespace System
 			{
 				return null;
 			}
-			MethodInfo baseDefinition = methodInfo.GetBaseDefinition();
-			if (baseDefinition == null || baseDefinition == methodInfo)
+			MethodInfo baseMethod = methodInfo.GetBaseMethod();
+			if (!(baseMethod != null) || !(baseMethod != methodInfo))
 			{
 				return null;
 			}
 			ParameterInfo[] indexParameters = property.GetIndexParameters();
-			if (indexParameters != null && indexParameters.Length > 0)
+			if (indexParameters != null && indexParameters.Length != 0)
 			{
 				Type[] array = new Type[indexParameters.Length];
 				for (int i = 0; i < array.Length; i++)
 				{
 					array[i] = indexParameters[i].ParameterType;
 				}
-				return baseDefinition.DeclaringType.GetProperty(property.Name, property.PropertyType, array);
+				return baseMethod.DeclaringType.GetProperty(property.Name, property.PropertyType, array);
 			}
-			return baseDefinition.DeclaringType.GetProperty(property.Name, property.PropertyType);
+			return baseMethod.DeclaringType.GetProperty(property.Name, property.PropertyType);
+		}
+
+		private static EventInfo GetBaseEventDefinition(MonoEvent evt)
+		{
+			MethodInfo methodInfo = evt.GetAddMethod(true);
+			if (methodInfo == null || !methodInfo.IsVirtual)
+			{
+				methodInfo = evt.GetRaiseMethod(true);
+			}
+			if (methodInfo == null || !methodInfo.IsVirtual)
+			{
+				methodInfo = evt.GetRemoveMethod(true);
+			}
+			if (methodInfo == null || !methodInfo.IsVirtual)
+			{
+				return null;
+			}
+			MethodInfo baseMethod = methodInfo.GetBaseMethod();
+			if (baseMethod != null && baseMethod != methodInfo)
+			{
+				BindingFlags bindingFlags = (methodInfo.IsPublic ? BindingFlags.Public : BindingFlags.NonPublic);
+				bindingFlags |= (methodInfo.IsStatic ? BindingFlags.Static : BindingFlags.Instance);
+				return baseMethod.DeclaringType.GetEvent(evt.Name, bindingFlags);
+			}
+			return null;
 		}
 
 		private static ICustomAttributeProvider GetBase(ICustomAttributeProvider obj)
@@ -309,6 +423,10 @@ namespace System
 			{
 				return MonoCustomAttrs.GetBasePropertyDefinition((MonoProperty)obj);
 			}
+			if (obj is MonoEvent)
+			{
+				return MonoCustomAttrs.GetBaseEventDefinition((MonoEvent)obj);
+			}
 			if (obj is MonoMethod)
 			{
 				methodInfo = (MethodInfo)obj;
@@ -317,22 +435,22 @@ namespace System
 			{
 				return null;
 			}
-			MethodInfo baseDefinition = methodInfo.GetBaseDefinition();
-			if (baseDefinition == methodInfo)
+			MethodInfo baseMethod = methodInfo.GetBaseMethod();
+			if (baseMethod == methodInfo)
 			{
 				return null;
 			}
-			return baseDefinition;
+			return baseMethod;
 		}
 
-		private static AttributeUsageAttribute RetrieveAttributeUsage(Type attributeType)
+		private static AttributeUsageAttribute RetrieveAttributeUsageNoCache(Type attributeType)
 		{
 			if (attributeType == typeof(AttributeUsageAttribute))
 			{
 				return new AttributeUsageAttribute(AttributeTargets.Class);
 			}
 			AttributeUsageAttribute attributeUsageAttribute = null;
-			object[] customAttributes = MonoCustomAttrs.GetCustomAttributes(attributeType, MonoCustomAttrs.AttributeUsageType, false);
+			object[] customAttributes = MonoCustomAttrs.GetCustomAttributes(attributeType, typeof(AttributeUsageAttribute), false);
 			if (customAttributes.Length == 0)
 			{
 				if (attributeType.BaseType != null)
@@ -355,9 +473,26 @@ namespace System
 			}
 		}
 
+		private static AttributeUsageAttribute RetrieveAttributeUsage(Type attributeType)
+		{
+			AttributeUsageAttribute attributeUsageAttribute = null;
+			if (MonoCustomAttrs.usage_cache == null)
+			{
+				MonoCustomAttrs.usage_cache = new Dictionary<Type, AttributeUsageAttribute>();
+			}
+			if (MonoCustomAttrs.usage_cache.TryGetValue(attributeType, out attributeUsageAttribute))
+			{
+				return attributeUsageAttribute;
+			}
+			attributeUsageAttribute = MonoCustomAttrs.RetrieveAttributeUsageNoCache(attributeType);
+			MonoCustomAttrs.usage_cache[attributeType] = attributeUsageAttribute;
+			return attributeUsageAttribute;
+		}
+
 		private static Assembly corlib;
 
-		private static readonly Type AttributeUsageType = typeof(AttributeUsageAttribute);
+		[ThreadStatic]
+		private static Dictionary<Type, AttributeUsageAttribute> usage_cache;
 
 		private static readonly AttributeUsageAttribute DefaultAttributeUsage = new AttributeUsageAttribute(AttributeTargets.All);
 

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
 	[RequireComponent(typeof(Canvas))]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[AddComponentMenu("Layout/Canvas Scaler", 101)]
 	public class CanvasScaler : UIBehaviour
 	{

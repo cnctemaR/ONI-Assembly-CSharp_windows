@@ -7,14 +7,6 @@ using Newtonsoft.Json;
 
 public class KleiAccount : ThreadedHttps<KleiAccount>
 {
-	public KleiAccount()
-	{
-		this.CLIENT_KEY = "ONI";
-		this.LIVE_ENDPOINT = "login.kleientertainment.com" + DistributionPlatform.Inst.AccountLoginEndpoint;
-		this.serviceName = "KleiAccount";
-		this.ClearAuthTicket();
-	}
-
 	private Dictionary<string, object> BuildLoginRequest(byte[] ticket)
 	{
 		return new Dictionary<string, object>
@@ -26,6 +18,14 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 			{ "Game", this.CLIENT_KEY },
 			{ "NoEmail", true }
 		};
+	}
+
+	public KleiAccount()
+	{
+		this.CLIENT_KEY = "ONI";
+		this.LIVE_ENDPOINT = "login.kleientertainment.com" + DistributionPlatform.Inst.AccountLoginEndpoint;
+		this.serviceName = "KleiAccount";
+		this.ClearAuthTicket();
 	}
 
 	protected override void OnReplyRecieved(WebResponse response)
@@ -45,7 +45,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		if (!accountReply.Error)
 		{
 			Debug.Log("[Account] Got login for user " + accountReply.UserID);
-			KleiAccount.KleiUserID = ((!(accountReply.UserID == string.Empty)) ? accountReply.UserID : null);
+			KleiAccount.KleiUserID = ((accountReply.UserID == "") ? null : accountReply.UserID);
 			this.gotUserID();
 		}
 		else
@@ -58,7 +58,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 
 	private string EncodeToAsciiHEX(byte[] data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < data.Length; i++)
 		{
 			text += data[i].ToString("X2");
@@ -81,16 +81,15 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name);
 			this.gotUserID = cb;
 			byte[] array = this.AuthTicket();
-			if (array == null || array.Length == 0)
-			{
-				if (DistributionPlatform.Initialized)
-				{
-					DistributionPlatform.Inst.GetAuthTicket(new DistributionPlatform.AuthTicketHandler(this.OnAuthTicketObtained));
-				}
-			}
-			else
+			if (array != null && array.Length != 0)
 			{
 				this.OnAuthTicketObtained(array);
+				return;
+			}
+			if (DistributionPlatform.Initialized)
+			{
+				DistributionPlatform.Inst.GetAuthTicket(new DistributionPlatform.AuthTicketHandler(this.OnAuthTicketObtained));
+				return;
 			}
 		}
 		else
@@ -101,7 +100,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 
 	public void OnAuthTicketObtained(byte[] ticket)
 	{
-		if (0 < ticket.Length)
+		if (ticket.Length != 0)
 		{
 			byte[] array = new byte[ticket.Length];
 			Array.Copy(ticket, array, ticket.Length);
@@ -109,11 +108,9 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 			base.Start();
 			Dictionary<string, object> dictionary = this.BuildLoginRequest(array);
 			this.PostRawData(dictionary);
+			return;
 		}
-		else
-		{
-			this.gotUserID();
-		}
+		this.gotUserID();
 	}
 
 	public byte[] AuthTicket()

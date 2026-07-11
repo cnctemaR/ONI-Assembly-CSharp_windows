@@ -10,7 +10,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
 		hoverTextDrawer.BeginShadowBar(false);
-		this.ActionName = ((!(this.currentDef != null) || !this.currentDef.DragBuild) ? UI.TOOLS.BUILD.TOOLACTION : UI.TOOLS.BUILD.TOOLACTION_DRAG);
+		this.ActionName = ((this.currentDef != null && this.currentDef.DragBuild) ? UI.TOOLS.BUILD.TOOLACTION_DRAG : UI.TOOLS.BUILD.TOOLACTION);
 		if (this.currentDef != null && this.currentDef.Name != null)
 		{
 			this.ToolName = string.Format(UI.TOOLS.BUILD.NAME, this.currentDef.Name);
@@ -61,99 +61,104 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 			if (mode == OverlayModes.Logic.ID && hoverObjects != null)
 			{
 				SelectToolHoverTextCard component2 = SelectTool.Instance.GetComponent<SelectToolHoverTextCard>();
-				foreach (KSelectable kselectable in hoverObjects)
+				using (List<KSelectable>.Enumerator enumerator = hoverObjects.GetEnumerator())
 				{
-					LogicPorts component3 = kselectable.GetComponent<LogicPorts>();
-					LogicPorts.Port port;
-					bool flag;
-					if (component3 != null && component3.TryGetPortAtCell(num, out port, out flag))
+					while (enumerator.MoveNext())
 					{
-						bool flag2 = component3.IsPortConnected(port.id);
-						hoverTextDrawer.BeginShadowBar(false);
-						int num4;
-						if (flag)
+						KSelectable kselectable = enumerator.Current;
+						LogicPorts component3 = kselectable.GetComponent<LogicPorts>();
+						LogicPorts.Port port;
+						bool flag;
+						if (component3 != null && component3.TryGetPortAtCell(num, out port, out flag))
 						{
-							string text3 = ((!port.displayCustomName) ? UI.LOGIC_PORTS.PORT_INPUT_DEFAULT_NAME.text : port.description);
-							num4 = component3.GetInputValue(port.id);
-							hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_INPUT_HOVER_FMT.Replace("{Port}", text3).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
+							bool flag2 = component3.IsPortConnected(port.id);
+							hoverTextDrawer.BeginShadowBar(false);
+							int num4;
+							if (flag)
+							{
+								string text3 = (port.displayCustomName ? port.description : UI.LOGIC_PORTS.PORT_INPUT_DEFAULT_NAME.text);
+								num4 = component3.GetInputValue(port.id);
+								hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_INPUT_HOVER_FMT.Replace("{Port}", text3).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
+							}
+							else
+							{
+								string text4 = (port.displayCustomName ? port.description : UI.LOGIC_PORTS.PORT_OUTPUT_DEFAULT_NAME.text);
+								num4 = component3.GetOutputValue(port.id);
+								hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_OUTPUT_HOVER_FMT.Replace("{Port}", text4).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
+							}
+							hoverTextDrawer.NewLine(26);
+							TextStyleSetting textStyleSetting;
+							if (flag2)
+							{
+								textStyleSetting = ((num4 == 1) ? component2.Styles_LogicActive.Selected : component2.Styles_LogicSignalInactive);
+							}
+							else
+							{
+								textStyleSetting = component2.Styles_LogicActive.Standard;
+							}
+							hoverTextDrawer.DrawIcon((num4 == 1 && flag2) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting.textColor, 18, 2);
+							hoverTextDrawer.DrawText(port.activeDescription, textStyleSetting);
+							hoverTextDrawer.NewLine(26);
+							TextStyleSetting textStyleSetting2;
+							if (flag2)
+							{
+								textStyleSetting2 = ((num4 == 0) ? component2.Styles_LogicStandby.Selected : component2.Styles_LogicSignalInactive);
+							}
+							else
+							{
+								textStyleSetting2 = component2.Styles_LogicStandby.Standard;
+							}
+							hoverTextDrawer.DrawIcon((num4 == 0 && flag2) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting2.textColor, 18, 2);
+							hoverTextDrawer.DrawText(port.inactiveDescription, textStyleSetting2);
+							hoverTextDrawer.EndShadowBar();
 						}
-						else
+						LogicGate component4 = kselectable.GetComponent<LogicGate>();
+						LogicGateBase.PortId portId;
+						if (component4 != null && component4.TryGetPortAtCell(num, out portId))
 						{
-							string text4 = ((!port.displayCustomName) ? UI.LOGIC_PORTS.PORT_OUTPUT_DEFAULT_NAME.text : port.description);
-							num4 = component3.GetOutputValue(port.id);
-							hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_OUTPUT_HOVER_FMT.Replace("{Port}", text4).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
+							int portValue = component4.GetPortValue(portId);
+							bool portConnected = component4.GetPortConnected(portId);
+							LogicGate.LogicGateDescriptions.Description portDescription = component4.GetPortDescription(portId);
+							hoverTextDrawer.BeginShadowBar(false);
+							if (portId == LogicGateBase.PortId.Output)
+							{
+								hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_MULTI_OUTPUT_HOVER_FMT.Replace("{Port}", portDescription.name).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
+							}
+							else
+							{
+								hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_MULTI_INPUT_HOVER_FMT.Replace("{Port}", portDescription.name).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
+							}
+							hoverTextDrawer.NewLine(26);
+							TextStyleSetting textStyleSetting3;
+							if (portConnected)
+							{
+								textStyleSetting3 = ((portValue == 1) ? component2.Styles_LogicActive.Selected : component2.Styles_LogicSignalInactive);
+							}
+							else
+							{
+								textStyleSetting3 = component2.Styles_LogicActive.Standard;
+							}
+							hoverTextDrawer.DrawIcon((portValue == 1 && portConnected) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting3.textColor, 18, 2);
+							hoverTextDrawer.DrawText(portDescription.active, textStyleSetting3);
+							hoverTextDrawer.NewLine(26);
+							TextStyleSetting textStyleSetting4;
+							if (portConnected)
+							{
+								textStyleSetting4 = ((portValue == 0) ? component2.Styles_LogicStandby.Selected : component2.Styles_LogicSignalInactive);
+							}
+							else
+							{
+								textStyleSetting4 = component2.Styles_LogicStandby.Standard;
+							}
+							hoverTextDrawer.DrawIcon((portValue == 0 && portConnected) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting4.textColor, 18, 2);
+							hoverTextDrawer.DrawText(portDescription.inactive, textStyleSetting4);
+							hoverTextDrawer.EndShadowBar();
 						}
-						hoverTextDrawer.NewLine(26);
-						TextStyleSetting textStyleSetting;
-						if (flag2)
-						{
-							textStyleSetting = ((num4 != 1) ? component2.Styles_LogicSignalInactive : component2.Styles_LogicActive.Selected);
-						}
-						else
-						{
-							textStyleSetting = component2.Styles_LogicActive.Standard;
-						}
-						hoverTextDrawer.DrawIcon((num4 != 1 || !flag2) ? component2.iconDash : component2.iconActiveAutomationPort, textStyleSetting.textColor, 18, 2);
-						hoverTextDrawer.DrawText(port.activeDescription, textStyleSetting);
-						hoverTextDrawer.NewLine(26);
-						TextStyleSetting textStyleSetting2;
-						if (flag2)
-						{
-							textStyleSetting2 = ((num4 != 0) ? component2.Styles_LogicSignalInactive : component2.Styles_LogicStandby.Selected);
-						}
-						else
-						{
-							textStyleSetting2 = component2.Styles_LogicStandby.Standard;
-						}
-						hoverTextDrawer.DrawIcon((num4 != 0 || !flag2) ? component2.iconDash : component2.iconActiveAutomationPort, textStyleSetting2.textColor, 18, 2);
-						hoverTextDrawer.DrawText(port.inactiveDescription, textStyleSetting2);
-						hoverTextDrawer.EndShadowBar();
 					}
-					LogicGate component4 = kselectable.GetComponent<LogicGate>();
-					LogicGateBase.PortId portId;
-					if (component4 != null && component4.TryGetPortAtCell(num, out portId))
-					{
-						int portValue = component4.GetPortValue(portId);
-						bool portConnected = component4.GetPortConnected(portId);
-						LogicGate.LogicGateDescriptions.Description portDescription = component4.GetPortDescription(portId);
-						hoverTextDrawer.BeginShadowBar(false);
-						if (portId == LogicGateBase.PortId.Output)
-						{
-							hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_MULTI_OUTPUT_HOVER_FMT.Replace("{Port}", portDescription.name).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
-						}
-						else
-						{
-							hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_MULTI_INPUT_HOVER_FMT.Replace("{Port}", portDescription.name).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
-						}
-						hoverTextDrawer.NewLine(26);
-						TextStyleSetting textStyleSetting3;
-						if (portConnected)
-						{
-							textStyleSetting3 = ((portValue != 1) ? component2.Styles_LogicSignalInactive : component2.Styles_LogicActive.Selected);
-						}
-						else
-						{
-							textStyleSetting3 = component2.Styles_LogicActive.Standard;
-						}
-						hoverTextDrawer.DrawIcon((portValue != 1 || !portConnected) ? component2.iconDash : component2.iconActiveAutomationPort, textStyleSetting3.textColor, 18, 2);
-						hoverTextDrawer.DrawText(portDescription.active, textStyleSetting3);
-						hoverTextDrawer.NewLine(26);
-						TextStyleSetting textStyleSetting4;
-						if (portConnected)
-						{
-							textStyleSetting4 = ((portValue != 0) ? component2.Styles_LogicSignalInactive : component2.Styles_LogicStandby.Selected);
-						}
-						else
-						{
-							textStyleSetting4 = component2.Styles_LogicStandby.Standard;
-						}
-						hoverTextDrawer.DrawIcon((portValue != 0 || !portConnected) ? component2.iconDash : component2.iconActiveAutomationPort, textStyleSetting4.textColor, 18, 2);
-						hoverTextDrawer.DrawText(portDescription.inactive, textStyleSetting4);
-						hoverTextDrawer.EndShadowBar();
-					}
+					goto IL_0701;
 				}
 			}
-			else if (mode == OverlayModes.Power.ID)
+			if (mode == OverlayModes.Power.ID)
 			{
 				CircuitManager circuitManager = Game.Instance.circuitManager;
 				ushort circuitID = circuitManager.GetCircuitID(num);
@@ -163,13 +168,14 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 					float num5 = circuitManager.GetWattsNeededWhenActive(circuitID);
 					num5 += this.currentDef.EnergyConsumptionWhenActive;
 					float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(circuitID);
-					Color color = ((num5 < maxSafeWattageForCircuit) ? Color.white : Color.red);
+					Color color = ((num5 >= maxSafeWattageForCircuit) ? Color.red : Color.white);
 					hoverTextDrawer.AddIndent(num3);
 					hoverTextDrawer.DrawText(string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num5, GameUtil.WattageFormatterUnit.Automatic)), this.Styles_BodyText.Standard, color, true);
 					hoverTextDrawer.EndShadowBar();
 				}
 			}
 		}
+		IL_0701:
 		hoverTextDrawer.EndDrawing();
 	}
 

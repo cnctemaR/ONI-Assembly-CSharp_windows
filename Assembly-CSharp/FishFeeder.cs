@@ -46,8 +46,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 
 	private static void OnStorageChange(FishFeeder.Instance smi, object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		if (gameObject == null)
+		if ((GameObject)data == null)
 		{
 			return;
 		}
@@ -191,22 +190,21 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				if (!(gameObject == null))
 				{
 					num += gameObject.GetComponent<PrimaryElement>().Mass;
-					int num2 = Grid.PosToCell(this.smi.transform.GetPosition());
-					int num3 = Grid.CellBelow(Grid.CellBelow(num2));
-					gameObject.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.BuildingBack));
+					int num2 = Grid.CellBelow(Grid.CellBelow(Grid.PosToCell(this.smi.transform.GetPosition())));
+					gameObject.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.BuildingBack));
 				}
 			}
 			if (num == 0f)
 			{
-				float num4 = 0f;
+				float num3 = 0f;
 				foreach (GameObject gameObject2 in this.topStorage.items)
 				{
 					if (!(gameObject2 == null))
 					{
-						num4 += gameObject2.GetComponent<PrimaryElement>().Mass;
+						num3 += gameObject2.GetComponent<PrimaryElement>().Mass;
 					}
 				}
-				if (num4 > 0f)
+				if (num3 > 0f)
 				{
 					this.anim.SetSymbolVisiblity(FishFeeder.FishFeederBot.HASH_FEEDBALL, true);
 					this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
@@ -217,9 +215,8 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 						this.anim.GetComponent<SymbolOverrideController>().AddSymbolOverride(FishFeeder.FishFeederBot.HASH_FEEDBALL, symbol, 0);
 					}
 					this.botStorage.Store(pickupable.gameObject, false, false, true, false);
-					int num5 = Grid.PosToCell(this.smi.transform.GetPosition());
-					int num6 = Grid.CellBelow(Grid.CellBelow(num5));
-					pickupable.transform.SetPosition(Grid.CellToPosCBC(num6, Grid.SceneLayer.BuildingUse));
+					int num4 = Grid.CellBelow(Grid.CellBelow(Grid.PosToCell(this.smi.transform.GetPosition())));
+					pickupable.transform.SetPosition(Grid.CellToPosCBC(num4, Grid.SceneLayer.BuildingUse));
 				}
 				else
 				{

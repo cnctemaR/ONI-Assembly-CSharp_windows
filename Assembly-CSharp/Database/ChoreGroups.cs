@@ -6,6 +6,13 @@ namespace Database
 {
 	public class ChoreGroups : ResourceSet<ChoreGroup>
 	{
+		private ChoreGroup Add(string id, string name, Klei.AI.Attribute attribute, string sprite, int default_personal_priority)
+		{
+			ChoreGroup choreGroup = new ChoreGroup(id, name, attribute, sprite, default_personal_priority);
+			base.Add(choreGroup);
+			return choreGroup;
+		}
+
 		public ChoreGroups(ResourceSet parent)
 			: base("ChoreGroups", parent)
 		{
@@ -25,13 +32,6 @@ namespace Database
 			this.Hauling = this.Add("Hauling", DUPLICANTS.CHOREGROUPS.HAULING.NAME, Db.Get().Attributes.Strength, "icon_errand_supply", 1);
 			this.Storage = this.Add("Storage", DUPLICANTS.CHOREGROUPS.STORAGE.NAME, Db.Get().Attributes.Strength, "icon_errand_storage", 1);
 			Debug.Assert(true);
-		}
-
-		private ChoreGroup Add(string id, string name, Klei.AI.Attribute attribute, string sprite, int default_personal_priority)
-		{
-			ChoreGroup choreGroup = new ChoreGroup(id, name, attribute, sprite, default_personal_priority);
-			base.Add(choreGroup);
-			return choreGroup;
 		}
 
 		public ChoreGroup FindByHash(HashedString id)

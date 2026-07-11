@@ -63,12 +63,10 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			};
 			component.ModifyDiseaseCount(-diseaseInfo.count, "Shower.RemoveDisease");
 			this.accumulatedDisease = SimUtil.CalculateFinalDiseaseInfo(this.accumulatedDisease, diseaseInfo);
-			Storage component2 = base.GetComponent<Storage>();
-			PrimaryElement primaryElement = component2.FindPrimaryElement(this.outputTargetElement);
+			PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(this.outputTargetElement);
 			if (primaryElement != null)
 			{
-				PrimaryElement component3 = primaryElement.GetComponent<PrimaryElement>();
-				component3.AddDisease(this.accumulatedDisease.idx, this.accumulatedDisease.count, "Shower.RemoveDisease");
+				primaryElement.GetComponent<PrimaryElement>().AddDisease(this.accumulatedDisease.idx, this.accumulatedDisease.count, "Shower.RemoveDisease");
 				this.accumulatedDisease = SimUtil.DiseaseInfo.Invalid;
 			}
 		}
@@ -88,7 +86,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		if (Shower.EffectsRemoved.Length > 0)
+		if (Shower.EffectsRemoved.Length != 0)
 		{
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE, UI.BUILDINGEFFECTS.TOOLTIPS.REMOVESEFFECTSUBTITLE, Descriptor.DescriptorType.Effect);
@@ -138,10 +136,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 
 		private Chore CreateShowerChore(Shower.ShowerSM.Instance smi)
 		{
-			ChoreType shower = Db.Get().ChoreTypes.Shower;
-			Shower master = smi.master;
-			ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
-			return new WorkChore<Shower>(shower, master, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			return new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		}
 
 		private void UpdateStatusItems(Shower.ShowerSM.Instance smi, float dt)
@@ -149,11 +144,9 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			if (smi.OutputFull())
 			{
 				smi.master.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, this);
+				return;
 			}
-			else
-			{
-				smi.master.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, false);
-			}
+			smi.master.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, false);
 		}
 
 		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State unoperational;

@@ -29,8 +29,8 @@ namespace UnityEngine
 
 		internal static Rect topmostRect
 		{
-			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopMostPhysicalRect")]
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			get
 			{
 				Rect rect;
@@ -54,8 +54,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int Internal_GetCount();
 
-		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopRect")]
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopRect")]
 		internal static Rect GetTopRect()
 		{
 			Rect rect;
@@ -154,8 +154,8 @@ namespace UnityEngine
 			GUIClip.SetMatrix_Injected(ref m);
 		}
 
-		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetParentTransform")]
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static Matrix4x4 GetParentMatrix()
 		{
 			Matrix4x4 matrix4x;

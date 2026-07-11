@@ -3,14 +3,14 @@
 namespace System.Data.SqlTypes
 {
 	[Flags]
-	[Serializable]
 	public enum SqlCompareOptions
 	{
-		BinarySort = 32768,
+		None = 0,
 		IgnoreCase = 1,
-		IgnoreKanaType = 8,
 		IgnoreNonSpace = 2,
+		IgnoreKanaType = 8,
 		IgnoreWidth = 16,
-		None = 0
+		BinarySort = 32768,
+		BinarySort2 = 16384
 	}
 }

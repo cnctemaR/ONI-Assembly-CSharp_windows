@@ -58,7 +58,7 @@ namespace System.Runtime.Remoting
 			}
 		}
 
-		[MonoTODO("Implement ensureSecurity")]
+		[MonoTODO("ensureSecurity support has not been implemented")]
 		public static void Configure(string filename, bool ensureSecurity)
 		{
 			Hashtable hashtable = RemotingConfiguration.channelTemplates;
@@ -66,7 +66,15 @@ namespace System.Runtime.Remoting
 			{
 				if (!RemotingConfiguration.defaultConfigRead)
 				{
-					RemotingConfiguration.ReadConfigFile(Environment.GetMachineConfigPath());
+					string bundledMachineConfig = Environment.GetBundledMachineConfig();
+					if (bundledMachineConfig != null)
+					{
+						RemotingConfiguration.ReadConfigString(bundledMachineConfig);
+					}
+					if (File.Exists(Environment.GetMachineConfigPath()))
+					{
+						RemotingConfiguration.ReadConfigFile(Environment.GetMachineConfigPath());
+					}
 					RemotingConfiguration.defaultConfigRead = true;
 				}
 				if (filename != null)
@@ -80,6 +88,23 @@ namespace System.Runtime.Remoting
 		public static void Configure(string filename)
 		{
 			RemotingConfiguration.Configure(filename, false);
+		}
+
+		private static void ReadConfigString(string filename)
+		{
+			try
+			{
+				SmallXmlParser smallXmlParser = new SmallXmlParser();
+				using (TextReader textReader = new StringReader(filename))
+				{
+					ConfigHandler configHandler = new ConfigHandler(false);
+					smallXmlParser.Parse(textReader, configHandler);
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new RemotingException("Configuration string could not be loaded: " + ex.Message, ex);
+			}
 		}
 
 		private static void ReadConfigFile(string filename)
@@ -172,12 +197,12 @@ namespace System.Runtime.Remoting
 		public static bool IsActivationAllowed(Type svrType)
 		{
 			Hashtable hashtable = RemotingConfiguration.channelTemplates;
-			bool flag;
+			bool flag2;
 			lock (hashtable)
 			{
-				flag = RemotingConfiguration.activatedServiceEntries.ContainsKey(svrType);
+				flag2 = RemotingConfiguration.activatedServiceEntries.ContainsKey(svrType);
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static ActivatedClientTypeEntry IsRemotelyActivatedClientType(Type svrType)
@@ -315,47 +340,44 @@ namespace System.Runtime.Remoting
 			foreach (object obj in channels)
 			{
 				ChannelData channelData = (ChannelData)obj;
-				if (!onlyDelayed || !(channelData.DelayLoadAsClientChannel != "true"))
+				if ((!onlyDelayed || !(channelData.DelayLoadAsClientChannel != "true")) && (!RemotingConfiguration.defaultDelayedConfigRead || !(channelData.DelayLoadAsClientChannel == "true")))
 				{
-					if (!RemotingConfiguration.defaultDelayedConfigRead || !(channelData.DelayLoadAsClientChannel == "true"))
+					if (channelData.Ref != null)
 					{
-						if (channelData.Ref != null)
+						ChannelData channelData2 = (ChannelData)RemotingConfiguration.channelTemplates[channelData.Ref];
+						if (channelData2 == null)
 						{
-							ChannelData channelData2 = (ChannelData)RemotingConfiguration.channelTemplates[channelData.Ref];
-							if (channelData2 == null)
-							{
-								throw new RemotingException("Channel template '" + channelData.Ref + "' not found");
-							}
-							channelData.CopyFrom(channelData2);
+							throw new RemotingException("Channel template '" + channelData.Ref + "' not found");
 						}
-						foreach (object obj2 in channelData.ServerProviders)
-						{
-							ProviderData providerData = (ProviderData)obj2;
-							if (providerData.Ref != null)
-							{
-								ProviderData providerData2 = (ProviderData)RemotingConfiguration.serverProviderTemplates[providerData.Ref];
-								if (providerData2 == null)
-								{
-									throw new RemotingException("Provider template '" + providerData.Ref + "' not found");
-								}
-								providerData.CopyFrom(providerData2);
-							}
-						}
-						foreach (object obj3 in channelData.ClientProviders)
-						{
-							ProviderData providerData3 = (ProviderData)obj3;
-							if (providerData3.Ref != null)
-							{
-								ProviderData providerData4 = (ProviderData)RemotingConfiguration.clientProviderTemplates[providerData3.Ref];
-								if (providerData4 == null)
-								{
-									throw new RemotingException("Provider template '" + providerData3.Ref + "' not found");
-								}
-								providerData3.CopyFrom(providerData4);
-							}
-						}
-						ChannelServices.RegisterChannelConfig(channelData);
+						channelData.CopyFrom(channelData2);
 					}
+					foreach (object obj2 in channelData.ServerProviders)
+					{
+						ProviderData providerData = (ProviderData)obj2;
+						if (providerData.Ref != null)
+						{
+							ProviderData providerData2 = (ProviderData)RemotingConfiguration.serverProviderTemplates[providerData.Ref];
+							if (providerData2 == null)
+							{
+								throw new RemotingException("Provider template '" + providerData.Ref + "' not found");
+							}
+							providerData.CopyFrom(providerData2);
+						}
+					}
+					foreach (object obj3 in channelData.ClientProviders)
+					{
+						ProviderData providerData3 = (ProviderData)obj3;
+						if (providerData3.Ref != null)
+						{
+							ProviderData providerData4 = (ProviderData)RemotingConfiguration.clientProviderTemplates[providerData3.Ref];
+							if (providerData4 == null)
+							{
+								throw new RemotingException("Provider template '" + providerData3.Ref + "' not found");
+							}
+							providerData3.CopyFrom(providerData4);
+						}
+					}
+					ChannelServices.RegisterChannelConfig(channelData);
 				}
 			}
 		}

@@ -2,37 +2,58 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Generic base class for events, implementing event pooling and automatic registration to the event type system.</para>
-	/// </summary>
 	public abstract class EventBase<T> : EventBase where T : EventBase<T>, new()
 	{
+		protected EventBase()
+		{
+			this.m_RefCount = 0;
+		}
+
 		public static long TypeId()
 		{
 			return EventBase<T>.s_TypeId;
+		}
+
+		protected override void Init()
+		{
+			base.Init();
+			if (this.m_RefCount != 0)
+			{
+				Debug.Log("Event improperly released.");
+				this.m_RefCount = 0;
+			}
 		}
 
 		public static T GetPooled()
 		{
 			T t = EventBase<T>.s_Pool.Get();
 			t.Init();
-			t.flags |= EventBase.EventFlags.Pooled;
+			t.pooled = true;
+			t.Acquire();
 			return t;
 		}
 
-		protected static void ReleasePooled(T evt)
+		private static void ReleasePooled(T evt)
 		{
-			if ((evt.flags & EventBase.EventFlags.Pooled) == EventBase.EventFlags.Pooled)
+			if (evt.pooled)
 			{
 				evt.Init();
 				EventBase<T>.s_Pool.Release(evt);
-				evt.flags &= ~EventBase.EventFlags.Pooled;
+				evt.pooled = false;
 			}
+		}
+
+		internal override void Acquire()
+		{
+			this.m_RefCount++;
 		}
 
 		public override void Dispose()
 		{
-			EventBase<T>.ReleasePooled((T)((object)this));
+			if (--this.m_RefCount == 0)
+			{
+				EventBase<T>.ReleasePooled((T)((object)this));
+			}
 		}
 
 		public override long GetEventTypeId()
@@ -43,5 +64,7 @@ namespace UnityEngine.Experimental.UIElements
 		private static readonly long s_TypeId = EventBase.RegisterEventType();
 
 		private static readonly ObjectPool<T> s_Pool = new ObjectPool<T>(100);
+
+		private int m_RefCount;
 	}
 }

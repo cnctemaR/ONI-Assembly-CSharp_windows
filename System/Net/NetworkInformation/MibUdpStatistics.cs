@@ -6,14 +6,18 @@ namespace System.Net.NetworkInformation
 {
 	internal class MibUdpStatistics : UdpStatistics
 	{
-		public MibUdpStatistics(global::System.Collections.Specialized.StringDictionary dic)
+		public MibUdpStatistics(StringDictionary dic)
 		{
 			this.dic = dic;
 		}
 
 		private long Get(string name)
 		{
-			return (this.dic[name] == null) ? 0L : long.Parse(this.dic[name], NumberFormatInfo.InvariantInfo);
+			if (this.dic[name] == null)
+			{
+				return 0L;
+			}
+			return long.Parse(this.dic[name], NumberFormatInfo.InvariantInfo);
 		}
 
 		public override long DatagramsReceived
@@ -56,6 +60,6 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		private global::System.Collections.Specialized.StringDictionary dic;
+		private StringDictionary dic;
 	}
 }

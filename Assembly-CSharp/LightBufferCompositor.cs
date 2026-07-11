@@ -47,11 +47,9 @@ public class LightBufferCompositor : MonoBehaviour
 		if (this.particlesEnabled)
 		{
 			this.material.DisableKeyword("DISABLE_TEMPERATURE_PARTICLES");
+			return;
 		}
-		else
-		{
-			this.material.EnableKeyword("DISABLE_TEMPERATURE_PARTICLES");
-		}
+		this.material.EnableKeyword("DISABLE_TEMPERATURE_PARTICLES");
 	}
 
 	private void OnRenderImage(RenderTexture src, RenderTexture dest)

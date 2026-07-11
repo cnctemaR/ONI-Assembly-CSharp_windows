@@ -18,30 +18,28 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.LoadExplorer();
 		this.PopulateAchievements();
 		this.ConsumeMouseScroll = true;
-		this.explorerSearch.text = string.Empty;
+		this.explorerSearch.text = "";
 		this.explorerSearch.onValueChanged.AddListener(delegate(string value)
 		{
 			if (this.colonyDataRoot.activeSelf)
 			{
 				this.FilterColonyData(this.explorerSearch.text);
+				return;
 			}
-			else
-			{
-				this.FilterExplorer(this.explorerSearch.text);
-			}
+			this.FilterExplorer(this.explorerSearch.text);
 		});
 		this.clearExplorerSearchButton.onClick += delegate
 		{
-			this.explorerSearch.text = string.Empty;
+			this.explorerSearch.text = "";
 		};
-		this.achievementSearch.text = string.Empty;
+		this.achievementSearch.text = "";
 		this.achievementSearch.onValueChanged.AddListener(delegate(string value)
 		{
 			this.FilterAchievements(this.achievementSearch.text);
 		});
 		this.clearAchievementSearchButton.onClick += delegate
 		{
-			this.achievementSearch.text = string.Empty;
+			this.achievementSearch.text = "";
 		};
 		this.RefreshUIScale(null);
 		base.Subscribe(-810220474, new Action<object>(this.RefreshUIScale));
@@ -54,19 +52,20 @@ public class RetiredColonyInfoScreen : KModalScreen
 
 	private IEnumerator DelayedRefreshScale()
 	{
-		for (int i = 0; i < 3; i++)
+		int num;
+		for (int i = 0; i < 3; i = num + 1)
 		{
 			yield return 0;
+			num = i;
 		}
-		float spacingBuffer = 36f;
-		GameObject parent = GameObject.Find("ScreenSpaceOverlayCanvas");
-		if (parent != null)
+		float num2 = 36f;
+		if (GameObject.Find("ScreenSpaceOverlayCanvas") != null)
 		{
-			this.explorerRoot.transform.parent.localScale = Vector3.one * ((this.colonyScroll.rectTransform().rect.width - spacingBuffer) / this.explorerRoot.transform.parent.rectTransform().rect.width);
+			this.explorerRoot.transform.parent.localScale = Vector3.one * ((this.colonyScroll.rectTransform().rect.width - num2) / this.explorerRoot.transform.parent.rectTransform().rect.width);
 		}
 		else
 		{
-			this.explorerRoot.transform.parent.localScale = Vector3.one * ((this.colonyScroll.rectTransform().rect.width - spacingBuffer) / this.explorerRoot.transform.parent.rectTransform().rect.width);
+			this.explorerRoot.transform.parent.localScale = Vector3.one * ((this.colonyScroll.rectTransform().rect.width - num2) / this.explorerRoot.transform.parent.rectTransform().rect.width);
 		}
 		yield break;
 	}
@@ -99,20 +98,17 @@ public class RetiredColonyInfoScreen : KModalScreen
 			this.closeScreenButton.gameObject.SetActive(true);
 			this.closeScreenButton.GetComponentInChildren<LocText>().SetText(UI.RETIRED_COLONY_INFO_SCREEN.BUTTONS.RETURN_TO_GAME);
 			this.quitToMainMenuButton.gameObject.SetActive(true);
+			return;
 		}
-		else
-		{
-			this.closeScreenButton.gameObject.SetActive(true);
-			this.closeScreenButton.GetComponentInChildren<LocText>().SetText(UI.RETIRED_COLONY_INFO_SCREEN.BUTTONS.CLOSE);
-			this.quitToMainMenuButton.gameObject.SetActive(false);
-		}
+		this.closeScreenButton.gameObject.SetActive(true);
+		this.closeScreenButton.GetComponentInChildren<LocText>().SetText(UI.RETIRED_COLONY_INFO_SCREEN.BUTTONS.CLOSE);
+		this.quitToMainMenuButton.gameObject.SetActive(false);
 	}
 
 	private void ConfirmDecision(string text, global::System.Action onConfirm)
 	{
 		base.gameObject.SetActive(false);
-		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
+		((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
 	}
 
 	private void OnCancelPopup()
@@ -142,11 +138,9 @@ public class RetiredColonyInfoScreen : KModalScreen
 		if (base.transform.parent.GetComponent<Canvas>() != null)
 		{
 			this.canvasRef = base.transform.parent.GetComponent<Canvas>();
+			return;
 		}
-		else
-		{
-			this.canvasRef = base.transform.parent.parent.GetComponent<Canvas>();
-		}
+		this.canvasRef = base.transform.parent.parent.GetComponent<Canvas>();
 	}
 
 	protected override void OnCmpDisable()
@@ -260,7 +254,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.clearCurrentSlideshow();
 		this.currentSlideshowFiles = RetireColonyUtility.LoadColonySlideshowFiles(data.colonyName);
 		this.slideshow.SetFiles(this.currentSlideshowFiles, -1);
-		return this.currentSlideshowFiles != null && this.currentSlideshowFiles.Length > 0;
+		return this.currentSlideshowFiles != null && this.currentSlideshowFiles.Length != 0;
 	}
 
 	private void clearCurrentSlideshow()
@@ -295,7 +289,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			GameObject gameObject = global::Util.KInstantiateUI((!colonyAchievement.isVictoryCondition) ? this.achievementsPrefab : this.victoryAchievementsPrefab, this.achievementsContainer, true);
+			GameObject gameObject = global::Util.KInstantiateUI(colonyAchievement.isVictoryCondition ? this.victoryAchievementsPrefab : this.achievementsPrefab, this.achievementsContainer, true);
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 			component.GetReference<LocText>("nameLabel").SetText(colonyAchievement.Name);
 			component.GetReference<LocText>("descriptionLabel").SetText(colonyAchievement.description);
@@ -327,17 +321,20 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private IEnumerator ClearAchievementVeil(float delay = 0f)
 	{
 		yield return new WaitForSecondsRealtime(delay);
+		GameObject[] array;
 		for (float i = 0.7f; i >= 0f; i -= Time.unscaledDeltaTime)
 		{
-			foreach (GameObject gameObject in this.achievementVeils)
+			array = this.achievementVeils;
+			for (int j = 0; j < array.Length; j++)
 			{
-				gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, i);
+				array[j].GetComponent<Image>().color = new Color(0f, 0f, 0f, i);
 			}
 			yield return 0;
 		}
-		foreach (GameObject gameObject2 in this.achievementVeils)
+		array = this.achievementVeils;
+		for (int j = 0; j < array.Length; j++)
 		{
-			gameObject2.SetActive(false);
+			array[j].SetActive(false);
 		}
 		yield break;
 	}
@@ -345,23 +342,26 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private IEnumerator ShowAchievementVeil()
 	{
 		float targetAlpha = 0.7f;
-		foreach (GameObject gameObject in this.achievementVeils)
+		GameObject[] array = this.achievementVeils;
+		for (int j = 0; j < array.Length; j++)
 		{
-			gameObject.SetActive(true);
+			array[j].SetActive(true);
 		}
 		for (float i = 0f; i <= targetAlpha; i += Time.unscaledDeltaTime)
 		{
-			foreach (GameObject gameObject2 in this.achievementVeils)
+			array = this.achievementVeils;
+			for (int j = 0; j < array.Length; j++)
 			{
-				gameObject2.GetComponent<Image>().color = new Color(0f, 0f, 0f, i);
+				array[j].GetComponent<Image>().color = new Color(0f, 0f, 0f, i);
 			}
 			yield return 0;
 		}
 		for (float num = 0f; num <= targetAlpha; num += Time.unscaledDeltaTime)
 		{
-			foreach (GameObject gameObject3 in this.achievementVeils)
+			array = this.achievementVeils;
+			for (int j = 0; j < array.Length; j++)
 			{
-				gameObject3.GetComponent<Image>().color = new Color(0f, 0f, 0f, targetAlpha);
+				array[j].GetComponent<Image>().color = new Color(0f, 0f, 0f, targetAlpha);
 			}
 		}
 		yield break;
@@ -371,7 +371,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	{
 		int num = 1;
 		float num2 = 1f;
-		if (newlyAchieved != null && newlyAchieved.Length > 0)
+		if (newlyAchieved != null && newlyAchieved.Length != 0)
 		{
 			this.retiredColonyData = RetireColonyUtility.LoadRetiredColonies(true);
 		}
@@ -381,9 +381,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 			bool flag2 = false;
 			if (data != null)
 			{
-				foreach (string text in data.achievements)
+				string[] array = data.achievements;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (text == keyValuePair.Key)
+					if (array[i] == keyValuePair.Key)
 					{
 						flag = true;
 						break;
@@ -392,11 +393,13 @@ public class RetiredColonyInfoScreen : KModalScreen
 			}
 			if (!flag && data == null && this.retiredColonyData != null)
 			{
-				foreach (RetiredColonyData retiredColonyData in this.retiredColonyData)
+				RetiredColonyData[] array2 = this.retiredColonyData;
+				for (int i = 0; i < array2.Length; i++)
 				{
-					foreach (string text2 in retiredColonyData.achievements)
+					string[] array = array2[i].achievements;
+					for (int j = 0; j < array.Length; j++)
 					{
-						if (text2 == keyValuePair.Key)
+						if (array[j] == keyValuePair.Key)
 						{
 							flag2 = true;
 						}
@@ -406,9 +409,9 @@ public class RetiredColonyInfoScreen : KModalScreen
 			bool flag3 = false;
 			if (newlyAchieved != null)
 			{
-				for (int l = 0; l < newlyAchieved.Length; l++)
+				for (int k = 0; k < newlyAchieved.Length; k++)
 				{
-					if (newlyAchieved[l] == keyValuePair.Key)
+					if (newlyAchieved[k] == keyValuePair.Key)
 					{
 						flag3 = true;
 					}
@@ -439,7 +442,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 				keyValuePair.Value.GetComponent<AchievementWidget>().SetNotAchieved();
 			}
 		}
-		if (newlyAchieved != null && newlyAchieved.Length > 0)
+		if (newlyAchieved != null && newlyAchieved.Length != 0)
 		{
 			base.StartCoroutine(this.ShowAchievementVeil());
 			base.StartCoroutine(this.ClearAchievementVeil(num2 + (float)num * 1f));
@@ -457,14 +460,8 @@ public class RetiredColonyInfoScreen : KModalScreen
 		Vector2 sizeDelta = this.slideshow.transform.parent.GetComponent<RectTransform>().sizeDelta;
 		Vector2 fittedSize = this.slideshow.GetFittedSize(sprite, sizeDelta.x, sizeDelta.y);
 		LayoutElement component = this.slideshow.GetComponent<LayoutElement>();
-		LayoutElement layoutElement = component;
-		float num = fittedSize.x;
-		component.preferredWidth = num;
-		layoutElement.minWidth = num;
-		LayoutElement layoutElement2 = component;
-		num = fittedSize.y;
-		component.preferredHeight = num;
-		layoutElement2.minHeight = num;
+		component.minWidth = (component.preferredWidth = fittedSize.x);
+		component.minHeight = (component.preferredHeight = fittedSize.y);
 	}
 
 	private void DisplayTimelapse(RetiredColonyData data, GameObject container)
@@ -485,12 +482,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 		{
 			this.slideshow.gameObject.SetActive(false);
 			reference.gameObject.SetActive(false);
+			return;
 		}
-		else
-		{
-			this.slideshow.gameObject.SetActive(true);
-			reference.gameObject.SetActive(true);
-		}
+		this.slideshow.gameObject.SetActive(true);
+		reference.gameObject.SetActive(true);
 	}
 
 	private void DisplayDuplicants(RetiredColonyData data, GameObject container, int range_min = -1, int range_max = -1)
@@ -503,20 +498,19 @@ public class RetiredColonyInfoScreen : KModalScreen
 		{
 			if (j < range_min || (j > range_max && range_max != -1))
 			{
-				GameObject gameObject = new GameObject();
-				gameObject.transform.SetParent(container.transform);
+				new GameObject().transform.SetParent(container.transform);
 			}
 			else
 			{
 				RetiredColonyData.RetiredDuplicantData retiredDuplicantData = data.Duplicants[j];
-				GameObject gameObject2 = global::Util.KInstantiateUI(this.duplicantPrefab, container, true);
-				HierarchyReferences component = gameObject2.GetComponent<HierarchyReferences>();
+				GameObject gameObject = global::Util.KInstantiateUI(this.duplicantPrefab, container, true);
+				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 				component.GetReference<LocText>("NameLabel").SetText(retiredDuplicantData.name);
 				component.GetReference<LocText>("AgeLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.DUPLICANT_AGE, retiredDuplicantData.age.ToString()));
 				component.GetReference<LocText>("SkillLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.SKILL_LEVEL, retiredDuplicantData.skillPointsGained.ToString()));
 				SymbolOverrideController reference = component.GetReference<SymbolOverrideController>("SymbolOverrideController");
 				reference.RemoveAllSymbolOverrides(0);
-				KBatchedAnimController componentInChildren = gameObject2.GetComponentInChildren<KBatchedAnimController>();
+				KBatchedAnimController componentInChildren = gameObject.GetComponentInChildren<KBatchedAnimController>();
 				componentInChildren.SetSymbolVisiblity("snapTo_neck", false);
 				componentInChildren.SetSymbolVisiblity("snapTo_goggles", false);
 				componentInChildren.SetSymbolVisiblity("snapTo_hat", false);
@@ -528,7 +522,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 						KAnim.Build.Symbol symbol = Db.Get().Accessories.Get(keyValuePair.Value).symbol;
 						AccessorySlot accessorySlot = Db.Get().AccessorySlots.Get(keyValuePair.Key);
 						reference.AddSymbolOverride(accessorySlot.targetSymbolId, symbol, 0);
-						gameObject2.GetComponentInChildren<KBatchedAnimController>().SetSymbolVisiblity(keyValuePair.Key, true);
+						gameObject.GetComponentInChildren<KBatchedAnimController>().SetSymbolVisiblity(keyValuePair.Key, true);
 					}
 				}
 				reference.ApplyOverrides();
@@ -557,7 +551,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 		{
 			global::UnityEngine.Object.Destroy(container.transform.GetChild(i).gameObject);
 		}
-		data.buildings.Sort(delegate(Tuple<string, int> a, Tuple<string, int> b)
+		data.buildings.Sort(delegate(global::Tuple<string, int> a, global::Tuple<string, int> b)
 		{
 			if (a.second > b.second)
 			{
@@ -570,14 +564,13 @@ public class RetiredColonyInfoScreen : KModalScreen
 			return -1;
 		});
 		data.buildings.Reverse();
-		foreach (Tuple<string, int> tuple in data.buildings)
+		foreach (global::Tuple<string, int> tuple in data.buildings)
 		{
 			GameObject prefab = Assets.GetPrefab(tuple.first);
-			GameObject gameObject = global::Util.KInstantiateUI(this.buildingPrefab, container, true);
-			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+			HierarchyReferences component = global::Util.KInstantiateUI(this.buildingPrefab, container, true).GetComponent<HierarchyReferences>();
 			component.GetReference<LocText>("NameLabel").SetText(GameUtil.ApplyBoldString(prefab.GetProperName()));
 			component.GetReference<LocText>("CountLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.BUILDING_COUNT, tuple.second.ToString()));
-			Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
 			component.GetReference<Image>("Portrait").sprite = uisprite.first;
 		}
 	}
@@ -585,26 +578,26 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private IEnumerator ComputeSizeStatGrid()
 	{
 		yield return new WaitForEndOfFrame();
-		GridLayoutGroup gridLayout = this.statsContainer.GetComponent<GridLayoutGroup>();
-		gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-		gridLayout.constraintCount = ((Screen.width >= 1920) ? 3 : 2);
+		GridLayoutGroup component = this.statsContainer.GetComponent<GridLayoutGroup>();
+		component.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+		component.constraintCount = ((Screen.width < 1920) ? 2 : 3);
 		yield return new WaitForEndOfFrame();
-		float targetAchievementWidth = base.gameObject.rectTransform().rect.width - this.explorerRoot.transform.parent.rectTransform().rect.width - 50f;
-		targetAchievementWidth = Mathf.Min(830f, targetAchievementWidth);
-		this.achievementsSection.GetComponent<LayoutElement>().preferredWidth = targetAchievementWidth;
+		float num = base.gameObject.rectTransform().rect.width - this.explorerRoot.transform.parent.rectTransform().rect.width - 50f;
+		num = Mathf.Min(830f, num);
+		this.achievementsSection.GetComponent<LayoutElement>().preferredWidth = num;
 		yield break;
 	}
 
 	private IEnumerator ComputeSizeExplorerGrid()
 	{
 		yield return new WaitForEndOfFrame();
-		GridLayoutGroup gridLayout = this.explorerGrid.GetComponent<GridLayoutGroup>();
-		gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-		gridLayout.constraintCount = ((Screen.width >= 1920) ? 3 : 2);
+		GridLayoutGroup component = this.explorerGrid.GetComponent<GridLayoutGroup>();
+		component.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+		component.constraintCount = ((Screen.width < 1920) ? 2 : 3);
 		yield return new WaitForEndOfFrame();
-		float targetAchievementWidth = base.gameObject.rectTransform().rect.width - this.explorerRoot.transform.parent.rectTransform().rect.width - 50f;
-		targetAchievementWidth = Mathf.Min(830f, targetAchievementWidth);
-		this.achievementsSection.GetComponent<LayoutElement>().preferredWidth = targetAchievementWidth;
+		float num = base.gameObject.rectTransform().rect.width - this.explorerRoot.transform.parent.rectTransform().rect.width - 50f;
+		num = Mathf.Min(830f, num);
+		this.achievementsSection.GetComponent<LayoutElement>().preferredWidth = num;
 		yield break;
 	}
 
@@ -665,7 +658,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 		componentInChildren.axis_x.guide_frequency = (componentInChildren.axis_x.max_value - componentInChildren.axis_x.min_value) / 10f;
 		componentInChildren.axis_y.guide_frequency = (componentInChildren.axis_y.max_value - componentInChildren.axis_y.min_value) / 10f;
 		componentInChildren.RefreshGuides();
-		Tuple<float, float>[] value = statistic.value;
+		global::Tuple<float, float>[] value = statistic.value;
 		GraphedLine graphedLine = componentInChildren2.NewLine(value, statistic.id);
 		if (this.statColors.ContainsKey(statistic.id))
 		{
@@ -703,7 +696,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			this.colonyDataRoot.transform.parent.rectTransform().SetPosition(new Vector3(this.colonyDataRoot.transform.parent.rectTransform().position.x, 0f, 0f));
 		}
 		this.UpdateAchievementData(null, null);
-		this.explorerSearch.text = string.Empty;
+		this.explorerSearch.text = "";
 	}
 
 	private void LoadExplorer()
@@ -721,8 +714,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			RetiredColonyData data = retiredColonyData;
 			GameObject gameObject = global::Util.KInstantiateUI(this.colonyButtonPrefab, this.explorerGrid, true);
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			string text = RetireColonyUtility.StripInvalidCharacters(data.colonyName);
-			Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(text);
+			Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(RetireColonyUtility.StripInvalidCharacters(data.colonyName));
 			Image reference = component.GetReference<Image>("ColonyImage");
 			RectTransform reference2 = component.GetReference<RectTransform>("PreviewUnavailableText");
 			if (sprite != null)
@@ -743,14 +735,14 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				this.LoadColony(data);
 			};
-			string text2 = retiredColonyData.colonyName;
+			string text = retiredColonyData.colonyName;
 			int num = 0;
-			while (this.explorerColonyWidgets.ContainsKey(text2))
+			while (this.explorerColonyWidgets.ContainsKey(text))
 			{
 				num++;
-				text2 = retiredColonyData.colonyName + "_" + num;
+				text = retiredColonyData.colonyName + "_" + num;
 			}
-			this.explorerColonyWidgets.Add(text2, gameObject);
+			this.explorerColonyWidgets.Add(text, gameObject);
 		}
 	}
 

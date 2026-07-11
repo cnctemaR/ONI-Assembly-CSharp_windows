@@ -6,20 +6,6 @@ namespace ProcGen.Noise
 {
 	public class Tree
 	{
-		public Tree()
-		{
-			this.settings = new SampleSettings();
-			this.links = new List<NodeLink>();
-			this.primitives = new Dictionary<string, Primitive>();
-			this.filters = new Dictionary<string, Filter>();
-			this.transformers = new Dictionary<string, Transformer>();
-			this.selectors = new Dictionary<string, Selector>();
-			this.modifiers = new Dictionary<string, Modifier>();
-			this.combiners = new Dictionary<string, Combiner>();
-			this.floats = new Dictionary<string, FloatList>();
-			this.controlpoints = new Dictionary<string, ControlPointList>();
-		}
-
 		public SampleSettings settings { get; set; }
 
 		public List<NodeLink> links { get; set; }
@@ -39,6 +25,20 @@ namespace ProcGen.Noise
 		public Dictionary<string, FloatList> floats { get; set; }
 
 		public Dictionary<string, ControlPointList> controlpoints { get; set; }
+
+		public Tree()
+		{
+			this.settings = new SampleSettings();
+			this.links = new List<NodeLink>();
+			this.primitives = new Dictionary<string, Primitive>();
+			this.filters = new Dictionary<string, Filter>();
+			this.transformers = new Dictionary<string, Transformer>();
+			this.selectors = new Dictionary<string, Selector>();
+			this.modifiers = new Dictionary<string, Modifier>();
+			this.combiners = new Dictionary<string, Combiner>();
+			this.floats = new Dictionary<string, FloatList>();
+			this.controlpoints = new Dictionary<string, ControlPointList>();
+		}
 
 		public void ClearEmptyLists()
 		{

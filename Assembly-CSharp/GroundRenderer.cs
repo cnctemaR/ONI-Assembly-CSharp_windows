@@ -175,17 +175,14 @@ public class GroundRenderer : KMonoBehaviour
 
 	private void ConfigureMaterialShine(Material material)
 	{
-		Texture texture = material.GetTexture("_ShineMask");
-		if (texture != null)
+		if (material.GetTexture("_ShineMask") != null)
 		{
 			material.DisableKeyword("MATTE");
 			material.EnableKeyword("SHINY");
+			return;
 		}
-		else
-		{
-			material.EnableKeyword("MATTE");
-			material.DisableKeyword("SHINY");
-		}
+		material.EnableKeyword("MATTE");
+		material.DisableKeyword("SHINY");
 	}
 
 	[ContextMenu("Reload Shaders")]
@@ -218,11 +215,11 @@ public class GroundRenderer : KMonoBehaviour
 				}
 			}
 			GroundRenderer.WorldChunk[,] array = this.worldChunks;
-			int length = array.GetLength(0);
-			int length2 = array.GetLength(1);
-			for (int k = 0; k < length; k++)
+			int upperBound = array.GetUpperBound(0);
+			int upperBound2 = array.GetUpperBound(1);
+			for (int k = array.GetLowerBound(0); k <= upperBound; k++)
 			{
-				for (int l = 0; l < length2; l++)
+				for (int l = array.GetLowerBound(1); l <= upperBound2; l++)
 				{
 					GroundRenderer.WorldChunk worldChunk = array[k, l];
 					worldChunk.Clear();
@@ -240,11 +237,11 @@ public class GroundRenderer : KMonoBehaviour
 		if (this.worldChunks != null)
 		{
 			GroundRenderer.WorldChunk[,] array = this.worldChunks;
-			int length = array.GetLength(0);
-			int length2 = array.GetLength(1);
-			for (int i = 0; i < length; i++)
+			int upperBound = array.GetUpperBound(0);
+			int upperBound2 = array.GetUpperBound(1);
+			for (int i = array.GetLowerBound(0); i <= upperBound; i++)
 			{
-				for (int j = 0; j < length2; j++)
+				for (int j = array.GetLowerBound(1); j <= upperBound2; j++)
 				{
 					GroundRenderer.WorldChunk worldChunk = array[i, j];
 					worldChunk.FreeResources();
@@ -506,17 +503,16 @@ public class GroundRenderer : KMonoBehaviour
 					GroundRenderer.WorldChunk.elements[1] = Grid.Element[num6];
 					GroundRenderer.WorldChunk.elements[2] = Grid.Element[num7];
 					GroundRenderer.WorldChunk.elements[3] = Grid.Element[num8];
-					GroundRenderer.WorldChunk.substances[0] = ((!Grid.RenderedByWorld[num5] || !GroundRenderer.WorldChunk.elements[0].IsSolid) ? (-1) : GroundRenderer.WorldChunk.elements[0].substance.idx);
-					GroundRenderer.WorldChunk.substances[1] = ((!Grid.RenderedByWorld[num6] || !GroundRenderer.WorldChunk.elements[1].IsSolid) ? (-1) : GroundRenderer.WorldChunk.elements[1].substance.idx);
-					GroundRenderer.WorldChunk.substances[2] = ((!Grid.RenderedByWorld[num7] || !GroundRenderer.WorldChunk.elements[2].IsSolid) ? (-1) : GroundRenderer.WorldChunk.elements[2].substance.idx);
-					GroundRenderer.WorldChunk.substances[3] = ((!Grid.RenderedByWorld[num8] || !GroundRenderer.WorldChunk.elements[3].IsSolid) ? (-1) : GroundRenderer.WorldChunk.elements[3].substance.idx);
+					GroundRenderer.WorldChunk.substances[0] = ((Grid.RenderedByWorld[num5] && GroundRenderer.WorldChunk.elements[0].IsSolid) ? GroundRenderer.WorldChunk.elements[0].substance.idx : (-1));
+					GroundRenderer.WorldChunk.substances[1] = ((Grid.RenderedByWorld[num6] && GroundRenderer.WorldChunk.elements[1].IsSolid) ? GroundRenderer.WorldChunk.elements[1].substance.idx : (-1));
+					GroundRenderer.WorldChunk.substances[2] = ((Grid.RenderedByWorld[num7] && GroundRenderer.WorldChunk.elements[2].IsSolid) ? GroundRenderer.WorldChunk.elements[2].substance.idx : (-1));
+					GroundRenderer.WorldChunk.substances[3] = ((Grid.RenderedByWorld[num8] && GroundRenderer.WorldChunk.elements[3].IsSolid) ? GroundRenderer.WorldChunk.elements[3].substance.idx : (-1));
 					GroundRenderer.WorldChunk.uniqueElements[0] = GroundRenderer.WorldChunk.elements[0];
 					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[1], GroundRenderer.WorldChunk.uniqueElements, 1);
 					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[2], GroundRenderer.WorldChunk.uniqueElements, 2);
 					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[3], GroundRenderer.WorldChunk.uniqueElements, 3);
 					int num9 = -1;
-					int num10 = i * Grid.WidthInCells + j;
-					int biomeIdx = GroundRenderer.WorldChunk.GetBiomeIdx(num10);
+					int biomeIdx = GroundRenderer.WorldChunk.GetBiomeIdx(i * Grid.WidthInCells + j);
 					GroundMasks.BiomeMaskData biomeMaskData = biomeMasks[biomeIdx];
 					for (int k = 0; k < GroundRenderer.WorldChunk.uniqueElements.Length; k++)
 					{
@@ -527,15 +523,15 @@ public class GroundRenderer : KMonoBehaviour
 							if (idx != num9)
 							{
 								num9 = idx;
-								int num11 = (((GroundRenderer.WorldChunk.substances[2] < idx) ? 0 : 1) << 3) | (((GroundRenderer.WorldChunk.substances[3] < idx) ? 0 : 1) << 2) | (((GroundRenderer.WorldChunk.substances[0] < idx) ? 0 : 1) << 1) | (((GroundRenderer.WorldChunk.substances[1] < idx) ? 0 : 1) << 0);
-								if (num11 > 0)
+								int num10 = (((GroundRenderer.WorldChunk.substances[2] >= idx) ? 1 : 0) << 3) | (((GroundRenderer.WorldChunk.substances[3] >= idx) ? 1 : 0) << 2) | (((GroundRenderer.WorldChunk.substances[0] >= idx) ? 1 : 0) << 1) | ((GroundRenderer.WorldChunk.substances[1] >= idx) ? 1 : 0);
+								if (num10 > 0)
 								{
-									GroundMasks.UVData[] variationUVs = biomeMaskData.tiles[num11].variationUVs;
+									GroundMasks.UVData[] variationUVs = biomeMaskData.tiles[num10].variationUVs;
 									float staticRandom = GroundRenderer.WorldChunk.GetStaticRandom(j, i);
-									int num12 = Mathf.Min(variationUVs.Length - 1, (int)((float)variationUVs.Length * staticRandom));
-									GroundMasks.UVData uvdata = variationUVs[num12 % variationUVs.Length];
+									int num11 = Mathf.Min(variationUVs.Length - 1, (int)((float)variationUVs.Length * staticRandom));
+									GroundMasks.UVData uvdata = variationUVs[num11 % variationUVs.Length];
 									GroundRenderer.ElementChunk elementChunk2 = this.GetElementChunk(element.id, materials);
-									if (num11 == 15)
+									if (num10 == 15)
 									{
 										elementChunk2.AddOpaqueQuad(j, i, uvdata);
 									}
@@ -555,12 +551,11 @@ public class GroundRenderer : KMonoBehaviour
 			}
 			for (int l = this.elementChunks.Count - 1; l >= 0; l--)
 			{
-				GroundRenderer.ElementChunk elementChunk4 = this.elementChunks[l];
-				if (elementChunk4.tileCount == 0)
+				if (this.elementChunks[l].tileCount == 0)
 				{
-					int num13 = this.elementChunks.Count - 1;
-					this.elementChunks[l] = this.elementChunks[num13];
-					this.elementChunks.RemoveAt(num13);
+					int num12 = this.elementChunks.Count - 1;
+					this.elementChunks[l] = this.elementChunks[num12];
+					this.elementChunks.RemoveAt(num12);
 				}
 			}
 		}

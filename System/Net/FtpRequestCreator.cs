@@ -4,7 +4,7 @@ namespace System.Net
 {
 	internal class FtpRequestCreator : IWebRequestCreate
 	{
-		public WebRequest Create(global::System.Uri uri)
+		public WebRequest Create(Uri uri)
 		{
 			return new FtpWebRequest(uri);
 		}

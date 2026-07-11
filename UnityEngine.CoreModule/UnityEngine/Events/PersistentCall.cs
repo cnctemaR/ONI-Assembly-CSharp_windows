@@ -151,17 +151,17 @@ namespace UnityEngine.Events
 		[SerializeField]
 		private string m_MethodName;
 
-		[FormerlySerializedAs("mode")]
 		[SerializeField]
+		[FormerlySerializedAs("mode")]
 		private PersistentListenerMode m_Mode = PersistentListenerMode.EventDefined;
 
-		[FormerlySerializedAs("arguments")]
 		[SerializeField]
+		[FormerlySerializedAs("arguments")]
 		private ArgumentCache m_Arguments = new ArgumentCache();
 
+		[SerializeField]
 		[FormerlySerializedAs("enabled")]
 		[FormerlySerializedAs("m_Enabled")]
-		[SerializeField]
 		private UnityEventCallState m_CallState = UnityEventCallState.RuntimeOnly;
 	}
 }

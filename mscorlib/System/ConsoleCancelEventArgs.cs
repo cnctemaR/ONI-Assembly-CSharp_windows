@@ -1,24 +1,26 @@
 ﻿using System;
+using Unity;
 
 namespace System
 {
 	[Serializable]
 	public sealed class ConsoleCancelEventArgs : EventArgs
 	{
-		internal ConsoleCancelEventArgs(ConsoleSpecialKey key)
+		internal ConsoleCancelEventArgs(ConsoleSpecialKey type)
 		{
-			this.specialKey = key;
+			this._type = type;
+			this._cancel = false;
 		}
 
 		public bool Cancel
 		{
 			get
 			{
-				return this.cancel;
+				return this._cancel;
 			}
 			set
 			{
-				this.cancel = value;
+				this._cancel = value;
 			}
 		}
 
@@ -26,12 +28,17 @@ namespace System
 		{
 			get
 			{
-				return this.specialKey;
+				return this._type;
 			}
 		}
 
-		private bool cancel;
+		internal ConsoleCancelEventArgs()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
 
-		private ConsoleSpecialKey specialKey;
+		private ConsoleSpecialKey _type;
+
+		private bool _cancel;
 	}
 }

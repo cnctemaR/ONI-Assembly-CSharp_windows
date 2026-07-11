@@ -9,8 +9,7 @@ namespace TMPro
 		private static GameObject CreateUIElementRoot(string name, Vector2 size)
 		{
 			GameObject gameObject = new GameObject(name);
-			RectTransform rectTransform = gameObject.AddComponent<RectTransform>();
-			rectTransform.sizeDelta = size;
+			gameObject.AddComponent<RectTransform>().sizeDelta = size;
 			return gameObject;
 		}
 
@@ -102,7 +101,7 @@ namespace TMPro
 			component.offsetMin = new Vector2(10f, 6f);
 			component.offsetMax = new Vector2(-10f, -7f);
 			TextMeshProUGUI textMeshProUGUI = gameObject4.AddComponent<TextMeshProUGUI>();
-			textMeshProUGUI.text = string.Empty;
+			textMeshProUGUI.text = "";
 			textMeshProUGUI.enableWordWrapping = false;
 			textMeshProUGUI.extraPadding = true;
 			textMeshProUGUI.richText = true;
@@ -179,22 +178,20 @@ namespace TMPro
 			scrollRect.verticalScrollbar = component;
 			scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
 			scrollRect.verticalScrollbarSpacing = -3f;
-			Mask mask = gameObject5.AddComponent<Mask>();
-			mask.showMaskGraphic = false;
+			gameObject5.AddComponent<Mask>().showMaskGraphic = false;
 			Image image4 = gameObject5.AddComponent<Image>();
 			image4.sprite = resources.mask;
 			image4.type = Image.Type.Sliced;
 			TextMeshProUGUI textMeshProUGUI2 = gameObject2.AddComponent<TextMeshProUGUI>();
 			TMP_DefaultControls.SetDefaultTextValues(textMeshProUGUI2);
 			textMeshProUGUI2.alignment = TextAlignmentOptions.Left;
-			Image image5 = gameObject3.AddComponent<Image>();
-			image5.sprite = resources.dropdown;
-			Image image6 = gameObject.AddComponent<Image>();
-			image6.sprite = resources.standard;
-			image6.color = TMP_DefaultControls.s_DefaultSelectableColor;
-			image6.type = Image.Type.Sliced;
+			gameObject3.AddComponent<Image>().sprite = resources.dropdown;
+			Image image5 = gameObject.AddComponent<Image>();
+			image5.sprite = resources.standard;
+			image5.color = TMP_DefaultControls.s_DefaultSelectableColor;
+			image5.type = Image.Type.Sliced;
 			TMP_Dropdown tmp_Dropdown = gameObject.AddComponent<TMP_Dropdown>();
-			tmp_Dropdown.targetGraphic = image6;
+			tmp_Dropdown.targetGraphic = image5;
 			TMP_DefaultControls.SetDefaultColorTransitionValues(tmp_Dropdown);
 			tmp_Dropdown.template = gameObject4.GetComponent<RectTransform>();
 			tmp_Dropdown.captionText = textMeshProUGUI2;

@@ -98,11 +98,9 @@ public class RootMenu : KScreen
 				this.AddSubMenu(this.userMenu);
 				this.userMenu.SetSelected(this.selectedGO);
 				this.userMenu.Refresh(this.selectedGO);
+				return;
 			}
-			else
-			{
-				this.userMenu.SetSelected(null);
-			}
+			this.userMenu.SetSelected(null);
 		}
 	}
 
@@ -184,11 +182,9 @@ public class RootMenu : KScreen
 		if (global::UnityEngine.EventSystems.EventSystem.current != null)
 		{
 			global::UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("OnUIClear() Event system is null");
-		}
+		global::Debug.LogWarning("OnUIClear() Event system is null");
 	}
 
 	protected override void OnActivate()

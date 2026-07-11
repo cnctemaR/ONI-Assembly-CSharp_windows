@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF48}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935651}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Harmony</RootNamespace>
     <AssemblyName>0Harmony</AssemblyName>
@@ -79,18 +79,6 @@
     <Compile Include="UpgradeToLatestVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF54}</Project>
-      <Name>System.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System\System.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF56}</Project>
-      <Name>System</Name>
-    </ProjectReference>
+    <Reference Include="System.Core" />
   </ItemGroup>
-  <ItemGroup />
 </Project>

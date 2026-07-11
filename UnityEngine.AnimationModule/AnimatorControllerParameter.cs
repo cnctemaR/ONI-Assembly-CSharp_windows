@@ -5,20 +5,14 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Used to communicate between scripting and the controller. Some parameters can be set in scripting and used by the controller, while other parameters are based on Custom Curves in Animation Clips and can be sampled using the scripting API.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeHeader("Runtime/Animation/AnimatorControllerParameter.h")]
 	[NativeAsStruct]
 	[UsedByNativeCode]
 	[NativeType(CodegenOptions.Custom, "MonoAnimatorControllerParameter")]
-	[NativeHeader("Runtime/Animation/AnimatorControllerParameter.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AnimatorControllerParameter
 	{
-		/// <summary>
-		///   <para>The name of the parameter.</para>
-		/// </summary>
 		public string name
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the hash of the parameter based on its name.</para>
-		/// </summary>
 		public int nameHash
 		{
 			get
@@ -38,9 +29,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The type of the parameter.</para>
-		/// </summary>
 		public AnimatorControllerParameterType type
 		{
 			get
@@ -53,9 +41,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The default float value for the parameter.</para>
-		/// </summary>
 		public float defaultFloat
 		{
 			get
@@ -68,9 +53,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The default int value for the parameter.</para>
-		/// </summary>
 		public int defaultInt
 		{
 			get
@@ -83,9 +65,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The default bool value for the parameter.</para>
-		/// </summary>
 		public bool defaultBool
 		{
 			get

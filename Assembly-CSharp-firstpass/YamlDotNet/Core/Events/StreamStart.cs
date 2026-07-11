@@ -4,16 +4,6 @@ namespace YamlDotNet.Core.Events
 {
 	public class StreamStart : ParsingEvent
 	{
-		public StreamStart()
-			: this(Mark.Empty, Mark.Empty)
-		{
-		}
-
-		public StreamStart(Mark start, Mark end)
-			: base(start, end)
-		{
-		}
-
 		public override int NestingIncrease
 		{
 			get
@@ -28,6 +18,16 @@ namespace YamlDotNet.Core.Events
 			{
 				return EventType.StreamStart;
 			}
+		}
+
+		public StreamStart()
+			: this(Mark.Empty, Mark.Empty)
+		{
+		}
+
+		public StreamStart(Mark start, Mark end)
+			: base(start, end)
+		{
 		}
 
 		public override string ToString()

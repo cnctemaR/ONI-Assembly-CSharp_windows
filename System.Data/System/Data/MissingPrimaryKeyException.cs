@@ -6,20 +6,28 @@ namespace System.Data
 	[Serializable]
 	public class MissingPrimaryKeyException : DataException
 	{
-		public MissingPrimaryKeyException()
+		protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
+			throw new PlatformNotSupportedException();
 		}
 
-		protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context)
+		public MissingPrimaryKeyException()
+			: base("Missing primary key.")
 		{
+			base.HResult = -2146232027;
 		}
 
 		public MissingPrimaryKeyException(string s)
+			: base(s)
 		{
+			base.HResult = -2146232027;
 		}
 
 		public MissingPrimaryKeyException(string message, Exception innerException)
+			: base(message, innerException)
 		{
+			base.HResult = -2146232027;
 		}
 	}
 }

@@ -36,7 +36,7 @@ public class LoadingOverlay : KModalScreen
 		GameObject gameObject = GameObject.Find("/SceneInitializerFE/FrontEndManager");
 		if (LoadingOverlay.instance == null)
 		{
-			LoadingOverlay.instance = Util.KInstantiateUI<LoadingOverlay>(ScreenPrefabs.Instance.loadingOverlay.gameObject, (!(GameScreenManager.Instance == null)) ? GameScreenManager.Instance.ssOverlayCanvas : gameObject, false);
+			LoadingOverlay.instance = Util.KInstantiateUI<LoadingOverlay>(ScreenPrefabs.Instance.loadingOverlay.gameObject, (GameScreenManager.Instance == null) ? gameObject : GameScreenManager.Instance.ssOverlayCanvas, false);
 			LoadingOverlay.instance.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.LOADING);
 		}
 		if (GameScreenManager.Instance != null)

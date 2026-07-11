@@ -90,8 +90,7 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicGateBuffer component = gameObject.GetComponent<LogicGateBuffer>();
+		LogicGateBuffer component = ((GameObject)data).GetComponent<LogicGateBuffer>();
 		if (component != null)
 		{
 			this.DelayAmount = component.DelayAmount;
@@ -152,7 +151,11 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 			}
 			this.input_was_previously_positive = false;
 		}
-		return (val1 == 0 && this.delayTicksRemaining <= 0) ? 0 : 1;
+		if (val1 == 0 && this.delayTicksRemaining <= 0)
+		{
+			return 0;
+		}
+		return 1;
 	}
 
 	private void OnDelay()

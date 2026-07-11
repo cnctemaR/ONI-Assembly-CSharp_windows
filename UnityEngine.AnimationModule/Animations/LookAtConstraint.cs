@@ -6,16 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>
-	///           Constrains the orientation of an object relative to the position of one or more source objects, such that the object is facing the average position of the sources.
-	///           The LookAtConstraint is a simplified Animations.AimConstraint typically used with a Camera.
-	///       </para>
-	/// </summary>
+	[UsedByNativeCode]
+	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Animation/Constraints/LookAtConstraint.h")]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
-	[RequireComponent(typeof(Transform))]
-	[UsedByNativeCode]
 	public sealed class LookAtConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private LookAtConstraint()
@@ -26,9 +20,6 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] LookAtConstraint self);
 
-		/// <summary>
-		///   <para>The weight of the constraint component.</para>
-		/// </summary>
 		public extern float weight
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -37,9 +28,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The rotation angle along the z axis of the object. The constraint uses this property to calculate the world up vector when Animations.LookAtConstraint.UseUpObject is false.</para>
-		/// </summary>
 		public extern float roll
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -48,9 +36,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Activates or deactivates the constraint.</para>
-		/// </summary>
 		public extern bool constraintActive
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -59,9 +44,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Locks the offset and rotation at rest.</para>
-		/// </summary>
 		public extern bool locked
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -70,9 +52,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The rotation used when the sources have a total weight of 0.</para>
-		/// </summary>
 		public Vector3 rotationAtRest
 		{
 			get
@@ -87,9 +66,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Represents an offset from the constrained orientation.</para>
-		/// </summary>
 		public Vector3 rotationOffset
 		{
 			get
@@ -104,9 +80,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>The world up object, used to calculate the world up vector when Animations.LookAtConstraint.UseUpObject is true.</para>
-		/// </summary>
 		public extern Transform worldUpObject
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -115,9 +88,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Determines how the up vector is calculated.</para>
-		/// </summary>
 		public extern bool useUpObject
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -126,9 +96,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of sources set on the component (Read Only).</para>
-		/// </summary>
 		public int sourceCount
 		{
 			get
@@ -139,7 +106,7 @@ namespace UnityEngine.Animations
 
 		[FreeFunction("ConstraintBindings::GetSourceCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSourceCountInternal(LookAtConstraint self);
+		private static extern int GetSourceCountInternal([NotNull] LookAtConstraint self);
 
 		[FreeFunction(Name = "ConstraintBindings::GetSources", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -156,24 +123,13 @@ namespace UnityEngine.Animations
 
 		[FreeFunction("ConstraintBindings::SetSources")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSourcesInternal(LookAtConstraint self, List<ConstraintSource> sources);
+		private static extern void SetSourcesInternal([NotNull] LookAtConstraint self, List<ConstraintSource> sources);
 
-		/// <summary>
-		///   <para>Adds a constraint source.</para>
-		/// </summary>
-		/// <param name="source">The source object and its weight.</param>
-		/// <returns>
-		///   <para>Returns the index of the added source.</para>
-		/// </returns>
 		public int AddSource(ConstraintSource source)
 		{
 			return this.AddSource_Injected(ref source);
 		}
 
-		/// <summary>
-		///   <para>Removes a source from the component.</para>
-		/// </summary>
-		/// <param name="index">The index of the source to remove.</param>
 		public void RemoveSource(int index)
 		{
 			this.ValidateSourceIndex(index);
@@ -184,13 +140,6 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void RemoveSourceInternal(int index);
 
-		/// <summary>
-		///   <para>Gets a constraint source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the source.</param>
-		/// <returns>
-		///   <para>Returns the source object and its weight.</para>
-		/// </returns>
 		public ConstraintSource GetSource(int index)
 		{
 			this.ValidateSourceIndex(index);
@@ -205,11 +154,6 @@ namespace UnityEngine.Animations
 			return constraintSource;
 		}
 
-		/// <summary>
-		///   <para>Sets a source at a specified index.</para>
-		/// </summary>
-		/// <param name="index">The index of the source to set.</param>
-		/// <param name="source">The source object and its weight.</param>
 		public void SetSource(int index, ConstraintSource source)
 		{
 			this.ValidateSourceIndex(index);

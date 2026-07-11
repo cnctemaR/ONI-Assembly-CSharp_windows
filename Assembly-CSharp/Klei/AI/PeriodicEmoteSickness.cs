@@ -20,8 +20,7 @@ namespace Klei.AI
 
 		public override void OnCure(GameObject go, object instance_data)
 		{
-			PeriodicEmoteSickness.StatesInstance statesInstance = (PeriodicEmoteSickness.StatesInstance)instance_data;
-			statesInstance.StopSM("Cured");
+			((PeriodicEmoteSickness.StatesInstance)instance_data).StopSM("Cured");
 		}
 
 		private HashedString[] anims;
@@ -38,17 +37,12 @@ namespace Klei.AI
 
 			public Reactable GetReactable()
 			{
-				GameObject gameObject = base.master.gameObject;
-				HashedString hashedString = "PeriodicEmoteSickness";
-				ChoreType emote = Db.Get().ChoreTypes.Emote;
-				HashedString hashedString2 = "anim_sneeze_kanim";
-				float cooldown = this.periodicEmoteSickness.cooldown;
-				SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(gameObject, hashedString, emote, hashedString2, 0f, cooldown, float.PositiveInfinity);
-				foreach (HashedString hashedString3 in this.periodicEmoteSickness.anims)
+				SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "PeriodicEmoteSickness", Db.Get().ChoreTypes.Emote, "anim_sneeze_kanim", 0f, this.periodicEmoteSickness.cooldown, float.PositiveInfinity);
+				foreach (HashedString hashedString in this.periodicEmoteSickness.anims)
 				{
 					selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
 					{
-						anim = hashedString3
+						anim = hashedString
 					});
 				}
 				return selfEmoteReactable;

@@ -32,11 +32,6 @@ namespace YamlDotNet
 			return type.IsEnum;
 		}
 
-		public static bool IsDbNull(this object value)
-		{
-			return value is DBNull;
-		}
-
 		public static bool HasDefaultConstructor(this Type type)
 		{
 			return type.IsValueType || type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null) != null;
@@ -55,7 +50,11 @@ namespace YamlDotNet
 		public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
 		{
 			BindingFlags instancePublic = BindingFlags.Instance | BindingFlags.Public;
-			return (!type.IsInterface) ? type.GetProperties(instancePublic) : new Type[] { type }.Concat<Type>(type.GetInterfaces()).SelectMany<Type, PropertyInfo>((Type i) => i.GetProperties(instancePublic));
+			if (!type.IsInterface)
+			{
+				return type.GetProperties(instancePublic);
+			}
+			return new Type[] { type }.Concat<Type>(type.GetInterfaces()).SelectMany<Type, PropertyInfo>((Type i) => i.GetProperties(instancePublic));
 		}
 
 		public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)

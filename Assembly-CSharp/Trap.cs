@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -12,16 +11,15 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 		vector.x += this.trappedOffset.x;
 		vector.y += this.trappedOffset.y;
 		go.transform.SetPosition(vector);
-		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
-		component.SetSceneLayer(Grid.SceneLayer.BuildingBack);
+		go.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.BuildingBack);
 	}
 
 	private static void CreateStatusItems()
 	{
 		if (Trap.statusSprung == null)
 		{
-			Trap.statusReady = new StatusItem("Ready", BUILDING.STATUSITEMS.CREATURE_TRAP.READY.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.READY.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
-			Trap.statusSprung = new StatusItem("Sprung", BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			Trap.statusReady = new StatusItem("Ready", BUILDING.STATUSITEMS.CREATURE_TRAP.READY.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.READY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			Trap.statusSprung = new StatusItem("Sprung", BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			Trap.statusSprung.resolveTooltipCallback = delegate(string str, object obj)
 			{
 				Trap.StatesInstance statesInstance = (Trap.StatesInstance)obj;
@@ -41,8 +39,7 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 	{
 		base.OnSpawn();
 		Storage component = base.GetComponent<Storage>();
-		List<GameObject> items = component.items;
-		foreach (GameObject gameObject in items)
+		foreach (GameObject gameObject in component.items)
 		{
 			this.SetStoredPosition(gameObject);
 			KBoxCollider2D component2 = gameObject.GetComponent<KBoxCollider2D>();
@@ -59,11 +56,9 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 			{
 				this.contents.Set(component3);
 				base.smi.GoTo(base.smi.sm.occupied);
+				return;
 			}
-			else
-			{
-				component.DropAll(false, false, default(Vector3), true);
-			}
+			component.DropAll(false, false, default(Vector3), true);
 		}
 	}
 

@@ -209,13 +209,12 @@ namespace UnityEngine.UI.Extensions
 			{
 				array = UILineRenderer.endUvs;
 			}
-			Vector2 vector = new Vector2(start.y - end.y, end.x - start.x);
-			Vector2 vector2 = vector.normalized * this.LineThickness / 2f;
-			Vector2 vector3 = start - vector2;
-			Vector2 vector4 = start + vector2;
-			Vector2 vector5 = end + vector2;
-			Vector2 vector6 = end - vector2;
-			return base.SetVbo(new Vector2[] { vector3, vector4, vector5, vector6 }, array);
+			Vector2 vector = new Vector2(start.y - end.y, end.x - start.x).normalized * this.LineThickness / 2f;
+			Vector2 vector2 = start - vector;
+			Vector2 vector3 = start + vector;
+			Vector2 vector4 = end + vector;
+			Vector2 vector5 = end - vector;
+			return base.SetVbo(new Vector2[] { vector2, vector3, vector4, vector5 }, array);
 		}
 
 		private const float MIN_MITER_JOIN = 0.2617994f;

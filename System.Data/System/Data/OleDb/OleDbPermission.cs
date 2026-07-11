@@ -9,40 +9,89 @@ namespace System.Data.OleDb
 	[Serializable]
 	public sealed class OleDbPermission : DBDataPermission
 	{
-		[Obsolete("use OleDbPermission(PermissionState.None)", true)]
+		[Obsolete("OleDbPermission() has been deprecated.  Use the OleDbPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
 		public OleDbPermission()
-			: base(null)
+			: this(PermissionState.None)
 		{
 		}
 
 		public OleDbPermission(PermissionState state)
-			: base(null)
+			: base(state)
 		{
 		}
 
-		[Obsolete("use OleDbPermission(PermissionState.None)", true)]
+		[Obsolete("OleDbPermission(PermissionState state, Boolean allowBlankPassword) has been deprecated.  Use the OleDbPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
 		public OleDbPermission(PermissionState state, bool allowBlankPassword)
-			: base(null)
+			: this(state)
+		{
+			base.AllowBlankPassword = allowBlankPassword;
+		}
+
+		private OleDbPermission(OleDbPermission permission)
+			: base(permission)
 		{
 		}
 
-		[Browsable(false)]
+		internal OleDbPermission(OleDbPermissionAttribute permissionAttribute)
+			: base(permissionAttribute)
+		{
+		}
+
+		internal OleDbPermission(OleDbConnectionString constr)
+			: base(constr)
+		{
+			if (constr == null || constr.IsEmpty)
+			{
+				base.Add(ADP.StrEmpty, ADP.StrEmpty, KeyRestrictionBehavior.AllowOnly);
+			}
+		}
+
+		[Obsolete("Provider property has been deprecated.  Use the Add method.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete]
+		[Browsable(false)]
 		public string Provider
 		{
 			get
 			{
-				throw null;
+				string text = this._providers;
+				if (text == null)
+				{
+					string[] providerRestriction = this._providerRestriction;
+					if (providerRestriction != null && providerRestriction.Length != 0)
+					{
+						text = providerRestriction[0];
+						for (int i = 1; i < providerRestriction.Length; i++)
+						{
+							text = text + ";" + providerRestriction[i];
+						}
+					}
+				}
+				if (text == null)
+				{
+					return ADP.StrEmpty;
+				}
+				return text;
 			}
 			set
 			{
+				string[] array = null;
+				if (!ADP.IsEmpty(value))
+				{
+					array = value.Split(new char[] { ';' });
+					array = DBConnectionString.RemoveDuplicates(array);
+				}
+				this._providerRestriction = array;
+				this._providers = value;
 			}
 		}
 
 		public override IPermission Copy()
 		{
-			throw null;
+			return new OleDbPermission(this);
 		}
+
+		private string[] _providerRestriction;
+
+		private string _providers;
 	}
 }

@@ -11,8 +11,7 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 		get
 		{
 			int num = Grid.PosToCell(this);
-			ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-			ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+			ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
 			if (contents.mass > 0f)
 			{
 				this.lastValue = contents.temperature;
@@ -97,24 +96,17 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 	public LocString ThresholdValueUnits()
 	{
 		LocString locString = null;
-		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
-		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
+		switch (GameUtil.temperatureUnit)
 		{
-			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
-			{
-				if (temperatureUnit == GameUtil.TemperatureUnit.Kelvin)
-				{
-					locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
-				}
-			}
-			else
-			{
-				locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
-			}
-		}
-		else
-		{
+		case GameUtil.TemperatureUnit.Celsius:
 			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
+			break;
+		case GameUtil.TemperatureUnit.Fahrenheit:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
+			break;
+		case GameUtil.TemperatureUnit.Kelvin:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
+			break;
 		}
 		return locString;
 	}

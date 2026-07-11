@@ -7,24 +7,18 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Shader scripts used for all rendering.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Misc/ResourceManager.h")]
 	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Misc/ResourceManager.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	public sealed class Shader : Object
 	{
 		private Shader()
 		{
 		}
 
-		/// <summary>
-		///   <para>Shader hardware tier classification for current device.</para>
-		/// </summary>
 		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", false)]
 		public static ShaderHardwareTier globalShaderHardwareTier
 		{
@@ -38,10 +32,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Finds a shader with the given name.</para>
-		/// </summary>
-		/// <param name="name"></param>
 		[FreeFunction("GetScriptMapper().FindShader")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Shader Find(string name);
@@ -50,9 +40,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Shader FindBuiltin(string name);
 
-		/// <summary>
-		///   <para>Shader LOD level for this shader.</para>
-		/// </summary>
 		[NativeProperty("MaximumShaderLOD")]
 		public extern int maximumLOD
 		{
@@ -62,9 +49,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Shader LOD level for all shaders.</para>
-		/// </summary>
 		[NativeProperty("GlobalMaximumShaderLOD")]
 		public static extern int globalMaximumLOD
 		{
@@ -74,9 +58,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Can this shader run on the end-users graphics card? (Read Only)</para>
-		/// </summary>
 		public extern bool isSupported
 		{
 			[NativeMethod("IsSupported")]
@@ -84,9 +65,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Render pipeline currently in use.</para>
-		/// </summary>
 		public static extern string globalRenderPipeline
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -95,33 +73,18 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Set a global shader keyword.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		[FreeFunction("ShaderScripting::EnableKeyword")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EnableKeyword(string keyword);
 
-		/// <summary>
-		///   <para>Unset a global shader keyword.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		[FreeFunction("ShaderScripting::DisableKeyword")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DisableKeyword(string keyword);
 
-		/// <summary>
-		///   <para>Is global shader keyword enabled?</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		[FreeFunction("ShaderScripting::IsKeywordEnabled")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsKeywordEnabled(string keyword);
 
-		/// <summary>
-		///   <para>Render queue of this shader. (Read Only)</para>
-		/// </summary>
 		public extern int renderQueue
 		{
 			[FreeFunction("ShaderScripting::GetRenderQueue", HasExplicitThis = true)]
@@ -136,9 +99,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Fully load all shaders to prevent future performance hiccups.</para>
-		/// </summary>
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void WarmupAllShaders();
@@ -151,13 +111,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string IDToTag(int name);
 
-		/// <summary>
-		///   <para>Gets unique identifier for a shader property name.</para>
-		/// </summary>
-		/// <param name="name">Shader property name.</param>
-		/// <returns>
-		///   <para>Unique integer for the name.</para>
-		/// </returns>
 		[FreeFunction(Name = "ShaderScripting::PropertyToID", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int PropertyToID(string name);
@@ -354,155 +307,71 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets a global float property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalFloat(string name, float value)
 		{
 			Shader.SetGlobalFloatImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global float property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalFloat(int nameID, float value)
 		{
 			Shader.SetGlobalFloatImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global int property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalInt(string name, int value)
 		{
 			Shader.SetGlobalFloatImpl(Shader.PropertyToID(name), (float)value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global int property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalInt(int nameID, int value)
 		{
 			Shader.SetGlobalFloatImpl(nameID, (float)value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global vector property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalVector(string name, Vector4 value)
 		{
 			Shader.SetGlobalVectorImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global vector property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalVector(int nameID, Vector4 value)
 		{
 			Shader.SetGlobalVectorImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global color property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalColor(string name, Color value)
 		{
 			Shader.SetGlobalVectorImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global color property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalColor(int nameID, Color value)
 		{
 			Shader.SetGlobalVectorImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global matrix property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalMatrix(string name, Matrix4x4 value)
 		{
 			Shader.SetGlobalMatrixImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global matrix property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalMatrix(int nameID, Matrix4x4 value)
 		{
 			Shader.SetGlobalMatrixImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global texture property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalTexture(string name, Texture value)
 		{
 			Shader.SetGlobalTextureImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global texture property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalTexture(int nameID, Texture value)
 		{
 			Shader.SetGlobalTextureImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global compute buffer property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalBuffer(string name, ComputeBuffer value)
 		{
 			Shader.SetGlobalBufferImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a global compute buffer property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="value"></param>
 		public static void SetGlobalBuffer(int nameID, ComputeBuffer value)
 		{
 			Shader.SetGlobalBufferImpl(nameID, value);
@@ -518,23 +387,11 @@ namespace UnityEngine
 			Shader.SetGlobalFloatArray(nameID, NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a global float array property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="values"></param>
 		public static void SetGlobalFloatArray(string name, float[] values)
 		{
 			Shader.SetGlobalFloatArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a global float array property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="values"></param>
 		public static void SetGlobalFloatArray(int nameID, float[] values)
 		{
 			Shader.SetGlobalFloatArray(nameID, values, values.Length);
@@ -550,23 +407,11 @@ namespace UnityEngine
 			Shader.SetGlobalVectorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a global vector array property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="values"></param>
 		public static void SetGlobalVectorArray(string name, Vector4[] values)
 		{
 			Shader.SetGlobalVectorArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a global vector array property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="values"></param>
 		public static void SetGlobalVectorArray(int nameID, Vector4[] values)
 		{
 			Shader.SetGlobalVectorArray(nameID, values, values.Length);
@@ -582,203 +427,101 @@ namespace UnityEngine
 			Shader.SetGlobalMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a global matrix array property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="values"></param>
 		public static void SetGlobalMatrixArray(string name, Matrix4x4[] values)
 		{
 			Shader.SetGlobalMatrixArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a global matrix array property for all shaders.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="values"></param>
 		public static void SetGlobalMatrixArray(int nameID, Matrix4x4[] values)
 		{
 			Shader.SetGlobalMatrixArray(nameID, values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Gets a global float property for all shaders previously set using SetGlobalFloat.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static float GetGlobalFloat(string name)
 		{
 			return Shader.GetGlobalFloatImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global float property for all shaders previously set using SetGlobalFloat.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static float GetGlobalFloat(int nameID)
 		{
 			return Shader.GetGlobalFloatImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global int property for all shaders previously set using SetGlobalInt.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static int GetGlobalInt(string name)
 		{
 			return (int)Shader.GetGlobalFloatImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global int property for all shaders previously set using SetGlobalInt.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static int GetGlobalInt(int nameID)
 		{
 			return (int)Shader.GetGlobalFloatImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global vector property for all shaders previously set using SetGlobalVector.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Vector4 GetGlobalVector(string name)
 		{
 			return Shader.GetGlobalVectorImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global vector property for all shaders previously set using SetGlobalVector.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Vector4 GetGlobalVector(int nameID)
 		{
 			return Shader.GetGlobalVectorImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global color property for all shaders previously set using SetGlobalColor.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Color GetGlobalColor(string name)
 		{
 			return Shader.GetGlobalVectorImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global color property for all shaders previously set using SetGlobalColor.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Color GetGlobalColor(int nameID)
 		{
 			return Shader.GetGlobalVectorImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global matrix property for all shaders previously set using SetGlobalMatrix.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Matrix4x4 GetGlobalMatrix(string name)
 		{
 			return Shader.GetGlobalMatrixImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global matrix property for all shaders previously set using SetGlobalMatrix.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Matrix4x4 GetGlobalMatrix(int nameID)
 		{
 			return Shader.GetGlobalMatrixImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global texture property for all shaders previously set using SetGlobalTexture.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Texture GetGlobalTexture(string name)
 		{
 			return Shader.GetGlobalTextureImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global texture property for all shaders previously set using SetGlobalTexture.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Texture GetGlobalTexture(int nameID)
 		{
 			return Shader.GetGlobalTextureImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global float array for all shaders previously set using SetGlobalFloatArray.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static float[] GetGlobalFloatArray(string name)
 		{
 			return Shader.GetGlobalFloatArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global float array for all shaders previously set using SetGlobalFloatArray.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static float[] GetGlobalFloatArray(int nameID)
 		{
 			return (Shader.GetGlobalFloatArrayCountImpl(nameID) == 0) ? null : Shader.GetGlobalFloatArrayImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global vector array for all shaders previously set using SetGlobalVectorArray.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Vector4[] GetGlobalVectorArray(string name)
 		{
 			return Shader.GetGlobalVectorArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global vector array for all shaders previously set using SetGlobalVectorArray.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Vector4[] GetGlobalVectorArray(int nameID)
 		{
 			return (Shader.GetGlobalVectorArrayCountImpl(nameID) == 0) ? null : Shader.GetGlobalVectorArrayImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Gets a global matrix array for all shaders previously set using SetGlobalMatrixArray.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Matrix4x4[] GetGlobalMatrixArray(string name)
 		{
 			return Shader.GetGlobalMatrixArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets a global matrix array for all shaders previously set using SetGlobalMatrixArray.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public static Matrix4x4[] GetGlobalMatrixArray(int nameID)
 		{
 			return (Shader.GetGlobalMatrixArrayCountImpl(nameID) == 0) ? null : Shader.GetGlobalMatrixArrayImpl(nameID);

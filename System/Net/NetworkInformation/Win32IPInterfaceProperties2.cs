@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
@@ -13,30 +14,49 @@ namespace System.Net.NetworkInformation
 
 		public override IPv4InterfaceProperties GetIPv4Properties()
 		{
-			Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.mib4.Index);
-			return (adapterInfoByIndex == null) ? null : new Win32IPv4InterfaceProperties(adapterInfoByIndex, this.mib4);
+			return new Win32IPv4InterfaceProperties(this.addr, this.mib4);
 		}
 
 		public override IPv6InterfaceProperties GetIPv6Properties()
 		{
-			Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.mib6.Index);
-			return (adapterInfoByIndex == null) ? null : new Win32IPv6InterfaceProperties(this.mib6);
+			return new Win32IPv6InterfaceProperties(this.mib6);
 		}
 
 		public override IPAddressInformationCollection AnycastAddresses
 		{
 			get
 			{
-				return IPAddressInformationImplCollection.Win32FromAnycast(this.addr.FirstAnycastAddress);
+				return Win32IPInterfaceProperties2.Win32FromAnycast(this.addr.FirstAnycastAddress);
 			}
+		}
+
+		private static IPAddressInformationCollection Win32FromAnycast(IntPtr ptr)
+		{
+			IPAddressInformationCollection ipaddressInformationCollection = new IPAddressInformationCollection();
+			IntPtr intPtr = ptr;
+			while (intPtr != IntPtr.Zero)
+			{
+				Win32_IP_ADAPTER_ANYCAST_ADDRESS win32_IP_ADAPTER_ANYCAST_ADDRESS = (Win32_IP_ADAPTER_ANYCAST_ADDRESS)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADAPTER_ANYCAST_ADDRESS));
+				ipaddressInformationCollection.InternalAdd(new SystemIPAddressInformation(win32_IP_ADAPTER_ANYCAST_ADDRESS.Address.GetIPAddress(), win32_IP_ADAPTER_ANYCAST_ADDRESS.LengthFlags.IsDnsEligible, win32_IP_ADAPTER_ANYCAST_ADDRESS.LengthFlags.IsTransient));
+				intPtr = win32_IP_ADAPTER_ANYCAST_ADDRESS.Next;
+			}
+			return ipaddressInformationCollection;
 		}
 
 		public override IPAddressCollection DhcpServerAddresses
 		{
 			get
 			{
-				Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.mib4.Index);
-				return (adapterInfoByIndex == null) ? Win32IPAddressCollection.Empty : new Win32IPAddressCollection(new Win32_IP_ADDR_STRING[] { adapterInfoByIndex.DhcpServer });
+				IPAddressCollection ipaddressCollection;
+				try
+				{
+					ipaddressCollection = Win32IPAddressCollection.FromSocketAddress(this.addr.Dhcpv4Server);
+				}
+				catch (IndexOutOfRangeException)
+				{
+					ipaddressCollection = Win32IPAddressCollection.Empty;
+				}
+				return ipaddressCollection;
 			}
 		}
 
@@ -60,8 +80,21 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.mib4.Index);
-				return (adapterInfoByIndex == null) ? Win32GatewayIPAddressInformationCollection.Empty : new Win32GatewayIPAddressInformationCollection(new Win32_IP_ADDR_STRING[] { adapterInfoByIndex.GatewayList });
+				GatewayIPAddressInformationCollection gatewayIPAddressInformationCollection = new GatewayIPAddressInformationCollection();
+				try
+				{
+					IntPtr intPtr = this.addr.FirstGatewayAddress;
+					while (intPtr != IntPtr.Zero)
+					{
+						Win32_IP_ADAPTER_GATEWAY_ADDRESS win32_IP_ADAPTER_GATEWAY_ADDRESS = (Win32_IP_ADAPTER_GATEWAY_ADDRESS)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADAPTER_GATEWAY_ADDRESS));
+						gatewayIPAddressInformationCollection.InternalAdd(new SystemGatewayIPAddressInformation(win32_IP_ADAPTER_GATEWAY_ADDRESS.Address.GetIPAddress()));
+						intPtr = win32_IP_ADAPTER_GATEWAY_ADDRESS.Next;
+					}
+				}
+				catch (IndexOutOfRangeException)
+				{
+				}
+				return gatewayIPAddressInformationCollection;
 			}
 		}
 
@@ -69,7 +102,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.EnableDns != 0U;
+				return Win32NetworkInterface.FixedInfo.EnableDns > 0U;
 			}
 		}
 
@@ -85,25 +118,67 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return MulticastIPAddressInformationImplCollection.Win32FromMulticast(this.addr.FirstMulticastAddress);
+				return Win32IPInterfaceProperties2.Win32FromMulticast(this.addr.FirstMulticastAddress);
 			}
+		}
+
+		private static MulticastIPAddressInformationCollection Win32FromMulticast(IntPtr ptr)
+		{
+			MulticastIPAddressInformationCollection multicastIPAddressInformationCollection = new MulticastIPAddressInformationCollection();
+			IntPtr intPtr = ptr;
+			while (intPtr != IntPtr.Zero)
+			{
+				Win32_IP_ADAPTER_MULTICAST_ADDRESS win32_IP_ADAPTER_MULTICAST_ADDRESS = (Win32_IP_ADAPTER_MULTICAST_ADDRESS)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADAPTER_MULTICAST_ADDRESS));
+				multicastIPAddressInformationCollection.InternalAdd(new SystemMulticastIPAddressInformation(new SystemIPAddressInformation(win32_IP_ADAPTER_MULTICAST_ADDRESS.Address.GetIPAddress(), win32_IP_ADAPTER_MULTICAST_ADDRESS.LengthFlags.IsDnsEligible, win32_IP_ADAPTER_MULTICAST_ADDRESS.LengthFlags.IsTransient)));
+				intPtr = win32_IP_ADAPTER_MULTICAST_ADDRESS.Next;
+			}
+			return multicastIPAddressInformationCollection;
 		}
 
 		public override UnicastIPAddressInformationCollection UnicastAddresses
 		{
 			get
 			{
-				Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.mib4.Index);
-				return (adapterInfoByIndex == null) ? UnicastIPAddressInformationImplCollection.Empty : UnicastIPAddressInformationImplCollection.Win32FromUnicast((int)adapterInfoByIndex.Index, this.addr.FirstUnicastAddress);
+				UnicastIPAddressInformationCollection unicastIPAddressInformationCollection;
+				try
+				{
+					unicastIPAddressInformationCollection = Win32IPInterfaceProperties2.Win32FromUnicast(this.addr.FirstUnicastAddress);
+				}
+				catch (IndexOutOfRangeException)
+				{
+					unicastIPAddressInformationCollection = new UnicastIPAddressInformationCollection();
+				}
+				return unicastIPAddressInformationCollection;
 			}
+		}
+
+		private static UnicastIPAddressInformationCollection Win32FromUnicast(IntPtr ptr)
+		{
+			UnicastIPAddressInformationCollection unicastIPAddressInformationCollection = new UnicastIPAddressInformationCollection();
+			IntPtr intPtr = ptr;
+			while (intPtr != IntPtr.Zero)
+			{
+				Win32_IP_ADAPTER_UNICAST_ADDRESS win32_IP_ADAPTER_UNICAST_ADDRESS = (Win32_IP_ADAPTER_UNICAST_ADDRESS)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADAPTER_UNICAST_ADDRESS));
+				unicastIPAddressInformationCollection.InternalAdd(new Win32UnicastIPAddressInformation(win32_IP_ADAPTER_UNICAST_ADDRESS));
+				intPtr = win32_IP_ADAPTER_UNICAST_ADDRESS.Next;
+			}
+			return unicastIPAddressInformationCollection;
 		}
 
 		public override IPAddressCollection WinsServersAddresses
 		{
 			get
 			{
-				Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.mib4.Index);
-				return (adapterInfoByIndex == null) ? Win32IPAddressCollection.Empty : new Win32IPAddressCollection(new Win32_IP_ADDR_STRING[] { adapterInfoByIndex.PrimaryWinsServer, adapterInfoByIndex.SecondaryWinsServer });
+				IPAddressCollection ipaddressCollection;
+				try
+				{
+					ipaddressCollection = Win32IPAddressCollection.FromWinsServer(this.addr.FirstWinsServerAddress);
+				}
+				catch (IndexOutOfRangeException)
+				{
+					ipaddressCollection = Win32IPAddressCollection.Empty;
+				}
+				return ipaddressCollection;
 			}
 		}
 

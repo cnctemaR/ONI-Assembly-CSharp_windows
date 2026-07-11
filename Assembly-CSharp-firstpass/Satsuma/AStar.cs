@@ -4,6 +4,12 @@ namespace Satsuma
 {
 	public sealed class AStar
 	{
+		public IGraph Graph { get; private set; }
+
+		public Func<Arc, double> Cost { get; private set; }
+
+		public Func<Node, double> Heuristic { get; private set; }
+
 		public AStar(IGraph graph, Func<Arc, double> cost, Func<Node, double> heuristic)
 		{
 			this.Graph = graph;
@@ -11,12 +17,6 @@ namespace Satsuma
 			this.Heuristic = heuristic;
 			this.dijkstra = new Dijkstra(this.Graph, (Arc arc) => this.Cost(arc) - this.Heuristic(this.Graph.U(arc)) + this.Heuristic(this.Graph.V(arc)), DijkstraMode.Sum);
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public Func<Arc, double> Cost { get; private set; }
-
-		public Func<Node, double> Heuristic { get; private set; }
 
 		private Node CheckTarget(Node node)
 		{
@@ -45,7 +45,11 @@ namespace Satsuma
 		public double GetDistance(Node node)
 		{
 			this.CheckTarget(node);
-			return (!this.dijkstra.Fixed(node)) ? double.PositiveInfinity : this.dijkstra.GetDistance(node);
+			if (!this.dijkstra.Fixed(node))
+			{
+				return double.PositiveInfinity;
+			}
+			return this.dijkstra.GetDistance(node);
 		}
 
 		public IPath GetPath(Node node)

@@ -10,6 +10,18 @@ namespace System.Data
 
 		object this[string name] { get; }
 
+		string GetName(int i);
+
+		string GetDataTypeName(int i);
+
+		Type GetFieldType(int i);
+
+		object GetValue(int i);
+
+		int GetValues(object[] values);
+
+		int GetOrdinal(string name);
+
 		bool GetBoolean(int i);
 
 		byte GetByte(int i);
@@ -20,20 +32,6 @@ namespace System.Data
 
 		long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length);
 
-		IDataReader GetData(int i);
-
-		string GetDataTypeName(int i);
-
-		DateTime GetDateTime(int i);
-
-		decimal GetDecimal(int i);
-
-		double GetDouble(int i);
-
-		Type GetFieldType(int i);
-
-		float GetFloat(int i);
-
 		Guid GetGuid(int i);
 
 		short GetInt16(int i);
@@ -42,15 +40,17 @@ namespace System.Data
 
 		long GetInt64(int i);
 
-		string GetName(int i);
+		float GetFloat(int i);
 
-		int GetOrdinal(string name);
+		double GetDouble(int i);
 
 		string GetString(int i);
 
-		object GetValue(int i);
+		decimal GetDecimal(int i);
 
-		int GetValues(object[] values);
+		DateTime GetDateTime(int i);
+
+		IDataReader GetData(int i);
 
 		bool IsDBNull(int i);
 	}

@@ -26,12 +26,11 @@ public class ElementEmitter : SimComponent
 
 	protected override void OnSimActivate()
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
+		int num = Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		if (this.outputElement.elementHash != (SimHashes)0 && this.outputElement.massGenerationRate > 0f && this.emissionFrequency > 0f)
 		{
-			float num3 = ((this.outputElement.minOutputTemperature != 0f) ? this.outputElement.minOutputTemperature : base.GetComponent<PrimaryElement>().Temperature);
-			SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.massGenerationRate, num3, this.maxPressure, this.outputElement.addedDiseaseIdx, this.outputElement.addedDiseaseCount);
+			float num2 = ((this.outputElement.minOutputTemperature == 0f) ? base.GetComponent<PrimaryElement>().Temperature : this.outputElement.minOutputTemperature);
+			SimMessages.ModifyElementEmitter(this.simHandle, num, (int)this.emitRange, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.massGenerationRate, num2, this.maxPressure, this.outputElement.addedDiseaseIdx, this.outputElement.addedDiseaseCount);
 		}
 		if (this.showDescriptor)
 		{
@@ -41,9 +40,8 @@ public class ElementEmitter : SimComponent
 
 	protected override void OnSimDeactivate()
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
-		SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, SimHashes.Vacuum, 0f, 0f, 0f, 0f, byte.MaxValue, 0);
+		int num = Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
+		SimMessages.ModifyElementEmitter(this.simHandle, num, (int)this.emitRange, SimHashes.Vacuum, 0f, 0f, 0f, 0f, byte.MaxValue, 0);
 		if (this.showDescriptor)
 		{
 			this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
@@ -56,12 +54,11 @@ public class ElementEmitter : SimComponent
 		{
 			return;
 		}
-		float num = ((temperature <= 0f) ? this.outputElement.minOutputTemperature : temperature);
+		float num = ((temperature > 0f) ? temperature : this.outputElement.minOutputTemperature);
 		Element element = ElementLoader.FindElementByHash(this.outputElement.elementHash);
 		if (element.IsGas || element.IsLiquid)
 		{
-			int num2 = Grid.PosToCell(base.transform.GetPosition());
-			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, true, -1);
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(base.transform.GetPosition()), this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, true, -1);
 		}
 		else if (element.IsSolid)
 		{
@@ -101,10 +98,9 @@ public class ElementEmitter : SimComponent
 
 	private void OnDrawGizmosSelected()
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
+		int num = Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		Gizmos.color = Color.green;
-		Gizmos.DrawSphere(Grid.CellToPos(num2) + Vector3.right / 2f + Vector3.up / 2f, 0.2f);
+		Gizmos.DrawSphere(Grid.CellToPos(num) + Vector3.right / 2f + Vector3.up / 2f, 0.2f);
 	}
 
 	protected override Action<int> GetStaticUnregister()

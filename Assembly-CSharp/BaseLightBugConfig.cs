@@ -8,20 +8,19 @@ public static class BaseLightBugConfig
 {
 	public static GameObject BaseLightBug(string id, string name, string desc, string anim_file, string traitId, Color lightColor, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null)
 	{
-		float num = 5f;
-		KAnimFile anim = Assets.GetAnim(anim_file);
-		string text = "idle_loop";
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, 5f, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
 		GameObject gameObject2 = gameObject;
 		FactionManager.FactionID factionID = FactionManager.FactionID.Prey;
-		string text2 = "FlyerNavGrid1x1";
+		string text = "FlyerNavGrid1x1";
 		NavType navType = NavType.Hover;
-		num = 2f;
-		string text3 = "Meat";
-		int num2 = 0;
-		float freezing_ = CREATURES.TEMPERATURE.FREEZING_1;
-		float hot_ = CREATURES.TEMPERATURE.HOT_1;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, navType, 32, num, text3, num2, true, true, freezing_, hot_, CREATURES.TEMPERATURE.FREEZING_2, CREATURES.TEMPERATURE.HOT_2);
+		int num = 32;
+		float num2 = 2f;
+		string text2 = "Meat";
+		int num3 = 0;
+		bool flag = true;
+		bool flag2 = true;
+		float freezing_ = CREATURES.TEMPERATURE.FREEZING_2;
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text, navType, num, num2, text2, num3, flag, flag2, CREATURES.TEMPERATURE.FREEZING_1, CREATURES.TEMPERATURE.HOT_1, freezing_, CREATURES.TEMPERATURE.HOT_2);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -33,8 +32,7 @@ public static class BaseLightBugConfig
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
 		gameObject.AddOrGet<LoopingSounds>();
-		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
-		def.lures = new Tag[] { GameTags.Phosphorite };
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Phosphorite };
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
@@ -81,21 +79,17 @@ public static class BaseLightBugConfig
 
 	public static GameObject SetupDiet(GameObject prefab, HashSet<Tag> consumed_tags, Tag producedTag, float caloriesPerKg)
 	{
-		Diet.Info[] array = new Diet.Info[]
+		Diet diet = new Diet(new Diet.Info[]
 		{
 			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f, false, false)
-		};
-		Diet diet = new Diet(array);
-		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def.diet = diet;
-		SolidConsumerMonitor.Def def2 = prefab.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def2.diet = diet;
+		});
+		prefab.AddOrGetDef<CreatureCalorieMonitor.Def>().diet = diet;
+		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}
 
 	public static void SetupLoopingSounds(GameObject inst)
 	{
-		LoopingSounds component = inst.GetComponent<LoopingSounds>();
-		component.StartSound(GlobalAssets.GetSound("ShineBug_wings_LP", false));
+		inst.GetComponent<LoopingSounds>().StartSound(GlobalAssets.GetSound("ShineBug_wings_LP", false));
 	}
 }

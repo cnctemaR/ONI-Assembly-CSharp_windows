@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,7 +40,7 @@ public class AttachableBuilding : KMonoBehaviour
 			{
 				if (num == Grid.OffsetCell(Grid.PosToCell(Components.BuildingAttachPoints[num2]), Components.BuildingAttachPoints[num2].points[i].position))
 				{
-					Components.BuildingAttachPoints[num2].points[i].attachedBuilding = ((!register) ? null : this);
+					Components.BuildingAttachPoints[num2].points[i].attachedBuilding = (register ? this : null);
 					flag = true;
 					break;
 				}
@@ -77,27 +76,14 @@ public class AttachableBuilding : KMonoBehaviour
 				}
 				if (hardPoint.attachedBuilding != null)
 				{
-					IEnumerator enumerator = Components.AttachableBuildings.GetEnumerator();
-					try
+					foreach (object obj in Components.AttachableBuildings)
 					{
-						while (enumerator.MoveNext())
+						AttachableBuilding attachableBuilding2 = (AttachableBuilding)obj;
+						if (attachableBuilding2 == hardPoint.attachedBuilding)
 						{
-							object obj = enumerator.Current;
-							AttachableBuilding attachableBuilding2 = (AttachableBuilding)obj;
-							if (attachableBuilding2 == hardPoint.attachedBuilding)
-							{
-								list.Add(attachableBuilding2.gameObject);
-								buildingAttachPoint = attachableBuilding2.GetComponent<BuildingAttachPoint>();
-								flag = true;
-							}
-						}
-					}
-					finally
-					{
-						IDisposable disposable;
-						if ((disposable = enumerator as IDisposable) != null)
-						{
-							disposable.Dispose();
+							list.Add(attachableBuilding2.gameObject);
+							buildingAttachPoint = attachableBuilding2.GetComponent<BuildingAttachPoint>();
+							flag = true;
 						}
 					}
 				}

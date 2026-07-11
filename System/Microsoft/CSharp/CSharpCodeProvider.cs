@@ -4,22 +4,24 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Security.Permissions;
-using Mono.CSharp;
+using System.Reflection;
 
 namespace Microsoft.CSharp
 {
-	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
-	public class CSharpCodeProvider : global::System.CodeDom.Compiler.CodeDomProvider
+	public class CSharpCodeProvider : CodeDomProvider
 	{
 		public CSharpCodeProvider()
 		{
+			this._generator = new CSharpCodeGenerator();
 		}
 
 		public CSharpCodeProvider(IDictionary<string, string> providerOptions)
 		{
-			this.providerOptions = providerOptions;
+			if (providerOptions == null)
+			{
+				throw new ArgumentNullException("providerOptions");
+			}
+			this._generator = new CSharpCodeGenerator(providerOptions);
 		}
 
 		public override string FileExtension
@@ -30,38 +32,36 @@ namespace Microsoft.CSharp
 			}
 		}
 
-		[Obsolete("Use CodeDomProvider class")]
-		public override global::System.CodeDom.Compiler.ICodeCompiler CreateCompiler()
+		[Obsolete("Callers should not use the ICodeGenerator interface and should instead use the methods directly on the CodeDomProvider class.")]
+		public override ICodeGenerator CreateGenerator()
 		{
-			if (this.providerOptions != null && this.providerOptions.Count > 0)
+			return this._generator;
+		}
+
+		[Obsolete("Callers should not use the ICodeCompiler interface and should instead use the methods directly on the CodeDomProvider class.")]
+		public override ICodeCompiler CreateCompiler()
+		{
+			return this._generator;
+		}
+
+		public override TypeConverter GetConverter(Type type)
+		{
+			if (type == typeof(MemberAttributes))
 			{
-				return new Mono.CSharp.CSharpCodeCompiler(this.providerOptions);
+				return CSharpMemberAttributeConverter.Default;
 			}
-			return new Mono.CSharp.CSharpCodeCompiler();
-		}
-
-		[Obsolete("Use CodeDomProvider class")]
-		public override global::System.CodeDom.Compiler.ICodeGenerator CreateGenerator()
-		{
-			if (this.providerOptions != null && this.providerOptions.Count > 0)
+			if (!(type == typeof(TypeAttributes)))
 			{
-				return new Mono.CSharp.CSharpCodeGenerator(this.providerOptions);
+				return base.GetConverter(type);
 			}
-			return new Mono.CSharp.CSharpCodeGenerator();
+			return CSharpTypeAttributeConverter.Default;
 		}
 
-		[global::System.MonoTODO]
-		public override global::System.ComponentModel.TypeConverter GetConverter(Type Type)
+		public override void GenerateCodeFromMember(CodeTypeMember member, TextWriter writer, CodeGeneratorOptions options)
 		{
-			throw new NotImplementedException();
+			this._generator.GenerateCodeFromMember(member, writer, options);
 		}
 
-		[global::System.MonoTODO]
-		public override void GenerateCodeFromMember(global::System.CodeDom.CodeTypeMember member, TextWriter writer, global::System.CodeDom.Compiler.CodeGeneratorOptions options)
-		{
-			throw new NotImplementedException();
-		}
-
-		private IDictionary<string, string> providerOptions;
+		private readonly CSharpCodeGenerator _generator;
 	}
 }

@@ -13,15 +13,13 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		ElementSplitter data = base.GetData(handle);
 		Pickupable component = data.primaryElement.GetComponent<Pickupable>();
 		Func<float, Pickupable> func = (float amount) => ElementSplitterComponents.OnTake(handle, amount);
-		Pickupable pickupable = component;
-		pickupable.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable.OnTake, func);
+		component.OnTake = (Func<float, Pickupable>)Delegate.Combine(component.OnTake, func);
 		Func<Pickupable, bool> func2 = delegate(Pickupable other)
 		{
 			HandleVector<int>.Handle handle2 = this.GetHandle(other.gameObject);
 			return ElementSplitterComponents.CanFirstAbsorbSecond(handle, handle2);
 		};
-		Pickupable pickupable2 = component;
-		pickupable2.CanAbsorb = (Func<Pickupable, bool>)Delegate.Combine(pickupable2.CanAbsorb, func2);
+		component.CanAbsorb = (Func<Pickupable, bool>)Delegate.Combine(component.CanAbsorb, func2);
 		component.absorbable = true;
 		data.onTakeCB = func;
 		data.canAbsorbCB = func2;

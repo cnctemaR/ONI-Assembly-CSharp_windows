@@ -5,9 +5,9 @@ namespace System.Runtime.ConstrainedExecution
 	[Serializable]
 	public enum Consistency
 	{
-		MayCorruptAppDomain = 1,
+		MayCorruptProcess,
+		MayCorruptAppDomain,
 		MayCorruptInstance,
-		MayCorruptProcess = 0,
-		WillNotCorruptState = 3
+		WillNotCorruptState
 	}
 }

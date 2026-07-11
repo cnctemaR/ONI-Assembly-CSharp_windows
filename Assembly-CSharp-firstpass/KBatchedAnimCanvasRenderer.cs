@@ -162,12 +162,12 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			this.uiMat.SetTexture(textureToCopyEntry2.textureId, this.batch.matProperties.GetTexture(textureToCopyEntry2.textureId));
 			this.uiMat.SetVector(textureToCopyEntry2.sizeId, this.batch.matProperties.GetVector(textureToCopyEntry2.sizeId));
 		}
-		for (int l = 0; l < KAnimBatchManager.instance.atlasNames.Length; l++)
+		for (int k = 0; k < KAnimBatchManager.instance.atlasNames.Length; k++)
 		{
-			Texture texture2 = this.batch.matProperties.GetTexture(KAnimBatchManager.instance.atlasNames[l]);
+			Texture texture2 = this.batch.matProperties.GetTexture(KAnimBatchManager.instance.atlasNames[k]);
 			if (texture2 != null)
 			{
-				this.uiMat.SetTexture(KAnimBatchManager.instance.atlasNames[l], texture2);
+				this.uiMat.SetTexture(KAnimBatchManager.instance.atlasNames[k], texture2);
 			}
 		}
 		this.uiMat.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, this.batch.matProperties.GetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING));

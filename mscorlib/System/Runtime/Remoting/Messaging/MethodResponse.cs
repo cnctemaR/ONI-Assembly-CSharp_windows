@@ -3,13 +3,15 @@ using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[Serializable]
-	public class MethodResponse : ISerializable, IInternalMessage, IMessage, IMethodMessage, IMethodReturnMessage, ISerializationRootObject
+	public class MethodResponse : IMethodReturnMessage, IMethodMessage, IMessage, ISerializable, IInternalMessage, ISerializationRootObject
 	{
 		public MethodResponse(Header[] h1, IMethodCallMessage mcm)
 		{
@@ -77,6 +79,24 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		internal MethodResponse(IMethodCallMessage msg, object handlerObject, BinaryMethodReturnMessage smuggledMrm)
+		{
+			if (msg != null)
+			{
+				this._methodBase = msg.MethodBase;
+				this._methodName = msg.MethodName;
+				this._uri = msg.Uri;
+			}
+			this._returnValue = smuggledMrm.ReturnValue;
+			this._args = smuggledMrm.Args;
+			this._exception = smuggledMrm.Exception;
+			this._callContext = smuggledMrm.LogicalCallContext;
+			if (smuggledMrm.HasProperties)
+			{
+				smuggledMrm.PopulateMessageProperties(this.Properties);
+			}
+		}
+
 		internal MethodResponse(SerializationInfo info, StreamingContext context)
 		{
 			foreach (SerializationEntry serializationEntry in info)
@@ -85,57 +105,80 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
-		string IInternalMessage.Uri
-		{
-			get
-			{
-				return this.Uri;
-			}
-			set
-			{
-				this.Uri = value;
-			}
-		}
-
-		Identity IInternalMessage.TargetIdentity
-		{
-			get
-			{
-				return this._targetIdentity;
-			}
-			set
-			{
-				this._targetIdentity = value;
-			}
-		}
-
 		internal void InitMethodProperty(string key, object value)
 		{
-			switch (key)
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(key);
+			if (num <= 1960967436U)
 			{
-			case "__TypeName":
-				this._typeName = (string)value;
-				return;
-			case "__MethodName":
-				this._methodName = (string)value;
-				return;
-			case "__MethodSignature":
-				this._methodSignature = (Type[])value;
-				return;
-			case "__Uri":
-				this._uri = (string)value;
-				return;
-			case "__Return":
-				this._returnValue = value;
-				return;
-			case "__OutArgs":
-				this._args = (object[])value;
-				return;
-			case "__fault":
+				if (num <= 1201911322U)
+				{
+					if (num != 990701179U)
+					{
+						if (num == 1201911322U)
+						{
+							if (key == "__CallContext")
+							{
+								this._callContext = (LogicalCallContext)value;
+								return;
+							}
+						}
+					}
+					else if (key == "__Uri")
+					{
+						this._uri = (string)value;
+						return;
+					}
+				}
+				else if (num != 1637783905U)
+				{
+					if (num == 1960967436U)
+					{
+						if (key == "__OutArgs")
+						{
+							this._args = (object[])value;
+							return;
+						}
+					}
+				}
+				else if (key == "__Return")
+				{
+					this._returnValue = value;
+					return;
+				}
+			}
+			else if (num <= 3166241401U)
+			{
+				if (num != 2010141056U)
+				{
+					if (num == 3166241401U)
+					{
+						if (key == "__MethodName")
+						{
+							this._methodName = (string)value;
+							return;
+						}
+					}
+				}
+				else if (key == "__TypeName")
+				{
+					this._typeName = (string)value;
+					return;
+				}
+			}
+			else if (num != 3626951189U)
+			{
+				if (num == 3679129400U)
+				{
+					if (key == "__MethodSignature")
+					{
+						this._methodSignature = (Type[])value;
+						return;
+					}
+				}
+			}
+			else if (key == "__fault")
+			{
 				this._exception = (Exception)value;
-				return;
-			case "__CallContext":
-				this._callContext = (LogicalCallContext)value;
 				return;
 			}
 			this.Properties[key] = value;
@@ -143,6 +186,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public int ArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._args == null)
@@ -155,6 +199,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] Args
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args;
@@ -163,6 +208,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public Exception Exception
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._exception;
@@ -171,14 +217,16 @@ namespace System.Runtime.Remoting.Messaging
 
 		public bool HasVarArgs
 		{
+			[SecurityCritical]
 			get
 			{
-				return (this.MethodBase.CallingConvention | CallingConventions.VarArgs) != (CallingConventions)0;
+				return (this.MethodBase.CallingConvention | CallingConventions.VarArgs) > (CallingConventions)0;
 			}
 		}
 
 		public LogicalCallContext LogicalCallContext
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._callContext == null)
@@ -191,9 +239,10 @@ namespace System.Runtime.Remoting.Messaging
 
 		public MethodBase MethodBase
 		{
+			[SecurityCritical]
 			get
 			{
-				if (this._methodBase == null)
+				if (null == this._methodBase)
 				{
 					if (this._callMsg != null)
 					{
@@ -210,6 +259,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string MethodName
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodName == null && this._callMsg != null)
@@ -222,6 +272,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object MethodSignature
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodSignature == null && this._callMsg != null)
@@ -234,6 +285,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public int OutArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._args == null || this._args.Length == 0)
@@ -250,6 +302,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] OutArgs
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._outArgs == null && this._args != null)
@@ -266,6 +319,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual IDictionary Properties
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this.ExternalProperties == null)
@@ -280,6 +334,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object ReturnValue
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._returnValue;
@@ -288,6 +343,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string TypeName
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._typeName == null && this._callMsg != null)
@@ -300,6 +356,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string Uri
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._uri == null && this._callMsg != null)
@@ -314,6 +371,19 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		string IInternalMessage.Uri
+		{
+			get
+			{
+				return this.Uri;
+			}
+			set
+			{
+				this.Uri = value;
+			}
+		}
+
+		[SecurityCritical]
 		public object GetArg(int argNum)
 		{
 			if (this._args == null)
@@ -323,11 +393,13 @@ namespace System.Runtime.Remoting.Messaging
 			return this._args[argNum];
 		}
 
+		[SecurityCritical]
 		public string GetArgName(int index)
 		{
 			return this.MethodBase.GetParameters()[index].Name;
 		}
 
+		[SecurityCritical]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (this._exception == null)
@@ -354,6 +426,7 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		[SecurityCritical]
 		public object GetOutArg(int argNum)
 		{
 			if (this._args == null)
@@ -367,9 +440,10 @@ namespace System.Runtime.Remoting.Messaging
 			return this._args[this._inArgInfo.GetInOutArgIndex(argNum)];
 		}
 
+		[SecurityCritical]
 		public string GetOutArgName(int index)
 		{
-			if (this._methodBase == null)
+			if (null == this._methodBase)
 			{
 				return "__method_" + index;
 			}
@@ -390,6 +464,23 @@ namespace System.Runtime.Remoting.Messaging
 		public void RootSetObjectData(SerializationInfo info, StreamingContext ctx)
 		{
 			throw new NotImplementedException();
+		}
+
+		Identity IInternalMessage.TargetIdentity
+		{
+			get
+			{
+				return this._targetIdentity;
+			}
+			set
+			{
+				this._targetIdentity = value;
+			}
+		}
+
+		bool IInternalMessage.HasProperties()
+		{
+			return this.ExternalProperties != null || this.InternalProperties != null;
 		}
 
 		private string _methodName;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity;
 
 namespace System.Security.Cryptography.Pkcs
 {
@@ -24,6 +25,11 @@ namespace System.Security.Cryptography.Pkcs
 		}
 
 		public abstract int Version { get; }
+
+		internal RecipientInfo()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
 
 		private RecipientInfoType _type;
 	}

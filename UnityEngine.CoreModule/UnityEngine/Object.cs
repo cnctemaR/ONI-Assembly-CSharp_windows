@@ -9,19 +9,13 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Base class for all objects Unity can reference.</para>
-	/// </summary>
-	[NativeHeader("Runtime/GameCode/CloneObject.h")]
-	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 	[RequiredByNativeCode(GenerateProxy = true)]
 	[NativeHeader("Runtime/Export/UnityEngineObject.bindings.h")]
+	[NativeHeader("Runtime/GameCode/CloneObject.h")]
+	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Object
 	{
-		/// <summary>
-		///   <para>Returns the instance id of the object.</para>
-		/// </summary>
 		[SecuritySafeCritical]
 		public unsafe int GetInstanceID()
 		{
@@ -99,9 +93,6 @@ namespace UnityEngine
 			return this.m_CachedPtr;
 		}
 
-		/// <summary>
-		///   <para>The name of the object.</para>
-		/// </summary>
 		public string name
 		{
 			get
@@ -114,17 +105,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Clones the object original and returns the clone.</para>
-		/// </summary>
-		/// <param name="original">An existing object that you want to make a copy of.</param>
-		/// <param name="position">Position for the new object.</param>
-		/// <param name="rotation">Orientation of the new object.</param>
-		/// <param name="parent">Parent that will be assigned to the new object.</param>
-		/// <param name="instantiateInWorldSpace">Pass true when assigning a parent Object to maintain the world position of the Object, instead of setting its position relative to the new parent. Pass false to set the Object's position relative to its new parent.</param>
-		/// <returns>
-		///   <para>The instantiated clone.</para>
-		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Vector3 position, Quaternion rotation)
 		{
@@ -141,17 +121,6 @@ namespace UnityEngine
 			return @object;
 		}
 
-		/// <summary>
-		///   <para>Clones the object original and returns the clone.</para>
-		/// </summary>
-		/// <param name="original">An existing object that you want to make a copy of.</param>
-		/// <param name="position">Position for the new object.</param>
-		/// <param name="rotation">Orientation of the new object.</param>
-		/// <param name="parent">Parent that will be assigned to the new object.</param>
-		/// <param name="instantiateInWorldSpace">Pass true when assigning a parent Object to maintain the world position of the Object, instead of setting its position relative to the new parent. Pass false to set the Object's position relative to its new parent.</param>
-		/// <returns>
-		///   <para>The instantiated clone.</para>
-		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Vector3 position, Quaternion rotation, Transform parent)
 		{
@@ -173,17 +142,6 @@ namespace UnityEngine
 			return @object;
 		}
 
-		/// <summary>
-		///   <para>Clones the object original and returns the clone.</para>
-		/// </summary>
-		/// <param name="original">An existing object that you want to make a copy of.</param>
-		/// <param name="position">Position for the new object.</param>
-		/// <param name="rotation">Orientation of the new object.</param>
-		/// <param name="parent">Parent that will be assigned to the new object.</param>
-		/// <param name="instantiateInWorldSpace">Pass true when assigning a parent Object to maintain the world position of the Object, instead of setting its position relative to the new parent. Pass false to set the Object's position relative to its new parent.</param>
-		/// <returns>
-		///   <para>The instantiated clone.</para>
-		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original)
 		{
@@ -196,34 +154,12 @@ namespace UnityEngine
 			return @object;
 		}
 
-		/// <summary>
-		///   <para>Clones the object original and returns the clone.</para>
-		/// </summary>
-		/// <param name="original">An existing object that you want to make a copy of.</param>
-		/// <param name="position">Position for the new object.</param>
-		/// <param name="rotation">Orientation of the new object.</param>
-		/// <param name="parent">Parent that will be assigned to the new object.</param>
-		/// <param name="instantiateInWorldSpace">Pass true when assigning a parent Object to maintain the world position of the Object, instead of setting its position relative to the new parent. Pass false to set the Object's position relative to its new parent.</param>
-		/// <returns>
-		///   <para>The instantiated clone.</para>
-		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Transform parent)
 		{
 			return Object.Instantiate(original, parent, false);
 		}
 
-		/// <summary>
-		///   <para>Clones the object original and returns the clone.</para>
-		/// </summary>
-		/// <param name="original">An existing object that you want to make a copy of.</param>
-		/// <param name="position">Position for the new object.</param>
-		/// <param name="rotation">Orientation of the new object.</param>
-		/// <param name="parent">Parent that will be assigned to the new object.</param>
-		/// <param name="instantiateInWorldSpace">Pass true when assigning a parent Object to maintain the world position of the Object, instead of setting its position relative to the new parent. Pass false to set the Object's position relative to its new parent.</param>
-		/// <returns>
-		///   <para>The instantiated clone.</para>
-		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Transform parent, bool instantiateInWorldSpace)
 		{
@@ -276,20 +212,10 @@ namespace UnityEngine
 			return (T)((object)Object.Instantiate(original, parent, worldPositionStays));
 		}
 
-		/// <summary>
-		///   <para>Removes a gameobject, component or asset.</para>
-		/// </summary>
-		/// <param name="obj">The object to destroy.</param>
-		/// <param name="t">The optional amount of time to delay before destroying the object.</param>
-		[FreeFunction("Scripting::DestroyObjectFromScripting")]
+		[NativeMethod(Name = "Scripting::DestroyObjectFromScripting", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Destroy(Object obj, [DefaultValue("0.0F")] float t);
 
-		/// <summary>
-		///   <para>Removes a gameobject, component or asset.</para>
-		/// </summary>
-		/// <param name="obj">The object to destroy.</param>
-		/// <param name="t">The optional amount of time to delay before destroying the object.</param>
 		[ExcludeFromDocs]
 		public static void Destroy(Object obj)
 		{
@@ -297,20 +223,10 @@ namespace UnityEngine
 			Object.Destroy(obj, num);
 		}
 
-		/// <summary>
-		///   <para>Destroys the object obj immediately. You are strongly recommended to use Destroy instead.</para>
-		/// </summary>
-		/// <param name="obj">Object to be destroyed.</param>
-		/// <param name="allowDestroyingAssets">Set to true to allow assets to be destroyed.</param>
-		[FreeFunction("Scripting::DestroyObjectFromScriptingImmediate")]
+		[NativeMethod(Name = "Scripting::DestroyObjectFromScriptingImmediate", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DestroyImmediate(Object obj, [DefaultValue("false")] bool allowDestroyingAssets);
 
-		/// <summary>
-		///   <para>Destroys the object obj immediately. You are strongly recommended to use Destroy instead.</para>
-		/// </summary>
-		/// <param name="obj">Object to be destroyed.</param>
-		/// <param name="allowDestroyingAssets">Set to true to allow assets to be destroyed.</param>
 		[ExcludeFromDocs]
 		public static void DestroyImmediate(Object obj)
 		{
@@ -318,29 +234,15 @@ namespace UnityEngine
 			Object.DestroyImmediate(obj, flag);
 		}
 
-		/// <summary>
-		///   <para>Returns a list of all active loaded objects of Type type.</para>
-		/// </summary>
-		/// <param name="type">The type of object to find.</param>
-		/// <returns>
-		///   <para>The array of objects found matching the type specified.</para>
-		/// </returns>
-		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
 		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfType")]
+		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] FindObjectsOfType(Type type);
 
-		/// <summary>
-		///   <para>Do not destroy the target Object when loading a new Scene.</para>
-		/// </summary>
-		/// <param name="target">An Object not destroyed on Scene change.</param>
 		[FreeFunction("GetSceneManager().DontDestroyOnLoad")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DontDestroyOnLoad(Object target);
 
-		/// <summary>
-		///   <para>Should the object be hidden, saved with the Scene or modifiable by the user?</para>
-		/// </summary>
 		public extern HideFlags hideFlags
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -350,32 +252,26 @@ namespace UnityEngine
 		}
 
 		[Obsolete("use Object.Destroy instead.")]
-		[FreeFunction("Scripting::DestroyObjectFromScripting")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DestroyObject(Object obj, [DefaultValue("0.0F")] float t);
+		public static void DestroyObject(Object obj, [DefaultValue("0.0F")] float t)
+		{
+			Object.Destroy(obj, t);
+		}
 
 		[Obsolete("use Object.Destroy instead.")]
 		[ExcludeFromDocs]
 		public static void DestroyObject(Object obj)
 		{
 			float num = 0f;
-			Object.DestroyObject(obj, num);
+			Object.Destroy(obj, num);
 		}
 
-		[Obsolete("warning use Object.FindObjectsOfType instead.")]
 		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfType")]
+		[Obsolete("warning use Object.FindObjectsOfType instead.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] FindSceneObjectsOfType(Type type);
 
-		/// <summary>
-		///   <para>Returns a list of all active and inactive loaded objects of Type type, including assets.</para>
-		/// </summary>
-		/// <param name="type">The type of object or asset to find.</param>
-		/// <returns>
-		///   <para>The array of objects and assets found matching the type specified.</para>
-		/// </returns>
-		[Obsolete("use Resources.FindObjectsOfTypeAll instead.")]
 		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfTypeIncludingAssets")]
+		[Obsolete("use Resources.FindObjectsOfTypeAll instead.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] FindObjectsOfTypeIncludingAssets(Type type);
 
@@ -389,13 +285,6 @@ namespace UnityEngine
 			return (T)((object)Object.FindObjectOfType(typeof(T)));
 		}
 
-		/// <summary>
-		///   <para>Returns a list of all active and inactive loaded objects of Type type.</para>
-		/// </summary>
-		/// <param name="type">The type of object to find.</param>
-		/// <returns>
-		///   <para>The array of objects found matching the type specified.</para>
-		/// </returns>
 		[Obsolete("Please use Resources.FindObjectsOfTypeAll instead")]
 		public static Object[] FindObjectsOfTypeAll(Type type)
 		{
@@ -410,13 +299,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the first active loaded object of Type type.</para>
-		/// </summary>
-		/// <param name="type">The type of object to find.</param>
-		/// <returns>
-		///   <para>This returns the  Object that matches the specified type. It returns null if no Object matches the type.</para>
-		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public static Object FindObjectOfType(Type type)
 		{
@@ -433,12 +315,6 @@ namespace UnityEngine
 			return @object;
 		}
 
-		/// <summary>
-		///   <para>Returns the name of the GameObject.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The name returned by ToString.</para>
-		/// </returns>
 		public override string ToString()
 		{
 			return Object.ToString(this);
@@ -498,8 +374,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool DoesObjectWithInstanceIDExist(int instanceID);
 
-		[VisibleToOtherModules]
 		[FreeFunction("UnityEngineObjectBindings::FindObjectFromInstanceID")]
+		[VisibleToOtherModules]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object FindObjectFromInstanceID(int instanceID);
 

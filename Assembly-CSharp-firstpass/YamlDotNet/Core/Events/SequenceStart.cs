@@ -5,18 +5,6 @@ namespace YamlDotNet.Core.Events
 {
 	public class SequenceStart : NodeEvent
 	{
-		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
-			: base(anchor, tag, start, end)
-		{
-			this.isImplicit = isImplicit;
-			this.style = style;
-		}
-
-		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style)
-			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
-		{
-		}
-
 		public override int NestingIncrease
 		{
 			get
@@ -55,6 +43,18 @@ namespace YamlDotNet.Core.Events
 			{
 				return this.style;
 			}
+		}
+
+		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
+			: base(anchor, tag, start, end)
+		{
+			this.isImplicit = isImplicit;
+			this.style = style;
+		}
+
+		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style)
+			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
+		{
 		}
 
 		public override string ToString()

@@ -3,9 +3,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>A collection of Rendering.ShaderKeyword that represents a specific platform variant.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct PlatformKeywordSet
 	{
@@ -14,10 +11,6 @@ namespace UnityEngine.Rendering
 			return 1U << (int)(define % (BuiltinShaderDefine)32);
 		}
 
-		/// <summary>
-		///   <para>Check whether a specific shader keyword is enabled.</para>
-		/// </summary>
-		/// <param name="define"></param>
 		public bool IsEnabled(BuiltinShaderDefine define)
 		{
 			return (this.m_Bits & this.ComputeKeywordMask(define)) != 0U;

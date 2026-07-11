@@ -53,8 +53,8 @@ public class EasingAnimations : MonoBehaviour
 		bool keepAnimating = true;
 		while (keepAnimating)
 		{
-			float t = Time.realtimeSinceStartup - startTime;
-			this.currentAnimation.currentScale = this.GetEasing(t * this.currentAnimation.easingMultiplier);
+			float num = Time.realtimeSinceStartup - startTime;
+			this.currentAnimation.currentScale = this.GetEasing(num * this.currentAnimation.easingMultiplier);
 			if (this.currentAnimation.endScale > this.currentAnimation.startScale)
 			{
 				keepAnimating = this.currentAnimation.currentScale < this.currentAnimation.endScale - 0.025f;
@@ -80,15 +80,15 @@ public class EasingAnimations : MonoBehaviour
 	private float GetEasing(float t)
 	{
 		EasingAnimations.AnimationScales.AnimationType type = this.currentAnimation.type;
+		if (type == EasingAnimations.AnimationScales.AnimationType.EaseOutBack)
+		{
+			return this.EaseOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
+		}
 		if (type == EasingAnimations.AnimationScales.AnimationType.EaseInBack)
 		{
 			return this.EaseInBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
 		}
-		if (type != EasingAnimations.AnimationScales.AnimationType.EaseOutBack)
-		{
-			return this.EaseInOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
-		}
-		return this.EaseOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
+		return this.EaseInOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
 	}
 
 	public float EaseInOutBack(float start, float end, float value)

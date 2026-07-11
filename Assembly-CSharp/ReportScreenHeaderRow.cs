@@ -7,10 +7,7 @@ public class ReportScreenHeaderRow : KMonoBehaviour
 	public void SetLine(ReportManager.ReportGroup reportGroup)
 	{
 		LayoutElement component = this.name.GetComponent<LayoutElement>();
-		LayoutElement layoutElement = component;
-		float num = this.nameWidth;
-		component.preferredWidth = num;
-		layoutElement.minWidth = num;
+		component.minWidth = (component.preferredWidth = this.nameWidth);
 		this.spacer.minWidth = this.groupSpacerWidth;
 		this.name.text = reportGroup.stringKey;
 	}

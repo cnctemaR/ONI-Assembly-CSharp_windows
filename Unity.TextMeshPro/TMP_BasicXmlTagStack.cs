@@ -20,20 +20,32 @@ namespace TMPro
 
 		public byte Add(FontStyles style)
 		{
-			switch (style)
+			if (style <= FontStyles.Strikethrough)
 			{
-			case FontStyles.Bold:
-				this.bold += 1;
-				return this.bold;
-			case FontStyles.Italic:
-				this.italic += 1;
-				return this.italic;
-			default:
-				if (style == FontStyles.Strikethrough)
+				switch (style)
 				{
-					this.strikethrough += 1;
-					return this.strikethrough;
+				case FontStyles.Bold:
+					this.bold += 1;
+					return this.bold;
+				case FontStyles.Italic:
+					this.italic += 1;
+					return this.italic;
+				case (FontStyles)3:
+					break;
+				case FontStyles.Underline:
+					this.underline += 1;
+					return this.underline;
+				default:
+					if (style == FontStyles.Strikethrough)
+					{
+						this.strikethrough += 1;
+						return this.strikethrough;
+					}
+					break;
 				}
+			}
+			else
+			{
 				if (style == FontStyles.Superscript)
 				{
 					this.superscript += 1;
@@ -44,55 +56,71 @@ namespace TMPro
 					this.subscript += 1;
 					return this.subscript;
 				}
-				if (style != FontStyles.Highlight)
+				if (style == FontStyles.Highlight)
 				{
-					return 0;
+					this.highlight += 1;
+					return this.highlight;
 				}
-				this.highlight += 1;
-				return this.highlight;
-			case FontStyles.Underline:
-				this.underline += 1;
-				return this.underline;
 			}
+			return 0;
 		}
 
 		public byte Remove(FontStyles style)
 		{
-			switch (style)
+			if (style <= FontStyles.Strikethrough)
 			{
-			case FontStyles.Bold:
-				if (this.bold > 1)
+				switch (style)
 				{
-					this.bold -= 1;
-				}
-				else
-				{
-					this.bold = 0;
-				}
-				return this.bold;
-			case FontStyles.Italic:
-				if (this.italic > 1)
-				{
-					this.italic -= 1;
-				}
-				else
-				{
-					this.italic = 0;
-				}
-				return this.italic;
-			default:
-				if (style == FontStyles.Strikethrough)
-				{
-					if (this.strikethrough > 1)
+				case FontStyles.Bold:
+					if (this.bold > 1)
 					{
-						this.strikethrough -= 1;
+						this.bold -= 1;
 					}
 					else
 					{
-						this.strikethrough = 0;
+						this.bold = 0;
 					}
-					return this.strikethrough;
+					return this.bold;
+				case FontStyles.Italic:
+					if (this.italic > 1)
+					{
+						this.italic -= 1;
+					}
+					else
+					{
+						this.italic = 0;
+					}
+					return this.italic;
+				case (FontStyles)3:
+					break;
+				case FontStyles.Underline:
+					if (this.underline > 1)
+					{
+						this.underline -= 1;
+					}
+					else
+					{
+						this.underline = 0;
+					}
+					return this.underline;
+				default:
+					if (style == FontStyles.Strikethrough)
+					{
+						if (this.strikethrough > 1)
+						{
+							this.strikethrough -= 1;
+						}
+						else
+						{
+							this.strikethrough = 0;
+						}
+						return this.strikethrough;
+					}
+					break;
 				}
+			}
+			else
+			{
 				if (style == FontStyles.Superscript)
 				{
 					if (this.superscript > 1)
@@ -117,30 +145,20 @@ namespace TMPro
 					}
 					return this.subscript;
 				}
-				if (style != FontStyles.Highlight)
+				if (style == FontStyles.Highlight)
 				{
-					return 0;
+					if (this.highlight > 1)
+					{
+						this.highlight -= 1;
+					}
+					else
+					{
+						this.highlight = 0;
+					}
+					return this.highlight;
 				}
-				if (this.highlight > 1)
-				{
-					this.highlight -= 1;
-				}
-				else
-				{
-					this.highlight = 0;
-				}
-				return this.highlight;
-			case FontStyles.Underline:
-				if (this.underline > 1)
-				{
-					this.underline -= 1;
-				}
-				else
-				{
-					this.underline = 0;
-				}
-				return this.underline;
 			}
+			return 0;
 		}
 
 		public byte bold;

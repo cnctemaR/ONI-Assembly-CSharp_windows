@@ -64,8 +64,9 @@ public static class CreatureHelpers
 		if (heading.x < 0f)
 		{
 			anim.FlipX = true;
+			return;
 		}
-		else if (heading.x > 0f)
+		if (heading.x > 0f)
 		{
 			anim.FlipX = false;
 		}
@@ -76,8 +77,9 @@ public static class CreatureHelpers
 		if (heading.x < 0f)
 		{
 			anim.FlipX = true;
+			return;
 		}
-		else if (heading.x > 0f)
+		if (heading.x > 0f)
 		{
 			anim.FlipX = false;
 		}
@@ -242,21 +244,18 @@ public static class CreatureHelpers
 		int num4 = -1;
 		foreach (int num5 in hashSet)
 		{
-			if (nav.CanReach(num5))
+			if (nav.CanReach(num5) && num5 != num2)
 			{
-				if (num5 != num2)
+				int num6 = -1;
+				num6 += Grid.GetCellDistance(num5, num);
+				if (CreatureHelpers.isInFavoredFleeDirection(num5, num, self))
 				{
-					int num6 = -1;
-					num6 += Grid.GetCellDistance(num5, num);
-					if (CreatureHelpers.isInFavoredFleeDirection(num5, num, self))
-					{
-						num6 += 2;
-					}
-					if (num6 > num4)
-					{
-						num4 = num6;
-						num3 = num5;
-					}
+					num6 += 2;
+				}
+				if (num6 > num4)
+				{
+					num4 = num6;
+					num3 = num5;
 				}
 			}
 		}

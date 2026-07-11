@@ -16,11 +16,9 @@ namespace YamlDotNet.RepresentationModel
 			if (this.anchors.ContainsKey(node.Anchor))
 			{
 				this.anchors[node.Anchor] = node;
+				return;
 			}
-			else
-			{
-				this.anchors.Add(node.Anchor, node);
-			}
+			this.anchors.Add(node.Anchor, node);
 		}
 
 		public YamlNode GetNode(string anchor, bool throwException, Mark start, Mark end)
@@ -32,7 +30,7 @@ namespace YamlDotNet.RepresentationModel
 			}
 			if (throwException)
 			{
-				throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", new object[] { anchor }));
+				throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
 			}
 			return null;
 		}

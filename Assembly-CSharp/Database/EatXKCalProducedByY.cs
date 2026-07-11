@@ -18,22 +18,23 @@ namespace Database
 		public override bool Success()
 		{
 			List<string> list = new List<string>();
-			List<ComplexRecipe> recipes = ComplexRecipeManager.Get().recipes;
-			foreach (ComplexRecipe complexRecipe in recipes)
+			foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
 			{
 				foreach (Tag tag in this.foodProducers)
 				{
-					foreach (Tag tag2 in complexRecipe.fabricators)
+					using (List<Tag>.Enumerator enumerator3 = complexRecipe.fabricators.GetEnumerator())
 					{
-						if (tag2 == tag)
+						while (enumerator3.MoveNext())
 						{
-							list.Add(complexRecipe.FirstResult.ToString());
+							if (enumerator3.Current == tag)
+							{
+								list.Add(complexRecipe.FirstResult.ToString());
+							}
 						}
 					}
 				}
 			}
-			float caloiresConsumedByFood = RationTracker.Get().GetCaloiresConsumedByFood(list.Distinct<string>().ToList<string>());
-			return caloiresConsumedByFood / 1000f > (float)this.numCalories;
+			return RationTracker.Get().GetCaloiresConsumedByFood(list.Distinct<string>().ToList<string>()) / 1000f > (float)this.numCalories;
 		}
 
 		public override void Serialize(BinaryWriter writer)
@@ -60,7 +61,7 @@ namespace Database
 
 		public override string GetProgress(bool complete)
 		{
-			string text = string.Empty;
+			string text = "";
 			for (int i = 0; i < this.foodProducers.Count; i++)
 			{
 				if (i != 0)

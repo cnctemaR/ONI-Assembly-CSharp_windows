@@ -4,9 +4,6 @@ using System.Reflection;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Generic base class for UXML factories, which instantiate a VisualElement using the data read from a UXML file.</para>
-	/// </summary>
 	public class UxmlFactory<TCreatedType, TTraits> : IUxmlFactory where TCreatedType : VisualElement where TTraits : UxmlTraits, new()
 	{
 		protected UxmlFactory()
@@ -121,7 +118,13 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		[Obsolete("Call or override AcceptsAttributeBag(IUxmlAttributes bag, CreationContext cc) instaed")]
 		public virtual bool AcceptsAttributeBag(IUxmlAttributes bag)
+		{
+			return this.AcceptsAttributeBag(bag, default(CreationContext));
+		}
+
+		public virtual bool AcceptsAttributeBag(IUxmlAttributes bag, CreationContext cc)
 		{
 			return true;
 		}
@@ -139,6 +142,7 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				if (!UxmlFactory<TCreatedType, TTraits>.s_WarningLogged)
 				{
+					Debug.LogWarning("Calling obsolete method " + base.GetType().FullName + ".DoCreate(IUxmlAttributes bag, CreationContext cc). Remove and implemenent a default constructor for the created type instead.");
 					UxmlFactory<TCreatedType, TTraits>.s_WarningLogged = true;
 				}
 				tcreatedType = this.DoCreate(bag, cc);
@@ -166,11 +170,13 @@ namespace UnityEngine.Experimental.UIElements
 			return tcreatedType;
 		}
 
+		[Obsolete("Remove and implemenent a default constructor for the created type instead.")]
 		protected virtual TCreatedType DoCreate(IUxmlAttributes bag, CreationContext cc)
 		{
 			return (TCreatedType)((object)null);
 		}
 
+		[Obsolete("Use uxmlName and uxmlNamespace instead.")]
 		public Type CreatesType
 		{
 			get

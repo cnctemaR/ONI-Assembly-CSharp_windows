@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	internal sealed class PlayerConnectionInternal : IPlayerEditorConnectionNative
+	[NativeHeader("Runtime/Export/PlayerConnectionInternal.bindings.h")]
+	internal class PlayerConnectionInternal : IPlayerEditorConnectionNative
 	{
 		void IPlayerEditorConnectionNative.SendMessage(Guid messageId, byte[] data, int playerId)
 		{
@@ -13,6 +14,15 @@ namespace UnityEngine
 				throw new ArgumentException("messageId must not be empty");
 			}
 			PlayerConnectionInternal.SendMessage(messageId.ToString("N"), data, playerId);
+		}
+
+		bool IPlayerEditorConnectionNative.TrySendMessage(Guid messageId, byte[] data, int playerId)
+		{
+			if (messageId == Guid.Empty)
+			{
+				throw new ArgumentException("messageId must not be empty");
+			}
+			return PlayerConnectionInternal.TrySendMessage(messageId.ToString("N"), data, playerId);
 		}
 
 		void IPlayerEditorConnectionNative.Poll()
@@ -45,32 +55,36 @@ namespace UnityEngine
 			PlayerConnectionInternal.DisconnectAll();
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::IsConnected")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsConnected();
+		private static extern bool IsConnected();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::Initialize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Initialize();
+		private static extern void Initialize();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::RegisterInternal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void RegisterInternal(string messageId);
+		private static extern void RegisterInternal(string messageId);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::UnregisterInternal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void UnregisterInternal(string messageId);
+		private static extern void UnregisterInternal(string messageId);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::SendMessage")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SendMessage(string messageId, byte[] data, int playerId);
+		private static extern void SendMessage(string messageId, byte[] data, int playerId);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::TrySendMessage")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void PollInternal();
+		private static extern bool TrySendMessage(string messageId, byte[] data, int playerId);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("PlayerConnection_Bindings::PollInternal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DisconnectAll();
+		private static extern void PollInternal();
+
+		[FreeFunction("PlayerConnection_Bindings::DisconnectAll")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisconnectAll();
 	}
 }

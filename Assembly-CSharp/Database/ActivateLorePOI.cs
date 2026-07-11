@@ -18,10 +18,13 @@ namespace Database
 		{
 			foreach (BuildingComplete buildingComplete in Components.TemplateBuildings.Items)
 			{
-				Unsealable component = buildingComplete.GetComponent<Unsealable>();
-				if (component != null && component.unsealed)
+				if (!(buildingComplete == null))
 				{
-					return true;
+					Unsealable component = buildingComplete.GetComponent<Unsealable>();
+					if (component != null && component.unsealed)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

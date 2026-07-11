@@ -5,41 +5,6 @@ using UnityEngine;
 
 public abstract class Chore
 {
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
-	{
-		if (priority_value == 2147483647)
-		{
-			priority_class = PriorityScreen.PriorityClass.topPriority;
-			priority_value = 2;
-		}
-		if (priority_value < 1 || priority_value > 9)
-		{
-			global::Debug.LogErrorFormat("Priority Value Out Of Range: {0}", new object[] { priority_value });
-		}
-		this.masterPriority = new PrioritySetting(priority_class, priority_value);
-		this.priorityMod = priority_mod;
-		this.id = ++Chore.nextId;
-		if (chore_provider == null)
-		{
-			chore_provider = GlobalChoreProvider.Instance;
-			DebugUtil.Assert(chore_provider != null);
-		}
-		this.choreType = chore_type;
-		this.runUntilComplete = run_until_complete;
-		this.onComplete = on_complete;
-		this.onEnd = on_end;
-		this.onBegin = on_begin;
-		this.IsPreemptable = is_preemptable;
-		this.AddPrecondition(ChorePreconditions.instance.IsValid, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsPermitted, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsPreemptable, null);
-		this.AddPrecondition(ChorePreconditions.instance.HasUrge, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingEarly, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingLate, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsOverrideTargetNullOrMe, null);
-		chore_provider.AddChore(this);
-	}
-
 	public int id { get; private set; }
 
 	public ChoreDriver driver { get; set; }
@@ -77,6 +42,41 @@ public abstract class Chore
 	}
 
 	public bool IsPreemptable { get; protected set; }
+
+	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
+	{
+		if (priority_value == 2147483647)
+		{
+			priority_class = PriorityScreen.PriorityClass.topPriority;
+			priority_value = 2;
+		}
+		if (priority_value < 1 || priority_value > 9)
+		{
+			global::Debug.LogErrorFormat("Priority Value Out Of Range: {0}", new object[] { priority_value });
+		}
+		this.masterPriority = new PrioritySetting(priority_class, priority_value);
+		this.priorityMod = priority_mod;
+		this.id = ++Chore.nextId;
+		if (chore_provider == null)
+		{
+			chore_provider = GlobalChoreProvider.Instance;
+			DebugUtil.Assert(chore_provider != null);
+		}
+		this.choreType = chore_type;
+		this.runUntilComplete = run_until_complete;
+		this.onComplete = on_complete;
+		this.onEnd = on_end;
+		this.onBegin = on_begin;
+		this.IsPreemptable = is_preemptable;
+		this.AddPrecondition(ChorePreconditions.instance.IsValid, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsPermitted, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsPreemptable, null);
+		this.AddPrecondition(ChorePreconditions.instance.HasUrge, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingEarly, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingLate, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsOverrideTargetNullOrMe, null);
+		chore_provider.AddChore(this);
+	}
 
 	public virtual void Cleanup()
 	{
@@ -152,11 +152,9 @@ public abstract class Chore
 		if (context.IsSuccess())
 		{
 			succeeded_contexts.Add(context);
+			return;
 		}
-		else
-		{
-			failed_contexts.Add(context);
-		}
+		failed_contexts.Add(context);
 	}
 
 	public bool SatisfiesUrge(Urge urge)
@@ -205,8 +203,7 @@ public abstract class Chore
 		}
 		this.driver = context.consumerState.choreDriver;
 		StateMachine.Instance smi = this.GetSMI();
-		StateMachine.Instance instance = smi;
-		instance.OnStop = (Action<string, StateMachine.Status>)Delegate.Combine(instance.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
+		smi.OnStop = (Action<string, StateMachine.Status>)Delegate.Combine(smi.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
 		KSelectable component = this.driver.GetComponent<KSelectable>();
 		if (component != null)
 		{
@@ -230,8 +227,7 @@ public abstract class Chore
 			}
 		}
 		StateMachine.Instance smi = this.GetSMI();
-		StateMachine.Instance instance = smi;
-		instance.OnStop = (Action<string, StateMachine.Status>)Delegate.Remove(instance.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
+		smi.OnStop = (Action<string, StateMachine.Status>)Delegate.Remove(smi.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
 		smi.StopSM(reason);
 		if (this.driver == null)
 		{
@@ -264,7 +260,7 @@ public abstract class Chore
 		if (this.addToDailyReport)
 		{
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, null));
-			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogSuitChore((!(this.driver != null)) ? this.lastDriver : this.driver);
+			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogSuitChore((this.driver != null) ? this.driver : this.lastDriver);
 		}
 		this.End(reason);
 		this.Cleanup();
@@ -302,7 +298,7 @@ public abstract class Chore
 		if (this.addToDailyReport)
 		{
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, null));
-			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogSuitChore((!(this.driver != null)) ? this.lastDriver : this.driver);
+			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogSuitChore((this.driver != null) ? this.driver : this.lastDriver);
 		}
 		this.End(reason);
 		this.Cleanup();
@@ -313,11 +309,9 @@ public abstract class Chore
 		if (status == StateMachine.Status.Success)
 		{
 			this.Succeed(reason);
+			return;
 		}
-		else
-		{
-			this.Fail(reason);
-		}
+		this.Fail(reason);
 	}
 
 	private bool RemoveFromProvider()
@@ -466,7 +460,7 @@ public abstract class Chore
 
 			public void SetPriority(Chore chore)
 			{
-				this.priority = ((!Game.Instance.advancedPersonalPriorities) ? chore.choreType.priority : chore.choreType.explicitPriority);
+				this.priority = (Game.Instance.advancedPersonalPriorities ? chore.choreType.explicitPriority : chore.choreType.priority);
 				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = chore.choreType.interruptPriority;
 			}
@@ -524,7 +518,7 @@ public abstract class Chore
 					if (!preconditionInstance.fn(ref this, preconditionInstance.data))
 					{
 						this.failedPreconditionId = i;
-						break;
+						return;
 					}
 				}
 			}
@@ -533,58 +527,65 @@ public abstract class Chore
 			{
 				bool flag = this.failedPreconditionId != -1;
 				bool flag2 = obj.failedPreconditionId != -1;
-				if (flag != flag2)
+				if (flag == flag2)
 				{
-					return (!flag) ? 1 : (-1);
+					int num = this.masterPriority.priority_class - obj.masterPriority.priority_class;
+					if (num != 0)
+					{
+						return num;
+					}
+					int num2 = this.personalPriority - obj.personalPriority;
+					if (num2 != 0)
+					{
+						return num2;
+					}
+					int num3 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
+					if (num3 != 0)
+					{
+						return num3;
+					}
+					int num4 = this.priority - obj.priority;
+					if (num4 != 0)
+					{
+						return num4;
+					}
+					int num5 = this.priorityMod - obj.priorityMod;
+					if (num5 != 0)
+					{
+						return num5;
+					}
+					int num6 = this.consumerPriority - obj.consumerPriority;
+					if (num6 != 0)
+					{
+						return num6;
+					}
+					int num7 = obj.cost - this.cost;
+					if (num7 != 0)
+					{
+						return num7;
+					}
+					if (this.chore == null && obj.chore == null)
+					{
+						return 0;
+					}
+					if (this.chore == null)
+					{
+						return -1;
+					}
+					if (obj.chore == null)
+					{
+						return 1;
+					}
+					return this.chore.id - obj.chore.id;
 				}
-				int num = this.masterPriority.priority_class - obj.masterPriority.priority_class;
-				if (num != 0)
+				else
 				{
-					return num;
-				}
-				int num2 = this.personalPriority - obj.personalPriority;
-				if (num2 != 0)
-				{
-					return num2;
-				}
-				int num3 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
-				if (num3 != 0)
-				{
-					return num3;
-				}
-				int num4 = this.priority - obj.priority;
-				if (num4 != 0)
-				{
-					return num4;
-				}
-				int num5 = this.priorityMod - obj.priorityMod;
-				if (num5 != 0)
-				{
-					return num5;
-				}
-				int num6 = this.consumerPriority - obj.consumerPriority;
-				if (num6 != 0)
-				{
-					return num6;
-				}
-				int num7 = obj.cost - this.cost;
-				if (num7 != 0)
-				{
-					return num7;
-				}
-				if (this.chore == null && obj.chore == null)
-				{
-					return 0;
-				}
-				if (this.chore == null)
-				{
+					if (!flag)
+					{
+						return 1;
+					}
 					return -1;
 				}
-				if (obj.chore == null)
-				{
-					return 1;
-				}
-				return this.chore.id - obj.chore.id;
 			}
 
 			public override bool Equals(object obj)

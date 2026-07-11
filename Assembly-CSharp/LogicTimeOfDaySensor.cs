@@ -13,8 +13,7 @@ public class LogicTimeOfDaySensor : Switch, ISaveLoadable, ISim200ms
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicTimeOfDaySensor component = gameObject.GetComponent<LogicTimeOfDaySensor>();
+		LogicTimeOfDaySensor component = ((GameObject)data).GetComponent<LogicTimeOfDaySensor>();
 		if (component != null)
 		{
 			this.startTime = component.startTime;
@@ -54,8 +53,7 @@ public class LogicTimeOfDaySensor : Switch, ISaveLoadable, ISim200ms
 
 	private void UpdateLogicCircuit()
 	{
-		LogicPorts component = base.GetComponent<LogicPorts>();
-		component.SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -64,14 +62,14 @@ public class LogicTimeOfDaySensor : Switch, ISaveLoadable, ISim200ms
 		{
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 

@@ -4,16 +4,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A Splat prototype is just a texture that is used by the TerrainData.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class SplatPrototype
 	{
-		/// <summary>
-		///   <para>Texture of the splat applied to the Terrain.</para>
-		/// </summary>
 		public Texture2D texture
 		{
 			get
@@ -26,9 +20,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Normal map of the splat applied to the Terrain.</para>
-		/// </summary>
 		public Texture2D normalMap
 		{
 			get
@@ -41,9 +32,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Size of the tile used in the texture of the SplatPrototype.</para>
-		/// </summary>
 		public Vector2 tileSize
 		{
 			get
@@ -56,9 +44,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Offset of the tile texture of the SplatPrototype.</para>
-		/// </summary>
 		public Vector2 tileOffset
 		{
 			get
@@ -85,9 +70,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The metallic value of the splat layer.</para>
-		/// </summary>
 		public float metallic
 		{
 			get
@@ -100,9 +82,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The smoothness value of the splat layer when the main texture has no alpha channel.</para>
-		/// </summary>
 		public float smoothness
 		{
 			get

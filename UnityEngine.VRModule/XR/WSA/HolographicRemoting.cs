@@ -2,14 +2,8 @@
 
 namespace UnityEngine.XR.WSA
 {
-	/// <summary>
-	///   <para>he Holographic Remoting interface allows you to connect an application to a remote holographic device, and stream data between the application and that device.</para>
-	/// </summary>
 	public class HolographicRemoting
 	{
-		/// <summary>
-		///   <para>Whether the app is displaying protected content.</para>
-		/// </summary>
 		public static HolographicStreamerConnectionState ConnectionState
 		{
 			get
@@ -19,6 +13,11 @@ namespace UnityEngine.XR.WSA
 		}
 
 		public static void Connect(string clientName, int maxBitRate = 9999)
+		{
+			HolographicRemoting.Connect(clientName, maxBitRate, RemoteDeviceVersion.V1);
+		}
+
+		public static void Connect(string clientName, int maxBitRate, RemoteDeviceVersion deviceVersion)
 		{
 		}
 

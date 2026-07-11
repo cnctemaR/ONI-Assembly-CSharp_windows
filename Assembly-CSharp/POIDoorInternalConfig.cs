@@ -39,8 +39,7 @@ public class POIDoorInternalConfig : IBuildingConfig
 		door.doorType = Door.DoorType.Internal;
 		go.AddOrGet<ZoneTile>();
 		go.AddOrGet<AccessControl>();
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 3f;
+		go.AddOrGet<Workable>().workTime = 3f;
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
@@ -60,12 +59,10 @@ public class POIDoorInternalConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 		AccessControl component = go.GetComponent<AccessControl>();
-		Door component2 = go.GetComponent<Door>();
-		component2.hasComplexUserControls = false;
+		go.GetComponent<Door>().hasComplexUserControls = false;
 		component.controlEnabled = false;
 		go.GetComponent<Deconstructable>().allowDeconstruction = true;
-		KBatchedAnimController component3 = go.GetComponent<KBatchedAnimController>();
-		component3.initialAnim = "closed";
+		go.GetComponent<KBatchedAnimController>().initialAnim = "closed";
 	}
 
 	public static string ID = "POIDoorInternal";

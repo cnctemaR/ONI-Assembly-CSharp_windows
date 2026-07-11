@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KIconToggleMenu : KScreen
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KIconToggleMenu.OnSelect onSelect;
 
 	public void Setup(IList<KIconToggleMenu.ToggleInfo> toggleInfo)
@@ -42,7 +40,7 @@ public class KIconToggleMenu : KScreen
 		{
 			return;
 		}
-		Transform transform = ((!(this.toggleParent != null)) ? base.transform : this.toggleParent);
+		Transform transform = ((this.toggleParent != null) ? this.toggleParent : base.transform);
 		for (int i = 0; i < this.toggleInfo.Count; i++)
 		{
 			int idx = i;
@@ -80,9 +78,9 @@ public class KIconToggleMenu : KScreen
 			ToolTip component2 = ktoggle2.GetComponent<ToolTip>();
 			if (component2)
 			{
-				if (toggleInfo.tooltipHeader != string.Empty)
+				if (toggleInfo.tooltipHeader != "")
 				{
-					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (!(this.ToggleToolTipHeaderTextStyleSetting != null)) ? this.ToggleToolTipTextStyleSetting : this.ToggleToolTipHeaderTextStyleSetting);
+					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (this.ToggleToolTipHeaderTextStyleSetting != null) ? this.ToggleToolTipHeaderTextStyleSetting : this.ToggleToolTipTextStyleSetting);
 					if (this.ToggleToolTipHeaderTextStyleSetting == null)
 					{
 						global::Debug.Log("!");
@@ -175,6 +173,7 @@ public class KIconToggleMenu : KScreen
 							this.toggles[i].Deselect();
 						}
 						this.selected = i;
+						return;
 					}
 					break;
 				}

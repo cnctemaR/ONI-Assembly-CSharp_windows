@@ -35,8 +35,7 @@ public class SpecialCargoBayConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		BuildingAttachPoint buildingAttachPoint = go.AddOrGet<BuildingAttachPoint>();
-		buildingAttachPoint.points = new BuildingAttachPoint.HardPoint[]
+		go.AddOrGet<BuildingAttachPoint>().points = new BuildingAttachPoint.HardPoint[]
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 5), GameTags.Rocket, null)
 		};
@@ -56,8 +55,7 @@ public class SpecialCargoBayConfig : IBuildingConfig
 		cargoBay.storage = go.AddOrGet<Storage>();
 		cargoBay.storageType = CargoBay.CargoType.entities;
 		cargoBay.storage.capacityKg = 100f;
-		RocketModule rocketModule = go.AddOrGet<RocketModule>();
-		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_storage_live_bg_kanim"));
+		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_storage_live_bg_kanim"));
 		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 

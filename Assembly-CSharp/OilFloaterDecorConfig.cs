@@ -9,8 +9,7 @@ public class OilFloaterDecorConfig : IEntityConfig
 	public static GameObject CreateOilFloater(string id, string name, string desc, string anim_file, bool is_baby)
 	{
 		GameObject gameObject = BaseOilFloaterConfig.BaseOilFloater(id, name, desc, anim_file, "OilfloaterDecorBaseTrait", 283.15f, 343.15f, is_baby, "oxy_");
-		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
-		decorProvider.SetValues(DECOR.BONUS.TIER6);
+		gameObject.AddOrGet<DecorProvider>().SetValues(DECOR.BONUS.TIER6);
 		EntityTemplates.ExtendEntityToWildCreature(gameObject, OilFloaterTuning.PEN_SIZE_PER_CREATURE, 150f);
 		Trait trait = Db.Get().CreateTrait("OilfloaterDecorBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, OilFloaterTuning.STANDARD_STOMACH_SIZE, name, false, false, true));

@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("0000000e-0000-0000-c000-000000000046")]
-	[Obsolete]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Obsolete]
+	[Guid("0000000e-0000-0000-c000-000000000046")]
 	[ComImport]
 	public interface UCOMIBindCtx
 	{

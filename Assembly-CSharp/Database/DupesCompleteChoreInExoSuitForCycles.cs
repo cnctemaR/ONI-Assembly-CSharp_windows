@@ -36,7 +36,7 @@ namespace Database
 							break;
 						}
 					}
-					num = ((!flag) ? 0 : (num + 1));
+					num = (flag ? (num + 1) : 0);
 					this.currentCycleStreak = num;
 					if (num >= this.numCycles)
 					{

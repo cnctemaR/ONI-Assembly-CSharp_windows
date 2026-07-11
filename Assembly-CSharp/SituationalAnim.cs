@@ -13,7 +13,7 @@ public class SituationalAnim : KMonoBehaviour
 
 	private void SetAnimForSituation(SituationalAnim.Situation situation)
 	{
-		foreach (Tuple<SituationalAnim.Situation, string> tuple in this.anims)
+		foreach (global::Tuple<SituationalAnim.Situation, string> tuple in this.anims)
 		{
 			if ((tuple.first & situation) == tuple.first)
 			{
@@ -26,15 +26,13 @@ public class SituationalAnim : KMonoBehaviour
 
 	private void SetAnim(string animName)
 	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.Play(animName, KAnim.PlayMode.Once, 1f, 0f);
+		base.GetComponent<KBatchedAnimController>().Play(animName, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	private SituationalAnim.Situation GetSituation()
 	{
 		SituationalAnim.Situation situation = (SituationalAnim.Situation)0;
-		Building component = base.GetComponent<Building>();
-		Extents extents = component.GetExtents();
+		Extents extents = base.GetComponent<Building>().GetExtents();
 		int x = extents.x;
 		int num = extents.x + extents.width - 1;
 		int y = extents.y;
@@ -66,7 +64,7 @@ public class SituationalAnim : KMonoBehaviour
 		}
 		if (requirement == SituationalAnim.MustSatisfy.Any)
 		{
-			return result != SituationalAnim.MustSatisfy.None;
+			return result > SituationalAnim.MustSatisfy.None;
 		}
 		return result == SituationalAnim.MustSatisfy.None;
 	}
@@ -101,7 +99,7 @@ public class SituationalAnim : KMonoBehaviour
 		return SituationalAnim.MustSatisfy.None;
 	}
 
-	public List<Tuple<SituationalAnim.Situation, string>> anims;
+	public List<global::Tuple<SituationalAnim.Situation, string>> anims;
 
 	public Func<int, bool> test;
 

@@ -5,18 +5,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A handler that lets you read or write a HumanPose from or to a humanoid avatar skeleton hierarchy.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	[NativeHeader("Runtime/Animation/HumanPoseHandler.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	public class HumanPoseHandler : IDisposable
 	{
-		/// <summary>
-		///   <para>Creates a human pose handler from an avatar and a root transform.</para>
-		/// </summary>
-		/// <param name="avatar">The avatar that defines the humanoid rig on skeleton hierarchy with root as the top most parent.</param>
-		/// <param name="root">The top most node of the skeleton hierarchy defined in humanoid avatar.</param>
 		public HumanPoseHandler(Avatar avatar, Transform root)
 		{
 			this.m_Ptr = IntPtr.Zero;

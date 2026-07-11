@@ -19,58 +19,56 @@ public class SafeCellQuery : PathFinderQuery
 		{
 			return (SafeCellQuery.SafeFlags)0;
 		}
-		bool flag = Grid.Solid[cell] || Grid.Solid[num];
-		if (flag)
+		if (Grid.Solid[cell] || Grid.Solid[num])
 		{
 			return (SafeCellQuery.SafeFlags)0;
 		}
-		bool flag2 = Grid.IsTileUnderConstruction[cell] || Grid.IsTileUnderConstruction[num];
-		if (flag2)
+		if (Grid.IsTileUnderConstruction[cell] || Grid.IsTileUnderConstruction[num])
 		{
 			return (SafeCellQuery.SafeFlags)0;
 		}
-		bool flag3 = brain.IsCellClear(cell);
-		bool flag4 = !Grid.Element[cell].IsLiquid;
-		bool flag5 = !Grid.Element[num].IsLiquid;
-		bool flag6 = Grid.Temperature[cell] > 285.15f && Grid.Temperature[cell] < 303.15f;
-		bool flag7 = brain.OxygenBreather.IsBreathableElementAtCell(cell, Grid.DefaultOffset);
-		bool flag8 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole);
-		bool flag9 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Tube);
-		bool flag10 = !avoid_light || SleepChore.IsLightLevelOk(cell);
+		bool flag = brain.IsCellClear(cell);
+		bool flag2 = !Grid.Element[cell].IsLiquid;
+		bool flag3 = !Grid.Element[num].IsLiquid;
+		bool flag4 = Grid.Temperature[cell] > 285.15f && Grid.Temperature[cell] < 303.15f;
+		bool flag5 = brain.OxygenBreather.IsBreathableElementAtCell(cell, Grid.DefaultOffset);
+		bool flag6 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole);
+		bool flag7 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Tube);
+		bool flag8 = !avoid_light || SleepChore.IsLightLevelOk(cell);
 		if (cell == Grid.PosToCell(brain))
 		{
-			flag7 = !brain.OxygenBreather.IsSuffocating;
+			flag5 = !brain.OxygenBreather.IsSuffocating;
 		}
 		SafeCellQuery.SafeFlags safeFlags = (SafeCellQuery.SafeFlags)0;
-		if (flag3)
+		if (flag)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsClear;
 		}
-		if (flag6)
+		if (flag4)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.CorrectTemperature;
 		}
-		if (flag7)
+		if (flag5)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsBreathable;
 		}
-		if (flag8)
+		if (flag6)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsNotLadder;
 		}
-		if (flag9)
+		if (flag7)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsNotTube;
 		}
-		if (flag4)
+		if (flag2)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsNotLiquid;
 		}
-		if (flag5)
+		if (flag3)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsNotLiquidOnMyFace;
 		}
-		if (flag10)
+		if (flag8)
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsLightOk;
 		}

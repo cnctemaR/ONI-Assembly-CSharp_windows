@@ -8,7 +8,15 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this.DbConnection;
+			}
+		}
+
+		IDbConnection IDbTransaction.Connection
+		{
+			get
+			{
+				return this.DbConnection;
 			}
 		}
 
@@ -16,18 +24,11 @@ namespace System.Data.Common
 
 		public abstract IsolationLevel IsolationLevel { get; }
 
-		IDbConnection IDbTransaction.Connection
-		{
-			get
-			{
-				throw null;
-			}
-		}
-
 		public abstract void Commit();
 
 		public void Dispose()
 		{
+			this.Dispose(true);
 		}
 
 		protected virtual void Dispose(bool disposing)

@@ -144,14 +144,13 @@ public class RocketStats
 			OxidizerTank component = gameObject.GetComponent<OxidizerTank>();
 			if (component != null)
 			{
-				Dictionary<Tag, float> oxidizersAvailable = component.GetOxidizersAvailable();
-				foreach (KeyValuePair<Tag, float> keyValuePair in oxidizersAvailable)
+				foreach (KeyValuePair<Tag, float> keyValuePair in component.GetOxidizersAvailable())
 				{
 					if (dictionary.ContainsKey(keyValuePair.Key))
 					{
-						Dictionary<Tag, float> dictionary2;
-						Tag key;
-						(dictionary2 = dictionary)[key = keyValuePair.Key] = dictionary2[key] + keyValuePair.Value;
+						Dictionary<Tag, float> dictionary2 = dictionary;
+						Tag key = keyValuePair.Key;
+						dictionary2[key] += keyValuePair.Value;
 					}
 				}
 			}
@@ -167,8 +166,7 @@ public class RocketStats
 		{
 			return 0f;
 		}
-		float num3 = num / num2;
-		return num3 * 100f;
+		return num / num2 * 100f;
 	}
 
 	public float GetTotalThrust()
@@ -181,8 +179,7 @@ public class RocketStats
 		{
 			return 0f;
 		}
-		float num = ((!mainEngine.requireOxidizer) ? (totalFuel * mainEngine.efficiency) : (Mathf.Min(totalFuel, totalOxidizer) * (mainEngine.efficiency * (averageOxidizerEfficiency / 100f))));
-		return num + this.GetBoosterThrust();
+		return (mainEngine.requireOxidizer ? (Mathf.Min(totalFuel, totalOxidizer) * (mainEngine.efficiency * (averageOxidizerEfficiency / 100f))) : (totalFuel * mainEngine.efficiency)) + this.GetBoosterThrust();
 	}
 
 	public float GetBoosterThrust()

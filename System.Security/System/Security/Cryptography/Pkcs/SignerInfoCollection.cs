@@ -3,16 +3,11 @@ using System.Collections;
 
 namespace System.Security.Cryptography.Pkcs
 {
-	public sealed class SignerInfoCollection : IEnumerable, ICollection
+	public sealed class SignerInfoCollection : ICollection, IEnumerable
 	{
 		internal SignerInfoCollection()
 		{
 			this._list = new ArrayList();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new SignerInfoEnumerator(this._list);
 		}
 
 		public int Count
@@ -79,6 +74,11 @@ namespace System.Security.Cryptography.Pkcs
 		}
 
 		public SignerInfoEnumerator GetEnumerator()
+		{
+			return new SignerInfoEnumerator(this._list);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new SignerInfoEnumerator(this._list);
 		}

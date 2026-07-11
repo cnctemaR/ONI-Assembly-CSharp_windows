@@ -6,13 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>A Playable that controls an AnimationClip.</para>
-	/// </summary>
-	[StaticAccessor("AnimationClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationClipPlayable.bindings.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationClipPlayable.h")]
 	[RequiredByNativeCode]
+	[StaticAccessor("AnimationClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Animation/Director/AnimationClipPlayable.h")]
 	public struct AnimationClipPlayable : IPlayable, IEquatable<AnimationClipPlayable>
 	{
 		internal AnimationClipPlayable(PlayableHandle handle)
@@ -27,14 +24,6 @@ namespace UnityEngine.Animations
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates an AnimationClipPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph object that will own the AnimationClipPlayable.</param>
-		/// <param name="clip">The AnimationClip that will be added in the PlayableGraph.</param>
-		/// <returns>
-		///   <para>A AnimationClipPlayable linked to the PlayableGraph.</para>
-		/// </returns>
 		public static AnimationClipPlayable Create(PlayableGraph graph, AnimationClip clip)
 		{
 			PlayableHandle playableHandle = AnimationClipPlayable.CreateHandle(graph, clip);
@@ -76,43 +65,26 @@ namespace UnityEngine.Animations
 			return this.GetHandle() == other.GetHandle();
 		}
 
-		/// <summary>
-		///   <para>Returns the AnimationClip stored in the AnimationClipPlayable.</para>
-		/// </summary>
 		public AnimationClip GetAnimationClip()
 		{
 			return AnimationClipPlayable.GetAnimationClipInternal(ref this.m_Handle);
 		}
 
-		/// <summary>
-		///   <para>Returns the state of the ApplyFootIK flag.</para>
-		/// </summary>
 		public bool GetApplyFootIK()
 		{
 			return AnimationClipPlayable.GetApplyFootIKInternal(ref this.m_Handle);
 		}
 
-		/// <summary>
-		///   <para>Sets the value of the ApplyFootIK flag.</para>
-		/// </summary>
-		/// <param name="value">The new value of the ApplyFootIK flag.</param>
 		public void SetApplyFootIK(bool value)
 		{
 			AnimationClipPlayable.SetApplyFootIKInternal(ref this.m_Handle, value);
 		}
 
-		/// <summary>
-		///   <para>Returns the state of the ApplyPlayableIK flag.</para>
-		/// </summary>
 		public bool GetApplyPlayableIK()
 		{
 			return AnimationClipPlayable.GetApplyPlayableIKInternal(ref this.m_Handle);
 		}
 
-		/// <summary>
-		///   <para>Requests OnAnimatorIK to be called on the animated GameObject.</para>
-		/// </summary>
-		/// <param name="value"></param>
 		public void SetApplyPlayableIK(bool value)
 		{
 			AnimationClipPlayable.SetApplyPlayableIKInternal(ref this.m_Handle, value);
@@ -128,29 +100,37 @@ namespace UnityEngine.Animations
 			AnimationClipPlayable.SetRemoveStartOffsetInternal(ref this.m_Handle, value);
 		}
 
+		[NativeThrows]
 		private static bool CreateHandleInternal(PlayableGraph graph, AnimationClip clip, ref PlayableHandle handle)
 		{
 			return AnimationClipPlayable.CreateHandleInternal_Injected(ref graph, clip, ref handle);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnimationClip GetAnimationClipInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetApplyFootIKInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetApplyFootIKInternal(ref PlayableHandle handle, bool value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetApplyPlayableIKInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetApplyPlayableIKInternal(ref PlayableHandle handle, bool value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetRemoveStartOffsetInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetRemoveStartOffsetInternal(ref PlayableHandle handle, bool value);
 

@@ -40,12 +40,11 @@ public class AmbienceManager : KMonoBehaviour
 		}
 		vector = vector3 + vector4 / 2f;
 		vector2 = vector3 - vector4 / 2f;
-		Vector3 vector5 = vector4 / 2f;
-		Vector3 vector6 = vector5 / 2f;
-		this.quadrants[0].Update(new Vector2I(min.x, min.y), new Vector2I(vector2I.x, vector2I.y), new Vector3(vector2.x + vector6.x, vector2.y + vector6.y, this.emitterZPosition));
-		this.quadrants[1].Update(new Vector2I(vector2I.x, min.y), new Vector2I(max.x, vector2I.y), new Vector3(vector3.x + vector6.x, vector2.y + vector6.y, this.emitterZPosition));
-		this.quadrants[2].Update(new Vector2I(min.x, vector2I.y), new Vector2I(vector2I.x, max.y), new Vector3(vector2.x + vector6.x, vector3.y + vector6.y, this.emitterZPosition));
-		this.quadrants[3].Update(new Vector2I(vector2I.x, vector2I.y), new Vector2I(max.x, max.y), new Vector3(vector3.x + vector6.x, vector3.y + vector6.y, this.emitterZPosition));
+		Vector3 vector5 = vector4 / 2f / 2f;
+		this.quadrants[0].Update(new Vector2I(min.x, min.y), new Vector2I(vector2I.x, vector2I.y), new Vector3(vector2.x + vector5.x, vector2.y + vector5.y, this.emitterZPosition));
+		this.quadrants[1].Update(new Vector2I(vector2I.x, min.y), new Vector2I(max.x, vector2I.y), new Vector3(vector3.x + vector5.x, vector2.y + vector5.y, this.emitterZPosition));
+		this.quadrants[2].Update(new Vector2I(min.x, vector2I.y), new Vector2I(vector2I.x, max.y), new Vector3(vector2.x + vector5.x, vector3.y + vector5.y, this.emitterZPosition));
+		this.quadrants[3].Update(new Vector2I(vector2I.x, vector2I.y), new Vector2I(max.x, max.y), new Vector3(vector3.x + vector5.x, vector3.y + vector5.y, this.emitterZPosition));
 		float num = 0f;
 		float num2 = 0f;
 		float num3 = 0f;
@@ -137,12 +136,12 @@ public class AmbienceManager : KMonoBehaviour
 						global::Debug.LogWarning("Could not find event: " + this.oneShotSound);
 						return;
 					}
-					Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
-					ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
+					ATTRIBUTES_3D attributes_3D = new Vector3(emitter_position.x, emitter_position.y, 0f).To3DAttributes();
 					eventInstance.set3DAttributes(attributes_3D);
 					eventInstance.setVolume(this.tilePercentage * 2f);
 					eventInstance.start();
 					eventInstance.release();
+					return;
 				}
 				else
 				{
@@ -249,8 +248,7 @@ public class AmbienceManager : KMonoBehaviour
 			this.totalTileCount = 0;
 			for (int i = 0; i < this.allLayers.Count; i++)
 			{
-				AmbienceManager.Layer layer = this.allLayers[i];
-				layer.Reset();
+				this.allLayers[i].Reset();
 			}
 			for (int j = min.y; j < max.y; j++)
 			{
@@ -341,24 +339,23 @@ public class AmbienceManager : KMonoBehaviour
 			int num2 = vector2I.x * vector2I.y;
 			for (int l = 0; l < this.allLayers.Count; l++)
 			{
-				AmbienceManager.Layer layer2 = this.allLayers[l];
-				layer2.UpdatePercentage(num2);
+				this.allLayers[l].UpdatePercentage(num2);
 			}
 			this.loopingLayers.Sort();
 			this.topLayers.Clear();
 			for (int m = 0; m < this.loopingLayers.Count; m++)
 			{
-				AmbienceManager.Layer layer3 = this.loopingLayers[m];
-				if (m < 3 && layer3.tilePercentage > 0f)
+				AmbienceManager.Layer layer = this.loopingLayers[m];
+				if (m < 3 && layer.tilePercentage > 0f)
 				{
-					layer3.Start(emitter_position);
-					layer3.UpdateAverageTemperature();
-					layer3.UpdateParameters(emitter_position);
-					this.topLayers.Add(layer3);
+					layer.Start(emitter_position);
+					layer.UpdateAverageTemperature();
+					layer.UpdateParameters(emitter_position);
+					this.topLayers.Add(layer);
 				}
 				else
 				{
-					layer3.Stop();
+					layer.Stop();
 				}
 			}
 			this.oneShotLayers.Sort();

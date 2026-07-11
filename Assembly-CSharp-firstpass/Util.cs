@@ -113,7 +113,7 @@ public static class Util
 				typeof(T).ToString(),
 				cmp.GetType().ToString()
 			});
-			return (T)((object)null);
+			return default(T);
 		}
 		Util.InitializeComponent(component);
 		return component;
@@ -130,7 +130,7 @@ public static class Util
 				gameObject.name,
 				typeof(T).ToString()
 			});
-			return (T)((object)null);
+			return default(T);
 		}
 		Util.InitializeComponent(component);
 		return component;
@@ -174,7 +174,7 @@ public static class Util
 			KMonoBehaviour kmonoBehaviour = t as KMonoBehaviour;
 			if (kmonoBehaviour != null && !KMonoBehaviour.isPoolPreInit && !kmonoBehaviour.IsInitialized())
 			{
-				global::Debug.LogErrorFormat("Could not find component " + typeof(T).ToString() + " on object " + go.ToString(), new object[0]);
+				global::Debug.LogErrorFormat("Could not find component " + typeof(T).ToString() + " on object " + go.ToString(), Array.Empty<object>());
 			}
 		}
 		else
@@ -187,9 +187,10 @@ public static class Util
 	public static void PreInit(this GameObject go)
 	{
 		KMonoBehaviour.isPoolPreInit = true;
-		foreach (KMonoBehaviour kmonoBehaviour in go.GetComponents<KMonoBehaviour>())
+		KMonoBehaviour[] components = go.GetComponents<KMonoBehaviour>();
+		for (int i = 0; i < components.Length; i++)
 		{
-			kmonoBehaviour.InitializeComponent();
+			components[i].InitializeComponent();
 		}
 		KMonoBehaviour.isPoolPreInit = false;
 	}
@@ -267,8 +268,7 @@ public static class Util
 
 	public static T KInstantiateUI<T>(GameObject original, GameObject parent = null, bool force_active = false) where T : Component
 	{
-		GameObject gameObject = Util.KInstantiateUI(original, parent, force_active);
-		return gameObject.GetComponent<T>();
+		return Util.KInstantiateUI(original, parent, force_active).GetComponent<T>();
 	}
 
 	public static GameObject KInstantiateUI(GameObject original, GameObject parent = null, bool force_active = false)
@@ -284,7 +284,7 @@ public static class Util
 		}
 		if (gameObject == null)
 		{
-			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original, (!(parent != null)) ? null : parent.transform, false);
+			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original, (parent != null) ? parent.transform : null, false);
 		}
 		gameObject.name = original.name;
 		if (force_active)
@@ -314,7 +314,7 @@ public static class Util
 		if (!required && t != null)
 		{
 			global::UnityEngine.Object.DestroyImmediate(t, true);
-			t = (T)((object)null);
+			t = default(T);
 		}
 		else if (required && t == null)
 		{
@@ -347,12 +347,9 @@ public static class Util
 	{
 		for (int i = inputField.text.Length - 1; i >= 0; i--)
 		{
-			if (i < inputField.text.Length)
+			if (i < inputField.text.Length && !Util.IsInputCharacterValid(inputField.text[i], isPath))
 			{
-				if (!Util.IsInputCharacterValid(inputField.text[i], isPath))
-				{
-					inputField.text = inputField.text.Remove(i, 1);
-				}
+				inputField.text = inputField.text.Remove(i, 1);
 			}
 		}
 	}
@@ -374,8 +371,7 @@ public static class Util
 		double num = Util.random.NextDouble();
 		double num2 = Util.random.NextDouble();
 		double num3 = (double)(Mathf.Sqrt(-2f * Mathf.Log((float)num)) * Mathf.Sin(6.2831855f * (float)num2));
-		double num4 = (double)mu + (double)sigma * num3;
-		return (float)num4;
+		return (float)((double)mu + (double)sigma * num3);
 	}
 
 	public static void Shuffle<T>(this IList<T> list)
@@ -410,8 +406,7 @@ public static class Util
 			}
 			for (int i = 0; i < go.transform.childCount; i++)
 			{
-				Transform child = go.transform.GetChild(i);
-				Util.GetBounds(child.gameObject, ref bounds, ref first);
+				Util.GetBounds(go.transform.GetChild(i).gameObject, ref bounds, ref first);
 			}
 		}
 	}
@@ -554,8 +549,7 @@ public static class Util
 	{
 		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
 		{
-			string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			return Path.Combine(folderPath, "Klei");
+			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Klei");
 		}
 		return Util.defaultRootFolder;
 	}

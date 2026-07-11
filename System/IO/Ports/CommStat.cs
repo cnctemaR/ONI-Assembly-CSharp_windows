@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.IO.Ports
 {
-	[StructLayout(LayoutKind.Sequential)]
-	internal class CommStat
+	internal struct CommStat
 	{
 		public uint flags;
 

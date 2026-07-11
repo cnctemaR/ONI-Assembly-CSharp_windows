@@ -4,18 +4,6 @@ using UnityEngine;
 
 public class CodexTextWithTooltip : CodexWidget<CodexTextWithTooltip>
 {
-	public CodexTextWithTooltip()
-	{
-		this.style = CodexTextStyle.Body;
-	}
-
-	public CodexTextWithTooltip(string text, string tooltip, CodexTextStyle style = CodexTextStyle.Body)
-	{
-		this.text = text;
-		this.style = style;
-		this.tooltip = tooltip;
-	}
-
 	public string text { get; set; }
 
 	public string tooltip { get; set; }
@@ -32,6 +20,18 @@ public class CodexTextWithTooltip : CodexWidget<CodexTextWithTooltip>
 		{
 			this.text = Strings.Get(value);
 		}
+	}
+
+	public CodexTextWithTooltip()
+	{
+		this.style = CodexTextStyle.Body;
+	}
+
+	public CodexTextWithTooltip(string text, string tooltip, CodexTextStyle style = CodexTextStyle.Body)
+	{
+		this.text = text;
+		this.style = style;
+		this.tooltip = tooltip;
 	}
 
 	public void ConfigureLabel(LocText label, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)

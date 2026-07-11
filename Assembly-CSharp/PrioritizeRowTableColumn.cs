@@ -4,7 +4,7 @@ using UnityEngine;
 public class PrioritizeRowTableColumn : TableColumn
 {
 	public PrioritizeRowTableColumn(object user_data, Action<object, int> on_change_priority, Func<object, int, string> on_hover_widget)
-		: base(null, null, null, null, null, false, string.Empty)
+		: base(null, null, null, null, null, false, "")
 	{
 		this.userData = user_data;
 		this.onChangePriority = on_change_priority;

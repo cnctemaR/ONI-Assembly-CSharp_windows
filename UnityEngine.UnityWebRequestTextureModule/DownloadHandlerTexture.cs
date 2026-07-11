@@ -5,25 +5,15 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
-	/// <summary>
-	///   <para>A DownloadHandler subclass specialized for downloading images for use as Texture objects.</para>
-	/// </summary>
 	[NativeHeader("Modules/UnityWebRequestTexture/Public/DownloadHandlerTexture.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerTexture : DownloadHandler
 	{
-		/// <summary>
-		///   <para>Default constructor.</para>
-		/// </summary>
 		public DownloadHandlerTexture()
 		{
 			this.InternalCreateTexture(true);
 		}
 
-		/// <summary>
-		///   <para>Constructor, allows TextureImporter.isReadable property to be set.</para>
-		/// </summary>
-		/// <param name="readable">Value to set for TextureImporter.isReadable.</param>
 		public DownloadHandlerTexture(bool readable)
 		{
 			this.InternalCreateTexture(readable);
@@ -38,20 +28,11 @@ namespace UnityEngine.Networking
 			this.m_Ptr = DownloadHandlerTexture.Create(this, readable);
 		}
 
-		/// <summary>
-		///   <para>Called by DownloadHandler.data. Returns a copy of the downloaded image data as raw bytes.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>A copy of the downloaded data.</para>
-		/// </returns>
 		protected override byte[] GetData()
 		{
 			return DownloadHandler.InternalGetByteArray(this);
 		}
 
-		/// <summary>
-		///   <para>Returns the downloaded Texture, or null. (Read Only)</para>
-		/// </summary>
 		public Texture2D texture
 		{
 			get
@@ -82,13 +63,6 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Texture2D InternalGetTextureNative();
 
-		/// <summary>
-		///   <para>Returns the downloaded Texture, or null.</para>
-		/// </summary>
-		/// <param name="www">A finished UnityWebRequest object with DownloadHandlerTexture attached.</param>
-		/// <returns>
-		///   <para>The same as DownloadHandlerTexture.texture</para>
-		/// </returns>
 		public static Texture2D GetContent(UnityWebRequest www)
 		{
 			return DownloadHandler.GetCheckedDownloader<DownloadHandlerTexture>(www).texture;

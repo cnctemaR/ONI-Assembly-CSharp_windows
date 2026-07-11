@@ -5,24 +5,16 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Represents an axis aligned bounding box.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Geometry/AABB.h")]
-	[NativeClass("AABB")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeType(Header = "Runtime/Geometry/AABB.h")]
-	[NativeHeader("Runtime/Geometry/Intersection.h")]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[NativeHeader("Runtime/Geometry/Ray.h")]
+	[NativeHeader("Runtime/Geometry/Intersection.h")]
 	[ThreadAndSerializationSafe]
+	[NativeType(Header = "Runtime/Geometry/AABB.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeClass("AABB")]
+	[NativeHeader("Runtime/Geometry/AABB.h")]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
 	public struct Bounds : IEquatable<Bounds>
 	{
-		/// <summary>
-		///   <para>Creates a new Bounds.</para>
-		/// </summary>
-		/// <param name="center">The location of the origin of the Bounds.</param>
-		/// <param name="size">The dimensions of the Bounds.</param>
 		public Bounds(Vector3 center, Vector3 size)
 		{
 			this.m_Center = center;
@@ -44,9 +36,6 @@ namespace UnityEngine
 			return this.center.Equals(other.center) && this.extents.Equals(other.extents);
 		}
 
-		/// <summary>
-		///   <para>The center of the bounding box.</para>
-		/// </summary>
 		public Vector3 center
 		{
 			get
@@ -59,9 +48,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The total size of the box. This is always twice as large as the extents.</para>
-		/// </summary>
 		public Vector3 size
 		{
 			get
@@ -74,9 +60,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The extents of the Bounding Box. This is always half of the size of the Bounds.</para>
-		/// </summary>
 		public Vector3 extents
 		{
 			get
@@ -89,9 +72,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimal point of the box. This is always equal to center-extents.</para>
-		/// </summary>
 		public Vector3 min
 		{
 			get
@@ -104,9 +84,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximal point of the box. This is always equal to center+extents.</para>
-		/// </summary>
 		public Vector3 max
 		{
 			get
@@ -129,68 +106,39 @@ namespace UnityEngine
 			return !(lhs == rhs);
 		}
 
-		/// <summary>
-		///   <para>Sets the bounds to the min and max value of the box.</para>
-		/// </summary>
-		/// <param name="min"></param>
-		/// <param name="max"></param>
 		public void SetMinMax(Vector3 min, Vector3 max)
 		{
 			this.extents = (max - min) * 0.5f;
 			this.center = min + this.extents;
 		}
 
-		/// <summary>
-		///   <para>Grows the Bounds to include the point.</para>
-		/// </summary>
-		/// <param name="point"></param>
 		public void Encapsulate(Vector3 point)
 		{
 			this.SetMinMax(Vector3.Min(this.min, point), Vector3.Max(this.max, point));
 		}
 
-		/// <summary>
-		///   <para>Grow the bounds to encapsulate the bounds.</para>
-		/// </summary>
-		/// <param name="bounds"></param>
 		public void Encapsulate(Bounds bounds)
 		{
 			this.Encapsulate(bounds.center - bounds.extents);
 			this.Encapsulate(bounds.center + bounds.extents);
 		}
 
-		/// <summary>
-		///   <para>Expand the bounds by increasing its size by amount along each side.</para>
-		/// </summary>
-		/// <param name="amount"></param>
 		public void Expand(float amount)
 		{
 			amount *= 0.5f;
 			this.extents += new Vector3(amount, amount, amount);
 		}
 
-		/// <summary>
-		///   <para>Expand the bounds by increasing its size by amount along each side.</para>
-		/// </summary>
-		/// <param name="amount"></param>
 		public void Expand(Vector3 amount)
 		{
 			this.extents += amount * 0.5f;
 		}
 
-		/// <summary>
-		///   <para>Does another bounding box intersect with this bounding box?</para>
-		/// </summary>
-		/// <param name="bounds"></param>
 		public bool Intersects(Bounds bounds)
 		{
 			return this.min.x <= bounds.max.x && this.max.x >= bounds.min.x && this.min.y <= bounds.max.y && this.max.y >= bounds.min.y && this.min.z <= bounds.max.z && this.max.z >= bounds.min.z;
 		}
 
-		/// <summary>
-		///   <para>Does ray intersect this bounding box?</para>
-		/// </summary>
-		/// <param name="ray"></param>
 		public bool IntersectRay(Ray ray)
 		{
 			float num;
@@ -202,19 +150,11 @@ namespace UnityEngine
 			return Bounds.IntersectRayAABB(ray, this, out distance);
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for the bounds.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public override string ToString()
 		{
 			return UnityString.Format("Center: {0}, Extents: {1}", new object[] { this.m_Center, this.m_Extents });
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for the bounds.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public string ToString(string format)
 		{
 			return UnityString.Format("Center: {0}, Extents: {1}", new object[]
@@ -224,20 +164,12 @@ namespace UnityEngine
 			});
 		}
 
-		/// <summary>
-		///   <para>Is point contained in the bounding box?</para>
-		/// </summary>
-		/// <param name="point"></param>
 		[NativeMethod("IsInside", IsThreadSafe = true)]
 		public bool Contains(Vector3 point)
 		{
 			return Bounds.Contains_Injected(ref this, ref point);
 		}
 
-		/// <summary>
-		///   <para>The smallest squared distance between the point and this bounding box.</para>
-		/// </summary>
-		/// <param name="point"></param>
 		[FreeFunction("BoundsScripting::SqrDistance", HasExplicitThis = true, IsThreadSafe = true)]
 		public float SqrDistance(Vector3 point)
 		{
@@ -250,13 +182,6 @@ namespace UnityEngine
 			return Bounds.IntersectRayAABB_Injected(ref ray, ref bounds, out dist);
 		}
 
-		/// <summary>
-		///   <para>The closest point on the bounding box.</para>
-		/// </summary>
-		/// <param name="point">Arbitrary point.</param>
-		/// <returns>
-		///   <para>The point on the bounding box or inside the bounding box.</para>
-		/// </returns>
 		[FreeFunction("BoundsScripting::ClosestPoint", HasExplicitThis = true, IsThreadSafe = true)]
 		public Vector3 ClosestPoint(Vector3 point)
 		{

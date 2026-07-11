@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Diagnostics;
 using FMOD.Studio;
 using UnityEngine;
@@ -7,28 +6,6 @@ using UnityEngine;
 [DebuggerDisplay("{Name}")]
 public class SoundEvent : AnimEvent
 {
-	public SoundEvent()
-	{
-	}
-
-	public SoundEvent(string file_name, string sound_name, int frame, bool do_load, bool is_looping, float min_interval, bool is_dynamic)
-		: base(file_name, sound_name, frame)
-	{
-		this.shouldCameraScalePosition = true;
-		if (do_load)
-		{
-			this.sound = GlobalAssets.GetSound(sound_name, false);
-			this.soundHash = new HashedString(this.sound);
-			if (this.sound == null || this.sound == string.Empty)
-			{
-			}
-		}
-		this.minInterval = min_interval;
-		this.looping = is_looping;
-		this.isDynamic = is_dynamic;
-		this.noiseValues = SoundEventVolumeCache.instance.GetVolume(file_name, sound_name);
-	}
-
 	public string sound { get; private set; }
 
 	public HashedString soundHash { get; private set; }
@@ -44,6 +21,29 @@ public class SoundEvent : AnimEvent
 	public bool objectIsSelectedAndVisible { get; set; }
 
 	public EffectorValues noiseValues { get; set; }
+
+	public SoundEvent()
+	{
+	}
+
+	public SoundEvent(string file_name, string sound_name, int frame, bool do_load, bool is_looping, float min_interval, bool is_dynamic)
+		: base(file_name, sound_name, frame)
+	{
+		this.shouldCameraScalePosition = true;
+		if (do_load)
+		{
+			this.sound = GlobalAssets.GetSound(sound_name, false);
+			this.soundHash = new HashedString(this.sound);
+			if (this.sound != null)
+			{
+				this.sound == "";
+			}
+		}
+		this.minInterval = min_interval;
+		this.looping = is_looping;
+		this.isDynamic = is_dynamic;
+		this.noiseValues = SoundEventVolumeCache.instance.GetVolume(file_name, sound_name);
+	}
 
 	public static bool ObjectIsSelectedAndVisible(GameObject go)
 	{
@@ -64,7 +64,7 @@ public class SoundEvent : AnimEvent
 			if (go.GetComponent<Workable>() != null)
 			{
 				Workable[] components = go.GetComponents<Workable>();
-				if (components.Length > 0)
+				if (components.Length != 0)
 				{
 					for (int i = 0; i < components.Length; i++)
 					{
@@ -79,25 +79,12 @@ public class SoundEvent : AnimEvent
 			{
 				return true;
 			}
-			IEnumerator enumerator = go.transform.GetEnumerator();
-			try
+			foreach (object obj in go.transform)
 			{
-				while (enumerator.MoveNext())
+				Transform transform = (Transform)obj;
+				if (transform.GetComponent<KSelectable>() != null && transform.GetComponent<KSelectable>().IsSelected)
 				{
-					object obj = enumerator.Current;
-					Transform transform = (Transform)obj;
-					if (transform.GetComponent<KSelectable>() != null && transform.GetComponent<KSelectable>().IsSelected)
-					{
-						return true;
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
+					return true;
 				}
 			}
 			return false;
@@ -111,8 +98,7 @@ public class SoundEvent : AnimEvent
 		float num = 1f * sound_pos.x + 0f * position.x;
 		float num2 = 1f * sound_pos.y + 0f * position.y;
 		float num3 = 0f * position.z;
-		Vector3 vector = new Vector3(num, num2, num3);
-		return vector;
+		return new Vector3(num, num2, num3);
 	}
 
 	public static float GetVolume(bool objectIsSelectedAndVisible)
@@ -173,8 +159,7 @@ public class SoundEvent : AnimEvent
 	{
 		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
 		vector.z = 0f;
-		GameObject gameObject = behaviour.controller.gameObject;
-		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		if (SoundEvent.ObjectIsSelectedAndVisible(behaviour.controller.gameObject))
 		{
 			vector = SoundEvent.AudioHighlightListenerPosition(vector);
 		}
@@ -211,7 +196,7 @@ public class SoundEvent : AnimEvent
 		}
 		catch (Exception ex)
 		{
-			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + sound == null) ? "null" : sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
+			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + sound != null) ? sound.ToString() : "null", behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
 			global::Debug.LogError(text);
 			throw new ArgumentException(text, ex);
 		}
@@ -298,11 +283,9 @@ public class SoundEvent : AnimEvent
 		if (sound != null)
 		{
 			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", base.frame, ", ", sound_pos }));
+			return;
 		}
-		else
-		{
-			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);
-		}
+		global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);
 	}
 
 	public static int IGNORE_INTERVAL = -1;

@@ -5,11 +5,6 @@ namespace Satsuma
 {
 	public sealed class ReverseGraph : IGraph, IArcLookup
 	{
-		public ReverseGraph(IGraph graph)
-		{
-			this.graph = graph;
-		}
-
 		public static ArcFilter Reverse(ArcFilter filter)
 		{
 			if (filter == ArcFilter.Forward)
@@ -21,6 +16,11 @@ namespace Satsuma
 				return ArcFilter.Forward;
 			}
 			return filter;
+		}
+
+		public ReverseGraph(IGraph graph)
+		{
+			this.graph = graph;
 		}
 
 		public Node U(Arc arc)

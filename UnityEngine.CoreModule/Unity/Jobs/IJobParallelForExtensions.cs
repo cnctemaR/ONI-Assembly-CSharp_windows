@@ -4,9 +4,6 @@ using Unity.Jobs.LowLevel.Unsafe;
 
 namespace Unity.Jobs
 {
-	/// <summary>
-	///   <para>Extension methods for Jobs using the IJobParallelFor.</para>
-	/// </summary>
 	public static class IJobParallelForExtensions
 	{
 		public static JobHandle Schedule<T>(this T jobData, int arrayLength, int innerloopBatchCount, JobHandle dependsOn = default(JobHandle)) where T : struct, IJobParallelFor

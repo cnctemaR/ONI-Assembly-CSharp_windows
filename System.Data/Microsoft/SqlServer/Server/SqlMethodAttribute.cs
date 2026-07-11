@@ -6,26 +6,53 @@ namespace Microsoft.SqlServer.Server
 	[Serializable]
 	public sealed class SqlMethodAttribute : SqlFunctionAttribute
 	{
-		public bool IsMutator
+		public SqlMethodAttribute()
 		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
-			}
+			this.m_fCallOnNullInputs = true;
+			this.m_fMutator = false;
+			this.m_fInvokeIfReceiverIsNull = false;
 		}
 
 		public bool OnNullCall
 		{
 			get
 			{
-				throw null;
+				return this.m_fCallOnNullInputs;
 			}
 			set
 			{
+				this.m_fCallOnNullInputs = value;
 			}
 		}
+
+		public bool IsMutator
+		{
+			get
+			{
+				return this.m_fMutator;
+			}
+			set
+			{
+				this.m_fMutator = value;
+			}
+		}
+
+		public bool InvokeIfReceiverIsNull
+		{
+			get
+			{
+				return this.m_fInvokeIfReceiverIsNull;
+			}
+			set
+			{
+				this.m_fInvokeIfReceiverIsNull = value;
+			}
+		}
+
+		private bool m_fCallOnNullInputs;
+
+		private bool m_fMutator;
+
+		private bool m_fInvokeIfReceiverIsNull;
 	}
 }

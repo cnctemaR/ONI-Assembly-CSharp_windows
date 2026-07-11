@@ -63,8 +63,7 @@ namespace System.Security.Policy
 			{
 				foreach (object obj in base.Children)
 				{
-					CodeGroup codeGroup = (CodeGroup)obj;
-					PolicyStatement policyStatement = codeGroup.Resolve(evidence);
+					PolicyStatement policyStatement = ((CodeGroup)obj).Resolve(evidence);
 					if (policyStatement != null)
 					{
 						permissionSet = permissionSet.Union(policyStatement.PermissionSet);
@@ -97,11 +96,10 @@ namespace System.Security.Policy
 			FileCodeGroup fileCodeGroup = new FileCodeGroup(base.MembershipCondition, this.m_access);
 			foreach (object obj in base.Children)
 			{
-				CodeGroup codeGroup = (CodeGroup)obj;
-				CodeGroup codeGroup2 = codeGroup.ResolveMatchingCodeGroups(evidence);
-				if (codeGroup2 != null)
+				CodeGroup codeGroup = ((CodeGroup)obj).ResolveMatchingCodeGroups(evidence);
+				if (codeGroup != null)
 				{
-					fileCodeGroup.AddChild(codeGroup2);
+					fileCodeGroup.AddChild(codeGroup);
 				}
 			}
 			return fileCodeGroup;
@@ -138,12 +136,10 @@ namespace System.Security.Policy
 			string text = e.Attribute("Access");
 			if (text != null)
 			{
-				this.m_access = (FileIOPermissionAccess)((int)Enum.Parse(typeof(FileIOPermissionAccess), text, true));
+				this.m_access = (FileIOPermissionAccess)Enum.Parse(typeof(FileIOPermissionAccess), text, true);
+				return;
 			}
-			else
-			{
-				this.m_access = FileIOPermissionAccess.NoAccess;
-			}
+			this.m_access = FileIOPermissionAccess.NoAccess;
 		}
 
 		protected override void CreateXml(SecurityElement element, PolicyLevel level)

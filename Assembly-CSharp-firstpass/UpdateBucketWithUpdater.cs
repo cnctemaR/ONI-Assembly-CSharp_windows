@@ -5,17 +5,17 @@ using System.Diagnostics;
 [DebuggerDisplay("{name}")]
 public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateBucket
 {
-	public UpdateBucketWithUpdater(string name)
-		: base(name)
-	{
-	}
-
 	public override int count
 	{
 		get
 		{
 			return this.entries.Count;
 		}
+	}
+
+	public UpdateBucketWithUpdater(string name)
+		: base(name)
+	{
 	}
 
 	public HandleVector<int>.Handle Add(DataType data, float last_update_time, UpdateBucketWithUpdater<DataType>.IUpdater updater)
@@ -48,19 +48,17 @@ public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateB
 		if (this.batch_update_delegate != null)
 		{
 			this.batch_update_delegate(dataList, dt);
+			return;
 		}
-		else
+		int count = dataList.Count;
+		for (int i = 0; i < count; i++)
 		{
-			int count = dataList.Count;
-			for (int i = 0; i < count; i++)
+			UpdateBucketWithUpdater<DataType>.Entry entry = dataList[i];
+			if (entry.updater != null)
 			{
-				UpdateBucketWithUpdater<DataType>.Entry entry = dataList[i];
-				if (entry.updater != null)
-				{
-					entry.updater.Update(entry.data, dt - entry.lastUpdateTime);
-					entry.lastUpdateTime = 0f;
-					dataList[i] = entry;
-				}
+				entry.updater.Update(entry.data, dt - entry.lastUpdateTime);
+				entry.lastUpdateTime = 0f;
+				dataList[i] = entry;
 			}
 		}
 	}

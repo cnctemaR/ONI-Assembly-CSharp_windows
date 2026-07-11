@@ -5,16 +5,16 @@ namespace Satsuma.Drawing
 {
 	public struct PointD : IEquatable<PointD>
 	{
+		public double X { get; private set; }
+
+		public double Y { get; private set; }
+
 		public PointD(double x, double y)
 		{
 			this = default(PointD);
 			this.X = x;
 			this.Y = y;
 		}
-
-		public double X { get; private set; }
-
-		public double Y { get; private set; }
 
 		public bool Equals(PointD other)
 		{
@@ -43,7 +43,7 @@ namespace Satsuma.Drawing
 
 		public string ToString(IFormatProvider provider)
 		{
-			return string.Format(provider, "({0} {1})", new object[] { this.X, this.Y });
+			return string.Format(provider, "({0} {1})", this.X, this.Y);
 		}
 
 		public override string ToString()

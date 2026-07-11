@@ -10,7 +10,7 @@ namespace Mono.Remoting.Channels.Unix
 			this._pool = pool;
 			this._client = client;
 			this._stream = new BufferedStream(client.GetStream());
-			this._controlTime = DateTime.Now;
+			this._controlTime = DateTime.UtcNow;
 			this._buffer = new byte[UnixMessageIO.DefaultStreamBufferSize];
 		}
 

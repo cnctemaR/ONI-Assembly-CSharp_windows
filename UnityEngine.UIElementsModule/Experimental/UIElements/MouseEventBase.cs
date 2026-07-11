@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>The base class for mouse events.</para>
-	/// </summary>
 	public abstract class MouseEventBase<T> : EventBase<T>, IMouseEvent, IMouseEventInternal where T : MouseEventBase<T>, new()
 	{
 		protected MouseEventBase()
@@ -56,12 +53,29 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		public bool actionKey
+		{
+			get
+			{
+				bool flag;
+				if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
+				{
+					flag = this.commandKey;
+				}
+				else
+				{
+					flag = this.ctrlKey;
+				}
+				return flag;
+			}
+		}
+
 		bool IMouseEventInternal.hasUnderlyingPhysicalEvent { get; set; }
 
 		protected override void Init()
 		{
 			base.Init();
-			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.Capturable | EventBase.EventFlags.Cancellable;
+			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.TricklesDown | EventBase.EventFlags.Cancellable;
 			this.modifiers = EventModifiers.None;
 			this.mousePosition = Vector2.zero;
 			this.localMousePosition = Vector2.zero;
@@ -102,6 +116,13 @@ namespace UnityEngine.Experimental.UIElements
 				pooled.clickCount = systemEvent.clickCount;
 				pooled.hasUnderlyingPhysicalEvent = true;
 			}
+			return pooled;
+		}
+
+		public static T GetPooled(Vector2 mousePosition)
+		{
+			T pooled = EventBase<T>.GetPooled();
+			pooled.mousePosition = mousePosition;
 			return pooled;
 		}
 

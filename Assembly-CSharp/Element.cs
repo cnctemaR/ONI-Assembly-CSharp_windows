@@ -25,7 +25,7 @@ public class Element : IComparable<Element>
 	{
 		get
 		{
-			return (byte)(this.state & Element.State.Solid) == 2;
+			return (this.state & Element.State.Solid) == Element.State.Liquid;
 		}
 	}
 
@@ -33,7 +33,7 @@ public class Element : IComparable<Element>
 	{
 		get
 		{
-			return (byte)(this.state & Element.State.Solid) == 1;
+			return (this.state & Element.State.Solid) == Element.State.Gas;
 		}
 	}
 
@@ -41,7 +41,7 @@ public class Element : IComparable<Element>
 	{
 		get
 		{
-			return (byte)(this.state & Element.State.Solid) == 3;
+			return (this.state & Element.State.Solid) == Element.State.Solid;
 		}
 	}
 
@@ -49,7 +49,7 @@ public class Element : IComparable<Element>
 	{
 		get
 		{
-			return (byte)(this.state & Element.State.Solid) == 0;
+			return (this.state & Element.State.Solid) == Element.State.Vacuum;
 		}
 	}
 
@@ -57,7 +57,7 @@ public class Element : IComparable<Element>
 	{
 		get
 		{
-			return (byte)(this.state & Element.State.TemperatureInsulated) != 0;
+			return (this.state & Element.State.TemperatureInsulated) > Element.State.Vacuum;
 		}
 	}
 
@@ -87,15 +87,15 @@ public class Element : IComparable<Element>
 
 	public static string GetStateString(Element.State state)
 	{
-		if ((byte)(state & Element.State.Solid) == 3)
+		if ((state & Element.State.Solid) == Element.State.Solid)
 		{
 			return ELEMENTS.STATE.SOLID;
 		}
-		if ((byte)(state & Element.State.Solid) == 2)
+		if ((state & Element.State.Solid) == Element.State.Liquid)
 		{
 			return ELEMENTS.STATE.LIQUID;
 		}
-		if ((byte)(state & Element.State.Solid) == 1)
+		if ((state & Element.State.Solid) == Element.State.Gas)
 		{
 			return ELEMENTS.STATE.GAS;
 		}
@@ -124,10 +124,10 @@ public class Element : IComparable<Element>
 		text2 = text2.Replace("{SPECIFIC_HEAT_CAPACITY}", GameUtil.GetFormattedSHC(this.specificHeatCapacity));
 		text2 = text2.Replace("{THERMAL_CONDUCTIVITY}", GameUtil.GetFormattedThermalConductivity(this.thermalConductivity));
 		text = text + "\n" + text2;
-		if (this.oreTags.Length > 0 && !this.IsVacuum)
+		if (this.oreTags.Length != 0 && !this.IsVacuum)
 		{
 			text += "\n\n";
-			string text3 = string.Empty;
+			string text3 = "";
 			for (int i = 0; i < this.oreTags.Length; i++)
 			{
 				Tag tag = new Tag(this.oreTags[i]);

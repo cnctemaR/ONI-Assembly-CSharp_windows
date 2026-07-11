@@ -7,23 +7,27 @@ namespace System
 	public class UriFormatException : FormatException, ISerializable
 	{
 		public UriFormatException()
-			: base(global::Locale.GetText("Invalid URI format"))
 		{
 		}
 
-		public UriFormatException(string message)
-			: base(message)
+		public UriFormatException(string textString)
+			: base(textString)
 		{
 		}
 
-		protected UriFormatException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		public UriFormatException(string textString, Exception e)
+			: base(textString, e)
 		{
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		protected UriFormatException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
 		{
-			base.GetObjectData(info, context);
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			base.GetObjectData(serializationInfo, streamingContext);
 		}
 	}
 }

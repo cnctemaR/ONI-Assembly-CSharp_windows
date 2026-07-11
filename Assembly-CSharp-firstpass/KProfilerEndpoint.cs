@@ -4,7 +4,7 @@ using System.Diagnostics;
 public class KProfilerEndpoint
 {
 	[Conditional("ENABLE_KPROFILER")]
-	public virtual void Begin(string name)
+	public virtual void Begin(string name, string group)
 	{
 	}
 
@@ -19,7 +19,17 @@ public class KProfilerEndpoint
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public virtual void Ping(string display, double value)
+	public virtual void Ping(string display, string group, double value)
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public virtual void BeginAsync(string display, string group)
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public virtual void EndAsync(string display)
 	{
 	}
 

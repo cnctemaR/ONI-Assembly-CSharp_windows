@@ -1,16 +1,49 @@
 ﻿using System;
 using System.Globalization;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 
 namespace System.Net
 {
 	[Serializable]
 	public class IPAddress
 	{
-		public IPAddress(long addr)
+		public IPAddress(long newAddress)
 		{
-			this.m_Address = addr;
-			this.m_Family = global::System.Net.Sockets.AddressFamily.InterNetwork;
+			if (newAddress < 0L || newAddress > (long)((ulong)(-1)))
+			{
+				throw new ArgumentOutOfRangeException("newAddress");
+			}
+			this.m_Address = newAddress;
+		}
+
+		public IPAddress(byte[] address, long scopeid)
+		{
+			if (address == null)
+			{
+				throw new ArgumentNullException("address");
+			}
+			if (address.Length != 16)
+			{
+				throw new ArgumentException(global::SR.GetString("An invalid IP address was specified."), "address");
+			}
+			this.m_Family = AddressFamily.InterNetworkV6;
+			for (int i = 0; i < 8; i++)
+			{
+				this.m_Numbers[i] = (ushort)((int)address[i * 2] * 256 + (int)address[i * 2 + 1]);
+			}
+			if (scopeid < 0L || scopeid > (long)((ulong)(-1)))
+			{
+				throw new ArgumentOutOfRangeException("scopeid");
+			}
+			this.m_ScopeId = scopeid;
+		}
+
+		private IPAddress(ushort[] address, uint scopeid)
+		{
+			this.m_Family = AddressFamily.InterNetworkV6;
+			this.m_Numbers = address;
+			this.m_ScopeId = (long)((ulong)scopeid);
 		}
 
 		public IPAddress(byte[] address)
@@ -19,360 +52,186 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("address");
 			}
-			int num = address.Length;
-			if (num != 16 && num != 4)
+			if (address.Length != 4 && address.Length != 16)
 			{
-				throw new ArgumentException("An invalid IP address was specified.", "address");
+				throw new ArgumentException(global::SR.GetString("An invalid IP address was specified."), "address");
 			}
-			if (num == 16)
+			if (address.Length == 4)
 			{
-				this.m_Numbers = new ushort[8];
-				Buffer.BlockCopy(address, 0, this.m_Numbers, 0, 16);
-				this.m_Family = global::System.Net.Sockets.AddressFamily.InterNetworkV6;
-				this.m_ScopeId = 0L;
+				this.m_Family = AddressFamily.InterNetwork;
+				this.m_Address = (long)(((int)address[3] << 24) | ((int)address[2] << 16) | ((int)address[1] << 8) | (int)address[0]) & (long)((ulong)(-1));
+				return;
 			}
-			else
-			{
-				this.m_Address = (long)((ulong)((ulong)address[3] << 24) + (ulong)((long)((long)address[2] << 16)) + (ulong)((long)((long)address[1] << 8)) + (ulong)((long)address[0]));
-				this.m_Family = global::System.Net.Sockets.AddressFamily.InterNetwork;
-			}
-		}
-
-		public IPAddress(byte[] address, long scopeId)
-		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (address.Length != 16)
-			{
-				throw new ArgumentException("An invalid IP address was specified.", "address");
-			}
-			this.m_Numbers = new ushort[8];
-			Buffer.BlockCopy(address, 0, this.m_Numbers, 0, 16);
-			this.m_Family = global::System.Net.Sockets.AddressFamily.InterNetworkV6;
-			this.m_ScopeId = scopeId;
-		}
-
-		internal IPAddress(ushort[] address, long scopeId)
-		{
-			this.m_Numbers = address;
+			this.m_Family = AddressFamily.InterNetworkV6;
 			for (int i = 0; i < 8; i++)
 			{
-				this.m_Numbers[i] = (ushort)IPAddress.HostToNetworkOrder((short)this.m_Numbers[i]);
+				this.m_Numbers[i] = (ushort)((int)address[i * 2] * 256 + (int)address[i * 2 + 1]);
 			}
-			this.m_Family = global::System.Net.Sockets.AddressFamily.InterNetworkV6;
-			this.m_ScopeId = scopeId;
 		}
 
-		private static short SwapShort(short number)
+		internal IPAddress(int newAddress)
 		{
-			return (short)(((number >> 8) & 255) | (((int)number << 8) & 65280));
-		}
-
-		private static int SwapInt(int number)
-		{
-			return ((number >> 24) & 255) | ((number >> 8) & 65280) | ((number << 8) & 16711680) | (number << 24);
-		}
-
-		private static long SwapLong(long number)
-		{
-			return ((number >> 56) & 255L) | ((number >> 40) & 65280L) | ((number >> 24) & 16711680L) | ((number >> 8) & (long)((ulong)(-16777216))) | ((number << 8) & 1095216660480L) | ((number << 24) & 280375465082880L) | ((number << 40) & 71776119061217280L) | (number << 56);
-		}
-
-		public static short HostToNetworkOrder(short host)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				return host;
-			}
-			return IPAddress.SwapShort(host);
-		}
-
-		public static int HostToNetworkOrder(int host)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				return host;
-			}
-			return IPAddress.SwapInt(host);
-		}
-
-		public static long HostToNetworkOrder(long host)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				return host;
-			}
-			return IPAddress.SwapLong(host);
-		}
-
-		public static short NetworkToHostOrder(short network)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				return network;
-			}
-			return IPAddress.SwapShort(network);
-		}
-
-		public static int NetworkToHostOrder(int network)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				return network;
-			}
-			return IPAddress.SwapInt(network);
-		}
-
-		public static long NetworkToHostOrder(long network)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				return network;
-			}
-			return IPAddress.SwapLong(network);
-		}
-
-		public static IPAddress Parse(string ipString)
-		{
-			IPAddress ipaddress;
-			if (IPAddress.TryParse(ipString, out ipaddress))
-			{
-				return ipaddress;
-			}
-			throw new FormatException("An invalid IP address was specified.");
+			this.m_Address = (long)newAddress & (long)((ulong)(-1));
 		}
 
 		public static bool TryParse(string ipString, out IPAddress address)
 		{
-			if (ipString == null)
-			{
-				throw new ArgumentNullException("ipString");
-			}
-			IPAddress ipaddress;
-			address = (ipaddress = IPAddress.ParseIPV4(ipString));
-			if (ipaddress == null)
-			{
-				address = (ipaddress = IPAddress.ParseIPV6(ipString));
-				if (ipaddress == null)
-				{
-					return false;
-				}
-			}
-			return true;
+			address = IPAddress.InternalParse(ipString, true);
+			return address != null;
 		}
 
-		private static IPAddress ParseIPV4(string ip)
+		public static IPAddress Parse(string ipString)
 		{
-			int num = ip.IndexOf(' ');
-			if (num != -1)
+			return IPAddress.InternalParse(ipString, false);
+		}
+
+		private unsafe static IPAddress InternalParse(string ipString, bool tryParse)
+		{
+			if (ipString == null)
 			{
-				string[] array = ip.Substring(num + 1).Split(new char[] { '.' });
-				if (array.Length > 0)
+				if (tryParse)
 				{
-					string text = array[array.Length - 1];
-					if (text.Length == 0)
-					{
-						return null;
-					}
-					foreach (char c in text)
-					{
-						if (!global::System.Uri.IsHexDigit(c))
-						{
-							return null;
-						}
-					}
+					return null;
 				}
-				ip = ip.Substring(0, num);
+				throw new ArgumentNullException("ipString");
 			}
-			if (ip.Length == 0 || ip[ip.Length - 1] == '.')
+			else if (ipString.IndexOf(':') != -1)
 			{
-				return null;
-			}
-			string[] array2 = ip.Split(new char[] { '.' });
-			if (array2.Length > 4)
-			{
-				return null;
-			}
-			IPAddress ipaddress;
-			try
-			{
-				long num2 = 0L;
-				long num3 = 0L;
-				for (int j = 0; j < array2.Length; j++)
+				int num = 0;
+				if (ipString[0] != '[')
 				{
-					string text3 = array2[j];
-					if (3 <= text3.Length && text3.Length <= 4 && text3[0] == '0' && (text3[1] == 'x' || text3[1] == 'X'))
+					ipString += "]";
+				}
+				else
+				{
+					num = 1;
+				}
+				int length = ipString.Length;
+				fixed (string text = ipString)
+				{
+					char* ptr = text;
+					if (ptr != null)
 					{
-						if (text3.Length == 3)
+						ptr += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					if (IPv6AddressHelper.IsValidStrict(ptr, num, ref length) || length != ipString.Length)
+					{
+						ushort[] array = new ushort[8];
+						string text2 = null;
+						ushort[] array2;
+						ushort* ptr2;
+						if ((array2 = array) == null || array2.Length == 0)
 						{
-							num3 = (long)((byte)global::System.Uri.FromHex(text3[2]));
+							ptr2 = null;
 						}
 						else
 						{
-							num3 = (long)((byte)((global::System.Uri.FromHex(text3[2]) << 4) | global::System.Uri.FromHex(text3[3])));
+							ptr2 = &array2[0];
 						}
+						IPv6AddressHelper.Parse(ipString, ptr2, 0, ref text2);
+						array2 = null;
+						if (text2 == null || text2.Length == 0)
+						{
+							return new IPAddress(array, 0U);
+						}
+						text2 = text2.Substring(1);
+						uint num2;
+						if (uint.TryParse(text2, NumberStyles.None, null, out num2))
+						{
+							return new IPAddress(array, num2);
+						}
+						return new IPAddress(array, 0U);
 					}
 					else
 					{
-						if (text3.Length == 0)
+						text = null;
+						if (tryParse)
 						{
 							return null;
 						}
-						if (text3[0] == '0')
-						{
-							num3 = 0L;
-							for (int k = 1; k < text3.Length; k++)
-							{
-								if ('0' > text3[k] || text3[k] > '7')
-								{
-									return null;
-								}
-								num3 = (num3 << 3) + (long)text3[k] - 48L;
-							}
-						}
-						else if (!long.TryParse(text3, NumberStyles.None, null, out num3))
-						{
-							return null;
-						}
-					}
-					if (j == array2.Length - 1)
-					{
-						j = 3;
-					}
-					else if (num3 > 255L)
-					{
-						return null;
-					}
-					int num4 = 0;
-					while (num3 > 0L)
-					{
-						num2 |= (num3 & 255L) << (j - num4 << 3);
-						num4++;
-						num3 /= 256L;
+						SocketException ex = new SocketException(SocketError.InvalidArgument);
+						throw new FormatException(global::SR.GetString("An invalid IP address was specified."), ex);
 					}
 				}
-				ipaddress = new IPAddress(num2);
 			}
-			catch (Exception)
+			else
 			{
-				ipaddress = null;
+				int length2 = ipString.Length;
+				long num3;
+				fixed (string text = ipString)
+				{
+					char* ptr3 = text;
+					if (ptr3 != null)
+					{
+						ptr3 += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					num3 = IPv4AddressHelper.ParseNonCanonical(ptr3, 0, ref length2, true);
+				}
+				if (num3 != -1L && length2 == ipString.Length)
+				{
+					num3 = ((num3 & 255L) << 24) | (((num3 & 65280L) << 8) | (((num3 & 16711680L) >> 8) | ((num3 & (long)((ulong)(-16777216))) >> 24)));
+					return new IPAddress(num3);
+				}
+				if (tryParse)
+				{
+					return null;
+				}
+				throw new FormatException(global::SR.GetString("An invalid IP address was specified."));
 			}
-			return ipaddress;
 		}
 
-		private static IPAddress ParseIPV6(string ip)
-		{
-			IPv6Address pv6Address;
-			if (IPv6Address.TryParse(ip, out pv6Address))
-			{
-				return new IPAddress(pv6Address.Address, pv6Address.ScopeId);
-			}
-			return null;
-		}
-
-		[Obsolete("This property is obsolete. Use GetAddressBytes.")]
+		[Obsolete("This property has been deprecated. It is address family dependent. Please use IPAddress.Equals method to perform comparisons. http://go.microsoft.com/fwlink/?linkid=14202")]
 		public long Address
 		{
 			get
 			{
-				if (this.m_Family != global::System.Net.Sockets.AddressFamily.InterNetwork)
+				if (this.m_Family == AddressFamily.InterNetworkV6)
 				{
-					throw new Exception("The attempted operation is not supported for the type of object referenced");
+					throw new SocketException(SocketError.OperationNotSupported);
 				}
 				return this.m_Address;
 			}
 			set
 			{
-				if (this.m_Family != global::System.Net.Sockets.AddressFamily.InterNetwork)
+				if (this.m_Family == AddressFamily.InterNetworkV6)
 				{
-					throw new Exception("The attempted operation is not supported for the type of object referenced");
+					throw new SocketException(SocketError.OperationNotSupported);
 				}
-				this.m_Address = value;
-			}
-		}
-
-		internal long InternalIPv4Address
-		{
-			get
-			{
-				return this.m_Address;
-			}
-		}
-
-		public bool IsIPv6LinkLocal
-		{
-			get
-			{
-				if (this.m_Family == global::System.Net.Sockets.AddressFamily.InterNetwork)
+				if (this.m_Address != value)
 				{
-					return false;
+					this.m_ToString = null;
+					this.m_Address = value;
 				}
-				int num = (int)IPAddress.NetworkToHostOrder((short)this.m_Numbers[0]) & 65520;
-				return 65152 <= num && num < 65216;
-			}
-		}
-
-		public bool IsIPv6SiteLocal
-		{
-			get
-			{
-				if (this.m_Family == global::System.Net.Sockets.AddressFamily.InterNetwork)
-				{
-					return false;
-				}
-				int num = (int)IPAddress.NetworkToHostOrder((short)this.m_Numbers[0]) & 65520;
-				return 65216 <= num && num < 65280;
-			}
-		}
-
-		public bool IsIPv6Multicast
-		{
-			get
-			{
-				return this.m_Family != global::System.Net.Sockets.AddressFamily.InterNetwork && ((ushort)IPAddress.NetworkToHostOrder((short)this.m_Numbers[0]) & 65280) == 65280;
-			}
-		}
-
-		public long ScopeId
-		{
-			get
-			{
-				if (this.m_Family != global::System.Net.Sockets.AddressFamily.InterNetworkV6)
-				{
-					throw new Exception("The attempted operation is not supported for the type of object referenced");
-				}
-				return this.m_ScopeId;
-			}
-			set
-			{
-				if (this.m_Family != global::System.Net.Sockets.AddressFamily.InterNetworkV6)
-				{
-					throw new Exception("The attempted operation is not supported for the type of object referenced");
-				}
-				this.m_ScopeId = value;
 			}
 		}
 
 		public byte[] GetAddressBytes()
 		{
-			if (this.m_Family == global::System.Net.Sockets.AddressFamily.InterNetworkV6)
+			byte[] array;
+			if (this.m_Family == AddressFamily.InterNetworkV6)
 			{
-				byte[] array = new byte[16];
-				Buffer.BlockCopy(this.m_Numbers, 0, array, 0, 16);
-				return array;
+				array = new byte[16];
+				int num = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					array[num++] = (byte)((this.m_Numbers[i] >> 8) & 255);
+					array[num++] = (byte)(this.m_Numbers[i] & 255);
+				}
 			}
-			return new byte[]
+			else
 			{
-				(byte)(this.m_Address & 255L),
-				(byte)((this.m_Address >> 8) & 255L),
-				(byte)((this.m_Address >> 16) & 255L),
-				(byte)(this.m_Address >> 24)
-			};
+				array = new byte[]
+				{
+					(byte)this.m_Address,
+					(byte)(this.m_Address >> 8),
+					(byte)(this.m_Address >> 16),
+					(byte)(this.m_Address >> 24)
+				};
+			}
+			return array;
 		}
 
-		public global::System.Net.Sockets.AddressFamily AddressFamily
+		public AddressFamily AddressFamily
 		{
 			get
 			{
@@ -380,115 +239,308 @@ namespace System.Net
 			}
 		}
 
-		public static bool IsLoopback(IPAddress addr)
+		public long ScopeId
 		{
-			if (addr.m_Family == global::System.Net.Sockets.AddressFamily.InterNetwork)
+			get
 			{
-				return (addr.m_Address & 255L) == 127L;
+				if (this.m_Family == AddressFamily.InterNetwork)
+				{
+					throw new SocketException(SocketError.OperationNotSupported);
+				}
+				return this.m_ScopeId;
 			}
-			for (int i = 0; i < 6; i++)
+			set
 			{
-				if (addr.m_Numbers[i] != 0)
+				if (this.m_Family == AddressFamily.InterNetwork)
+				{
+					throw new SocketException(SocketError.OperationNotSupported);
+				}
+				if (value < 0L || value > (long)((ulong)(-1)))
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
+				if (this.m_ScopeId != value)
+				{
+					this.m_Address = value;
+					this.m_ScopeId = value;
+				}
+			}
+		}
+
+		public unsafe override string ToString()
+		{
+			if (this.m_ToString == null)
+			{
+				if (this.m_Family == AddressFamily.InterNetworkV6)
+				{
+					IPv6AddressFormatter pv6AddressFormatter = new IPv6AddressFormatter(this.m_Numbers, this.ScopeId);
+					this.m_ToString = pv6AddressFormatter.ToString();
+				}
+				else
+				{
+					int num = 15;
+					char* ptr = stackalloc char[(UIntPtr)30];
+					int num2 = (int)((this.m_Address >> 24) & 255L);
+					do
+					{
+						ptr[(IntPtr)(--num) * 2] = (char)(48 + num2 % 10);
+						num2 /= 10;
+					}
+					while (num2 > 0);
+					ptr[(IntPtr)(--num) * 2] = '.';
+					num2 = (int)((this.m_Address >> 16) & 255L);
+					do
+					{
+						ptr[(IntPtr)(--num) * 2] = (char)(48 + num2 % 10);
+						num2 /= 10;
+					}
+					while (num2 > 0);
+					ptr[(IntPtr)(--num) * 2] = '.';
+					num2 = (int)((this.m_Address >> 8) & 255L);
+					do
+					{
+						ptr[(IntPtr)(--num) * 2] = (char)(48 + num2 % 10);
+						num2 /= 10;
+					}
+					while (num2 > 0);
+					ptr[(IntPtr)(--num) * 2] = '.';
+					num2 = (int)(this.m_Address & 255L);
+					do
+					{
+						ptr[(IntPtr)(--num) * 2] = (char)(48 + num2 % 10);
+						num2 /= 10;
+					}
+					while (num2 > 0);
+					this.m_ToString = new string(ptr, num, 15 - num);
+				}
+			}
+			return this.m_ToString;
+		}
+
+		public static long HostToNetworkOrder(long host)
+		{
+			return (((long)IPAddress.HostToNetworkOrder((int)host) & (long)((ulong)(-1))) << 32) | ((long)IPAddress.HostToNetworkOrder((int)(host >> 32)) & (long)((ulong)(-1)));
+		}
+
+		public static int HostToNetworkOrder(int host)
+		{
+			return (((int)IPAddress.HostToNetworkOrder((short)host) & 65535) << 16) | ((int)IPAddress.HostToNetworkOrder((short)(host >> 16)) & 65535);
+		}
+
+		public static short HostToNetworkOrder(short host)
+		{
+			return (short)(((int)(host & 255) << 8) | ((host >> 8) & 255));
+		}
+
+		public static long NetworkToHostOrder(long network)
+		{
+			return IPAddress.HostToNetworkOrder(network);
+		}
+
+		public static int NetworkToHostOrder(int network)
+		{
+			return IPAddress.HostToNetworkOrder(network);
+		}
+
+		public static short NetworkToHostOrder(short network)
+		{
+			return IPAddress.HostToNetworkOrder(network);
+		}
+
+		public static bool IsLoopback(IPAddress address)
+		{
+			if (address == null)
+			{
+				throw new ArgumentNullException("address");
+			}
+			if (address.m_Family == AddressFamily.InterNetworkV6)
+			{
+				return address.Equals(IPAddress.IPv6Loopback);
+			}
+			return (address.m_Address & 255L) == (IPAddress.Loopback.m_Address & 255L);
+		}
+
+		internal bool IsBroadcast
+		{
+			get
+			{
+				return this.m_Family != AddressFamily.InterNetworkV6 && this.m_Address == IPAddress.Broadcast.m_Address;
+			}
+		}
+
+		public bool IsIPv6Multicast
+		{
+			get
+			{
+				return this.m_Family == AddressFamily.InterNetworkV6 && (this.m_Numbers[0] & 65280) == 65280;
+			}
+		}
+
+		public bool IsIPv6LinkLocal
+		{
+			get
+			{
+				return this.m_Family == AddressFamily.InterNetworkV6 && (this.m_Numbers[0] & 65472) == 65152;
+			}
+		}
+
+		public bool IsIPv6SiteLocal
+		{
+			get
+			{
+				return this.m_Family == AddressFamily.InterNetworkV6 && (this.m_Numbers[0] & 65472) == 65216;
+			}
+		}
+
+		public bool IsIPv6Teredo
+		{
+			get
+			{
+				return this.m_Family == AddressFamily.InterNetworkV6 && this.m_Numbers[0] == 8193 && this.m_Numbers[1] == 0;
+			}
+		}
+
+		public bool IsIPv4MappedToIPv6
+		{
+			get
+			{
+				if (this.AddressFamily != AddressFamily.InterNetworkV6)
 				{
 					return false;
 				}
+				for (int i = 0; i < 5; i++)
+				{
+					if (this.m_Numbers[i] != 0)
+					{
+						return false;
+					}
+				}
+				return this.m_Numbers[5] == ushort.MaxValue;
 			}
-			return IPAddress.NetworkToHostOrder((short)addr.m_Numbers[7]) == 1;
 		}
 
-		public override string ToString()
+		internal bool Equals(object comparandObj, bool compareScopeId)
 		{
-			if (this.m_Family == global::System.Net.Sockets.AddressFamily.InterNetwork)
-			{
-				return IPAddress.ToString(this.m_Address);
-			}
-			ushort[] array = this.m_Numbers.Clone() as ushort[];
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i] = (ushort)IPAddress.NetworkToHostOrder((short)array[i]);
-			}
-			return new IPv6Address(array)
-			{
-				ScopeId = this.ScopeId
-			}.ToString();
-		}
-
-		private static string ToString(long addr)
-		{
-			return string.Concat(new string[]
-			{
-				(addr & 255L).ToString(),
-				".",
-				((addr >> 8) & 255L).ToString(),
-				".",
-				((addr >> 16) & 255L).ToString(),
-				".",
-				((addr >> 24) & 255L).ToString()
-			});
-		}
-
-		public override bool Equals(object other)
-		{
-			IPAddress ipaddress = other as IPAddress;
+			IPAddress ipaddress = comparandObj as IPAddress;
 			if (ipaddress == null)
 			{
 				return false;
 			}
-			if (this.AddressFamily != ipaddress.AddressFamily)
+			if (this.m_Family != ipaddress.m_Family)
 			{
 				return false;
 			}
-			if (this.AddressFamily == global::System.Net.Sockets.AddressFamily.InterNetwork)
+			if (this.m_Family == AddressFamily.InterNetworkV6)
 			{
-				return this.m_Address == ipaddress.m_Address;
-			}
-			ushort[] numbers = ipaddress.m_Numbers;
-			for (int i = 0; i < 8; i++)
-			{
-				if (this.m_Numbers[i] != numbers[i])
+				for (int i = 0; i < 8; i++)
 				{
-					return false;
+					if (ipaddress.m_Numbers[i] != this.m_Numbers[i])
+					{
+						return false;
+					}
 				}
+				return ipaddress.m_ScopeId == this.m_ScopeId || !compareScopeId;
 			}
-			return true;
+			return ipaddress.m_Address == this.m_Address;
+		}
+
+		public override bool Equals(object comparand)
+		{
+			return this.Equals(comparand, true);
 		}
 
 		public override int GetHashCode()
 		{
-			if (this.m_Family == global::System.Net.Sockets.AddressFamily.InterNetwork)
+			if (this.m_Family == AddressFamily.InterNetworkV6)
 			{
-				return (int)this.m_Address;
+				if (this.m_HashCode == 0)
+				{
+					this.m_HashCode = StringComparer.InvariantCultureIgnoreCase.GetHashCode(this.ToString());
+				}
+				return this.m_HashCode;
 			}
-			return IPAddress.Hash(((int)this.m_Numbers[0] << 16) + (int)this.m_Numbers[1], ((int)this.m_Numbers[2] << 16) + (int)this.m_Numbers[3], ((int)this.m_Numbers[4] << 16) + (int)this.m_Numbers[5], ((int)this.m_Numbers[6] << 16) + (int)this.m_Numbers[7]);
+			return (int)this.m_Address;
 		}
 
-		private static int Hash(int i, int j, int k, int l)
+		internal IPAddress Snapshot()
 		{
-			return i ^ ((j << 13) | (j >> 19)) ^ ((k << 26) | (k >> 6)) ^ ((l << 7) | (l >> 25));
+			AddressFamily family = this.m_Family;
+			if (family == AddressFamily.InterNetwork)
+			{
+				return new IPAddress(this.m_Address);
+			}
+			if (family != AddressFamily.InterNetworkV6)
+			{
+				throw new InternalException();
+			}
+			return new IPAddress(this.m_Numbers, (uint)this.m_ScopeId);
 		}
 
-		private long m_Address;
+		public IPAddress MapToIPv6()
+		{
+			if (this.AddressFamily == AddressFamily.InterNetworkV6)
+			{
+				return this;
+			}
+			return new IPAddress(new ushort[]
+			{
+				0,
+				0,
+				0,
+				0,
+				0,
+				ushort.MaxValue,
+				(ushort)(((this.m_Address & 65280L) >> 8) | ((this.m_Address & 255L) << 8)),
+				(ushort)(((this.m_Address & (long)((ulong)(-16777216))) >> 24) | ((this.m_Address & 16711680L) >> 8))
+			}, 0U);
+		}
 
-		private global::System.Net.Sockets.AddressFamily m_Family;
+		public IPAddress MapToIPv4()
+		{
+			if (this.AddressFamily == AddressFamily.InterNetwork)
+			{
+				return this;
+			}
+			return new IPAddress((long)((ulong)(((uint)(this.m_Numbers[6] & 65280) >> 8) | (uint)((uint)(this.m_Numbers[6] & 255) << 8) | ((((uint)(this.m_Numbers[7] & 65280) >> 8) | (uint)((uint)(this.m_Numbers[7] & 255) << 8)) << 16))));
+		}
 
-		private ushort[] m_Numbers;
+		public static readonly IPAddress Any = new IPAddress(0);
+
+		public static readonly IPAddress Loopback = new IPAddress(16777343);
+
+		public static readonly IPAddress Broadcast = new IPAddress((long)((ulong)(-1)));
+
+		public static readonly IPAddress None = IPAddress.Broadcast;
+
+		internal const long LoopbackMask = 255L;
+
+		internal long m_Address;
+
+		[NonSerialized]
+		internal string m_ToString;
+
+		public static readonly IPAddress IPv6Any = new IPAddress(new byte[16], 0L);
+
+		public static readonly IPAddress IPv6Loopback = new IPAddress(new byte[]
+		{
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1
+		}, 0L);
+
+		public static readonly IPAddress IPv6None = new IPAddress(new byte[16], 0L);
+
+		private AddressFamily m_Family = AddressFamily.InterNetwork;
+
+		private ushort[] m_Numbers = new ushort[8];
 
 		private long m_ScopeId;
 
-		public static readonly IPAddress Any = new IPAddress(0L);
-
-		public static readonly IPAddress Broadcast = IPAddress.Parse("255.255.255.255");
-
-		public static readonly IPAddress Loopback = IPAddress.Parse("127.0.0.1");
-
-		public static readonly IPAddress None = IPAddress.Parse("255.255.255.255");
-
-		public static readonly IPAddress IPv6Any = IPAddress.ParseIPV6("::");
-
-		public static readonly IPAddress IPv6Loopback = IPAddress.ParseIPV6("::1");
-
-		public static readonly IPAddress IPv6None = IPAddress.ParseIPV6("::");
-
 		private int m_HashCode;
+
+		internal const int IPv4AddressBytes = 4;
+
+		internal const int IPv6AddressBytes = 16;
+
+		internal const int NumberOfLabels = 8;
 	}
 }

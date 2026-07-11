@@ -9,28 +9,26 @@ namespace System
 	public class DllNotFoundException : TypeLoadException
 	{
 		public DllNotFoundException()
-			: base(Locale.GetText("DLL not found."))
+			: base(Environment.GetResourceString("Dll was not found."))
 		{
-			base.HResult = -2146233052;
+			base.SetErrorCode(-2146233052);
 		}
 
 		public DllNotFoundException(string message)
 			: base(message)
 		{
-			base.HResult = -2146233052;
+			base.SetErrorCode(-2146233052);
+		}
+
+		public DllNotFoundException(string message, Exception inner)
+			: base(message, inner)
+		{
+			base.SetErrorCode(-2146233052);
 		}
 
 		protected DllNotFoundException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		public DllNotFoundException(string message, Exception inner)
-			: base(message, inner)
-		{
-			base.HResult = -2146233052;
-		}
-
-		private const int Result = -2146233052;
 	}
 }

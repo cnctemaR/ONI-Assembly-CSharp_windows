@@ -4,16 +4,30 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Detail prototype used by the Terrain GameObject.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DetailPrototype
 	{
-		/// <summary>
-		///   <para>GameObject used by the DetailPrototype.</para>
-		/// </summary>
+		public DetailPrototype()
+		{
+		}
+
+		public DetailPrototype(DetailPrototype other)
+		{
+			this.m_Prototype = other.m_Prototype;
+			this.m_PrototypeTexture = other.m_PrototypeTexture;
+			this.m_HealthyColor = other.m_HealthyColor;
+			this.m_DryColor = other.m_DryColor;
+			this.m_MinWidth = other.m_MinWidth;
+			this.m_MaxWidth = other.m_MaxWidth;
+			this.m_MinHeight = other.m_MinHeight;
+			this.m_MaxHeight = other.m_MaxHeight;
+			this.m_NoiseSpread = other.m_NoiseSpread;
+			this.m_BendFactor = other.m_BendFactor;
+			this.m_RenderMode = other.m_RenderMode;
+			this.m_UsePrototypeMesh = other.m_UsePrototypeMesh;
+		}
+
 		public GameObject prototype
 		{
 			get
@@ -26,9 +40,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Texture used by the DetailPrototype.</para>
-		/// </summary>
 		public Texture2D prototypeTexture
 		{
 			get
@@ -41,9 +52,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Minimum width of the grass billboards (if render mode is GrassBillboard).</para>
-		/// </summary>
 		public float minWidth
 		{
 			get
@@ -56,9 +64,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Maximum width of the grass billboards (if render mode is GrassBillboard).</para>
-		/// </summary>
 		public float maxWidth
 		{
 			get
@@ -71,9 +76,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Minimum height of the grass billboards (if render mode is GrassBillboard).</para>
-		/// </summary>
 		public float minHeight
 		{
 			get
@@ -86,9 +88,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Maximum height of the grass billboards (if render mode is GrassBillboard).</para>
-		/// </summary>
 		public float maxHeight
 		{
 			get
@@ -101,9 +100,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>How spread out is the noise for the DetailPrototype.</para>
-		/// </summary>
 		public float noiseSpread
 		{
 			get
@@ -116,9 +112,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Bend factor of the detailPrototype.</para>
-		/// </summary>
 		public float bendFactor
 		{
 			get
@@ -131,9 +124,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Color when the DetailPrototypes are "healthy".</para>
-		/// </summary>
 		public Color healthyColor
 		{
 			get
@@ -146,9 +136,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Color when the DetailPrototypes are "dry".</para>
-		/// </summary>
 		public Color dryColor
 		{
 			get
@@ -161,9 +148,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Render mode for the DetailPrototype.</para>
-		/// </summary>
 		public DetailRenderMode renderMode
 		{
 			get
@@ -186,6 +170,39 @@ namespace UnityEngine
 			{
 				this.m_UsePrototypeMesh = ((!value) ? 0 : 1);
 			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return this.Equals(obj as DetailPrototype);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		private bool Equals(DetailPrototype other)
+		{
+			bool flag;
+			if (object.ReferenceEquals(other, null))
+			{
+				flag = false;
+			}
+			else if (object.ReferenceEquals(other, this))
+			{
+				flag = true;
+			}
+			else if (base.GetType() != other.GetType())
+			{
+				flag = false;
+			}
+			else
+			{
+				bool flag2 = this.m_Prototype == other.m_Prototype && this.m_PrototypeTexture == other.m_PrototypeTexture && this.m_HealthyColor == other.m_HealthyColor && this.m_DryColor == other.m_DryColor && this.m_MinWidth == other.m_MinWidth && this.m_MaxWidth == other.m_MaxWidth && this.m_MinHeight == other.m_MinHeight && this.m_MaxHeight == other.m_MaxHeight && this.m_NoiseSpread == other.m_NoiseSpread && this.m_BendFactor == other.m_BendFactor && this.m_RenderMode == other.m_RenderMode && this.m_UsePrototypeMesh == other.m_UsePrototypeMesh;
+				flag = flag2;
+			}
+			return flag;
 		}
 
 		internal GameObject m_Prototype = null;

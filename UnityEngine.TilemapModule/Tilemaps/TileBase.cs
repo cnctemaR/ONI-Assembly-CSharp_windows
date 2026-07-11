@@ -3,17 +3,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
-	/// <summary>
-	///   <para>Base class for a tile in the Tilemap.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	public abstract class TileBase : ScriptableObject
 	{
-		/// <summary>
-		///   <para>This method is called when the tile is refreshed.</para>
-		/// </summary>
-		/// <param name="position">Position of the Tile on the Tilemap.</param>
-		/// <param name="tilemap">The Tilemap the tile is present on.</param>
 		[RequiredByNativeCode]
 		public virtual void RefreshTile(Vector3Int position, ITilemap tilemap)
 		{
@@ -45,15 +37,6 @@ namespace UnityEngine.Tilemaps
 			return tileAnimationData;
 		}
 
-		/// <summary>
-		///   <para>StartUp is called on the first frame of the running scene.</para>
-		/// </summary>
-		/// <param name="position">Position of the Tile on the Tilemap.</param>
-		/// <param name="tilemap">The Tilemap the tile is present on.</param>
-		/// <param name="go">The GameObject instantiated for the Tile.</param>
-		/// <returns>
-		///   <para>Whether the call was successful.</para>
-		/// </returns>
 		[RequiredByNativeCode]
 		public virtual bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
 		{

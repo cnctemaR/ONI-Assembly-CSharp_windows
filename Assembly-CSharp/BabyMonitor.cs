@@ -62,8 +62,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("growup_pst");
 			if (base.smi.def.onGrowDropID != null)
 			{
-				GameObject gameObject2 = Util.KInstantiate(Assets.GetPrefab(base.smi.def.onGrowDropID), position);
-				gameObject2.SetActive(true);
+				Util.KInstantiate(Assets.GetPrefab(base.smi.def.onGrowDropID), position).SetActive(true);
 			}
 			foreach (AmountInstance amountInstance in base.gameObject.GetAmounts())
 			{
@@ -75,11 +74,10 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 				}
 			}
 			Navigator component = base.smi.GetComponent<Navigator>();
-			Navigator component2 = gameObject.GetComponent<Navigator>();
-			component2.SetCurrentNavType(component.CurrentNavType);
+			gameObject.GetComponent<Navigator>().SetCurrentNavType(component.CurrentNavType);
 			gameObject.Trigger(-2027483228, base.gameObject);
-			KSelectable component3 = base.gameObject.GetComponent<KSelectable>();
-			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component3)
+			KSelectable component2 = base.gameObject.GetComponent<KSelectable>();
+			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component2)
 			{
 				SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
 			}

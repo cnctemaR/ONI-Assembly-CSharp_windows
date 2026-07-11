@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -8,15 +7,17 @@ namespace System.Security.Cryptography
 	public class HMACMD5 : HMAC
 	{
 		public HMACMD5()
-			: this(KeyBuilder.Key(8))
+			: this(Utils.GenerateRandom(64))
 		{
 		}
 
 		public HMACMD5(byte[] key)
 		{
-			base.HashName = "MD5";
+			this.m_hashName = "MD5";
+			this.m_hash1 = new MD5CryptoServiceProvider();
+			this.m_hash2 = new MD5CryptoServiceProvider();
 			this.HashSizeValue = 128;
-			this.Key = key;
+			base.InitializeKey(key);
 		}
 	}
 }

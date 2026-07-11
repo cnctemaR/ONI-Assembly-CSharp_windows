@@ -89,8 +89,7 @@ namespace Mono.Security.X509.Extensions
 			{
 				if (value < -1)
 				{
-					string text = Locale.GetText("PathLenConstraint must be positive or -1 for none ({0}).", new object[] { value });
-					throw new ArgumentOutOfRangeException(text);
+					throw new ArgumentOutOfRangeException(Locale.GetText("PathLenConstraint must be positive or -1 for none ({0}).", new object[] { value }));
 				}
 				this.pathLenConstraint = value;
 			}
@@ -100,7 +99,7 @@ namespace Mono.Security.X509.Extensions
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append("Subject Type=");
-			stringBuilder.Append((!this.cA) ? "End Entity" : "CA");
+			stringBuilder.Append(this.cA ? "CA" : "End Entity");
 			stringBuilder.Append(Environment.NewLine);
 			stringBuilder.Append("Path Length Constraint=");
 			if (this.pathLenConstraint == -1)

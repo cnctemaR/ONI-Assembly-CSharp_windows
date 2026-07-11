@@ -16,25 +16,21 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("el");
 			}
-			SecurityElement securityElement = el.SearchForChildByTag("Deformatter");
-			this._DeformatterAlgorithm = ((securityElement != null) ? securityElement.Text : null);
-			securityElement = el.SearchForChildByTag("Digest");
-			this._DigestAlgorithm = ((securityElement != null) ? securityElement.Text : null);
-			securityElement = el.SearchForChildByTag("Formatter");
-			this._FormatterAlgorithm = ((securityElement != null) ? securityElement.Text : null);
-			securityElement = el.SearchForChildByTag("Key");
-			this._KeyAlgorithm = ((securityElement != null) ? securityElement.Text : null);
+			this._strKey = el.SearchForTextOfTag("Key");
+			this._strDigest = el.SearchForTextOfTag("Digest");
+			this._strFormatter = el.SearchForTextOfTag("Formatter");
+			this._strDeformatter = el.SearchForTextOfTag("Deformatter");
 		}
 
-		public string DeformatterAlgorithm
+		public string KeyAlgorithm
 		{
 			get
 			{
-				return this._DeformatterAlgorithm;
+				return this._strKey;
 			}
 			set
 			{
-				this._DeformatterAlgorithm = value;
+				this._strKey = value;
 			}
 		}
 
@@ -42,11 +38,11 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this._DigestAlgorithm;
+				return this._strDigest;
 			}
 			set
 			{
-				this._DigestAlgorithm = value;
+				this._strDigest = value;
 			}
 		}
 
@@ -54,71 +50,51 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this._FormatterAlgorithm;
+				return this._strFormatter;
 			}
 			set
 			{
-				this._FormatterAlgorithm = value;
+				this._strFormatter = value;
 			}
 		}
 
-		public string KeyAlgorithm
+		public string DeformatterAlgorithm
 		{
 			get
 			{
-				return this._KeyAlgorithm;
+				return this._strDeformatter;
 			}
 			set
 			{
-				this._KeyAlgorithm = value;
+				this._strDeformatter = value;
 			}
 		}
 
 		public virtual AsymmetricSignatureDeformatter CreateDeformatter(AsymmetricAlgorithm key)
 		{
-			if (this._DeformatterAlgorithm == null)
-			{
-				throw new ArgumentNullException("DeformatterAlgorithm");
-			}
-			AsymmetricSignatureDeformatter asymmetricSignatureDeformatter = (AsymmetricSignatureDeformatter)CryptoConfig.CreateFromName(this._DeformatterAlgorithm);
-			if (this._KeyAlgorithm == null)
-			{
-				throw new NullReferenceException("KeyAlgorithm");
-			}
+			AsymmetricSignatureDeformatter asymmetricSignatureDeformatter = (AsymmetricSignatureDeformatter)CryptoConfig.CreateFromName(this._strDeformatter);
 			asymmetricSignatureDeformatter.SetKey(key);
 			return asymmetricSignatureDeformatter;
 		}
 
-		public virtual HashAlgorithm CreateDigest()
-		{
-			if (this._DigestAlgorithm == null)
-			{
-				throw new ArgumentNullException("DigestAlgorithm");
-			}
-			return (HashAlgorithm)CryptoConfig.CreateFromName(this._DigestAlgorithm);
-		}
-
 		public virtual AsymmetricSignatureFormatter CreateFormatter(AsymmetricAlgorithm key)
 		{
-			if (this._FormatterAlgorithm == null)
-			{
-				throw new ArgumentNullException("FormatterAlgorithm");
-			}
-			AsymmetricSignatureFormatter asymmetricSignatureFormatter = (AsymmetricSignatureFormatter)CryptoConfig.CreateFromName(this._FormatterAlgorithm);
-			if (this._KeyAlgorithm == null)
-			{
-				throw new NullReferenceException("KeyAlgorithm");
-			}
+			AsymmetricSignatureFormatter asymmetricSignatureFormatter = (AsymmetricSignatureFormatter)CryptoConfig.CreateFromName(this._strFormatter);
 			asymmetricSignatureFormatter.SetKey(key);
 			return asymmetricSignatureFormatter;
 		}
 
-		private string _DeformatterAlgorithm;
+		public virtual HashAlgorithm CreateDigest()
+		{
+			return (HashAlgorithm)CryptoConfig.CreateFromName(this._strDigest);
+		}
 
-		private string _DigestAlgorithm;
+		private string _strKey;
 
-		private string _FormatterAlgorithm;
+		private string _strDigest;
 
-		private string _KeyAlgorithm;
+		private string _strFormatter;
+
+		private string _strDeformatter;
 	}
 }

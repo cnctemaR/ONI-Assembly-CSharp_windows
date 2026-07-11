@@ -47,6 +47,7 @@ public class DropToUserCapacity : Workable
 			if (this.chore == null)
 			{
 				this.chore = new WorkChore<DropToUserCapacity>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+				return;
 			}
 		}
 		else if (this.chore != null)
@@ -69,8 +70,7 @@ public class DropToUserCapacity : Workable
 			Pickupable component3 = list[i].GetComponent<Pickupable>();
 			if (component3.PrimaryElement.Mass > num)
 			{
-				Pickupable pickupable = component3.Take(num);
-				pickupable.transform.SetPosition(base.transform.GetPosition());
+				component3.Take(num).transform.SetPosition(base.transform.GetPosition());
 				return;
 			}
 			num -= component3.PrimaryElement.Mass;

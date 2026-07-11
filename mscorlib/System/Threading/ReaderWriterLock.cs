@@ -15,7 +15,6 @@ namespace System.Threading
 			GC.SuppressFinalize(this);
 		}
 
-		[MonoTODO]
 		~ReaderWriterLock()
 		{
 		}
@@ -25,12 +24,12 @@ namespace System.Threading
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				bool flag;
+				bool flag2;
 				lock (this)
 				{
-					flag = this.reader_locks.ContainsKey(Thread.CurrentThreadId);
+					flag2 = this.reader_locks.ContainsKey(Thread.CurrentThreadId);
 				}
-				return flag;
+				return flag2;
 			}
 		}
 
@@ -39,12 +38,12 @@ namespace System.Threading
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				bool flag;
+				bool flag2;
 				lock (this)
 				{
-					flag = this.state < 0 && Thread.CurrentThreadId == this.writer_lock_owner;
+					flag2 = this.state < 0 && Thread.CurrentThreadId == this.writer_lock_owner;
 				}
-				return flag;
+				return flag2;
 			}
 		}
 
@@ -88,12 +87,12 @@ namespace System.Threading
 								{
 									if (this.state >= 0)
 									{
-										goto IL_0089;
+										goto IL_007B;
 									}
 								}
 								throw new ApplicationException("Timeout expired");
 							}
-							IL_0089:;
+							IL_007B:;
 						}
 						finally
 						{
@@ -138,12 +137,12 @@ namespace System.Threading
 						{
 							if (this.state == 0)
 							{
-								goto IL_0068;
+								goto IL_005A;
 							}
 						}
 						throw new ApplicationException("Timeout expired");
 					}
-					IL_0068:
+					IL_005A:
 					this.state = -initialLockCount;
 					this.writer_lock_owner = Thread.CurrentThreadId;
 					this.seq_num++;
@@ -159,12 +158,12 @@ namespace System.Threading
 
 		public bool AnyWritersSince(int seqNum)
 		{
-			bool flag;
+			bool flag2;
 			lock (this)
 			{
-				flag = this.seq_num > seqNum;
+				flag2 = this.seq_num > seqNum;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public void DowngradeFromWriterLock(ref LockCookie lockCookie)
@@ -175,11 +174,18 @@ namespace System.Threading
 				{
 					throw new ApplicationException("The thread does not have the writer lock.");
 				}
-				this.state = lockCookie.ReaderLocks;
-				this.reader_locks[Thread.CurrentThreadId] = this.state;
-				if (this.readers > 0)
+				if (lockCookie.WriterLocks != 0)
 				{
-					Monitor.PulseAll(this);
+					this.state++;
+				}
+				else
+				{
+					this.state = lockCookie.ReaderLocks;
+					this.reader_locks[Thread.CurrentThreadId] = this.state;
+					if (this.readers > 0)
+					{
+						Monitor.PulseAll(this);
+					}
 				}
 			}
 		}
@@ -263,8 +269,9 @@ namespace System.Threading
 				if (this.readers > 0)
 				{
 					Monitor.PulseAll(this);
+					return;
 				}
-				else if (!this.writer_queue.IsEmpty)
+				if (!this.writer_queue.IsEmpty)
 				{
 					this.writer_queue.Pulse();
 				}
@@ -351,10 +358,10 @@ namespace System.Threading
 
 		private int readers;
 
+		private int writer_lock_owner;
+
 		private LockQueue writer_queue;
 
 		private Hashtable reader_locks;
-
-		private int writer_lock_owner;
 	}
 }

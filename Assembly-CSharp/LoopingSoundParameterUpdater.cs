@@ -4,12 +4,12 @@ using UnityEngine;
 
 public abstract class LoopingSoundParameterUpdater
 {
+	public HashedString parameter { get; private set; }
+
 	public LoopingSoundParameterUpdater(HashedString parameter)
 	{
 		this.parameter = parameter;
 	}
-
-	public HashedString parameter { get; private set; }
 
 	public abstract void Add(LoopingSoundParameterUpdater.Sound sound);
 

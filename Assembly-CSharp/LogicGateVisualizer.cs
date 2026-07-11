@@ -60,7 +60,11 @@ public class LogicGateVisualizer : LogicGateBase
 
 		public LogicPortSpriteType GetLogicPortSpriteType()
 		{
-			return (!this.input) ? LogicPortSpriteType.Output : LogicPortSpriteType.Input;
+			if (!this.input)
+			{
+				return LogicPortSpriteType.Output;
+			}
+			return LogicPortSpriteType.Input;
 		}
 
 		public Vector2 PosMin()

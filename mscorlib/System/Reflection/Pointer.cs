@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Reflection
 {
@@ -13,11 +14,14 @@ namespace System.Reflection
 		{
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		[SecurityCritical]
+		private Pointer(SerializationInfo info, StreamingContext context)
 		{
-			throw new NotSupportedException("Pointer deserializatioon not supported.");
+			this._ptr = ((IntPtr)info.GetValue("_ptr", typeof(IntPtr))).ToPointer();
+			this._ptrType = (RuntimeType)info.GetValue("_ptrType", typeof(RuntimeType));
 		}
 
+		[SecurityCritical]
 		public unsafe static object Box(void* ptr, Type type)
 		{
 			if (type == null)
@@ -26,27 +30,51 @@ namespace System.Reflection
 			}
 			if (!type.IsPointer)
 			{
-				throw new ArgumentException("type");
+				throw new ArgumentException(Environment.GetResourceString("Type must be a Pointer."), "ptr");
+			}
+			RuntimeType runtimeType = type as RuntimeType;
+			if (runtimeType == null)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Type must be a Pointer."), "ptr");
 			}
 			return new Pointer
 			{
-				data = ptr,
-				type = type
+				_ptr = ptr,
+				_ptrType = runtimeType
 			};
 		}
 
+		[SecurityCritical]
 		public unsafe static void* Unbox(object ptr)
 		{
-			Pointer pointer = ptr as Pointer;
-			if (pointer == null)
+			if (!(ptr is Pointer))
 			{
-				throw new ArgumentException("ptr");
+				throw new ArgumentException(Environment.GetResourceString("Type must be a Pointer."), "ptr");
 			}
-			return pointer.data;
+			return ((Pointer)ptr)._ptr;
 		}
 
-		private unsafe void* data;
+		internal RuntimeType GetPointerType()
+		{
+			return this._ptrType;
+		}
 
-		private Type type;
+		[SecurityCritical]
+		internal object GetPointerValue()
+		{
+			return (IntPtr)this._ptr;
+		}
+
+		[SecurityCritical]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			info.AddValue("_ptr", new IntPtr(this._ptr));
+			info.AddValue("_ptrType", this._ptrType);
+		}
+
+		[SecurityCritical]
+		private unsafe void* _ptr;
+
+		private RuntimeType _ptrType;
 	}
 }

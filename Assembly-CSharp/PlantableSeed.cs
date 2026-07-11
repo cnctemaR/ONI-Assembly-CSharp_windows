@@ -55,20 +55,14 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.BuildingFront);
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.PlantID), vector, Grid.SceneLayer.BuildingFront, null, 0);
 			gameObject.SetActive(true);
-			Pickupable component = base.GetComponent<Pickupable>();
-			Pickupable pickupable = component.Take(1f);
+			Pickupable pickupable = base.GetComponent<Pickupable>().Take(1f);
 			if (pickupable != null)
 			{
-				Crop component2 = gameObject.GetComponent<Crop>();
-				if (component2 != null)
-				{
-				}
+				gameObject.GetComponent<Crop>() != null;
 				Util.KDestroyGameObject(pickupable.gameObject);
+				return;
 			}
-			else
-			{
-				KCrashReporter.Assert(false, "Seed has fractional total amount < 1f");
-			}
+			KCrashReporter.Assert(false, "Seed has fractional total amount < 1f");
 		}
 	}
 

@@ -12,7 +12,7 @@ namespace NodeEditorFramework
 		private static void FillAddNodes(NodeEditorInputInfo inputInfo, GenericMenu canvasContextMenu)
 		{
 			NodeEditorState editorState = inputInfo.editorState;
-			List<Node> list = ((!(editorState.connectOutput != null)) ? NodeTypes.nodes.Keys.ToList<Node>() : NodeTypes.getCompatibleNodes(editorState.connectOutput));
+			List<Node> list = ((editorState.connectOutput != null) ? NodeTypes.getCompatibleNodes(editorState.connectOutput) : NodeTypes.nodes.Keys.ToList<Node>());
 			NodeEditorInputControls.DeCafList(ref list, editorState.canvas);
 			foreach (Node node in list)
 			{
@@ -141,11 +141,9 @@ namespace NodeEditorFramework
 					editorState.selectedNode.rect.position = editorState.dragPos + editorState.dragOffset * editorState.zoom;
 					NodeEditorCallbacks.IssueOnMoveNode(editorState.selectedNode);
 					NodeEditor.RepaintClients();
+					return;
 				}
-				else
-				{
-					editorState.dragNode = false;
-				}
+				editorState.dragNode = false;
 			}
 		}
 
@@ -203,8 +201,9 @@ namespace NodeEditorFramework
 				{
 					editorState.connectOutput = (NodeOutput)editorState.focusedNodeKnob;
 					inputInfo.inputEvent.Use();
+					return;
 				}
-				else if (editorState.focusedNodeKnob is NodeInput)
+				if (editorState.focusedNodeKnob is NodeInput)
 				{
 					NodeInput nodeInput = (NodeInput)editorState.focusedNodeKnob;
 					if (nodeInput.connection != null)
@@ -223,8 +222,7 @@ namespace NodeEditorFramework
 			NodeEditorState editorState = inputInfo.editorState;
 			if (inputInfo.inputEvent.button == 0 && editorState.connectOutput != null && editorState.focusedNode != null && editorState.focusedNodeKnob != null && editorState.focusedNodeKnob is NodeInput)
 			{
-				NodeInput nodeInput = editorState.focusedNodeKnob as NodeInput;
-				nodeInput.TryApplyConnection(editorState.connectOutput);
+				(editorState.focusedNodeKnob as NodeInput).TryApplyConnection(editorState.connectOutput);
 				inputInfo.inputEvent.Use();
 			}
 			editorState.connectOutput = null;

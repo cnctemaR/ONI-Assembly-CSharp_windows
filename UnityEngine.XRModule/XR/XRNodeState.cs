@@ -6,9 +6,6 @@ namespace UnityEngine.XR
 	[UsedByNativeCode]
 	public struct XRNodeState
 	{
-		/// <summary>
-		///   <para>The unique identifier of the tracked node.</para>
-		/// </summary>
 		public ulong uniqueID
 		{
 			get
@@ -21,9 +18,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>The type of the tracked node as specified in XR.XRNode.</para>
-		/// </summary>
 		public XRNode nodeType
 		{
 			get
@@ -36,11 +30,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>
-		///     Set to true if the node is presently being tracked by the underlying XR system,
-		/// and false if the node is not presently being tracked by the underlying XR system.</para>
-		/// </summary>
 		public bool tracked
 		{
 			get
@@ -53,9 +42,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the vector representing the current position of the tracked node.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			set
@@ -65,9 +51,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the quaternion representing the current rotation of the tracked node.</para>
-		/// </summary>
 		public Quaternion rotation
 		{
 			set
@@ -77,9 +60,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the vector representing the current velocity of the tracked node.</para>
-		/// </summary>
 		public Vector3 velocity
 		{
 			set
@@ -89,9 +69,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the vector representing the current angular velocity of the tracked node.</para>
-		/// </summary>
 		public Vector3 angularVelocity
 		{
 			set
@@ -101,9 +78,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the vector representing the current acceleration of the tracked node.</para>
-		/// </summary>
 		public Vector3 acceleration
 		{
 			set
@@ -113,9 +87,6 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the vector representing the current angular acceleration of the tracked node.</para>
-		/// </summary>
 		public Vector3 angularAcceleration
 		{
 			set
@@ -127,35 +98,51 @@ namespace UnityEngine.XR
 
 		public bool TryGetPosition(out Vector3 position)
 		{
-			return this.TryGet<Vector3>(this.m_Position, AvailableTrackingData.PositionAvailable, out position);
+			return this.TryGet(this.m_Position, AvailableTrackingData.PositionAvailable, out position);
 		}
 
 		public bool TryGetRotation(out Quaternion rotation)
 		{
-			return this.TryGet<Quaternion>(this.m_Rotation, AvailableTrackingData.RotationAvailable, out rotation);
+			return this.TryGet(this.m_Rotation, AvailableTrackingData.RotationAvailable, out rotation);
 		}
 
 		public bool TryGetVelocity(out Vector3 velocity)
 		{
-			return this.TryGet<Vector3>(this.m_Velocity, AvailableTrackingData.VelocityAvailable, out velocity);
+			return this.TryGet(this.m_Velocity, AvailableTrackingData.VelocityAvailable, out velocity);
 		}
 
 		public bool TryGetAngularVelocity(out Vector3 angularVelocity)
 		{
-			return this.TryGet<Vector3>(this.m_AngularVelocity, AvailableTrackingData.AngularVelocityAvailable, out angularVelocity);
+			return this.TryGet(this.m_AngularVelocity, AvailableTrackingData.AngularVelocityAvailable, out angularVelocity);
 		}
 
 		public bool TryGetAcceleration(out Vector3 acceleration)
 		{
-			return this.TryGet<Vector3>(this.m_Acceleration, AvailableTrackingData.AccelerationAvailable, out acceleration);
+			return this.TryGet(this.m_Acceleration, AvailableTrackingData.AccelerationAvailable, out acceleration);
 		}
 
 		public bool TryGetAngularAcceleration(out Vector3 angularAcceleration)
 		{
-			return this.TryGet<Vector3>(this.m_AngularAcceleration, AvailableTrackingData.AngularAccelerationAvailable, out angularAcceleration);
+			return this.TryGet(this.m_AngularAcceleration, AvailableTrackingData.AngularAccelerationAvailable, out angularAcceleration);
 		}
 
-		private bool TryGet<T>(T inValue, AvailableTrackingData availabilityFlag, out T outValue) where T : new()
+		private bool TryGet(Vector3 inValue, AvailableTrackingData availabilityFlag, out Vector3 outValue)
+		{
+			bool flag;
+			if ((this.m_AvailableFields & availabilityFlag) > AvailableTrackingData.None)
+			{
+				outValue = inValue;
+				flag = true;
+			}
+			else
+			{
+				outValue = Vector3.zero;
+				flag = false;
+			}
+			return flag;
+		}
+
+		private bool TryGet(Quaternion inValue, AvailableTrackingData availabilityFlag, out Quaternion outValue)
 		{
 			bool flag;
 			if (this.m_Tracked == 1 && (this.m_AvailableFields & availabilityFlag) > AvailableTrackingData.None)
@@ -165,7 +152,7 @@ namespace UnityEngine.XR
 			}
 			else
 			{
-				outValue = new T();
+				outValue = Quaternion.identity;
 				flag = false;
 			}
 			return flag;

@@ -1,20 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
+using Unity;
 
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ConstructorBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class ConstructorBuilder : ConstructorInfo, _ConstructorBuilder
 	{
 		internal ConstructorBuilder(TypeBuilder tb, MethodAttributes attributes, CallingConventions callingConvention, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
 		{
+			this.init_locals = true;
+			base..ctor();
 			this.attrs = attributes | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
 			this.call_conv = callingConvention;
 			if (parameterTypes != null)
@@ -34,26 +39,6 @@ namespace System.Reflection.Emit
 			this.paramModOpt = paramModOpt;
 			this.table_idx = this.get_next_table_index(this, 6, true);
 			((ModuleBuilder)tb.Module).RegisterToken(this, this.GetToken().Token);
-		}
-
-		void _ConstructorBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
@@ -92,34 +77,44 @@ namespace System.Reflection.Emit
 
 		public override ParameterInfo[] GetParameters()
 		{
-			if (!this.type.is_created && !this.IsCompilerContext)
+			if (!this.type.is_created)
 			{
 				throw this.not_created();
 			}
 			return this.GetParametersInternal();
 		}
 
-		internal ParameterInfo[] GetParametersInternal()
+		internal override ParameterInfo[] GetParametersInternal()
 		{
 			if (this.parameters == null)
 			{
-				return new ParameterInfo[0];
+				return EmptyArray<ParameterInfo>.Value;
 			}
 			ParameterInfo[] array = new ParameterInfo[this.parameters.Length];
 			for (int i = 0; i < this.parameters.Length; i++)
 			{
-				array[i] = new ParameterInfo((this.pinfo != null) ? this.pinfo[i + 1] : null, this.parameters[i], this, i + 1);
+				array[i] = ParameterInfo.New((this.pinfo == null) ? null : this.pinfo[i + 1], this.parameters[i], this, i + 1);
 			}
 			return array;
 		}
 
-		internal override int GetParameterCount()
+		internal override int GetParametersCount()
 		{
 			if (this.parameters == null)
 			{
 				return 0;
 			}
 			return this.parameters.Length;
+		}
+
+		internal override Type GetParameterType(int pos)
+		{
+			return this.parameters[pos];
+		}
+
+		internal MethodBase RuntimeResolve()
+		{
+			return this.type.RuntimeResolve().GetConstructor(this);
 		}
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
@@ -164,6 +159,7 @@ namespace System.Reflection.Emit
 			}
 		}
 
+		[Obsolete]
 		public Type ReturnType
 		{
 			get
@@ -176,7 +172,11 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return ((this.attrs & MethodAttributes.Static) == MethodAttributes.PrivateScope) ? ConstructorInfo.ConstructorName : ConstructorInfo.TypeConstructorName;
+				if ((this.attrs & MethodAttributes.Static) == MethodAttributes.PrivateScope)
+				{
+					return ConstructorInfo.ConstructorName;
+				}
+				return ConstructorInfo.TypeConstructorName;
 			}
 		}
 
@@ -201,9 +201,10 @@ namespace System.Reflection.Emit
 			this.RejectIfCreated();
 			if (this.permissions != null)
 			{
-				foreach (RefEmitPermissionSet refEmitPermissionSet in this.permissions)
+				RefEmitPermissionSet[] array = this.permissions;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (refEmitPermissionSet.action == action)
+					if (array[i].action == action)
 					{
 						throw new InvalidOperationException("Multiple permission sets specified with the same SecurityAction.");
 					}
@@ -222,7 +223,7 @@ namespace System.Reflection.Emit
 
 		public ParameterBuilder DefineParameter(int iSequence, ParameterAttributes attributes, string strParamName)
 		{
-			if (iSequence < 1 || iSequence > this.GetParameterCount())
+			if (iSequence < 0 || iSequence > this.GetParametersCount())
 			{
 				throw new ArgumentOutOfRangeException("iSequence");
 			}
@@ -246,19 +247,11 @@ namespace System.Reflection.Emit
 
 		public override object[] GetCustomAttributes(bool inherit)
 		{
-			if (this.type.is_created && this.IsCompilerContext)
-			{
-				return MonoCustomAttrs.GetCustomAttributes(this, inherit);
-			}
 			throw this.not_supported();
 		}
 
 		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			if (this.type.is_created && this.IsCompilerContext)
-			{
-				return MonoCustomAttrs.GetCustomAttributes(this, attributeType, inherit);
-			}
 			throw this.not_supported();
 		}
 
@@ -277,14 +270,18 @@ namespace System.Reflection.Emit
 			return this.ilgen;
 		}
 
+		public void SetMethodBody(byte[] il, int maxStack, byte[] localSignature, IEnumerable<ExceptionHandler> exceptionHandlers, IEnumerable<int> tokenFixups)
+		{
+			this.GetILGenerator().Init(il, maxStack, localSignature, exceptionHandlers, tokenFixups);
+		}
+
 		public void SetCustomAttribute(CustomAttributeBuilder customBuilder)
 		{
 			if (customBuilder == null)
 			{
 				throw new ArgumentNullException("customBuilder");
 			}
-			string fullName = customBuilder.Ctor.ReflectedType.FullName;
-			if (fullName == "System.Runtime.CompilerServices.MethodImplAttribute")
+			if (customBuilder.Ctor.ReflectedType.FullName == "System.Runtime.CompilerServices.MethodImplAttribute")
 			{
 				byte[] data = customBuilder.Data;
 				int num = (int)data[2];
@@ -298,12 +295,10 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
+				return;
 			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
-			}
+			this.cattrs = new CustomAttributeBuilder[1];
+			this.cattrs[0] = customBuilder;
 		}
 
 		[ComVisible(true)]
@@ -352,7 +347,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return base.Module;
+				return this.GetModule();
 			}
 		}
 
@@ -363,13 +358,42 @@ namespace System.Reflection.Emit
 
 		internal void fixup()
 		{
-			if ((this.attrs & (MethodAttributes.Abstract | MethodAttributes.PinvokeImpl)) == MethodAttributes.PrivateScope && (this.iattrs & (MethodImplAttributes)4099) == MethodImplAttributes.IL && (this.ilgen == null || ILGenerator.Mono_GetCurrentOffset(this.ilgen) == 0))
+			if ((this.attrs & (MethodAttributes.Abstract | MethodAttributes.PinvokeImpl)) == MethodAttributes.PrivateScope && (this.iattrs & (MethodImplAttributes)4099) == MethodImplAttributes.IL && (this.ilgen == null || this.ilgen.ILOffset == 0))
 			{
 				throw new InvalidOperationException("Method '" + this.Name + "' does not have a method body.");
 			}
 			if (this.ilgen != null)
 			{
-				this.ilgen.label_fixup();
+				this.ilgen.label_fixup(this);
+			}
+		}
+
+		internal void ResolveUserTypes()
+		{
+			TypeBuilder.ResolveUserTypes(this.parameters);
+			if (this.paramModReq != null)
+			{
+				Type[][] array = this.paramModReq;
+				for (int i = 0; i < array.Length; i++)
+				{
+					TypeBuilder.ResolveUserTypes(array[i]);
+				}
+			}
+			if (this.paramModOpt != null)
+			{
+				Type[][] array = this.paramModOpt;
+				for (int i = 0; i < array.Length; i++)
+				{
+					TypeBuilder.ResolveUserTypes(array[i]);
+				}
+			}
+		}
+
+		internal void FixupTokens(Dictionary<int, int> token_map, Dictionary<int, MemberInfo> member_map)
+		{
+			if (this.ilgen != null)
+			{
+				this.ilgen.FixupTokens(token_map, member_map);
 			}
 		}
 
@@ -388,16 +412,6 @@ namespace System.Reflection.Emit
 		internal override int get_next_table_index(object obj, int table, bool inc)
 		{
 			return this.type.get_next_table_index(obj, table, inc);
-		}
-
-		private bool IsCompilerContext
-		{
-			get
-			{
-				ModuleBuilder moduleBuilder = (ModuleBuilder)this.TypeBuilder.Module;
-				AssemblyBuilder assemblyBuilder = (AssemblyBuilder)moduleBuilder.Assembly;
-				return assemblyBuilder.IsCompilerContext;
-			}
 		}
 
 		private void RejectIfCreated()
@@ -423,6 +437,31 @@ namespace System.Reflection.Emit
 			return new NotSupportedException("The type is not yet created.");
 		}
 
+		void _ConstructorBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ConstructorBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ConstructorBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ConstructorBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal ConstructorBuilder()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
 		private RuntimeMethodHandle mhandle;
 
 		private ILGenerator ilgen;
@@ -443,7 +482,7 @@ namespace System.Reflection.Emit
 
 		private CustomAttributeBuilder[] cattrs;
 
-		private bool init_locals = true;
+		private bool init_locals;
 
 		private Type[][] paramModReq;
 

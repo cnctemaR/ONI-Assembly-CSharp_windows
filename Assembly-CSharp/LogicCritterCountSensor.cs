@@ -15,8 +15,7 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicCritterCountSensor component = gameObject.GetComponent<LogicCritterCountSensor>();
+		LogicCritterCountSensor component = ((GameObject)data).GetComponent<LogicCritterCountSensor>();
 		if (component != null)
 		{
 			this.countThreshold = component.countThreshold;
@@ -43,11 +42,12 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 			{
 				this.currentCount += roomOfGameObject.cavity.eggs.Count;
 			}
-			bool flag = ((!this.activateOnGreaterThan) ? (this.currentCount < this.countThreshold) : (this.currentCount > this.countThreshold));
+			bool flag = (this.activateOnGreaterThan ? (this.currentCount > this.countThreshold) : (this.currentCount < this.countThreshold));
 			this.SetState(flag);
 			if (this.selectable.HasStatusItem(Db.Get().BuildingStatusItems.NotInAnyRoom))
 			{
 				this.selectable.RemoveStatusItem(this.roomStatusGUID, false);
+				return;
 			}
 		}
 		else
@@ -68,8 +68,7 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 
 	private void UpdateLogicCircuit()
 	{
-		LogicPorts component = base.GetComponent<LogicPorts>();
-		component.SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -78,14 +77,14 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 		{
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 
@@ -196,7 +195,7 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 
 	public LocString ThresholdValueUnits()
 	{
-		return string.Empty;
+		return "";
 	}
 
 	public ThresholdScreenLayoutType LayoutType

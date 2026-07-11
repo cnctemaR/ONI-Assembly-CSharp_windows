@@ -56,11 +56,9 @@ public class GasLogicValveConfig : IBuildingConfig
 	{
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
-		RequireInputs component = go.GetComponent<RequireInputs>();
-		component.SetRequirements(true, false);
+		go.GetComponent<RequireInputs>().SetRequirements(true, false);
 		GeneratedBuildings.RegisterLogicPorts(go, GasLogicValveConfig.INPUT_PORTS);
-		LogicOperationalController logicOperationalController = go.AddOrGet<LogicOperationalController>();
-		logicOperationalController.unNetworkedValue = 0;
+		go.AddOrGet<LogicOperationalController>().unNetworkedValue = 0;
 	}
 
 	public const string ID = "GasLogicValve";

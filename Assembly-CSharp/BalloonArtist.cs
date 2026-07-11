@@ -23,7 +23,7 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 				smi.GoTo(this.overjoyed.balloon_stand);
 			}
 		}).EventTransition(GameHashes.ScheduleBlocksChanged, this.overjoyed.balloon_stand, (BalloonArtist.Instance smi) => smi.IsRecTime());
-		this.overjoyed.balloon_stand.EventTransition(GameHashes.ScheduleBlocksChanged, this.overjoyed.idle, (BalloonArtist.Instance smi) => !smi.IsRecTime()).ToggleChore((BalloonArtist.Instance smi) => new BalloonArtistChore(smi.master), null);
+		this.overjoyed.balloon_stand.EventTransition(GameHashes.ScheduleBlocksChanged, this.overjoyed.idle, (BalloonArtist.Instance smi) => !smi.IsRecTime()).ToggleChore((BalloonArtist.Instance smi) => new BalloonArtistChore(smi.master), this.overjoyed.idle);
 		this.overjoyed.exitEarly.Enter(delegate(BalloonArtist.Instance smi)
 		{
 			smi.ExitJoyReactionEarly();
@@ -60,8 +60,7 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 
 		public bool IsRecTime()
 		{
-			Schedulable component = base.master.GetComponent<Schedulable>();
-			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
+			return base.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
 		}
 
 		public void GiveBalloon()

@@ -5,9 +5,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Avatar definition.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Animation/Avatar.h")]
 	public class Avatar : Object
@@ -16,9 +13,6 @@ namespace UnityEngine
 		{
 		}
 
-		/// <summary>
-		///   <para>Return true if this avatar is a valid mecanim avatar. It can be a generic avatar or a human avatar.</para>
-		/// </summary>
 		public extern bool isValid
 		{
 			[NativeMethod("IsValid")]
@@ -26,9 +20,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Return true if this avatar is a valid human avatar.</para>
-		/// </summary>
 		public extern bool isHuman
 		{
 			[NativeMethod("IsHuman")]

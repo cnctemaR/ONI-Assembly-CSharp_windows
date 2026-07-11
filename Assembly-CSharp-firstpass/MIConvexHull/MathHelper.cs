@@ -94,16 +94,16 @@ namespace MIConvexHull
 			{
 			case 2:
 				this.FindNormalVector2D(vertices, normalData);
-				break;
+				return;
 			case 3:
 				this.FindNormalVector3D(vertices, normalData);
-				break;
+				return;
 			case 4:
 				this.FindNormalVector4D(vertices, normalData);
-				break;
+				return;
 			default:
 				this.FindNormalVectorND(vertices, normalData);
-				break;
+				return;
 			}
 		}
 
@@ -164,7 +164,7 @@ namespace MIConvexHull
 					int num2 = vertices[j] * this.Dimension;
 					for (int k = 0; k < this.Dimension; k++)
 					{
-						array2[this.Dimension * j + k] = ((k != i) ? this.PositionData[num2 + k] : 1.0);
+						array2[this.Dimension * j + k] = ((k == i) ? 1.0 : this.PositionData[num2 + k]);
 					}
 				}
 				MathHelper.LUFactor(array2, this.Dimension, array, this.nDNormalHelperVector);

@@ -35,9 +35,10 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		}
 		foreach (ElementConverter elementConverter in base.GetComponents<ElementConverter>())
 		{
-			foreach (ElementConverter.OutputElement outputElement in elementConverter.outputElements)
+			ElementConverter.OutputElement[] outputElements = elementConverter.outputElements;
+			for (int j = 0; j < outputElements.Length; j++)
 			{
-				if (outputElement.elementHash == SimHashes.DirtyWater)
+				if (outputElements[j].elementHash == SimHashes.DirtyWater)
 				{
 					elementConverter.SetStorage(storage);
 					break;
@@ -144,7 +145,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 			}).Update("GeneratingOxygen", delegate(AlgaeHabitat.SMInstance smi, float dt)
 			{
 				int num = Grid.PosToCell(smi.master.transform.GetPosition());
-				smi.converter.OutputMultiplier = ((Grid.LightCount[num] <= 0) ? 1f : smi.master.lightBonusMultiplier);
+				smi.converter.OutputMultiplier = ((Grid.LightCount[num] > 0) ? smi.master.lightBonusMultiplier : 1f);
 			}, UpdateRate.SIM_200ms, false)
 				.QueueAnim("working_loop", true, null)
 				.EventTransition(GameHashes.OnStorageChange, this.stoppedGeneratingOxygen, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water) || !smi.HasEnoughMass(GameTags.Algae) || smi.NeedsEmptying());

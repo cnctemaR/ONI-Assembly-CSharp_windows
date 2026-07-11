@@ -20,17 +20,15 @@ public class StringTable
 		{
 			StringEntry stringEntry = new StringEntry(value[idx + 1]);
 			this.Entries[hashCode] = stringEntry;
+			return;
 		}
-		else
+		StringTable stringTable = null;
+		if (!this.SubTables.TryGetValue(hashCode, out stringTable))
 		{
-			StringTable stringTable = null;
-			if (!this.SubTables.TryGetValue(hashCode, out stringTable))
-			{
-				stringTable = new StringTable();
-				this.SubTables[hashCode] = stringTable;
-			}
-			stringTable.Add(idx + 1, value);
+			stringTable = new StringTable();
+			this.SubTables[hashCode] = stringTable;
 		}
+		stringTable.Add(idx + 1, value);
 	}
 
 	public void Print(string parent_path)
@@ -47,7 +45,7 @@ public class StringTable
 			}));
 		}
 		string text = parent_path;
-		if (text != string.Empty)
+		if (text != "")
 		{
 			text += ".";
 		}

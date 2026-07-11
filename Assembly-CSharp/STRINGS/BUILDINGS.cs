@@ -1926,7 +1926,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Carpeted Tile", "CARPETTILE");
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -2812,7 +2812,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Tile", "TILEPOI");
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = "Used to build the walls and floor of rooms.";
 			}
@@ -4102,7 +4102,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Anti Entropy Thermo-Nullifier", "MASSIVEHEATSINK");
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -4120,7 +4120,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Window", "FACILITYBACKWALLWINDOW");
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = "A tall, thin window.";
 			}
@@ -4131,7 +4131,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class POIDOORINTERNAL
@@ -4140,7 +4140,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class POIFACILITYDOOR
@@ -4149,7 +4149,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "Large double doors that were once the main entrance to a large facility.";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 			}
 
 			public class VENDINGMACHINE

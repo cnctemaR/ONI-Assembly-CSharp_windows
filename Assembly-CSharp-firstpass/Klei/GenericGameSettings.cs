@@ -6,18 +6,6 @@ namespace Klei
 {
 	public class GenericGameSettings
 	{
-		public GenericGameSettings()
-		{
-			this.demoMode = false;
-			this.demoTime = 300;
-			this.showDemoTimer = true;
-			this.sleepWhenOutOfFocus = true;
-			this.debugEnable = false;
-			this.developerDebugEnable = false;
-			this.performanceCapture = new GenericGameSettings.PerformanceCapture();
-			GenericGameSettings._instance = this;
-		}
-
 		public static GenericGameSettings instance
 		{
 			get
@@ -77,6 +65,18 @@ namespace Klei
 			{
 				return global::System.IO.Path.GetDirectoryName(Application.dataPath) + "/settings.yml";
 			}
+		}
+
+		public GenericGameSettings()
+		{
+			this.demoMode = false;
+			this.demoTime = 300;
+			this.showDemoTimer = true;
+			this.sleepWhenOutOfFocus = true;
+			this.debugEnable = false;
+			this.developerDebugEnable = false;
+			this.performanceCapture = new GenericGameSettings.PerformanceCapture();
+			GenericGameSettings._instance = this;
 		}
 
 		public void SaveSettings()

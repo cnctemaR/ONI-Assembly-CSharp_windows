@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using STRINGS;
 using UnityEngine;
 
@@ -8,11 +7,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.findSeed;
-		GameStateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State root = this.root;
-		string text = CREATURES.STATUSITEMS.PLANTINGSEED.NAME;
-		string text2 = CREATURES.STATUSITEMS.PLANTINGSEED.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).Exit(new StateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State.Callback(SeedPlantingStates.UnreserveSeed)).Exit(new StateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State.Callback(SeedPlantingStates.DropAll))
+		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.PLANTINGSEED.NAME, CREATURES.STATUSITEMS.PLANTINGSEED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Exit(new StateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State.Callback(SeedPlantingStates.UnreserveSeed)).Exit(new StateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State.Callback(SeedPlantingStates.DropAll))
 			.Exit(new StateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State.Callback(SeedPlantingStates.RemoveMouthOverride));
 		this.findSeed.Enter(delegate(SeedPlantingStates.Instance smi)
 		{
@@ -20,32 +15,26 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 			if (smi.targetSeed == null)
 			{
 				smi.GoTo(this.behaviourcomplete);
+				return;
 			}
-			else
-			{
-				SeedPlantingStates.ReserveSeed(smi);
-				smi.GoTo(this.moveToSeed);
-			}
+			SeedPlantingStates.ReserveSeed(smi);
+			smi.GoTo(this.moveToSeed);
 		});
 		this.moveToSeed.MoveTo(new Func<SeedPlantingStates.Instance, int>(SeedPlantingStates.GetSeedCell), this.findPlantLocation, this.behaviourcomplete, false);
 		this.findPlantLocation.Enter(delegate(SeedPlantingStates.Instance smi)
 		{
-			if (smi.targetSeed)
-			{
-				SeedPlantingStates.FindDirtPlot(smi);
-				if (smi.targetPlot != null || smi.targetDirtPlotCell != Grid.InvalidCell)
-				{
-					smi.GoTo(this.pickupSeed);
-				}
-				else
-				{
-					smi.GoTo(this.behaviourcomplete);
-				}
-			}
-			else
+			if (!smi.targetSeed)
 			{
 				smi.GoTo(this.behaviourcomplete);
+				return;
 			}
+			SeedPlantingStates.FindDirtPlot(smi);
+			if (smi.targetPlot != null || smi.targetDirtPlotCell != Grid.InvalidCell)
+			{
+				smi.GoTo(this.pickupSeed);
+				return;
+			}
+			smi.GoTo(this.behaviourcomplete);
 		});
 		this.pickupSeed.PlayAnim("gather").Enter(new StateMachine<SeedPlantingStates, SeedPlantingStates.Instance, IStateMachineTarget, SeedPlantingStates.Def>.State.Callback(SeedPlantingStates.PickupComplete)).OnAnimQueueComplete(this.moveToPlantLocation);
 		this.moveToPlantLocation.Enter(delegate(SeedPlantingStates.Instance smi)
@@ -53,19 +42,19 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 			if (smi.targetSeed == null)
 			{
 				smi.GoTo(this.behaviourcomplete);
+				return;
 			}
-			else if (smi.targetPlot != null)
+			if (smi.targetPlot != null)
 			{
 				smi.GoTo(this.moveToPlot);
+				return;
 			}
-			else if (smi.targetDirtPlotCell != Grid.InvalidCell)
+			if (smi.targetDirtPlotCell != Grid.InvalidCell)
 			{
 				smi.GoTo(this.moveToDirt);
+				return;
 			}
-			else
-			{
-				smi.GoTo(this.behaviourcomplete);
-			}
+			smi.GoTo(this.behaviourcomplete);
 		});
 		this.moveToDirt.MoveTo((SeedPlantingStates.Instance smi) => smi.targetDirtPlotCell, this.planting, this.behaviourcomplete, false);
 		this.moveToPlot.Enter(delegate(SeedPlantingStates.Instance smi)
@@ -83,8 +72,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 	private static void AddMouthOverride(SeedPlantingStates.Instance smi)
 	{
 		SymbolOverrideController component = smi.GetComponent<SymbolOverrideController>();
-		KBatchedAnimController component2 = smi.GetComponent<KBatchedAnimController>();
-		KAnim.Build.Symbol symbol = component2.AnimFiles[0].GetData().build.GetSymbol("sq_mouth_cheeks");
+		KAnim.Build.Symbol symbol = smi.GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbol("sq_mouth_cheeks");
 		if (symbol != null)
 		{
 			component.AddSymbolOverride("sq_mouth", symbol, 0);
@@ -93,8 +81,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 
 	private static void RemoveMouthOverride(SeedPlantingStates.Instance smi)
 	{
-		SymbolOverrideController component = smi.GetComponent<SymbolOverrideController>();
-		component.TryRemoveSymbolOverride("sq_mouth", 0);
+		smi.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride("sq_mouth", 0);
 	}
 
 	private static void PickupComplete(SeedPlantingStates.Instance smi)
@@ -110,8 +97,9 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 		{
 			global::Debug.LogWarningFormat("PickupComplete seed {0} moved {1} != {2}", new object[] { smi.targetSeed, num, smi.seed_cell });
 			smi.targetSeed = null;
+			return;
 		}
-		else if (smi.targetSeed.HasTag(GameTags.Stored))
+		if (smi.targetSeed.HasTag(GameTags.Stored))
 		{
 			global::Debug.LogWarningFormat("PickupComplete seed {0} was stored by {1}", new object[]
 			{
@@ -119,18 +107,16 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 				smi.targetSeed.storage
 			});
 			smi.targetSeed = null;
+			return;
 		}
-		else
-		{
-			smi.targetSeed = EntitySplitter.Split(smi.targetSeed, 1f, null);
-			smi.GetComponent<Storage>().Store(smi.targetSeed.gameObject, false, false, true, false);
-			SeedPlantingStates.AddMouthOverride(smi);
-		}
+		smi.targetSeed = EntitySplitter.Split(smi.targetSeed, 1f, null);
+		smi.GetComponent<Storage>().Store(smi.targetSeed.gameObject, false, false, true, false);
+		SeedPlantingStates.AddMouthOverride(smi);
 	}
 
 	private static void PlantComplete(SeedPlantingStates.Instance smi)
 	{
-		PlantableSeed plantableSeed = ((!smi.targetSeed) ? null : smi.targetSeed.GetComponent<PlantableSeed>());
+		PlantableSeed plantableSeed = (smi.targetSeed ? smi.targetSeed.GetComponent<PlantableSeed>() : null);
 		PlantablePlot plantablePlot;
 		if (plantableSeed && SeedPlantingStates.CheckValidPlotCell(smi, plantableSeed, smi.targetDirtPlotCell, out plantablePlot))
 		{
@@ -171,8 +157,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 		smi.targetDirtPlotCell = Grid.InvalidCell;
 		PlantableSeed component = smi.targetSeed.GetComponent<PlantableSeed>();
 		PlantableCellQuery plantableCellQuery = PathFinderQueries.plantableCellQuery.Reset(component, 20);
-		Navigator component2 = smi.GetComponent<Navigator>();
-		component2.RunQuery(plantableCellQuery);
+		smi.GetComponent<Navigator>().RunQuery(plantableCellQuery);
 		if (plantableCellQuery.result_cells.Count > 0)
 		{
 			smi.targetDirtPlotCell = plantableCellQuery.result_cells[global::UnityEngine.Random.Range(0, plantableCellQuery.result_cells.Count)];
@@ -224,45 +209,26 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 		Navigator component = smi.GetComponent<Navigator>();
 		Pickupable pickupable = null;
 		int num = 100;
-		IEnumerator enumerator = Components.PlantableSeeds.GetEnumerator();
-		try
+		foreach (object obj in Components.PlantableSeeds)
 		{
-			while (enumerator.MoveNext())
+			PlantableSeed plantableSeed = (PlantableSeed)obj;
+			if ((plantableSeed.HasTag(GameTags.Seed) || plantableSeed.HasTag(GameTags.CropSeed)) && !plantableSeed.HasTag(GameTags.Creatures.ReservedByCreature) && Vector2.Distance(smi.transform.position, plantableSeed.transform.position) <= 25f)
 			{
-				object obj = enumerator.Current;
-				PlantableSeed plantableSeed = (PlantableSeed)obj;
-				if (plantableSeed.HasTag(GameTags.Seed) || plantableSeed.HasTag(GameTags.CropSeed))
+				int navigationCost = component.GetNavigationCost(Grid.PosToCell(plantableSeed));
+				if (navigationCost != -1 && navigationCost < num)
 				{
-					if (!plantableSeed.HasTag(GameTags.Creatures.ReservedByCreature))
-					{
-						if (Vector2.Distance(smi.transform.position, plantableSeed.transform.position) <= 25f)
-						{
-							int navigationCost = component.GetNavigationCost(Grid.PosToCell(plantableSeed));
-							if (navigationCost != -1 && navigationCost < num)
-							{
-								pickupable = plantableSeed.GetComponent<Pickupable>();
-								num = navigationCost;
-							}
-						}
-					}
+					pickupable = plantableSeed.GetComponent<Pickupable>();
+					num = navigationCost;
 				}
 			}
 		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
-			}
-		}
 		smi.targetSeed = pickupable;
-		smi.seed_cell = ((!smi.targetSeed) ? Grid.InvalidCell : Grid.PosToCell(smi.targetSeed));
+		smi.seed_cell = (smi.targetSeed ? Grid.PosToCell(smi.targetSeed) : Grid.InvalidCell);
 	}
 
 	private static void ReserveSeed(SeedPlantingStates.Instance smi)
 	{
-		GameObject gameObject = ((!smi.targetSeed) ? null : smi.targetSeed.gameObject);
+		GameObject gameObject = (smi.targetSeed ? smi.targetSeed.gameObject : null);
 		if (gameObject != null)
 		{
 			DebugUtil.Assert(!gameObject.HasTag(GameTags.Creatures.ReservedByCreature));
@@ -272,7 +238,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 
 	private static void UnreserveSeed(SeedPlantingStates.Instance smi)
 	{
-		GameObject gameObject = ((!smi.targetSeed) ? null : smi.targetSeed.gameObject);
+		GameObject gameObject = (smi.targetSeed ? smi.targetSeed.gameObject : null);
 		if (smi.targetSeed != null)
 		{
 			gameObject.RemoveTag(GameTags.Creatures.ReservedByCreature);

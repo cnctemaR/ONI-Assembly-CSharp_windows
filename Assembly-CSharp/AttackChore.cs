@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class AttackChore : Chore<AttackChore.StatesInstance>
 {
+	protected override void OnStateMachineStop(string reason, StateMachine.Status status)
+	{
+		this.CleanUpMultitool();
+		base.OnStateMachineStop(reason, status);
+	}
+
 	public AttackChore(IStateMachineTarget target, GameObject enemy)
 		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
@@ -10,19 +16,12 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		base.smi.sm.attackTarget.Set(enemy, base.smi);
 	}
 
-	protected override void OnStateMachineStop(string reason, StateMachine.Status status)
-	{
-		this.CleanUpMultitool();
-		base.OnStateMachineStop(reason, status);
-	}
-
 	public string GetHitAnim()
 	{
 		Workable component = base.smi.sm.attackTarget.Get(base.smi).gameObject.GetComponent<Workable>();
 		if (component)
 		{
-			string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
-			return text.Replace("_loop", string.Empty);
+			return MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1].Replace("_loop", "");
 		}
 		return "hit";
 	}
@@ -151,27 +150,24 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				{
 					Transform transform = this.attackTarget.Get(smi).transform;
 					Weapon component2 = this.attacker.Get(smi).gameObject.GetComponent<Weapon>();
-					if (component2 != null)
-					{
-						component2.AttackTarget(transform.gameObject);
-						Health component3 = this.attackTarget.Get(smi).GetComponent<Health>();
-						if (component3 != null)
-						{
-							if (!component3.IsDefeated())
-							{
-								smi.GoTo(this.attack);
-							}
-							else
-							{
-								smi.master.CleanUpMultitool();
-								smi.StopSM("target defeated");
-							}
-						}
-					}
-					else
+					if (!(component2 != null))
 					{
 						smi.master.CleanUpMultitool();
 						smi.StopSM("no weapon");
+						return;
+					}
+					component2.AttackTarget(transform.gameObject);
+					Health component3 = this.attackTarget.Get(smi).GetComponent<Health>();
+					if (component3 != null)
+					{
+						if (!component3.IsDefeated())
+						{
+							smi.GoTo(this.attack);
+							return;
+						}
+						smi.master.CleanUpMultitool();
+						smi.StopSM("target defeated");
+						return;
 					}
 				}
 				else

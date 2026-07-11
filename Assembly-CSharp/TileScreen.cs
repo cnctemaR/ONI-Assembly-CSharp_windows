@@ -22,8 +22,7 @@ public class TileScreen : KScreen
 	{
 		Vector3 mousePos = KInputManager.GetMousePos();
 		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
-		int num = Grid.PosToCell(vector);
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(mousePos));
 		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			Element element = Grid.Element[num];
@@ -55,7 +54,7 @@ public class TileScreen : KScreen
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.massIcon.sprite = this.solidIcon.sprite;
 				this.solidText.text = ((int)element.highTemp).ToString();
-				this.gasText.text = string.Empty;
+				this.gasText.text = "";
 				this.liquidIcon.rectTransform.SetParent(this.solidIcon.transform.parent, true);
 				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(0f, 64f));
 				this.SetSliderColour(num3, element.highTemp);
@@ -78,7 +77,7 @@ public class TileScreen : KScreen
 			}
 			else if (element.IsGas)
 			{
-				this.solidText.text = string.Empty;
+				this.solidText.text = "";
 				this.gasText.text = ((int)element.lowTemp).ToString();
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
@@ -91,40 +90,41 @@ public class TileScreen : KScreen
 			this.temperatureSlider.SetExtraValue(num3);
 			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)num3), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 			Dictionary<int, float> info = FallingWater.instance.GetInfo(num);
-			if (info.Count > 0)
+			if (info.Count <= 0)
 			{
-				List<Element> elements = ElementLoader.elements;
-				foreach (KeyValuePair<int, float> keyValuePair in info)
+				return;
+			}
+			List<Element> elements = ElementLoader.elements;
+			using (Dictionary<int, float>.Enumerator enumerator = info.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
 				{
+					KeyValuePair<int, float> keyValuePair = enumerator.Current;
 					Element element2 = elements[keyValuePair.Key];
 					Text text2 = this.nameLabel;
 					text2.text = text2.text + "\n" + element2.name + string.Format(" {0:0.00} kg", keyValuePair.Value);
 				}
+				return;
 			}
 		}
-		else
-		{
-			this.nameLabel.text = "Unknown";
-		}
+		this.nameLabel.text = "Unknown";
 	}
 
 	private void DisplayConduitFlowInfo()
 	{
 		HashedString mode = OverlayScreen.Instance.GetMode();
-		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((!(mode == OverlayModes.GasConduits.ID)) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
-		ConduitFlow conduitFlow = ((!(mode == OverlayModes.LiquidConduits.ID)) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow);
+		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((mode == OverlayModes.GasConduits.ID) ? Game.Instance.gasConduitSystem : Game.Instance.liquidConduitSystem);
+		ConduitFlow conduitFlow = ((mode == OverlayModes.LiquidConduits.ID) ? Game.Instance.gasConduitFlow : Game.Instance.liquidConduitFlow);
 		Vector3 mousePos = KInputManager.GetMousePos();
 		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
-		int num = Grid.PosToCell(vector);
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(mousePos));
 		if (Grid.IsValidCell(num) && utilityNetworkManager.GetConnections(num, true) != (UtilityConnections)0)
 		{
 			ConduitFlow.ConduitContents contents = conduitFlow.GetContents(num);
-			SimHashes element = contents.element;
-			Element element2 = ElementLoader.FindElementByHash(element);
+			Element element = ElementLoader.FindElementByHash(contents.element);
 			float num2 = contents.mass;
 			float temperature = contents.temperature;
-			this.nameLabel.text = element2.name;
+			this.nameLabel.text = element.name;
 			string text = "kg";
 			if (num2 < 5f)
 			{
@@ -133,43 +133,41 @@ public class TileScreen : KScreen
 			}
 			this.massAmtLabel.text = string.Format("{0:0.0} {1}", num2, text);
 			this.massTitleLabel.text = "mass";
-			if (element2.IsLiquid)
+			if (element.IsLiquid)
 			{
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(true);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
 				this.massIcon.sprite = this.liquidIcon.sprite;
-				this.solidText.text = ((int)element2.lowTemp).ToString();
-				this.gasText.text = ((int)element2.highTemp).ToString();
+				this.solidText.text = ((int)element.lowTemp).ToString();
+				this.gasText.text = ((int)element.highTemp).ToString();
 				this.liquidIcon.rectTransform.SetParent(this.temperatureSlider.transform.parent, true);
 				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(-80f, 0f));
-				if (!this.SetSliderColour(temperature, element2.lowTemp))
+				if (!this.SetSliderColour(temperature, element.lowTemp))
 				{
-					this.SetSliderColour(temperature, element2.highTemp);
+					this.SetSliderColour(temperature, element.highTemp);
 				}
-				this.temperatureSlider.SetMinMaxValue(element2.lowTemp, element2.highTemp, Mathf.Max(element2.lowTemp - 100f, 0f), Mathf.Min(element2.highTemp + 100f, 5200f));
+				this.temperatureSlider.SetMinMaxValue(element.lowTemp, element.highTemp, Mathf.Max(element.lowTemp - 100f, 0f), Mathf.Min(element.highTemp + 100f, 5200f));
 			}
-			else if (element2.IsGas)
+			else if (element.IsGas)
 			{
-				this.solidText.text = string.Empty;
-				this.gasText.text = ((int)element2.lowTemp).ToString();
+				this.solidText.text = "";
+				this.gasText.text = ((int)element.lowTemp).ToString();
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
 				this.massIcon.sprite = this.gasIcon.sprite;
-				this.SetSliderColour(temperature, element2.lowTemp);
+				this.SetSliderColour(temperature, element.lowTemp);
 				this.liquidIcon.rectTransform.SetParent(this.gasIcon.transform.parent, true);
 				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(0f, -64f));
-				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element2.lowTemp - 100f, 0f), 0f, element2.lowTemp + 100f);
+				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element.lowTemp - 100f, 0f), 0f, element.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(temperature);
 			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
+			return;
 		}
-		else
-		{
-			this.nameLabel.text = "No Conduit";
-			this.symbolLabel.text = string.Empty;
-			this.massAmtLabel.text = string.Empty;
-			this.massTitleLabel.text = string.Empty;
-		}
+		this.nameLabel.text = "No Conduit";
+		this.symbolLabel.text = "";
+		this.massAmtLabel.text = "";
+		this.massTitleLabel.text = "";
 	}
 
 	private void Update()
@@ -179,11 +177,9 @@ public class TileScreen : KScreen
 		if (mode == OverlayModes.GasConduits.ID || mode == OverlayModes.LiquidConduits.ID)
 		{
 			this.DisplayConduitFlowInfo();
+			return;
 		}
-		else
-		{
-			this.DisplayTileInfo();
-		}
+		this.DisplayTileInfo();
 	}
 
 	public Text nameLabel;

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Net.WebSockets;
 using System.Security.Principal;
 using System.Text;
+using System.Threading.Tasks;
+using Unity;
 
 namespace System.Net
 {
@@ -8,6 +11,8 @@ namespace System.Net
 	{
 		internal HttpListenerContext(HttpConnection cnc)
 		{
+			this.err_status = 400;
+			base..ctor();
 			this.cnc = cnc;
 			this.request = new HttpListenerRequest(this);
 			this.response = new HttpListenerResponse(this);
@@ -114,14 +119,42 @@ namespace System.Net
 				{
 					text3 = text;
 				}
-				HttpListenerBasicIdentity httpListenerBasicIdentity = new HttpListenerBasicIdentity(text3, text2);
-				principal = new GenericPrincipal(httpListenerBasicIdentity, new string[0]);
+				principal = new GenericPrincipal(new HttpListenerBasicIdentity(text3, text2), new string[0]);
 			}
 			catch (Exception)
 			{
 				principal = null;
 			}
 			return principal;
+		}
+
+		[MonoTODO]
+		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, TimeSpan keepAliveInterval)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, TimeSpan keepAliveInterval)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, TimeSpan keepAliveInterval, ArraySegment<byte> internalBuffer)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal HttpListenerContext()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private HttpListenerRequest request;
@@ -134,7 +167,7 @@ namespace System.Net
 
 		private string error;
 
-		private int err_status = 400;
+		private int err_status;
 
 		internal HttpListener Listener;
 	}

@@ -12,8 +12,7 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_BALLOON_STALL_CELL;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			BalloonArtistChore balloonArtistChore = (BalloonArtistChore)data;
-			return balloonArtistChore.smi.HasBalloonStallCell();
+			return ((BalloonArtistChore)data).smi.HasBalloonStallCell();
 		};
 		this.HasBalloonStallCell = precondition;
 		base..ctor(Db.Get().ChoreTypes.JoyReaction, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime);
@@ -53,7 +52,7 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 			})
 				.DefaultState(this.balloonStand.idle);
 			this.balloonStand.idle.PlayAnim("working_pre").QueueAnim("working_loop", true, null).OnSignal(this.giveBalloonOut, this.balloonStand.giveBalloon);
-			this.balloonStand.giveBalloon.PlayAnim("working_pst").OnAnimQueueComplete(this.goToStand);
+			this.balloonStand.giveBalloon.PlayAnim("working_pst").OnAnimQueueComplete(this.balloonStand.idle);
 		}
 
 		public StateMachine<BalloonArtistChore.States, BalloonArtistChore.StatesInstance, BalloonArtistChore, object>.TargetParameter balloonArtist;
@@ -87,13 +86,17 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 
 		public bool IsRecTime()
 		{
-			Schedulable component = base.master.GetComponent<Schedulable>();
-			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
+			return base.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
 		}
 
 		public int GetBalloonStallCell()
 		{
 			return this.balloonArtistCellSensor.GetCell();
+		}
+
+		public int GetBalloonStallTargetCell()
+		{
+			return this.balloonArtistCellSensor.GetStandCell();
 		}
 
 		public bool HasBalloonStallCell()
@@ -115,9 +118,9 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 
 		public void SpawnBalloonStand()
 		{
-			bool facing = base.gameObject.GetComponent<Facing>().GetFacing();
-			Vector3 vector = ((!facing) ? (Vector3.right * 2f) : (Vector3.left * 2f));
-			this.balloonStand = Util.KInstantiate(Assets.GetPrefab("BalloonStand"), base.gameObject.transform.GetPosition() + vector, Quaternion.identity, null, null, true, 0);
+			Vector3 vector = Grid.CellToPos(this.GetBalloonStallTargetCell());
+			this.balloonArtist.GetComponent<Facing>().Face(vector);
+			this.balloonStand = Util.KInstantiate(Assets.GetPrefab("BalloonStand"), vector, Quaternion.identity, null, null, true, 0);
 			this.balloonStand.SetActive(true);
 			this.balloonStand.GetComponent<GetBalloonWorkable>().SetBalloonArtist(base.smi);
 		}
@@ -129,8 +132,7 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 
 		public void GiveBalloon()
 		{
-			BalloonArtist.Instance smi = this.balloonArtist.GetSMI<BalloonArtist.Instance>();
-			smi.GiveBalloon();
+			this.balloonArtist.GetSMI<BalloonArtist.Instance>().GiveBalloon();
 			base.smi.sm.giveBalloonOut.Trigger(base.smi);
 		}
 

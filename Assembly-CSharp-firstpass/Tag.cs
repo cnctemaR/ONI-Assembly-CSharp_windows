@@ -9,7 +9,7 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 	public Tag(int hash)
 	{
 		this.hash = hash;
-		this.name = string.Empty;
+		this.name = "";
 	}
 
 	public Tag(Tag orig)
@@ -91,11 +91,9 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		if (this.name != null)
 		{
 			this.Name = this.name;
+			return;
 		}
-		else
-		{
-			this.name = string.Empty;
-		}
+		this.name = "";
 	}
 
 	public int CompareTo(Tag other)
@@ -105,7 +103,11 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 
 	public override string ToString()
 	{
-		return (this.name == null) ? this.hash.ToString("X") : this.name;
+		if (this.name == null)
+		{
+			return this.hash.ToString("X");
+		}
+		return this.name;
 	}
 
 	public static implicit operator Tag(string s)
@@ -113,7 +115,7 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		return new Tag(s);
 	}
 
-	public static readonly Tag Invalid = default(Tag);
+	public static readonly Tag Invalid;
 
 	[Serialize]
 	[SerializeField]

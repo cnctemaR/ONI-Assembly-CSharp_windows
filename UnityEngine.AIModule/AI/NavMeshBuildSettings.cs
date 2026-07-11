@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>The NavMeshBuildSettings struct allows you to specify a collection of settings which describe the dimensions and limitations of a particular agent type.</para>
-	/// </summary>
 	[NativeHeader("Modules/AI/Public/NavMeshBuildSettings.h")]
 	public struct NavMeshBuildSettings
 	{
-		/// <summary>
-		///   <para>The agent type ID the NavMesh will be baked for.</para>
-		/// </summary>
 		public int agentTypeID
 		{
 			get
@@ -25,9 +19,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The radius of the agent for baking in world units.</para>
-		/// </summary>
 		public float agentRadius
 		{
 			get
@@ -40,9 +31,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The height of the agent for baking in world units.</para>
-		/// </summary>
 		public float agentHeight
 		{
 			get
@@ -55,9 +43,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximum slope angle which is walkable (angle in degrees).</para>
-		/// </summary>
 		public float agentSlope
 		{
 			get
@@ -70,9 +55,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximum vertical step size an agent can take.</para>
-		/// </summary>
 		public float agentClimb
 		{
 			get
@@ -85,9 +67,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The approximate minimum area of individual NavMesh regions.</para>
-		/// </summary>
 		public float minRegionArea
 		{
 			get
@@ -100,9 +79,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Enables overriding the default voxel size. See Also: voxelSize.</para>
-		/// </summary>
 		public bool overrideVoxelSize
 		{
 			get
@@ -115,9 +91,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the voxel size in world length units.</para>
-		/// </summary>
 		public float voxelSize
 		{
 			get
@@ -130,9 +103,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Enables overriding the default tile size. See Also: tileSize.</para>
-		/// </summary>
 		public bool overrideTileSize
 		{
 			get
@@ -145,9 +115,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the tile size in voxel units.</para>
-		/// </summary>
 		public int tileSize
 		{
 			get
@@ -160,9 +127,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Options for collecting debug data during the build process.</para>
-		/// </summary>
 		public NavMeshBuildDebugSettings debug
 		{
 			get
@@ -175,20 +139,13 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Validates the properties of NavMeshBuildSettings.</para>
-		/// </summary>
-		/// <param name="buildBounds">Describes the volume to build NavMesh for.</param>
-		/// <returns>
-		///   <para>The list of violated constraints.</para>
-		/// </returns>
 		public string[] ValidationReport(Bounds buildBounds)
 		{
 			return NavMeshBuildSettings.InternalValidationReport(this, buildBounds);
 		}
 
-		[FreeFunction]
 		[NativeHeader("Modules/AI/Public/NavMeshBuildSettings.h")]
+		[FreeFunction]
 		private static string[] InternalValidationReport(NavMeshBuildSettings buildSettings, Bounds buildBounds)
 		{
 			return NavMeshBuildSettings.InternalValidationReport_Injected(ref buildSettings, ref buildBounds);

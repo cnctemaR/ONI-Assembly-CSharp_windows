@@ -108,15 +108,14 @@ public class ChoreTable
 	{
 		public Entry(StateMachine.BaseDef state_machine_def, int priority, int interrupt_priority)
 		{
-			StateMachine stateMachine = Singleton<StateMachineManager>.Instance.CreateStateMachine(state_machine_def.GetStateMachineType());
-			Type stateMachineInstanceType = stateMachine.GetStateMachineInstanceType();
+			Type stateMachineInstanceType = Singleton<StateMachineManager>.Instance.CreateStateMachine(state_machine_def.GetStateMachineType()).GetStateMachineInstanceType();
 			Type[] array = new Type[]
 			{
 				state_machine_def.GetStateMachineType(),
 				stateMachineInstanceType
 			};
 			this.choreClassType = typeof(ChoreTable.ChoreTableChore<, >).MakeGenericType(array);
-			this.choreType = new ChoreType(state_machine_def.ToString(), null, new string[0], string.Empty, string.Empty, string.Empty, string.Empty, new Tag[0], priority, priority);
+			this.choreType = new ChoreType(state_machine_def.ToString(), null, new string[0], "", "", "", "", new Tag[0], priority, priority);
 			this.choreType.interruptPriority = interrupt_priority;
 			this.stateMachineDef = state_machine_def;
 		}
@@ -130,20 +129,20 @@ public class ChoreTable
 
 	public class Instance
 	{
+		public static void ResetParameters()
+		{
+			for (int i = 0; i < ChoreTable.Instance.parameters.Length; i++)
+			{
+				ChoreTable.Instance.parameters[i] = null;
+			}
+		}
+
 		public Instance(ChoreTable chore_table, KPrefabID prefab_id)
 		{
 			this.entries = ListPool<ChoreTable.Instance.Entry, ChoreTable.Instance>.Allocate();
 			for (int i = 0; i < chore_table.entries.Length; i++)
 			{
 				this.entries.Add(new ChoreTable.Instance.Entry(chore_table.entries[i], prefab_id));
-			}
-		}
-
-		public static void ResetParameters()
-		{
-			for (int i = 0; i < ChoreTable.Instance.parameters.Length; i++)
-			{
-				ChoreTable.Instance.parameters[i] = null;
 			}
 		}
 

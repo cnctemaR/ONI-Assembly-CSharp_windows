@@ -110,12 +110,10 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 			{
 				component.size = this.originalColliderSize;
 				component.offset = this.originalColliderOffset;
+				return;
 			}
-			else
-			{
-				component.size = base.def.moundColliderSize;
-				component.offset = base.def.moundColliderOffset;
-			}
+			component.size = base.def.moundColliderSize;
+			component.offset = base.def.moundColliderOffset;
 		}
 
 		private Vector2 originalColliderSize;

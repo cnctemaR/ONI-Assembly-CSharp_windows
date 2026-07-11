@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 public class AccessorySlot : Resource
 {
+	public KAnimHashedString targetSymbolId { get; private set; }
+
+	public List<Accessory> accessories { get; private set; }
+
 	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build, string build_symbol_override = null)
 		: base(id, parent, null)
 	{
@@ -15,18 +19,11 @@ public class AccessorySlot : Resource
 		this.file = swap_build;
 	}
 
-	public KAnimHashedString targetSymbolId { get; private set; }
-
-	public List<Accessory> accessories { get; private set; }
-
 	public void AddAccessories(KAnimFile default_build, ResourceSet parent)
 	{
 		KAnim.Build build = this.file.GetData().build;
-		KAnim.Build.Symbol symbol = default_build.GetData().build.GetSymbol(this.targetSymbolId);
+		default_build.GetData().build.GetSymbol(this.targetSymbolId);
 		string text = this.Id.ToLower();
-		if (symbol != null)
-		{
-		}
 		for (int i = 0; i < build.symbols.Length; i++)
 		{
 			string text2 = HashCache.Get().Get(build.symbols[i].hash);

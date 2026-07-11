@@ -10,7 +10,7 @@ namespace YamlDotNet.Serialization.Converters
 	{
 		public DateTimeConverter(DateTimeKind kind = DateTimeKind.Utc, IFormatProvider provider = null, params string[] formats)
 		{
-			this.kind = ((kind != DateTimeKind.Unspecified) ? kind : DateTimeKind.Utc);
+			this.kind = ((kind == DateTimeKind.Unspecified) ? DateTimeKind.Utc : kind);
 			this.provider = provider ?? CultureInfo.InvariantCulture;
 			this.formats = formats.DefaultIfEmpty("G").ToArray<string>();
 		}
@@ -23,9 +23,8 @@ namespace YamlDotNet.Serialization.Converters
 		public object ReadYaml(IParser parser, Type type)
 		{
 			string value = ((Scalar)parser.Current).Value;
-			DateTimeStyles dateTimeStyles = ((this.kind != DateTimeKind.Local) ? DateTimeStyles.AssumeUniversal : DateTimeStyles.AssumeLocal);
-			DateTime dateTime = DateTime.ParseExact(value, this.formats, this.provider, dateTimeStyles);
-			dateTime = DateTimeConverter.EnsureDateTimeKind(dateTime, this.kind);
+			DateTimeStyles dateTimeStyles = ((this.kind == DateTimeKind.Local) ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal);
+			DateTime dateTime = DateTimeConverter.EnsureDateTimeKind(DateTime.ParseExact(value, this.formats, this.provider, dateTimeStyles), this.kind);
 			parser.MoveNext();
 			return dateTime;
 		}
@@ -33,7 +32,7 @@ namespace YamlDotNet.Serialization.Converters
 		public void WriteYaml(IEmitter emitter, object value, Type type)
 		{
 			DateTime dateTime = (DateTime)value;
-			string text = ((this.kind != DateTimeKind.Local) ? dateTime.ToUniversalTime() : dateTime.ToLocalTime()).ToString(this.formats.First<string>(), this.provider);
+			string text = ((this.kind == DateTimeKind.Local) ? dateTime.ToLocalTime() : dateTime.ToUniversalTime()).ToString(this.formats.First<string>(), this.provider);
 			emitter.Emit(new Scalar(null, null, text, ScalarStyle.Any, true, false));
 		}
 

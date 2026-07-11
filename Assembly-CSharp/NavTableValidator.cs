@@ -29,9 +29,9 @@ public class NavTableValidator
 		}
 		if (is_dupe)
 		{
-			return (byte)(buildFlags & Grid.BuildFlags.DupeImpassable) == 0 && ((byte)(buildFlags & Grid.BuildFlags.Solid) == 0 || (byte)(buildFlags & Grid.BuildFlags.DupePassable) != 0);
+			return (buildFlags & Grid.BuildFlags.DupeImpassable) == (Grid.BuildFlags)0 && ((buildFlags & Grid.BuildFlags.Solid) == (Grid.BuildFlags)0 || (buildFlags & Grid.BuildFlags.DupePassable) > (Grid.BuildFlags)0);
 		}
-		return (byte)(buildFlags & (Grid.BuildFlags.Solid | Grid.BuildFlags.CritterImpassable)) == 0;
+		return (buildFlags & (Grid.BuildFlags.Solid | Grid.BuildFlags.CritterImpassable)) == (Grid.BuildFlags)0;
 	}
 
 	public virtual void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)

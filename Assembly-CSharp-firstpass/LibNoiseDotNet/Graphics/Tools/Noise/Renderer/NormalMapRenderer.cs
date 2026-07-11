@@ -4,12 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 {
 	public class NormalMapRenderer : AbstractImageRenderer
 	{
-		public NormalMapRenderer()
-		{
-			this._WrapEnabled = false;
-			this._bumpHeight = 1f;
-		}
-
 		public bool WrapEnabled
 		{
 			get
@@ -32,6 +26,12 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Renderer
 			{
 				this._bumpHeight = value;
 			}
+		}
+
+		public NormalMapRenderer()
+		{
+			this._WrapEnabled = false;
+			this._bumpHeight = 1f;
 		}
 
 		public override void Render()

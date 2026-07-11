@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Collections;
-using System.IO;
 using System.Text;
-using Mono.Xml;
-using Mono.Xml2;
 
 namespace System.Xml
 {
 	public class XmlParserContext
 	{
 		public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string xmlLang, XmlSpace xmlSpace)
-			: this(nt, nsMgr, null, null, null, null, null, xmlLang, xmlSpace, null)
+			: this(nt, nsMgr, null, null, null, null, string.Empty, xmlLang, xmlSpace)
 		{
 		}
 
 		public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string xmlLang, XmlSpace xmlSpace, Encoding enc)
-			: this(nt, nsMgr, null, null, null, null, null, xmlLang, xmlSpace, enc)
+			: this(nt, nsMgr, null, null, null, null, string.Empty, xmlLang, xmlSpace, enc)
 		{
 		}
 
@@ -25,86 +21,46 @@ namespace System.Xml
 		}
 
 		public XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, string docTypeName, string pubId, string sysId, string internalSubset, string baseURI, string xmlLang, XmlSpace xmlSpace, Encoding enc)
-			: this(nt, nsMgr, (docTypeName == null || !(docTypeName != string.Empty)) ? null : new XmlTextReader(TextReader.Null, nt).GenerateDTDObjectModel(docTypeName, pubId, sysId, internalSubset), baseURI, xmlLang, xmlSpace, enc)
 		{
-		}
-
-		internal XmlParserContext(XmlNameTable nt, XmlNamespaceManager nsMgr, DTDObjectModel dtd, string baseURI, string xmlLang, XmlSpace xmlSpace, Encoding enc)
-		{
-			this.namespaceManager = nsMgr;
-			this.nameTable = ((nt == null) ? ((nsMgr == null) ? null : nsMgr.NameTable) : nt);
-			if (dtd != null)
+			if (nsMgr != null)
 			{
-				this.DocTypeName = dtd.Name;
-				this.PublicId = dtd.PublicId;
-				this.SystemId = dtd.SystemId;
-				this.InternalSubset = dtd.InternalSubset;
-				this.dtd = dtd;
+				if (nt == null)
+				{
+					this._nt = nsMgr.NameTable;
+				}
+				else
+				{
+					if (nt != nsMgr.NameTable)
+					{
+						throw new XmlException("Not the same name table.", string.Empty);
+					}
+					this._nt = nt;
+				}
 			}
-			this.encoding = enc;
-			this.BaseURI = baseURI;
-			this.XmlLang = xmlLang;
-			this.xmlSpace = xmlSpace;
-			this.contextItems = new ArrayList();
+			else
+			{
+				this._nt = nt;
+			}
+			this._nsMgr = nsMgr;
+			this._docTypeName = ((docTypeName == null) ? string.Empty : docTypeName);
+			this._pubId = ((pubId == null) ? string.Empty : pubId);
+			this._sysId = ((sysId == null) ? string.Empty : sysId);
+			this._internalSubset = ((internalSubset == null) ? string.Empty : internalSubset);
+			this._baseURI = ((baseURI == null) ? string.Empty : baseURI);
+			this._xmlLang = ((xmlLang == null) ? string.Empty : xmlLang);
+			this._xmlSpace = xmlSpace;
+			this._encoding = enc;
 		}
 
-		public string BaseURI
+		public XmlNameTable NameTable
 		{
 			get
 			{
-				return this.baseURI;
+				return this._nt;
 			}
 			set
 			{
-				this.baseURI = ((value == null) ? string.Empty : value);
-			}
-		}
-
-		public string DocTypeName
-		{
-			get
-			{
-				return (this.docTypeName == null) ? ((this.dtd == null) ? null : this.dtd.Name) : this.docTypeName;
-			}
-			set
-			{
-				this.docTypeName = ((value == null) ? string.Empty : value);
-			}
-		}
-
-		internal DTDObjectModel Dtd
-		{
-			get
-			{
-				return this.dtd;
-			}
-			set
-			{
-				this.dtd = value;
-			}
-		}
-
-		public Encoding Encoding
-		{
-			get
-			{
-				return this.encoding;
-			}
-			set
-			{
-				this.encoding = value;
-			}
-		}
-
-		public string InternalSubset
-		{
-			get
-			{
-				return (this.internalSubset == null) ? ((this.dtd == null) ? null : this.dtd.InternalSubset) : this.internalSubset;
-			}
-			set
-			{
-				this.internalSubset = ((value == null) ? string.Empty : value);
+				this._nt = value;
 			}
 		}
 
@@ -112,23 +68,23 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.namespaceManager;
+				return this._nsMgr;
 			}
 			set
 			{
-				this.namespaceManager = value;
+				this._nsMgr = value;
 			}
 		}
 
-		public XmlNameTable NameTable
+		public string DocTypeName
 		{
 			get
 			{
-				return this.nameTable;
+				return this._docTypeName;
 			}
 			set
 			{
-				this.nameTable = value;
+				this._docTypeName = ((value == null) ? string.Empty : value);
 			}
 		}
 
@@ -136,11 +92,11 @@ namespace System.Xml
 		{
 			get
 			{
-				return (this.publicID == null) ? ((this.dtd == null) ? null : this.dtd.PublicId) : this.publicID;
+				return this._pubId;
 			}
 			set
 			{
-				this.publicID = ((value == null) ? string.Empty : value);
+				this._pubId = ((value == null) ? string.Empty : value);
 			}
 		}
 
@@ -148,11 +104,35 @@ namespace System.Xml
 		{
 			get
 			{
-				return (this.systemID == null) ? ((this.dtd == null) ? null : this.dtd.SystemId) : this.systemID;
+				return this._sysId;
 			}
 			set
 			{
-				this.systemID = ((value == null) ? string.Empty : value);
+				this._sysId = ((value == null) ? string.Empty : value);
+			}
+		}
+
+		public string BaseURI
+		{
+			get
+			{
+				return this._baseURI;
+			}
+			set
+			{
+				this._baseURI = ((value == null) ? string.Empty : value);
+			}
+		}
+
+		public string InternalSubset
+		{
+			get
+			{
+				return this._internalSubset;
+			}
+			set
+			{
+				this._internalSubset = ((value == null) ? string.Empty : value);
 			}
 		}
 
@@ -160,11 +140,11 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.xmlLang;
+				return this._xmlLang;
 			}
 			set
 			{
-				this.xmlLang = ((value == null) ? string.Empty : value);
+				this._xmlLang = ((value == null) ? string.Empty : value);
 			}
 		}
 
@@ -172,78 +152,52 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.xmlSpace;
+				return this._xmlSpace;
 			}
 			set
 			{
-				this.xmlSpace = value;
+				this._xmlSpace = value;
 			}
 		}
 
-		internal void PushScope()
+		public Encoding Encoding
 		{
-			XmlParserContext.ContextItem contextItem;
-			if (this.contextItems.Count == this.contextItemCount)
+			get
 			{
-				contextItem = new XmlParserContext.ContextItem();
-				this.contextItems.Add(contextItem);
+				return this._encoding;
 			}
-			else
+			set
 			{
-				contextItem = (XmlParserContext.ContextItem)this.contextItems[this.contextItemCount];
+				this._encoding = value;
 			}
-			contextItem.BaseURI = this.BaseURI;
-			contextItem.XmlLang = this.XmlLang;
-			contextItem.XmlSpace = this.XmlSpace;
-			this.contextItemCount++;
 		}
 
-		internal void PopScope()
+		internal bool HasDtdInfo
 		{
-			if (this.contextItemCount == 0)
+			get
 			{
-				throw new XmlException("Unexpected end of element scope.");
+				return this._internalSubset != string.Empty || this._pubId != string.Empty || this._sysId != string.Empty;
 			}
-			this.contextItemCount--;
-			XmlParserContext.ContextItem contextItem = (XmlParserContext.ContextItem)this.contextItems[this.contextItemCount];
-			this.baseURI = contextItem.BaseURI;
-			this.xmlLang = contextItem.XmlLang;
-			this.xmlSpace = contextItem.XmlSpace;
 		}
 
-		private string baseURI = string.Empty;
+		private XmlNameTable _nt;
 
-		private string docTypeName = string.Empty;
+		private XmlNamespaceManager _nsMgr;
 
-		private Encoding encoding;
+		private string _docTypeName = string.Empty;
 
-		private string internalSubset = string.Empty;
+		private string _pubId = string.Empty;
 
-		private XmlNamespaceManager namespaceManager;
+		private string _sysId = string.Empty;
 
-		private XmlNameTable nameTable;
+		private string _internalSubset = string.Empty;
 
-		private string publicID = string.Empty;
+		private string _xmlLang = string.Empty;
 
-		private string systemID = string.Empty;
+		private XmlSpace _xmlSpace;
 
-		private string xmlLang = string.Empty;
+		private string _baseURI = string.Empty;
 
-		private XmlSpace xmlSpace;
-
-		private ArrayList contextItems;
-
-		private int contextItemCount;
-
-		private DTDObjectModel dtd;
-
-		private class ContextItem
-		{
-			public string BaseURI;
-
-			public string XmlLang;
-
-			public XmlSpace XmlSpace;
-		}
+		private Encoding _encoding;
 	}
 }

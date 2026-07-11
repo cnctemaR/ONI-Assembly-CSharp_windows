@@ -32,11 +32,9 @@ namespace Steamworks
 			if (eAccountType == EAccountType.k_EAccountTypeClan || eAccountType == EAccountType.k_EAccountTypeGameServer)
 			{
 				this.SetAccountInstance(0U);
+				return;
 			}
-			else
-			{
-				this.SetAccountInstance(1U);
-			}
+			this.SetAccountInstance(1U);
 		}
 
 		public void InstancedSet(AccountID_t unAccountID, uint unInstance, EUniverse eUniverse, EAccountType eAccountType)
@@ -105,7 +103,7 @@ namespace Steamworks
 
 		public bool IsLobby()
 		{
-			return this.GetEAccountType() == EAccountType.k_EAccountTypeChat && (this.GetUnAccountInstance() & 262144U) != 0U;
+			return this.GetEAccountType() == EAccountType.k_EAccountTypeChat && (this.GetUnAccountInstance() & 262144U) > 0U;
 		}
 
 		public bool BIndividualAccount()
@@ -130,7 +128,7 @@ namespace Steamworks
 
 		public void SetAccountID(AccountID_t other)
 		{
-			this.m_SteamID = (this.m_SteamID & 18446744069414584320UL) | (((ulong)(uint)other & (ulong)(-1)) << 0);
+			this.m_SteamID = (this.m_SteamID & 18446744069414584320UL) | ((ulong)(uint)other & (ulong)(-1));
 		}
 
 		public void SetAccountInstance(uint other)

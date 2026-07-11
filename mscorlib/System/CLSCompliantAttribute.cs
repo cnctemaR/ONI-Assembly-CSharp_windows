@@ -4,23 +4,23 @@ using System.Runtime.InteropServices;
 namespace System
 {
 	[ComVisible(true)]
-	[AttributeUsage(AttributeTargets.All)]
+	[AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
 	[Serializable]
 	public sealed class CLSCompliantAttribute : Attribute
 	{
 		public CLSCompliantAttribute(bool isCompliant)
 		{
-			this.is_compliant = isCompliant;
+			this.m_compliant = isCompliant;
 		}
 
 		public bool IsCompliant
 		{
 			get
 			{
-				return this.is_compliant;
+				return this.m_compliant;
 			}
 		}
 
-		private bool is_compliant;
+		private bool m_compliant;
 	}
 }

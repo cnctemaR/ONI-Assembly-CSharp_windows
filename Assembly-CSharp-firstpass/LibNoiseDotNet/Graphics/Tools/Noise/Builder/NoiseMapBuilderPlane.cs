@@ -5,18 +5,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 {
 	public class NoiseMapBuilderPlane : NoiseMapBuilder
 	{
-		public NoiseMapBuilderPlane()
-		{
-			this._seamless = false;
-			this._lowerXBound = (this._lowerZBound = (this._upperXBound = (this._upperZBound = 0f)));
-		}
-
-		public NoiseMapBuilderPlane(float lowerXBound, float upperXBound, float lowerZBound, float upperZBound, bool seamless)
-		{
-			this._seamless = seamless;
-			this.SetBounds(lowerXBound, upperXBound, lowerZBound, upperZBound);
-		}
-
 		public bool Seamless
 		{
 			get
@@ -59,6 +47,18 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 			{
 				return this._upperZBound;
 			}
+		}
+
+		public NoiseMapBuilderPlane()
+		{
+			this._seamless = false;
+			this._lowerXBound = (this._lowerZBound = (this._upperXBound = (this._upperZBound = 0f)));
+		}
+
+		public NoiseMapBuilderPlane(float lowerXBound, float upperXBound, float lowerZBound, float upperZBound, bool seamless)
+		{
+			this._seamless = seamless;
+			this.SetBounds(lowerXBound, upperXBound, lowerZBound, upperZBound);
 		}
 
 		public void SetBounds(float lowerXBound, float upperXBound, float lowerZBound, float upperZBound)

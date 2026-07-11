@@ -10,7 +10,17 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 		public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
 			: base(nextVisitor)
 		{
-			this.typeConverters = ((typeConverters == null) ? Enumerable.Empty<IYamlTypeConverter>() : typeConverters.ToList<IYamlTypeConverter>());
+			IEnumerable<IYamlTypeConverter> enumerable;
+			if (typeConverters == null)
+			{
+				enumerable = Enumerable.Empty<IYamlTypeConverter>();
+			}
+			else
+			{
+				IEnumerable<IYamlTypeConverter> enumerable2 = typeConverters.ToList<IYamlTypeConverter>();
+				enumerable = enumerable2;
+			}
+			this.typeConverters = enumerable;
 			this.nestedObjectSerializer = nestedObjectSerializer;
 		}
 

@@ -33,8 +33,9 @@ public class GeneShufflerSideScreen : SideScreenContent
 		if (this.target.WorkComplete)
 		{
 			this.target.SetWorkTime(0f);
+			return;
 		}
-		else if (this.target.IsConsumed)
+		if (this.target.IsConsumed)
 		{
 			this.target.RequestRecharge(!this.target.RechargeRequested);
 			this.Refresh();
@@ -43,44 +44,44 @@ public class GeneShufflerSideScreen : SideScreenContent
 
 	private void Refresh()
 	{
-		if (this.target != null)
+		if (!(this.target != null))
 		{
-			if (this.target.WorkComplete)
+			this.contents.SetActive(false);
+			return;
+		}
+		if (this.target.WorkComplete)
+		{
+			this.contents.SetActive(true);
+			this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.COMPLETE;
+			this.button.gameObject.SetActive(true);
+			this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON;
+			return;
+		}
+		if (this.target.IsConsumed)
+		{
+			this.contents.SetActive(true);
+			this.button.gameObject.SetActive(true);
+			if (this.target.RechargeRequested)
 			{
-				this.contents.SetActive(true);
-				this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.COMPLETE;
-				this.button.gameObject.SetActive(true);
-				this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON;
+				this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED_WAITING;
+				this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON_RECHARGE_CANCEL;
+				return;
 			}
-			else if (this.target.IsConsumed)
-			{
-				this.contents.SetActive(true);
-				this.button.gameObject.SetActive(true);
-				if (this.target.RechargeRequested)
-				{
-					this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED_WAITING;
-					this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON_RECHARGE_CANCEL;
-				}
-				else
-				{
-					this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED;
-					this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON_RECHARGE;
-				}
-			}
-			else if (this.target.IsWorking)
+			this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED;
+			this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON_RECHARGE;
+			return;
+		}
+		else
+		{
+			if (this.target.IsWorking)
 			{
 				this.contents.SetActive(true);
 				this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.UNDERWAY;
 				this.button.gameObject.SetActive(false);
+				return;
 			}
-			else
-			{
-				this.contents.SetActive(false);
-			}
-		}
-		else
-		{
 			this.contents.SetActive(false);
+			return;
 		}
 	}
 

@@ -225,29 +225,33 @@ namespace UnityEngine.UI
 			{
 				if (!(this.m_ContainerRect == null))
 				{
-					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_ContainerRect, eventData.position, eventData.pressEventCamera, out vector))
+					Vector2 zero = Vector2.zero;
+					if (MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
 					{
-						Vector2 vector2 = vector - this.m_Offset - this.m_ContainerRect.rect.position;
-						Vector2 vector3 = vector2 - (this.m_HandleRect.rect.size - this.m_HandleRect.sizeDelta) * 0.5f;
-						float num = ((this.axis != Scrollbar.Axis.Horizontal) ? this.m_ContainerRect.rect.height : this.m_ContainerRect.rect.width);
-						float num2 = num * (1f - this.size);
-						if (num2 > 0f)
+						Vector2 vector;
+						if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_ContainerRect, zero, eventData.pressEventCamera, out vector))
 						{
-							switch (this.m_Direction)
+							Vector2 vector2 = vector - this.m_Offset - this.m_ContainerRect.rect.position;
+							Vector2 vector3 = vector2 - (this.m_HandleRect.rect.size - this.m_HandleRect.sizeDelta) * 0.5f;
+							float num = ((this.axis != Scrollbar.Axis.Horizontal) ? this.m_ContainerRect.rect.height : this.m_ContainerRect.rect.width);
+							float num2 = num * (1f - this.size);
+							if (num2 > 0f)
 							{
-							case Scrollbar.Direction.LeftToRight:
-								this.Set(vector3.x / num2);
-								break;
-							case Scrollbar.Direction.RightToLeft:
-								this.Set(1f - vector3.x / num2);
-								break;
-							case Scrollbar.Direction.BottomToTop:
-								this.Set(vector3.y / num2);
-								break;
-							case Scrollbar.Direction.TopToBottom:
-								this.Set(1f - vector3.y / num2);
-								break;
+								switch (this.m_Direction)
+								{
+								case Scrollbar.Direction.LeftToRight:
+									this.Set(vector3.x / num2);
+									break;
+								case Scrollbar.Direction.RightToLeft:
+									this.Set(1f - vector3.x / num2);
+									break;
+								case Scrollbar.Direction.BottomToTop:
+									this.Set(vector3.y / num2);
+									break;
+								case Scrollbar.Direction.TopToBottom:
+									this.Set(1f - vector3.y / num2);
+									break;
+								}
 							}
 						}
 					}
@@ -268,10 +272,10 @@ namespace UnityEngine.UI
 				if (!(this.m_ContainerRect == null))
 				{
 					this.m_Offset = Vector2.zero;
-					if (RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.position, eventData.enterEventCamera))
+					if (RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
 					{
 						Vector2 vector;
-						if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.position, eventData.pressEventCamera, out vector))
+						if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
 						{
 							this.m_Offset = vector - this.m_HandleRect.rect.center;
 						}
@@ -305,10 +309,10 @@ namespace UnityEngine.UI
 		{
 			while (this.isPointerDownAndNotDragging)
 			{
-				if (!RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.position, eventData.enterEventCamera))
+				if (!RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
 				{
 					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.position, eventData.pressEventCamera, out vector))
+					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
 					{
 						float num = ((this.axis != Scrollbar.Axis.Horizontal) ? vector.y : vector.x);
 						if (num < 0f)

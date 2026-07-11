@@ -4,7 +4,7 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
 	public sealed class EventLogTraceListener : TraceListener
 	{
 		public EventLogTraceListener()
@@ -46,7 +46,11 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return (this.name == null) ? this.event_log.Source : this.name;
+				if (this.name == null)
+				{
+					return this.event_log.Source;
+				}
+				return this.name;
 			}
 			set
 			{
@@ -78,26 +82,29 @@ namespace System.Diagnostics
 		}
 
 		[ComVisible(false)]
-		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
+		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType severity, int id, object data)
 		{
 			EventLogEntryType eventLogEntryType;
-			switch (eventType)
+			if (severity - TraceEventType.Critical > 1)
 			{
-			case TraceEventType.Critical:
-			case TraceEventType.Error:
-				eventLogEntryType = EventLogEntryType.Error;
-				goto IL_0034;
-			case TraceEventType.Warning:
-				eventLogEntryType = EventLogEntryType.Warning;
-				goto IL_0034;
+				if (severity != TraceEventType.Warning)
+				{
+					eventLogEntryType = EventLogEntryType.Information;
+				}
+				else
+				{
+					eventLogEntryType = EventLogEntryType.Warning;
+				}
 			}
-			eventLogEntryType = EventLogEntryType.Information;
-			IL_0034:
-			this.event_log.WriteEntry((data == null) ? string.Empty : data.ToString(), eventLogEntryType, id, 0);
+			else
+			{
+				eventLogEntryType = EventLogEntryType.Error;
+			}
+			this.event_log.WriteEntry((data != null) ? data.ToString() : string.Empty, eventLogEntryType, id, 0);
 		}
 
 		[ComVisible(false)]
-		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, params object[] data)
+		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType severity, int id, params object[] data)
 		{
 			string text = string.Empty;
 			if (data != null)
@@ -105,23 +112,23 @@ namespace System.Diagnostics
 				string[] array = new string[data.Length];
 				for (int i = 0; i < data.Length; i++)
 				{
-					array[i] = ((data[i] == null) ? string.Empty : data[i].ToString());
+					array[i] = ((data[i] != null) ? data[i].ToString() : string.Empty);
 				}
 				text = string.Join(", ", array);
 			}
-			this.TraceData(eventCache, source, eventType, id, text);
+			this.TraceData(eventCache, source, severity, id, text);
 		}
 
 		[ComVisible(false)]
-		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
+		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType severity, int id, string message)
 		{
-			this.TraceData(eventCache, source, eventType, id, message);
+			this.TraceData(eventCache, source, severity, id, message);
 		}
 
 		[ComVisible(false)]
-		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
+		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType severity, int id, string format, params object[] args)
 		{
-			this.TraceEvent(eventCache, source, eventType, id, (format == null) ? null : string.Format(format, args));
+			this.TraceEvent(eventCache, source, severity, id, (format != null) ? string.Format(format, args) : null);
 		}
 
 		private EventLog event_log;

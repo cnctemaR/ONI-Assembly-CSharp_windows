@@ -5,14 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.LowLevel
 {
-	/// <summary>
-	///   <para>The class representing the player loop in Unity.</para>
-	/// </summary>
 	public class PlayerLoop
 	{
-		/// <summary>
-		///   <para>Returns the default update order of all engine systems in Unity.</para>
-		/// </summary>
 		public static PlayerLoopSystem GetDefaultPlayerLoop()
 		{
 			PlayerLoopSystemInternal[] defaultPlayerLoopInternal = PlayerLoop.GetDefaultPlayerLoopInternal();

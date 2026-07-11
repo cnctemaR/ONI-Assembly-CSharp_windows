@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeStatementCollection : CollectionBase
 	{
@@ -13,12 +10,12 @@ namespace System.CodeDom
 		{
 		}
 
-		public CodeStatementCollection(CodeStatement[] value)
+		public CodeStatementCollection(CodeStatementCollection value)
 		{
 			this.AddRange(value);
 		}
 
-		public CodeStatementCollection(CodeStatementCollection value)
+		public CodeStatementCollection(CodeStatement[] value)
 		{
 			this.AddRange(value);
 		}

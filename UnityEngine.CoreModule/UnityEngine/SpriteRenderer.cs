@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Renders a Sprite for 2D graphics.</para>
-	/// </summary>
 	[NativeType("Runtime/Graphics/Mesh/SpriteRenderer.h")]
 	[RequireComponent(typeof(Transform))]
 	public sealed class SpriteRenderer : Renderer
@@ -18,9 +15,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The Sprite to render.</para>
-		/// </summary>
 		public extern Sprite sprite
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -29,9 +23,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The current draw mode of the Sprite Renderer.</para>
-		/// </summary>
 		public extern SpriteDrawMode drawMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -40,9 +31,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Property to set/get the size to render when the SpriteRenderer.drawMode is set to SpriteDrawMode.Sliced.</para>
-		/// </summary>
 		public Vector2 size
 		{
 			get
@@ -57,9 +45,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The current threshold for Sprite Renderer tiling.</para>
-		/// </summary>
 		public extern float adaptiveModeThreshold
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -68,9 +53,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The current tile mode of the Sprite Renderer.</para>
-		/// </summary>
 		public extern SpriteTileMode tileMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -79,9 +61,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Rendering color for the Sprite graphic.</para>
-		/// </summary>
 		public Color color
 		{
 			get
@@ -96,9 +75,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies how the sprite interacts with the masks.</para>
-		/// </summary>
 		public extern SpriteMaskInteraction maskInteraction
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -107,9 +83,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Flips the sprite on the X axis.</para>
-		/// </summary>
 		public extern bool flipX
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -118,9 +91,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Flips the sprite on the Y axis.</para>
-		/// </summary>
 		public extern bool flipY
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -129,9 +99,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Determines the position of the Sprite used for sorting the SpriteRenderer.</para>
-		/// </summary>
 		public extern SpriteSortPoint spriteSortPoint
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

@@ -7,11 +7,6 @@ using UnityEngine;
 
 internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 {
-	public UpdateObjectCountParameter()
-		: base("objectCount")
-	{
-	}
-
 	public static UpdateObjectCountParameter.Settings GetSettings(HashedString path_hash, SoundDescription description)
 	{
 		UpdateObjectCountParameter.Settings settings = default(UpdateObjectCountParameter.Settings);
@@ -64,6 +59,11 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 		ev.setParameterValueByIndex(settings.parameterIdx, num);
 	}
 
+	public UpdateObjectCountParameter()
+		: base("objectCount")
+	{
+	}
+
 	public override void Add(LoopingSoundParameterUpdater.Sound sound)
 	{
 		UpdateObjectCountParameter.Settings settings = UpdateObjectCountParameter.GetSettings(sound.path, sound.description);
@@ -99,7 +99,7 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 			if (this.entries[i].ev.handle == sound.ev.handle)
 			{
 				this.entries.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}

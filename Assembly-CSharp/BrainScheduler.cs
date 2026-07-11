@@ -101,6 +101,8 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 
 	private abstract class BrainGroup : ICPULoad
 	{
+		public Tag tag { get; private set; }
+
 		protected BrainGroup(Tag tag)
 		{
 			this.tag = tag;
@@ -110,8 +112,6 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			this.increaseLoadLabel = "IncLoad" + text;
 			this.decreaseLoadLabel = "DecLoad" + text;
 		}
-
-		public Tag tag { get; private set; }
 
 		public void AddBrain(Brain brain)
 		{
@@ -154,7 +154,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			}
 			if (num == 0)
 			{
-				int num10 = Math.Max(1, (int)num3 + ((!flag) ? (-1) : 1));
+				int num10 = Math.Max(1, (int)num3 + (flag ? 1 : (-1)));
 				int num11 = MathUtil.Clamp(this.MinProbeSize(), this.IdealProbeSize(), (int)((num5 + num7) / (float)num10));
 				int num12 = Math.Min(this.brains.Count, num10 * CPUBudget.coreCount);
 				num += num12 - this.probeCount;
@@ -167,12 +167,9 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				num += num13 - this.probeSize;
 				this.probeSize = num13;
 			}
-			if (num >= 0)
+			if (num >= 0 && num <= 0)
 			{
-				if (num <= 0)
-				{
-					Debug.LogWarning("AdjustLoad() failed");
-				}
+				Debug.LogWarning("AdjustLoad() failed");
 			}
 			return num != 0;
 		}
@@ -196,8 +193,9 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			if (removedIndex < brainIndex)
 			{
 				brainIndex--;
+				return;
 			}
-			else if (brainIndex == this.brains.Count)
+			if (brainIndex == this.brains.Count)
 			{
 				brainIndex = 0;
 			}
@@ -236,12 +234,9 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				this.AsyncPathProbe();
 			}
 			int num = this.InitialProbeCount();
-			for (int num2 = 0; num2 != this.brains.Count; num2++)
+			int num2 = 0;
+			while (num2 != this.brains.Count && num != 0)
 			{
-				if (num == 0)
-				{
-					break;
-				}
 				this.ClampBrainIndex(ref this.nextPathProbeBrain);
 				Brain brain = this.brains[this.nextUpdateBrain];
 				this.IncrementBrainIndex(ref this.nextUpdateBrain);
@@ -250,6 +245,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 					brain.UpdateBrain();
 					num--;
 				}
+				num2++;
 			}
 		}
 
@@ -258,12 +254,9 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			foreach (Brain brain in this.brains)
 			{
 				Navigator component = brain.GetComponent<Navigator>();
-				if (!(component == null))
+				if (!(component == null) && !pathProbeIterations.ContainsKey(brain.name))
 				{
-					if (!pathProbeIterations.ContainsKey(brain.name))
-					{
-						pathProbeIterations.Add(brain.name, component.PathProber.updateCount);
-					}
+					pathProbeIterations.Add(brain.name, component.PathProber.updateCount);
 				}
 			}
 		}

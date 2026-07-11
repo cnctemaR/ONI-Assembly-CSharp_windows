@@ -42,8 +42,7 @@ namespace Mono.Unix
 
 		public override void Delete()
 		{
-			int num = Syscall.unlink(base.FullPath);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.unlink(base.FullPath));
 			base.Refresh();
 		}
 

@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.XR
 {
-	/// <summary>
-	///   <para>Timing and other statistics from the XR subsystem.</para>
-	/// </summary>
 	[NativeConditional("ENABLE_VR")]
 	public static class XRStats
 	{
@@ -22,9 +19,6 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool TryGetFramePresentCount(out int framePresentCount);
 
-		/// <summary>
-		///   <para>Total GPU time utilized last frame as measured by the XR subsystem.</para>
-		/// </summary>
 		[Obsolete("gpuTimeLastFrame is deprecated. Use XRStats.TryGetGPUTimeLastFrame instead.", false)]
 		public static float gpuTimeLastFrame
 		{

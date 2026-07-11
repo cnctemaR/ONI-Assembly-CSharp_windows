@@ -33,8 +33,7 @@ public class CompostConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 2000f;
-		Compost compost = go.AddOrGet<Compost>();
-		compost.simulatedInternalTemperature = 348.15f;
+		go.AddOrGet<Compost>().simulatedInternalTemperature = 348.15f;
 		CompostWorkable compostWorkable = go.AddOrGet<CompostWorkable>();
 		compostWorkable.workTime = 20f;
 		compostWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_compost_kanim") };

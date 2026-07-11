@@ -2,48 +2,35 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>The base class for all UIElements events.</para>
-	/// </summary>
 	public abstract class EventBase : IDisposable
 	{
 		protected EventBase()
 		{
+			this.m_ImguiEvent = null;
 			this.Init();
 		}
 
-		/// <summary>
-		///   <para>Register an event class to the event type system.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The type ID.</para>
-		/// </returns>
 		protected static long RegisterEventType()
 		{
 			return EventBase.s_LastTypeId += 1L;
 		}
 
-		/// <summary>
-		///   <para>Get the type id for this event instance.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The type ID.</para>
-		/// </returns>
 		public abstract long GetEventTypeId();
 
-		/// <summary>
-		///   <para>The time at which the event was created.</para>
-		/// </summary>
 		public long timestamp { get; private set; }
 
-		/// <summary>
-		///   <para>Flags for the event.</para>
-		/// </summary>
 		protected EventBase.EventFlags flags { get; set; }
 
-		/// <summary>
-		///   <para>Returns whether this event type bubbles up in the event propagation path.</para>
-		/// </summary>
+		private EventBase.LifeCycleFlags lifeCycleFlags { get; set; }
+
+		protected internal virtual void PreDispatch()
+		{
+		}
+
+		protected internal virtual void PostDispatch()
+		{
+		}
+
 		public bool bubbles
 		{
 			get
@@ -52,59 +39,95 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Return whether this event is sent down the event propagation path during the capture phase.</para>
-		/// </summary>
+		[Obsolete("Use tricklesDown instead of capturable.")]
 		public bool capturable
 		{
 			get
 			{
-				return (this.flags & EventBase.EventFlags.Capturable) != EventBase.EventFlags.None;
+				return this.tricklesDown;
 			}
 		}
 
-		/// <summary>
-		///   <para>The target for this event. The is the visual element that received the event. Unlike currentTarget, target does not change when the event is sent to elements along the propagation path.</para>
-		/// </summary>
-		public IEventHandler target { get; internal set; }
+		public bool tricklesDown
+		{
+			get
+			{
+				return (this.flags & EventBase.EventFlags.TricklesDown) != EventBase.EventFlags.None;
+			}
+		}
 
-		protected internal IEventHandler skipElement { get; set; }
+		public IEventHandler target { get; set; }
 
-		/// <summary>
-		///   <para>Return true if StopPropagation() has been called for this event.</para>
-		/// </summary>
-		public bool isPropagationStopped { get; private set; }
+		internal IEventHandler skipElement { get; set; }
 
-		/// <summary>
-		///   <para>Stop the propagation of this event. The event will not be sent to any further element in the propagation path. Further event handlers on the current target will be executed.</para>
-		/// </summary>
+		public bool isPropagationStopped
+		{
+			get
+			{
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.PropagationStopped) != EventBase.LifeCycleFlags.None;
+			}
+			private set
+			{
+				if (value)
+				{
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.PropagationStopped;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.PropagationStopped;
+				}
+			}
+		}
+
 		public void StopPropagation()
 		{
 			this.isPropagationStopped = true;
 		}
 
-		/// <summary>
-		///   <para>Return true if StopImmediatePropagation() has been called for this event.</para>
-		/// </summary>
-		public bool isImmediatePropagationStopped { get; private set; }
+		public bool isImmediatePropagationStopped
+		{
+			get
+			{
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.ImmediatePropagationStopped) != EventBase.LifeCycleFlags.None;
+			}
+			private set
+			{
+				if (value)
+				{
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.ImmediatePropagationStopped;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.ImmediatePropagationStopped;
+				}
+			}
+		}
 
-		/// <summary>
-		///   <para>Immediately stop the propagation of this event. The event will not be sent to any further event handlers on the current target or on any other element in the propagation path.</para>
-		/// </summary>
 		public void StopImmediatePropagation()
 		{
 			this.isPropagationStopped = true;
 			this.isImmediatePropagationStopped = true;
 		}
 
-		/// <summary>
-		///   <para>Return true if the default actions should not be executed for this event.</para>
-		/// </summary>
-		public bool isDefaultPrevented { get; private set; }
+		public bool isDefaultPrevented
+		{
+			get
+			{
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.DefaultPrevented) != EventBase.LifeCycleFlags.None;
+			}
+			private set
+			{
+				if (value)
+				{
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.DefaultPrevented;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.DefaultPrevented;
+				}
+			}
+		}
 
-		/// <summary>
-		///   <para>Call this function to prevent the execution of the default actions for this event.</para>
-		/// </summary>
 		public void PreventDefault()
 		{
 			if ((this.flags & EventBase.EventFlags.Cancellable) == EventBase.EventFlags.Cancellable)
@@ -113,14 +136,8 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>The current propagation phase.</para>
-		/// </summary>
 		public PropagationPhase propagationPhase { get; internal set; }
 
-		/// <summary>
-		///   <para>The current target of the event. The current target is the element in the propagation path for which event handlers are currently being executed.</para>
-		/// </summary>
 		public virtual IEventHandler currentTarget
 		{
 			get
@@ -135,57 +152,106 @@ namespace UnityEngine.Experimental.UIElements
 					VisualElement visualElement = this.currentTarget as VisualElement;
 					if (visualElement != null)
 					{
-						this.imguiEvent.mousePosition = visualElement.WorldToLocal(this.m_OriginalMousePosition);
+						this.imguiEvent.mousePosition = visualElement.WorldToLocal(this.originalMousePosition);
 					}
 				}
 			}
 		}
 
-		/// <summary>
-		///   <para>Return whether the event is currently being dispatched to visual element. An event can not be redispatched while being dispatched. If you need to recursively redispatch an event, you should use a copy.</para>
-		/// </summary>
-		public bool dispatch { get; internal set; }
-
-		/// <summary>
-		///   <para>The IMGUIEvent at the source of this event. This can be null as not all events are generated by IMGUI.</para>
-		/// </summary>
-		public Event imguiEvent
+		public bool dispatch
 		{
 			get
 			{
-				return this.m_ImguiEvent;
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.Dispatching) != EventBase.LifeCycleFlags.None;
 			}
-			protected set
+			internal set
 			{
-				this.m_ImguiEvent = value;
-				if (this.m_ImguiEvent != null)
+				if (value)
 				{
-					this.originalMousePosition = value.mousePosition;
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.Dispatching;
+					this.dispatched = true;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.Dispatching;
 				}
 			}
 		}
 
-		/// <summary>
-		///   <para>The original mouse position of the IMGUI event, before it is transformed to the local element coordinates. </para>
-		/// </summary>
-		public Vector2 originalMousePosition
+		internal void MarkReceivedByDispatcher()
+		{
+			Debug.Assert(!this.dispatched, "Events cannot be dispatched more than once.");
+			this.dispatched = true;
+		}
+
+		private bool dispatched
 		{
 			get
 			{
-				return this.m_OriginalMousePosition;
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.Dispatched) != EventBase.LifeCycleFlags.None;
 			}
-			private set
+			set
 			{
-				this.m_OriginalMousePosition = value;
+				if (value)
+				{
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.Dispatched;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.Dispatched;
+				}
 			}
 		}
 
-		/// <summary>
-		///   <para>Reset the event members to their initial value.</para>
-		/// </summary>
+		private bool imguiEventIsValid
+		{
+			get
+			{
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.IMGUIEventIsValid) != EventBase.LifeCycleFlags.None;
+			}
+			set
+			{
+				if (value)
+				{
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.IMGUIEventIsValid;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.IMGUIEventIsValid;
+				}
+			}
+		}
+
+		public Event imguiEvent
+		{
+			get
+			{
+				return (!this.imguiEventIsValid) ? null : this.m_ImguiEvent;
+			}
+			protected set
+			{
+				if (this.m_ImguiEvent == null)
+				{
+					this.m_ImguiEvent = new Event();
+				}
+				if (value != null)
+				{
+					this.m_ImguiEvent.CopyFrom(value);
+					this.imguiEventIsValid = true;
+					this.originalMousePosition = value.mousePosition;
+				}
+				else
+				{
+					this.imguiEventIsValid = false;
+				}
+			}
+		}
+
+		public Vector2 originalMousePosition { get; private set; }
+
 		protected virtual void Init()
 		{
-			this.timestamp = DateTime.Now.Ticks;
+			this.timestamp = (long)(Time.realtimeSinceStartup * 1000f);
 			this.flags = EventBase.EventFlags.None;
 			this.target = null;
 			this.skipElement = null;
@@ -193,16 +259,35 @@ namespace UnityEngine.Experimental.UIElements
 			this.isImmediatePropagationStopped = false;
 			this.isDefaultPrevented = false;
 			this.propagationPhase = PropagationPhase.None;
-			this.m_OriginalMousePosition = Vector2.zero;
+			this.originalMousePosition = Vector2.zero;
 			this.m_CurrentTarget = null;
 			this.dispatch = false;
-			this.imguiEvent = null;
-			this.originalMousePosition = Vector2.zero;
+			this.dispatched = false;
+			this.imguiEventIsValid = false;
+			this.pooled = false;
 		}
 
-		/// <summary>
-		///   <para>Implementation of IDisposable.</para>
-		/// </summary>
+		protected bool pooled
+		{
+			get
+			{
+				return (this.lifeCycleFlags & EventBase.LifeCycleFlags.Pooled) != EventBase.LifeCycleFlags.None;
+			}
+			set
+			{
+				if (value)
+				{
+					this.lifeCycleFlags |= EventBase.LifeCycleFlags.Pooled;
+				}
+				else
+				{
+					this.lifeCycleFlags &= ~EventBase.LifeCycleFlags.Pooled;
+				}
+			}
+		}
+
+		internal abstract void Acquire();
+
 		public abstract void Dispose();
 
 		private static long s_LastTypeId = 0L;
@@ -211,34 +296,28 @@ namespace UnityEngine.Experimental.UIElements
 
 		private Event m_ImguiEvent;
 
-		private Vector2 m_OriginalMousePosition;
-
-		/// <summary>
-		///   <para>Flags to describe the characteristics of an event.</para>
-		/// </summary>
 		[Flags]
-		public enum EventFlags
+		protected internal enum EventFlags
 		{
-			/// <summary>
-			///   <para>Empty value.</para>
-			/// </summary>
 			None = 0,
-			/// <summary>
-			///   <para>Event will bubble up the propagation path (i.e. from the target parent up to the visual tree root).</para>
-			/// </summary>
 			Bubbles = 1,
-			/// <summary>
-			///   <para>Event will be sent down the propagation path during the capture phase (i.e. from the visual tree root down to the target parent).</para>
-			/// </summary>
+			TricklesDown = 2,
+			[Obsolete("Use TrickesDown instead of Capturable")]
 			Capturable = 2,
-			/// <summary>
-			///   <para>Execution of default behavior for this event can be cancelled.</para>
-			/// </summary>
-			Cancellable = 4,
-			/// <summary>
-			///   <para>Event has been instanciated from the event pool.</para>
-			/// </summary>
-			Pooled = 256
+			Cancellable = 4
+		}
+
+		[Flags]
+		private enum LifeCycleFlags
+		{
+			None = 0,
+			PropagationStopped = 1,
+			ImmediatePropagationStopped = 2,
+			DefaultPrevented = 4,
+			Dispatching = 8,
+			Pooled = 16,
+			IMGUIEventIsValid = 32,
+			Dispatched = 512
 		}
 	}
 }

@@ -4,12 +4,12 @@ namespace YamlDotNet.Core
 {
 	internal class RecursionLevel
 	{
+		public int Maximum { get; private set; }
+
 		public RecursionLevel(int maximum)
 		{
 			this.Maximum = maximum;
 		}
-
-		public int Maximum { get; private set; }
 
 		public void Increment()
 		{

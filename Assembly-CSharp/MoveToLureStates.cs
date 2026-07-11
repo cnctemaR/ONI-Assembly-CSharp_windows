@@ -7,11 +7,7 @@ public class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureSta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.move;
-		GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State root = this.root;
-		string text = CREATURES.STATUSITEMS.CONSIDERINGLURE.NAME;
-		string text2 = CREATURES.STATUSITEMS.CONSIDERINGLURE.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.CONSIDERINGLURE.NAME, CREATURES.STATUSITEMS.CONSIDERINGLURE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.move.MoveTo(new Func<MoveToLureStates.Instance, int>(MoveToLureStates.GetLureCell), new Func<MoveToLureStates.Instance, CellOffset[]>(MoveToLureStates.GetLureOffsets), this.arrive_at_lure, this.behaviourcomplete, false);
 		this.arrive_at_lure.Enter(delegate(MoveToLureStates.Instance smi)
 		{
@@ -26,8 +22,7 @@ public class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureSta
 
 	private static Lure.Instance GetTargetLure(MoveToLureStates.Instance smi)
 	{
-		LureableMonitor.Instance smi2 = smi.GetSMI<LureableMonitor.Instance>();
-		GameObject targetLure = smi2.GetTargetLure();
+		GameObject targetLure = smi.GetSMI<LureableMonitor.Instance>().GetTargetLure();
 		if (targetLure == null)
 		{
 			return null;

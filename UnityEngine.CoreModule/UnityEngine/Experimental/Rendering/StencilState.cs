@@ -3,52 +3,13 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Values for the stencil state.</para>
-	/// </summary>
 	public struct StencilState
 	{
-		/// <summary>
-		///   <para>Creates a new stencil state with the given values.</para>
-		/// </summary>
-		/// <param name="readMask">An 8 bit mask as an 0–255 integer, used when comparing the reference value with the contents of the buffer.</param>
-		/// <param name="writeMask">An 8 bit mask as an 0–255 integer, used when writing to the buffer.</param>
-		/// <param name="enabled">Controls whether the stencil buffer is enabled.</param>
-		/// <param name="compareFunctionFront">The function used to compare the reference value to the current contents of the buffer for front-facing geometry.</param>
-		/// <param name="passOperationFront">What to do with the contents of the buffer if the stencil test (and the depth test) passes for front-facing geometry.</param>
-		/// <param name="failOperationFront">What to do with the contents of the buffer if the stencil test fails for front-facing geometry.</param>
-		/// <param name="zFailOperationFront">What to do with the contents of the buffer if the stencil test passes, but the depth test fails for front-facing geometry.</param>
-		/// <param name="compareFunctionBack">The function used to compare the reference value to the current contents of the buffer for back-facing geometry.</param>
-		/// <param name="passOperationBack">What to do with the contents of the buffer if the stencil test (and the depth test) passes for back-facing geometry.</param>
-		/// <param name="failOperationBack">What to do with the contents of the buffer if the stencil test fails for back-facing geometry.</param>
-		/// <param name="zFailOperationBack">What to do with the contents of the buffer if the stencil test passes, but the depth test fails for back-facing geometry.</param>
-		/// <param name="compareFunction">The function used to compare the reference value to the current contents of the buffer.</param>
-		/// <param name="passOperation">What to do with the contents of the buffer if the stencil test (and the depth test) passes.</param>
-		/// <param name="failOperation">What to do with the contents of the buffer if the stencil test fails.</param>
-		/// <param name="zFailOperation">What to do with the contents of the buffer if the stencil test passes, but the depth test.</param>
 		public StencilState(bool enabled = false, byte readMask = 255, byte writeMask = 255, CompareFunction compareFunction = CompareFunction.Always, StencilOp passOperation = StencilOp.Keep, StencilOp failOperation = StencilOp.Keep, StencilOp zFailOperation = StencilOp.Keep)
 		{
 			this = new StencilState(enabled, readMask, writeMask, compareFunction, passOperation, failOperation, zFailOperation, compareFunction, passOperation, failOperation, zFailOperation);
 		}
 
-		/// <summary>
-		///   <para>Creates a new stencil state with the given values.</para>
-		/// </summary>
-		/// <param name="readMask">An 8 bit mask as an 0–255 integer, used when comparing the reference value with the contents of the buffer.</param>
-		/// <param name="writeMask">An 8 bit mask as an 0–255 integer, used when writing to the buffer.</param>
-		/// <param name="enabled">Controls whether the stencil buffer is enabled.</param>
-		/// <param name="compareFunctionFront">The function used to compare the reference value to the current contents of the buffer for front-facing geometry.</param>
-		/// <param name="passOperationFront">What to do with the contents of the buffer if the stencil test (and the depth test) passes for front-facing geometry.</param>
-		/// <param name="failOperationFront">What to do with the contents of the buffer if the stencil test fails for front-facing geometry.</param>
-		/// <param name="zFailOperationFront">What to do with the contents of the buffer if the stencil test passes, but the depth test fails for front-facing geometry.</param>
-		/// <param name="compareFunctionBack">The function used to compare the reference value to the current contents of the buffer for back-facing geometry.</param>
-		/// <param name="passOperationBack">What to do with the contents of the buffer if the stencil test (and the depth test) passes for back-facing geometry.</param>
-		/// <param name="failOperationBack">What to do with the contents of the buffer if the stencil test fails for back-facing geometry.</param>
-		/// <param name="zFailOperationBack">What to do with the contents of the buffer if the stencil test passes, but the depth test fails for back-facing geometry.</param>
-		/// <param name="compareFunction">The function used to compare the reference value to the current contents of the buffer.</param>
-		/// <param name="passOperation">What to do with the contents of the buffer if the stencil test (and the depth test) passes.</param>
-		/// <param name="failOperation">What to do with the contents of the buffer if the stencil test fails.</param>
-		/// <param name="zFailOperation">What to do with the contents of the buffer if the stencil test passes, but the depth test.</param>
 		public StencilState(bool enabled, byte readMask, byte writeMask, CompareFunction compareFunctionFront, StencilOp passOperationFront, StencilOp failOperationFront, StencilOp zFailOperationFront, CompareFunction compareFunctionBack, StencilOp passOperationBack, StencilOp failOperationBack, StencilOp zFailOperationBack)
 		{
 			this.m_Enabled = Convert.ToByte(enabled);
@@ -65,9 +26,6 @@ namespace UnityEngine.Experimental.Rendering
 			this.m_ZFailOperationBack = (byte)zFailOperationBack;
 		}
 
-		/// <summary>
-		///   <para>Default values for the stencil state.</para>
-		/// </summary>
 		public static StencilState Default
 		{
 			get
@@ -76,9 +34,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls whether the stencil buffer is enabled.</para>
-		/// </summary>
 		public bool enabled
 		{
 			get
@@ -91,9 +46,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>An 8 bit mask as an 0–255 integer, used when comparing the reference value with the contents of the buffer.</para>
-		/// </summary>
 		public byte readMask
 		{
 			get
@@ -106,9 +58,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>An 8 bit mask as an 0–255 integer, used when writing to the buffer.</para>
-		/// </summary>
 		public byte writeMask
 		{
 			get
@@ -121,9 +70,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The function used to compare the reference value to the current contents of the buffer.</para>
-		/// </summary>
 		public CompareFunction compareFunction
 		{
 			set
@@ -133,9 +79,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test (and the depth test) passes.</para>
-		/// </summary>
 		public StencilOp passOperation
 		{
 			set
@@ -145,9 +88,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test fails.</para>
-		/// </summary>
 		public StencilOp failOperation
 		{
 			set
@@ -157,9 +97,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test passes, but the depth test fails.</para>
-		/// </summary>
 		public StencilOp zFailOperation
 		{
 			set
@@ -169,9 +106,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The function used to compare the reference value to the current contents of the buffer for front-facing geometry.</para>
-		/// </summary>
 		public CompareFunction compareFunctionFront
 		{
 			get
@@ -184,9 +118,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test (and the depth test) passes for front-facing geometry.</para>
-		/// </summary>
 		public StencilOp passOperationFront
 		{
 			get
@@ -199,9 +130,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test fails for front-facing geometry.</para>
-		/// </summary>
 		public StencilOp failOperationFront
 		{
 			get
@@ -214,9 +142,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test passes, but the depth test fails for front-facing geometry.</para>
-		/// </summary>
 		public StencilOp zFailOperationFront
 		{
 			get
@@ -229,9 +154,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The function used to compare the reference value to the current contents of the buffer for back-facing geometry.</para>
-		/// </summary>
 		public CompareFunction compareFunctionBack
 		{
 			get
@@ -244,9 +166,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test (and the depth test) passes for back-facing geometry.</para>
-		/// </summary>
 		public StencilOp passOperationBack
 		{
 			get
@@ -259,9 +178,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test fails for back-facing geometry.</para>
-		/// </summary>
 		public StencilOp failOperationBack
 		{
 			get
@@ -274,9 +190,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>What to do with the contents of the buffer if the stencil test passes, but the depth test fails for back-facing geometry.</para>
-		/// </summary>
 		public StencilOp zFailOperationBack
 		{
 			get

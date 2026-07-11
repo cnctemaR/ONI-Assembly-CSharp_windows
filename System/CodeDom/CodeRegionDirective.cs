@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeRegionDirective : CodeDirective
 	{
@@ -14,40 +11,24 @@ namespace System.CodeDom
 
 		public CodeRegionDirective(CodeRegionMode regionMode, string regionText)
 		{
-			this.regionMode = regionMode;
-			this.regionText = regionText;
-		}
-
-		public CodeRegionMode RegionMode
-		{
-			get
-			{
-				return this.regionMode;
-			}
-			set
-			{
-				this.regionMode = value;
-			}
+			this.RegionText = regionText;
+			this.RegionMode = regionMode;
 		}
 
 		public string RegionText
 		{
 			get
 			{
-				if (this.regionText == null)
-				{
-					return string.Empty;
-				}
-				return this.regionText;
+				return this._regionText ?? string.Empty;
 			}
 			set
 			{
-				this.regionText = value;
+				this._regionText = value;
 			}
 		}
 
-		private CodeRegionMode regionMode;
+		public CodeRegionMode RegionMode { get; set; }
 
-		private string regionText;
+		private string _regionText;
 	}
 }

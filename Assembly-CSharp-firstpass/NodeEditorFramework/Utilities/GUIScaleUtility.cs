@@ -35,15 +35,14 @@ namespace NodeEditorFramework.Utilities
 
 		public static void Init()
 		{
-			Assembly assembly = Assembly.GetAssembly(typeof(GUI));
-			Type type = assembly.GetType("UnityEngine.GUIClip", true);
+			Type type = Assembly.GetAssembly(typeof(GUI)).GetType("UnityEngine.GUIClip", true);
 			PropertyInfo property = type.GetProperty("topmostRect", BindingFlags.Static | BindingFlags.Public);
 			MethodInfo method = type.GetMethod("GetTopRect", BindingFlags.Static | BindingFlags.NonPublic);
 			MethodInfo method2 = type.GetMethod("Clip", BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, new Type[] { typeof(Rect) }, new ParameterModifier[0]);
 			if (type == null || property == null || method == null || method2 == null)
 			{
 				global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!");
-				global::Debug.LogWarning(((type != null) ? string.Empty : "GUIClipType is Null, ") + ((property != null) ? string.Empty : "topmostRect is Null, ") + ((method != null) ? string.Empty : "GetTopRect is Null, ") + ((method2 != null) ? string.Empty : "ClipRect is Null, "));
+				global::Debug.LogWarning(((type == null) ? "GUIClipType is Null, " : "") + ((property == null) ? "topmostRect is Null, " : "") + ((method == null) ? "GetTopRect is Null, " : "") + ((method2 == null) ? "ClipRect is Null, " : ""));
 				GUIScaleUtility.compabilityMode = true;
 				GUIScaleUtility.initiated = true;
 				return;
@@ -53,7 +52,7 @@ namespace NodeEditorFramework.Utilities
 			if (GUIScaleUtility.GetTopRectDelegate == null || GUIScaleUtility.topmostRectDelegate == null)
 			{
 				global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!");
-				global::Debug.LogWarning(((type != null) ? string.Empty : "GUIClipType is Null, ") + ((property != null) ? string.Empty : "topmostRect is Null, ") + ((method != null) ? string.Empty : "GetTopRect is Null, ") + ((method2 != null) ? string.Empty : "ClipRect is Null, "));
+				global::Debug.LogWarning(((type == null) ? "GUIClipType is Null, " : "") + ((property == null) ? "topmostRect is Null, " : "") + ((method == null) ? "GetTopRect is Null, " : "") + ((method2 == null) ? "ClipRect is Null, " : ""));
 				GUIScaleUtility.compabilityMode = true;
 				GUIScaleUtility.initiated = true;
 				return;
@@ -93,9 +92,9 @@ namespace NodeEditorFramework.Utilities
 			GUIScaleUtility.adjustedGUILayout.Add(adjustGUILayout);
 			if (adjustGUILayout)
 			{
-				GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 				GUILayout.Space(rect.center.x - rect2.size.x + zoomPivot.x);
-				GUILayout.BeginVertical(new GUILayoutOption[0]);
+				GUILayout.BeginVertical(Array.Empty<GUILayoutOption>());
 				GUILayout.Space(rect.center.y - rect2.size.y + zoomPivot.y);
 			}
 			GUIScaleUtility.GUIMatrices.Add(GUI.matrix);
@@ -118,21 +117,17 @@ namespace NodeEditorFramework.Utilities
 			}
 			GUIScaleUtility.adjustedGUILayout.RemoveAt(GUIScaleUtility.adjustedGUILayout.Count - 1);
 			GUI.EndGroup();
-			if (GUIScaleUtility.compabilityMode)
-			{
-				if (!Application.isPlaying)
-				{
-					GUI.BeginClip(new Rect(0f, 23f, (float)Screen.width, (float)(Screen.height - 23)));
-				}
-				else
-				{
-					GUI.BeginClip(new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
-				}
-			}
-			else
+			if (!GUIScaleUtility.compabilityMode)
 			{
 				GUIScaleUtility.RestoreClips();
+				return;
 			}
+			if (!Application.isPlaying)
+			{
+				GUI.BeginClip(new Rect(0f, 23f, (float)Screen.width, (float)(Screen.height - 23)));
+				return;
+			}
+			GUI.BeginClip(new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
 		}
 
 		public static void BeginNoClip()
@@ -192,11 +187,9 @@ namespace NodeEditorFramework.Utilities
 			if (getTopRect != new Rect(-10000f, -10000f, 40000f, 40000f))
 			{
 				GUILayout.BeginArea(new Rect(0f, 0f, getTopRect.width, getTopRect.height));
+				return;
 			}
-			else
-			{
-				GUILayout.BeginArea(new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
-			}
+			GUILayout.BeginArea(new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
 		}
 
 		public static void EndNewLayout()

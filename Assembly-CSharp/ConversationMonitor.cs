@@ -63,7 +63,7 @@ public class ConversationMonitor : GameStateMachine<ConversationMonitor, Convers
 			{
 				return this.personalTopics[num2];
 			}
-			return string.Empty;
+			return "";
 		}
 
 		public void OnTopicDiscovered(object data)
@@ -96,11 +96,9 @@ public class ConversationMonitor : GameStateMachine<ConversationMonitor, Convers
 				if (this.favouriteTopics.Count < 5)
 				{
 					this.favouriteTopics.Add(topic);
+					return;
 				}
-				else
-				{
-					this.favouriteTopics[global::UnityEngine.Random.Range(0, this.favouriteTopics.Count)] = topic;
-				}
+				this.favouriteTopics[global::UnityEngine.Random.Range(0, this.favouriteTopics.Count)] = topic;
 			}
 		}
 

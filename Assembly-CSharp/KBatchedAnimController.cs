@@ -6,11 +6,6 @@ using UnityEngine.UI;
 [DebuggerDisplay("{name} visible={visible} suspendUpdates={suspendUpdates} moving={moving}")]
 public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimConverter
 {
-	public KBatchedAnimController()
-	{
-		this.batchInstanceData = new KBatchedAnimInstanceData(this);
-	}
-
 	public int GetCurrentFrameIndex()
 	{
 		return this.curAnimFrameIdx;
@@ -31,6 +26,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			this._forceRebuild = value;
 		}
+	}
+
+	public KBatchedAnimController()
+	{
+		this.batchInstanceData = new KBatchedAnimInstanceData(this);
 	}
 
 	public bool IsActive()
@@ -120,8 +120,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private static void OnMovementStateChanged(Transform transform, bool is_moving)
 	{
-		KBatchedAnimController component = transform.GetComponent<KBatchedAnimController>();
-		component.OnMovementStateChanged(is_moving);
+		transform.GetComponent<KBatchedAnimController>().OnMovementStateChanged(is_moving);
 	}
 
 	private void SetBatchGroup(KAnimFileData kafd)
@@ -152,7 +151,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			global::Debug.LogError("KAnimBatchManager is not ready when loading anim:" + base.name);
 		}
-		if (this.animFiles.Length <= 0)
+		if (this.animFiles.Length == 0)
 		{
 			DebugUtil.Assert(false, "KBatchedAnimController has no anim files:" + base.name);
 		}
@@ -189,14 +188,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			}
 			Vector3 positionIncludingOffset = base.PositionIncludingOffset;
 			this.lastPos = positionIncludingOffset;
-			if (this.visibilityType != KAnimControllerBase.VisibilityType.Always)
+			if (this.visibilityType != KAnimControllerBase.VisibilityType.Always && KAnimBatchManager.ControllerToChunkXY(this) != this.lastChunkXY && this.lastChunkXY != KBatchedAnimUpdater.INVALID_CHUNK_ID)
 			{
-				Vector2I vector2I = KAnimBatchManager.ControllerToChunkXY(this);
-				if (vector2I != this.lastChunkXY && this.lastChunkXY != KBatchedAnimUpdater.INVALID_CHUNK_ID)
-				{
-					this.DeRegister();
-					this.Register();
-				}
+				this.DeRegister();
+				this.Register();
 			}
 			this.SetDirty();
 		}
@@ -266,8 +261,9 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		if (this.animQueue.Count > 0)
 		{
 			base.StartQueuedAnim();
+			return;
 		}
-		else if (this.curAnim != null && this.mode == KAnim.PlayMode.Once)
+		if (this.curAnim != null && this.mode == KAnim.PlayMode.Once)
 		{
 			base.currentFrame = this.curAnim.numFrames - 1;
 			base.Stop();
@@ -332,12 +328,20 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public int GetCurrentNumFrames()
 	{
-		return (this.curAnim == null) ? 0 : this.curAnim.numFrames;
+		if (this.curAnim == null)
+		{
+			return 0;
+		}
+		return this.curAnim.numFrames;
 	}
 
 	public int GetFirstFrameIndex()
 	{
-		return (this.curAnim == null) ? (-1) : this.curAnim.firstFrameIdx;
+		if (this.curAnim == null)
+		{
+			return -1;
+		}
+		return this.curAnim.firstFrameIdx;
 	}
 
 	private Canvas GetRootCanvas()
@@ -407,23 +411,20 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			this.pivot = this.rt.pivot;
 		}
 		Matrix2x3 matrix2x = Matrix2x3.Scale(vector2);
-		Matrix2x3 matrix2x2 = Matrix2x3.Scale(new Vector2((!this.flipX) ? 1f : (-1f), (!this.flipY) ? 1f : (-1f)));
-		Matrix2x3 matrix2x8;
+		Matrix2x3 matrix2x2 = Matrix2x3.Scale(new Vector2(this.flipX ? (-1f) : 1f, this.flipY ? (-1f) : 1f));
+		Matrix2x3 matrix2x6;
 		if (this.rotation != 0f)
 		{
 			Matrix2x3 matrix2x3 = Matrix2x3.Translate(-this.pivot);
 			Matrix2x3 matrix2x4 = Matrix2x3.Rotate(this.rotation * 0.017453292f);
-			Matrix2x3 matrix2x5 = Matrix2x3.Translate(this.pivot);
-			Matrix2x3 matrix2x6 = matrix2x5 * matrix2x4 * matrix2x3;
-			Matrix2x3 matrix2x7 = Matrix2x3.TRS(vector, base.transform.rotation, base.transform.localScale);
-			matrix2x8 = matrix2x7 * matrix2x6 * matrix2x * this.navMatrix * matrix2x2;
+			Matrix2x3 matrix2x5 = Matrix2x3.Translate(this.pivot) * matrix2x4 * matrix2x3;
+			matrix2x6 = Matrix2x3.TRS(vector, base.transform.rotation, base.transform.localScale) * matrix2x5 * matrix2x * this.navMatrix * matrix2x2;
 		}
 		else
 		{
-			Matrix2x3 matrix2x9 = Matrix2x3.TRS(vector, base.transform.rotation, base.transform.localScale);
-			matrix2x8 = matrix2x9 * matrix2x * this.navMatrix * matrix2x2;
+			matrix2x6 = Matrix2x3.TRS(vector, base.transform.rotation, base.transform.localScale) * matrix2x * this.navMatrix * matrix2x2;
 		}
-		return matrix2x8;
+		return matrix2x6;
 	}
 
 	public override Matrix4x4 GetSymbolTransform(HashedString symbol, out bool symbolVisible)
@@ -433,8 +434,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			Matrix2x3 symbolLocalTransform = this.GetSymbolLocalTransform(symbol, out symbolVisible);
 			if (symbolVisible)
 			{
-				Matrix4x4 matrix4x = this.GetTransformMatrix();
-				return matrix4x * symbolLocalTransform;
+				return this.GetTransformMatrix() * symbolLocalTransform;
 			}
 		}
 		symbolVisible = false;
@@ -497,7 +497,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.LoadAnims();
 		if (this.visibilityType == KAnimControllerBase.VisibilityType.Default)
 		{
-			this.visibilityType = ((this.materialType != KAnimBatchGroup.MaterialType.UI) ? this.visibilityType : KAnimControllerBase.VisibilityType.Always);
+			this.visibilityType = ((this.materialType == KAnimBatchGroup.MaterialType.UI) ? KAnimControllerBase.VisibilityType.Always : this.visibilityType);
 		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
 		this.UpdateHidden();
@@ -663,15 +663,12 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void ConfigureUpdateListener()
 	{
-		bool flag = (this.IsActive() && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.OffscreenUpdate || this.visibilityType == KAnimControllerBase.VisibilityType.Always;
-		if (flag)
+		if ((this.IsActive() && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.OffscreenUpdate || this.visibilityType == KAnimControllerBase.VisibilityType.Always)
 		{
 			Singleton<KBatchedAnimUpdater>.Instance.UpdateRegister(this);
+			return;
 		}
-		else
-		{
-			Singleton<KBatchedAnimUpdater>.Instance.UpdateUnregister(this);
-		}
+		Singleton<KBatchedAnimUpdater>.Instance.UpdateUnregister(this);
 	}
 
 	protected override void SuspendUpdates(bool suspend)
@@ -690,12 +687,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				this.SuspendUpdates(false);
 				this.SetDirty();
 				base.UpdateAnimEventSequenceTime();
+				return;
 			}
-			else
-			{
-				this.SuspendUpdates(true);
-				this.SetDirty();
-			}
+			this.SuspendUpdates(true);
+			this.SetDirty();
 		}
 	}
 
@@ -708,11 +703,9 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		if (enabled)
 		{
 			this.RegisterVisibilityListener();
+			return;
 		}
-		else
-		{
-			this.UnregisterVisibilityListener();
-		}
+		this.UnregisterVisibilityListener();
 	}
 
 	protected override void RefreshVisibilityListener()

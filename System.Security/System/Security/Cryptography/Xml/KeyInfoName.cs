@@ -6,31 +6,39 @@ namespace System.Security.Cryptography.Xml
 	public class KeyInfoName : KeyInfoClause
 	{
 		public KeyInfoName()
+			: this(null)
 		{
 		}
 
 		public KeyInfoName(string keyName)
 		{
-			this.name = keyName;
+			this.Value = keyName;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this.name;
+				return this._keyName;
 			}
 			set
 			{
-				this.name = value;
+				this._keyName = value;
 			}
 		}
 
 		public override XmlElement GetXml()
 		{
-			XmlDocument xmlDocument = new XmlDocument();
+			return this.GetXml(new XmlDocument
+			{
+				PreserveWhitespace = true
+			});
+		}
+
+		internal override XmlElement GetXml(XmlDocument xmlDocument)
+		{
 			XmlElement xmlElement = xmlDocument.CreateElement("KeyName", "http://www.w3.org/2000/09/xmldsig#");
-			xmlElement.InnerText = this.name;
+			xmlElement.AppendChild(xmlDocument.CreateTextNode(this._keyName));
 			return xmlElement;
 		}
 
@@ -38,18 +46,11 @@ namespace System.Security.Cryptography.Xml
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException();
+				throw new ArgumentNullException("value");
 			}
-			if (value.LocalName != "KeyName" || value.NamespaceURI != "http://www.w3.org/2000/09/xmldsig#")
-			{
-				this.name = string.Empty;
-			}
-			else
-			{
-				this.name = value.InnerText;
-			}
+			this._keyName = value.InnerText.Trim();
 		}
 
-		private string name;
+		private string _keyName;
 	}
 }

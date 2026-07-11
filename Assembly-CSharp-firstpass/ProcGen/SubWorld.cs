@@ -7,18 +7,6 @@ namespace ProcGen
 	[Serializable]
 	public class SubWorld : SampleDescriber
 	{
-		public SubWorld()
-		{
-			this.minChildCount = 2;
-			this.features = new List<Feature>();
-			this.tags = new List<string>();
-			this.biomes = new List<WeightedBiome>();
-			this.samplers = new List<SampleDescriber>();
-			this.pointsOfInterest = new Dictionary<string, string[]>();
-			this.featureTemplates = new Dictionary<string, int>();
-			this.pdWeight = 1f;
-		}
-
 		public string biomeNoise { get; protected set; }
 
 		public string overrideNoise { get; protected set; }
@@ -55,6 +43,18 @@ namespace ProcGen
 		public List<SampleDescriber> samplers { get; private set; }
 
 		public float pdWeight { get; private set; }
+
+		public SubWorld()
+		{
+			this.minChildCount = 2;
+			this.features = new List<Feature>();
+			this.tags = new List<string>();
+			this.biomes = new List<WeightedBiome>();
+			this.samplers = new List<SampleDescriber>();
+			this.pointsOfInterest = new Dictionary<string, string[]>();
+			this.featureTemplates = new Dictionary<string, int>();
+			this.pdWeight = 1f;
+		}
 
 		public enum ZoneType
 		{

@@ -14,8 +14,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicPressureSensor component = gameObject.GetComponent<LogicPressureSensor>();
+		LogicPressureSensor component = ((GameObject)data).GetComponent<LogicPressureSensor>();
 		if (component != null)
 		{
 			this.Threshold = component.Threshold;
@@ -37,7 +36,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 		int num = Grid.PosToCell(this);
 		if (this.sampleIdx < 8)
 		{
-			float num2 = ((!Grid.Element[num].IsState(this.desiredState)) ? 0f : Grid.Mass[num]);
+			float num2 = (Grid.Element[num].IsState(this.desiredState) ? Grid.Mass[num] : 0f);
 			this.samples[this.sampleIdx] = num2;
 			this.sampleIdx++;
 			return;
@@ -49,6 +48,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 			if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
 			{
 				this.Toggle();
+				return;
 			}
 		}
 		else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue <= this.threshold && !base.IsSwitchedOn))
@@ -118,12 +118,20 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 
 	public float GetRangeMinInputField()
 	{
-		return (this.desiredState != Element.State.Gas) ? this.rangeMin : (this.rangeMin * 1000f);
+		if (this.desiredState != Element.State.Gas)
+		{
+			return this.rangeMin;
+		}
+		return this.rangeMin * 1000f;
 	}
 
 	public float GetRangeMaxInputField()
 	{
-		return (this.desiredState != Element.State.Gas) ? this.rangeMax : (this.rangeMax * 1000f);
+		if (this.desiredState != Element.State.Gas)
+		{
+			return this.rangeMax;
+		}
+		return this.rangeMax * 1000f;
 	}
 
 	public LocString ThresholdValueName
@@ -225,7 +233,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 
 	private void UpdateLogicCircuit()
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -234,14 +242,14 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 		{
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 

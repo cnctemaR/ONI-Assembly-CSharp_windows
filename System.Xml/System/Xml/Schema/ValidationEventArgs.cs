@@ -1,34 +1,20 @@
 ﻿using System;
+using Unity;
 
 namespace System.Xml.Schema
 {
 	public class ValidationEventArgs : EventArgs
 	{
-		private ValidationEventArgs()
+		internal ValidationEventArgs(XmlSchemaException ex)
 		{
+			this.ex = ex;
+			this.severity = XmlSeverityType.Error;
 		}
 
-		internal ValidationEventArgs(XmlSchemaException ex, string message, XmlSeverityType severity)
+		internal ValidationEventArgs(XmlSchemaException ex, XmlSeverityType severity)
 		{
-			this.exception = ex;
-			this.message = message;
+			this.ex = ex;
 			this.severity = severity;
-		}
-
-		public XmlSchemaException Exception
-		{
-			get
-			{
-				return this.exception;
-			}
-		}
-
-		public string Message
-		{
-			get
-			{
-				return this.message;
-			}
 		}
 
 		public XmlSeverityType Severity
@@ -39,9 +25,28 @@ namespace System.Xml.Schema
 			}
 		}
 
-		private XmlSchemaException exception;
+		public XmlSchemaException Exception
+		{
+			get
+			{
+				return this.ex;
+			}
+		}
 
-		private string message;
+		public string Message
+		{
+			get
+			{
+				return this.ex.Message;
+			}
+		}
+
+		internal ValidationEventArgs()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		private XmlSchemaException ex;
 
 		private XmlSeverityType severity;
 	}

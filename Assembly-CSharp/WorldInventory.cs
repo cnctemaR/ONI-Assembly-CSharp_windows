@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
@@ -10,7 +9,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 {
 	public static WorldInventory Instance { get; private set; }
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Tag, Tag> OnDiscover;
 
 	protected override void OnPrefabInit()
@@ -25,34 +23,21 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	{
 		int num = 0;
 		int num2 = 0;
-		IEnumerator enumerator = Components.Brains.GetEnumerator();
-		try
+		foreach (object obj in Components.Brains)
 		{
-			while (enumerator.MoveNext())
+			CreatureBrain creatureBrain = obj as CreatureBrain;
+			if (creatureBrain != null)
 			{
-				object obj = enumerator.Current;
-				CreatureBrain creatureBrain = obj as CreatureBrain;
-				if (creatureBrain != null)
+				if (creatureBrain.HasTag(GameTags.Creatures.Wild))
 				{
-					if (creatureBrain.HasTag(GameTags.Creatures.Wild))
-					{
-						num++;
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.WildCritters, 1f, creatureBrain.GetProperName(), creatureBrain.GetProperName());
-					}
-					else
-					{
-						num2++;
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.DomesticatedCritters, 1f, creatureBrain.GetProperName(), creatureBrain.GetProperName());
-					}
+					num++;
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.WildCritters, 1f, creatureBrain.GetProperName(), creatureBrain.GetProperName());
 				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				else
+				{
+					num2++;
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.DomesticatedCritters, 1f, creatureBrain.GetProperName(), creatureBrain.GetProperName());
+				}
 			}
 		}
 		foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
@@ -72,9 +57,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	private IEnumerator InitialRefresh()
 	{
-		for (int i = 0; i < 1; i++)
+		int num;
+		for (int i = 0; i < 1; i = num)
 		{
 			yield return null;
+			num = i + 1;
 		}
 		for (int j = 0; j < Components.Pickupables.Count; j++)
 		{
@@ -126,9 +113,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	public float GetAmount(Tag tag)
 	{
-		float num = this.GetTotalAmount(tag);
-		num -= MaterialNeeds.Instance.GetAmount(tag);
-		return Mathf.Max(num, 0f);
+		return Mathf.Max(this.GetTotalAmount(tag) - MaterialNeeds.Instance.GetAmount(tag), 0f);
 	}
 
 	public void Discover(Tag tag, Tag categoryTag)
@@ -255,8 +240,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		ElementChunk component = entity.GetComponent<ElementChunk>();
 		if (component != null)
 		{
-			PrimaryElement component2 = component.GetComponent<PrimaryElement>();
-			return component2.Element.materialCategory;
+			return component.GetComponent<PrimaryElement>().Element.materialCategory;
 		}
 		return WorldInventory.GetCategoryForTags(entity.Tags);
 	}
@@ -291,8 +275,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	private void OnRemovedFetchable(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		Pickupable component = gameObject.GetComponent<Pickupable>();
+		Pickupable component = ((GameObject)data).GetComponent<Pickupable>();
 		foreach (Tag tag in component.GetComponent<KPrefabID>().Tags)
 		{
 			List<Pickupable> list;

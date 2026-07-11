@@ -4,17 +4,6 @@ using UnityEngine;
 
 public class CodexText : CodexWidget<CodexText>
 {
-	public CodexText()
-	{
-		this.style = CodexTextStyle.Body;
-	}
-
-	public CodexText(string text, CodexTextStyle style = CodexTextStyle.Body)
-	{
-		this.text = text;
-		this.style = style;
-	}
-
 	public string text { get; set; }
 
 	public CodexTextStyle style { get; set; }
@@ -29,6 +18,17 @@ public class CodexText : CodexWidget<CodexText>
 		{
 			this.text = Strings.Get(value);
 		}
+	}
+
+	public CodexText()
+	{
+		this.style = CodexTextStyle.Body;
+	}
+
+	public CodexText(string text, CodexTextStyle style = CodexTextStyle.Body)
+	{
+		this.text = text;
+		this.style = style;
 	}
 
 	public void ConfigureLabel(LocText label, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)

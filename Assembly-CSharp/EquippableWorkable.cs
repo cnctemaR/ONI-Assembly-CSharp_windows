@@ -50,14 +50,9 @@ public class EquippableWorkable : Workable, ISaveLoadable
 			this.chore.Cancel("Equipment Reassigned");
 			this.chore = null;
 		}
-		if (target != null)
+		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this.equippable))
 		{
-			Ownables soleOwner = target.GetSoleOwner();
-			Equipment component = soleOwner.GetComponent<Equipment>();
-			if (!component.IsEquipped(this.equippable))
-			{
-				this.CreateChore();
-			}
+			this.CreateChore();
 		}
 	}
 

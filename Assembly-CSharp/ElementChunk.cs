@@ -48,15 +48,17 @@ public class ElementChunk : KMonoBehaviour
 				{
 					PrimaryElement component = base.GetComponent<PrimaryElement>();
 					float mass2 = component.Mass;
-					float num = ((mass2 <= 0f) ? primaryElement.Temperature : SimUtil.CalculateFinalTemperature(mass2, component.Temperature, mass, primaryElement.Temperature));
+					float num = ((mass2 > 0f) ? SimUtil.CalculateFinalTemperature(mass2, component.Temperature, mass, primaryElement.Temperature) : primaryElement.Temperature);
 					component.SetMassTemperature(mass2 + mass, num);
 				}
 				if (CameraController.Instance != null)
 				{
 					string sound = GlobalAssets.GetSound("Ore_absorb", false);
-					if (sound != null && CameraController.Instance.IsAudibleSound(pickupable.transform.GetPosition(), sound))
+					Vector3 position = pickupable.transform.GetPosition();
+					position.z = 0f;
+					if (sound != null && CameraController.Instance.IsAudibleSound(position, sound))
 					{
-						base.PlaySound3D(sound);
+						KFMOD.PlayOneShot(sound, position, 1f);
 					}
 				}
 			}

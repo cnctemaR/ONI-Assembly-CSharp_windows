@@ -76,16 +76,17 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 			return;
 		}
 		ConduitType typeOfConduit = this.consumer.TypeOfConduit;
-		if (typeOfConduit != ConduitType.Liquid)
+		if (typeOfConduit != ConduitType.Gas)
 		{
-			if (typeOfConduit == ConduitType.Gas)
+			if (typeOfConduit == ConduitType.Liquid)
 			{
-				this.EmitGas(num);
+				this.EmitLiquid(num);
+				return;
 			}
 		}
 		else
 		{
-			this.EmitLiquid(num);
+			this.EmitGas(num);
 		}
 	}
 
@@ -117,16 +118,13 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 	private void EmitLiquid(int cell)
 	{
 		int num = Grid.CellBelow(cell);
-		Exhaust.EmitDelegate emitDelegate = ((!Grid.IsValidCell(num) || Grid.Solid[num]) ? Exhaust.emit_element : Exhaust.emit_particle);
+		Exhaust.EmitDelegate emitDelegate = ((Grid.IsValidCell(num) && !Grid.Solid[num]) ? Exhaust.emit_particle : Exhaust.emit_element);
 		foreach (GameObject gameObject in this.storage.items)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component.Element.IsLiquid)
+			if (component.Element.IsLiquid && this.EmitCommon(cell, component, emitDelegate))
 			{
-				if (this.EmitCommon(cell, component, emitDelegate))
-				{
-					break;
-				}
+				break;
 			}
 		}
 	}
@@ -136,12 +134,9 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 		foreach (GameObject gameObject in this.storage.items)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component.Element.IsGas)
+			if (component.Element.IsGas && this.EmitCommon(cell, component, Exhaust.emit_element))
 			{
-				if (this.EmitCommon(cell, component, Exhaust.emit_element))
-				{
-					break;
-				}
+				break;
 			}
 		}
 	}

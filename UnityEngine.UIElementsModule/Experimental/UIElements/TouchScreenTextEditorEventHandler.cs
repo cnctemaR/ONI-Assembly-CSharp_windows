@@ -34,7 +34,7 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				base.textInputField.SyncTextEngine();
 				base.textInputField.UpdateText(base.editorEngine.text);
-				base.textInputField.TakeMouseCapture();
+				base.textInputField.CaptureMouse();
 				base.editorEngine.keyboardOnScreen = TouchScreenKeyboard.Open(string.IsNullOrEmpty(this.secureText) ? base.textInputField.text : this.secureText, TouchScreenKeyboardType.Default, true, base.editorEngine.multiline, !string.IsNullOrEmpty(this.secureText));
 				base.editorEngine.UpdateScrollOffset();
 				evt.StopPropagation();

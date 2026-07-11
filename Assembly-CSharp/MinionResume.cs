@@ -38,9 +38,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public static int CalculateTotalSkillPointsGained(float experience)
 	{
-		float num = experience / (float)SKILLS.TARGET_SKILLS_CYCLE / 600f;
-		float num2 = Mathf.Pow(num, 1f / SKILLS.EXPERIENCE_LEVEL_POWER);
-		return Mathf.FloorToInt(num2 * (float)SKILLS.TARGET_SKILLS_EARNED);
+		return Mathf.FloorToInt(Mathf.Pow(experience / (float)SKILLS.TARGET_SKILLS_CYCLE / 600f, 1f / SKILLS.EXPERIENCE_LEVEL_POWER) * (float)SKILLS.TARGET_SKILLS_EARNED);
 	}
 
 	public int SkillsMastered
@@ -148,6 +146,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			if (!base.gameObject.GetComponent<ChoreConsumer>().HasUrge(Db.Get().Urges.LearnSkill))
 			{
 				base.gameObject.GetComponent<ChoreConsumer>().AddUrge(Db.Get().Urges.LearnSkill);
+				return;
 			}
 		}
 		else
@@ -201,8 +200,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	private void ApplySkillPerks(string skillId)
 	{
-		Skill skill = Db.Get().Skills.Get(skillId);
-		foreach (SkillPerk skillPerk in skill.perks)
+		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
 			if (skillPerk.OnApply != null)
 			{
@@ -213,8 +211,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	private void RemoveSkillPerks(string skillId)
 	{
-		Skill skill = Db.Get().Skills.Get(skillId);
-		foreach (SkillPerk skillPerk in skill.perks)
+		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
 			if (skillPerk.OnRemove != null)
 			{
@@ -239,14 +236,14 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		string choreGroupID = Db.Get().SkillGroups.Get(skill.skillGroup).choreGroupID;
 		if (!string.IsNullOrEmpty(choreGroupID))
 		{
-			Traits component = base.GetComponent<Traits>();
-			foreach (Trait trait in component.TraitList)
+			foreach (Trait trait in base.GetComponent<Traits>().TraitList)
 			{
 				if (trait.disabledChoreGroups != null)
 				{
-					foreach (ChoreGroup choreGroup in trait.disabledChoreGroups)
+					ChoreGroup[] disabledChoreGroups = trait.disabledChoreGroups;
+					for (int i = 0; i < disabledChoreGroups.Length; i++)
 					{
-						if (choreGroup.Id == choreGroupID)
+						if (disabledChoreGroups[i].Id == choreGroupID)
 						{
 							return false;
 						}
@@ -396,16 +393,12 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public static float CalculateNextExperienceBar(int current_skill_points)
 	{
-		float num = (float)(current_skill_points + 1) / (float)SKILLS.TARGET_SKILLS_EARNED;
-		float num2 = Mathf.Pow(num, SKILLS.EXPERIENCE_LEVEL_POWER);
-		return num2 * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
+		return Mathf.Pow((float)(current_skill_points + 1) / (float)SKILLS.TARGET_SKILLS_EARNED, SKILLS.EXPERIENCE_LEVEL_POWER) * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
 	}
 
 	public static float CalculatePreviousExperienceBar(int current_skill_points)
 	{
-		float num = (float)current_skill_points / (float)SKILLS.TARGET_SKILLS_EARNED;
-		float num2 = Mathf.Pow(num, SKILLS.EXPERIENCE_LEVEL_POWER);
-		return num2 * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
+		return Mathf.Pow((float)current_skill_points / (float)SKILLS.TARGET_SKILLS_EARNED, SKILLS.EXPERIENCE_LEVEL_POWER) * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
 	}
 
 	private void UpdateExpectations()
@@ -469,19 +462,18 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			{
 				ManagementMenu.Instance.OpenSkills(this.identity);
 			}, null, null);
-			Game.Instance.GetComponent<Notifier>().Add(this.lastSkillNotification, string.Empty);
+			Game.Instance.GetComponent<Notifier>().Add(this.lastSkillNotification, "");
 		}
 		if (PopFXManager.Instance != null)
 		{
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 		}
-		StateMachine.Instance instance = new UpgradeFX.Instance(base.gameObject.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f));
-		instance.StartSM();
+		new UpgradeFX.Instance(base.gameObject.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f)).StartSM();
 	}
 
 	private string GetSkillPointGainedTooltip(List<Notification> notifications, object data)
 	{
-		return string.Format(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.TOOLTIP, new object[0]);
+		return string.Format(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.TOOLTIP, Array.Empty<object>());
 	}
 
 	public void SetAptitude(HashedString skillGroupID, float amount)
@@ -540,8 +532,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public void RemoveHat()
 	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		MinionResume.RemoveHat(component);
+		MinionResume.RemoveHat(base.GetComponent<KBatchedAnimController>());
 	}
 
 	public static void RemoveHat(KBatchedAnimController controller)
@@ -610,11 +601,9 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		if (hat_id.IsNullOrWhiteSpace())
 		{
 			MinionResume.RemoveHat(controller);
+			return;
 		}
-		else
-		{
-			MinionResume.AddHat(hat_id, controller);
-		}
+		MinionResume.AddHat(hat_id, controller);
 	}
 
 	public string GetSkillsSubtitle()
@@ -624,11 +613,14 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public static bool AnyMinionHasPerk(string perk)
 	{
-		foreach (MinionResume minionResume in Components.MinionResumes.Items)
+		using (List<MinionResume>.Enumerator enumerator = Components.MinionResumes.Items.GetEnumerator())
 		{
-			if (minionResume.HasPerk(perk))
+			while (enumerator.MoveNext())
 			{
-				return true;
+				if (enumerator.Current.HasPerk(perk))
+				{
+					return true;
+				}
 			}
 		}
 		return false;
@@ -638,12 +630,9 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		foreach (MinionResume minionResume in Components.MinionResumes.Items)
 		{
-			if (!(minionResume == me))
+			if (!(minionResume == me) && minionResume.HasPerk(perk))
 			{
-				if (minionResume.HasPerk(perk))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;

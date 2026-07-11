@@ -40,11 +40,9 @@ public class ShadowImage : ShadowRect
 			if (this.shadowImage.sprite != null)
 			{
 				this.shadowImage.color = this.shadowColor;
+				return;
 			}
-			else
-			{
-				this.shadowImage.color = Color.clear;
-			}
+			this.shadowImage.color = Color.clear;
 		}
 	}
 

@@ -63,13 +63,11 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 		private void StartSmallSnoreInternal(object data)
 		{
 			this.snoreHandle.ClearScheduler();
-			KBatchedAnimController component = base.smi.master.GetComponent<KBatchedAnimController>();
 			bool flag;
-			Matrix4x4 symbolTransform = component.GetSymbolTransform(Snorer.HeadHash, out flag);
+			Matrix4x4 symbolTransform = base.smi.master.GetComponent<KBatchedAnimController>().GetSymbolTransform(Snorer.HeadHash, out flag);
 			if (flag)
 			{
-				Vector4 column = symbolTransform.GetColumn(3);
-				Vector3 vector = column;
+				Vector3 vector = symbolTransform.GetColumn(3);
 				vector.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
 				this.snoreEffect = FXHelpers.CreateEffect("snore_fx_kanim", vector, null, false, Grid.SceneLayer.Front, false);
 				this.snoreEffect.destroyOnAnimComplete = true;
@@ -135,9 +133,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 
 		private float GetNewInterval()
 		{
-			float num = Util.GaussianRandom(5f, 1f);
-			num = Mathf.Max(num, 3f);
-			return Mathf.Min(num, 10f);
+			return Mathf.Min(Mathf.Max(Util.GaussianRandom(5f, 1f), 3f), 10f);
 		}
 
 		public GameStateMachine<Snorer.States, Snorer.StatesInstance, Snorer, object>.State idle;

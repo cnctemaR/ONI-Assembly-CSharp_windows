@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace UnityEngine.VR
 {
 	[Obsolete("VRStats has been moved and renamed.  Use UnityEngine.XR.XRStats instead (UnityUpgradable) -> UnityEngine.XR.XRStats", true)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public static class VRStats
 	{
 		public static bool TryGetGPUTimeLastFrame(out float gpuTimeLastFrame)

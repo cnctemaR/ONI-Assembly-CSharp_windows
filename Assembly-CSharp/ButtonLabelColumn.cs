@@ -13,7 +13,7 @@ public class ButtonLabelColumn : LabelTableColumn
 
 	public override GameObject GetDefaultWidget(GameObject parent)
 	{
-		GameObject widget_go = Util.KInstantiateUI((!this.whiteText) ? Assets.UIPrefabs.TableScreenWidgets.ButtonLabel : Assets.UIPrefabs.TableScreenWidgets.ButtonLabelWhite, parent, true);
+		GameObject widget_go = Util.KInstantiateUI(this.whiteText ? Assets.UIPrefabs.TableScreenWidgets.ButtonLabelWhite : Assets.UIPrefabs.TableScreenWidgets.ButtonLabel, parent, true);
 		if (this.on_click_action != null)
 		{
 			widget_go.GetComponent<KButton>().onClick += delegate
@@ -38,7 +38,7 @@ public class ButtonLabelColumn : LabelTableColumn
 
 	public override GameObject GetMinionWidget(GameObject parent)
 	{
-		GameObject widget_go = Util.KInstantiateUI((!this.whiteText) ? Assets.UIPrefabs.TableScreenWidgets.ButtonLabel : Assets.UIPrefabs.TableScreenWidgets.ButtonLabelWhite, parent, true);
+		GameObject widget_go = Util.KInstantiateUI(this.whiteText ? Assets.UIPrefabs.TableScreenWidgets.ButtonLabelWhite : Assets.UIPrefabs.TableScreenWidgets.ButtonLabel, parent, true);
 		ToolTip tt = widget_go.GetComponent<ToolTip>();
 		tt.OnToolTip = () => this.GetTooltip(tt);
 		if (this.on_click_action != null)

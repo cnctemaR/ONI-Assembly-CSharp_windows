@@ -1,35 +1,39 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Timers
 {
-	[global::System.ComponentModel.DefaultProperty("Interval")]
-	[global::System.ComponentModel.DefaultEvent("Elapsed")]
-	public class Timer : global::System.ComponentModel.Component, global::System.ComponentModel.ISupportInitialize
+	[DefaultProperty("Interval")]
+	[DefaultEvent("Elapsed")]
+	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
+	public class Timer : Component, ISupportInitialize
 	{
 		public Timer()
-			: this(100.0)
 		{
+			this.interval = 100.0;
+			this.enabled = false;
+			this.autoReset = true;
+			this.initializing = false;
+			this.delayedEnable = false;
+			this.callback = new TimerCallback(this.MyTimerCallback);
 		}
 
 		public Timer(double interval)
+			: this()
 		{
-			if (interval > 2147483647.0)
+			if (interval <= 0.0)
 			{
-				throw new ArgumentException("Invalid value: " + interval, "interval");
+				throw new ArgumentException(global::SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
 			}
-			this.autoReset = true;
-			this.Interval = interval;
+			this.interval = (double)Timer.CalculateRoundedInterval(interval, true);
 		}
 
-		[global::System.ComponentModel.Category("Behavior")]
-		[TimersDescription("Occurs when the Interval has elapsed.")]
-		public event ElapsedEventHandler Elapsed;
-
-		[global::System.ComponentModel.Category("Behavior")]
-		[global::System.ComponentModel.DefaultValue(true)]
+		[DefaultValue(true)]
 		[TimersDescription("Indicates whether the timer will be restarted when it is enabled.")]
+		[Category("Behavior")]
 		public bool AutoReset
 		{
 			get
@@ -38,51 +42,101 @@ namespace System.Timers
 			}
 			set
 			{
-				this.autoReset = value;
-			}
-		}
-
-		[TimersDescription("Indicates whether the timer is enabled to fire events at a defined interval.")]
-		[global::System.ComponentModel.Category("Behavior")]
-		[global::System.ComponentModel.DefaultValue(false)]
-		public bool Enabled
-		{
-			get
-			{
-				object @lock = this._lock;
-				bool flag;
-				lock (@lock)
+				if (base.DesignMode)
 				{
-					flag = this.timer != null;
+					this.autoReset = value;
+					return;
 				}
-				return flag;
-			}
-			set
-			{
-				object @lock = this._lock;
-				lock (@lock)
+				if (this.autoReset != value)
 				{
-					bool flag = this.timer != null;
-					if (flag != value)
+					this.autoReset = value;
+					if (this.timer != null)
 					{
-						if (value)
-						{
-							this.timer = new Timer(new TimerCallback(Timer.Callback), this, (int)this.interval, (!this.autoReset) ? 0 : ((int)this.interval));
-						}
-						else
-						{
-							this.timer.Dispose();
-							this.timer = null;
-						}
+						this.UpdateTimer();
 					}
 				}
 			}
 		}
 
-		[global::System.ComponentModel.DefaultValue(100)]
+		[DefaultValue(false)]
+		[TimersDescription("Indicates whether the timer is enabled to fire events at a defined interval.")]
+		[Category("Behavior")]
+		public bool Enabled
+		{
+			get
+			{
+				return this.enabled;
+			}
+			set
+			{
+				if (base.DesignMode)
+				{
+					this.delayedEnable = value;
+					this.enabled = value;
+					return;
+				}
+				if (this.initializing)
+				{
+					this.delayedEnable = value;
+					return;
+				}
+				if (this.enabled != value)
+				{
+					if (!value)
+					{
+						if (this.timer != null)
+						{
+							this.cookie = null;
+							this.timer.Dispose();
+							this.timer = null;
+						}
+						this.enabled = value;
+						return;
+					}
+					this.enabled = value;
+					if (this.timer == null)
+					{
+						if (this.disposed)
+						{
+							throw new ObjectDisposedException(base.GetType().Name);
+						}
+						int num = Timer.CalculateRoundedInterval(this.interval, false);
+						this.cookie = new object();
+						this.timer = new Timer(this.callback, this.cookie, num, this.autoReset ? num : (-1));
+						return;
+					}
+					else
+					{
+						this.UpdateTimer();
+					}
+				}
+			}
+		}
+
+		private static int CalculateRoundedInterval(double interval, bool argumentCheck = false)
+		{
+			double num = Math.Ceiling(interval);
+			if (num <= 2147483647.0 && num > 0.0)
+			{
+				return (int)num;
+			}
+			if (argumentCheck)
+			{
+				throw new ArgumentException(global::SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
+			}
+			throw new ArgumentOutOfRangeException(global::SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
+		}
+
+		private void UpdateTimer()
+		{
+			int num = Timer.CalculateRoundedInterval(this.interval, false);
+			this.timer.Change(num, this.autoReset ? num : (-1));
+		}
+
+		[SettingsBindable(true)]
 		[TimersDescription("The number of milliseconds between timer events.")]
-		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
-		[global::System.ComponentModel.Category("Behavior")]
+		[Category("Behavior")]
+		[DefaultValue(100.0)]
 		public double Interval
 		{
 			get
@@ -93,21 +147,31 @@ namespace System.Timers
 			{
 				if (value <= 0.0)
 				{
-					throw new ArgumentException("Invalid value: " + value);
+					throw new ArgumentException(global::SR.GetString("'{0}' is not a valid value for 'Interval'. 'Interval' must be greater than {1}.", new object[] { value, 0 }));
 				}
-				object @lock = this._lock;
-				lock (@lock)
+				this.interval = value;
+				if (this.timer != null)
 				{
-					this.interval = value;
-					if (this.timer != null)
-					{
-						this.timer.Change((int)this.interval, (!this.autoReset) ? 0 : ((int)this.interval));
-					}
+					this.UpdateTimer();
 				}
 			}
 		}
 
-		public override global::System.ComponentModel.ISite Site
+		[TimersDescription("Occurs when the Interval has elapsed.")]
+		[Category("Behavior")]
+		public event ElapsedEventHandler Elapsed
+		{
+			add
+			{
+				this.onIntervalElapsed = (ElapsedEventHandler)Delegate.Combine(this.onIntervalElapsed, value);
+			}
+			remove
+			{
+				this.onIntervalElapsed = (ElapsedEventHandler)Delegate.Remove(this.onIntervalElapsed, value);
+			}
+		}
+
+		public override ISite Site
 		{
 			get
 			{
@@ -116,35 +180,69 @@ namespace System.Timers
 			set
 			{
 				base.Site = value;
+				if (base.DesignMode)
+				{
+					this.enabled = true;
+				}
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DefaultValue(null)]
 		[TimersDescription("The object used to marshal the event handler calls issued when an interval has elapsed.")]
-		public global::System.ComponentModel.ISynchronizeInvoke SynchronizingObject
+		[Browsable(false)]
+		[DefaultValue(null)]
+		public ISynchronizeInvoke SynchronizingObject
 		{
 			get
 			{
-				return this.so;
+				if (this.synchronizingObject == null && base.DesignMode)
+				{
+					IDesignerHost designerHost = (IDesignerHost)this.GetService(typeof(IDesignerHost));
+					if (designerHost != null)
+					{
+						object rootComponent = designerHost.RootComponent;
+						if (rootComponent != null && rootComponent is ISynchronizeInvoke)
+						{
+							this.synchronizingObject = (ISynchronizeInvoke)rootComponent;
+						}
+					}
+				}
+				return this.synchronizingObject;
 			}
 			set
 			{
-				this.so = value;
+				this.synchronizingObject = value;
 			}
 		}
 
 		public void BeginInit()
 		{
+			this.Close();
+			this.initializing = true;
 		}
 
 		public void Close()
 		{
-			this.Enabled = false;
+			this.initializing = false;
+			this.delayedEnable = false;
+			this.enabled = false;
+			if (this.timer != null)
+			{
+				this.timer.Dispose();
+				this.timer = null;
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			this.Close();
+			this.disposed = true;
+			base.Dispose(disposing);
 		}
 
 		public void EndInit()
 		{
+			this.initializing = false;
+			this.Enabled = this.delayedEnable;
 		}
 
 		public void Start()
@@ -157,53 +255,57 @@ namespace System.Timers
 			this.Enabled = false;
 		}
 
-		protected override void Dispose(bool disposing)
+		private void MyTimerCallback(object state)
 		{
-			this.Close();
-			base.Dispose(disposing);
-		}
-
-		private static void Callback(object state)
-		{
-			Timer timer = (Timer)state;
-			if (!timer.Enabled)
+			if (state != this.cookie)
 			{
 				return;
 			}
-			ElapsedEventHandler elapsed = timer.Elapsed;
-			if (!timer.autoReset)
+			if (!this.autoReset)
 			{
-				timer.Enabled = false;
-			}
-			if (elapsed == null)
-			{
-				return;
+				this.enabled = false;
 			}
 			ElapsedEventArgs e = new ElapsedEventArgs(DateTime.Now);
-			if (timer.so != null && timer.so.InvokeRequired)
+			try
 			{
-				timer.so.BeginInvoke(elapsed, new object[] { timer, e });
+				ElapsedEventHandler elapsedEventHandler = this.onIntervalElapsed;
+				if (elapsedEventHandler != null)
+				{
+					if (this.SynchronizingObject != null && this.SynchronizingObject.InvokeRequired)
+					{
+						this.SynchronizingObject.BeginInvoke(elapsedEventHandler, new object[] { this, e });
+					}
+					else
+					{
+						elapsedEventHandler(this, e);
+					}
+				}
 			}
-			else
+			catch
 			{
-				try
-				{
-					elapsed(timer, e);
-				}
-				catch
-				{
-				}
 			}
 		}
 
 		private double interval;
 
+		private bool enabled;
+
+		private bool initializing;
+
+		private bool delayedEnable;
+
+		private ElapsedEventHandler onIntervalElapsed;
+
 		private bool autoReset;
+
+		private ISynchronizeInvoke synchronizingObject;
+
+		private bool disposed;
 
 		private Timer timer;
 
-		private object _lock = new object();
+		private TimerCallback callback;
 
-		private global::System.ComponentModel.ISynchronizeInvoke so;
+		private object cookie;
 	}
 }

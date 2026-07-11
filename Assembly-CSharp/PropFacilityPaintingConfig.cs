@@ -7,7 +7,13 @@ public class PropFacilityPaintingConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityPainting", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYPAINTING.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYPAINTING.DESC, 50f, Assets.GetAnim("gravitas_painting_kanim"), "off", Grid.SceneLayer.Building, 3, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		string text = "PropFacilityPainting";
+		string text2 = global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYPAINTING.NAME;
+		string text3 = global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYPAINTING.DESC;
+		float num = 50f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("gravitas_painting_kanim"), "off", Grid.SceneLayer.Building, 3, 2, tier, tier2, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Granite);
 		component.Temperature = 294.15f;

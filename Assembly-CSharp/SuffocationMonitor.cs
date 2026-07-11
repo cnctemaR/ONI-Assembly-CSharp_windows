@@ -52,6 +52,8 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 	public new class Instance : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
+		public OxygenBreather oxygenBreather { get; private set; }
+
 		public Instance(OxygenBreather oxygen_breather)
 			: base(oxygen_breather)
 		{
@@ -62,8 +64,6 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false, true);
 			this.oxygenBreather = oxygen_breather;
 		}
-
-		public OxygenBreather oxygenBreather { get; private set; }
 
 		public bool IsInBreathableArea()
 		{
@@ -77,7 +77,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 		public bool IsSuffocating()
 		{
-			return this.breath.deltaAttribute.GetTotalValue() <= 0f && this.breath.value <= 45.454544f;
+			return this.breath.deltaAttribute.GetTotalValue() <= 0f && this.breath.value <= 45.454548f;
 		}
 
 		public void Kill()
@@ -93,10 +93,12 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 				{
 					this.wasInHighPressure = true;
 					this.highPressureTime = Time.time;
+					return;
 				}
-				else if (Time.time - this.highPressureTime > 3f)
+				if (Time.time - this.highPressureTime > 3f)
 				{
 					base.master.GetComponent<Effects>().Add("PoppedEarDrums", true);
+					return;
 				}
 			}
 			else

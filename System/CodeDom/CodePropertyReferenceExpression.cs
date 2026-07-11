@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodePropertyReferenceExpression : CodeExpression
 	{
@@ -14,45 +11,24 @@ namespace System.CodeDom
 
 		public CodePropertyReferenceExpression(CodeExpression targetObject, string propertyName)
 		{
-			this.targetObject = targetObject;
-			this.propertyName = propertyName;
+			this.TargetObject = targetObject;
+			this.PropertyName = propertyName;
 		}
+
+		public CodeExpression TargetObject { get; set; }
 
 		public string PropertyName
 		{
 			get
 			{
-				if (this.propertyName == null)
-				{
-					return string.Empty;
-				}
-				return this.propertyName;
+				return this._propertyName ?? string.Empty;
 			}
 			set
 			{
-				this.propertyName = value;
+				this._propertyName = value;
 			}
 		}
 
-		public CodeExpression TargetObject
-		{
-			get
-			{
-				return this.targetObject;
-			}
-			set
-			{
-				this.targetObject = value;
-			}
-		}
-
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeExpression targetObject;
-
-		private string propertyName;
+		private string _propertyName;
 	}
 }

@@ -64,7 +64,7 @@ namespace System.Globalization
 								int num6 = this.base_num;
 								for (;;)
 								{
-									int num7 = ((num6 > num3 + this.tmin) ? ((num6 < num3 + this.tmax) ? (num6 - num3) : this.tmax) : this.tmin);
+									int num7 = ((num6 <= num3 + this.tmin) ? this.tmin : ((num6 >= num3 + this.tmax) ? this.tmax : (num6 - num3)));
 									if (num5 < num7)
 									{
 										break;
@@ -89,12 +89,24 @@ namespace System.Globalization
 
 		private char EncodeDigit(int d)
 		{
-			return (char)((d >= 26) ? (d - 26 + 48) : (d + 97));
+			return (char)((d < 26) ? (d + 97) : (d - 26 + 48));
 		}
 
 		private int DecodeDigit(char c)
 		{
-			return (c - '0' >= '\n') ? ((c - 'A' >= '\u001a') ? ((c - 'a' >= '\u001a') ? this.base_num : ((int)(c - 'a'))) : ((int)(c - 'A'))) : ((int)(c - '\u0016'));
+			if (c - '0' < '\n')
+			{
+				return (int)(c - '\u0016');
+			}
+			if (c - 'A' < '\u001a')
+			{
+				return (int)(c - 'A');
+			}
+			if (c - 'a' >= '\u001a')
+			{
+				return this.base_num;
+			}
+			return (int)(c - 'a');
 		}
 
 		private int Adapt(int delta, int numPoints, bool firstTime)
@@ -136,7 +148,7 @@ namespace System.Globalization
 				return s;
 			}
 			stringBuilder.Append(s, 0, num4);
-			int j = ((num4 <= 0) ? 0 : (num4 + 1));
+			int j = ((num4 > 0) ? (num4 + 1) : 0);
 			while (j < s.Length)
 			{
 				int num5 = num2;
@@ -146,7 +158,7 @@ namespace System.Globalization
 				{
 					int num8 = this.DecodeDigit(s[j++]);
 					num2 += num8 * num6;
-					int num9 = ((num7 > num3 + this.tmin) ? ((num7 < num3 + this.tmax) ? (num7 - num3) : this.tmax) : this.tmin);
+					int num9 = ((num7 <= num3 + this.tmin) ? this.tmin : ((num7 >= num3 + this.tmax) ? this.tmax : (num7 - num3)));
 					if (num8 < num9)
 					{
 						break;

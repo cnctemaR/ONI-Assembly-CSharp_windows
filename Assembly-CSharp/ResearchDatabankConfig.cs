@@ -8,26 +8,12 @@ public class ResearchDatabankConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		string text = "ResearchDatabank";
-		string text2 = ITEMS.INDUSTRIAL_PRODUCTS.RESEARCH_DATABANK.NAME;
-		string text3 = ITEMS.INDUSTRIAL_PRODUCTS.RESEARCH_DATABANK.DESC;
-		float num = 1f;
-		bool flag = true;
-		KAnimFile anim = Assets.GetAnim("floppy_disc_kanim");
-		string text4 = "object";
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
-		EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE;
-		float num2 = 0.35f;
-		float num3 = 0.35f;
-		bool flag2 = true;
-		List<Tag> list = new List<Tag>
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("ResearchDatabank", ITEMS.INDUSTRIAL_PRODUCTS.RESEARCH_DATABANK.NAME, ITEMS.INDUSTRIAL_PRODUCTS.RESEARCH_DATABANK.DESC, 1f, true, Assets.GetAnim("floppy_disc_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, true, 0, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.IndustrialIngredient,
 			GameTags.Experimental
-		};
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(text, text2, text3, num, flag, anim, text4, sceneLayer, collisionShape, num2, num3, flag2, 0, SimHashes.Creature, list);
-		EntitySplitter entitySplitter = gameObject.AddOrGet<EntitySplitter>();
-		entitySplitter.maxStackSize = (float)ROCKETRY.DESTINATION_RESEARCH.BASIC;
+		});
+		gameObject.AddOrGet<EntitySplitter>().maxStackSize = (float)ROCKETRY.DESTINATION_RESEARCH.BASIC;
 		return gameObject;
 	}
 

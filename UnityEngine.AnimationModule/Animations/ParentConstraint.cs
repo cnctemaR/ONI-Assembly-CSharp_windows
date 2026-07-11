@@ -6,13 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>Constrains the orientation and translation of an object to one or more source objects. The constrained object behaves as if it is in the hierarchy of the sources.</para>
-	/// </summary>
-	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Animation/Constraints/ParentConstraint.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
+	[NativeHeader("Runtime/Animation/Constraints/ParentConstraint.h")]
+	[RequireComponent(typeof(Transform))]
+	[UsedByNativeCode]
 	public sealed class ParentConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private ParentConstraint()
@@ -23,9 +20,6 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] ParentConstraint self);
 
-		/// <summary>
-		///   <para>The weight of the constraint component.</para>
-		/// </summary>
 		public extern float weight
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -34,9 +28,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Activates or deactivates the constraint.</para>
-		/// </summary>
 		public extern bool constraintActive
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -45,9 +36,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Locks the offsets and position (translation and rotation) at rest.</para>
-		/// </summary>
 		public extern bool locked
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -56,9 +44,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of sources set on the component (read-only).</para>
-		/// </summary>
 		public int sourceCount
 		{
 			get
@@ -69,11 +54,8 @@ namespace UnityEngine.Animations
 
 		[FreeFunction("ConstraintBindings::GetSourceCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSourceCountInternal(ParentConstraint self);
+		private static extern int GetSourceCountInternal([NotNull] ParentConstraint self);
 
-		/// <summary>
-		///   <para>The position of the object in local space, used when the sources have a total weight of 0.</para>
-		/// </summary>
 		public Vector3 translationAtRest
 		{
 			get
@@ -88,9 +70,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation used when the sources have a total weight of 0.</para>
-		/// </summary>
 		public Vector3 rotationAtRest
 		{
 			get
@@ -105,9 +84,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>The translation offsets from the constrained orientation.</para>
-		/// </summary>
 		public extern Vector3[] translationOffsets
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -116,9 +92,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The rotation offsets from the constrained orientation.</para>
-		/// </summary>
 		public extern Vector3[] rotationOffsets
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -127,9 +100,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The translation axes affected by the ParentConstraint.</para>
-		/// </summary>
 		public extern Axis translationAxis
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -138,9 +108,6 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>The rotation axes affected by the ParentConstraint.</para>
-		/// </summary>
 		public extern Axis rotationAxis
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -149,24 +116,12 @@ namespace UnityEngine.Animations
 			set;
 		}
 
-		/// <summary>
-		///   <para>Gets the rotation offset associated with a source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the constraint source.</param>
-		/// <returns>
-		///   <para>The translation offset.</para>
-		/// </returns>
 		public Vector3 GetTranslationOffset(int index)
 		{
 			this.ValidateSourceIndex(index);
 			return this.GetTranslationOffsetInternal(index);
 		}
 
-		/// <summary>
-		///   <para>Sets the translation offset associated with a source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the constraint source.</param>
-		/// <param name="value">The new translation offset.</param>
 		public void SetTranslationOffset(int index, Vector3 value)
 		{
 			this.ValidateSourceIndex(index);
@@ -187,24 +142,12 @@ namespace UnityEngine.Animations
 			this.SetTranslationOffsetInternal_Injected(index, ref value);
 		}
 
-		/// <summary>
-		///   <para>Gets the rotation offset associated with a source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the constraint source.</param>
-		/// <returns>
-		///   <para>The rotation offset, as Euler angles.</para>
-		/// </returns>
 		public Vector3 GetRotationOffset(int index)
 		{
 			this.ValidateSourceIndex(index);
 			return this.GetRotationOffsetInternal(index);
 		}
 
-		/// <summary>
-		///   <para>Sets the rotation offset associated with a source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the constraint source.</param>
-		/// <param name="value">The new rotation offset.</param>
 		public void SetRotationOffset(int index, Vector3 value)
 		{
 			this.ValidateSourceIndex(index);
@@ -252,24 +195,13 @@ namespace UnityEngine.Animations
 
 		[FreeFunction("ConstraintBindings::SetSources")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSourcesInternal(ParentConstraint self, List<ConstraintSource> sources);
+		private static extern void SetSourcesInternal([NotNull] ParentConstraint self, List<ConstraintSource> sources);
 
-		/// <summary>
-		///   <para>Adds a constraint source.</para>
-		/// </summary>
-		/// <param name="source">The source object and its weight.</param>
-		/// <returns>
-		///   <para>Returns the index of the added source.</para>
-		/// </returns>
 		public int AddSource(ConstraintSource source)
 		{
 			return this.AddSource_Injected(ref source);
 		}
 
-		/// <summary>
-		///   <para>Removes a source from the component.</para>
-		/// </summary>
-		/// <param name="index">The index of the source to remove.</param>
 		public void RemoveSource(int index)
 		{
 			this.ValidateSourceIndex(index);
@@ -280,13 +212,6 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void RemoveSourceInternal(int index);
 
-		/// <summary>
-		///   <para>Gets a constraint source by index.</para>
-		/// </summary>
-		/// <param name="index">The index of the source.</param>
-		/// <returns>
-		///   <para>The source object and its weight.</para>
-		/// </returns>
 		public ConstraintSource GetSource(int index)
 		{
 			this.ValidateSourceIndex(index);
@@ -301,11 +226,6 @@ namespace UnityEngine.Animations
 			return constraintSource;
 		}
 
-		/// <summary>
-		///   <para>Sets a source at a specified index.</para>
-		/// </summary>
-		/// <param name="index">The index of the source to set.</param>
-		/// <param name="source">The source object and its weight.</param>
 		public void SetSource(int index, ConstraintSource source)
 		{
 			this.ValidateSourceIndex(index);

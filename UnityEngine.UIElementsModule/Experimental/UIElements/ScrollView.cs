@@ -1,57 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
+using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace UnityEngine.Experimental.UIElements
 {
 	public class ScrollView : VisualElement
 	{
 		public ScrollView()
-			: this(ScrollView.kDefaultScrollerValues, ScrollView.kDefaultScrollerValues)
 		{
-		}
-
-		public ScrollView(Vector2 horizontalScrollerValues, Vector2 verticalScrollerValues)
-		{
-			this.horizontalScrollerValues = horizontalScrollerValues;
-			this.verticalScrollerValues = verticalScrollerValues;
 			this.contentViewport = new VisualElement
 			{
 				name = "ContentViewport"
 			};
-			this.contentViewport.clippingOptions = VisualElement.ClippingOptions.ClipContents;
+			this.contentViewport.style.overflow = Overflow.Hidden;
 			base.shadow.Add(this.contentViewport);
-			this.m_ContentContainer = new VisualElement
+			this.AssignContentContainer(new VisualElement
 			{
 				name = "ContentView"
-			};
-			this.contentViewport.Add(this.m_ContentContainer);
-			this.horizontalScroller = new Scroller(horizontalScrollerValues.x, horizontalScrollerValues.y, delegate(float value)
+			});
+			this.horizontalScroller = new Scroller(0f, 100f, delegate(float value)
 			{
 				this.scrollOffset = new Vector2(value, this.scrollOffset.y);
 				this.UpdateContentViewTransform();
-			}, Slider.Direction.Horizontal)
+			}, SliderDirection.Horizontal)
 			{
 				name = "HorizontalScroller",
-				persistenceKey = "HorizontalScroller"
+				persistenceKey = "HorizontalScroller",
+				visible = false
 			};
 			base.shadow.Add(this.horizontalScroller);
-			this.verticalScroller = new Scroller(verticalScrollerValues.x, verticalScrollerValues.y, delegate(float value)
+			this.verticalScroller = new Scroller(0f, 100f, delegate(float value)
 			{
 				this.scrollOffset = new Vector2(this.scrollOffset.x, value);
 				this.UpdateContentViewTransform();
-			}, Slider.Direction.Vertical)
+			}, SliderDirection.Vertical)
 			{
 				name = "VerticalScroller",
-				persistenceKey = "VerticalScroller"
+				persistenceKey = "VerticalScroller",
+				visible = false
 			};
 			base.shadow.Add(this.verticalScroller);
-			base.RegisterCallback<WheelEvent>(new EventCallback<WheelEvent>(this.OnScrollWheel), Capture.NoCapture);
-			this.contentContainer.RegisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnGeometryChanged), Capture.NoCapture);
+			base.RegisterCallback<WheelEvent>(new EventCallback<WheelEvent>(this.OnScrollWheel), TrickleDown.NoTrickleDown);
+			this.scrollOffset = Vector2.zero;
 		}
 
-		/// <summary>
-		///   <para>Indicates whether the content of ScrollView should fill the width of its viewport. The default value is false.</para>
-		/// </summary>
 		public bool stretchContentWidth
 		{
 			get
@@ -74,10 +65,6 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 		}
-
-		public Vector2 horizontalScrollerValues { get; set; }
-
-		public Vector2 verticalScrollerValues { get; set; }
 
 		public bool showHorizontal { get; set; }
 
@@ -116,6 +103,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		public float horizontalPageSize
+		{
+			get
+			{
+				return this.horizontalScroller.slider.pageSize;
+			}
+			set
+			{
+				this.horizontalScroller.slider.pageSize = value;
+			}
+		}
+
+		public float verticalPageSize
+		{
+			get
+			{
+				return this.verticalScroller.slider.pageSize;
+			}
+			set
+			{
+				this.verticalScroller.slider.pageSize = value;
+			}
+		}
+
 		private float scrollableWidth
 		{
 			get
@@ -139,13 +150,9 @@ namespace UnityEngine.Experimental.UIElements
 			position.x = -scrollOffset.x;
 			position.y = -scrollOffset.y;
 			this.contentContainer.transform.position = position;
-			base.Dirty(ChangeType.Repaint);
+			base.IncrementVersion(VersionChangeType.Repaint);
 		}
 
-		/// <summary>
-		///   <para>Scroll to a specific child element.</para>
-		/// </summary>
-		/// <param name="child">The child to scroll to.</param>
 		public void ScrollTo(VisualElement child)
 		{
 			if (!this.contentContainer.Contains(child))
@@ -193,6 +200,29 @@ namespace UnityEngine.Experimental.UIElements
 			get
 			{
 				return this.m_ContentContainer;
+			}
+		}
+
+		private void AssignContentContainer(VisualElement contents)
+		{
+			contents.RegisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnGeometryChanged), TrickleDown.NoTrickleDown);
+			contents.AddToClassList(ScrollView.contentViewClass);
+			this.contentViewport.Add(contents);
+			this.m_ContentContainer = contents;
+		}
+
+		public void SetContents(VisualElement contents)
+		{
+			if (contents != null && contents != this.m_ContentContainer)
+			{
+				if (this.m_ContentContainer != null)
+				{
+					this.m_ContentContainer.RemoveFromHierarchy();
+					this.m_ContentContainer.UnregisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnGeometryChanged), TrickleDown.NoTrickleDown);
+					this.m_ContentContainer.RemoveFromClassList(ScrollView.contentViewClass);
+				}
+				this.AssignContentContainer(contents);
+				this.scrollOffset = Vector2.zero;
 			}
 		}
 
@@ -246,11 +276,11 @@ namespace UnityEngine.Experimental.UIElements
 					this.horizontalScroller.visible = this.needsHorizontal;
 					if (this.needsHorizontal)
 					{
-						this.contentViewport.AddToClassList("HorizontalScroll");
+						this.contentViewport.AddToClassList(ScrollView.horizontalScrollClass);
 					}
 					else
 					{
-						this.contentViewport.RemoveFromClassList("HorizontalScroll");
+						this.contentViewport.RemoveFromClassList(ScrollView.horizontalScrollClass);
 					}
 				}
 				if (this.verticalScroller.visible != this.needsVertical)
@@ -258,11 +288,11 @@ namespace UnityEngine.Experimental.UIElements
 					this.verticalScroller.visible = this.needsVertical;
 					if (this.needsVertical)
 					{
-						this.contentViewport.AddToClassList("VerticalScroll");
+						this.contentViewport.AddToClassList(ScrollView.verticalScrollClass);
 					}
 					else
 					{
-						this.contentViewport.RemoveFromClassList("VerticalScroll");
+						this.contentViewport.RemoveFromClassList(ScrollView.verticalScrollClass);
 					}
 				}
 				this.UpdateContentViewTransform();
@@ -275,11 +305,11 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				if (evt.delta.y < 0f)
 				{
-					this.verticalScroller.ScrollPageUp();
+					this.verticalScroller.ScrollPageUp(Mathf.Abs(evt.delta.y));
 				}
 				else if (evt.delta.y > 0f)
 				{
-					this.verticalScroller.ScrollPageDown();
+					this.verticalScroller.ScrollPageDown(Mathf.Abs(evt.delta.y));
 				}
 			}
 			evt.StopPropagation();
@@ -287,136 +317,57 @@ namespace UnityEngine.Experimental.UIElements
 
 		private bool m_StretchContentWidth = false;
 
-		public static readonly Vector2 kDefaultScrollerValues = new Vector2(0f, 100f);
-
 		private VisualElement m_ContentContainer;
 
-		/// <summary>
-		///   <para>Instantiates a ScrollView using the data read from a UXML file.</para>
-		/// </summary>
-		public class ScrollViewFactory : UxmlFactory<ScrollView, ScrollView.ScrollViewUxmlTraits>
+		private static readonly string contentViewClass = "content-view";
+
+		private static readonly string horizontalScrollClass = "horizontal-scroll-visible";
+
+		private static readonly string verticalScrollClass = "vertical-scroll-visible";
+
+		public new class UxmlFactory : UxmlFactory<ScrollView, ScrollView.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the ScrollView.</para>
-		/// </summary>
-		public class ScrollViewUxmlTraits : VisualElement.VisualElementUxmlTraits
+		public new class UxmlTraits : VisualElement.UxmlTraits
 		{
-			/// <summary>
-			///   <para>Constructor.</para>
-			/// </summary>
-			public ScrollViewUxmlTraits()
-			{
-				this.m_ShowHorizontal = new UxmlBoolAttributeDescription
-				{
-					name = "showHorizontalScroller"
-				};
-				this.m_ShowVertical = new UxmlBoolAttributeDescription
-				{
-					name = "showVerticalScroller"
-				};
-				this.m_HorizontalLowValue = new UxmlFloatAttributeDescription
-				{
-					name = "horizontalLowValue"
-				};
-				this.m_HorizontalHighValue = new UxmlFloatAttributeDescription
-				{
-					name = "horizontalHighValue"
-				};
-				this.m_HorizontalPageSize = new UxmlFloatAttributeDescription
-				{
-					name = "horizontalPageSize",
-					defaultValue = 10f
-				};
-				this.m_HorizontalValue = new UxmlFloatAttributeDescription
-				{
-					name = "horizontalValue"
-				};
-				this.m_VerticalLowValue = new UxmlFloatAttributeDescription
-				{
-					name = "verticalLowValue"
-				};
-				this.m_VerticalHighValue = new UxmlFloatAttributeDescription
-				{
-					name = "verticalHighValue"
-				};
-				this.m_VerticalPageSize = new UxmlFloatAttributeDescription
-				{
-					name = "verticalPageSize",
-					defaultValue = 10f
-				};
-				this.m_VerticalValue = new UxmlFloatAttributeDescription
-				{
-					name = "verticalValue"
-				};
-			}
-
-			/// <summary>
-			///   <para>Returns an enumerable containing attribute descriptions for ScrollView properties that should be available in UXML.</para>
-			/// </summary>
-			public override IEnumerable<UxmlAttributeDescription> uxmlAttributesDescription
-			{
-				get
-				{
-					foreach (UxmlAttributeDescription attr in this.<get_uxmlAttributesDescription>__BaseCallProxy0())
-					{
-						yield return attr;
-					}
-					yield return this.m_ShowHorizontal;
-					yield return this.m_ShowVertical;
-					yield return this.m_HorizontalLowValue;
-					yield return this.m_HorizontalHighValue;
-					yield return this.m_HorizontalPageSize;
-					yield return this.m_HorizontalValue;
-					yield return this.m_VerticalLowValue;
-					yield return this.m_VerticalHighValue;
-					yield return this.m_VerticalPageSize;
-					yield return this.m_VerticalValue;
-					yield break;
-				}
-			}
-
-			/// <summary>
-			///   <para>Initialize ScrollView properties using values from the attribute bag.</para>
-			/// </summary>
-			/// <param name="ve">The object to initialize.</param>
-			/// <param name="bag">The attribute bag.</param>
-			/// <param name="cc">The creation context; unused.</param>
 			public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
 			{
 				base.Init(ve, bag, cc);
-				Vector2 vector = new Vector2(this.m_HorizontalLowValue.GetValueFromBag(bag), this.m_HorizontalHighValue.GetValueFromBag(bag));
-				Vector2 vector2 = new Vector2(this.m_VerticalLowValue.GetValueFromBag(bag), this.m_VerticalHighValue.GetValueFromBag(bag));
 				ScrollView scrollView = (ScrollView)ve;
-				scrollView.horizontalScrollerValues = vector;
-				scrollView.verticalScrollerValues = vector2;
-				scrollView.showHorizontal = this.m_ShowHorizontal.GetValueFromBag(bag);
-				scrollView.showVertical = this.m_ShowVertical.GetValueFromBag(bag);
-				scrollView.scrollOffset = new Vector2(this.m_HorizontalValue.GetValueFromBag(bag), this.m_VerticalValue.GetValueFromBag(bag));
-				scrollView.horizontalScroller.slider.pageSize = this.m_HorizontalPageSize.GetValueFromBag(bag);
-				scrollView.verticalScroller.slider.pageSize = this.m_VerticalPageSize.GetValueFromBag(bag);
+				scrollView.showHorizontal = this.m_ShowHorizontal.GetValueFromBag(bag, cc);
+				scrollView.showVertical = this.m_ShowVertical.GetValueFromBag(bag, cc);
+				scrollView.stretchContentWidth = this.m_StretchContentWidth.GetValueFromBag(bag, cc);
+				scrollView.horizontalPageSize = this.m_HorizontalPageSize.GetValueFromBag(bag, cc);
+				scrollView.verticalPageSize = this.m_VerticalPageSize.GetValueFromBag(bag, cc);
 			}
 
-			private UxmlBoolAttributeDescription m_ShowHorizontal;
+			private UxmlBoolAttributeDescription m_ShowHorizontal = new UxmlBoolAttributeDescription
+			{
+				name = "show-horizontal-scroller"
+			};
 
-			private UxmlBoolAttributeDescription m_ShowVertical;
+			private UxmlBoolAttributeDescription m_ShowVertical = new UxmlBoolAttributeDescription
+			{
+				name = "show-vertical-scroller"
+			};
 
-			private UxmlFloatAttributeDescription m_HorizontalLowValue;
+			private UxmlFloatAttributeDescription m_HorizontalPageSize = new UxmlFloatAttributeDescription
+			{
+				name = "horizontal-page-size",
+				defaultValue = 20f
+			};
 
-			private UxmlFloatAttributeDescription m_HorizontalHighValue;
+			private UxmlFloatAttributeDescription m_VerticalPageSize = new UxmlFloatAttributeDescription
+			{
+				name = "vertical-page-size",
+				defaultValue = 20f
+			};
 
-			private UxmlFloatAttributeDescription m_HorizontalPageSize;
-
-			private UxmlFloatAttributeDescription m_HorizontalValue;
-
-			private UxmlFloatAttributeDescription m_VerticalLowValue;
-
-			private UxmlFloatAttributeDescription m_VerticalHighValue;
-
-			private UxmlFloatAttributeDescription m_VerticalPageSize;
-
-			private UxmlFloatAttributeDescription m_VerticalValue;
+			private UxmlBoolAttributeDescription m_StretchContentWidth = new UxmlBoolAttributeDescription
+			{
+				name = "stretch-content-width"
+			};
 		}
 	}
 }

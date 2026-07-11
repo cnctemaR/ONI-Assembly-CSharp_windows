@@ -40,18 +40,17 @@ public class CO2ScrubberConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.capacityKg = 30000f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		AirFilter airFilter = go.AddOrGet<AirFilter>();
-		airFilter.filterTag = GameTagExtensions.Create(SimHashes.Water);
-		ElementConsumer elementConsumer = go.AddOrGet<PassiveElementConsumer>();
-		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;
-		elementConsumer.consumptionRate = 0.6f;
-		elementConsumer.capacityKG = 0.6f;
-		elementConsumer.consumptionRadius = 3;
-		elementConsumer.showInStatusPanel = true;
-		elementConsumer.sampleCellOffset = new Vector3(0f, 0f, 0f);
-		elementConsumer.isRequired = false;
-		elementConsumer.storeOnConsume = true;
-		elementConsumer.showDescriptor = false;
+		go.AddOrGet<AirFilter>().filterTag = GameTagExtensions.Create(SimHashes.Water);
+		PassiveElementConsumer passiveElementConsumer = go.AddOrGet<PassiveElementConsumer>();
+		passiveElementConsumer.elementToConsume = SimHashes.CarbonDioxide;
+		passiveElementConsumer.consumptionRate = 0.6f;
+		passiveElementConsumer.capacityKG = 0.6f;
+		passiveElementConsumer.consumptionRadius = 3;
+		passiveElementConsumer.showInStatusPanel = true;
+		passiveElementConsumer.sampleCellOffset = new Vector3(0f, 0f, 0f);
+		passiveElementConsumer.isRequired = false;
+		passiveElementConsumer.storeOnConsume = true;
+		passiveElementConsumer.showDescriptor = false;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{

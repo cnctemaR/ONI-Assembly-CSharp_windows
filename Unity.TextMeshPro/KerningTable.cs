@@ -17,20 +17,17 @@ namespace TMPro
 			if (this.kerningPairs.Count == 0)
 			{
 				this.kerningPairs.Add(new KerningPair(0U, 0U, 0f));
+				return;
 			}
-			else
-			{
-				uint firstGlyph = this.kerningPairs.Last<KerningPair>().firstGlyph;
-				uint secondGlyph = this.kerningPairs.Last<KerningPair>().secondGlyph;
-				float xOffset = this.kerningPairs.Last<KerningPair>().xOffset;
-				this.kerningPairs.Add(new KerningPair(firstGlyph, secondGlyph, xOffset));
-			}
+			uint firstGlyph = this.kerningPairs.Last<KerningPair>().firstGlyph;
+			uint secondGlyph = this.kerningPairs.Last<KerningPair>().secondGlyph;
+			float xOffset = this.kerningPairs.Last<KerningPair>().xOffset;
+			this.kerningPairs.Add(new KerningPair(firstGlyph, secondGlyph, xOffset));
 		}
 
 		public int AddKerningPair(uint first, uint second, float offset)
 		{
-			int num = this.kerningPairs.FindIndex((KerningPair item) => item.firstGlyph == first && item.secondGlyph == second);
-			if (num == -1)
+			if (this.kerningPairs.FindIndex((KerningPair item) => item.firstGlyph == first && item.secondGlyph == second) == -1)
 			{
 				this.kerningPairs.Add(new KerningPair(first, second, offset));
 				return 0;
@@ -40,8 +37,7 @@ namespace TMPro
 
 		public int AddGlyphPairAdjustmentRecord(uint first, GlyphValueRecord firstAdjustments, uint second, GlyphValueRecord secondAdjustments)
 		{
-			int num = this.kerningPairs.FindIndex((KerningPair item) => item.firstGlyph == first && item.secondGlyph == second);
-			if (num == -1)
+			if (this.kerningPairs.FindIndex((KerningPair item) => item.firstGlyph == first && item.secondGlyph == second) == -1)
 			{
 				this.kerningPairs.Add(new KerningPair(first, firstAdjustments, second, secondAdjustments));
 				return 0;

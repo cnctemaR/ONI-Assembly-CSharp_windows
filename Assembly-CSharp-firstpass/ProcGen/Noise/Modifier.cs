@@ -7,18 +7,6 @@ namespace ProcGen.Noise
 {
 	public class Modifier : NoiseBase
 	{
-		public Modifier()
-		{
-			this.modifyType = Modifier.ModifyType.Abs;
-			this.lower = -1f;
-			this.upper = 1f;
-			this.exponent = 0.02f;
-			this.invert = false;
-			this.scale = 1f;
-			this.bias = 0f;
-			this.scale2d = new Vector2f(1, 1);
-		}
-
 		public override Type GetObjectType()
 		{
 			return typeof(Modifier);
@@ -39,6 +27,18 @@ namespace ProcGen.Noise
 		public float bias { get; set; }
 
 		public Vector2f scale2d { get; set; }
+
+		public Modifier()
+		{
+			this.modifyType = Modifier.ModifyType.Abs;
+			this.lower = -1f;
+			this.upper = 1f;
+			this.exponent = 0.02f;
+			this.invert = false;
+			this.scale = 1f;
+			this.bias = 0f;
+			this.scale2d = new Vector2f(1, 1);
+		}
 
 		public IModule3D CreateModule()
 		{
@@ -111,20 +111,23 @@ namespace ProcGen.Noise
 			{
 				Curve curve = target as Curve;
 				curve.ClearControlPoints();
-				List<ControlPoint> controls = controlPoints.GetControls();
-				foreach (ControlPoint controlPoint in controls)
+				using (List<ControlPoint>.Enumerator enumerator = controlPoints.GetControls().GetEnumerator())
 				{
-					curve.AddControlPoint(controlPoint);
+					while (enumerator.MoveNext())
+					{
+						ControlPoint controlPoint = enumerator.Current;
+						curve.AddControlPoint(controlPoint);
+					}
+					return;
 				}
 			}
-			else if (this.modifyType == Modifier.ModifyType.Terrace)
+			if (this.modifyType == Modifier.ModifyType.Terrace)
 			{
 				Terrace terrace = target as Terrace;
 				terrace.ClearControlPoints();
 				foreach (float num in controlFloats.points)
 				{
-					float num2 = num;
-					terrace.AddControlPoint(num2);
+					terrace.AddControlPoint(num);
 				}
 			}
 		}

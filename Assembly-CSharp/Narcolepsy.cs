@@ -100,11 +100,9 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 				if (smi.master.GetSMI<StaminaMonitor.Instance>().IsSleeping())
 				{
 					smi.GoTo(this.idle);
+					return;
 				}
-				else
-				{
-					smi.ScheduleGoTo(this.GetNewInterval(TRAITS.NARCOLEPSY_SLEEPDURATION_MIN, TRAITS.NARCOLEPSY_SLEEPDURATION_MAX), this.idle);
-				}
+				smi.ScheduleGoTo(this.GetNewInterval(TRAITS.NARCOLEPSY_SLEEPDURATION_MIN, TRAITS.NARCOLEPSY_SLEEPDURATION_MAX), this.idle);
 			}).ToggleUrge(Db.Get().Urges.Narcolepsy).ToggleChore(new Func<Narcolepsy.StatesInstance, Chore>(this.CreateNarcolepsyChore), this.idle);
 			this.dead.DoNothing();
 		}
@@ -119,10 +117,7 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 
 		private float GetNewInterval(float min, float max)
 		{
-			float num = max - min;
-			float num2 = Util.GaussianRandom(num, 1f);
-			num2 = Mathf.Max(num2, min);
-			num2 = Mathf.Min(num2, max);
+			Mathf.Min(Mathf.Max(Util.GaussianRandom(max - min, 1f), min), max);
 			return global::UnityEngine.Random.Range(min, max);
 		}
 

@@ -13,17 +13,6 @@ namespace ProcGenGame
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class TerrainCell
 	{
-		protected TerrainCell()
-		{
-		}
-
-		protected TerrainCell(global::ProcGen.Node node, Diagram.Site site)
-		{
-			this.node = node;
-			this.site = site;
-			this.node.SetPosition(site.position);
-		}
-
 		public Polygon poly
 		{
 			get
@@ -52,6 +41,17 @@ namespace ProcGenGame
 		}
 
 		public List<KeyValuePair<int, Tag>> mobs { get; private set; }
+
+		protected TerrainCell()
+		{
+		}
+
+		protected TerrainCell(global::ProcGen.Node node, Diagram.Site site)
+		{
+			this.node = node;
+			this.site = site;
+			this.node.SetPosition(site.position);
+		}
 
 		public virtual void LogInfo(string evt, string param, float value)
 		{
@@ -99,7 +99,7 @@ namespace ProcGenGame
 					}
 				}
 			}
-			this.LogInfo("Initialise cells", string.Empty, (float)this.allCells.Count);
+			this.LogInfo("Initialise cells", "", (float)this.allCells.Count);
 		}
 
 		public List<int> GetAllCells()
@@ -190,7 +190,7 @@ namespace ProcGenGame
 			}
 			this.mobs.Add(mob);
 			bool flag = this.RemoveFromAvailableSpawnCells(mob.Key);
-			this.LogInfo("\t\t\tRemoveFromAvailableCells", mob.Value.Name + ": " + ((!flag) ? "failed" : "success"), (float)mob.Key);
+			this.LogInfo("\t\t\tRemoveFromAvailableCells", mob.Value.Name + ": " + (flag ? "success" : "failed"), (float)mob.Key);
 			if (!flag)
 			{
 				if (!this.allCells.Contains(mob.Key))
@@ -203,18 +203,16 @@ namespace ProcGenGame
 						mob.Value.Name,
 						"]"
 					}));
+					return;
 				}
-				else
+				global::Debug.Assert(false, string.Concat(new object[]
 				{
-					global::Debug.Assert(false, string.Concat(new object[]
-					{
-						"Couldnt find cell [",
-						mob.Key,
-						"] to remove for mob [",
-						mob.Value.Name,
-						"]"
-					}));
-				}
+					"Couldnt find cell [",
+					mob.Key,
+					"] to remove for mob [",
+					mob.Value.Name,
+					"]"
+				}));
 			}
 		}
 
@@ -263,29 +261,26 @@ namespace ProcGenGame
 
 		private void HandleSprinkleOfElement(WorldGenSettings settings, Tag targetTag, Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd)
 		{
-			FeatureSettings feature = settings.GetFeature(targetTag.Name);
-			string element = feature.GetOneWeightedSimHash("SprinkleOfElementChoices", rnd).element;
-			Element element2 = ElementLoader.FindElementByName(element);
+			Element element = ElementLoader.FindElementByName(settings.GetFeature(targetTag.Name).GetOneWeightedSimHash("SprinkleOfElementChoices", rnd).element);
 			global::ProcGen.Room room = null;
 			SettingsCache.rooms.TryGetValue(targetTag.Name, out room);
 			SampleDescriber sampleDescriber = room;
-			Sim.PhysicsData defaultValues = element2.defaultValues;
+			Sim.PhysicsData defaultValues = element.defaultValues;
 			Sim.DiseaseCell invalid = Sim.DiseaseCell.Invalid;
 			for (int i = 0; i < this.terrainPositions.Count; i++)
 			{
 				if (!(this.terrainPositions[i].Value != targetTag))
 				{
 					float num = rnd.RandomRange(sampleDescriber.blobSize.min, sampleDescriber.blobSize.max);
-					Vector2 vector = Grid.CellToPos2D(this.terrainPositions[i].Key);
-					List<Vector2I> filledCircle = global::ProcGen.Util.GetFilledCircle(vector, num);
+					List<Vector2I> filledCircle = global::ProcGen.Util.GetFilledCircle(Grid.CellToPos2D(this.terrainPositions[i].Key), num);
 					for (int j = 0; j < filledCircle.Count; j++)
 					{
 						int num2 = Grid.XYToCell(filledCircle[j].x, filledCircle[j].y);
 						if (Grid.IsValidCell(num2))
 						{
-							defaultValues.mass = this.GetDensityMassForCell(world, num2, element2.defaultValues.mass);
+							defaultValues.mass = this.GetDensityMassForCell(world, num2, element.defaultValues.mass);
 							defaultValues.temperature = temperatureMin + world.heatOffset[num2] * temperatureRange;
-							SetValues(num2, element2, defaultValues, invalid);
+							SetValues(num2, element, defaultValues, invalid);
 						}
 					}
 				}
@@ -358,8 +353,10 @@ namespace ProcGenGame
 		public static TerrainCell.ElementOverride GetElementOverride(string element, SampleDescriber.Override overrides)
 		{
 			global::Debug.Assert(element != null && element.Length > 0);
-			TerrainCell.ElementOverride elementOverride = default(TerrainCell.ElementOverride);
-			elementOverride.element = ElementLoader.FindElementByName(element);
+			TerrainCell.ElementOverride elementOverride = new TerrainCell.ElementOverride
+			{
+				element = ElementLoader.FindElementByName(element)
+			};
 			global::Debug.Assert(elementOverride.element != null, "Couldn't find an element called " + element);
 			elementOverride.pdelement = elementOverride.element.defaultValues;
 			elementOverride.dc = Sim.DiseaseCell.Invalid;
@@ -492,24 +489,20 @@ namespace ProcGenGame
 			}
 			for (int i = 0; i < points.Count; i++)
 			{
-				int num2 = Grid.XYToCell(points[i].x, points[i].y);
-				if (Grid.IsValidCell(num2))
+				if (Grid.IsValidCell(Grid.XYToCell(points[i].x, points[i].y)))
 				{
 					if (num == -1)
 					{
 						num = i;
 					}
-					else if (location != Mob.Location.Ceiling)
+					else if (location != Mob.Location.Floor)
 					{
-						if (location == Mob.Location.Floor)
+						if (location == Mob.Location.Ceiling && points[i].y > points[num].y)
 						{
-							if (points[i].y < points[num].y)
-							{
-								num = i;
-							}
+							num = i;
 						}
 					}
-					else if (points[i].y > points[num].y)
+					else if (points[i].y < points[num].y)
 					{
 						num = i;
 					}
@@ -574,12 +567,9 @@ namespace ProcGenGame
 					if (this.site.poly.Contains(new Vector2(num2, num)))
 					{
 						float num4 = (float)((int)basenoise[num3]);
-						if (num4 >= minThreshold && num4 <= maxThreshold)
+						if (num4 >= minThreshold && num4 <= maxThreshold && !list.Contains(num3))
 						{
-							if (!list.Contains(num3))
-							{
-								list.Add(Grid.PosToCell(new Vector2(num2, num)));
-							}
+							list.Add(Grid.PosToCell(new Vector2(num2, num)));
 						}
 					}
 				}
@@ -589,7 +579,7 @@ namespace ProcGenGame
 
 		private void ApplyForeground(WorldGenSettings settings, Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd)
 		{
-			this.LogInfo("Apply foregreound", (this.node.tags != null).ToString(), (float)((this.node.tags == null) ? 0 : this.node.tags.Count));
+			this.LogInfo("Apply foregreound", (this.node.tags != null).ToString(), (float)((this.node.tags != null) ? this.node.tags.Count : 0));
 			if (this.node.tags != null)
 			{
 				FeatureSettings featureSettings = settings.TryGetFeature(this.node.type);
@@ -604,7 +594,7 @@ namespace ProcGenGame
 							list.Add(tag);
 						}
 					}
-					this.LogInfo("\tNo feature, checking possible feature tags, found", string.Empty, (float)list.Count);
+					this.LogInfo("\tNo feature, checking possible feature tags, found", "", (float)list.Count);
 					if (list.Count > 0)
 					{
 						Tag tag2 = list[rnd.RandomSource().Next(list.Count)];
@@ -688,7 +678,7 @@ namespace ProcGenGame
 			ElementBandConfiguration elementBandConfiguration = worldGen.Settings.GetElementBandForBiome(this.node.type);
 			if (elementBandConfiguration == null && this.node.biomeSpecificTags != null)
 			{
-				this.LogInfo("\tType is not a biome, checking tags", string.Empty, (float)this.node.tags.Count);
+				this.LogInfo("\tType is not a biome, checking tags", "", (float)this.node.tags.Count);
 				List<ElementBandConfiguration> list = new List<ElementBandConfiguration>();
 				foreach (Tag tag in this.node.biomeSpecificTags)
 				{
@@ -703,7 +693,7 @@ namespace ProcGenGame
 				{
 					int num = rnd.RandomSource().Next(list.Count);
 					elementBandConfiguration = list[num];
-					this.LogInfo("\tPicked biome", string.Empty, (float)num);
+					this.LogInfo("\tPicked biome", "", (float)num);
 				}
 			}
 			DebugUtil.Assert(elementBandConfiguration != null, "A node didn't get assigned a biome! ", this.node.type);
@@ -739,8 +729,7 @@ namespace ProcGenGame
 							{
 								float num6 = 0f;
 								MathUtil.Pair<Vector2, Vector2> closestEdge = this.poly.GetClosestEdge(vector, ref num6);
-								Vector2 vector2 = closestEdge.First + (closestEdge.Second - closestEdge.First) * num6;
-								num5 = Vector2.Distance(vector2, vector);
+								num5 = Vector2.Distance(closestEdge.First + (closestEdge.Second - closestEdge.First) * num6, vector);
 							}
 							num4 = Vector2.Distance(this.poly.Centroid(), vector) / num5;
 							num4 = Mathf.Max(0f, Mathf.Min(1f, num4));
@@ -753,13 +742,13 @@ namespace ProcGenGame
 						{
 							float num7 = 0f;
 							MathUtil.Pair<Vector2, Vector2> closestEdge2 = this.poly.GetClosestEdge(vector, ref num7);
-							Vector2 vector3 = closestEdge2.First + (closestEdge2.Second - closestEdge2.First) * num7;
+							Vector2 vector2 = closestEdge2.First + (closestEdge2.Second - closestEdge2.First) * num7;
 							float num8 = 15f;
 							if (flag10)
 							{
 								num8 = Vector2.Distance(this.poly.Centroid(), vector);
 							}
-							num4 = Vector2.Distance(vector3, vector) / num8;
+							num4 = Vector2.Distance(vector2, vector) / num8;
 							num4 = Mathf.Max(0f, Mathf.Min(1f, num4));
 							if (flag6)
 							{
@@ -774,15 +763,14 @@ namespace ProcGenGame
 							{
 								MathUtil.Pair<Vector2, Vector2> pair = new MathUtil.Pair<Vector2, Vector2>(edge.corner0.position, edge.corner1.position);
 								float num10 = 0f;
-								float num11 = Mathf.Abs(MathUtil.GetClosestPointBetweenPointAndLineSegment(pair, vector, ref num10));
-								num9 = Mathf.Min(num11, num9);
+								num9 = Mathf.Min(Mathf.Abs(MathUtil.GetClosestPointBetweenPointAndLineSegment(pair, vector, ref num10)), num9);
 							}
-							float num12 = 7f;
+							float num11 = 7f;
 							if (flag10)
 							{
-								num12 = Vector2.Distance(this.poly.Centroid(), vector);
+								num11 = Vector2.Distance(this.poly.Centroid(), vector);
 							}
-							num4 = num9 / num12;
+							num4 = num9 / num11;
 							num4 = Mathf.Max(0f, Mathf.Min(1f, num4));
 							if (flag8)
 							{
@@ -791,17 +779,17 @@ namespace ProcGenGame
 						}
 						if (flag9)
 						{
-							int y = worldGen.WorldSize.y;
-							float num13 = 38f;
-							float num14 = 58f;
-							float num15 = (float)y - vector.y;
-							if (num15 < num13)
+							float y = (float)worldGen.WorldSize.y;
+							float num12 = 38f;
+							float num13 = 58f;
+							float num14 = y - vector.y;
+							if (num14 < num12)
 							{
 								num4 = 0f;
 							}
-							else if (num15 < num14)
+							else if (num14 < num13)
 							{
-								num4 = Mathf.Clamp01((num15 - num13) / (num14 - num13));
+								num4 = Mathf.Clamp01((num14 - num12) / (num13 - num12));
 							}
 							else
 							{
@@ -930,11 +918,9 @@ namespace ProcGenGame
 					}
 					cells[index].SetValues(elem as Element, pd, ElementLoader.elements);
 					dcs[index] = dc;
+					return;
 				}
-				else
-				{
-					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
-				}
+				global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
 			};
 			this.DoProcess(worldGen, world, setValuesFunction, rnd);
 		}
@@ -972,8 +958,7 @@ namespace ProcGenGame
 				while (enumerator.MoveNext())
 				{
 					uint neighbor_idx = enumerator.Current;
-					TerrainCell terrainCell = allCells.Find((TerrainCell cell) => cell.site.id == neighbor_idx);
-					if (terrainCell.node.tags.ContainsOne(TerrainCell.noPOINeighborSpawnTagSet))
+					if (allCells.Find((TerrainCell cell) => cell.site.id == neighbor_idx).node.tags.ContainsOne(TerrainCell.noPOINeighborSpawnTagSet))
 					{
 						return false;
 					}

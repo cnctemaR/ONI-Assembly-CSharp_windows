@@ -41,9 +41,23 @@ namespace YamlDotNet.Serialization
 				}
 			};
 			this.typeInspectorFactories.Add(typeof(CachedTypeInspector), (ITypeInspector inner) => new CachedTypeInspector(inner));
-			this.typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), (ITypeInspector inner) => (this.namingConvention == null) ? inner : new NamingConventionTypeInspector(inner, this.namingConvention));
+			this.typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), delegate(ITypeInspector inner)
+			{
+				if (this.namingConvention == null)
+				{
+					return inner;
+				}
+				return new NamingConventionTypeInspector(inner, this.namingConvention);
+			});
 			this.typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), (ITypeInspector inner) => new YamlAttributesTypeInspector(inner));
-			this.typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), (ITypeInspector inner) => (this.overrides == null) ? inner : new YamlAttributeOverridesInspector(inner, this.overrides.Clone()));
+			this.typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), delegate(ITypeInspector inner)
+			{
+				if (this.overrides == null)
+				{
+					return inner;
+				}
+				return new YamlAttributeOverridesInspector(inner, this.overrides.Clone());
+			});
 			this.typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), (ITypeInspector inner) => new ReadableAndWritablePropertiesTypeInspector(inner));
 			LazyComponentRegistrationList<Nothing, INodeDeserializer> lazyComponentRegistrationList = new LazyComponentRegistrationList<Nothing, INodeDeserializer>();
 			lazyComponentRegistrationList.Add(typeof(YamlConvertibleNodeDeserializer), (Nothing _) => new YamlConvertibleNodeDeserializer(this.objectFactory));
@@ -61,7 +75,7 @@ namespace YamlDotNet.Serialization
 			lazyComponentRegistrationList2.Add(typeof(YamlConvertibleTypeResolver), (Nothing _) => new YamlConvertibleTypeResolver());
 			lazyComponentRegistrationList2.Add(typeof(YamlSerializableTypeResolver), (Nothing _) => new YamlSerializableTypeResolver());
 			lazyComponentRegistrationList2.Add(typeof(TagNodeTypeResolver), (Nothing _) => new TagNodeTypeResolver(this.tagMappings));
-			lazyComponentRegistrationList2.Add(typeof(PreventUnknownTagsNodeTypeResolver), (Nothing _) => new PreventUnknownTagsNodeTypeResolver());
+			lazyComponentRegistrationList2.Add(typeof(TypeNameInTagNodeTypeResolver), (Nothing _) => new TypeNameInTagNodeTypeResolver());
 			lazyComponentRegistrationList2.Add(typeof(DefaultContainersNodeTypeResolver), (Nothing _) => new DefaultContainersNodeTypeResolver());
 			this.nodeTypeResolverFactories = lazyComponentRegistrationList2;
 			base.WithTypeResolver(new StaticTypeResolver());

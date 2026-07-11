@@ -128,8 +128,7 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 
 	private bool IsPickupableRelevantToMyInterests(Pickupable pickupable)
 	{
-		KPrefabID kprefabID = pickupable.KPrefabID;
-		return kprefabID.HasAnyTags(ref LogicDuplicantSensor.tagBits);
+		return pickupable.KPrefabID.HasAnyTags(ref LogicDuplicantSensor.tagBits);
 	}
 
 	private bool IsPickupableRelevantToMyInterestsAndReachable(Pickupable pickupable)
@@ -155,8 +154,7 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 
 	private void UpdateLogicCircuit()
 	{
-		LogicPorts component = base.GetComponent<LogicPorts>();
-		component.SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -165,14 +163,14 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 		{
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 

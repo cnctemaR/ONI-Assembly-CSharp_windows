@@ -122,7 +122,7 @@ namespace Mono.Xml
 						switch (num5)
 						{
 						case 0:
-							goto IL_019F;
+							break;
 						case 1:
 						{
 							text2 = stringBuilder.ToString();
@@ -140,20 +140,20 @@ namespace Mono.Xml
 								}
 							}
 							handler.OnEndElement(text2);
-							break;
+							continue;
 						}
 						case 2:
 							text2 = stringBuilder.ToString();
 							stringBuilder = new StringBuilder();
-							if (num == 47 || num == 62)
+							if (num != 47 && num != 62)
 							{
-								goto IL_019F;
+								continue;
 							}
 							break;
 						case 3:
 							text = stringBuilder.ToString();
 							stringBuilder = new StringBuilder();
-							break;
+							continue;
 						case 4:
 							if (text == null)
 							{
@@ -162,11 +162,11 @@ namespace Mono.Xml
 							attrListImpl.Add(text, stringBuilder.ToString());
 							stringBuilder = new StringBuilder();
 							text = null;
-							break;
+							continue;
 						case 5:
 							handler.OnChars(stringBuilder.ToString());
 							stringBuilder = new StringBuilder();
-							break;
+							continue;
 						case 6:
 						{
 							string text4 = "CDATA[";
@@ -183,26 +183,25 @@ namespace Mono.Xml
 								flag2 = true;
 								this.twoCharBuff[0] = -1;
 								this.twoCharBuff[1] = -1;
+								continue;
 							}
-							else if (num != 91)
+							if (num != 91)
 							{
 								flag3 = true;
 								num3 = 0;
+								continue;
 							}
-							else
+							for (int i = 0; i < text4.Length; i++)
 							{
-								for (int i = 0; i < text4.Length; i++)
+								if (reader.Read() != (int)text4[i])
 								{
-									if (reader.Read() != (int)text4[i])
-									{
-										this.col += i + 1;
-										break;
-									}
+									this.col += i + 1;
+									break;
 								}
-								this.col += text4.Length;
-								flag = true;
 							}
-							break;
+							this.col += text4.Length;
+							flag = true;
+							continue;
 						}
 						case 7:
 						{
@@ -231,22 +230,22 @@ namespace Mono.Xml
 								flag = false;
 							}
 							this.col += num6;
-							break;
+							continue;
 						}
 						case 8:
 							this.FatalErr(string.Format("Error {0}", num2));
-							break;
+							continue;
 						case 9:
-							break;
+							continue;
 						case 10:
 							stringBuilder = new StringBuilder();
 							if (num != 60)
 							{
-								goto IL_0465;
+								goto IL_03E3;
 							}
-							break;
+							continue;
 						case 11:
-							goto IL_0465;
+							goto IL_03E3;
 						case 12:
 							if (flag2)
 							{
@@ -254,15 +253,25 @@ namespace Mono.Xml
 								{
 									flag2 = false;
 									num2 = 0;
+									continue;
 								}
-								else
-								{
-									this.twoCharBuff[0] = this.twoCharBuff[1];
-									this.twoCharBuff[1] = num;
-								}
+								this.twoCharBuff[0] = this.twoCharBuff[1];
+								this.twoCharBuff[1] = num;
+								continue;
 							}
-							else if (flag3)
+							else
 							{
+								if (!flag3)
+								{
+									if (this.splitCData && stringBuilder.Length > 0 && flag)
+									{
+										handler.OnChars(stringBuilder.ToString());
+										stringBuilder = new StringBuilder();
+									}
+									flag = false;
+									stringBuilder.Append((char)num);
+									continue;
+								}
 								if (num == 60 || num == 62)
 								{
 									num3 ^= 1;
@@ -271,17 +280,9 @@ namespace Mono.Xml
 								{
 									flag3 = false;
 									num2 = 0;
+									continue;
 								}
-							}
-							else
-							{
-								if (this.splitCData && stringBuilder.Length > 0 && flag)
-								{
-									handler.OnChars(stringBuilder.ToString());
-									stringBuilder = new StringBuilder();
-								}
-								flag = false;
-								stringBuilder.Append((char)num);
+								continue;
 							}
 							break;
 						case 13:
@@ -301,19 +302,21 @@ namespace Mono.Xml
 									num7++;
 									num8 = 16;
 								}
-								NumberStyles numberStyles = ((num8 != 16) ? NumberStyles.Integer : NumberStyles.HexNumber);
+								NumberStyles numberStyles = ((num8 == 16) ? NumberStyles.HexNumber : NumberStyles.Integer);
 								for (;;)
 								{
 									int num11 = -1;
-									if (char.IsNumber((char)num))
+									if (char.IsNumber((char)num) || "abcdef".IndexOf(char.ToLower((char)num)) != -1)
 									{
-										goto IL_05D9;
+										try
+										{
+											num11 = int.Parse(new string((char)num, 1), numberStyles);
+										}
+										catch (FormatException)
+										{
+											num11 = -1;
+										}
 									}
-									if ("abcdef".IndexOf(char.ToLower((char)num)) != -1)
-									{
-										goto Block_43;
-									}
-									IL_05F9:
 									if (num11 == -1)
 									{
 										break;
@@ -323,18 +326,6 @@ namespace Mono.Xml
 									num10++;
 									num = reader.Read();
 									num7++;
-									continue;
-									Block_43:
-									try
-									{
-										IL_05D9:
-										num11 = int.Parse(new string((char)num, 1), numberStyles);
-									}
-									catch (FormatException)
-									{
-										num11 = -1;
-									}
-									goto IL_05F9;
 								}
 								if (num == 59 && num10 > 0)
 								{
@@ -410,14 +401,12 @@ namespace Mono.Xml
 								}
 							}
 							this.col = num7;
-							break;
+							continue;
 						}
 						default:
 							this.FatalErr(string.Format("Unexpected action code - {0}.", num5));
-							break;
+							continue;
 						}
-						continue;
-						IL_019F:
 						handler.OnStartElement(text2, attrListImpl);
 						if (num != 47)
 						{
@@ -429,7 +418,7 @@ namespace Mono.Xml
 						}
 						attrListImpl.Clear();
 						continue;
-						IL_0465:
+						IL_03E3:
 						stringBuilder.Append((char)num);
 					}
 				}
@@ -597,7 +586,7 @@ namespace Mono.Xml
 			UNKNOWN = 15
 		}
 
-		public class AttrListImpl : MiniParser.IAttrList, MiniParser.IMutableAttrList
+		public class AttrListImpl : MiniParser.IMutableAttrList, MiniParser.IAttrList
 		{
 			public AttrListImpl()
 				: this(0)
@@ -610,16 +599,14 @@ namespace Mono.Xml
 				{
 					this.names = new ArrayList();
 					this.values = new ArrayList();
+					return;
 				}
-				else
-				{
-					this.names = new ArrayList(initialCapacity);
-					this.values = new ArrayList(initialCapacity);
-				}
+				this.names = new ArrayList(initialCapacity);
+				this.values = new ArrayList(initialCapacity);
 			}
 
 			public AttrListImpl(MiniParser.IAttrList attrs)
-				: this((attrs == null) ? 0 : attrs.Length)
+				: this((attrs != null) ? attrs.Length : 0)
 			{
 				if (attrs != null)
 				{

@@ -6,16 +6,6 @@ using UnityEngine;
 [Serializable]
 public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>, ISerializationCallbackReceiver
 {
-	public HashedString(string name)
-	{
-		this.hash = global::Hash.SDBMLower(name);
-	}
-
-	public HashedString(int initial_hash)
-	{
-		this.hash = initial_hash;
-	}
-
 	public static implicit operator HashedString(string s)
 	{
 		return new HashedString(s);
@@ -41,9 +31,19 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 		}
 	}
 
+	public HashedString(string name)
+	{
+		this.hash = global::Hash.SDBMLower(name);
+	}
+
 	public static int Hash(string name)
 	{
 		return global::Hash.SDBMLower(name);
+	}
+
+	public HashedString(int initial_hash)
+	{
+		this.hash = initial_hash;
 	}
 
 	public int CompareTo(HashedString obj)
@@ -84,7 +84,7 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 
 	public override string ToString()
 	{
-		return base.ToString();
+		return "0x" + this.hash.ToString("X");
 	}
 
 	public void OnAfterDeserialize()
@@ -95,7 +95,7 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 	{
 	}
 
-	public static HashedString Invalid = default(HashedString);
+	public static HashedString Invalid;
 
 	[SerializeField]
 	[Serialize]

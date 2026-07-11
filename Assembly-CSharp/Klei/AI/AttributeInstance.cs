@@ -8,13 +8,6 @@ namespace Klei.AI
 	[DebuggerDisplay("{Attribute.Id}")]
 	public class AttributeInstance : ModifierInstance<Attribute>
 	{
-		public AttributeInstance(GameObject game_object, Attribute attribute)
-			: base(game_object, attribute)
-		{
-			DebugUtil.Assert(attribute != null);
-			this.Attribute = attribute;
-		}
-
 		public string Id
 		{
 			get
@@ -111,6 +104,13 @@ namespace Klei.AI
 			return num * testModifier.Value;
 		}
 
+		public AttributeInstance(GameObject game_object, Attribute attribute)
+			: base(game_object, attribute)
+		{
+			DebugUtil.Assert(attribute != null);
+			this.Attribute = attribute;
+		}
+
 		public void Add(AttributeModifier modifier)
 		{
 			this.Modifiers.Add(modifier);
@@ -122,7 +122,8 @@ namespace Klei.AI
 
 		public void Remove(AttributeModifier modifier)
 		{
-			for (int i = 0; i < this.Modifiers.Count; i++)
+			int i = 0;
+			while (i < this.Modifiers.Count)
 			{
 				if (this.Modifiers[i] == modifier)
 				{
@@ -130,8 +131,13 @@ namespace Klei.AI
 					if (this.OnDirty != null)
 					{
 						this.OnDirty();
+						return;
 					}
 					break;
+				}
+				else
+				{
+					i++;
 				}
 			}
 		}

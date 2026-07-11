@@ -35,10 +35,8 @@ public class POIFacilityDoorConfig : IBuildingConfig
 		go.AddOrGet<Unsealable>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 5f;
-		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
-		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
+		go.AddOrGet<Workable>().workTime = 5f;
+		go.AddOrGet<KBatchedAnimController>().fgLayer = Grid.SceneLayer.BuildingFront;
 		PrimaryElement component = go.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Steel);
 		component.Temperature = 273f;
@@ -46,11 +44,9 @@ public class POIFacilityDoorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		AccessControl component = go.GetComponent<AccessControl>();
-		component.controlEnabled = false;
+		go.GetComponent<AccessControl>().controlEnabled = false;
 		go.GetComponent<Deconstructable>().allowDeconstruction = true;
-		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
-		component2.initialAnim = "closed";
+		go.GetComponent<KBatchedAnimController>().initialAnim = "closed";
 	}
 
 	public const string ID = "POIFacilityDoor";

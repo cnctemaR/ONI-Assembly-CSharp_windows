@@ -90,9 +90,10 @@ public class Turbine : KMonoBehaviour
 				float num = this.storedMass / (float)this.destCells.Length;
 				int num2 = this.diseaseCount / this.destCells.Length;
 				Game.Instance.massEmitCallbackManager.GetItem(this.simEmitCBHandle);
-				foreach (int num3 in this.destCells)
+				int[] array = this.destCells;
+				for (int i = 0; i < array.Length; i++)
 				{
-					SimMessages.EmitMass(num3, mass_cb_info.elemIdx, num, this.emitTemperature, this.diseaseIdx, num2, this.simEmitCBHandle.index);
+					SimMessages.EmitMass(array[i], mass_cb_info.elemIdx, num, this.emitTemperature, this.diseaseIdx, num2, this.simEmitCBHandle.index);
 				}
 				this.storedMass = 0f;
 				this.storedTemperature = 0f;
@@ -136,8 +137,8 @@ public class Turbine : KMonoBehaviour
 	{
 		Turbine.inputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_INPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		Turbine.outputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_OUTPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
-		Turbine.spinningUpStatusItem = new StatusItem("TURBINE_SPINNING_UP", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
-		Turbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		Turbine.spinningUpStatusItem = new StatusItem("TURBINE_SPINNING_UP", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		Turbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
 		Turbine.activeStatusItem.resolveStringCallback = delegate(string str, object data)
 		{
 			Turbine turbine = (Turbine)data;
@@ -293,8 +294,7 @@ public class Turbine : KMonoBehaviour
 
 		public void UpdateState(float dt)
 		{
-			bool flag = this.CanSteamFlow(ref this.insufficientMass, ref this.insufficientTemperature);
-			float num = ((!flag) ? (-base.master.rpmDeceleration) : base.master.rpmAcceleration);
+			float num = (this.CanSteamFlow(ref this.insufficientMass, ref this.insufficientTemperature) ? base.master.rpmAcceleration : (-base.master.rpmDeceleration));
 			base.master.currentRPM = Mathf.Clamp(base.master.currentRPM + dt * num, 0f, base.master.maxRPM);
 			this.UpdateMeter();
 			this.UpdateStatusItems();
@@ -306,12 +306,14 @@ public class Turbine : KMonoBehaviour
 					base.smi.GoTo(base.sm.operational.active);
 				}
 				base.smi.master.generator.GenerateJoules(base.smi.master.generator.WattageRating * dt, false);
+				return;
 			}
-			else if (base.master.currentRPM > 0f)
+			if (base.master.currentRPM > 0f)
 			{
 				if (currentState != base.sm.operational.spinningUp)
 				{
 					base.smi.GoTo(base.sm.operational.spinningUp);
+					return;
 				}
 			}
 			else if (currentState != base.sm.operational.idle)
@@ -326,7 +328,7 @@ public class Turbine : KMonoBehaviour
 			{
 				float num = Mathf.Clamp01(base.master.currentRPM / base.master.maxRPM);
 				base.master.meter.SetPositionPercent(num);
-				base.master.meter.SetSymbolTint(Turbine.TINT_SYMBOL, (num < base.master.activePercent) ? Color.red : Color.green);
+				base.master.meter.SetSymbolTint(Turbine.TINT_SYMBOL, (num >= base.master.activePercent) ? Color.green : Color.red);
 			}
 		}
 

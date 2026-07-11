@@ -62,12 +62,9 @@ public class Sauna : StateMachineComponent<Sauna.StatesInstance>, IEffectDescrip
 		private Chore CreateChore(Sauna.StatesInstance smi)
 		{
 			Workable component = smi.master.GetComponent<SaunaWorkable>();
-			ChoreType relax = Db.Get().ChoreTypes.Relax;
-			Workable workable = component;
-			ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-			Chore chore = new WorkChore<SaunaWorkable>(relax, workable, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-			chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
-			return chore;
+			WorkChore<SaunaWorkable> workChore = new WorkChore<SaunaWorkable>(Db.Get().ChoreTypes.Relax, component, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
+			return workChore;
 		}
 
 		private bool IsReady(Sauna.StatesInstance smi)

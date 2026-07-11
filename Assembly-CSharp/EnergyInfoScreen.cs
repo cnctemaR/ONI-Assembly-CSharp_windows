@@ -133,16 +133,15 @@ public class EnergyInfoScreen : TargetScreen
 			ReadOnlyCollection<Battery> transformersOnCircuit = circuitManager.GetTransformersOnCircuit(num);
 			if (generatorsOnCircuit.Count > 0)
 			{
-				foreach (Generator generator in generatorsOnCircuit)
+				using (IEnumerator<Generator> enumerator2 = generatorsOnCircuit.GetEnumerator())
 				{
-					if (generator != null)
+					while (enumerator2.MoveNext())
 					{
-						bool flag = generator.GetComponent<Battery>() == null;
-						if (flag)
+						Generator generator = enumerator2.Current;
+						if (generator != null && generator.GetComponent<Battery>() == null)
 						{
 							gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, generator.gameObject.GetInstanceID().ToString());
-							Operational component3 = generator.GetComponent<Operational>();
-							if (component3.IsActive)
+							if (generator.GetComponent<Operational>().IsActive)
 							{
 								gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(generator.WattageRating, GameUtil.WattageFormatterUnit.Automatic));
 							}
@@ -151,64 +150,66 @@ public class EnergyInfoScreen : TargetScreen
 								gameObject.GetComponent<LocText>().text = string.Format("{0}: {1} / {2}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(0f, GameUtil.WattageFormatterUnit.Automatic), GameUtil.GetFormattedWattage(generator.WattageRating, GameUtil.WattageFormatterUnit.Automatic));
 							}
 							gameObject.SetActive(true);
-							gameObject.GetComponent<LocText>().fontStyle = ((!(generator.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
+							gameObject.GetComponent<LocText>().fontStyle = ((generator.gameObject == this.selectedTarget) ? FontStyles.Bold : FontStyles.Normal);
 						}
 					}
+					goto IL_0556;
 				}
 			}
-			else
-			{
-				gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, "nogenerators");
-				gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOGENERATORS;
-				gameObject.SetActive(true);
-			}
+			gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, "nogenerators");
+			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOGENERATORS;
+			gameObject.SetActive(true);
+			IL_0556:
 			if (consumersOnCircuit.Count > 0 || transformersOnCircuit.Count > 0)
 			{
 				foreach (IEnergyConsumer energyConsumer in consumersOnCircuit)
 				{
 					this.AddConsumerInfo(energyConsumer, gameObject);
 				}
-				foreach (IEnergyConsumer energyConsumer2 in transformersOnCircuit)
+				using (IEnumerator<Battery> enumerator4 = transformersOnCircuit.GetEnumerator())
 				{
-					this.AddConsumerInfo(energyConsumer2, gameObject);
+					while (enumerator4.MoveNext())
+					{
+						IEnergyConsumer energyConsumer2 = enumerator4.Current;
+						this.AddConsumerInfo(energyConsumer2, gameObject);
+					}
+					goto IL_060B;
 				}
 			}
-			else
-			{
-				gameObject = this.AddOrGetLabel(this.consumersLabels, this.consumersPanel, "noconsumers");
-				gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOCONSUMERS;
-				gameObject.SetActive(true);
-			}
+			gameObject = this.AddOrGetLabel(this.consumersLabels, this.consumersPanel, "noconsumers");
+			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOCONSUMERS;
+			gameObject.SetActive(true);
+			IL_060B:
 			if (batteriesOnCircuit.Count > 0)
 			{
-				foreach (Battery battery in batteriesOnCircuit)
+				using (List<Battery>.Enumerator enumerator5 = batteriesOnCircuit.GetEnumerator())
 				{
-					if (battery != null)
+					while (enumerator5.MoveNext())
 					{
-						gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, battery.gameObject.GetInstanceID().ToString());
-						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1", GameUtil.TimeSlice.None));
-						gameObject.SetActive(true);
-						gameObject.GetComponent<LocText>().fontStyle = ((!(battery.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
+						Battery battery = enumerator5.Current;
+						if (battery != null)
+						{
+							gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, battery.gameObject.GetInstanceID().ToString());
+							gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1", GameUtil.TimeSlice.None));
+							gameObject.SetActive(true);
+							gameObject.GetComponent<LocText>().fontStyle = ((battery.gameObject == this.selectedTarget) ? FontStyles.Bold : FontStyles.Normal);
+						}
 					}
+					return;
 				}
 			}
-			else
-			{
-				gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, "nobatteries");
-				gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOBATTERIES;
-				gameObject.SetActive(true);
-			}
+			gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, "nobatteries");
+			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOBATTERIES;
+			gameObject.SetActive(true);
+			return;
 		}
-		else
-		{
-			this.overviewPanel.SetActive(true);
-			this.generatorsPanel.SetActive(false);
-			this.consumersPanel.SetActive(false);
-			this.batteriesPanel.SetActive(false);
-			GameObject gameObject2 = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "nocircuit");
-			gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.DISCONNECTED;
-			gameObject2.SetActive(true);
-		}
+		this.overviewPanel.SetActive(true);
+		this.generatorsPanel.SetActive(false);
+		this.consumersPanel.SetActive(false);
+		this.batteriesPanel.SetActive(false);
+		GameObject gameObject2 = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "nocircuit");
+		gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.DISCONNECTED;
+		gameObject2.SetActive(true);
 	}
 
 	private void AddConsumerInfo(IEnergyConsumer consumer, GameObject label)
@@ -230,7 +231,7 @@ public class EnergyInfoScreen : TargetScreen
 			}
 			label.GetComponent<LocText>().text = string.Format("{0}: {1}", consumer.Name, text);
 			label.SetActive(true);
-			label.GetComponent<LocText>().fontStyle = ((!(kmonoBehaviour.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
+			label.GetComponent<LocText>().fontStyle = ((kmonoBehaviour.gameObject == this.selectedTarget) ? FontStyles.Bold : FontStyles.Normal);
 		}
 	}
 

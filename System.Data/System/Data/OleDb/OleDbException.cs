@@ -1,53 +1,37 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data.Common;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.Data.OleDb
 {
-	[Serializable]
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbException : DbException
 	{
 		internal OleDbException()
 		{
 		}
 
-		[TypeConverter("System.Data.OleDb.OleDbException.ErrorCodeConverter")]
 		public override int ErrorCode
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public OleDbErrorCollection Errors
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
-		public new string Message
-		{
-			get
-			{
-				throw null;
-			}
-		}
-
-		public new string Source
-		{
-			get
-			{
-				throw null;
-			}
-		}
-
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public override void GetObjectData(SerializationInfo si, StreamingContext context)
 		{
+			throw ADP.OleDb();
 		}
 	}
 }

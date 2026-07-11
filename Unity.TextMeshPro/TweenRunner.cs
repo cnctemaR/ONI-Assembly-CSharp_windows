@@ -15,9 +15,9 @@ namespace TMPro
 			float elapsedTime = 0f;
 			while (elapsedTime < tweenInfo.duration)
 			{
-				elapsedTime += ((!tweenInfo.ignoreTimeScale) ? Time.deltaTime : Time.unscaledDeltaTime);
-				float percentage = Mathf.Clamp01(elapsedTime / tweenInfo.duration);
-				tweenInfo.TweenValue(percentage);
+				elapsedTime += (tweenInfo.ignoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime);
+				float num = Mathf.Clamp01(elapsedTime / tweenInfo.duration);
+				tweenInfo.TweenValue(num);
 				yield return null;
 			}
 			tweenInfo.TweenValue(1f);

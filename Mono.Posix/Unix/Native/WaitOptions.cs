@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[Map]
 	[Flags]
+	[Map]
 	public enum WaitOptions
 	{
 		WNOHANG = 1,

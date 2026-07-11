@@ -3,8 +3,8 @@
 namespace System.Runtime.InteropServices
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("00020402-0000-0000-c000-000000000046")]
 	[Obsolete]
+	[Guid("00020402-0000-0000-c000-000000000046")]
 	[ComImport]
 	public interface UCOMITypeLib
 	{

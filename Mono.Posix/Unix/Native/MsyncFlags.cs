@@ -3,8 +3,8 @@
 namespace Mono.Unix.Native
 {
 	[Map]
-	[CLSCompliant(false)]
 	[Flags]
+	[CLSCompliant(false)]
 	public enum MsyncFlags
 	{
 		MS_ASYNC = 1,

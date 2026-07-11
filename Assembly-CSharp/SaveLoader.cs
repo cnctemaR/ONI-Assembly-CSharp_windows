@@ -35,13 +35,6 @@ public class SaveLoader : KMonoBehaviour
 
 	private void MoveCorruptFile(string filename)
 	{
-		try
-		{
-		}
-		catch
-		{
-			File.Replace(filename, filename + "_", filename + "_.bak", true);
-		}
 	}
 
 	protected override void OnSpawn()
@@ -187,8 +180,7 @@ public class SaveLoader : KMonoBehaviour
 	private void Save(BinaryWriter writer)
 	{
 		writer.WriteKleiString("world");
-		SaveFileRoot saveFileRoot = this.PrepSaveFile();
-		Serializer.Serialize(saveFileRoot, writer);
+		Serializer.Serialize(this.PrepSaveFile(), writer);
 		Game.SaveSettings(writer);
 		this.saveManager.Save(writer);
 		Game.Instance.Save(writer);
@@ -196,8 +188,7 @@ public class SaveLoader : KMonoBehaviour
 
 	private bool Load(IReader reader)
 	{
-		string text = reader.ReadKleiString();
-		global::Debug.Assert(text == "world");
+		global::Debug.Assert(reader.ReadKleiString() == "world");
 		Deserializer deserializer = new Deserializer(reader);
 		SaveFileRoot saveFileRoot = new SaveFileRoot();
 		deserializer.Deserialize(saveFileRoot);
@@ -258,9 +249,7 @@ public class SaveLoader : KMonoBehaviour
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
 		SimMessages.CreateDiseaseTable();
-		byte[] array = saveFileRoot.streamed["Sim"];
-		FastReader fastReader = new FastReader(array);
-		if (Sim.Load(fastReader) != 0)
+		if (Sim.Load(new FastReader(saveFileRoot.streamed["Sim"])) != 0)
 		{
 			DebugUtil.LogWarningArgs(new object[] { "--- Error loading save ---\nSimDLL found bad data\n" });
 			Sim.Shutdown();
@@ -282,15 +271,13 @@ public class SaveLoader : KMonoBehaviour
 		}
 		Grid.Damage = this.BytesToFloat(saveFileRoot.streamed["GridDamage"]);
 		Game.Instance.Load(deserializer);
-		FastReader fastReader2 = new FastReader(saveFileRoot.streamed["Camera"]);
-		CameraSaveData.Load(fastReader2);
+		CameraSaveData.Load(new FastReader(saveFileRoot.streamed["Camera"]));
 		return true;
 	}
 
 	public static string GetSavePrefix()
 	{
-		string text = Util.RootFolder();
-		return Path.Combine(text, "save_files/");
+		return Path.Combine(Util.RootFolder(), "save_files/");
 	}
 
 	public static string GetSavePrefixAndCreateFolder()
@@ -387,9 +374,8 @@ public class SaveLoader : KMonoBehaviour
 			{
 				throw ex2;
 			}
-			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
-			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null, true);
+			GameObject gameObject = ((FrontEndManager.Instance == null) ? GameScreenManager.Instance.ssOverlayCanvas : FrontEndManager.Instance.gameObject);
+			Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(text2, null, null, null, null, null, null, null, null, true);
 		}
 		return list;
 	}
@@ -494,15 +480,13 @@ public class SaveLoader : KMonoBehaviour
 			if (ex3 is UnauthorizedAccessException)
 			{
 				DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException for " + filename });
-				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null, true);
+				((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null, true);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			if (ex3 is IOException)
 			{
 				DebugUtil.LogArgs(new object[] { "IOException (probably out of disk space) for " + filename });
-				ConfirmDialogScreen confirmDialogScreen2 = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null, true);
+				((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null, true);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			throw ex3;
@@ -523,9 +507,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public static SaveGame.GameInfo LoadHeader(string filename, out SaveGame.Header header)
 	{
-		byte[] array = File.ReadAllBytes(filename);
-		IReader reader = new FastReader(array);
-		return SaveGame.GetHeader(reader, out header);
+		return SaveGame.GetHeader(new FastReader(File.ReadAllBytes(filename)), out header);
 	}
 
 	public bool Load(string filename)
@@ -559,8 +541,7 @@ public class SaveLoader : KMonoBehaviour
 				int num = array.Length - reader.Position;
 				byte[] array2 = new byte[num];
 				Array.Copy(array, reader.Position, array2, 0, num);
-				byte[] array3 = SaveLoader.DecompressContents(array2);
-				IReader reader2 = new FastReader(array3);
+				IReader reader2 = new FastReader(SaveLoader.DecompressContents(array2));
 				this.Load(reader2);
 			}
 			else
@@ -700,8 +681,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			if (!(minionIdentity == null))
 			{
-				Modifiers component = minionIdentity.gameObject.GetComponent<Modifiers>();
-				Amounts amounts = component.amounts;
+				Amounts amounts = minionIdentity.gameObject.GetComponent<Modifiers>().amounts;
 				List<SaveLoader.MinionAttrFloatData> list2 = new List<SaveLoader.MinionAttrFloatData>(amounts.Count);
 				foreach (AmountInstance amountInstance in amounts)
 				{
@@ -715,10 +695,10 @@ public class SaveLoader : KMonoBehaviour
 						});
 					}
 				}
-				MinionResume component2 = minionIdentity.gameObject.GetComponent<MinionResume>();
-				float totalExperienceGained = component2.TotalExperienceGained;
+				MinionResume component = minionIdentity.gameObject.GetComponent<MinionResume>();
+				float totalExperienceGained = component.TotalExperienceGained;
 				List<string> list3 = new List<string>();
-				foreach (KeyValuePair<string, bool> keyValuePair in component2.MasteryBySkillID)
+				foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
 				{
 					if (keyValuePair.Value)
 					{

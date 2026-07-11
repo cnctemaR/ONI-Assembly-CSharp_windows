@@ -10,11 +10,9 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		if (this.InstantiateOnAwake)
 		{
 			this.InstantiateElements(null);
+			return;
 		}
-		else
-		{
-			Game.Instance.Subscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
-		}
+		Game.Instance.Subscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
 	}
 
 	public void InstantiateElements(object data)
@@ -50,7 +48,7 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 				return this.instantiatedObjects[i].GetComponent(typeof(T)) as T;
 			}
 		}
-		return (T)((object)null);
+		return default(T);
 	}
 
 	public ScheduledUIInstantiation.Instantiation[] UIElements;

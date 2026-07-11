@@ -90,22 +90,28 @@ public class BuildingDef : Def
 	{
 		if (this.ReplacementCandidateLayers != null)
 		{
-			foreach (ObjectLayer objectLayer in this.ReplacementCandidateLayers)
+			using (List<ObjectLayer>.Enumerator enumerator = this.ReplacementCandidateLayers.GetEnumerator())
 			{
-				if (Grid.ObjectLayers[(int)objectLayer].ContainsKey(cell))
+				while (enumerator.MoveNext())
 				{
-					GameObject gameObject = Grid.ObjectLayers[(int)objectLayer][cell];
-					if (gameObject != null && gameObject.GetComponent<BuildingComplete>() != null)
+					ObjectLayer objectLayer = enumerator.Current;
+					if (Grid.ObjectLayers[(int)objectLayer].ContainsKey(cell))
 					{
-						return gameObject;
+						GameObject gameObject = Grid.ObjectLayers[(int)objectLayer][cell];
+						if (gameObject != null && gameObject.GetComponent<BuildingComplete>() != null)
+						{
+							return gameObject;
+						}
 					}
 				}
+				goto IL_0096;
 			}
 		}
-		else if (Grid.ObjectLayers[(int)this.TileLayer].ContainsKey(cell))
+		if (Grid.ObjectLayers[(int)this.TileLayer].ContainsKey(cell))
 		{
 			return Grid.ObjectLayers[(int)this.TileLayer][cell];
 		}
+		IL_0096:
 		return null;
 	}
 
@@ -176,7 +182,9 @@ public class BuildingDef : Def
 		string sound = GlobalAssets.GetSound("Finish_Building_" + this.AudioSize, false);
 		if (playsound && sound != null)
 		{
-			KMonoBehaviour.PlaySound3DAtLocation(sound, gameObject.transform.GetPosition());
+			Vector3 position = gameObject.transform.GetPosition();
+			position.z = 0f;
+			KFMOD.PlayOneShot(sound, position, 1f);
 		}
 		Deconstructable component2 = gameObject.GetComponent<Deconstructable>();
 		if (component2 != null)
@@ -226,10 +234,7 @@ public class BuildingDef : Def
 	{
 		float num = -0.15f;
 		pos.z += num;
-		GameObject buildingUnderConstruction = this.BuildingUnderConstruction;
-		Vector3 vector = pos;
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
-		GameObject gameObject = GameUtil.KInstantiate(buildingUnderConstruction, vector, sceneLayer, null, layer);
+		GameObject gameObject = GameUtil.KInstantiate(this.BuildingUnderConstruction, pos, Grid.SceneLayer.Front, null, layer);
 		Element element = ElementLoader.GetElement(selected_elements[0]);
 		global::Debug.Assert(element != null, "Missing primary element for BuildingDef");
 		gameObject.GetComponent<PrimaryElement>().ElementID = element.id;
@@ -242,10 +247,10 @@ public class BuildingDef : Def
 	{
 		bool flag = true;
 		fail_reason = null;
-		for (int i = 0; i < this.PlacementOffsets.Length; i++)
+		int i = 0;
+		while (i < this.PlacementOffsets.Length)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 			if (!Grid.IsCellOffsetValid(cell, rotatedCellOffset))
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
@@ -275,67 +280,69 @@ public class BuildingDef : Def
 					{
 						fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
 						flag = false;
+						break;
 					}
 					break;
 				}
-				if (tile_layer != ObjectLayer.NumLayers && Grid.Objects[num, (int)tile_layer] != null && Grid.Objects[num, (int)tile_layer].GetComponent<BuildingPreview>() == null)
+				else if (tile_layer != ObjectLayer.NumLayers && Grid.Objects[num, (int)tile_layer] != null && Grid.Objects[num, (int)tile_layer].GetComponent<BuildingPreview>() == null)
 				{
 					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
 					flag = false;
 					break;
 				}
 			}
-			if (layer == ObjectLayer.Building && this.AttachmentSlotTag != GameTags.Rocket)
+			if (layer == ObjectLayer.Building && this.AttachmentSlotTag != GameTags.Rocket && Grid.Objects[num, 38] != null)
 			{
-				GameObject gameObject2 = Grid.Objects[num, 38];
-				if (gameObject2 != null)
+				if (this.BuildingComplete.GetComponent<Wire>() == null)
 				{
-					if (this.BuildingComplete.GetComponent<Wire>() == null)
-					{
-						fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
-						flag = false;
-					}
-					break;
-				}
-			}
-			if (layer == ObjectLayer.Gantry)
-			{
-				bool flag3 = false;
-				for (int j = 0; j < Gantry.TileOffsets.Length; j++)
-				{
-					CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(Gantry.TileOffsets[j], orientation);
-					flag3 |= rotatedCellOffset2 == rotatedCellOffset;
-				}
-				if (flag3 && !this.IsValidTileLocation(source_go, num, ref fail_reason))
-				{
+					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
 					flag = false;
 					break;
 				}
-				GameObject gameObject3 = Grid.Objects[num, 1];
-				if (gameObject3 != null && gameObject3.GetComponent<BuildingPreview>() == null)
+				break;
+			}
+			else
+			{
+				if (layer == ObjectLayer.Gantry)
 				{
-					Building component = gameObject3.GetComponent<Building>();
-					if (flag3 || component == null || component.Def.AttachmentSlotTag != GameTags.Rocket)
+					bool flag3 = false;
+					for (int j = 0; j < Gantry.TileOffsets.Length; j++)
 					{
-						fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
+						CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(Gantry.TileOffsets[j], orientation);
+						flag3 |= rotatedCellOffset2 == rotatedCellOffset;
+					}
+					if (flag3 && !this.IsValidTileLocation(source_go, num, ref fail_reason))
+					{
+						flag = false;
+						break;
+					}
+					GameObject gameObject2 = Grid.Objects[num, 1];
+					if (gameObject2 != null && gameObject2.GetComponent<BuildingPreview>() == null)
+					{
+						Building component = gameObject2.GetComponent<Building>();
+						if (flag3 || component == null || component.Def.AttachmentSlotTag != GameTags.Rocket)
+						{
+							fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_OCCUPIED;
+							flag = false;
+							break;
+						}
+					}
+				}
+				if (this.BuildLocationRule == BuildLocationRule.Tile)
+				{
+					if (!this.IsValidTileLocation(source_go, num, ref fail_reason))
+					{
 						flag = false;
 						break;
 					}
 				}
-			}
-			if (this.BuildLocationRule == BuildLocationRule.Tile)
-			{
-				if (!this.IsValidTileLocation(source_go, num, ref fail_reason))
+				else if (this.BuildLocationRule == BuildLocationRule.OnFloorOverSpace && global::World.Instance.zoneRenderData.GetSubWorldZoneType(num) != SubWorld.ZoneType.Space)
 				{
+					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_SPACE;
 					flag = false;
 					break;
 				}
-			}
-			else if (this.BuildLocationRule == BuildLocationRule.OnFloorOverSpace && global::World.Instance.zoneRenderData.GetSubWorldZoneType(num) != SubWorld.ZoneType.Space)
-			{
-				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_SPACE;
-				flag = false;
-				break;
+				i++;
 			}
 		}
 		if (!flag)
@@ -346,8 +353,8 @@ public class BuildingDef : Def
 		{
 		case BuildLocationRule.NotInTiles:
 		{
-			GameObject gameObject4 = Grid.Objects[cell, 9];
-			if (gameObject4 != null && gameObject4 != source_go)
+			GameObject gameObject3 = Grid.Objects[cell, 9];
+			if (gameObject3 != null && gameObject3 != source_go)
 			{
 				flag = false;
 			}
@@ -357,19 +364,19 @@ public class BuildingDef : Def
 			}
 			else
 			{
-				GameObject gameObject5 = Grid.Objects[cell, (int)this.ObjectLayer];
-				if (gameObject5 != null)
+				GameObject gameObject4 = Grid.Objects[cell, (int)this.ObjectLayer];
+				if (gameObject4 != null)
 				{
 					if (this.ReplacementLayer == ObjectLayer.NumLayers)
 					{
-						if (gameObject5 != source_go)
+						if (gameObject4 != source_go)
 						{
 							flag = false;
 						}
 					}
 					else
 					{
-						Building component2 = gameObject5.GetComponent<Building>();
+						Building component2 = gameObject4.GetComponent<Building>();
 						if (component2 != null && component2.Def.ReplacementLayer != this.ReplacementLayer)
 						{
 							flag = false;
@@ -391,21 +398,18 @@ public class BuildingDef : Def
 		case BuildLocationRule.BuildingAttachPoint:
 		{
 			flag = false;
-			for (int k = 0; k < Components.BuildingAttachPoints.Count; k++)
+			int num2 = 0;
+			while (num2 < Components.BuildingAttachPoints.Count && !flag)
 			{
-				if (flag)
+				for (int k = 0; k < Components.BuildingAttachPoints[num2].points.Length; k++)
 				{
-					break;
-				}
-				for (int l = 0; l < Components.BuildingAttachPoints[k].points.Length; l++)
-				{
-					BuildingAttachPoint buildingAttachPoint = Components.BuildingAttachPoints[k];
-					if (buildingAttachPoint.AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
+					if (Components.BuildingAttachPoints[num2].AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
 					{
 						flag = true;
 						break;
 					}
 				}
+				num2++;
 			}
 			if (!flag)
 			{
@@ -422,30 +426,22 @@ public class BuildingDef : Def
 	private bool IsValidTileLocation(GameObject source_go, int cell, ref string fail_reason)
 	{
 		GameObject gameObject = Grid.Objects[cell, 27];
-		if (gameObject != null && gameObject != source_go)
+		if (gameObject != null && gameObject != source_go && gameObject.GetComponent<Building>().Def.BuildLocationRule == BuildLocationRule.NotInTiles)
 		{
-			Building component = gameObject.GetComponent<Building>();
-			if (component.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
-			{
-				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WIRE_OBSTRUCTION;
-				return false;
-			}
+			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WIRE_OBSTRUCTION;
+			return false;
 		}
 		gameObject = Grid.Objects[cell, 29];
-		if (gameObject != null && gameObject != source_go)
+		if (gameObject != null && gameObject != source_go && gameObject.GetComponent<Building>().Def.BuildLocationRule == BuildLocationRule.HighWattBridgeTile)
 		{
-			Building component2 = gameObject.GetComponent<Building>();
-			if (component2.Def.BuildLocationRule == BuildLocationRule.HighWattBridgeTile)
-			{
-				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WIRE_OBSTRUCTION;
-				return false;
-			}
+			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WIRE_OBSTRUCTION;
+			return false;
 		}
 		gameObject = Grid.Objects[cell, 2];
 		if (gameObject != null && gameObject != source_go)
 		{
-			Building component3 = gameObject.GetComponent<Building>();
-			if (component3 != null && component3.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
+			Building component = gameObject.GetComponent<Building>();
+			if (component != null && component.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_BACK_WALL;
 				return false;
@@ -458,8 +454,7 @@ public class BuildingDef : Def
 	{
 		for (int i = 0; i < this.PlacementOffsets.Length; i++)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 			int num = Grid.OffsetCell(cell, rotatedCellOffset);
 			callback(num);
 		}
@@ -471,8 +466,7 @@ public class BuildingDef : Def
 		{
 			for (int i = 0; i < this.PlacementOffsets.Length; i++)
 			{
-				CellOffset cellOffset = this.PlacementOffsets[i];
-				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 				int num = Grid.OffsetCell(cell, rotatedCellOffset);
 				Grid.Objects[num, (int)layer] = go;
 			}
@@ -509,10 +503,9 @@ public class BuildingDef : Def
 		}
 		if (this.BuildLocationRule == BuildLocationRule.WireBridge || this.BuildLocationRule == BuildLocationRule.HighWattBridgeTile)
 		{
-			UtilityNetworkLink component = go.GetComponent<UtilityNetworkLink>();
 			int num6;
 			int num7;
-			component.GetCells(cell, orientation, out num6, out num7);
+			go.GetComponent<UtilityNetworkLink>().GetCells(cell, orientation, out num6, out num7);
 			this.MarkOverlappingPorts(Grid.Objects[num6, 29], go);
 			this.MarkOverlappingPorts(Grid.Objects[num7, 29], go);
 			Grid.Objects[num6, 29] = go;
@@ -520,34 +513,33 @@ public class BuildingDef : Def
 		}
 		if (this.BuildLocationRule == BuildLocationRule.LogicBridge)
 		{
-			LogicPorts component2 = go.GetComponent<LogicPorts>();
-			if (component2 != null && component2.inputPortInfo != null)
+			LogicPorts component = go.GetComponent<LogicPorts>();
+			if (component != null && component.inputPortInfo != null)
 			{
-				foreach (LogicPorts.Port port in component2.inputPortInfo)
+				LogicPorts.Port[] inputPortInfo = component.inputPortInfo;
+				for (int j = 0; j < inputPortInfo.Length; j++)
 				{
-					CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(port.cellOffset, orientation);
+					CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(inputPortInfo[j].cellOffset, orientation);
 					int num8 = Grid.OffsetCell(cell, rotatedCellOffset6);
 					this.MarkOverlappingPorts(Grid.Objects[num8, (int)layer], go);
 					Grid.Objects[num8, (int)layer] = go;
 				}
 			}
 		}
-		ISecondaryInput component3 = this.BuildingComplete.GetComponent<ISecondaryInput>();
-		if (component3 != null)
+		ISecondaryInput component2 = this.BuildingComplete.GetComponent<ISecondaryInput>();
+		if (component2 != null)
 		{
-			ConduitType secondaryConduitType = component3.GetSecondaryConduitType();
-			ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(secondaryConduitType);
-			CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(), orientation);
+			ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(component2.GetSecondaryConduitType());
+			CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(), orientation);
 			int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
 			this.MarkOverlappingPorts(Grid.Objects[num9, (int)objectLayerForConduitType3], go);
 			Grid.Objects[num9, (int)objectLayerForConduitType3] = go;
 		}
-		ISecondaryOutput component4 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
-		if (component4 != null)
+		ISecondaryOutput component3 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
+		if (component3 != null)
 		{
-			ConduitType secondaryConduitType2 = component4.GetSecondaryConduitType();
-			ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(secondaryConduitType2);
-			CellOffset rotatedCellOffset8 = Rotatable.GetRotatedCellOffset(component4.GetSecondaryConduitOffset(), orientation);
+			ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(component3.GetSecondaryConduitType());
+			CellOffset rotatedCellOffset8 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(), orientation);
 			int num10 = Grid.OffsetCell(cell, rotatedCellOffset8);
 			this.MarkOverlappingPorts(Grid.Objects[num10, (int)objectLayerForConduitType4], go);
 			Grid.Objects[num10, (int)objectLayerForConduitType4] = go;
@@ -570,8 +562,7 @@ public class BuildingDef : Def
 	{
 		for (int i = 0; i < this.PlacementOffsets.Length; i++)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 			int num = Grid.OffsetCell(cell, rotatedCellOffset);
 			if (Grid.Objects[num, (int)layer] == go)
 			{
@@ -618,10 +609,9 @@ public class BuildingDef : Def
 		}
 		if (this.BuildLocationRule == BuildLocationRule.HighWattBridgeTile)
 		{
-			UtilityNetworkLink component = go.GetComponent<UtilityNetworkLink>();
 			int num6;
 			int num7;
-			component.GetCells(cell, orientation, out num6, out num7);
+			go.GetComponent<UtilityNetworkLink>().GetCells(cell, orientation, out num6, out num7);
 			if (Grid.Objects[num6, 29] == go)
 			{
 				Grid.Objects[num6, 29] = null;
@@ -631,24 +621,22 @@ public class BuildingDef : Def
 				Grid.Objects[num7, 29] = null;
 			}
 		}
-		ISecondaryInput component2 = this.BuildingComplete.GetComponent<ISecondaryInput>();
-		if (component2 != null)
+		ISecondaryInput component = this.BuildingComplete.GetComponent<ISecondaryInput>();
+		if (component != null)
 		{
-			ConduitType secondaryConduitType = component2.GetSecondaryConduitType();
-			ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(secondaryConduitType);
-			CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(), orientation);
+			ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(component.GetSecondaryConduitType());
+			CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(component.GetSecondaryConduitOffset(), orientation);
 			int num8 = Grid.OffsetCell(cell, rotatedCellOffset6);
 			if (Grid.Objects[num8, (int)objectLayerForConduitType3] == go)
 			{
 				Grid.Objects[num8, (int)objectLayerForConduitType3] = null;
 			}
 		}
-		ISecondaryOutput component3 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
-		if (component3 != null)
+		ISecondaryOutput component2 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
+		if (component2 != null)
 		{
-			ConduitType secondaryConduitType2 = component3.GetSecondaryConduitType();
-			ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(secondaryConduitType2);
-			CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(), orientation);
+			ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(component2.GetSecondaryConduitType());
+			CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(), orientation);
 			int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
 			if (Grid.Objects[num9, (int)objectLayerForConduitType4] == go)
 			{
@@ -735,8 +723,7 @@ public class BuildingDef : Def
 		int num = Grid.PosToCell(pos);
 		for (int i = 0; i < this.PlacementOffsets.Length; i++)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 			int num2 = Grid.OffsetCell(num, rotatedCellOffset);
 			if (!Grid.IsValidBuildingCell(num2))
 			{
@@ -753,8 +740,8 @@ public class BuildingDef : Def
 
 	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation)
 	{
-		string empty = string.Empty;
-		return this.IsValidBuildLocation(source_go, pos, orientation, out empty);
+		string text = "";
+		return this.IsValidBuildLocation(source_go, pos, orientation, out text);
 	}
 
 	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation, out string reason)
@@ -867,21 +854,18 @@ public class BuildingDef : Def
 		case BuildLocationRule.BuildingAttachPoint:
 		{
 			flag = false;
-			for (int i = 0; i < Components.BuildingAttachPoints.Count; i++)
+			int num = 0;
+			while (num < Components.BuildingAttachPoints.Count && !flag)
 			{
-				if (flag)
+				for (int i = 0; i < Components.BuildingAttachPoints[num].points.Length; i++)
 				{
-					break;
-				}
-				for (int j = 0; j < Components.BuildingAttachPoints[i].points.Length; j++)
-				{
-					BuildingAttachPoint buildingAttachPoint = Components.BuildingAttachPoints[i];
-					if (buildingAttachPoint.AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
+					if (Components.BuildingAttachPoints[num].AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
 					{
 						flag = true;
 						break;
 					}
 				}
+				num++;
 			}
 			fail_reason = string.Format(UI.TOOLTIPS.HELP_BUILDLOCATION_ATTACHPOINT, this.AttachmentSlotTag);
 			break;
@@ -893,21 +877,18 @@ public class BuildingDef : Def
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR_OR_ATTACHPOINT;
 				if (!flag)
 				{
-					for (int k = 0; k < Components.BuildingAttachPoints.Count; k++)
+					int num2 = 0;
+					while (num2 < Components.BuildingAttachPoints.Count && !flag)
 					{
-						if (flag)
+						for (int j = 0; j < Components.BuildingAttachPoints[num2].points.Length; j++)
 						{
-							break;
-						}
-						for (int l = 0; l < Components.BuildingAttachPoints[k].points.Length; l++)
-						{
-							BuildingAttachPoint buildingAttachPoint2 = Components.BuildingAttachPoints[k];
-							if (buildingAttachPoint2.AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
+							if (Components.BuildingAttachPoints[num2].AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
 							{
 								flag = true;
 								break;
 							}
 						}
+						num2++;
 					}
 					fail_reason = string.Format(UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR_OR_ATTACHPOINT, this.AttachmentSlotTag);
 				}
@@ -928,8 +909,7 @@ public class BuildingDef : Def
 		fail_reason = null;
 		for (int i = 0; i < this.PlacementOffsets.Length; i++)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
 			if (!Grid.IsCellOffsetValid(cell, rotatedCellOffset))
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
@@ -1081,8 +1061,8 @@ public class BuildingDef : Def
 			GameObject gameObject2 = Grid.Objects[num2, 1];
 			if (gameObject != null || gameObject2 != null)
 			{
-				BuildingUnderConstruction buildingUnderConstruction = ((!gameObject) ? null : gameObject.GetComponent<BuildingUnderConstruction>());
-				BuildingUnderConstruction buildingUnderConstruction2 = ((!gameObject2) ? null : gameObject2.GetComponent<BuildingUnderConstruction>());
+				BuildingUnderConstruction buildingUnderConstruction = (gameObject ? gameObject.GetComponent<BuildingUnderConstruction>() : null);
+				BuildingUnderConstruction buildingUnderConstruction2 = (gameObject2 ? gameObject2.GetComponent<BuildingUnderConstruction>() : null);
 				if ((buildingUnderConstruction && buildingUnderConstruction.Def.BuildingComplete.GetComponent<Door>()) || (buildingUnderConstruction2 && buildingUnderConstruction2.Def.BuildingComplete.GetComponent<Door>()))
 				{
 					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_HIGHWATT_NOT_IN_TILE;
@@ -1101,8 +1081,7 @@ public class BuildingDef : Def
 		{
 			return true;
 		}
-		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-		ReadOnlyCollection<ILogicUIElement> visElements = logicCircuitManager.GetVisElements();
+		ReadOnlyCollection<ILogicUIElement> visElements = Game.Instance.logicCircuitManager.GetVisElements();
 		LogicPorts component = source_go.GetComponent<LogicPorts>();
 		if (component != null)
 		{
@@ -1148,11 +1127,14 @@ public class BuildingDef : Def
 	private bool IsLogicPortObstructed(int cell, IList<ILogicUIElement> ports)
 	{
 		int num = 0;
-		foreach (ILogicUIElement logicUIElement in ports)
+		using (IEnumerator<ILogicUIElement> enumerator = ports.GetEnumerator())
 		{
-			if (logicUIElement.GetLogicUICell() == cell)
+			while (enumerator.MoveNext())
 			{
-				num++;
+				if (enumerator.Current.GetLogicUICell() == cell)
+				{
+					num++;
+				}
 			}
 		}
 		return num > 0;
@@ -1161,38 +1143,38 @@ public class BuildingDef : Def
 	private bool IsValidConduitConnection(GameObject source_go, ConduitType conduit_type, int utility_cell, ref string fail_reason)
 	{
 		bool flag = true;
-		if (conduit_type != ConduitType.Gas)
+		switch (conduit_type)
 		{
-			if (conduit_type != ConduitType.Liquid)
-			{
-				if (conduit_type == ConduitType.Solid)
-				{
-					GameObject gameObject = Grid.Objects[utility_cell, 23];
-					if (gameObject != null && gameObject != source_go)
-					{
-						flag = false;
-						fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_SOLIDPORTS_OVERLAP;
-					}
-				}
-			}
-			else
-			{
-				GameObject gameObject2 = Grid.Objects[utility_cell, 19];
-				if (gameObject2 != null && gameObject2 != source_go)
-				{
-					flag = false;
-					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_LIQUIDPORTS_OVERLAP;
-				}
-			}
-		}
-		else
+		case ConduitType.Gas:
 		{
-			GameObject gameObject3 = Grid.Objects[utility_cell, 15];
-			if (gameObject3 != null && gameObject3 != source_go)
+			GameObject gameObject = Grid.Objects[utility_cell, 15];
+			if (gameObject != null && gameObject != source_go)
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_GASPORTS_OVERLAP;
 			}
+			break;
+		}
+		case ConduitType.Liquid:
+		{
+			GameObject gameObject2 = Grid.Objects[utility_cell, 19];
+			if (gameObject2 != null && gameObject2 != source_go)
+			{
+				flag = false;
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_LIQUIDPORTS_OVERLAP;
+			}
+			break;
+		}
+		case ConduitType.Solid:
+		{
+			GameObject gameObject3 = Grid.Objects[utility_cell, 23];
+			if (gameObject3 != null && gameObject3 != source_go)
+			{
+				flag = false;
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_SOLIDPORTS_OVERLAP;
+			}
+			break;
+		}
 		}
 		return flag;
 	}
@@ -1221,8 +1203,7 @@ public class BuildingDef : Def
 		int num2 = width / 2;
 		for (int i = num; i <= num2; i++)
 		{
-			CellOffset cellOffset = ((location_rule != BuildLocationRule.OnCeiling) ? new CellOffset(i, -1) : new CellOffset(i, height));
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset((location_rule == BuildLocationRule.OnCeiling) ? new CellOffset(i, height) : new CellOffset(i, -1), orientation);
 			int num3 = Grid.OffsetCell(cell, rotatedCellOffset);
 			if (!Grid.IsValidBuildingCell(num3) || !Grid.Solid[num3])
 			{
@@ -1234,12 +1215,11 @@ public class BuildingDef : Def
 
 	public static bool CheckWallFoundation(int cell, int width, int height, bool leftWall)
 	{
-		int num = 0;
-		for (int i = num; i <= height; i++)
+		for (int i = 0; i <= height; i++)
 		{
-			CellOffset cellOffset = new CellOffset((!leftWall) ? (width / 2 + 1) : (-(width - 1) / 2 - 1), i);
-			int num2 = Grid.OffsetCell(cell, cellOffset);
-			if (!Grid.IsValidBuildingCell(num2) || !Grid.Solid[num2])
+			CellOffset cellOffset = new CellOffset(leftWall ? (-(width - 1) / 2 - 1) : (width / 2 + 1), i);
+			int num = Grid.OffsetCell(cell, cellOffset);
+			if (!Grid.IsValidBuildingCell(num) || !Grid.Solid[num])
 			{
 				return false;
 			}
@@ -1273,7 +1253,7 @@ public class BuildingDef : Def
 
 	public Sprite GetUISprite(string animName = "ui", bool centered = false)
 	{
-		return Def.GetUISpriteFromMultiObjectAnim(this.AnimFiles[0], animName, centered, string.Empty);
+		return Def.GetUISpriteFromMultiObjectAnim(this.AnimFiles[0], animName, centered, "");
 	}
 
 	public void GenerateOffsets()
@@ -1285,17 +1265,16 @@ public class BuildingDef : Def
 	{
 		if (!BuildingDef.placementOffsetsCache.TryGetValue(new CellOffset(width, height), out this.PlacementOffsets))
 		{
-			int num = width / 2;
-			int num2 = num - width + 1;
+			int num = width / 2 - width + 1;
 			this.PlacementOffsets = new CellOffset[width * height];
-			for (int num3 = 0; num3 != height; num3++)
+			for (int num2 = 0; num2 != height; num2++)
 			{
-				int num4 = num3 * width;
-				for (int num5 = 0; num5 != width; num5++)
+				int num3 = num2 * width;
+				for (int num4 = 0; num4 != width; num4++)
 				{
-					int num6 = num4 + num5;
-					this.PlacementOffsets[num6].x = num5 + num2;
-					this.PlacementOffsets[num6].y = num3;
+					int num5 = num3 + num4;
+					this.PlacementOffsets[num5].x = num4 + num;
+					this.PlacementOffsets[num5].y = num2;
 				}
 			}
 			BuildingDef.placementOffsetsCache.Add(new CellOffset(width, height), this.PlacementOffsets);
@@ -1304,9 +1283,7 @@ public class BuildingDef : Def
 
 	public void PostProcess()
 	{
-		string name = this.BuildingComplete.PrefabID().Name;
-		string name2 = this.Name;
-		this.CraftRecipe = new Recipe(name, 1f, (SimHashes)0, name2, null, 0);
+		this.CraftRecipe = new Recipe(this.BuildingComplete.PrefabID().Name, 1f, (SimHashes)0, this.Name, null, 0);
 		this.CraftRecipe.Icon = this.UISprite;
 		for (int i = 0; i < this.MaterialCategory.Length; i++)
 		{
@@ -1332,8 +1309,7 @@ public class BuildingDef : Def
 		bool flag = true;
 		foreach (Recipe.Ingredient ingredient in this.CraftRecipe.GetAllIngredients(selected_elements))
 		{
-			float amount = WorldInventory.Instance.GetAmount(ingredient.tag);
-			if (amount < ingredient.amount)
+			if (WorldInventory.Instance.GetAmount(ingredient.tag) < ingredient.amount)
 			{
 				flag = false;
 				break;
@@ -1515,7 +1491,7 @@ public class BuildingDef : Def
 
 	public Grid.SceneLayer ForegroundLayer = Grid.SceneLayer.BuildingFront;
 
-	public string RequiredAttribute = string.Empty;
+	public string RequiredAttribute = "";
 
 	public int RequiredAttributeLevel;
 

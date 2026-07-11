@@ -48,31 +48,27 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_3;
-		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
-		buildingHP.destroyOnDamaged = true;
+		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddOrGet<TileTemperature>();
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
-		wireUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
-		wireUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
-		wireUtilityNetworkLink.visualizeOnly = false;
+		this.AddNetworkLink(go).visualizeOnly = false;
 		go.GetComponent<KPrefabID>().AddTag(GameTags.WireBridges, false);
 		go.AddOrGet<BuildingCellVisualizer>();
 	}

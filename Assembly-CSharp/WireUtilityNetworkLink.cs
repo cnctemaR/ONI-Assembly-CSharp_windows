@@ -39,7 +39,11 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 			int num2;
 			base.GetCells(out num, out num2);
 			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
-			return (electricalUtilityNetwork == null) ? ushort.MaxValue : ((ushort)electricalUtilityNetwork.id);
+			if (electricalUtilityNetwork == null)
+			{
+				return ushort.MaxValue;
+			}
+			return (ushort)electricalUtilityNetwork.id;
 		}
 	}
 
@@ -48,8 +52,7 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 		int num;
 		int num2;
 		base.GetCells(out num, out num2);
-		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
-		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
 		if (networkForCell != null)
 		{
 			networks.Add(networkForCell);
@@ -61,8 +64,7 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 		int num;
 		int num2;
 		base.GetCells(out num, out num2);
-		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
-		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
 		return networks.Contains(networkForCell);
 	}
 

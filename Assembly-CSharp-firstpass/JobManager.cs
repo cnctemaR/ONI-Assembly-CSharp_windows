@@ -50,22 +50,20 @@ public class JobManager
 			{
 				work_items.InternalDoWorkItem(i);
 			}
+			return;
 		}
-		else
+		this.workerThreadCount = this.threads.Count;
+		this.nextWorkIndex = -1;
+		this.workItems = work_items;
+		Thread.MemoryBarrier();
+		this.semaphore.Release(this.threads.Count);
+		this.manualResetEvent.WaitOne();
+		this.manualResetEvent.Reset();
+		if (JobManager.errorOccured)
 		{
-			this.workerThreadCount = this.threads.Count;
-			this.nextWorkIndex = -1;
-			this.workItems = work_items;
-			Thread.MemoryBarrier();
-			this.semaphore.Release(this.threads.Count);
-			this.manualResetEvent.WaitOne();
-			this.manualResetEvent.Reset();
-			if (JobManager.errorOccured)
+			foreach (JobManager.WorkerThread workerThread in this.threads)
 			{
-				foreach (JobManager.WorkerThread workerThread in this.threads)
-				{
-					workerThread.PrintExceptions();
-				}
+				workerThread.PrintExceptions();
 			}
 		}
 	}
@@ -149,8 +147,7 @@ public class JobManager
 
 		public static void ThreadMain(object data)
 		{
-			JobManager.WorkerThread workerThread = (JobManager.WorkerThread)data;
-			workerThread.Run();
+			((JobManager.WorkerThread)data).Run();
 		}
 
 		private Thread thread;

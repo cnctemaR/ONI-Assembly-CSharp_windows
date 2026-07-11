@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace System.Runtime.Remoting.Channels
 {
@@ -15,6 +16,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public string[] ChannelUris
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._channelURIs;
@@ -27,6 +29,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public object this[object key]
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._extraData == null)
@@ -42,6 +45,7 @@ namespace System.Runtime.Remoting.Channels
 				}
 				return null;
 			}
+			[SecurityCritical]
 			set
 			{
 				if (this._extraData == null)
@@ -50,14 +54,12 @@ namespace System.Runtime.Remoting.Channels
 					{
 						new DictionaryEntry(key, value)
 					};
+					return;
 				}
-				else
-				{
-					DictionaryEntry[] array = new DictionaryEntry[this._extraData.Length + 1];
-					this._extraData.CopyTo(array, 0);
-					array[this._extraData.Length] = new DictionaryEntry(key, value);
-					this._extraData = array;
-				}
+				DictionaryEntry[] array = new DictionaryEntry[this._extraData.Length + 1];
+				this._extraData.CopyTo(array, 0);
+				array[this._extraData.Length] = new DictionaryEntry(key, value);
+				this._extraData = array;
 			}
 		}
 

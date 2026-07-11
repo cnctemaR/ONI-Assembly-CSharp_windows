@@ -70,8 +70,7 @@ public class ConduitTemperatureManager
 
 	public unsafe void Sim200ms(float dt)
 	{
-		IntPtr intPtr = ConduitTemperatureManager.ConduitTemperatureManager_Update(dt, (IntPtr)((void*)Game.Instance.simData.buildingTemperatures));
-		ConduitTemperatureManager.ConduitTemperatureUpdateData* ptr = (ConduitTemperatureManager.ConduitTemperatureUpdateData*)(void*)intPtr;
+		ConduitTemperatureManager.ConduitTemperatureUpdateData* ptr = (ConduitTemperatureManager.ConduitTemperatureUpdateData*)(void*)ConduitTemperatureManager.ConduitTemperatureManager_Update(dt, (IntPtr)((void*)Game.Instance.simData.buildingTemperatures));
 		int numEntries = ptr->numEntries;
 		if (numEntries > 0)
 		{
@@ -79,19 +78,15 @@ public class ConduitTemperatureManager
 		}
 		for (int i = 0; i < ptr->numFrozenHandles; i++)
 		{
-			int num = ptr->frozenHandles[i];
-			int handleIndex = Sim.GetHandleIndex(num);
+			int handleIndex = Sim.GetHandleIndex(ptr->frozenHandles[i]);
 			ConduitTemperatureManager.ConduitInfo conduitInfo = this.conduitInfo[handleIndex];
-			ConduitFlow flowManager = Conduit.GetFlowManager(conduitInfo.type);
-			flowManager.FreezeConduitContents(conduitInfo.idx);
+			Conduit.GetFlowManager(conduitInfo.type).FreezeConduitContents(conduitInfo.idx);
 		}
 		for (int j = 0; j < ptr->numMeltedHandles; j++)
 		{
-			int num2 = ptr->meltedHandles[j];
-			int handleIndex2 = Sim.GetHandleIndex(num2);
+			int handleIndex2 = Sim.GetHandleIndex(ptr->meltedHandles[j]);
 			ConduitTemperatureManager.ConduitInfo conduitInfo2 = this.conduitInfo[handleIndex2];
-			ConduitFlow flowManager2 = Conduit.GetFlowManager(conduitInfo2.type);
-			flowManager2.MeltConduitContents(conduitInfo2.idx);
+			Conduit.GetFlowManager(conduitInfo2.type).MeltConduitContents(conduitInfo2.idx);
 		}
 	}
 

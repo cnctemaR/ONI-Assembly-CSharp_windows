@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Base class for command events.</para>
-	/// </summary>
 	public abstract class CommandEventBase<T> : EventBase<T>, ICommandEvent, IPropagatableEvent where T : CommandEventBase<T>, new()
 	{
 		protected CommandEventBase()
@@ -36,7 +33,7 @@ namespace UnityEngine.Experimental.UIElements
 		protected override void Init()
 		{
 			base.Init();
-			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.Capturable | EventBase.EventFlags.Cancellable;
+			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.TricklesDown | EventBase.EventFlags.Cancellable;
 			this.commandName = null;
 		}
 

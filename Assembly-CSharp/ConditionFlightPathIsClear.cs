@@ -23,8 +23,7 @@ public class ConditionFlightPathIsClear : RocketFlightCondition
 
 	public void Update()
 	{
-		Building component = this.module.GetComponent<Building>();
-		Extents extents = component.GetExtents();
+		Extents extents = this.module.GetComponent<Building>().GetExtents();
 		int num = extents.x - this.bufferWidth;
 		int num2 = extents.x + extents.width - 1 + this.bufferWidth;
 		int y = extents.y;
@@ -37,7 +36,7 @@ public class ConditionFlightPathIsClear : RocketFlightCondition
 			if (!this.CanReachSpace(i))
 			{
 				this.hasClearSky = false;
-				break;
+				return;
 			}
 		}
 	}
@@ -65,9 +64,7 @@ public class ConditionFlightPathIsClear : RocketFlightCondition
 		}
 		if (Grid.Objects[this.obstructedTile, 1] != null)
 		{
-			GameObject gameObject = Grid.Objects[this.obstructedTile, 1];
-			BuildingDef def = gameObject.GetComponent<Building>().Def;
-			return def.Name;
+			return Grid.Objects[this.obstructedTile, 1].GetComponent<Building>().Def.Name;
 		}
 		return string.Format(BUILDING.STATUSITEMS.PATH_NOT_CLEAR.TILE_FORMAT, Grid.Element[this.obstructedTile].tag.ProperName());
 	}

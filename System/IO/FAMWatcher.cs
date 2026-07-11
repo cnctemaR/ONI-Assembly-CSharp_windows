@@ -41,8 +41,9 @@ namespace System.IO
 
 		public void StartDispatching(FileSystemWatcher fsw)
 		{
+			FAMWatcher famwatcher = this;
 			FAMData famdata;
-			lock (this)
+			lock (famwatcher)
 			{
 				if (FAMWatcher.thread == null)
 				{
@@ -65,7 +66,8 @@ namespace System.IO
 				}
 				famdata.Enabled = true;
 				FAMWatcher.StartMonitoringDirectory(famdata, false);
-				lock (this)
+				famwatcher = this;
+				lock (famwatcher)
 				{
 					FAMWatcher.watches[fsw] = famdata;
 					FAMWatcher.requests[famdata.Request.ReqNum] = famdata;
@@ -79,7 +81,7 @@ namespace System.IO
 			FAMRequest famrequest;
 			if (FAMWatcher.FAMMonitorDirectory(ref FAMWatcher.conn, data.Directory, out famrequest, IntPtr.Zero) == -1)
 			{
-				throw new global::System.ComponentModel.Win32Exception();
+				throw new Win32Exception();
 			}
 			FileSystemWatcher fsw = data.FSW;
 			data.Request = famrequest;
@@ -117,8 +119,8 @@ namespace System.IO
 			{
 				foreach (string text2 in Directory.GetFiles(data.Directory))
 				{
-					FileSystemWatcher fileSystemWatcher2 = fsw;
-					lock (fileSystemWatcher2)
+					FileSystemWatcher fileSystemWatcher = fsw;
+					lock (fileSystemWatcher)
 					{
 						RenamedEventArgs e2 = null;
 						fsw.DispatchEvents(FileAction.Added, text2, ref e2);
@@ -164,16 +166,18 @@ namespace System.IO
 		{
 			if (FAMWatcher.FAMCancelMonitor(ref FAMWatcher.conn, ref data.Request) == -1)
 			{
-				throw new global::System.ComponentModel.Win32Exception();
+				throw new Win32Exception();
 			}
 		}
 
 		private void Monitor()
 		{
+			FAMWatcher famwatcher;
 			while (!FAMWatcher.stop)
 			{
+				famwatcher = this;
 				int num;
-				lock (this)
+				lock (famwatcher)
 				{
 					num = FAMWatcher.FAMPending(ref FAMWatcher.conn);
 				}
@@ -186,7 +190,8 @@ namespace System.IO
 					Thread.Sleep(500);
 				}
 			}
-			lock (this)
+			famwatcher = this;
+			lock (famwatcher)
 			{
 				FAMWatcher.thread = null;
 				FAMWatcher.stop = false;
@@ -203,13 +208,13 @@ namespace System.IO
 				int num2;
 				while (FAMWatcher.InternalFAMNextEvent(ref FAMWatcher.conn, out text, out num, out num2) == 1)
 				{
-					bool flag;
+					bool flag2;
 					switch (num)
 					{
 					case 1:
 					case 2:
 					case 5:
-						flag = FAMWatcher.requests.ContainsKey(num2);
+						flag2 = FAMWatcher.requests.ContainsKey(num2);
 						break;
 					case 3:
 					case 4:
@@ -217,12 +222,12 @@ namespace System.IO
 					case 7:
 					case 8:
 					case 9:
-						goto IL_0075;
+						goto IL_0070;
 					default:
-						goto IL_0075;
+						goto IL_0070;
 					}
-					IL_007D:
-					if (flag)
+					IL_0073:
+					if (flag2)
 					{
 						FAMData famdata = (FAMData)FAMWatcher.requests[num2];
 						if (famdata.Enabled)
@@ -301,16 +306,16 @@ namespace System.IO
 					}
 					if (FAMWatcher.FAMPending(ref FAMWatcher.conn) <= 0)
 					{
-						goto IL_028F;
+						goto IL_024A;
 					}
 					continue;
-					IL_0075:
-					flag = false;
-					goto IL_007D;
+					IL_0070:
+					flag2 = false;
+					goto IL_0073;
 				}
 				return;
 			}
-			IL_028F:
+			IL_024A:
 			if (arrayList != null)
 			{
 				int count = arrayList.Count;
@@ -413,8 +418,6 @@ namespace System.IO
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int InternalFAMNextEvent(ref FAMConnection fc, out string filename, out int code, out int reqnum);
 
-		private const NotifyFilters changed = NotifyFilters.Attributes | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Size;
-
 		private static bool failed;
 
 		private static FAMWatcher instance;
@@ -430,5 +433,7 @@ namespace System.IO
 		private static bool stop;
 
 		private static bool use_gamin;
+
+		private const NotifyFilters changed = NotifyFilters.Attributes | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Size;
 	}
 }

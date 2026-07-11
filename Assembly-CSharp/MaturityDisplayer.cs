@@ -17,15 +17,14 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 		Growing component = instance.gameObject.GetComponent<Growing>();
 		if (component.IsGrowing())
 		{
-			float num = instance.GetMax() - instance.value;
-			float num2 = num / instance.GetDelta();
+			float num = (instance.GetMax() - instance.value) / instance.GetDelta();
 			if (component != null && component.IsGrowing())
 			{
-				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num2, "F1"), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
+				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num, "F1"), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
 			}
 			else
 			{
-				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num2, "F1"));
+				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num, "F1"));
 			}
 		}
 		else if (component.ReachedNextHarvest())

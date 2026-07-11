@@ -7,6 +7,14 @@ namespace YamlDotNet.Serialization
 {
 	public sealed class EmissionPhaseObjectGraphVisitorArgs
 	{
+		public IObjectGraphVisitor<IEmitter> InnerVisitor { get; private set; }
+
+		public IEventEmitter EventEmitter { get; private set; }
+
+		public ObjectSerializer NestedObjectSerializer { get; private set; }
+
+		public IEnumerable<IYamlTypeConverter> TypeConverters { get; private set; }
+
 		public EmissionPhaseObjectGraphVisitorArgs(IObjectGraphVisitor<IEmitter> innerVisitor, IEventEmitter eventEmitter, IEnumerable<IObjectGraphVisitor<Nothing>> preProcessingPhaseVisitors, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
 		{
 			if (innerVisitor == null)
@@ -35,14 +43,6 @@ namespace YamlDotNet.Serialization
 			}
 			this.NestedObjectSerializer = nestedObjectSerializer;
 		}
-
-		public IObjectGraphVisitor<IEmitter> InnerVisitor { get; private set; }
-
-		public IEventEmitter EventEmitter { get; private set; }
-
-		public ObjectSerializer NestedObjectSerializer { get; private set; }
-
-		public IEnumerable<IYamlTypeConverter> TypeConverters { get; private set; }
 
 		public T GetPreProcessingPhaseObjectGraphVisitor<T>() where T : IObjectGraphVisitor<Nothing>
 		{

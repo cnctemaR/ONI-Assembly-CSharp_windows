@@ -54,15 +54,15 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public new class Instance : GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.GameInstance, ICheckboxControl
 	{
+		public FixedCapturableMonitor.Instance targetCapturable { get; private set; }
+
+		public bool shouldCreatureGoGetCaptured { get; private set; }
+
 		public Instance(IStateMachineTarget master, FixedCapturePoint.Def def)
 			: base(master, def)
 		{
 			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		}
-
-		public FixedCapturableMonitor.Instance targetCapturable { get; private set; }
-
-		public bool shouldCreatureGoGetCaptured { get; private set; }
 
 		private void OnCopySettings(object data)
 		{
@@ -134,8 +134,7 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			{
 				return false;
 			}
-			int navigationCost = capturable.GetComponent<Navigator>().GetNavigationCost(capture_cell);
-			if (navigationCost == -1)
+			if (capturable.GetComponent<Navigator>().GetNavigationCost(capture_cell) == -1)
 			{
 				return false;
 			}
@@ -217,6 +216,8 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 
 		private struct CapturableIterator : GameScenePartitioner.Iterator
 		{
+			public FixedCapturableMonitor.Instance result { get; private set; }
+
 			public CapturableIterator(FixedCapturePoint.Instance capture_point, CavityInfo capture_cavity_info, int capture_cell)
 			{
 				this.capturePoint = capture_point;
@@ -224,8 +225,6 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 				this.captureCell = capture_cell;
 				this.result = null;
 			}
-
-			public FixedCapturableMonitor.Instance result { get; private set; }
 
 			public void Iterate(object target_obj)
 			{

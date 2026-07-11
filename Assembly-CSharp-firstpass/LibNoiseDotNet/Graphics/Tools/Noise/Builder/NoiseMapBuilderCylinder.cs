@@ -5,11 +5,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 {
 	public class NoiseMapBuilderCylinder : NoiseMapBuilder
 	{
-		public NoiseMapBuilderCylinder()
-		{
-			this.SetBounds(-180f, 180f, -10f, 10f);
-		}
-
 		public float LowerHeightBound
 		{
 			get
@@ -40,6 +35,11 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 			{
 				return this._upperHeightBound;
 			}
+		}
+
+		public NoiseMapBuilderCylinder()
+		{
+			this.SetBounds(-180f, 180f, -10f, 10f);
 		}
 
 		public void SetBounds(float lowerAngleBound, float upperAngleBound, float lowerHeightBound, float upperHeightBound)

@@ -1,21 +1,15 @@
 ﻿using System;
+using System.Collections;
+using System.Globalization;
 using System.IO;
+using System.Security.Permissions;
 using System.Text;
 
 namespace System.Diagnostics
 {
+	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 	public class DelimitedListTraceListener : TextWriterTraceListener
 	{
-		public DelimitedListTraceListener(string fileName)
-			: base(fileName)
-		{
-		}
-
-		public DelimitedListTraceListener(string fileName, string name)
-			: base(fileName, name)
-		{
-		}
-
 		public DelimitedListTraceListener(Stream stream)
 			: base(stream)
 		{
@@ -36,95 +30,237 @@ namespace System.Diagnostics
 		{
 		}
 
+		public DelimitedListTraceListener(string fileName)
+			: base(fileName)
+		{
+		}
+
+		public DelimitedListTraceListener(string fileName, string name)
+			: base(fileName, name)
+		{
+		}
+
 		public string Delimiter
 		{
 			get
 			{
+				lock (this)
+				{
+					if (!this.initializedDelim)
+					{
+						if (base.Attributes.ContainsKey("delimiter"))
+						{
+							this.delimiter = base.Attributes["delimiter"];
+						}
+						this.initializedDelim = true;
+					}
+				}
 				return this.delimiter;
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException("Delimiter");
 				}
-				this.delimiter = value;
+				if (value.Length == 0)
+				{
+					throw new ArgumentException(global::SR.GetString("Generic_ArgCantBeEmptyString", new object[] { "Delimiter" }));
+				}
+				lock (this)
+				{
+					this.delimiter = value;
+					this.initializedDelim = true;
+				}
+				if (this.delimiter == ",")
+				{
+					this.secondaryDelim = ";";
+					return;
+				}
+				this.secondaryDelim = ",";
 			}
 		}
 
 		protected internal override string[] GetSupportedAttributes()
 		{
-			return DelimitedListTraceListener.attributes;
-		}
-
-		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
-		{
-			this.TraceCore(eventCache, source, eventType, id, null, new object[] { data });
-		}
-
-		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, params object[] data)
-		{
-			this.TraceCore(eventCache, source, eventType, id, null, data);
-		}
-
-		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
-		{
-			this.TraceCore(eventCache, source, eventType, id, message, new object[0]);
+			return new string[] { "delimiter" };
 		}
 
 		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
 		{
-			this.TraceCore(eventCache, source, eventType, id, string.Format(format, args), new object[0]);
-		}
-
-		private void TraceCore(TraceEventCache c, string source, TraceEventType eventType, int id, string message, params object[] data)
-		{
-			this.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{12}", new object[]
+			if (base.Filter != null && !base.Filter.ShouldTrace(eventCache, source, eventType, id, format, args))
 			{
-				this.delimiter,
-				(source == null) ? null : ("\"" + source.Replace("\"", "\"\"") + "\""),
-				eventType,
-				id,
-				(message == null) ? null : ("\"" + message.Replace("\"", "\"\"") + "\""),
-				this.FormatData(data),
-				(!this.IsTarget(c, TraceOptions.ProcessId)) ? null : c.ProcessId.ToString(),
-				(!this.IsTarget(c, TraceOptions.LogicalOperationStack)) ? null : TraceListener.FormatArray(c.LogicalOperationStack, ", "),
-				(!this.IsTarget(c, TraceOptions.ThreadId)) ? null : c.ThreadId,
-				(!this.IsTarget(c, TraceOptions.DateTime)) ? null : c.DateTime.ToString("o"),
-				(!this.IsTarget(c, TraceOptions.Timestamp)) ? null : c.Timestamp.ToString(),
-				(!this.IsTarget(c, TraceOptions.Callstack)) ? null : c.Callstack,
-				Environment.NewLine
-			}));
-		}
-
-		private bool IsTarget(TraceEventCache c, TraceOptions opt)
-		{
-			return c != null && (base.TraceOutputOptions & opt) != TraceOptions.None;
-		}
-
-		private string FormatData(object[] data)
-		{
-			if (data == null || data.Length == 0)
-			{
-				return null;
+				return;
 			}
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < data.Length; i++)
+			this.WriteHeader(source, eventType, id);
+			if (args != null)
 			{
-				if (data[i] != null)
-				{
-					stringBuilder.Append('"').Append(data[i].ToString().Replace("\"", "\"\"")).Append('"');
-				}
-				if (i + 1 < data.Length)
-				{
-					stringBuilder.Append(',');
-				}
+				this.WriteEscaped(string.Format(CultureInfo.InvariantCulture, format, args));
 			}
-			return stringBuilder.ToString();
+			else
+			{
+				this.WriteEscaped(format);
+			}
+			this.Write(this.Delimiter);
+			this.Write(this.Delimiter);
+			this.WriteFooter(eventCache);
 		}
 
-		private static readonly string[] attributes = new string[] { "delimiter" };
+		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
+		{
+			if (base.Filter != null && !base.Filter.ShouldTrace(eventCache, source, eventType, id, message))
+			{
+				return;
+			}
+			this.WriteHeader(source, eventType, id);
+			this.WriteEscaped(message);
+			this.Write(this.Delimiter);
+			this.Write(this.Delimiter);
+			this.WriteFooter(eventCache);
+		}
+
+		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
+		{
+			if (base.Filter != null && !base.Filter.ShouldTrace(eventCache, source, eventType, id, null, null, data))
+			{
+				return;
+			}
+			this.WriteHeader(source, eventType, id);
+			this.Write(this.Delimiter);
+			this.WriteEscaped(data.ToString());
+			this.Write(this.Delimiter);
+			this.WriteFooter(eventCache);
+		}
+
+		public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, params object[] data)
+		{
+			if (base.Filter != null && !base.Filter.ShouldTrace(eventCache, source, eventType, id, null, null, null, data))
+			{
+				return;
+			}
+			this.WriteHeader(source, eventType, id);
+			this.Write(this.Delimiter);
+			if (data != null)
+			{
+				for (int i = 0; i < data.Length; i++)
+				{
+					if (i != 0)
+					{
+						this.Write(this.secondaryDelim);
+					}
+					this.WriteEscaped(data[i].ToString());
+				}
+			}
+			this.Write(this.Delimiter);
+			this.WriteFooter(eventCache);
+		}
+
+		private void WriteHeader(string source, TraceEventType eventType, int id)
+		{
+			this.WriteEscaped(source);
+			this.Write(this.Delimiter);
+			this.Write(eventType.ToString());
+			this.Write(this.Delimiter);
+			this.Write(id.ToString(CultureInfo.InvariantCulture));
+			this.Write(this.Delimiter);
+		}
+
+		private void WriteFooter(TraceEventCache eventCache)
+		{
+			if (eventCache != null)
+			{
+				if (base.IsEnabled(TraceOptions.ProcessId))
+				{
+					this.Write(eventCache.ProcessId.ToString(CultureInfo.InvariantCulture));
+				}
+				this.Write(this.Delimiter);
+				if (base.IsEnabled(TraceOptions.LogicalOperationStack))
+				{
+					this.WriteStackEscaped(eventCache.LogicalOperationStack);
+				}
+				this.Write(this.Delimiter);
+				if (base.IsEnabled(TraceOptions.ThreadId))
+				{
+					this.WriteEscaped(eventCache.ThreadId.ToString(CultureInfo.InvariantCulture));
+				}
+				this.Write(this.Delimiter);
+				if (base.IsEnabled(TraceOptions.DateTime))
+				{
+					this.WriteEscaped(eventCache.DateTime.ToString("o", CultureInfo.InvariantCulture));
+				}
+				this.Write(this.Delimiter);
+				if (base.IsEnabled(TraceOptions.Timestamp))
+				{
+					this.Write(eventCache.Timestamp.ToString(CultureInfo.InvariantCulture));
+				}
+				this.Write(this.Delimiter);
+				if (base.IsEnabled(TraceOptions.Callstack))
+				{
+					this.WriteEscaped(eventCache.Callstack);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					this.Write(this.Delimiter);
+				}
+			}
+			this.WriteLine("");
+		}
+
+		private void WriteEscaped(string message)
+		{
+			if (!string.IsNullOrEmpty(message))
+			{
+				StringBuilder stringBuilder = new StringBuilder("\"");
+				int num = 0;
+				int num2;
+				while ((num2 = message.IndexOf('"', num)) != -1)
+				{
+					stringBuilder.Append(message, num, num2 - num);
+					stringBuilder.Append("\"\"");
+					num = num2 + 1;
+				}
+				stringBuilder.Append(message, num, message.Length - num);
+				stringBuilder.Append("\"");
+				this.Write(stringBuilder.ToString());
+			}
+		}
+
+		private void WriteStackEscaped(Stack stack)
+		{
+			StringBuilder stringBuilder = new StringBuilder("\"");
+			bool flag = true;
+			foreach (object obj in stack)
+			{
+				if (!flag)
+				{
+					stringBuilder.Append(", ");
+				}
+				else
+				{
+					flag = false;
+				}
+				string text = obj.ToString();
+				int num = 0;
+				int num2;
+				while ((num2 = text.IndexOf('"', num)) != -1)
+				{
+					stringBuilder.Append(text, num, num2 - num);
+					stringBuilder.Append("\"\"");
+					num = num2 + 1;
+				}
+				stringBuilder.Append(text, num, text.Length - num);
+			}
+			stringBuilder.Append("\"");
+			this.Write(stringBuilder.ToString());
+		}
 
 		private string delimiter = ";";
+
+		private string secondaryDelim = ",";
+
+		private bool initializedDelim;
 	}
 }

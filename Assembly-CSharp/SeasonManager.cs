@@ -62,13 +62,13 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 		{
 			float num = this.bombardmentPeriodRemaining;
 			this.bombardmentOn = !this.bombardmentOn;
-			this.bombardmentPeriodRemaining = ((!this.bombardmentOn) ? season.secondsBombardmentOff.Get() : season.secondsBombardmentOn.Get());
+			this.bombardmentPeriodRemaining = (this.bombardmentOn ? season.secondsBombardmentOn.Get() : season.secondsBombardmentOff.Get());
 			if (this.bombardmentPeriodRemaining != 0f)
 			{
 				this.bombardmentPeriodRemaining += num;
 			}
 		}
-		if (this.bombardmentOn && season.bombardmentInfo != null && season.bombardmentInfo.Length > 0)
+		if (this.bombardmentOn && season.bombardmentInfo != null && season.bombardmentInfo.Length != 0)
 		{
 			if (this.activeMeteorBackground == null)
 			{
@@ -85,6 +85,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 				if (this.secondsUntilNextBombardment != 0f)
 				{
 					this.secondsUntilNextBombardment += num2;
+					return;
 				}
 			}
 		}
@@ -130,20 +131,32 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	public bool CurrentSeasonHasBombardment()
 	{
 		SeasonManager.Season season = this.seasons[this.SeasonLoop[this.currentSeasonIndex]];
-		return season.bombardmentInfo != null && season.bombardmentInfo.Length > 0;
+		return season.bombardmentInfo != null && season.bombardmentInfo.Length != 0;
 	}
 
 	public float TimeUntilNextBombardment()
 	{
-		return (!this.CurrentSeasonHasBombardment()) ? float.MaxValue : ((!this.bombardmentOn) ? this.bombardmentPeriodRemaining : 0f);
+		if (!this.CurrentSeasonHasBombardment())
+		{
+			return float.MaxValue;
+		}
+		if (!this.bombardmentOn)
+		{
+			return this.bombardmentPeriodRemaining;
+		}
+		return 0f;
 	}
 
 	public float GetBombardmentDuration()
 	{
-		if (this.CurrentSeasonHasBombardment())
+		if (!this.CurrentSeasonHasBombardment())
 		{
-			SeasonManager.Season season = this.seasons[this.SeasonLoop[this.currentSeasonIndex]];
-			return (!this.bombardmentOn) ? season.secondsBombardmentOn.Get() : 0f;
+			return 0f;
+		}
+		SeasonManager.Season season = this.seasons[this.SeasonLoop[this.currentSeasonIndex]];
+		if (!this.bombardmentOn)
+		{
+			return season.secondsBombardmentOn.Get();
 		}
 		return 0f;
 	}

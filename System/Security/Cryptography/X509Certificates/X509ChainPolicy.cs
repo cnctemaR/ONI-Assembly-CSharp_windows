@@ -9,6 +9,12 @@ namespace System.Security.Cryptography.X509Certificates
 			this.Reset();
 		}
 
+		internal X509ChainPolicy(X509CertificateCollection store)
+		{
+			this.store = store;
+			this.Reset();
+		}
+
 		public OidCollection ApplicationPolicy
 		{
 			get
@@ -29,7 +35,23 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				return this.store;
+				if (this.store2 != null)
+				{
+					return this.store2;
+				}
+				this.store2 = new X509Certificate2Collection();
+				if (this.store != null)
+				{
+					foreach (X509Certificate x509Certificate in this.store)
+					{
+						this.store2.Add(new X509Certificate2(x509Certificate));
+					}
+				}
+				return this.store2;
+			}
+			internal set
+			{
+				this.store2 = value;
 			}
 		}
 
@@ -109,7 +131,7 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			this.apps = new OidCollection();
 			this.cert = new OidCollection();
-			this.store = new X509Certificate2Collection();
+			this.store2 = null;
 			this.rflag = X509RevocationFlag.ExcludeRoot;
 			this.mode = X509RevocationMode.Online;
 			this.timeout = TimeSpan.Zero;
@@ -121,7 +143,9 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private OidCollection cert;
 
-		private X509Certificate2Collection store;
+		private X509CertificateCollection store;
+
+		private X509Certificate2Collection store2;
 
 		private X509RevocationFlag rflag;
 

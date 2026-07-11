@@ -38,11 +38,9 @@ namespace ProcGen
 				}
 				this.bucket.ShuffleSeeded<WeightedMob>(rnd.RandomSource());
 				this.mobIter = this.bucket.GetEnumerator();
+				return;
 			}
-			else
-			{
-				this.mobIter = this.mobs.GetEnumerator();
-			}
+			this.mobIter = this.mobs.GetEnumerator();
 		}
 
 		public WeightedMob GetNextMob(SeededRandom rnd)

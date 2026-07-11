@@ -6,16 +6,32 @@ namespace System.Data.Common
 	{
 		public RowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
 		{
+			ADP.CheckArgumentNull(dataRow, "dataRow");
+			ADP.CheckArgumentNull(tableMapping, "tableMapping");
+			if (statementType <= StatementType.Delete)
+			{
+				this._dataRow = dataRow;
+				this._command = command;
+				this._statementType = statementType;
+				this._tableMapping = tableMapping;
+				return;
+			}
+			if (statementType == StatementType.Batch)
+			{
+				throw ADP.NotSupportedStatementType(statementType, "RowUpdatingEventArgs");
+			}
+			throw ADP.InvalidStatementType(statementType);
 		}
 
 		protected virtual IDbCommand BaseCommand
 		{
 			get
 			{
-				throw null;
+				return this._command;
 			}
 			set
 			{
+				this._command = value;
 			}
 		}
 
@@ -23,10 +39,11 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this.BaseCommand;
 			}
 			set
 			{
+				this.BaseCommand = value;
 			}
 		}
 
@@ -34,10 +51,11 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this._errors;
 			}
 			set
 			{
+				this._errors = value;
 			}
 		}
 
@@ -45,7 +63,7 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this._dataRow;
 			}
 		}
 
@@ -53,7 +71,7 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this._statementType;
 			}
 		}
 
@@ -61,10 +79,16 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this._status;
 			}
 			set
 			{
+				if (value <= UpdateStatus.SkipAllRemainingRows)
+				{
+					this._status = value;
+					return;
+				}
+				throw ADP.InvalidUpdateStatus(value);
 			}
 		}
 
@@ -72,8 +96,20 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this._tableMapping;
 			}
 		}
+
+		private IDbCommand _command;
+
+		private StatementType _statementType;
+
+		private DataTableMapping _tableMapping;
+
+		private Exception _errors;
+
+		private DataRow _dataRow;
+
+		private UpdateStatus _status;
 	}
 }

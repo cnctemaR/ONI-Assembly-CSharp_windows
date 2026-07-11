@@ -32,8 +32,7 @@ public class GasConduitElementSensorConfig : ConduitSensorConfig
 	{
 		base.DoPostConfigureComplete(go);
 		GeneratedBuildings.RegisterLogicPorts(go, GasConduitElementSensorConfig.OUTPUT_PORT);
-		Filterable filterable = go.AddOrGet<Filterable>();
-		filterable.filterElementState = Filterable.ElementState.Gas;
+		go.AddOrGet<Filterable>().filterElementState = Filterable.ElementState.Gas;
 		ConduitElementSensor conduitElementSensor = go.AddOrGet<ConduitElementSensor>();
 		conduitElementSensor.manuallyControlled = false;
 		conduitElementSensor.conduitType = this.ConduitType;

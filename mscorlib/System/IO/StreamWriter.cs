@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Permissions;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
@@ -8,94 +13,225 @@ namespace System.IO
 	[Serializable]
 	public class StreamWriter : TextWriter
 	{
+		private void CheckAsyncTaskInProgress()
+		{
+			Task asyncWriteTask = this._asyncWriteTask;
+			if (asyncWriteTask != null && !asyncWriteTask.IsCompleted)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The stream is currently in use by a previous operation on the stream."));
+			}
+		}
+
+		internal static Encoding UTF8NoBOM
+		{
+			[FriendAccessAllowed]
+			get
+			{
+				if (StreamWriter._UTF8NoBOM == null)
+				{
+					Encoding encoding = new UTF8Encoding(false, true);
+					Thread.MemoryBarrier();
+					StreamWriter._UTF8NoBOM = encoding;
+				}
+				return StreamWriter._UTF8NoBOM;
+			}
+		}
+
+		internal StreamWriter()
+			: base(null)
+		{
+		}
+
 		public StreamWriter(Stream stream)
-			: this(stream, Encoding.UTF8Unmarked, 1024)
+			: this(stream, StreamWriter.UTF8NoBOM, 1024, false)
 		{
 		}
 
 		public StreamWriter(Stream stream, Encoding encoding)
-			: this(stream, encoding, 1024)
+			: this(stream, encoding, 1024, false)
 		{
 		}
 
 		public StreamWriter(Stream stream, Encoding encoding, int bufferSize)
+			: this(stream, encoding, bufferSize, false)
 		{
-			if (stream == null)
+		}
+
+		public StreamWriter(Stream stream, Encoding encoding, int bufferSize, bool leaveOpen)
+			: base(null)
+		{
+			if (stream == null || encoding == null)
 			{
-				throw new ArgumentNullException("stream");
-			}
-			if (encoding == null)
-			{
-				throw new ArgumentNullException("encoding");
-			}
-			if (bufferSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException("bufferSize");
+				throw new ArgumentNullException((stream == null) ? "stream" : "encoding");
 			}
 			if (!stream.CanWrite)
 			{
-				throw new ArgumentException("Can not write to stream");
+				throw new ArgumentException(Environment.GetResourceString("Stream was not writable."));
 			}
-			this.internalStream = stream;
-			this.Initialize(encoding, bufferSize);
+			if (bufferSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+			}
+			this.Init(stream, encoding, bufferSize, leaveOpen);
 		}
 
 		public StreamWriter(string path)
-			: this(path, false, Encoding.UTF8Unmarked, 4096)
+			: this(path, false, StreamWriter.UTF8NoBOM, 1024)
 		{
 		}
 
 		public StreamWriter(string path, bool append)
-			: this(path, append, Encoding.UTF8Unmarked, 4096)
+			: this(path, append, StreamWriter.UTF8NoBOM, 1024)
 		{
 		}
 
 		public StreamWriter(string path, bool append, Encoding encoding)
-			: this(path, append, encoding, 4096)
+			: this(path, append, encoding, 1024)
 		{
 		}
 
+		[SecuritySafeCritical]
 		public StreamWriter(string path, bool append, Encoding encoding, int bufferSize)
+			: this(path, append, encoding, bufferSize, true)
 		{
+		}
+
+		[SecurityCritical]
+		internal StreamWriter(string path, bool append, Encoding encoding, int bufferSize, bool checkHost)
+			: base(null)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			if (encoding == null)
 			{
 				throw new ArgumentNullException("encoding");
 			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Empty path name is not legal."));
+			}
 			if (bufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("bufferSize");
+				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
 			}
-			FileMode fileMode;
-			if (append)
-			{
-				fileMode = FileMode.Append;
-			}
-			else
-			{
-				fileMode = FileMode.Create;
-			}
-			this.internalStream = new FileStream(path, fileMode, FileAccess.Write, FileShare.Read);
-			if (append)
-			{
-				this.internalStream.Position = this.internalStream.Length;
-			}
-			else
-			{
-				this.internalStream.SetLength(0L);
-			}
-			this.Initialize(encoding, bufferSize);
+			Stream stream = StreamWriter.CreateFile(path, append, checkHost);
+			this.Init(stream, encoding, bufferSize, false);
 		}
 
-		internal void Initialize(Encoding encoding, int bufferSize)
+		[SecuritySafeCritical]
+		private void Init(Stream streamArg, Encoding encodingArg, int bufferSize, bool shouldLeaveOpen)
 		{
-			this.internalEncoding = encoding;
-			this.decode_pos = (this.byte_pos = 0);
-			int num = Math.Max(bufferSize, 256);
-			this.decode_buf = new char[num];
-			this.byte_buf = new byte[encoding.GetMaxByteCount(num)];
-			if (this.internalStream.CanSeek && this.internalStream.Position > 0L)
+			this.stream = streamArg;
+			this.encoding = encodingArg;
+			this.encoder = this.encoding.GetEncoder();
+			if (bufferSize < 128)
 			{
-				this.preamble_done = true;
+				bufferSize = 128;
+			}
+			this.charBuffer = new char[bufferSize];
+			this.byteBuffer = new byte[this.encoding.GetMaxByteCount(bufferSize)];
+			this.charLen = bufferSize;
+			if (this.stream.CanSeek && this.stream.Position > 0L)
+			{
+				this.haveWrittenPreamble = true;
+			}
+			this.closable = !shouldLeaveOpen;
+		}
+
+		[SecurityCritical]
+		private static Stream CreateFile(string path, bool append, bool checkHost)
+		{
+			FileMode fileMode = (append ? FileMode.Append : FileMode.Create);
+			return new FileStream(path, fileMode, FileAccess.Write, FileShare.Read, 4096, FileOptions.SequentialScan, Path.GetFileName(path), false, false, checkHost);
+		}
+
+		public override void Close()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				if (this.stream != null)
+				{
+					if (!disposing)
+					{
+						if (this.LeaveOpen)
+						{
+							Stream stream = this.stream;
+						}
+					}
+					else
+					{
+						this.CheckAsyncTaskInProgress();
+						this.Flush(true, true);
+					}
+				}
+			}
+			finally
+			{
+				if (!this.LeaveOpen && this.stream != null)
+				{
+					try
+					{
+						if (disposing)
+						{
+							this.stream.Close();
+						}
+					}
+					finally
+					{
+						this.stream = null;
+						this.byteBuffer = null;
+						this.charBuffer = null;
+						this.encoding = null;
+						this.encoder = null;
+						this.charLen = 0;
+						base.Dispose(disposing);
+					}
+				}
+			}
+		}
+
+		public override void Flush()
+		{
+			this.CheckAsyncTaskInProgress();
+			this.Flush(true, true);
+		}
+
+		private void Flush(bool flushStream, bool flushEncoder)
+		{
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			if (this.charPos == 0 && ((!flushStream && !flushEncoder) || CompatibilitySwitches.IsAppEarlierThanWindowsPhone8))
+			{
+				return;
+			}
+			if (!this.haveWrittenPreamble)
+			{
+				this.haveWrittenPreamble = true;
+				byte[] preamble = this.encoding.GetPreamble();
+				if (preamble.Length != 0)
+				{
+					this.stream.Write(preamble, 0, preamble.Length);
+				}
+			}
+			int bytes = this.encoder.GetBytes(this.charBuffer, 0, this.charPos, this.byteBuffer, 0, flushEncoder);
+			this.charPos = 0;
+			if (bytes > 0)
+			{
+				this.stream.Write(this.byteBuffer, 0, bytes);
+			}
+			if (flushStream)
+			{
+				this.stream.Flush();
 			}
 		}
 
@@ -103,14 +239,15 @@ namespace System.IO
 		{
 			get
 			{
-				return this.iflush;
+				return this.autoFlush;
 			}
 			set
 			{
-				this.iflush = value;
-				if (this.iflush)
+				this.CheckAsyncTaskInProgress();
+				this.autoFlush = value;
+				if (value)
 				{
-					this.Flush();
+					this.Flush(true, false);
 				}
 			}
 		}
@@ -119,7 +256,23 @@ namespace System.IO
 		{
 			get
 			{
-				return this.internalStream;
+				return this.stream;
+			}
+		}
+
+		internal bool LeaveOpen
+		{
+			get
+			{
+				return !this.closable;
+			}
+		}
+
+		internal bool HaveWrittenPreamble
+		{
+			set
+			{
+				this.haveWrittenPreamble = value;
 			}
 		}
 
@@ -127,248 +280,500 @@ namespace System.IO
 		{
 			get
 			{
-				return this.internalEncoding;
-			}
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			Exception ex = null;
-			if (!this.DisposedAlready && disposing && this.internalStream != null)
-			{
-				try
-				{
-					this.Flush();
-				}
-				catch (Exception ex2)
-				{
-					ex = ex2;
-				}
-				this.DisposedAlready = true;
-				try
-				{
-					this.internalStream.Close();
-				}
-				catch (Exception ex3)
-				{
-					if (ex == null)
-					{
-						ex = ex3;
-					}
-				}
-			}
-			this.internalStream = null;
-			this.byte_buf = null;
-			this.internalEncoding = null;
-			this.decode_buf = null;
-			if (ex != null)
-			{
-				throw ex;
-			}
-		}
-
-		public override void Flush()
-		{
-			if (this.DisposedAlready)
-			{
-				throw new ObjectDisposedException("StreamWriter");
-			}
-			this.Decode();
-			if (this.byte_pos > 0)
-			{
-				this.FlushBytes();
-				this.internalStream.Flush();
-			}
-		}
-
-		private void FlushBytes()
-		{
-			if (!this.preamble_done && this.byte_pos > 0)
-			{
-				byte[] preamble = this.internalEncoding.GetPreamble();
-				if (preamble.Length > 0)
-				{
-					this.internalStream.Write(preamble, 0, preamble.Length);
-				}
-				this.preamble_done = true;
-			}
-			this.internalStream.Write(this.byte_buf, 0, this.byte_pos);
-			this.byte_pos = 0;
-		}
-
-		private void Decode()
-		{
-			if (this.byte_pos > 0)
-			{
-				this.FlushBytes();
-			}
-			if (this.decode_pos > 0)
-			{
-				int bytes = this.internalEncoding.GetBytes(this.decode_buf, 0, this.decode_pos, this.byte_buf, this.byte_pos);
-				this.byte_pos += bytes;
-				this.decode_pos = 0;
-			}
-		}
-
-		public override void Write(char[] buffer, int index, int count)
-		{
-			if (this.DisposedAlready)
-			{
-				throw new ObjectDisposedException("StreamWriter");
-			}
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", "< 0");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", "< 0");
-			}
-			if (index > buffer.Length - count)
-			{
-				throw new ArgumentException("index + count > buffer.Length");
-			}
-			this.LowLevelWrite(buffer, index, count);
-			if (this.iflush)
-			{
-				this.Flush();
-			}
-		}
-
-		private void LowLevelWrite(char[] buffer, int index, int count)
-		{
-			while (count > 0)
-			{
-				int num = this.decode_buf.Length - this.decode_pos;
-				if (num == 0)
-				{
-					this.Decode();
-					num = this.decode_buf.Length;
-				}
-				if (num > count)
-				{
-					num = count;
-				}
-				Buffer.BlockCopy(buffer, index * 2, this.decode_buf, this.decode_pos * 2, num * 2);
-				count -= num;
-				index += num;
-				this.decode_pos += num;
-			}
-		}
-
-		private void LowLevelWrite(string s)
-		{
-			int i = s.Length;
-			int num = 0;
-			while (i > 0)
-			{
-				int num2 = this.decode_buf.Length - this.decode_pos;
-				if (num2 == 0)
-				{
-					this.Decode();
-					num2 = this.decode_buf.Length;
-				}
-				if (num2 > i)
-				{
-					num2 = i;
-				}
-				for (int j = 0; j < num2; j++)
-				{
-					this.decode_buf[j + this.decode_pos] = s[j + num];
-				}
-				i -= num2;
-				num += num2;
-				this.decode_pos += num2;
+				return this.encoding;
 			}
 		}
 
 		public override void Write(char value)
 		{
-			if (this.DisposedAlready)
+			this.CheckAsyncTaskInProgress();
+			if (this.charPos == this.charLen)
 			{
-				throw new ObjectDisposedException("StreamWriter");
+				this.Flush(false, false);
 			}
-			if (this.decode_pos >= this.decode_buf.Length)
+			this.charBuffer[this.charPos] = value;
+			this.charPos++;
+			if (this.autoFlush)
 			{
-				this.Decode();
-			}
-			this.decode_buf[this.decode_pos++] = value;
-			if (this.iflush)
-			{
-				this.Flush();
+				this.Flush(true, false);
 			}
 		}
 
 		public override void Write(char[] buffer)
 		{
-			if (this.DisposedAlready)
+			if (buffer == null)
 			{
-				throw new ObjectDisposedException("StreamWriter");
+				return;
 			}
-			if (buffer != null)
+			this.CheckAsyncTaskInProgress();
+			int num = 0;
+			int num2;
+			for (int i = buffer.Length; i > 0; i -= num2)
 			{
-				this.LowLevelWrite(buffer, 0, buffer.Length);
+				if (this.charPos == this.charLen)
+				{
+					this.Flush(false, false);
+				}
+				num2 = this.charLen - this.charPos;
+				if (num2 > i)
+				{
+					num2 = i;
+				}
+				Buffer.InternalBlockCopy(buffer, num * 2, this.charBuffer, this.charPos * 2, num2 * 2);
+				this.charPos += num2;
+				num += num2;
 			}
-			if (this.iflush)
+			if (this.autoFlush)
 			{
-				this.Flush();
+				this.Flush(true, false);
+			}
+		}
+
+		public override void Write(char[] buffer, int index, int count)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			this.CheckAsyncTaskInProgress();
+			while (count > 0)
+			{
+				if (this.charPos == this.charLen)
+				{
+					this.Flush(false, false);
+				}
+				int num = this.charLen - this.charPos;
+				if (num > count)
+				{
+					num = count;
+				}
+				Buffer.InternalBlockCopy(buffer, index * 2, this.charBuffer, this.charPos * 2, num * 2);
+				this.charPos += num;
+				index += num;
+				count -= num;
+			}
+			if (this.autoFlush)
+			{
+				this.Flush(true, false);
 			}
 		}
 
 		public override void Write(string value)
 		{
-			if (this.DisposedAlready)
+			if (value != null)
 			{
-				throw new ObjectDisposedException("StreamWriter");
+				this.CheckAsyncTaskInProgress();
+				int i = value.Length;
+				int num = 0;
+				while (i > 0)
+				{
+					if (this.charPos == this.charLen)
+					{
+						this.Flush(false, false);
+					}
+					int num2 = this.charLen - this.charPos;
+					if (num2 > i)
+					{
+						num2 = i;
+					}
+					value.CopyTo(num, this.charBuffer, this.charPos, num2);
+					this.charPos += num2;
+					num += num2;
+					i -= num2;
+				}
+				if (this.autoFlush)
+				{
+					this.Flush(true, false);
+				}
+			}
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteAsync(char value)
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteAsync(value);
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, value, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, false);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		private static async Task WriteAsyncInternal(StreamWriter _this, char value, char[] charBuffer, int charPos, int charLen, char[] coreNewLine, bool autoFlush, bool appendNewLine)
+		{
+			if (charPos == charLen)
+			{
+				await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+				charPos = 0;
+			}
+			charBuffer[charPos] = value;
+			charPos++;
+			if (appendNewLine)
+			{
+				for (int i = 0; i < coreNewLine.Length; i++)
+				{
+					if (charPos == charLen)
+					{
+						await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+						charPos = 0;
+					}
+					charBuffer[charPos] = coreNewLine[i];
+					charPos++;
+				}
+			}
+			if (autoFlush)
+			{
+				await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+				charPos = 0;
+			}
+			_this.CharPos_Prop = charPos;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteAsync(string value)
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteAsync(value);
 			}
 			if (value != null)
 			{
-				this.LowLevelWrite(value);
+				if (this.stream == null)
+				{
+					__Error.WriterClosed();
+				}
+				this.CheckAsyncTaskInProgress();
+				Task task = StreamWriter.WriteAsyncInternal(this, value, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, false);
+				this._asyncWriteTask = task;
+				return task;
 			}
-			if (this.iflush)
+			return Task.CompletedTask;
+		}
+
+		private static async Task WriteAsyncInternal(StreamWriter _this, string value, char[] charBuffer, int charPos, int charLen, char[] coreNewLine, bool autoFlush, bool appendNewLine)
+		{
+			int count = value.Length;
+			int index = 0;
+			while (count > 0)
 			{
-				this.Flush();
+				if (charPos == charLen)
+				{
+					await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+					charPos = 0;
+				}
+				int num = charLen - charPos;
+				if (num > count)
+				{
+					num = count;
+				}
+				value.CopyTo(index, charBuffer, charPos, num);
+				charPos += num;
+				index += num;
+				count -= num;
+			}
+			if (appendNewLine)
+			{
+				for (int i = 0; i < coreNewLine.Length; i++)
+				{
+					if (charPos == charLen)
+					{
+						await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+						charPos = 0;
+					}
+					charBuffer[charPos] = coreNewLine[i];
+					charPos++;
+				}
+			}
+			if (autoFlush)
+			{
+				await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+				charPos = 0;
+			}
+			_this.CharPos_Prop = charPos;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteAsync(char[] buffer, int index, int count)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteAsync(buffer, index, count);
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, buffer, index, count, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, false);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		private static async Task WriteAsyncInternal(StreamWriter _this, char[] buffer, int index, int count, char[] charBuffer, int charPos, int charLen, char[] coreNewLine, bool autoFlush, bool appendNewLine)
+		{
+			while (count > 0)
+			{
+				if (charPos == charLen)
+				{
+					await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+					charPos = 0;
+				}
+				int num = charLen - charPos;
+				if (num > count)
+				{
+					num = count;
+				}
+				Buffer.InternalBlockCopy(buffer, index * 2, charBuffer, charPos * 2, num * 2);
+				charPos += num;
+				index += num;
+				count -= num;
+			}
+			if (appendNewLine)
+			{
+				for (int i = 0; i < coreNewLine.Length; i++)
+				{
+					if (charPos == charLen)
+					{
+						await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+						charPos = 0;
+					}
+					charBuffer[charPos] = coreNewLine[i];
+					charPos++;
+				}
+			}
+			if (autoFlush)
+			{
+				await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+				charPos = 0;
+			}
+			_this.CharPos_Prop = charPos;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteLineAsync()
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteLineAsync();
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, null, 0, 0, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteLineAsync(char value)
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteLineAsync(value);
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, value, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteLineAsync(string value)
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteLineAsync(value);
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, value ?? "", this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteLineAsync(char[] buffer, int index, int count)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteLineAsync(buffer, index, count);
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, buffer, index, count, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task FlushAsync()
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.FlushAsync();
+			}
+			if (this.stream == null)
+			{
+				__Error.WriterClosed();
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = this.FlushAsyncInternal(true, true, this.charBuffer, this.charPos);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		private int CharPos_Prop
+		{
+			set
+			{
+				this.charPos = value;
 			}
 		}
 
-		public override void Close()
+		private bool HaveWrittenPreamble_Prop
 		{
-			this.Dispose(true);
+			set
+			{
+				this.haveWrittenPreamble = value;
+			}
 		}
 
-		~StreamWriter()
+		private Task FlushAsyncInternal(bool flushStream, bool flushEncoder, char[] sCharBuffer, int sCharPos)
 		{
-			this.Dispose(false);
+			if (sCharPos == 0 && !flushStream && !flushEncoder)
+			{
+				return Task.CompletedTask;
+			}
+			Task task = StreamWriter.FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, sCharPos, this.haveWrittenPreamble, this.encoding, this.encoder, this.byteBuffer, this.stream);
+			this.charPos = 0;
+			return task;
 		}
 
-		private const int DefaultBufferSize = 1024;
+		private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder, char[] charBuffer, int charPos, bool haveWrittenPreamble, Encoding encoding, Encoder encoder, byte[] byteBuffer, Stream stream)
+		{
+			if (!haveWrittenPreamble)
+			{
+				_this.HaveWrittenPreamble_Prop = true;
+				byte[] preamble = encoding.GetPreamble();
+				if (preamble.Length != 0)
+				{
+					await stream.WriteAsync(preamble, 0, preamble.Length).ConfigureAwait(false);
+				}
+			}
+			int bytes = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
+			if (bytes > 0)
+			{
+				await stream.WriteAsync(byteBuffer, 0, bytes).ConfigureAwait(false);
+			}
+			if (flushStream)
+			{
+				await stream.FlushAsync().ConfigureAwait(false);
+			}
+		}
 
-		private const int DefaultFileBufferSize = 4096;
+		internal const int DefaultBufferSize = 1024;
 
-		private const int MinimumBufferSize = 256;
+		private const int DefaultFileStreamBufferSize = 4096;
 
-		private Encoding internalEncoding;
+		private const int MinBufferSize = 128;
 
-		private Stream internalStream;
+		private const int DontCopyOnWriteLineThreshold = 512;
 
-		private bool iflush;
+		public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, new UTF8Encoding(false, true), 128, true);
 
-		private byte[] byte_buf;
+		private Stream stream;
 
-		private int byte_pos;
+		private Encoding encoding;
 
-		private char[] decode_buf;
+		private Encoder encoder;
 
-		private int decode_pos;
+		private byte[] byteBuffer;
 
-		private bool DisposedAlready;
+		private char[] charBuffer;
 
-		private bool preamble_done;
+		private int charPos;
 
-		public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, Encoding.UTF8Unmarked, 1);
+		private int charLen;
+
+		private bool autoFlush;
+
+		private bool haveWrittenPreamble;
+
+		private bool closable;
+
+		[NonSerialized]
+		private volatile Task _asyncWriteTask;
+
+		private static volatile Encoding _UTF8NoBOM;
 	}
 }

@@ -10,9 +10,9 @@ namespace System.Data
 
 		ITableMappingCollection TableMappings { get; }
 
-		int Fill(DataSet dataSet);
-
 		DataTable[] FillSchema(DataSet dataSet, SchemaType schemaType);
+
+		int Fill(DataSet dataSet);
 
 		IDataParameter[] GetFillParameters();
 

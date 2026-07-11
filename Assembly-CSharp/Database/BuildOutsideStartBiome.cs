@@ -20,8 +20,7 @@ namespace Database
 					Polygon poly = overworldCell.poly;
 					foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
 					{
-						KPrefabID component = buildingComplete.GetComponent<KPrefabID>();
-						if (!component.HasTag(GameTags.TemplateBuilding) && poly.PointInPolygon(buildingComplete.transform.GetPosition()))
+						if (!buildingComplete.GetComponent<KPrefabID>().HasTag(GameTags.TemplateBuilding) && poly.PointInPolygon(buildingComplete.transform.GetPosition()))
 						{
 							Game.Instance.unlocks.Unlock("buildoutsidestartingbiome");
 							return true;

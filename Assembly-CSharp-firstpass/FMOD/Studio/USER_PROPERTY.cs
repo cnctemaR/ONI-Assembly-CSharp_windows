@@ -6,7 +6,11 @@ namespace FMOD.Studio
 	{
 		public int intValue()
 		{
-			return (this.type != USER_PROPERTY_TYPE.INTEGER) ? (-1) : this.value.intvalue;
+			if (this.type != USER_PROPERTY_TYPE.INTEGER)
+			{
+				return -1;
+			}
+			return this.value.intvalue;
 		}
 
 		public bool boolValue()
@@ -16,12 +20,20 @@ namespace FMOD.Studio
 
 		public float floatValue()
 		{
-			return (this.type != USER_PROPERTY_TYPE.FLOAT) ? (-1f) : this.value.floatvalue;
+			if (this.type != USER_PROPERTY_TYPE.FLOAT)
+			{
+				return -1f;
+			}
+			return this.value.floatvalue;
 		}
 
 		public string stringValue()
 		{
-			return (this.type != USER_PROPERTY_TYPE.STRING) ? string.Empty : this.value.stringvalue;
+			if (this.type != USER_PROPERTY_TYPE.STRING)
+			{
+				return "";
+			}
+			return this.value.stringvalue;
 		}
 
 		public StringWrapper name;

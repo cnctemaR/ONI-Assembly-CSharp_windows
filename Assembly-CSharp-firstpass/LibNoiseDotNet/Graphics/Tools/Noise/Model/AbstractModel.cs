@@ -4,15 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Model
 {
 	public class AbstractModel
 	{
-		public AbstractModel()
-		{
-		}
-
-		public AbstractModel(IModule module)
-		{
-			this._sourceModule = module;
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -23,6 +14,15 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Model
 			{
 				this._sourceModule = value;
 			}
+		}
+
+		public AbstractModel()
+		{
+		}
+
+		public AbstractModel(IModule module)
+		{
+			this._sourceModule = module;
 		}
 
 		protected IModule _sourceModule;

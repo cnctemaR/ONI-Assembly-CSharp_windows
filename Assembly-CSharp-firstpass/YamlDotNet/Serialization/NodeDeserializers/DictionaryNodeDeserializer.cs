@@ -87,24 +87,20 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						if (hasFirstPart)
 						{
 							result[v] = value;
+							return;
 						}
-						else
-						{
-							key = v;
-							hasFirstPart = true;
-						}
+						key = v;
+						hasFirstPart = true;
 					};
 					valuePromise2.ValueAvailable += delegate(object v)
 					{
 						if (hasFirstPart)
 						{
 							result[key] = v;
+							return;
 						}
-						else
-						{
-							value = v;
-							hasFirstPart = true;
-						}
+						value = v;
+						hasFirstPart = true;
 					};
 				}
 			}

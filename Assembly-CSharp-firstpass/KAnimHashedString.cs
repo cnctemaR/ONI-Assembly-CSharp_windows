@@ -6,16 +6,6 @@ using UnityEngine;
 [Serializable]
 public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAnimHashedString>
 {
-	public KAnimHashedString(string name)
-	{
-		this.hash = Hash.SDBMLower(name);
-	}
-
-	public KAnimHashedString(int hash)
-	{
-		this.hash = hash;
-	}
-
 	public int HashValue
 	{
 		get
@@ -26,6 +16,16 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 		{
 			this.hash = value;
 		}
+	}
+
+	public KAnimHashedString(string name)
+	{
+		this.hash = Hash.SDBMLower(name);
+	}
+
+	public KAnimHashedString(int hash)
+	{
+		this.hash = hash;
 	}
 
 	public bool IsValid()
@@ -102,7 +102,11 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 
 	public override string ToString()
 	{
-		return string.IsNullOrEmpty(this.DebuggerDisplay) ? ("0x" + this.hash.ToString("X")) : this.DebuggerDisplay;
+		if (string.IsNullOrEmpty(this.DebuggerDisplay))
+		{
+			return "0x" + this.hash.ToString("X");
+		}
+		return this.DebuggerDisplay;
 	}
 
 	[SerializeField]

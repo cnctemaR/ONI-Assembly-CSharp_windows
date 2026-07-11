@@ -3,39 +3,31 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Interface | AttributeTargets.Parameter | AttributeTargets.Delegate, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ObfuscationAttribute : Attribute
 	{
-		public ObfuscationAttribute()
+		public bool StripAfterObfuscation
 		{
-			this.exclude = true;
-			this.strip = true;
-			this.applyToMembers = true;
-			this.feature = "all";
+			get
+			{
+				return this.m_strip;
+			}
+			set
+			{
+				this.m_strip = value;
+			}
 		}
 
 		public bool Exclude
 		{
 			get
 			{
-				return this.exclude;
+				return this.m_exclude;
 			}
 			set
 			{
-				this.exclude = value;
-			}
-		}
-
-		public bool StripAfterObfuscation
-		{
-			get
-			{
-				return this.strip;
-			}
-			set
-			{
-				this.strip = value;
+				this.m_exclude = value;
 			}
 		}
 
@@ -43,11 +35,11 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.applyToMembers;
+				return this.m_applyToMembers;
 			}
 			set
 			{
-				this.applyToMembers = value;
+				this.m_applyToMembers = value;
 			}
 		}
 
@@ -55,20 +47,20 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.feature;
+				return this.m_feature;
 			}
 			set
 			{
-				this.feature = value;
+				this.m_feature = value;
 			}
 		}
 
-		private bool exclude;
+		private bool m_strip = true;
 
-		private bool strip;
+		private bool m_exclude = true;
 
-		private bool applyToMembers;
+		private bool m_applyToMembers = true;
 
-		private string feature;
+		private string m_feature = "all";
 	}
 }

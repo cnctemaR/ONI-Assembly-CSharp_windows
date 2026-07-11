@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
@@ -132,6 +133,7 @@ namespace UnityEngine.EventSystems
 		[SerializeField]
 		private List<EventTrigger.Entry> m_Delegates;
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]
 		public List<EventTrigger.Entry> delegates;
 

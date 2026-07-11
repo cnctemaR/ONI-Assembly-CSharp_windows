@@ -6,7 +6,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class PolicyException : SystemException, _Exception
+	public class PolicyException : SystemException
 	{
 		public PolicyException()
 			: base(Locale.GetText("Cannot run because of policy."))

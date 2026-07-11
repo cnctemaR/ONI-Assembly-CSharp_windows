@@ -6,6 +6,12 @@ namespace System.Net.Configuration
 {
 	public sealed class WebRequestModuleElement : ConfigurationElement
 	{
+		static WebRequestModuleElement()
+		{
+			WebRequestModuleElement.properties.Add(WebRequestModuleElement.prefixProp);
+			WebRequestModuleElement.properties.Add(WebRequestModuleElement.typeProp);
+		}
+
 		public WebRequestModuleElement()
 		{
 		}
@@ -21,12 +27,6 @@ namespace System.Net.Configuration
 		{
 		}
 
-		static WebRequestModuleElement()
-		{
-			WebRequestModuleElement.properties.Add(WebRequestModuleElement.prefixProp);
-			WebRequestModuleElement.properties.Add(WebRequestModuleElement.typeProp);
-		}
-
 		[ConfigurationProperty("prefix", Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]
 		public string Prefix
 		{
@@ -40,7 +40,7 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[global::System.ComponentModel.TypeConverter(typeof(global::System.ComponentModel.TypeConverter))]
+		[TypeConverter(typeof(TypeConverter))]
 		[ConfigurationProperty("type")]
 		public Type Type
 		{

@@ -6,9 +6,9 @@ namespace System.Linq
 {
 	public interface IQueryable : IEnumerable
 	{
-		Type ElementType { get; }
-
 		Expression Expression { get; }
+
+		Type ElementType { get; }
 
 		IQueryProvider Provider { get; }
 	}

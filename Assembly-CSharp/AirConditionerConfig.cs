@@ -36,8 +36,7 @@ public class AirConditionerConfig : IBuildingConfig
 		AirConditioner airConditioner = go.AddOrGet<AirConditioner>();
 		airConditioner.temperatureDelta = -14f;
 		airConditioner.maxEnvironmentDelta = -50f;
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.showInUI = true;
+		BuildingTemplates.CreateDefaultStorage(go, false).showInUI = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 1f;

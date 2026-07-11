@@ -3,9 +3,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Representation of 3D vectors and points using integers.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct Vector3Int : IEquatable<Vector3Int>
 	{
@@ -16,9 +13,6 @@ namespace UnityEngine
 			this.m_Z = z;
 		}
 
-		/// <summary>
-		///   <para>X component of the vector.</para>
-		/// </summary>
 		public int x
 		{
 			get
@@ -31,9 +25,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Y component of the vector.</para>
-		/// </summary>
 		public int y
 		{
 			get
@@ -46,9 +37,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Z component of the vector.</para>
-		/// </summary>
 		public int z
 		{
 			get
@@ -61,12 +49,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Set x, y and z components of an existing Vector3Int.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
 		public void Set(int x, int y, int z)
 		{
 			this.m_X = x;
@@ -114,9 +96,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the length of this vector (Read Only).</para>
-		/// </summary>
 		public float magnitude
 		{
 			get
@@ -125,9 +104,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the squared length of this vector (Read Only).</para>
-		/// </summary>
 		public int sqrMagnitude
 		{
 			get
@@ -136,50 +112,26 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the distance between a and b.</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
 		public static float Distance(Vector3Int a, Vector3Int b)
 		{
 			return (a - b).magnitude;
 		}
 
-		/// <summary>
-		///   <para>Returns a vector that is made from the smallest components of two vectors.</para>
-		/// </summary>
-		/// <param name="lhs"></param>
-		/// <param name="rhs"></param>
 		public static Vector3Int Min(Vector3Int lhs, Vector3Int rhs)
 		{
 			return new Vector3Int(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y), Mathf.Min(lhs.z, rhs.z));
 		}
 
-		/// <summary>
-		///   <para>Returns a vector that is made from the largest components of two vectors.</para>
-		/// </summary>
-		/// <param name="lhs"></param>
-		/// <param name="rhs"></param>
 		public static Vector3Int Max(Vector3Int lhs, Vector3Int rhs)
 		{
 			return new Vector3Int(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y), Mathf.Max(lhs.z, rhs.z));
 		}
 
-		/// <summary>
-		///   <para>Multiplies two vectors component-wise.</para>
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
 		public static Vector3Int Scale(Vector3Int a, Vector3Int b)
 		{
 			return new Vector3Int(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
 
-		/// <summary>
-		///   <para>Multiplies every component of this vector by the same component of scale.</para>
-		/// </summary>
-		/// <param name="scale"></param>
 		public void Scale(Vector3Int scale)
 		{
 			this.x *= scale.x;
@@ -187,11 +139,6 @@ namespace UnityEngine
 			this.z *= scale.z;
 		}
 
-		/// <summary>
-		///   <para>Clamps the Vector3Int to the bounds given by min and max.</para>
-		/// </summary>
-		/// <param name="min"></param>
-		/// <param name="max"></param>
 		public void Clamp(Vector3Int min, Vector3Int max)
 		{
 			this.x = Math.Max(min.x, this.x);
@@ -207,28 +154,21 @@ namespace UnityEngine
 			return new Vector3((float)v.x, (float)v.y, (float)v.z);
 		}
 
-		/// <summary>
-		///   <para>Converts a  Vector3 to a Vector3Int by doing a Floor to each value.</para>
-		/// </summary>
-		/// <param name="v"></param>
+		public static explicit operator Vector2Int(Vector3Int v)
+		{
+			return new Vector2Int(v.x, v.y);
+		}
+
 		public static Vector3Int FloorToInt(Vector3 v)
 		{
 			return new Vector3Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y), Mathf.FloorToInt(v.z));
 		}
 
-		/// <summary>
-		///   <para>Converts a  Vector3 to a Vector3Int by doing a Ceiling to each value.</para>
-		/// </summary>
-		/// <param name="v"></param>
 		public static Vector3Int CeilToInt(Vector3 v)
 		{
 			return new Vector3Int(Mathf.CeilToInt(v.x), Mathf.CeilToInt(v.y), Mathf.CeilToInt(v.z));
 		}
 
-		/// <summary>
-		///   <para>Converts a  Vector3 to a Vector3Int by doing a Round to each value.</para>
-		/// </summary>
-		/// <param name="v"></param>
 		public static Vector3Int RoundToInt(Vector3 v)
 		{
 			return new Vector3Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
@@ -264,10 +204,6 @@ namespace UnityEngine
 			return !(lhs == rhs);
 		}
 
-		/// <summary>
-		///   <para>Returns true if the objects are equal.</para>
-		/// </summary>
-		/// <param name="other"></param>
 		public override bool Equals(object other)
 		{
 			return other is Vector3Int && this.Equals((Vector3Int)other);
@@ -278,30 +214,18 @@ namespace UnityEngine
 			return this == other;
 		}
 
-		/// <summary>
-		///   <para>Gets the hash code for the Vector3Int.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The hash code of the Vector3Int.</para>
-		/// </returns>
 		public override int GetHashCode()
 		{
-			return this.x.GetHashCode() ^ (this.y.GetHashCode() << 2) ^ (this.z.GetHashCode() >> 2);
+			int hashCode = this.y.GetHashCode();
+			int hashCode2 = this.z.GetHashCode();
+			return this.x.GetHashCode() ^ (hashCode << 4) ^ (hashCode >> 28) ^ (hashCode2 >> 4) ^ (hashCode2 << 28);
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for this vector.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public override string ToString()
 		{
 			return UnityString.Format("({0}, {1}, {2})", new object[] { this.x, this.y, this.z });
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for this vector.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public string ToString(string format)
 		{
 			return UnityString.Format("({0}, {1}, {2})", new object[]
@@ -312,9 +236,6 @@ namespace UnityEngine
 			});
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing Vector3Int (0, 0, 0).</para>
-		/// </summary>
 		public static Vector3Int zero
 		{
 			get
@@ -323,9 +244,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing Vector3Int (1, 1, 1).</para>
-		/// </summary>
 		public static Vector3Int one
 		{
 			get
@@ -334,9 +252,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing Vector3Int (0, 1, 0).</para>
-		/// </summary>
 		public static Vector3Int up
 		{
 			get
@@ -345,9 +260,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing Vector3Int (0, -1, 0).</para>
-		/// </summary>
 		public static Vector3Int down
 		{
 			get
@@ -356,9 +268,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing Vector3Int (-1, 0, 0).</para>
-		/// </summary>
 		public static Vector3Int left
 		{
 			get
@@ -367,9 +276,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing Vector3Int (1, 0, 0).</para>
-		/// </summary>
 		public static Vector3Int right
 		{
 			get

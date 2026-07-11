@@ -7,26 +7,17 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Represents an asynchronous request for a GPU resource.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
+	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[UsedByNativeCode]
 	public struct AsyncGPUReadbackRequest
 	{
-		/// <summary>
-		///   <para>Triggers an update of the request.</para>
-		/// </summary>
 		public void Update()
 		{
 			AsyncGPUReadbackRequest.Update_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Waits for completion of the request.</para>
-		/// </summary>
 		public void WaitForCompletion()
 		{
 			AsyncGPUReadbackRequest.WaitForCompletion_Injected(ref this);
@@ -46,9 +37,6 @@ namespace UnityEngine.Rendering
 			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)this.GetDataRaw(layer), this.layerDataSize / num, Allocator.None);
 		}
 
-		/// <summary>
-		///   <para>Checks whether the request has been processed.</para>
-		/// </summary>
 		public bool done
 		{
 			get
@@ -57,9 +45,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>This property is true if the request has encountered an error.</para>
-		/// </summary>
 		public bool hasError
 		{
 			get
@@ -68,9 +53,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Number of layers in the current request.</para>
-		/// </summary>
 		public int layerCount
 		{
 			get
@@ -79,9 +61,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The size in bytes of one layer of the readback data.</para>
-		/// </summary>
 		public int layerDataSize
 		{
 			get
@@ -90,9 +69,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The width of the requested GPU data.</para>
-		/// </summary>
 		public int width
 		{
 			get
@@ -101,9 +77,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>When reading data from a ComputeBuffer, height is 1, otherwise, the property takes the value of the requested height from the texture.</para>
-		/// </summary>
 		public int height
 		{
 			get
@@ -112,9 +85,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>When reading data from a ComputeBuffer, depth is 1, otherwise, the property takes the value of the requested depth from the texture.</para>
-		/// </summary>
 		public int depth
 		{
 			get

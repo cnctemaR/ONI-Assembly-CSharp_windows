@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace System.Runtime.Remoting.Channels
 {
 	[ComVisible(true)]
-	public abstract class BaseChannelObjectWithProperties : IEnumerable, ICollection, IDictionary
+	public abstract class BaseChannelObjectWithProperties : IDictionary, ICollection, IEnumerable
 	{
 		protected BaseChannelObjectWithProperties()
 		{
 			this.table = new Hashtable();
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.table.GetEnumerator();
-		}
-
 		public virtual int Count
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.table.Count;
@@ -27,6 +24,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual bool IsFixedSize
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return true;
@@ -35,6 +33,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual bool IsReadOnly
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return false;
@@ -43,6 +42,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual bool IsSynchronized
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return false;
@@ -51,10 +51,12 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual object this[object key]
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				throw new NotImplementedException();
 			}
+			[SecuritySafeCritical]
 			set
 			{
 				throw new NotImplementedException();
@@ -63,6 +65,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual ICollection Keys
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.table.Keys;
@@ -79,6 +82,7 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual object SyncRoot
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this;
@@ -87,37 +91,49 @@ namespace System.Runtime.Remoting.Channels
 
 		public virtual ICollection Values
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return this.table.Values;
 			}
 		}
 
+		[SecuritySafeCritical]
 		public virtual void Add(object key, object value)
 		{
 			throw new NotSupportedException();
 		}
 
+		[SecuritySafeCritical]
 		public virtual void Clear()
 		{
 			throw new NotSupportedException();
 		}
 
+		[SecuritySafeCritical]
 		public virtual bool Contains(object key)
 		{
 			return this.table.Contains(key);
 		}
 
+		[SecuritySafeCritical]
 		public virtual void CopyTo(Array array, int index)
 		{
 			throw new NotSupportedException();
 		}
 
+		[SecuritySafeCritical]
 		public virtual IDictionaryEnumerator GetEnumerator()
 		{
 			return this.table.GetEnumerator();
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.table.GetEnumerator();
+		}
+
+		[SecuritySafeCritical]
 		public virtual void Remove(object key)
 		{
 			throw new NotSupportedException();

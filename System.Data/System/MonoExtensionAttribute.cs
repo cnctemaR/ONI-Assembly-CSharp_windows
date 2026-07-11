@@ -6,6 +6,7 @@ namespace System
 	internal class MonoExtensionAttribute : MonoTODOAttribute
 	{
 		public MonoExtensionAttribute(string comment)
+			: base(comment)
 		{
 		}
 	}

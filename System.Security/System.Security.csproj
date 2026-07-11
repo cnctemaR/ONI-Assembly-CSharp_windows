@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF59}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935663}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Security</RootNamespace>
     <AssemblyName>System.Security</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net20</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultItems>False</EnableDefaultItems>
@@ -17,10 +17,8 @@
     <Compile Include="Locale.cs" />
     <Compile Include="Mono\Security\Cryptography\ManagedProtection.cs" />
     <Compile Include="Mono\Security\Cryptography\NativeDapiProtection.cs" />
-    <Compile Include="Mono\Xml\XmlCanonicalizer.cs" />
-    <Compile Include="Mono\Xml\XmlDsigC14NTransformAttributesComparer.cs" />
-    <Compile Include="Mono\Xml\XmlDsigC14NTransformNamespacesComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SR.cs" />
     <Compile Include="System\MonoDocumentationNoteAttribute.cs" />
     <Compile Include="System\MonoExtensionAttribute.cs" />
     <Compile Include="System\MonoInternalNoteAttribute.cs" />
@@ -31,6 +29,8 @@
     <Compile Include="System\Security\Cryptography\CryptographicAttributeObjectCollection.cs" />
     <Compile Include="System\Security\Cryptography\CryptographicAttributeObjectEnumerator.cs" />
     <Compile Include="System\Security\Cryptography\DataProtectionScope.cs" />
+    <Compile Include="System\Security\Cryptography\DataProtector.cs" />
+    <Compile Include="System\Security\Cryptography\DpapiDataProtector.cs" />
     <Compile Include="System\Security\Cryptography\MemoryProtectionScope.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\AlgorithmIdentifier.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\CmsRecipient.cs" />
@@ -63,13 +63,35 @@
     <Compile Include="System\Security\Cryptography\Pkcs\SubjectIdentifierType.cs" />
     <Compile Include="System\Security\Cryptography\ProtectedData.cs" />
     <Compile Include="System\Security\Cryptography\ProtectedMemory.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\RSACertificateExtensions.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Certificate2UI.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509SelectionFlag.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\AncestralNamespaceContextManager.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\AttributeSortOrder.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\C14NAncestralNamespaceContextManager.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalizationDispatcher.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXml.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlAttribute.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlCDataSection.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlComment.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlDocument.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlElement.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlEntityReference.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlNodeList.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlProcessingInstruction.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlSignificantWhitespace.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlText.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CanonicalXmlWhitespace.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CertUsageType.cs" />
     <Compile Include="System\Security\Cryptography\Xml\CipherData.cs" />
     <Compile Include="System\Security\Cryptography\Xml\CipherReference.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CryptoHelpers.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\CryptoSignedXmlRecursionException.cs" />
     <Compile Include="System\Security\Cryptography\Xml\DataObject.cs" />
     <Compile Include="System\Security\Cryptography\Xml\DataReference.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\DocPosition.cs" />
     <Compile Include="System\Security\Cryptography\Xml\DSAKeyValue.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\DSASignatureDescription.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptedData.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptedKey.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptedReference.cs" />
@@ -78,6 +100,9 @@
     <Compile Include="System\Security\Cryptography\Xml\EncryptionMethod.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptionProperty.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptionPropertyCollection.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\ExcAncestralNamespaceContextManager.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\ExcCanonicalXml.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\ICanonicalizableNode.cs" />
     <Compile Include="System\Security\Cryptography\Xml\IRelDecryptor.cs" />
     <Compile Include="System\Security\Cryptography\Xml\KeyInfo.cs" />
     <Compile Include="System\Security\Cryptography\Xml\KeyInfoClause.cs" />
@@ -88,15 +113,26 @@
     <Compile Include="System\Security\Cryptography\Xml\KeyInfoX509Data.cs" />
     <Compile Include="System\Security\Cryptography\Xml\KeyReference.cs" />
     <Compile Include="System\Security\Cryptography\Xml\Manifest.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\MyXmlDocument.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\NamespaceFrame.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\NamespaceSortOrder.cs" />
     <Compile Include="System\Security\Cryptography\Xml\Reference.cs" />
     <Compile Include="System\Security\Cryptography\Xml\ReferenceList.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\ReferenceTargetType.cs" />
     <Compile Include="System\Security\Cryptography\Xml\RSAKeyValue.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\RSAPKCS1SHA1SignatureDescription.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\RSAPKCS1SHA256SignatureDescription.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\RSAPKCS1SHA384SignatureDescription.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\RSAPKCS1SHA512SignatureDescription.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\RSAPKCS1SignatureDescription.cs" />
     <Compile Include="System\Security\Cryptography\Xml\Signature.cs" />
     <Compile Include="System\Security\Cryptography\Xml\SignedInfo.cs" />
     <Compile Include="System\Security\Cryptography\Xml\SignedXml.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\SignedXmlDebugLog.cs" />
     <Compile Include="System\Security\Cryptography\Xml\SymmetricKeyWrap.cs" />
     <Compile Include="System\Security\Cryptography\Xml\Transform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\TransformChain.cs" />
+    <Compile Include="System\Security\Cryptography\Xml\Utils.cs" />
     <Compile Include="System\Security\Cryptography\Xml\X509IssuerSerial.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDecryptionTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigBase64Transform.cs" />
@@ -105,33 +141,31 @@
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigEnvelopedSignatureTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigExcC14NTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigExcC14NWithCommentsTransform.cs" />
-    <Compile Include="System\Security\Cryptography\Xml\XmlDsigNodeList.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigXPathTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigXsltTransform.cs" />
-    <Compile Include="System\Security\Cryptography\Xml\XmlEncryption.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlLicenseTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlSignature.cs" />
-    <Compile Include="System\Security\Cryptography\Xml\XmlSignatureStreamReader.cs" />
     <Compile Include="System\Security\Permissions\DataProtectionPermission.cs" />
     <Compile Include="System\Security\Permissions\DataProtectionPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\DataProtectionPermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\PermissionHelper.cs" />
+    <Compile Include="Unity\ThrowStub.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF50}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935659}</Project>
       <Name>Mono.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC93565A}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF5B}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935666}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF56}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC93565F}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

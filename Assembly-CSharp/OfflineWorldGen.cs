@@ -5,6 +5,7 @@ using Klei.CustomSettings;
 using ProcGen;
 using ProcGenGame;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VoronoiTree;
@@ -21,8 +22,7 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	public static bool CanLoadSave()
 	{
-		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
-		bool flag = WorldGen.CanLoad(activeSaveFilePath);
+		bool flag = WorldGen.CanLoad(SaveLoader.GetActiveSaveFilePath());
 		if (!flag)
 		{
 			SaveLoader.SetActiveSaveFilePath(null);
@@ -49,12 +49,11 @@ public class OfflineWorldGen : KMonoBehaviour
 				RectTransform component = gameObject.GetComponent<RectTransform>();
 				component.SetParent(this.buttonRoot);
 				component.localScale = Vector3.one;
-				LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
+				TMP_Text componentInChildren = gameObject.GetComponentInChildren<LocText>();
 				OfflineWorldGen.ValidDimensions validDimensions = this.validDimensions[i];
 				componentInChildren.text = validDimensions.name.ToString();
 				int idx = i;
-				KButton component2 = gameObject.GetComponent<KButton>();
-				component2.onClick += delegate
+				gameObject.GetComponent<KButton>().onClick += delegate
 				{
 					this.DoWorldGen(idx);
 					this.ToggleGenerationUI();
@@ -125,36 +124,34 @@ public class OfflineWorldGen : KMonoBehaviour
 		{
 			this.DoRenderWorld();
 			this.RemoveLocationButtons();
+			return;
 		}
-		else if (this.startNodes.Count > 0)
+		if (this.startNodes.Count > 0)
 		{
 			this.ChooseBaseLocation(this.startNodes[0]);
+			return;
 		}
-		else
+		List<SubWorld> list = new List<SubWorld>();
+		int i = 0;
+		while (i < this.startNodes.Count)
 		{
-			List<SubWorld> list = new List<SubWorld>();
-			int i = 0;
-			while (i < this.startNodes.Count)
+			Tree tree = this.startNodes[i] as Tree;
+			if (tree != null)
 			{
-				Tree tree = this.startNodes[i] as Tree;
-				if (tree != null)
-				{
-					goto IL_00E5;
-				}
-				tree = this.worldGen.GetOverworldForNode(this.startNodes[i] as Leaf);
-				if (tree != null)
-				{
-					goto IL_00E5;
-				}
-				IL_0214:
-				i++;
-				continue;
-				IL_00E5:
-				SubWorld subWorldForNode = this.worldGen.GetSubWorldForNode(tree);
-				if (subWorldForNode == null || list.Contains(subWorldForNode))
-				{
-					goto IL_0214;
-				}
+				goto IL_00CC;
+			}
+			tree = this.worldGen.GetOverworldForNode(this.startNodes[i] as Leaf);
+			if (tree != null)
+			{
+				goto IL_00CC;
+			}
+			IL_01E1:
+			i++;
+			continue;
+			IL_00CC:
+			SubWorld subWorldForNode = this.worldGen.GetSubWorldForNode(tree);
+			if (subWorldForNode != null && !list.Contains(subWorldForNode))
+			{
 				list.Add(subWorldForNode);
 				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.locationButtonPrefab);
 				RectTransform component = gameObject.GetComponent<RectTransform>();
@@ -182,20 +179,18 @@ public class OfflineWorldGen : KMonoBehaviour
 				{
 					this.ChooseBaseLocation(this.startNodes[idx]);
 				});
-				Button component2 = gameObject.GetComponent<Button>();
-				component2.onClick = buttonClickedEvent;
-				goto IL_0214;
+				gameObject.GetComponent<Button>().onClick = buttonClickedEvent;
+				goto IL_01E1;
 			}
+			goto IL_01E1;
 		}
 	}
 
 	private void RemoveLocationButtons()
 	{
-		int childCount = this.chooseLocationPanel.childCount;
-		for (int i = childCount - 1; i >= 0; i--)
+		for (int i = this.chooseLocationPanel.childCount - 1; i >= 0; i--)
 		{
-			Transform child = this.chooseLocationPanel.GetChild(i);
-			global::UnityEngine.Object.Destroy(child.gameObject);
+			global::UnityEngine.Object.Destroy(this.chooseLocationPanel.GetChild(i).gameObject);
 		}
 		if (this.titleText != null && this.titleText.gameObject != null)
 		{
@@ -264,7 +259,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			{
 				return;
 			}
-			this.percentText.text = string.Empty;
+			this.percentText.text = "";
 			this.loadTriggered = true;
 			App.LoadScene(this.mainGameLevel);
 			return;
@@ -301,8 +296,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			}
 			if (this.renderThreadComplete)
 			{
-				int num = 0;
-				num++;
+				int num = 0 + 1;
 			}
 			return;
 		}
@@ -315,8 +309,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		{
 			foreach (OfflineWorldGen.ErrorInfo errorInfo in this.errors)
 			{
-				ConfirmDialogScreen confirmDialogScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true);
-				confirmDialogScreen.PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null, true);
+				global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true).PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null, true);
 			}
 		}
 		this.errorMutex.ReleaseMutex();
@@ -342,11 +335,9 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void RemoveButtons()
 	{
-		int childCount = this.buttonRoot.childCount;
-		for (int i = childCount - 1; i >= 0; i--)
+		for (int i = this.buttonRoot.childCount - 1; i >= 0; i--)
 		{
-			Transform child = this.buttonRoot.GetChild(i);
-			global::UnityEngine.Object.Destroy(child.gameObject);
+			global::UnityEngine.Object.Destroy(this.buttonRoot.GetChild(i).gameObject);
 		}
 	}
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Reflection;
@@ -9,11 +8,12 @@ using System.Xml;
 namespace System.Diagnostics
 {
 	[Obsolete("This class is obsoleted")]
-	public class DiagnosticsConfigurationHandler : global::System.Configuration.IConfigurationSectionHandler
+	public class DiagnosticsConfigurationHandler : IConfigurationSectionHandler
 	{
 		public DiagnosticsConfigurationHandler()
 		{
 			this.elementHandlers["assert"] = new DiagnosticsConfigurationHandler.ElementHandler(this.AddAssertNode);
+			this.elementHandlers["performanceCounters"] = new DiagnosticsConfigurationHandler.ElementHandler(this.AddPerformanceCountersNode);
 			this.elementHandlers["switches"] = new DiagnosticsConfigurationHandler.ElementHandler(this.AddSwitchesNode);
 			this.elementHandlers["trace"] = new DiagnosticsConfigurationHandler.ElementHandler(this.AddTraceNode);
 			this.elementHandlers["sources"] = new DiagnosticsConfigurationHandler.ElementHandler(this.AddSourcesNode);
@@ -41,23 +41,19 @@ namespace System.Diagnostics
 			foreach (object obj in section.ChildNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
-				XmlNodeType xmlNodeType = xmlNode.NodeType;
-				if (xmlNodeType == XmlNodeType.Element)
+				XmlNodeType nodeType = xmlNode.NodeType;
+				if (nodeType == XmlNodeType.Element && !(xmlNode.LocalName != "sharedListeners"))
 				{
-					if (!(xmlNode.LocalName != "sharedListeners"))
-					{
-						this.AddTraceListeners(dictionary, xmlNode, this.GetSharedListeners(dictionary));
-					}
+					this.AddTraceListeners(dictionary, xmlNode, this.GetSharedListeners(dictionary));
 				}
 			}
 			foreach (object obj2 in section.ChildNodes)
 			{
 				XmlNode xmlNode2 = (XmlNode)obj2;
-				XmlNodeType nodeType = xmlNode2.NodeType;
-				XmlNodeType xmlNodeType = nodeType;
-				if (xmlNodeType != XmlNodeType.Element)
+				XmlNodeType nodeType2 = xmlNode2.NodeType;
+				if (nodeType2 != XmlNodeType.Element)
 				{
-					if (xmlNodeType != XmlNodeType.Comment && xmlNodeType != XmlNodeType.Whitespace)
+					if (nodeType2 != XmlNodeType.Comment && nodeType2 != XmlNodeType.Whitespace)
 					{
 						this.ThrowUnrecognizedElement(xmlNode2);
 					}
@@ -92,7 +88,7 @@ namespace System.Diagnostics
 				}
 				catch (Exception ex)
 				{
-					throw new global::System.Configuration.ConfigurationException("The `assertuienabled' attribute must be `true' or `false'", ex, node);
+					throw new ConfigurationException("The `assertuienabled' attribute must be `true' or `false'", ex, node);
 				}
 			}
 			if (attribute2 != null)
@@ -117,6 +113,28 @@ namespace System.Diagnostics
 			}
 		}
 
+		private void AddPerformanceCountersNode(IDictionary d, XmlNode node)
+		{
+			XmlAttributeCollection attributes = node.Attributes;
+			string attribute = this.GetAttribute(attributes, "filemappingsize", false, node);
+			this.ValidateInvalidAttributes(attributes, node);
+			if (attribute != null)
+			{
+				try
+				{
+					d["filemappingsize"] = int.Parse(attribute);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException("The `filemappingsize' attribute must be an integral value.", ex, node);
+				}
+			}
+			if (node.ChildNodes.Count > 0)
+			{
+				this.ThrowUnrecognizedElement(node.ChildNodes[0]);
+			}
+		}
+
 		private void AddSwitchesNode(IDictionary d, XmlNode node)
 		{
 			this.ValidateInvalidAttributes(node.Attributes, node);
@@ -131,53 +149,37 @@ namespace System.Diagnostics
 					{
 						XmlAttributeCollection attributes = xmlNode.Attributes;
 						string name = xmlNode.Name;
-						if (name == null)
+						if (!(name == "add"))
 						{
-							goto IL_013B;
-						}
-						if (DiagnosticsConfigurationHandler.<>f__switch$map5 == null)
-						{
-							DiagnosticsConfigurationHandler.<>f__switch$map5 = new Dictionary<string, int>(3)
+							if (!(name == "remove"))
 							{
-								{ "add", 0 },
-								{ "remove", 1 },
-								{ "clear", 2 }
-							};
+								if (!(name == "clear"))
+								{
+									this.ThrowUnrecognizedElement(xmlNode);
+								}
+								else
+								{
+									dictionary.Clear();
+								}
+							}
+							else
+							{
+								string text = this.GetAttribute(attributes, "name", true, xmlNode);
+								dictionary.Remove(text);
+							}
 						}
-						int num;
-						if (!DiagnosticsConfigurationHandler.<>f__switch$map5.TryGetValue(name, out num))
-						{
-							goto IL_013B;
-						}
-						switch (num)
-						{
-						case 0:
+						else
 						{
 							string text = this.GetAttribute(attributes, "name", true, xmlNode);
 							string attribute = this.GetAttribute(attributes, "value", true, xmlNode);
 							dictionary[text] = DiagnosticsConfigurationHandler.GetSwitchValue(text, attribute);
-							break;
 						}
-						case 1:
-						{
-							string text = this.GetAttribute(attributes, "name", true, xmlNode);
-							dictionary.Remove(text);
-							break;
-						}
-						case 2:
-							dictionary.Clear();
-							break;
-						default:
-							goto IL_013B;
-						}
-						IL_0147:
 						this.ValidateInvalidAttributes(attributes, xmlNode);
-						continue;
-						IL_013B:
-						this.ThrowUnrecognizedElement(xmlNode);
-						goto IL_0147;
 					}
-					this.ThrowUnrecognizedNode(xmlNode);
+					else
+					{
+						this.ThrowUnrecognizedNode(xmlNode);
+					}
 				}
 			}
 			d[node.Name] = dictionary;
@@ -233,7 +235,7 @@ namespace System.Diagnostics
 				}
 				catch (Exception ex)
 				{
-					throw new global::System.Configuration.ConfigurationException("The `autoflush' attribute must be `true' or `false'", ex, node);
+					throw new ConfigurationException("The `autoflush' attribute must be `true' or `false'", ex, node);
 				}
 				this.configValues.AutoFlush = flag;
 			}
@@ -247,7 +249,7 @@ namespace System.Diagnostics
 				}
 				catch (Exception ex2)
 				{
-					throw new global::System.Configuration.ConfigurationException("The `indentsize' attribute must be an integral value.", ex2, node);
+					throw new ConfigurationException("The `indentsize' attribute must be an integral value.", ex2, node);
 				}
 				this.configValues.IndentSize = num;
 			}
@@ -302,41 +304,30 @@ namespace System.Diagnostics
 		{
 			string text = null;
 			SourceLevels sourceLevels = SourceLevels.Error;
-			global::System.Collections.Specialized.StringDictionary stringDictionary = new global::System.Collections.Specialized.StringDictionary();
+			StringDictionary stringDictionary = new StringDictionary();
 			foreach (object obj in node.Attributes)
 			{
 				XmlAttribute xmlAttribute = (XmlAttribute)obj;
 				string name = xmlAttribute.Name;
-				if (name != null)
+				if (!(name == "name"))
 				{
-					if (DiagnosticsConfigurationHandler.<>f__switch$map6 == null)
+					if (!(name == "switchValue"))
 					{
-						DiagnosticsConfigurationHandler.<>f__switch$map6 = new Dictionary<string, int>(2)
-						{
-							{ "name", 0 },
-							{ "switchValue", 1 }
-						};
+						stringDictionary[xmlAttribute.Name] = xmlAttribute.Value;
 					}
-					int num;
-					if (DiagnosticsConfigurationHandler.<>f__switch$map6.TryGetValue(name, out num))
+					else
 					{
-						if (num == 0)
-						{
-							text = xmlAttribute.Value;
-							continue;
-						}
-						if (num == 1)
-						{
-							sourceLevels = (SourceLevels)((int)Enum.Parse(typeof(SourceLevels), xmlAttribute.Value));
-							continue;
-						}
+						sourceLevels = (SourceLevels)Enum.Parse(typeof(SourceLevels), xmlAttribute.Value);
 					}
 				}
-				stringDictionary[xmlAttribute.Name] = xmlAttribute.Value;
+				else
+				{
+					text = xmlAttribute.Value;
+				}
 			}
 			if (text == null)
 			{
-				throw new global::System.Configuration.ConfigurationException("Mandatory attribute 'name' is missing in 'source' element.");
+				throw new ConfigurationException("Mandatory attribute 'name' is missing in 'source' element.");
 			}
 			if (sources.ContainsKey(text))
 			{
@@ -383,49 +374,35 @@ namespace System.Diagnostics
 					{
 						XmlAttributeCollection attributes = xmlNode.Attributes;
 						string name = xmlNode.Name;
-						if (name == null)
+						if (!(name == "add"))
 						{
-							goto IL_0111;
-						}
-						if (DiagnosticsConfigurationHandler.<>f__switch$map7 == null)
-						{
-							DiagnosticsConfigurationHandler.<>f__switch$map7 = new Dictionary<string, int>(3)
+							if (!(name == "remove"))
 							{
-								{ "add", 0 },
-								{ "remove", 1 },
-								{ "clear", 2 }
-							};
+								if (!(name == "clear"))
+								{
+									this.ThrowUnrecognizedElement(xmlNode);
+								}
+								else
+								{
+									this.configValues.Listeners.Clear();
+								}
+							}
+							else
+							{
+								string attribute = this.GetAttribute(attributes, "name", true, xmlNode);
+								this.RemoveTraceListener(attribute);
+							}
 						}
-						int num;
-						if (!DiagnosticsConfigurationHandler.<>f__switch$map7.TryGetValue(name, out num))
+						else
 						{
-							goto IL_0111;
-						}
-						switch (num)
-						{
-						case 0:
 							this.AddTraceListener(d, xmlNode, attributes, listeners);
-							break;
-						case 1:
-						{
-							string attribute = this.GetAttribute(attributes, "name", true, xmlNode);
-							this.RemoveTraceListener(attribute);
-							break;
 						}
-						case 2:
-							this.configValues.Listeners.Clear();
-							break;
-						default:
-							goto IL_0111;
-						}
-						IL_011D:
 						this.ValidateInvalidAttributes(attributes, xmlNode);
-						continue;
-						IL_0111:
-						this.ThrowUnrecognizedElement(xmlNode);
-						goto IL_011D;
 					}
-					this.ThrowUnrecognizedNode(xmlNode);
+					else
+					{
+						this.ThrowUnrecognizedNode(xmlNode);
+					}
 				}
 			}
 		}
@@ -439,13 +416,14 @@ namespace System.Diagnostics
 				TraceListener traceListener = this.GetSharedListeners(d)[attribute];
 				if (traceListener == null)
 				{
-					throw new global::System.Configuration.ConfigurationException(string.Format("Shared trace listener {0} does not exist.", attribute));
+					throw new ConfigurationException(string.Format("Shared trace listener {0} does not exist.", attribute));
 				}
 				if (attributes.Count != 0)
 				{
 					throw new ConfigurationErrorsException(string.Format("Listener '{0}' references a shared listener and can only have a 'Name' attribute.", attribute));
 				}
-				listeners.Add(traceListener, this.configValues);
+				traceListener.IndentSize = this.configValues.IndentSize;
+				listeners.Add(traceListener);
 				return;
 			}
 			else
@@ -453,7 +431,7 @@ namespace System.Diagnostics
 				Type type = Type.GetType(attribute2);
 				if (type == null)
 				{
-					throw new global::System.Configuration.ConfigurationException(string.Format("Invalid Type Specified: {0}", attribute2));
+					throw new ConfigurationException(string.Format("Invalid Type Specified: {0}", attribute2));
 				}
 				string attribute3 = this.GetAttribute(attributes, "initializeData", false, child);
 				object[] array;
@@ -476,7 +454,7 @@ namespace System.Diagnostics
 				ConstructorInfo constructor = type.GetConstructor(bindingFlags, null, array2, null);
 				if (constructor == null)
 				{
-					throw new global::System.Configuration.ConfigurationException("Couldn't find constructor for class " + attribute2);
+					throw new ConfigurationException("Couldn't find constructor for class " + attribute2);
 				}
 				TraceListener traceListener2 = (TraceListener)constructor.Invoke(array);
 				traceListener2.Name = attribute;
@@ -490,7 +468,7 @@ namespace System.Diagnostics
 					TraceOptions traceOptions;
 					try
 					{
-						traceOptions = (TraceOptions)((int)Enum.Parse(typeof(TraceOptions), attribute4));
+						traceOptions = (TraceOptions)Enum.Parse(typeof(TraceOptions), attribute4);
 					}
 					catch (ArgumentException)
 					{
@@ -510,7 +488,8 @@ namespace System.Diagnostics
 						}
 					}
 				}
-				listeners.Add(traceListener2, this.configValues);
+				traceListener2.IndentSize = this.configValues.IndentSize;
+				listeners.Add(traceListener2);
 				return;
 			}
 		}
@@ -526,7 +505,7 @@ namespace System.Diagnostics
 			}
 			catch (Exception ex)
 			{
-				throw new global::System.Configuration.ConfigurationException(string.Format("Unknown error removing listener: {0}", name), ex);
+				throw new ConfigurationException(string.Format("Unknown error removing listener: {0}", name), ex);
 			}
 		}
 
@@ -554,7 +533,7 @@ namespace System.Diagnostics
 		{
 			if (value == null || value.Length == 0)
 			{
-				throw new global::System.Configuration.ConfigurationException(string.Format("Required attribute '{0}' cannot be empty.", attribute), node);
+				throw new ConfigurationException(string.Format("Required attribute '{0}' cannot be empty.", attribute), node);
 			}
 		}
 
@@ -568,22 +547,22 @@ namespace System.Diagnostics
 
 		private void ThrowMissingAttribute(string attribute, XmlNode node)
 		{
-			throw new global::System.Configuration.ConfigurationException(string.Format("Required attribute '{0}' not found.", attribute), node);
+			throw new ConfigurationException(string.Format("Required attribute '{0}' not found.", attribute), node);
 		}
 
 		private void ThrowUnrecognizedNode(XmlNode node)
 		{
-			throw new global::System.Configuration.ConfigurationException(string.Format("Unrecognized node `{0}'; nodeType={1}", node.Name, node.NodeType), node);
+			throw new ConfigurationException(string.Format("Unrecognized node `{0}'; nodeType={1}", node.Name, node.NodeType), node);
 		}
 
 		private void ThrowUnrecognizedElement(XmlNode node)
 		{
-			throw new global::System.Configuration.ConfigurationException(string.Format("Unrecognized element '{0}'.", node.Name), node);
+			throw new ConfigurationException(string.Format("Unrecognized element '{0}'.", node.Name), node);
 		}
 
 		private void ThrowUnrecognizedAttribute(string attribute, XmlNode node)
 		{
-			throw new global::System.Configuration.ConfigurationException(string.Format("Unrecognized attribute '{0}' on element <{1}/>.", attribute, node.Name), node);
+			throw new ConfigurationException(string.Format("Unrecognized attribute '{0}' on element <{1}/>.", attribute, node.Name), node);
 		}
 
 		private TraceImplSettings configValues;

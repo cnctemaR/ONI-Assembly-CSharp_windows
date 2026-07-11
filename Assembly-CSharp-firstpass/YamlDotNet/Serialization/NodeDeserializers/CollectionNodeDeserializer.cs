@@ -23,8 +23,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			IList list;
 			if (implementedGenericInterface != null)
 			{
-				Type[] genericArguments = implementedGenericInterface.GetGenericArguments();
-				type = genericArguments[0];
+				type = implementedGenericInterface.GetGenericArguments()[0];
 				value = this._objectFactory.Create(expectedType);
 				list = value as IList;
 				if (list == null)
@@ -67,7 +66,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					{
 						throw new ForwardAnchorNotSupportedException(parsingEvent.Start, parsingEvent.End, "Forward alias references are not allowed because this type does not implement IList<>");
 					}
-					int index = result.Add((!tItem.IsValueType()) ? null : Activator.CreateInstance(tItem));
+					int index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
 					valuePromise.ValueAvailable += delegate(object v)
 					{
 						result[index] = TypeConverter.ChangeType(v, tItem);

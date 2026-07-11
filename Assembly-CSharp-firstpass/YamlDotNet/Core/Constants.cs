@@ -3,7 +3,7 @@ using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core
 {
-	public static class Constants
+	internal static class Constants
 	{
 		public static readonly TagDirective[] DefaultTagDirectives = new TagDirective[]
 		{

@@ -1,23 +1,16 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Renders a billboard from a BillboardAsset.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Graphics/Billboard/BillboardRenderer.h")]
 	public sealed class BillboardRenderer : Renderer
 	{
-		/// <summary>
-		///   <para>The BillboardAsset to render.</para>
-		/// </summary>
 		public extern BillboardAsset billboard
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

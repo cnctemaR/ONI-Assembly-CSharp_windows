@@ -27,7 +27,8 @@ internal class UpdateDistanceToImpactParameter : LoopingSoundParameterUpdater
 			if (!(entry.comet == null))
 			{
 				float soundDistance = entry.comet.GetSoundDistance();
-				entry.ev.setParameterValueByIndex(entry.parameterIdx, soundDistance);
+				EventInstance ev = entry.ev;
+				ev.setParameterValueByIndex(entry.parameterIdx, soundDistance);
 			}
 		}
 	}
@@ -39,7 +40,7 @@ internal class UpdateDistanceToImpactParameter : LoopingSoundParameterUpdater
 			if (this.entries[i].ev.handle == sound.ev.handle)
 			{
 				this.entries.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}

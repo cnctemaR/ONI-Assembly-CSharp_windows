@@ -1,143 +1,118 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
+using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count={Count}")]
-	[DebuggerTypeProxy(typeof(CollectionDebuggerView<>))]
+	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
 	[Serializable]
-	public class List<T> : IEnumerable, ICollection, IList, ICollection<T>, IEnumerable<T>, IList<T>
+	public class List<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>
 	{
 		public List()
 		{
-			this._items = List<T>.EmptyArray;
-		}
-
-		public List(IEnumerable<T> collection)
-		{
-			this.CheckCollection(collection);
-			ICollection<T> collection2 = collection as ICollection<T>;
-			if (collection2 == null)
-			{
-				this._items = List<T>.EmptyArray;
-				this.AddEnumerable(collection);
-			}
-			else
-			{
-				this._items = new T[collection2.Count];
-				this.AddCollection(collection2);
-			}
+			this._items = List<T>._emptyArray;
 		}
 
 		public List(int capacity)
 		{
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity");
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.capacity, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (capacity == 0)
+			{
+				this._items = List<T>._emptyArray;
+				return;
 			}
 			this._items = new T[capacity];
 		}
 
-		internal List(T[] data, int size)
+		public List(IEnumerable<T> collection)
 		{
-			this._items = data;
-			this._size = size;
-		}
-
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		void ICollection.CopyTo(Array array, int arrayIndex)
-		{
-			Array.Copy(this._items, 0, array, arrayIndex, this._size);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		int IList.Add(object item)
-		{
-			try
+			if (collection == null)
 			{
-				this.Add((T)((object)item));
-				return this._size - 1;
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
 			}
-			catch (NullReferenceException)
+			ICollection<T> collection2 = collection as ICollection<T>;
+			if (collection2 == null)
 			{
-			}
-			catch (InvalidCastException)
-			{
-			}
-			throw new ArgumentException("item");
-		}
-
-		bool IList.Contains(object item)
-		{
-			try
-			{
-				return this.Contains((T)((object)item));
-			}
-			catch (NullReferenceException)
-			{
-			}
-			catch (InvalidCastException)
-			{
-			}
-			return false;
-		}
-
-		int IList.IndexOf(object item)
-		{
-			try
-			{
-				return this.IndexOf((T)((object)item));
-			}
-			catch (NullReferenceException)
-			{
-			}
-			catch (InvalidCastException)
-			{
-			}
-			return -1;
-		}
-
-		void IList.Insert(int index, object item)
-		{
-			this.CheckIndex(index);
-			try
-			{
-				this.Insert(index, (T)((object)item));
+				this._size = 0;
+				this._items = List<T>._emptyArray;
+				foreach (T t in collection)
+				{
+					this.Add(t);
+				}
 				return;
 			}
-			catch (NullReferenceException)
+			int count = collection2.Count;
+			if (count == 0)
 			{
+				this._items = List<T>._emptyArray;
+				return;
 			}
-			catch (InvalidCastException)
-			{
-			}
-			throw new ArgumentException("item");
+			this._items = new T[count];
+			collection2.CopyTo(this._items, 0);
+			this._size = count;
 		}
 
-		void IList.Remove(object item)
+		public int Capacity
 		{
-			try
+			get
 			{
-				this.Remove((T)((object)item));
+				return this._items.Length;
 			}
-			catch (NullReferenceException)
+			set
 			{
+				if (value < this._size)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value, ExceptionResource.ArgumentOutOfRange_SmallCapacity);
+				}
+				if (value != this._items.Length)
+				{
+					if (value > 0)
+					{
+						T[] array = new T[value];
+						if (this._size > 0)
+						{
+							Array.Copy(this._items, 0, array, 0, this._size);
+						}
+						this._items = array;
+						return;
+					}
+					this._items = List<T>._emptyArray;
+				}
 			}
-			catch (InvalidCastException)
+		}
+
+		public int Count
+		{
+			get
 			{
+				return this._size;
+			}
+		}
+
+		bool IList.IsFixedSize
+		{
+			get
+			{
+				return false;
 			}
 		}
 
 		bool ICollection<T>.IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		bool IList.IsReadOnly
 		{
 			get
 			{
@@ -157,24 +132,39 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				return this;
+				if (this._syncRoot == null)
+				{
+					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
+				}
+				return this._syncRoot;
 			}
 		}
 
-		bool IList.IsFixedSize
+		public T this[int index]
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return false;
+				if (index >= this._size)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException();
+				}
+				return Array.UnsafeLoad<T>(this._items, index);
+			}
+			set
+			{
+				if (index >= this._size)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException();
+				}
+				this._items[index] = value;
+				this._version++;
 			}
 		}
 
-		bool IList.IsReadOnly
+		private static bool IsCompatibleObject(object value)
 		{
-			get
-			{
-				return false;
-			}
+			return value is T || (value == null && default(T) == null);
 		}
 
 		object IList.this[int index]
@@ -185,18 +175,15 @@ namespace System.Collections.Generic
 			}
 			set
 			{
+				ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(value, ExceptionArgument.value);
 				try
 				{
 					this[index] = (T)((object)value);
-					return;
-				}
-				catch (NullReferenceException)
-				{
 				}
 				catch (InvalidCastException)
 				{
+					ThrowHelper.ThrowWrongValueTypeArgumentException(value, typeof(T));
 				}
-				throw new ArgumentException("value");
 			}
 		}
 
@@ -204,70 +191,32 @@ namespace System.Collections.Generic
 		{
 			if (this._size == this._items.Length)
 			{
-				this.GrowIfNeeded(1);
+				this.EnsureCapacity(this._size + 1);
 			}
-			this._items[this._size++] = item;
+			T[] items = this._items;
+			int size = this._size;
+			this._size = size + 1;
+			items[size] = item;
 			this._version++;
 		}
 
-		private void GrowIfNeeded(int newCount)
+		int IList.Add(object item)
 		{
-			int num = this._size + newCount;
-			if (num > this._items.Length)
+			ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(item, ExceptionArgument.item);
+			try
 			{
-				this.Capacity = Math.Max(Math.Max(this.Capacity * 2, 4), num);
+				this.Add((T)((object)item));
 			}
-		}
-
-		private void CheckRange(int idx, int count)
-		{
-			if (idx < 0)
+			catch (InvalidCastException)
 			{
-				throw new ArgumentOutOfRangeException("index");
+				ThrowHelper.ThrowWrongValueTypeArgumentException(item, typeof(T));
 			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count");
-			}
-			if (idx + count > this._size)
-			{
-				throw new ArgumentException("index and count exceed length of list");
-			}
-		}
-
-		private void AddCollection(ICollection<T> collection)
-		{
-			int count = collection.Count;
-			if (count == 0)
-			{
-				return;
-			}
-			this.GrowIfNeeded(count);
-			collection.CopyTo(this._items, this._size);
-			this._size += count;
-		}
-
-		private void AddEnumerable(IEnumerable<T> enumerable)
-		{
-			foreach (T t in enumerable)
-			{
-				this.Add(t);
-			}
+			return this.Count - 1;
 		}
 
 		public void AddRange(IEnumerable<T> collection)
 		{
-			this.CheckCollection(collection);
-			ICollection<T> collection2 = collection as ICollection<T>;
-			if (collection2 != null)
-			{
-				this.AddCollection(collection2);
-			}
-			else
-			{
-				this.AddEnumerable(collection);
-			}
-			this._version++;
+			this.InsertRange(this._size, collection);
 		}
 
 		public ReadOnlyCollection<T> AsReadOnly()
@@ -275,39 +224,77 @@ namespace System.Collections.Generic
 			return new ReadOnlyCollection<T>(this);
 		}
 
+		public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
+		{
+			if (index < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (count < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (this._size - index < count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+			}
+			return Array.BinarySearch<T>(this._items, index, count, item, comparer);
+		}
+
 		public int BinarySearch(T item)
 		{
-			return Array.BinarySearch<T>(this._items, 0, this._size, item);
+			return this.BinarySearch(0, this.Count, item, null);
 		}
 
 		public int BinarySearch(T item, IComparer<T> comparer)
 		{
-			return Array.BinarySearch<T>(this._items, 0, this._size, item, comparer);
-		}
-
-		public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
-		{
-			this.CheckRange(index, count);
-			return Array.BinarySearch<T>(this._items, index, count, item, comparer);
+			return this.BinarySearch(0, this.Count, item, comparer);
 		}
 
 		public void Clear()
 		{
-			Array.Clear(this._items, 0, this._items.Length);
-			this._size = 0;
+			if (this._size > 0)
+			{
+				Array.Clear(this._items, 0, this._size);
+				this._size = 0;
+			}
 			this._version++;
 		}
 
 		public bool Contains(T item)
 		{
-			return Array.IndexOf<T>(this._items, item, 0, this._size) != -1;
+			if (item == null)
+			{
+				for (int i = 0; i < this._size; i++)
+				{
+					if (this._items[i] == null)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			EqualityComparer<T> @default = EqualityComparer<T>.Default;
+			for (int j = 0; j < this._size; j++)
+			{
+				if (@default.Equals(this._items[j], item))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool IList.Contains(object item)
+		{
+			return List<T>.IsCompatibleObject(item) && this.Contains((T)((object)item));
 		}
 
 		public List<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)
 		{
 			if (converter == null)
 			{
-				throw new ArgumentNullException("converter");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.converter);
 			}
 			List<TOutput> list = new List<TOutput>(this._size);
 			for (int i = 0; i < this._size; i++)
@@ -320,7 +307,32 @@ namespace System.Collections.Generic
 
 		public void CopyTo(T[] array)
 		{
-			Array.Copy(this._items, 0, array, 0, this._size);
+			this.CopyTo(array, 0);
+		}
+
+		void ICollection.CopyTo(Array array, int arrayIndex)
+		{
+			if (array != null && array.Rank != 1)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
+			}
+			try
+			{
+				Array.Copy(this._items, 0, array, arrayIndex, this._size);
+			}
+			catch (ArrayTypeMismatchException)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+			}
+		}
+
+		public void CopyTo(int index, T[] array, int arrayIndex, int count)
+		{
+			if (this._size - index < count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+			}
+			Array.Copy(this._items, index, array, arrayIndex, count);
 		}
 
 		public void CopyTo(T[] array, int arrayIndex)
@@ -328,94 +340,50 @@ namespace System.Collections.Generic
 			Array.Copy(this._items, 0, array, arrayIndex, this._size);
 		}
 
-		public void CopyTo(int index, T[] array, int arrayIndex, int count)
+		private void EnsureCapacity(int min)
 		{
-			this.CheckRange(index, count);
-			Array.Copy(this._items, index, array, arrayIndex, count);
+			if (this._items.Length < min)
+			{
+				int num = ((this._items.Length == 0) ? 4 : (this._items.Length * 2));
+				if (num > 2146435071)
+				{
+					num = 2146435071;
+				}
+				if (num < min)
+				{
+					num = min;
+				}
+				this.Capacity = num;
+			}
 		}
 
 		public bool Exists(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			return this.GetIndex(0, this._size, match) != -1;
+			return this.FindIndex(match) != -1;
 		}
 
 		public T Find(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			int index = this.GetIndex(0, this._size, match);
-			return (index == -1) ? default(T) : this._items[index];
-		}
-
-		private static void CheckMatch(Predicate<T> match)
-		{
 			if (match == null)
 			{
-				throw new ArgumentNullException("match");
-			}
-		}
-
-		public List<T> FindAll(Predicate<T> match)
-		{
-			List<T>.CheckMatch(match);
-			if (this._size <= 65536)
-			{
-				return this.FindAllStackBits(match);
-			}
-			return this.FindAllList(match);
-		}
-
-		private unsafe List<T> FindAllStackBits(Predicate<T> match)
-		{
-			uint* ptr;
-			uint* ptr2;
-			int num;
-			uint num2;
-			checked
-			{
-				ptr = stackalloc uint[unchecked(this._size / 32 + 1) * 4];
-				ptr2 = ptr;
-				num = 0;
-				num2 = 2147483648U;
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
 			}
 			for (int i = 0; i < this._size; i++)
 			{
 				if (match(this._items[i]))
 				{
-					*ptr2 |= num2;
-					num++;
-				}
-				num2 >>= 1;
-				if (num2 == 0U)
-				{
-					ptr2++;
-					num2 = 2147483648U;
+					return this._items[i];
 				}
 			}
-			T[] array = new T[num];
-			num2 = 2147483648U;
-			ptr2 = ptr;
-			int num3 = 0;
-			int num4 = 0;
-			while (num4 < this._size && num3 < num)
-			{
-				if ((*ptr2 & num2) == num2)
-				{
-					array[num3++] = this._items[num4];
-				}
-				num2 >>= 1;
-				if (num2 == 0U)
-				{
-					ptr2++;
-					num2 = 2147483648U;
-				}
-				num4++;
-			}
-			return new List<T>(array, num);
+			return default(T);
 		}
 
-		private List<T> FindAllList(Predicate<T> match)
+		public List<T> FindAll(Predicate<T> match)
 		{
+			if (match == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
+			}
 			List<T> list = new List<T>();
 			for (int i = 0; i < this._size; i++)
 			{
@@ -429,26 +397,28 @@ namespace System.Collections.Generic
 
 		public int FindIndex(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			return this.GetIndex(0, this._size, match);
+			return this.FindIndex(0, this._size, match);
 		}
 
 		public int FindIndex(int startIndex, Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			this.CheckIndex(startIndex);
-			return this.GetIndex(startIndex, this._size - startIndex, match);
+			return this.FindIndex(startIndex, this._size - startIndex, match);
 		}
 
 		public int FindIndex(int startIndex, int count, Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			this.CheckRange(startIndex, count);
-			return this.GetIndex(startIndex, count, match);
-		}
-
-		private int GetIndex(int startIndex, int count, Predicate<T> match)
-		{
+			if (startIndex > this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (count < 0 || startIndex > this._size - count)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_Count);
+			}
+			if (match == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
+			}
 			int num = startIndex + count;
 			for (int i = startIndex; i < num; i++)
 			{
@@ -462,40 +432,57 @@ namespace System.Collections.Generic
 
 		public T FindLast(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			int lastIndex = this.GetLastIndex(0, this._size, match);
-			return (lastIndex != -1) ? this[lastIndex] : default(T);
+			if (match == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
+			}
+			for (int i = this._size - 1; i >= 0; i--)
+			{
+				if (match(this._items[i]))
+				{
+					return this._items[i];
+				}
+			}
+			return default(T);
 		}
 
 		public int FindLastIndex(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			return this.GetLastIndex(0, this._size, match);
+			return this.FindLastIndex(this._size - 1, this._size, match);
 		}
 
 		public int FindLastIndex(int startIndex, Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			this.CheckIndex(startIndex);
-			return this.GetLastIndex(0, startIndex + 1, match);
+			return this.FindLastIndex(startIndex, startIndex + 1, match);
 		}
 
 		public int FindLastIndex(int startIndex, int count, Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			int num = startIndex - count + 1;
-			this.CheckRange(num, count);
-			return this.GetLastIndex(num, count, match);
-		}
-
-		private int GetLastIndex(int startIndex, int count, Predicate<T> match)
-		{
-			int num = startIndex + count;
-			while (num != startIndex)
+			if (match == null)
 			{
-				if (match(this._items[--num]))
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
+			}
+			if (this._size == 0)
+			{
+				if (startIndex != -1)
 				{
-					return num;
+					ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+				}
+			}
+			else if (startIndex >= this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (count < 0 || startIndex - count + 1 < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_Count);
+			}
+			int num = startIndex - count;
+			for (int i = startIndex; i > num; i--)
+			{
+				if (match(this._items[i]))
+				{
+					return i;
 				}
 			}
 			return -1;
@@ -505,11 +492,18 @@ namespace System.Collections.Generic
 		{
 			if (action == null)
 			{
-				throw new ArgumentNullException("action");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
 			}
-			for (int i = 0; i < this._size; i++)
+			int version = this._version;
+			int num = 0;
+			while (num < this._size && (version == this._version || !BinaryCompatibility.TargetsAtLeast_Desktop_V4_5))
 			{
-				action(this._items[i]);
+				action(this._items[num]);
+				num++;
+			}
+			if (version != this._version && BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
+			{
+				ThrowHelper.ThrowInvalidOperationException(ExceptionResource.InvalidOperation_EnumFailedVersion);
 			}
 		}
 
@@ -518,12 +512,34 @@ namespace System.Collections.Generic
 			return new List<T>.Enumerator(this);
 		}
 
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			return new List<T>.Enumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new List<T>.Enumerator(this);
+		}
+
 		public List<T> GetRange(int index, int count)
 		{
-			this.CheckRange(index, count);
-			T[] array = new T[count];
-			Array.Copy(this._items, index, array, 0, count);
-			return new List<T>(array, count);
+			if (index < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (count < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (this._size - index < count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+			}
+			List<T> list = new List<T>(count);
+			Array.Copy(this._items, index, list._items, 0, count);
+			list._size = count;
+			return list;
 		}
 
 		public int IndexOf(T item)
@@ -531,141 +547,151 @@ namespace System.Collections.Generic
 			return Array.IndexOf<T>(this._items, item, 0, this._size);
 		}
 
+		int IList.IndexOf(object item)
+		{
+			if (List<T>.IsCompatibleObject(item))
+			{
+				return this.IndexOf((T)((object)item));
+			}
+			return -1;
+		}
+
 		public int IndexOf(T item, int index)
 		{
-			this.CheckIndex(index);
+			if (index > this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_Index);
+			}
 			return Array.IndexOf<T>(this._items, item, index, this._size - index);
 		}
 
 		public int IndexOf(T item, int index, int count)
 		{
-			if (index < 0)
+			if (index > this._size)
 			{
-				throw new ArgumentOutOfRangeException("index");
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_Index);
 			}
-			if (count < 0)
+			if (count < 0 || index > this._size - count)
 			{
-				throw new ArgumentOutOfRangeException("count");
-			}
-			if (index + count > this._size)
-			{
-				throw new ArgumentOutOfRangeException("index and count exceed length of list");
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_Count);
 			}
 			return Array.IndexOf<T>(this._items, item, index, count);
 		}
 
-		private void Shift(int start, int delta)
-		{
-			if (delta < 0)
-			{
-				start -= delta;
-			}
-			if (start < this._size)
-			{
-				Array.Copy(this._items, start, this._items, start + delta, this._size - start);
-			}
-			this._size += delta;
-			if (delta < 0)
-			{
-				Array.Clear(this._items, this._size, -delta);
-			}
-		}
-
-		private void CheckIndex(int index)
-		{
-			if (index < 0 || index > this._size)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-		}
-
 		public void Insert(int index, T item)
 		{
-			this.CheckIndex(index);
+			if (index > this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_ListInsert);
+			}
 			if (this._size == this._items.Length)
 			{
-				this.GrowIfNeeded(1);
+				this.EnsureCapacity(this._size + 1);
 			}
-			this.Shift(index, 1);
+			if (index < this._size)
+			{
+				Array.Copy(this._items, index, this._items, index + 1, this._size - index);
+			}
 			this._items[index] = item;
+			this._size++;
 			this._version++;
 		}
 
-		private void CheckCollection(IEnumerable<T> collection)
+		void IList.Insert(int index, object item)
 		{
-			if (collection == null)
+			ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(item, ExceptionArgument.item);
+			try
 			{
-				throw new ArgumentNullException("collection");
+				this.Insert(index, (T)((object)item));
+			}
+			catch (InvalidCastException)
+			{
+				ThrowHelper.ThrowWrongValueTypeArgumentException(item, typeof(T));
 			}
 		}
 
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
-			this.CheckCollection(collection);
-			this.CheckIndex(index);
-			if (collection == this)
+			if (collection == null)
 			{
-				T[] array = new T[this._size];
-				this.CopyTo(array, 0);
-				this.GrowIfNeeded(this._size);
-				this.Shift(index, array.Length);
-				Array.Copy(array, 0, this._items, index, array.Length);
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
+			}
+			if (index > this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			ICollection<T> collection2 = collection as ICollection<T>;
+			if (collection2 != null)
+			{
+				int count = collection2.Count;
+				if (count > 0)
+				{
+					this.EnsureCapacity(this._size + count);
+					if (index < this._size)
+					{
+						Array.Copy(this._items, index, this._items, index + count, this._size - index);
+					}
+					if (this == collection2)
+					{
+						Array.Copy(this._items, 0, this._items, index, index);
+						Array.Copy(this._items, index + count, this._items, index * 2, this._size - index);
+					}
+					else
+					{
+						collection2.CopyTo(this._items, index);
+					}
+					this._size += count;
+				}
 			}
 			else
 			{
-				ICollection<T> collection2 = collection as ICollection<T>;
-				if (collection2 != null)
+				foreach (T t in collection)
 				{
-					this.InsertCollection(index, collection2);
-				}
-				else
-				{
-					this.InsertEnumeration(index, collection);
+					this.Insert(index++, t);
 				}
 			}
 			this._version++;
 		}
 
-		private void InsertCollection(int index, ICollection<T> collection)
-		{
-			int count = collection.Count;
-			this.GrowIfNeeded(count);
-			this.Shift(index, count);
-			collection.CopyTo(this._items, index);
-		}
-
-		private void InsertEnumeration(int index, IEnumerable<T> enumerable)
-		{
-			foreach (T t in enumerable)
-			{
-				this.Insert(index++, t);
-			}
-		}
-
 		public int LastIndexOf(T item)
 		{
-			return Array.LastIndexOf<T>(this._items, item, this._size - 1, this._size);
+			if (this._size == 0)
+			{
+				return -1;
+			}
+			return this.LastIndexOf(item, this._size - 1, this._size);
 		}
 
 		public int LastIndexOf(T item, int index)
 		{
-			this.CheckIndex(index);
-			return Array.LastIndexOf<T>(this._items, item, index, index + 1);
+			if (index >= this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			return this.LastIndexOf(item, index, index + 1);
 		}
 
 		public int LastIndexOf(T item, int index, int count)
 		{
-			if (index < 0)
+			if (this.Count != 0 && index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", index, "index is negative");
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
 			}
-			if (count < 0)
+			if (this.Count != 0 && count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", count, "count is negative");
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
 			}
-			if (index - count + 1 < 0)
+			if (this._size == 0)
 			{
-				throw new ArgumentOutOfRangeException("cound", count, "count is too large");
+				return -1;
+			}
+			if (index >= this._size)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_BiggerThanCollection);
+			}
+			if (count > index + 1)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_BiggerThanCollection);
 			}
 			return Array.LastIndexOf<T>(this._items, item, index, count);
 		}
@@ -673,62 +699,92 @@ namespace System.Collections.Generic
 		public bool Remove(T item)
 		{
 			int num = this.IndexOf(item);
-			if (num != -1)
+			if (num >= 0)
 			{
 				this.RemoveAt(num);
+				return true;
 			}
-			return num != -1;
+			return false;
+		}
+
+		void IList.Remove(object item)
+		{
+			if (List<T>.IsCompatibleObject(item))
+			{
+				this.Remove((T)((object)item));
+			}
 		}
 
 		public int RemoveAll(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
-			int i;
-			for (i = 0; i < this._size; i++)
+			if (match == null)
 			{
-				if (match(this._items[i]))
-				{
-					break;
-				}
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
 			}
-			if (i == this._size)
+			int num = 0;
+			while (num < this._size && !match(this._items[num]))
+			{
+				num++;
+			}
+			if (num >= this._size)
 			{
 				return 0;
 			}
-			this._version++;
-			int j;
-			for (j = i + 1; j < this._size; j++)
+			int i = num + 1;
+			while (i < this._size)
 			{
-				if (!match(this._items[j]))
+				while (i < this._size && match(this._items[i]))
 				{
-					this._items[i++] = this._items[j];
+					i++;
+				}
+				if (i < this._size)
+				{
+					this._items[num++] = this._items[i++];
 				}
 			}
-			if (j - i > 0)
-			{
-				Array.Clear(this._items, i, j - i);
-			}
-			this._size = i;
-			return j - i;
+			Array.Clear(this._items, num, this._size - num);
+			int num2 = this._size - num;
+			this._size = num;
+			this._version++;
+			return num2;
 		}
 
 		public void RemoveAt(int index)
 		{
-			if (index < 0 || index >= this._size)
+			if (index >= this._size)
 			{
-				throw new ArgumentOutOfRangeException("index");
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
-			this.Shift(index, -1);
-			Array.Clear(this._items, this._size, 1);
+			this._size--;
+			if (index < this._size)
+			{
+				Array.Copy(this._items, index + 1, this._items, index, this._size - index);
+			}
+			this._items[this._size] = default(T);
 			this._version++;
 		}
 
 		public void RemoveRange(int index, int count)
 		{
-			this.CheckRange(index, count);
+			if (index < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (count < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (this._size - index < count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+			}
 			if (count > 0)
 			{
-				this.Shift(index, -count);
+				this._size -= count;
+				if (index < this._size)
+				{
+					Array.Copy(this._items, index + count, this._items, index, this._size - index);
+				}
 				Array.Clear(this._items, this._size, count);
 				this._version++;
 			}
@@ -736,57 +792,89 @@ namespace System.Collections.Generic
 
 		public void Reverse()
 		{
-			Array.Reverse(this._items, 0, this._size);
-			this._version++;
+			this.Reverse(0, this.Count);
 		}
 
 		public void Reverse(int index, int count)
 		{
-			this.CheckRange(index, count);
-			Array.Reverse(this._items, index, count);
+			if (index < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (count < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (this._size - index < count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+			}
+			Array.Reverse<T>(this._items, index, count);
 			this._version++;
 		}
 
 		public void Sort()
 		{
-			Array.Sort<T>(this._items, 0, this._size, Comparer<T>.Default);
-			this._version++;
+			this.Sort(0, this.Count, null);
 		}
 
 		public void Sort(IComparer<T> comparer)
 		{
-			Array.Sort<T>(this._items, 0, this._size, comparer);
+			this.Sort(0, this.Count, comparer);
+		}
+
+		public void Sort(int index, int count, IComparer<T> comparer)
+		{
+			if (index < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (count < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (this._size - index < count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+			}
+			Array.Sort<T>(this._items, index, count, comparer);
 			this._version++;
 		}
 
 		public void Sort(Comparison<T> comparison)
 		{
-			Array.Sort<T>(this._items, this._size, comparison);
-			this._version++;
-		}
-
-		public void Sort(int index, int count, IComparer<T> comparer)
-		{
-			this.CheckRange(index, count);
-			Array.Sort<T>(this._items, index, count, comparer);
-			this._version++;
+			if (comparison == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
+			}
+			if (this._size > 0)
+			{
+				ArraySortHelper<T>.Sort(this._items, 0, this._size, comparison);
+			}
 		}
 
 		public T[] ToArray()
 		{
 			T[] array = new T[this._size];
-			Array.Copy(this._items, array, this._size);
+			Array.Copy(this._items, 0, array, 0, this._size);
 			return array;
 		}
 
 		public void TrimExcess()
 		{
-			this.Capacity = this._size;
+			int num = (int)((double)this._items.Length * 0.9);
+			if (this._size < num)
+			{
+				this.Capacity = this._size;
+			}
 		}
 
 		public bool TrueForAll(Predicate<T> match)
 		{
-			List<T>.CheckMatch(match);
+			if (match == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
+			}
 			for (int i = 0; i < this._size; i++)
 			{
 				if (!match(this._items[i]))
@@ -797,52 +885,12 @@ namespace System.Collections.Generic
 			return true;
 		}
 
-		public int Capacity
+		internal static IList<T> Synchronized(List<T> list)
 		{
-			get
-			{
-				return this._items.Length;
-			}
-			set
-			{
-				if (value < this._size)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				Array.Resize<T>(ref this._items, value);
-			}
+			return new List<T>.SynchronizedList(list);
 		}
 
-		public int Count
-		{
-			get
-			{
-				return this._size;
-			}
-		}
-
-		public T this[int index]
-		{
-			get
-			{
-				if (index >= this._size)
-				{
-					throw new ArgumentOutOfRangeException("index");
-				}
-				return this._items[index];
-			}
-			set
-			{
-				this.CheckIndex(index);
-				if (index == this._size)
-				{
-					throw new ArgumentOutOfRangeException("index");
-				}
-				this._items[index] = value;
-			}
-		}
-
-		private const int DefaultCapacity = 4;
+		private const int _defaultCapacity = 4;
 
 		private T[] _items;
 
@@ -850,66 +898,204 @@ namespace System.Collections.Generic
 
 		private int _version;
 
-		private static readonly T[] EmptyArray = new T[0];
+		[NonSerialized]
+		private object _syncRoot;
+
+		private static readonly T[] _emptyArray = new T[0];
 
 		[Serializable]
-		public struct Enumerator : IEnumerator, IDisposable, IEnumerator<T>
+		internal class SynchronizedList : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
 		{
-			internal Enumerator(List<T> l)
+			internal SynchronizedList(List<T> list)
 			{
-				this.l = l;
-				this.ver = l._version;
+				this._list = list;
+				this._root = ((ICollection)list).SyncRoot;
 			}
 
-			void IEnumerator.Reset()
-			{
-				this.VerifyState();
-				this.next = 0;
-			}
-
-			object IEnumerator.Current
+			public int Count
 			{
 				get
 				{
-					this.VerifyState();
-					if (this.next <= 0)
+					object root = this._root;
+					int count;
+					lock (root)
 					{
-						throw new InvalidOperationException();
+						count = this._list.Count;
 					}
-					return this.current;
+					return count;
 				}
+			}
+
+			public bool IsReadOnly
+			{
+				get
+				{
+					return ((ICollection<T>)this._list).IsReadOnly;
+				}
+			}
+
+			public void Add(T item)
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._list.Add(item);
+				}
+			}
+
+			public void Clear()
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._list.Clear();
+				}
+			}
+
+			public bool Contains(T item)
+			{
+				object root = this._root;
+				bool flag2;
+				lock (root)
+				{
+					flag2 = this._list.Contains(item);
+				}
+				return flag2;
+			}
+
+			public void CopyTo(T[] array, int arrayIndex)
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._list.CopyTo(array, arrayIndex);
+				}
+			}
+
+			public bool Remove(T item)
+			{
+				object root = this._root;
+				bool flag2;
+				lock (root)
+				{
+					flag2 = this._list.Remove(item);
+				}
+				return flag2;
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				object root = this._root;
+				IEnumerator enumerator;
+				lock (root)
+				{
+					enumerator = this._list.GetEnumerator();
+				}
+				return enumerator;
+			}
+
+			IEnumerator<T> IEnumerable<T>.GetEnumerator()
+			{
+				object root = this._root;
+				IEnumerator<T> enumerator;
+				lock (root)
+				{
+					enumerator = ((IEnumerable<T>)this._list).GetEnumerator();
+				}
+				return enumerator;
+			}
+
+			public T this[int index]
+			{
+				get
+				{
+					object root = this._root;
+					T t;
+					lock (root)
+					{
+						t = this._list[index];
+					}
+					return t;
+				}
+				set
+				{
+					object root = this._root;
+					lock (root)
+					{
+						this._list[index] = value;
+					}
+				}
+			}
+
+			public int IndexOf(T item)
+			{
+				object root = this._root;
+				int num;
+				lock (root)
+				{
+					num = this._list.IndexOf(item);
+				}
+				return num;
+			}
+
+			public void Insert(int index, T item)
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._list.Insert(index, item);
+				}
+			}
+
+			public void RemoveAt(int index)
+			{
+				object root = this._root;
+				lock (root)
+				{
+					this._list.RemoveAt(index);
+				}
+			}
+
+			private List<T> _list;
+
+			private object _root;
+		}
+
+		[Serializable]
+		public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator
+		{
+			internal Enumerator(List<T> list)
+			{
+				this.list = list;
+				this.index = 0;
+				this.version = list._version;
+				this.current = default(T);
 			}
 
 			public void Dispose()
 			{
-				this.l = null;
-			}
-
-			private void VerifyState()
-			{
-				if (this.l == null)
-				{
-					throw new ObjectDisposedException(base.GetType().FullName);
-				}
-				if (this.ver != this.l._version)
-				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-				}
 			}
 
 			public bool MoveNext()
 			{
-				this.VerifyState();
-				if (this.next < 0)
+				List<T> list = this.list;
+				if (this.version == list._version && this.index < list._size)
 				{
-					return false;
-				}
-				if (this.next < this.l._size)
-				{
-					this.current = this.l._items[this.next++];
+					this.current = list._items[this.index];
+					this.index++;
 					return true;
 				}
-				this.next = -1;
+				return this.MoveNextRare();
+			}
+
+			private bool MoveNextRare()
+			{
+				if (this.version != this.list._version)
+				{
+					ThrowHelper.ThrowInvalidOperationException(ExceptionResource.InvalidOperation_EnumFailedVersion);
+				}
+				this.index = this.list._size + 1;
+				this.current = default(T);
 				return false;
 			}
 
@@ -921,11 +1107,33 @@ namespace System.Collections.Generic
 				}
 			}
 
-			private List<T> l;
+			object IEnumerator.Current
+			{
+				get
+				{
+					if (this.index == 0 || this.index == this.list._size + 1)
+					{
+						ThrowHelper.ThrowInvalidOperationException(ExceptionResource.InvalidOperation_EnumOpCantHappen);
+					}
+					return this.Current;
+				}
+			}
 
-			private int next;
+			void IEnumerator.Reset()
+			{
+				if (this.version != this.list._version)
+				{
+					ThrowHelper.ThrowInvalidOperationException(ExceptionResource.InvalidOperation_EnumFailedVersion);
+				}
+				this.index = 0;
+				this.current = default(T);
+			}
 
-			private int ver;
+			private List<T> list;
+
+			private int index;
+
+			private int version;
 
 			private T current;
 		}

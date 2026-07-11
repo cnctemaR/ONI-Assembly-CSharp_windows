@@ -1,58 +1,24 @@
 ﻿using System;
-using System.Text;
 using System.Xml.XPath;
 
 namespace System.Xml
 {
-	public class XmlDocumentFragment : XmlNode, IHasXmlChildNode
+	public class XmlDocumentFragment : XmlNode
 	{
-		protected internal XmlDocumentFragment(XmlDocument doc)
-			: base(doc)
+		protected internal XmlDocumentFragment(XmlDocument ownerDocument)
 		{
+			if (ownerDocument == null)
+			{
+				throw new ArgumentException(Res.GetString("Cannot create a node without an owner document."));
+			}
+			this.parentNode = ownerDocument;
 		}
 
-		XmlLinkedNode IHasXmlChildNode.LastLinkedChild
+		public override string Name
 		{
 			get
 			{
-				return this.lastLinkedChild;
-			}
-			set
-			{
-				this.lastLinkedChild = value;
-			}
-		}
-
-		public override string InnerXml
-		{
-			get
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				for (int i = 0; i < this.ChildNodes.Count; i++)
-				{
-					stringBuilder.Append(this.ChildNodes[i].OuterXml);
-				}
-				return stringBuilder.ToString();
-			}
-			set
-			{
-				for (int i = 0; i < this.ChildNodes.Count; i++)
-				{
-					this.RemoveChild(this.ChildNodes[i]);
-				}
-				XmlNamespaceManager xmlNamespaceManager = base.ConstructNamespaceManager();
-				XmlParserContext xmlParserContext = new XmlParserContext(this.OwnerDocument.NameTable, xmlNamespaceManager, (this.OwnerDocument.DocumentType == null) ? null : this.OwnerDocument.DocumentType.DTD, this.BaseURI, this.XmlLang, this.XmlSpace, null);
-				XmlTextReader xmlTextReader = new XmlTextReader(value, XmlNodeType.Element, xmlParserContext);
-				xmlTextReader.XmlResolver = this.OwnerDocument.Resolver;
-				for (;;)
-				{
-					XmlNode xmlNode = this.OwnerDocument.ReadNode(xmlTextReader);
-					if (xmlNode == null)
-					{
-						break;
-					}
-					this.AppendChild(xmlNode);
-				}
+				return this.OwnerDocument.strDocumentFragmentName;
 			}
 		}
 
@@ -60,15 +26,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return "#document-fragment";
-			}
-		}
-
-		public override string Name
-		{
-			get
-			{
-				return "#document-fragment";
+				return this.OwnerDocument.strDocumentFragmentName;
 			}
 		}
 
@@ -80,14 +38,6 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlDocument OwnerDocument
-		{
-			get
-			{
-				return base.OwnerDocument;
-			}
-		}
-
 		public override XmlNode ParentNode
 		{
 			get
@@ -96,7 +46,104 @@ namespace System.Xml
 			}
 		}
 
-		internal override XPathNodeType XPathNodeType
+		public override XmlDocument OwnerDocument
+		{
+			get
+			{
+				return (XmlDocument)this.parentNode;
+			}
+		}
+
+		public override string InnerXml
+		{
+			get
+			{
+				return base.InnerXml;
+			}
+			set
+			{
+				this.RemoveAll();
+				new XmlLoader().ParsePartialContent(this, value, XmlNodeType.Element);
+			}
+		}
+
+		public override XmlNode CloneNode(bool deep)
+		{
+			XmlDocument ownerDocument = this.OwnerDocument;
+			XmlDocumentFragment xmlDocumentFragment = ownerDocument.CreateDocumentFragment();
+			if (deep)
+			{
+				xmlDocumentFragment.CopyChildren(ownerDocument, this, deep);
+			}
+			return xmlDocumentFragment;
+		}
+
+		internal override bool IsContainer
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		internal override XmlLinkedNode LastNode
+		{
+			get
+			{
+				return this.lastChild;
+			}
+			set
+			{
+				this.lastChild = value;
+			}
+		}
+
+		internal override bool IsValidChildType(XmlNodeType type)
+		{
+			switch (type)
+			{
+			case XmlNodeType.Element:
+			case XmlNodeType.Text:
+			case XmlNodeType.CDATA:
+			case XmlNodeType.EntityReference:
+			case XmlNodeType.ProcessingInstruction:
+			case XmlNodeType.Comment:
+			case XmlNodeType.Whitespace:
+			case XmlNodeType.SignificantWhitespace:
+				return true;
+			case XmlNodeType.XmlDeclaration:
+			{
+				XmlNode firstChild = this.FirstChild;
+				return firstChild == null || firstChild.NodeType != XmlNodeType.XmlDeclaration;
+			}
+			}
+			return false;
+		}
+
+		internal override bool CanInsertAfter(XmlNode newChild, XmlNode refChild)
+		{
+			return newChild.NodeType != XmlNodeType.XmlDeclaration || (refChild == null && this.LastNode == null);
+		}
+
+		internal override bool CanInsertBefore(XmlNode newChild, XmlNode refChild)
+		{
+			return newChild.NodeType != XmlNodeType.XmlDeclaration || refChild == null || refChild == this.FirstChild;
+		}
+
+		public override void WriteTo(XmlWriter w)
+		{
+			this.WriteContentTo(w);
+		}
+
+		public override void WriteContentTo(XmlWriter w)
+		{
+			foreach (object obj in this)
+			{
+				((XmlNode)obj).WriteTo(w);
+			}
+		}
+
+		internal override XPathNodeType XPNodeType
 		{
 			get
 			{
@@ -104,37 +151,6 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
-		{
-			if (deep)
-			{
-				XmlNode xmlNode = this.FirstChild;
-				while (xmlNode != null && xmlNode.HasChildNodes)
-				{
-					this.AppendChild(xmlNode.NextSibling.CloneNode(false));
-					xmlNode = xmlNode.NextSibling;
-				}
-				return xmlNode;
-			}
-			return new XmlDocumentFragment(this.OwnerDocument);
-		}
-
-		public override void WriteContentTo(XmlWriter w)
-		{
-			for (int i = 0; i < this.ChildNodes.Count; i++)
-			{
-				this.ChildNodes[i].WriteContentTo(w);
-			}
-		}
-
-		public override void WriteTo(XmlWriter w)
-		{
-			for (int i = 0; i < this.ChildNodes.Count; i++)
-			{
-				this.ChildNodes[i].WriteTo(w);
-			}
-		}
-
-		private XmlLinkedNode lastLinkedChild;
+		private XmlLinkedNode lastChild;
 	}
 }

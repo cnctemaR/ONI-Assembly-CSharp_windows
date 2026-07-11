@@ -35,11 +35,9 @@ public class SealedDoorSideScreen : SideScreenContent
 		if (!this.target.isSealed)
 		{
 			this.ContentContainer.SetActive(false);
+			return;
 		}
-		else
-		{
-			this.ContentContainer.SetActive(true);
-		}
+		this.ContentContainer.SetActive(true);
 	}
 
 	[SerializeField]

@@ -1,131 +1,239 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Reflection
 {
 	[Serializable]
 	internal class MemberInfoSerializationHolder : ISerializable, IObjectReference
 	{
-		private MemberInfoSerializationHolder(SerializationInfo info, StreamingContext ctx)
+		public static void GetSerializationInfo(SerializationInfo info, string name, RuntimeType reflectedClass, string signature, MemberTypes type)
 		{
-			string @string = info.GetString("AssemblyName");
-			string string2 = info.GetString("ClassName");
-			this._memberName = info.GetString("Name");
-			this._memberSignature = info.GetString("Signature");
-			this._memberType = (MemberTypes)info.GetInt32("MemberType");
-			try
-			{
-				this._genericArguments = null;
-			}
-			catch (SerializationException)
-			{
-			}
-			Assembly assembly = Assembly.Load(@string);
-			this._reflectedType = assembly.GetType(string2, true, true);
+			MemberInfoSerializationHolder.GetSerializationInfo(info, name, reflectedClass, signature, null, type, null);
 		}
 
-		public static void Serialize(SerializationInfo info, string name, Type klass, string signature, MemberTypes type)
+		public static void GetSerializationInfo(SerializationInfo info, string name, RuntimeType reflectedClass, string signature, string signature2, MemberTypes type, Type[] genericArguments)
 		{
-			MemberInfoSerializationHolder.Serialize(info, name, klass, signature, type, null);
-		}
-
-		public static void Serialize(SerializationInfo info, string name, Type klass, string signature, MemberTypes type, Type[] genericArguments)
-		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			string fullName = reflectedClass.Module.Assembly.FullName;
+			string fullName2 = reflectedClass.FullName;
 			info.SetType(typeof(MemberInfoSerializationHolder));
-			info.AddValue("AssemblyName", klass.Module.Assembly.FullName, typeof(string));
-			info.AddValue("ClassName", klass.FullName, typeof(string));
 			info.AddValue("Name", name, typeof(string));
+			info.AddValue("AssemblyName", fullName, typeof(string));
+			info.AddValue("ClassName", fullName2, typeof(string));
 			info.AddValue("Signature", signature, typeof(string));
+			info.AddValue("Signature2", signature2, typeof(string));
 			info.AddValue("MemberType", (int)type);
 			info.AddValue("GenericArguments", genericArguments, typeof(Type[]));
 		}
 
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		internal MemberInfoSerializationHolder(SerializationInfo info, StreamingContext context)
 		{
-			throw new NotSupportedException();
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			string @string = info.GetString("AssemblyName");
+			string string2 = info.GetString("ClassName");
+			if (@string == null || string2 == null)
+			{
+				throw new SerializationException(Environment.GetResourceString("Insufficient state to return the real object."));
+			}
+			Assembly assembly = FormatterServices.LoadAssemblyFromString(@string);
+			this.m_reflectedType = assembly.GetType(string2, true, false) as RuntimeType;
+			this.m_memberName = info.GetString("Name");
+			this.m_signature = info.GetString("Signature");
+			this.m_signature2 = (string)info.GetValueNoThrow("Signature2", typeof(string));
+			this.m_memberType = (MemberTypes)info.GetInt32("MemberType");
+			this.m_info = info;
 		}
 
-		public object GetRealObject(StreamingContext context)
+		[SecurityCritical]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			MemberTypes memberType = this._memberType;
+			throw new NotSupportedException(Environment.GetResourceString("Method is not supported."));
+		}
+
+		[SecurityCritical]
+		public virtual object GetRealObject(StreamingContext context)
+		{
+			if (this.m_memberName == null || this.m_reflectedType == null || this.m_memberType == (MemberTypes)0)
+			{
+				throw new SerializationException(Environment.GetResourceString("Insufficient state to return the real object."));
+			}
+			BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.OptionalParamBinding;
+			MemberTypes memberType = this.m_memberType;
 			switch (memberType)
 			{
 			case MemberTypes.Constructor:
 			{
-				ConstructorInfo[] constructors = this._reflectedType.GetConstructors(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-				for (int i = 0; i < constructors.Length; i++)
+				if (this.m_signature == null)
 				{
-					if (constructors[i].ToString().Equals(this._memberSignature))
+					throw new SerializationException(Environment.GetResourceString("The method signature cannot be null."));
+				}
+				ConstructorInfo[] array = this.m_reflectedType.GetMember(this.m_memberName, MemberTypes.Constructor, bindingFlags) as ConstructorInfo[];
+				if (array.Length == 1)
+				{
+					return array[0];
+				}
+				if (array.Length > 1)
+				{
+					for (int i = 0; i < array.Length; i++)
 					{
-						return constructors[i];
-					}
-				}
-				throw new SerializationException(string.Format("Could not find constructor '{0}' in type '{1}'", this._memberSignature, this._reflectedType));
-			}
-			case MemberTypes.Event:
-			{
-				EventInfo @event = this._reflectedType.GetEvent(this._memberName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-				if (@event != null)
-				{
-					return @event;
-				}
-				throw new SerializationException(string.Format("Could not find event '{0}' in type '{1}'", this._memberName, this._reflectedType));
-			}
-			default:
-			{
-				if (memberType != MemberTypes.Property)
-				{
-					throw new SerializationException(string.Format("Unhandled MemberType {0}", this._memberType));
-				}
-				PropertyInfo property = this._reflectedType.GetProperty(this._memberName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-				if (property != null)
-				{
-					return property;
-				}
-				throw new SerializationException(string.Format("Could not find property '{0}' in type '{1}'", this._memberName, this._reflectedType));
-			}
-			case MemberTypes.Field:
-			{
-				FieldInfo field = this._reflectedType.GetField(this._memberName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-				if (field != null)
-				{
-					return field;
-				}
-				throw new SerializationException(string.Format("Could not find field '{0}' in type '{1}'", this._memberName, this._reflectedType));
-			}
-			case MemberTypes.Method:
-			{
-				MethodInfo[] methods = this._reflectedType.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-				for (int j = 0; j < methods.Length; j++)
-				{
-					if (methods[j].ToString().Equals(this._memberSignature))
-					{
-						return methods[j];
-					}
-					if (this._genericArguments != null && methods[j].IsGenericMethod && methods[j].GetGenericArguments().Length == this._genericArguments.Length)
-					{
-						MethodInfo methodInfo = methods[j].MakeGenericMethod(this._genericArguments);
-						if (methodInfo.ToString() == this._memberSignature)
+						if (this.m_signature2 != null)
 						{
-							return methodInfo;
+							if (((RuntimeConstructorInfo)array[i]).SerializationToString().Equals(this.m_signature2))
+							{
+								return array[i];
+							}
+						}
+						else if (array[i].ToString().Equals(this.m_signature))
+						{
+							return array[i];
 						}
 					}
 				}
-				throw new SerializationException(string.Format("Could not find method '{0}' in type '{1}'", this._memberSignature, this._reflectedType));
+				throw new SerializationException(Environment.GetResourceString("Cannot get the member '{0}'.", new object[] { this.m_memberName }));
 			}
+			case MemberTypes.Event:
+			{
+				EventInfo[] array2 = this.m_reflectedType.GetMember(this.m_memberName, MemberTypes.Event, bindingFlags) as EventInfo[];
+				if (array2.Length == 0)
+				{
+					throw new SerializationException(Environment.GetResourceString("Cannot get the member '{0}'.", new object[] { this.m_memberName }));
+				}
+				return array2[0];
 			}
+			case MemberTypes.Constructor | MemberTypes.Event:
+				break;
+			case MemberTypes.Field:
+			{
+				FieldInfo[] array3 = this.m_reflectedType.GetMember(this.m_memberName, MemberTypes.Field, bindingFlags) as FieldInfo[];
+				if (array3.Length == 0)
+				{
+					throw new SerializationException(Environment.GetResourceString("Cannot get the member '{0}'.", new object[] { this.m_memberName }));
+				}
+				return array3[0];
+			}
+			default:
+				if (memberType != MemberTypes.Method)
+				{
+					if (memberType == MemberTypes.Property)
+					{
+						PropertyInfo[] array4 = this.m_reflectedType.GetMember(this.m_memberName, MemberTypes.Property, bindingFlags) as PropertyInfo[];
+						if (array4.Length == 0)
+						{
+							throw new SerializationException(Environment.GetResourceString("Cannot get the member '{0}'.", new object[] { this.m_memberName }));
+						}
+						if (array4.Length == 1)
+						{
+							return array4[0];
+						}
+						if (array4.Length > 1)
+						{
+							for (int j = 0; j < array4.Length; j++)
+							{
+								if (this.m_signature2 != null)
+								{
+									if (((RuntimePropertyInfo)array4[j]).SerializationToString().Equals(this.m_signature2))
+									{
+										return array4[j];
+									}
+								}
+								else if (array4[j].ToString().Equals(this.m_signature))
+								{
+									return array4[j];
+								}
+							}
+						}
+						throw new SerializationException(Environment.GetResourceString("Cannot get the member '{0}'.", new object[] { this.m_memberName }));
+					}
+				}
+				else
+				{
+					MethodInfo methodInfo = null;
+					if (this.m_signature == null)
+					{
+						throw new SerializationException(Environment.GetResourceString("The method signature cannot be null."));
+					}
+					Type[] array5 = this.m_info.GetValueNoThrow("GenericArguments", typeof(Type[])) as Type[];
+					MethodInfo[] array6 = this.m_reflectedType.GetMember(this.m_memberName, MemberTypes.Method, bindingFlags) as MethodInfo[];
+					if (array6.Length == 1)
+					{
+						methodInfo = array6[0];
+					}
+					else if (array6.Length > 1)
+					{
+						for (int k = 0; k < array6.Length; k++)
+						{
+							if (this.m_signature2 != null)
+							{
+								if (((RuntimeMethodInfo)array6[k]).SerializationToString().Equals(this.m_signature2))
+								{
+									methodInfo = array6[k];
+									break;
+								}
+							}
+							else if (array6[k].ToString().Equals(this.m_signature))
+							{
+								methodInfo = array6[k];
+								break;
+							}
+							if (array5 != null && array6[k].IsGenericMethod && array6[k].GetGenericArguments().Length == array5.Length)
+							{
+								MethodInfo methodInfo2 = array6[k].MakeGenericMethod(array5);
+								if (this.m_signature2 != null)
+								{
+									if (((RuntimeMethodInfo)methodInfo2).SerializationToString().Equals(this.m_signature2))
+									{
+										methodInfo = methodInfo2;
+										break;
+									}
+								}
+								else if (methodInfo2.ToString().Equals(this.m_signature))
+								{
+									methodInfo = methodInfo2;
+									break;
+								}
+							}
+						}
+					}
+					if (methodInfo == null)
+					{
+						throw new SerializationException(Environment.GetResourceString("Cannot get the member '{0}'.", new object[] { this.m_memberName }));
+					}
+					if (!methodInfo.IsGenericMethodDefinition)
+					{
+						return methodInfo;
+					}
+					if (array5 == null)
+					{
+						return methodInfo;
+					}
+					if (array5[0] == null)
+					{
+						return null;
+					}
+					return methodInfo.MakeGenericMethod(array5);
+				}
+				break;
+			}
+			throw new ArgumentException(Environment.GetResourceString("Unknown member type."));
 		}
 
-		private const BindingFlags DefaultBinding = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+		private string m_memberName;
 
-		private readonly string _memberName;
+		private RuntimeType m_reflectedType;
 
-		private readonly string _memberSignature;
+		private string m_signature;
 
-		private readonly MemberTypes _memberType;
+		private string m_signature2;
 
-		private readonly Type _reflectedType;
+		private MemberTypes m_memberType;
 
-		private readonly Type[] _genericArguments;
+		private SerializationInfo m_info;
 	}
 }

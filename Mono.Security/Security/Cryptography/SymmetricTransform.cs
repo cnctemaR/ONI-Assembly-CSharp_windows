@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace Mono.Security.Cryptography
 {
-	internal abstract class SymmetricTransform : IDisposable, ICryptoTransform
+	internal abstract class SymmetricTransform : ICryptoTransform, IDisposable
 	{
 		public SymmetricTransform(SymmetricAlgorithm symmAlgo, bool encryption, byte[] rgbIV)
 		{
@@ -20,30 +20,26 @@ namespace Mono.Security.Cryptography
 			}
 			if (rgbIV.Length < this.BlockSizeByte)
 			{
-				string text = Locale.GetText("IV is too small ({0} bytes), it should be {1} bytes long.", new object[] { rgbIV.Length, this.BlockSizeByte });
-				throw new CryptographicException(text);
+				throw new CryptographicException(Locale.GetText("IV is too small ({0} bytes), it should be {1} bytes long.", new object[] { rgbIV.Length, this.BlockSizeByte }));
 			}
+			this.padmode = this.algo.Padding;
 			this.temp = new byte[this.BlockSizeByte];
 			Buffer.BlockCopy(rgbIV, 0, this.temp, 0, Math.Min(this.BlockSizeByte, rgbIV.Length));
 			this.temp2 = new byte[this.BlockSizeByte];
 			this.FeedBackByte = this.algo.FeedbackSize >> 3;
-			if (this.FeedBackByte != 0)
-			{
-				this.FeedBackIter = this.BlockSizeByte / this.FeedBackByte;
-			}
 			this.workBuff = new byte[this.BlockSizeByte];
 			this.workout = new byte[this.BlockSizeByte];
+		}
+
+		~SymmetricTransform()
+		{
+			this.Dispose(false);
 		}
 
 		void IDisposable.Dispose()
 		{
 			this.Dispose(true);
 			GC.SuppressFinalize(this);
-		}
-
-		~SymmetricTransform()
-		{
-			this.Dispose(false);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -99,19 +95,19 @@ namespace Mono.Security.Cryptography
 			{
 			case CipherMode.CBC:
 				this.CBC(input, output);
-				break;
+				return;
 			case CipherMode.ECB:
 				this.ECB(input, output);
-				break;
+				return;
 			case CipherMode.OFB:
 				this.OFB(input, output);
-				break;
+				return;
 			case CipherMode.CFB:
 				this.CFB(input, output);
-				break;
+				return;
 			case CipherMode.CTS:
 				this.CTS(input, output);
-				break;
+				return;
 			default:
 				throw new NotImplementedException("Unkown CipherMode" + this.algo.Mode.ToString());
 			}
@@ -131,49 +127,39 @@ namespace Mono.Security.Cryptography
 				}
 				this.ECB(this.temp, output);
 				Buffer.BlockCopy(output, 0, this.temp, 0, this.BlockSizeByte);
+				return;
 			}
-			else
+			Buffer.BlockCopy(input, 0, this.temp2, 0, this.BlockSizeByte);
+			this.ECB(input, output);
+			for (int j = 0; j < this.BlockSizeByte; j++)
 			{
-				Buffer.BlockCopy(input, 0, this.temp2, 0, this.BlockSizeByte);
-				this.ECB(input, output);
-				for (int j = 0; j < this.BlockSizeByte; j++)
-				{
-					int num2 = j;
-					output[num2] ^= this.temp[j];
-				}
-				Buffer.BlockCopy(this.temp2, 0, this.temp, 0, this.BlockSizeByte);
+				int num2 = j;
+				output[num2] ^= this.temp[j];
 			}
+			Buffer.BlockCopy(this.temp2, 0, this.temp, 0, this.BlockSizeByte);
 		}
 
 		protected virtual void CFB(byte[] input, byte[] output)
 		{
 			if (this.encrypt)
 			{
-				for (int i = 0; i < this.FeedBackIter; i++)
+				for (int i = 0; i < this.BlockSizeByte; i++)
 				{
 					this.ECB(this.temp, this.temp2);
-					for (int j = 0; j < this.FeedBackByte; j++)
-					{
-						output[j + i] = this.temp2[j] ^ input[j + i];
-					}
-					Buffer.BlockCopy(this.temp, this.FeedBackByte, this.temp, 0, this.BlockSizeByte - this.FeedBackByte);
-					Buffer.BlockCopy(output, i, this.temp, this.BlockSizeByte - this.FeedBackByte, this.FeedBackByte);
+					output[i] = this.temp2[0] ^ input[i];
+					Buffer.BlockCopy(this.temp, 1, this.temp, 0, this.BlockSizeByte - 1);
+					Buffer.BlockCopy(output, i, this.temp, this.BlockSizeByte - 1, 1);
 				}
+				return;
 			}
-			else
+			for (int j = 0; j < this.BlockSizeByte; j++)
 			{
-				for (int k = 0; k < this.FeedBackIter; k++)
-				{
-					this.encrypt = true;
-					this.ECB(this.temp, this.temp2);
-					this.encrypt = false;
-					Buffer.BlockCopy(this.temp, this.FeedBackByte, this.temp, 0, this.BlockSizeByte - this.FeedBackByte);
-					Buffer.BlockCopy(input, k, this.temp, this.BlockSizeByte - this.FeedBackByte, this.FeedBackByte);
-					for (int l = 0; l < this.FeedBackByte; l++)
-					{
-						output[l + k] = this.temp2[l] ^ input[l + k];
-					}
-				}
+				this.encrypt = true;
+				this.ECB(this.temp, this.temp2);
+				this.encrypt = false;
+				Buffer.BlockCopy(this.temp, 1, this.temp, 0, this.BlockSizeByte - 1);
+				Buffer.BlockCopy(input, j, this.temp, this.BlockSizeByte - 1, 1);
+				output[j] = this.temp2[0] ^ input[j];
 			}
 		}
 
@@ -223,7 +209,7 @@ namespace Mono.Security.Cryptography
 				throw new ArgumentOutOfRangeException("outputOffset", "< 0");
 			}
 			int num = outputBuffer.Length - inputCount - outputOffset;
-			if (!this.encrypt && 0 > num && (this.algo.Padding == PaddingMode.None || this.algo.Padding == PaddingMode.Zeros))
+			if (!this.encrypt && 0 > num && (this.padmode == PaddingMode.None || this.padmode == PaddingMode.Zeros))
 			{
 				throw new CryptographicException("outputBuffer", Locale.GetText("Overflow"));
 			}
@@ -249,7 +235,7 @@ namespace Mono.Security.Cryptography
 		{
 			get
 			{
-				return !this.encrypt && this.algo.Padding != PaddingMode.None && this.algo.Padding != PaddingMode.Zeros;
+				return !this.encrypt && this.padmode != PaddingMode.None && this.padmode != PaddingMode.Zeros;
 			}
 		}
 
@@ -324,37 +310,36 @@ namespace Mono.Security.Cryptography
 			throw new CryptographicException(text);
 		}
 
-		private byte[] FinalEncrypt(byte[] inputBuffer, int inputOffset, int inputCount)
+		protected virtual byte[] FinalEncrypt(byte[] inputBuffer, int inputOffset, int inputCount)
 		{
 			int num = inputCount / this.BlockSizeByte * this.BlockSizeByte;
 			int num2 = inputCount - num;
 			int i = num;
-			switch (this.algo.Padding)
+			PaddingMode paddingMode = this.padmode;
+			if (paddingMode == PaddingMode.PKCS7 || paddingMode - PaddingMode.ANSIX923 <= 1)
 			{
-			case PaddingMode.PKCS7:
-			case PaddingMode.ANSIX923:
-			case PaddingMode.ISO10126:
 				i += this.BlockSizeByte;
-				goto IL_00A8;
 			}
-			if (inputCount == 0)
+			else
 			{
-				return new byte[0];
-			}
-			if (num2 != 0)
-			{
-				if (this.algo.Padding == PaddingMode.None)
+				if (inputCount == 0)
 				{
-					throw new CryptographicException("invalid block length");
+					return new byte[0];
 				}
-				byte[] array = new byte[num + this.BlockSizeByte];
-				Buffer.BlockCopy(inputBuffer, inputOffset, array, 0, inputCount);
-				inputBuffer = array;
-				inputOffset = 0;
-				inputCount = array.Length;
-				i = inputCount;
+				if (num2 != 0)
+				{
+					if (this.padmode == PaddingMode.None)
+					{
+						throw new CryptographicException("invalid block length");
+					}
+					byte[] array = new byte[num + this.BlockSizeByte];
+					Buffer.BlockCopy(inputBuffer, inputOffset, array, 0, inputCount);
+					inputBuffer = array;
+					inputOffset = 0;
+					inputCount = array.Length;
+					i = inputCount;
+				}
 			}
-			IL_00A8:
 			byte[] array2 = new byte[i];
 			int num3 = 0;
 			while (i > this.BlockSizeByte)
@@ -365,7 +350,7 @@ namespace Mono.Security.Cryptography
 				i -= this.BlockSizeByte;
 			}
 			byte b = (byte)(this.BlockSizeByte - num2);
-			switch (this.algo.Padding)
+			switch (this.padmode)
 			{
 			case PaddingMode.PKCS7:
 			{
@@ -394,12 +379,9 @@ namespace Mono.Security.Cryptography
 			return array2;
 		}
 
-		private byte[] FinalDecrypt(byte[] inputBuffer, int inputOffset, int inputCount)
+		protected virtual byte[] FinalDecrypt(byte[] inputBuffer, int inputOffset, int inputCount)
 		{
-			if (inputCount % this.BlockSizeByte > 0)
-			{
-				throw new CryptographicException("Invalid input block size.");
-			}
+			int i = inputCount;
 			int num = inputCount;
 			if (this.lastBlock)
 			{
@@ -407,12 +389,12 @@ namespace Mono.Security.Cryptography
 			}
 			byte[] array = new byte[num];
 			int num2 = 0;
-			while (inputCount > 0)
+			while (i > 0)
 			{
 				int num3 = this.InternalTransformBlock(inputBuffer, inputOffset, this.BlockSizeByte, array, num2);
 				inputOffset += this.BlockSizeByte;
 				num2 += num3;
-				inputCount -= this.BlockSizeByte;
+				i -= this.BlockSizeByte;
 			}
 			if (this.lastBlock)
 			{
@@ -421,20 +403,20 @@ namespace Mono.Security.Cryptography
 				num2 += this.BlockSizeByte;
 				this.lastBlock = false;
 			}
-			byte b = ((num <= 0) ? 0 : array[num - 1]);
-			switch (this.algo.Padding)
+			byte b = ((num > 0) ? array[num - 1] : 0);
+			switch (this.padmode)
 			{
 			case PaddingMode.PKCS7:
 			{
 				if (b == 0 || (int)b > this.BlockSizeByte)
 				{
-					this.ThrowBadPaddingException(this.algo.Padding, (int)b, -1);
+					this.ThrowBadPaddingException(this.padmode, (int)b, -1);
 				}
-				for (int i = (int)(b - 1); i > 0; i--)
+				for (int j = (int)(b - 1); j > 0; j--)
 				{
-					if (array[num - 1 - i] != b)
+					if (array[num - 1 - j] != b)
 					{
-						this.ThrowBadPaddingException(this.algo.Padding, -1, i);
+						this.ThrowBadPaddingException(this.padmode, -1, j);
 					}
 				}
 				num -= (int)b;
@@ -444,13 +426,13 @@ namespace Mono.Security.Cryptography
 			{
 				if (b == 0 || (int)b > this.BlockSizeByte)
 				{
-					this.ThrowBadPaddingException(this.algo.Padding, (int)b, -1);
+					this.ThrowBadPaddingException(this.padmode, (int)b, -1);
 				}
-				for (int j = (int)(b - 1); j > 0; j--)
+				for (int k = (int)(b - 1); k > 0; k--)
 				{
-					if (array[num - 1 - j] != 0)
+					if (array[num - 1 - k] != 0)
 					{
-						this.ThrowBadPaddingException(this.algo.Padding, -1, j);
+						this.ThrowBadPaddingException(this.padmode, -1, k);
 					}
 				}
 				num -= (int)b;
@@ -459,7 +441,7 @@ namespace Mono.Security.Cryptography
 			case PaddingMode.ISO10126:
 				if (b == 0 || (int)b > this.BlockSizeByte)
 				{
-					this.ThrowBadPaddingException(this.algo.Padding, (int)b, -1);
+					this.ThrowBadPaddingException(this.padmode, (int)b, -1);
 				}
 				num -= (int)b;
 				break;
@@ -492,23 +474,23 @@ namespace Mono.Security.Cryptography
 
 		protected bool encrypt;
 
-		private int BlockSizeByte;
+		protected int BlockSizeByte;
 
-		private byte[] temp;
+		protected byte[] temp;
 
-		private byte[] temp2;
+		protected byte[] temp2;
 
 		private byte[] workBuff;
 
 		private byte[] workout;
 
-		private int FeedBackByte;
+		protected PaddingMode padmode;
 
-		private int FeedBackIter;
+		protected int FeedBackByte;
 
 		private bool m_disposed;
 
-		private bool lastBlock;
+		protected bool lastBlock;
 
 		private RandomNumberGenerator _rng;
 	}

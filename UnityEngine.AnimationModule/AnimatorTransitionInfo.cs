@@ -4,34 +4,20 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Information about the current transition.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
 	[RequiredByNativeCode]
 	public struct AnimatorTransitionInfo
 	{
-		/// <summary>
-		///   <para>Does name match the name of the active Transition.</para>
-		/// </summary>
-		/// <param name="name"></param>
 		public bool IsName(string name)
 		{
 			return Animator.StringToHash(name) == this.m_Name || Animator.StringToHash(name) == this.m_FullPath;
 		}
 
-		/// <summary>
-		///   <para>Does userName match the name of the active Transition.</para>
-		/// </summary>
-		/// <param name="name"></param>
 		public bool IsUserName(string name)
 		{
 			return Animator.StringToHash(name) == this.m_UserName;
 		}
 
-		/// <summary>
-		///   <para>The hash name of the Transition.</para>
-		/// </summary>
 		public int fullPathHash
 		{
 			get
@@ -40,9 +26,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The simplified name of the Transition.</para>
-		/// </summary>
 		public int nameHash
 		{
 			get
@@ -51,9 +34,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The user-specified name of the Transition.</para>
-		/// </summary>
 		public int userNameHash
 		{
 			get
@@ -62,9 +42,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The unit of the transition duration.</para>
-		/// </summary>
 		public DurationUnit durationUnit
 		{
 			get
@@ -73,9 +50,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Duration of the transition.</para>
-		/// </summary>
 		public float duration
 		{
 			get
@@ -84,9 +58,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Normalized time of the Transition.</para>
-		/// </summary>
 		public float normalizedTime
 		{
 			get
@@ -95,9 +66,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the transition is from an AnyState node, or from Animator.CrossFade.</para>
-		/// </summary>
 		public bool anyState
 		{
 			get

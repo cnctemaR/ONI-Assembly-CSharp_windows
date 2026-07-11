@@ -41,7 +41,7 @@ public class Notifier : KMonoBehaviour
 			{
 				notification.clickFocus = base.transform;
 			}
-			if (notification.Group.IsValid && notification.Group != string.Empty)
+			if (notification.Group.IsValid && notification.Group != "")
 			{
 				if (this.NotificationGroups == null)
 				{
@@ -73,7 +73,7 @@ public class Notifier : KMonoBehaviour
 		if (notification.Notifier != null)
 		{
 			notification.Notifier = null;
-			if (this.NotificationGroups != null && notification.Group.IsValid && notification.Group != string.Empty)
+			if (this.NotificationGroups != null && notification.Group.IsValid && notification.Group != "")
 			{
 				this.NotificationGroups.Remove(notification.Group);
 			}
@@ -88,8 +88,7 @@ public class Notifier : KMonoBehaviour
 	{
 		if (this.NotificationGroups != null)
 		{
-			List<HashedString> list = new List<HashedString>(this.NotificationGroups.Keys);
-			foreach (HashedString hashedString in list)
+			foreach (HashedString hashedString in new List<HashedString>(this.NotificationGroups.Keys))
 			{
 				this.Remove(this.NotificationGroups[hashedString]);
 			}

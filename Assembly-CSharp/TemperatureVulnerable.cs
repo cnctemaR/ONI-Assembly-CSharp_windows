@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -20,7 +19,6 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<float, float> OnTemperature;
 
 	public float InternalTemperature
@@ -75,7 +73,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			{
 				return Db.Get().CreatureStatusItems.Hot_Crop.resolveStringCallback(CREATURES.STATUSITEMS.HOT_CROP.NAME, this);
 			}
-			return string.Empty;
+			return "";
 		}
 	}
 
@@ -116,8 +114,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 
 	public void SlicedSim1000ms(float dt)
 	{
-		int num = Grid.PosToCell(base.gameObject);
-		if (!Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(Grid.PosToCell(base.gameObject)))
 		{
 			return;
 		}
@@ -195,8 +192,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		public StatesInstance(TemperatureVulnerable master)
 			: base(master)
 		{
-			AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(base.gameObject);
-			if (amountInstance != null)
+			if (Db.Get().Amounts.Maturity.Lookup(base.gameObject) != null)
 			{
 				this.hasMaturity = true;
 			}

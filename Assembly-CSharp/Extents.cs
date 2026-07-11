@@ -2,6 +2,14 @@
 
 public struct Extents
 {
+	public static Extents OneCell(int cell)
+	{
+		int num;
+		int num2;
+		Grid.CellToXY(cell, out num, out num2);
+		return new Extents(num, num2, 1, 1);
+	}
+
 	public Extents(int x, int y, int width, int height)
 	{
 		this.x = x;
@@ -40,8 +48,7 @@ public struct Extents
 		{
 			int num5 = 0;
 			int num6 = 0;
-			int num7 = Grid.OffsetCell(cell, cellOffset);
-			Grid.CellToXY(num7, out num5, out num6);
+			Grid.CellToXY(Grid.OffsetCell(cell, cellOffset), out num5, out num6);
 			num = Math.Min(num, num5);
 			num2 = Math.Min(num2, num6);
 			num3 = Math.Max(num3, num5);
@@ -65,8 +72,7 @@ public struct Extents
 			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(offsets[i], orientation);
 			int num5 = 0;
 			int num6 = 0;
-			int num7 = Grid.OffsetCell(cell, rotatedCellOffset);
-			Grid.CellToXY(num7, out num5, out num6);
+			Grid.CellToXY(Grid.OffsetCell(cell, rotatedCellOffset), out num5, out num6);
 			num = Math.Min(num, num5);
 			num2 = Math.Min(num2, num6);
 			num3 = Math.Max(num3, num5);
@@ -89,8 +95,7 @@ public struct Extents
 		{
 			int num5 = 0;
 			int num6 = 0;
-			int num7 = Grid.OffsetCell(cell, array[0]);
-			Grid.CellToXY(num7, out num5, out num6);
+			Grid.CellToXY(Grid.OffsetCell(cell, array[0]), out num5, out num6);
 			num = Math.Min(num, num5);
 			num2 = Math.Min(num2, num6);
 			num3 = Math.Max(num3, num5);
@@ -100,14 +105,6 @@ public struct Extents
 		this.y = num2;
 		this.width = num3 - num + 1;
 		this.height = num4 - num2 + 1;
-	}
-
-	public static Extents OneCell(int cell)
-	{
-		int num;
-		int num2;
-		Grid.CellToXY(cell, out num, out num2);
-		return new Extents(num, num2, 1, 1);
 	}
 
 	public bool Contains(Vector2I pos)

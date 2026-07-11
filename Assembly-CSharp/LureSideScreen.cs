@@ -20,21 +20,20 @@ public class LureSideScreen : SideScreenContent
 			while (enumerator.MoveNext())
 			{
 				Tag bait = enumerator.Current;
-				LureSideScreen $this = this;
 				Tag bait3 = bait;
 				if (!this.toggles_by_tag.ContainsKey(bait))
 				{
 					GameObject gameObject = Util.KInstantiateUI(this.prefab_toggle, this.toggle_container, true);
 					Image reference = gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("FGImage");
 					gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").text = ElementLoader.GetElement(bait).name;
-					reference.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(bait).substance.anim, "ui", false, string.Empty);
+					reference.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(bait).substance.anim, "ui", false, "");
 					MultiToggle component = gameObject.GetComponent<MultiToggle>();
 					this.toggles_by_tag.Add(bait3, component);
 				}
 				this.toggles_by_tag[bait].onClick = delegate
 				{
 					Tag bait2 = bait;
-					$this.SelectToggle(bait2);
+					this.SelectToggle(bait2);
 				};
 			}
 		}

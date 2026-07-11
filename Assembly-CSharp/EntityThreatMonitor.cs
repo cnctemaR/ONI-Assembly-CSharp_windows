@@ -46,6 +46,14 @@ public class EntityThreatMonitor : GameStateMachine<EntityThreatMonitor, EntityT
 
 	public new class Instance : GameStateMachine<EntityThreatMonitor, EntityThreatMonitor.Instance, IStateMachineTarget, EntityThreatMonitor.Def>.GameInstance
 	{
+		public GameObject MainThreat
+		{
+			get
+			{
+				return this.mainThreat;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, EntityThreatMonitor.Def def)
 			: base(master, def)
 		{
@@ -53,14 +61,6 @@ public class EntityThreatMonitor : GameStateMachine<EntityThreatMonitor, EntityT
 			this.navigator = master.GetComponent<Navigator>();
 			this.choreDriver = master.GetComponent<ChoreDriver>();
 			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
-		}
-
-		public GameObject MainThreat
-		{
-			get
-			{
-				return this.mainThreat;
-			}
 		}
 
 		public void SetMainThreat(GameObject threat)
@@ -111,12 +111,12 @@ public class EntityThreatMonitor : GameStateMachine<EntityThreatMonitor, EntityT
 			{
 				return;
 			}
-			bool flag = base.smi.CheckForThreats();
-			if (flag)
+			if (base.smi.CheckForThreats())
 			{
 				this.GoToThreatened();
+				return;
 			}
-			else if (base.smi.GetCurrentState() != base.sm.safe)
+			if (base.smi.GetCurrentState() != base.sm.safe)
 			{
 				base.Trigger(-21431934, null);
 				base.smi.GoTo(base.sm.safe);
@@ -142,23 +142,10 @@ public class EntityThreatMonitor : GameStateMachine<EntityThreatMonitor, EntityT
 			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.attackableEntitiesLayer, pooledList);
 			for (int i = 0; i < pooledList.Count; i++)
 			{
-				ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
-				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
-				if (!(factionAlignment.transform == null))
+				FactionAlignment factionAlignment = pooledList[i].obj as FactionAlignment;
+				if (!(factionAlignment.transform == null) && !(factionAlignment == this.alignment) && factionAlignment.IsAlignmentActive() && this.navigator.CanReach(factionAlignment.attackable) && (!(this.allyTag != null) || !factionAlignment.HasTag(this.allyTag)))
 				{
-					if (!(factionAlignment == this.alignment))
-					{
-						if (factionAlignment.IsAlignmentActive())
-						{
-							if (this.navigator.CanReach(factionAlignment.attackable))
-							{
-								if (!(this.allyTag != null) || !factionAlignment.HasTag(this.allyTag))
-								{
-									this.threats.Add(factionAlignment);
-								}
-							}
-						}
-					}
+					this.threats.Add(factionAlignment);
 				}
 			}
 			pooledList.Recycle();

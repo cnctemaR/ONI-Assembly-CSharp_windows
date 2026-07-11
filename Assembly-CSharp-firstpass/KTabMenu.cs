@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +13,6 @@ public class KTabMenu : KScreen
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KTabMenu.TabActivated onTabActivated;
 
 	public int AddTab(string tabName, KScreen contents)

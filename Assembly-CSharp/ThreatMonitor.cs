@@ -141,17 +141,6 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 	public new class Instance : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.GameInstance
 	{
-		public Instance(IStateMachineTarget master, ThreatMonitor.Def def)
-			: base(master, def)
-		{
-			this.alignment = master.GetComponent<FactionAlignment>();
-			this.navigator = master.GetComponent<Navigator>();
-			this.choreDriver = master.GetComponent<ChoreDriver>();
-			this.health = master.GetComponent<Health>();
-			this.choreConsumer = master.GetComponent<ChoreConsumer>();
-			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
-		}
-
 		public GameObject MainThreat
 		{
 			get
@@ -166,6 +155,17 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				return this.alignment.Alignment == FactionManager.FactionID.Duplicant;
 			}
+		}
+
+		public Instance(IStateMachineTarget master, ThreatMonitor.Def def)
+			: base(master, def)
+		{
+			this.alignment = master.GetComponent<FactionAlignment>();
+			this.navigator = master.GetComponent<Navigator>();
+			this.choreDriver = master.GetComponent<ChoreDriver>();
+			this.health = master.GetComponent<Health>();
+			this.choreConsumer = master.GetComponent<ChoreConsumer>();
+			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
 		}
 
 		public void ClearMainThreat()
@@ -221,8 +221,9 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				this.SetMainThreat(factionAlignment.gameObject);
 				this.GoToThreatened();
+				return;
 			}
-			else if (!this.WillFight())
+			if (!this.WillFight())
 			{
 				this.GoToThreatened();
 			}
@@ -241,8 +242,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 					return false;
 				}
 			}
-			bool flag = this.health.State >= base.smi.def.fleethresholdState;
-			return !flag;
+			return this.health.State < base.smi.def.fleethresholdState;
 		}
 
 		private void GotoThreatResponse()
@@ -252,15 +252,13 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			if (this.WillFight() && this.mainThreat.GetComponent<FactionAlignment>().targeted)
 			{
 				base.smi.GoTo(base.smi.sm.threatened.duplicant.ShouldFight);
+				return;
 			}
-			else
+			if (flag || (currentChore != null && currentChore.target != null && currentChore.target.GetComponent<Pickupable>() != null))
 			{
-				if (flag || (currentChore != null && currentChore.target != null && currentChore.target.GetComponent<Pickupable>() != null))
-				{
-					return;
-				}
-				base.smi.GoTo(base.smi.sm.threatened.duplicant.ShoudFlee);
+				return;
 			}
+			base.smi.GoTo(base.smi.sm.threatened.duplicant.ShoudFlee);
 		}
 
 		public void GoToThreatened()
@@ -268,11 +266,9 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			if (this.IAmADuplicant)
 			{
 				this.GotoThreatResponse();
+				return;
 			}
-			else
-			{
-				base.smi.GoTo(base.sm.threatened.creature);
-			}
+			base.smi.GoTo(base.sm.threatened.creature);
 		}
 
 		public void Cleanup(object data)
@@ -290,12 +286,12 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				return;
 			}
-			bool flag = base.smi.CheckForThreats();
-			if (flag)
+			if (base.smi.CheckForThreats())
 			{
 				this.GoToThreatened();
+				return;
 			}
-			else if (base.smi.GetCurrentState() != base.sm.safe)
+			if (base.smi.GetCurrentState() != base.sm.safe)
 			{
 				base.Trigger(-21431934, null);
 				base.smi.GoTo(base.sm.safe);

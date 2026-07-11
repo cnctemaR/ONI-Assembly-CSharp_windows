@@ -14,21 +14,20 @@ public class DescriptorPanel : KMonoBehaviour
 		int i;
 		for (i = 0; i < descriptors.Count; i++)
 		{
-			GameObject gameObject2;
+			GameObject gameObject;
 			if (i >= this.labels.Count)
 			{
-				GameObject gameObject = ((!(this.customLabelPrefab != null)) ? ScreenPrefabs.Instance.DescriptionLabel : this.customLabelPrefab);
-				gameObject2 = Util.KInstantiate(gameObject, base.gameObject, null);
-				gameObject2.transform.localScale = new Vector3(1f, 1f, 1f);
-				this.labels.Add(gameObject2);
+				gameObject = Util.KInstantiate((this.customLabelPrefab != null) ? this.customLabelPrefab : ScreenPrefabs.Instance.DescriptionLabel, base.gameObject, null);
+				gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
+				this.labels.Add(gameObject);
 			}
 			else
 			{
-				gameObject2 = this.labels[i];
+				gameObject = this.labels[i];
 			}
-			gameObject2.GetComponent<LocText>().text = descriptors[i].IndentedText();
-			gameObject2.GetComponent<ToolTip>().toolTip = descriptors[i].tooltipText;
-			gameObject2.SetActive(true);
+			gameObject.GetComponent<LocText>().text = descriptors[i].IndentedText();
+			gameObject.GetComponent<ToolTip>().toolTip = descriptors[i].tooltipText;
+			gameObject.SetActive(true);
 		}
 		while (i < this.labels.Count)
 		{

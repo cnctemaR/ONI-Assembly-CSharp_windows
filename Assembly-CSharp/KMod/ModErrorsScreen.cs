@@ -36,19 +36,21 @@ namespace KMod
 				ToolTip component = reference2.GetComponent<ToolTip>();
 				if (component != null)
 				{
-					component.toolTip = @event.mod.ToString();
+					ToolTip toolTip = component;
+					Label mod = @event.mod;
+					toolTip.toolTip = mod.ToString();
 				}
 				reference3.isInteractable = false;
-				Mod mod = Global.Instance.modManager.FindMod(@event.mod);
-				if (mod != null)
+				Mod mod2 = Global.Instance.modManager.FindMod(@event.mod);
+				if (mod2 != null)
 				{
-					if (component != null && !string.IsNullOrEmpty(mod.description))
+					if (component != null && !string.IsNullOrEmpty(mod2.description))
 					{
-						component.toolTip = mod.description;
+						component.toolTip = mod2.description;
 					}
-					if (mod.on_managed != null)
+					if (mod2.on_managed != null)
 					{
-						reference3.onClick += mod.on_managed;
+						reference3.onClick += mod2.on_managed;
 						reference3.isInteractable = true;
 					}
 				}

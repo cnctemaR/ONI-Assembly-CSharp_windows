@@ -6,13 +6,6 @@ namespace Satsuma
 {
 	public sealed class Opt2Tsp<TNode> : ITsp<TNode>
 	{
-		public Opt2Tsp(Func<TNode, TNode, double> cost, IEnumerable<TNode> tour, double? tourCost)
-		{
-			this.Cost = cost;
-			this.tour = tour.ToList<TNode>();
-			this.TourCost = ((tourCost == null) ? TspUtils.GetTourCost<TNode>(tour, cost) : tourCost.Value);
-		}
-
 		public Func<TNode, TNode, double> Cost { get; private set; }
 
 		public IEnumerable<TNode> Tour
@@ -25,13 +18,20 @@ namespace Satsuma
 
 		public double TourCost { get; private set; }
 
+		public Opt2Tsp(Func<TNode, TNode, double> cost, IEnumerable<TNode> tour, double? tourCost)
+		{
+			this.Cost = cost;
+			this.tour = tour.ToList<TNode>();
+			this.TourCost = tourCost ?? TspUtils.GetTourCost<TNode>(tour, cost);
+		}
+
 		public bool Step()
 		{
 			bool flag = false;
 			for (int i = 0; i < this.tour.Count - 3; i++)
 			{
 				int j = i + 2;
-				int num = this.tour.Count - ((i != 0) ? 1 : 2);
+				int num = this.tour.Count - ((i == 0) ? 2 : 1);
 				while (j < num)
 				{
 					double num2 = this.Cost(this.tour[i], this.tour[j]) + this.Cost(this.tour[i + 1], this.tour[j + 1]) - (this.Cost(this.tour[i], this.tour[i + 1]) + this.Cost(this.tour[j], this.tour[j + 1]));

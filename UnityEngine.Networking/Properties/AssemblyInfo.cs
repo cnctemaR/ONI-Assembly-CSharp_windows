@@ -20,5 +20,5 @@ using UnityEngine;
 [assembly: ComVisible(false)]
 [assembly: Guid("87035389-1bb3-40e2-b2a9-c8707e7419ba")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: UnityAPICompatibilityVersion("2018.2.20f1")]
+[assembly: UnityAPICompatibilityVersion("2018.4.14f1")]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

@@ -35,8 +35,7 @@ public class EggIncubatorStates : GameStateMachine<EggIncubatorStates, EggIncuba
 
 	public static bool HasAny(EggIncubatorStates.Instance smi)
 	{
-		GameObject occupant = smi.GetComponent<EggIncubator>().Occupant;
-		return occupant;
+		return smi.GetComponent<EggIncubator>().Occupant;
 	}
 
 	public StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.BoolParameter readyToHatch;

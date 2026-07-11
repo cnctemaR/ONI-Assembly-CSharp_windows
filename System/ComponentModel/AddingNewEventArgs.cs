@@ -1,31 +1,32 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class AddingNewEventArgs : EventArgs
 	{
 		public AddingNewEventArgs()
-			: this(null)
 		{
 		}
 
 		public AddingNewEventArgs(object newObject)
 		{
-			this.obj = newObject;
+			this.newObject = newObject;
 		}
 
 		public object NewObject
 		{
 			get
 			{
-				return this.obj;
+				return this.newObject;
 			}
 			set
 			{
-				this.obj = value;
+				this.newObject = value;
 			}
 		}
 
-		private object obj;
+		private object newObject;
 	}
 }

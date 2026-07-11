@@ -6,18 +6,15 @@ namespace Satsuma
 {
 	public sealed class PathGraph : IPath, IGraph, IArcLookup
 	{
-		public PathGraph(int nodeCount, PathGraph.Topology topology, Directedness directedness)
-		{
-			this.nodeCount = nodeCount;
-			this.isCycle = topology == PathGraph.Topology.Cycle;
-			this.directed = directedness == Directedness.Directed;
-		}
-
 		public Node FirstNode
 		{
 			get
 			{
-				return (this.nodeCount <= 0) ? Node.Invalid : new Node(1L);
+				if (this.nodeCount <= 0)
+				{
+					return Node.Invalid;
+				}
+				return new Node(1L);
 			}
 		}
 
@@ -25,8 +22,19 @@ namespace Satsuma
 		{
 			get
 			{
-				return (this.nodeCount <= 0) ? Node.Invalid : new Node((long)((!this.isCycle) ? this.nodeCount : 1));
+				if (this.nodeCount <= 0)
+				{
+					return Node.Invalid;
+				}
+				return new Node((long)(this.isCycle ? 1 : this.nodeCount));
 			}
+		}
+
+		public PathGraph(int nodeCount, PathGraph.Topology topology, Directedness directedness)
+		{
+			this.nodeCount = nodeCount;
+			this.isCycle = topology == PathGraph.Topology.Cycle;
+			this.directed = directedness == Directedness.Directed;
 		}
 
 		public Node GetNode(int index)
@@ -50,11 +58,15 @@ namespace Satsuma
 
 		public Arc PrevArc(Node node)
 		{
-			if (node.Id == 1L)
+			if (node.Id != 1L)
 			{
-				return (!this.isCycle) ? Arc.Invalid : new Arc((long)this.nodeCount);
+				return new Arc(node.Id - 1L);
 			}
-			return new Arc(node.Id - 1L);
+			if (!this.isCycle)
+			{
+				return Arc.Invalid;
+			}
+			return new Arc((long)this.nodeCount);
 		}
 
 		public Node U(Arc arc)
@@ -64,7 +76,7 @@ namespace Satsuma
 
 		public Node V(Arc arc)
 		{
-			return new Node((arc.Id != (long)this.nodeCount) ? (arc.Id + 1L) : 1L);
+			return new Node((arc.Id == (long)this.nodeCount) ? 1L : (arc.Id + 1L));
 		}
 
 		public bool IsEdge(Arc arc)
@@ -74,9 +86,11 @@ namespace Satsuma
 
 		public IEnumerable<Node> Nodes()
 		{
-			for (int i = 1; i <= this.nodeCount; i++)
+			int num;
+			for (int i = 1; i <= this.nodeCount; i = num + 1)
 			{
 				yield return new Node((long)i);
+				num = i;
 			}
 			yield break;
 		}
@@ -92,7 +106,8 @@ namespace Satsuma
 			while (i <= j)
 			{
 				yield return new Arc((long)i);
-				i++;
+				int num = i;
+				i = num + 1;
 			}
 			yield break;
 		}
@@ -116,12 +131,24 @@ namespace Satsuma
 
 		private int ArcCountInternal()
 		{
-			return (this.nodeCount != 0) ? ((!this.isCycle) ? (this.nodeCount - 1) : this.nodeCount) : 0;
+			if (this.nodeCount == 0)
+			{
+				return 0;
+			}
+			if (!this.isCycle)
+			{
+				return this.nodeCount - 1;
+			}
+			return this.nodeCount;
 		}
 
 		public int ArcCount(ArcFilter filter = ArcFilter.All)
 		{
-			return (!this.directed || filter != ArcFilter.Edge) ? this.ArcCountInternal() : 0;
+			if (!this.directed || filter != ArcFilter.Edge)
+			{
+				return this.ArcCountInternal();
+			}
+			return 0;
 		}
 
 		public int ArcCount(Node u, ArcFilter filter = ArcFilter.All)

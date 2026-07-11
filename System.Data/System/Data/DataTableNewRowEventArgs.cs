@@ -6,14 +6,9 @@ namespace System.Data
 	{
 		public DataTableNewRowEventArgs(DataRow dataRow)
 		{
+			this.Row = dataRow;
 		}
 
-		public DataRow Row
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public DataRow Row { get; }
 	}
 }

@@ -20,11 +20,9 @@ public class OneshotReactableHost : KMonoBehaviour
 		{
 			this.reactable.Cleanup();
 			global::UnityEngine.Object.Destroy(base.gameObject);
+			return;
 		}
-		else
-		{
-			GameScheduler.Instance.Schedule("CleanupOneshotReactable", 0.5f, new Action<object>(this.OnExpire), null, null);
-		}
+		GameScheduler.Instance.Schedule("CleanupOneshotReactable", 0.5f, new Action<object>(this.OnExpire), null, null);
 	}
 
 	private Reactable reactable;

@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>LODGroup culling parameters.</para>
-	/// </summary>
 	public struct LODParameters
 	{
-		/// <summary>
-		///   <para>Indicates whether camera is orthographic.</para>
-		/// </summary>
 		public bool isOrthographic
 		{
 			get
@@ -22,9 +16,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Camera position.</para>
-		/// </summary>
 		public Vector3 cameraPosition
 		{
 			get
@@ -37,9 +28,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Camera's field of view.</para>
-		/// </summary>
 		public float fieldOfView
 		{
 			get
@@ -52,9 +40,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Orhographic camera size.</para>
-		/// </summary>
 		public float orthoSize
 		{
 			get
@@ -67,9 +52,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Rendering view height in pixels.</para>
-		/// </summary>
 		public int cameraPixelHeight
 		{
 			get

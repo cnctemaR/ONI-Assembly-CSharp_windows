@@ -38,6 +38,7 @@ public class ConduitElementSensor : ConduitSensor
 			if (contents.element != this.desiredElement)
 			{
 				this.Toggle();
+				return;
 			}
 		}
 		else if (contents.element == this.desiredElement)

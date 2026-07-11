@@ -7,48 +7,57 @@ namespace UnityEngine.Experimental
 	internal static class Internal_SubsystemInstances
 	{
 		[RequiredByNativeCode]
-		internal static void Internal_InitializeManagedInstance(IntPtr ptr, Subsystem inst)
+		internal static void Internal_InitializeManagedInstance(IntPtr ptr, IntegratedSubsystem inst)
 		{
 			inst.m_Ptr = ptr;
 			inst.SetHandle(inst);
-			Internal_SubsystemInstances.s_SubsystemInstances.Add(inst);
+			Internal_SubsystemInstances.s_IntegratedSubsystemInstances.Add(inst);
 		}
 
 		[RequiredByNativeCode]
 		internal static void Internal_ClearManagedInstances()
 		{
-			foreach (Subsystem subsystem in Internal_SubsystemInstances.s_SubsystemInstances)
+			foreach (ISubsystem subsystem in Internal_SubsystemInstances.s_IntegratedSubsystemInstances)
 			{
-				subsystem.m_Ptr = IntPtr.Zero;
+				((IntegratedSubsystem)subsystem).m_Ptr = IntPtr.Zero;
 			}
-			Internal_SubsystemInstances.s_SubsystemInstances.Clear();
+			Internal_SubsystemInstances.s_IntegratedSubsystemInstances.Clear();
+			Internal_SubsystemInstances.s_StandaloneSubsystemInstances.Clear();
 		}
 
 		[RequiredByNativeCode]
 		internal static void Internal_RemoveInstanceByPtr(IntPtr ptr)
 		{
-			for (int i = Internal_SubsystemInstances.s_SubsystemInstances.Count - 1; i >= 0; i--)
+			for (int i = Internal_SubsystemInstances.s_IntegratedSubsystemInstances.Count - 1; i >= 0; i--)
 			{
-				if (Internal_SubsystemInstances.s_SubsystemInstances[i].m_Ptr == ptr)
+				if (((IntegratedSubsystem)Internal_SubsystemInstances.s_IntegratedSubsystemInstances[i]).m_Ptr == ptr)
 				{
-					Internal_SubsystemInstances.s_SubsystemInstances[i].m_Ptr = IntPtr.Zero;
-					Internal_SubsystemInstances.s_SubsystemInstances.RemoveAt(i);
+					((IntegratedSubsystem)Internal_SubsystemInstances.s_IntegratedSubsystemInstances[i]).m_Ptr = IntPtr.Zero;
+					Internal_SubsystemInstances.s_IntegratedSubsystemInstances.RemoveAt(i);
 				}
 			}
 		}
 
-		internal static Subsystem Internal_GetInstanceByPtr(IntPtr ptr)
+		internal static IntegratedSubsystem Internal_GetInstanceByPtr(IntPtr ptr)
 		{
-			foreach (Subsystem subsystem in Internal_SubsystemInstances.s_SubsystemInstances)
+			foreach (ISubsystem subsystem in Internal_SubsystemInstances.s_IntegratedSubsystemInstances)
 			{
-				if (subsystem.m_Ptr == ptr)
+				IntegratedSubsystem integratedSubsystem = (IntegratedSubsystem)subsystem;
+				if (integratedSubsystem.m_Ptr == ptr)
 				{
-					return subsystem;
+					return integratedSubsystem;
 				}
 			}
 			return null;
 		}
 
-		internal static List<Subsystem> s_SubsystemInstances = new List<Subsystem>();
+		internal static void Internal_AddStandaloneSubsystem(Subsystem inst)
+		{
+			Internal_SubsystemInstances.s_StandaloneSubsystemInstances.Add(inst);
+		}
+
+		internal static List<ISubsystem> s_IntegratedSubsystemInstances = new List<ISubsystem>();
+
+		internal static List<ISubsystem> s_StandaloneSubsystemInstances = new List<ISubsystem>();
 	}
 }

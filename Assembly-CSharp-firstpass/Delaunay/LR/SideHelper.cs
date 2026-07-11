@@ -6,7 +6,11 @@ namespace Delaunay.LR
 	{
 		public static Side Other(Side leftRight)
 		{
-			return (leftRight != Side.LEFT) ? Side.LEFT : Side.RIGHT;
+			if (leftRight != Side.LEFT)
+			{
+				return Side.LEFT;
+			}
+			return Side.RIGHT;
 		}
 	}
 }

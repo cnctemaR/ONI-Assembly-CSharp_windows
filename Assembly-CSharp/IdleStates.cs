@@ -7,14 +7,10 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.loop;
-		GameStateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State state = this.root.Exit("StopNavigator", delegate(IdleStates.Instance smi)
+		this.root.Exit("StopNavigator", delegate(IdleStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().Stop(false);
-		});
-		string text = CREATURES.STATUSITEMS.IDLE.NAME;
-		string text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).ToggleTag(GameTags.Idle);
+		}).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ToggleTag(GameTags.Idle);
 		this.loop.Enter(new StateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("IdleMove", (IdleStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(IdleStates.Instance smi)
 		{
 			smi.GoTo(this.move);
@@ -36,8 +32,7 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 		KAnimControllerBase component = smi.GetComponent<KAnimControllerBase>();
 		Navigator component2 = smi.GetComponent<Navigator>();
 		NavType navType = component2.CurrentNavType;
-		Facing component3 = smi.GetComponent<Facing>();
-		if (component3.GetFacing())
+		if (smi.GetComponent<Facing>().GetFacing())
 		{
 			navType = NavGrid.MirrorNavType(navType);
 		}
@@ -80,13 +75,13 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 
 	public class MoveCellQuery : PathFinderQuery
 	{
+		public bool allowLiquid { get; set; }
+
 		public MoveCellQuery(NavType navType)
 		{
 			this.navType = navType;
 			this.maxIterations = global::UnityEngine.Random.Range(5, 25);
 		}
-
-		public bool allowLiquid { get; set; }
 
 		public override bool IsMatch(int cell, int parent_cell, int cost)
 		{
@@ -106,7 +101,9 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 				return false;
 			}
 			this.targetCell = cell;
-			return --this.maxIterations <= 0;
+			int num = this.maxIterations - 1;
+			this.maxIterations = num;
+			return num <= 0;
 		}
 
 		public override int GetResultCell()

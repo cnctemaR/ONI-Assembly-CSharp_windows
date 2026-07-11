@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR.Tango
 {
-	[UsedByNativeCode]
 	[NativeHeader("ARScriptingClasses.h")]
-	[StructLayout(LayoutKind.Explicit, Size = 60)]
+	[UsedByNativeCode]
 	internal struct PoseData
 	{
 		public Quaternion rotation
@@ -26,28 +24,20 @@ namespace UnityEngine.XR.Tango
 			}
 		}
 
-		[FieldOffset(0)]
 		public double orientation_x;
 
-		[FieldOffset(8)]
 		public double orientation_y;
 
-		[FieldOffset(16)]
 		public double orientation_z;
 
-		[FieldOffset(24)]
 		public double orientation_w;
 
-		[FieldOffset(32)]
 		public double translation_x;
 
-		[FieldOffset(40)]
 		public double translation_y;
 
-		[FieldOffset(48)]
 		public double translation_z;
 
-		[FieldOffset(56)]
 		public PoseStatus statusCode;
 	}
 }

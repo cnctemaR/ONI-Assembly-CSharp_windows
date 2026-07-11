@@ -51,7 +51,7 @@ namespace Database
 					num++;
 				}
 			}
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CLOTHE_DUPES, (!complete) ? num : this.numToEquip, this.numToEquip);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CLOTHE_DUPES, complete ? this.numToEquip : num, this.numToEquip);
 		}
 
 		private AssignableSlot equipmentSlot;

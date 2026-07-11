@@ -23,13 +23,13 @@ public class FileErrorReporter : KMonoBehaviour
 		{
 		case FileUtil.ErrorType.UnauthorizedAccess:
 			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, FileUtil.errorSubject);
-			goto IL_0076;
+			goto IL_0065;
 		case FileUtil.ErrorType.IOError:
 			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, FileUtil.errorSubject);
-			goto IL_0076;
+			goto IL_0065;
 		}
 		text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNKNOWN, FileUtil.errorSubject);
-		IL_0076:
+		IL_0065:
 		GameObject gameObject;
 		if (FrontEndManager.Instance != null)
 		{
@@ -52,7 +52,7 @@ public class FileErrorReporter : KMonoBehaviour
 		}
 		if ((FileUtil.exceptionMessage != null || FileUtil.exceptionStackTrace != null) && !KCrashReporter.hasReportedError)
 		{
-			KCrashReporter.ReportError(FileUtil.exceptionMessage, FileUtil.exceptionStackTrace, null, null, null, string.Empty);
+			KCrashReporter.ReportError(FileUtil.exceptionMessage, FileUtil.exceptionStackTrace, null, null, null, "");
 		}
 		ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
 		component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null, true);

@@ -324,7 +324,13 @@ namespace UnityEngine.Timeline
 			{
 				throw new InvalidOperationException("Could not create an instance of the ScriptableObject type " + requestedType.Name);
 			}
-			scriptableObject.name = requestedType.Name;
+			try
+			{
+				scriptableObject.name = requestedType.Name;
+			}
+			catch (Exception)
+			{
+			}
 			TimelineCreateUtilities.SaveAssetIntoObject(scriptableObject, this);
 			return this.CreateClipFromAsset(scriptableObject);
 		}
@@ -361,9 +367,9 @@ namespace UnityEngine.Timeline
 			if (playableAsset2 != null)
 			{
 				double duration = playableAsset2.duration;
-				if (!double.IsInfinity(duration) && duration >= TimelineClip.kMinDuration && duration < TimelineClip.kMaxTimeValue)
+				if (!double.IsInfinity(duration) && duration > 0.0)
 				{
-					timelineClip.duration = duration;
+					timelineClip.duration = Math.Min(Math.Max(duration, TimelineClip.kMinDuration), TimelineClip.kMaxTimeValue);
 				}
 			}
 			try
@@ -530,7 +536,7 @@ namespace UnityEngine.Timeline
 			if (this.clips.Length == 0)
 			{
 				outStart = 0.0;
-				outDuration = this.GetMarkerDuration();
+				outDuration = 0.0;
 			}
 			else
 			{
@@ -542,7 +548,7 @@ namespace UnityEngine.Timeline
 					num = Math.Max(this.clips[i].start + this.clips[i].duration, num);
 				}
 				outStart = Math.Max(outStart, 0.0);
-				outDuration = Math.Max(this.GetMarkerDuration(), num - outStart);
+				outDuration = num - outStart;
 			}
 		}
 
@@ -636,8 +642,8 @@ namespace UnityEngine.Timeline
 
 		protected internal virtual void UpdateDuration()
 		{
-			int num = ((!(this.m_AnimClip != null)) ? 0 : ((int)(this.m_AnimClip.frameRate * this.m_AnimClip.length)));
-			int num2 = HashUtility.CombineHash(this.GetClipsHash(), this.GetMarkerHash(), num);
+			int num = ((!(this.m_AnimClip != null)) ? 0 : this.m_AnimClip.frameRate.GetHashCode().CombineHash(this.m_AnimClip.length.GetHashCode()));
+			int num2 = this.GetClipsHash().CombineHash(num);
 			if (num2 != this.m_ItemsHash)
 			{
 				this.m_ItemsHash = num2;
@@ -653,20 +659,28 @@ namespace UnityEngine.Timeline
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		internal static event Action<TimelineClip, GameObject, Playable> OnPlayableCreate;
 
-		protected internal Playable CreatePlayable(PlayableGraph graph, GameObject go, TimelineClip clip)
+		protected virtual Playable CreatePlayable(PlayableGraph graph, GameObject gameObject, TimelineClip clip)
 		{
+			if (!graph.IsValid())
+			{
+				throw new ArgumentException("graph must be a valid PlayableGraph");
+			}
+			if (clip == null)
+			{
+				throw new ArgumentNullException("clip");
+			}
 			IPlayableAsset playableAsset = clip.asset as IPlayableAsset;
 			Playable playable2;
 			if (playableAsset != null)
 			{
-				Playable playable = playableAsset.CreatePlayable(graph, go);
+				Playable playable = playableAsset.CreatePlayable(graph, gameObject);
 				if (playable.IsValid<Playable>())
 				{
 					playable.SetAnimatedProperties(clip.curves);
 					playable.SetSpeed(clip.timeScale);
 					if (TrackAsset.OnPlayableCreate != null)
 					{
-						TrackAsset.OnPlayableCreate(clip, go, playable);
+						TrackAsset.OnPlayableCreate(clip, gameObject, playable);
 					}
 				}
 				playable2 = playable;
@@ -714,67 +728,15 @@ namespace UnityEngine.Timeline
 
 		protected internal virtual int Hash()
 		{
-			return this.clips.Length + (this.GetMarkerContainerHash() << 16);
+			return this.clips.Length;
 		}
 
 		private int GetClipsHash()
 		{
 			int num = 0;
-			foreach (ITimelineItem timelineItem in this.m_Clips)
+			foreach (TimelineClip timelineClip in this.m_Clips)
 			{
-				num = num.CombineHash(timelineItem.Hash());
-			}
-			return num;
-		}
-
-		private int GetMarkerContainerHash()
-		{
-			ITimelineMarkerContainer timelineMarkerContainer = this as ITimelineMarkerContainer;
-			int num;
-			if (timelineMarkerContainer == null)
-			{
-				num = 0;
-			}
-			else
-			{
-				TimelineMarker[] markers = timelineMarkerContainer.GetMarkers();
-				num = ((markers != null) ? markers.Length : 0);
-			}
-			return num;
-		}
-
-		private int GetMarkerHash()
-		{
-			ITimelineMarkerContainer timelineMarkerContainer = this as ITimelineMarkerContainer;
-			int num = 0;
-			if (timelineMarkerContainer != null)
-			{
-				TimelineMarker[] markers = timelineMarkerContainer.GetMarkers();
-				if (markers != null)
-				{
-					for (int i = 0; i < markers.Length; i++)
-					{
-						num = num.CombineHash(((ITimelineItem)markers[i]).Hash());
-					}
-				}
-			}
-			return num;
-		}
-
-		private double GetMarkerDuration()
-		{
-			ITimelineMarkerContainer timelineMarkerContainer = this as ITimelineMarkerContainer;
-			double num = 0.0;
-			if (timelineMarkerContainer != null)
-			{
-				TimelineMarker[] markers = timelineMarkerContainer.GetMarkers();
-				if (markers != null)
-				{
-					for (int i = 0; i < markers.Length; i++)
-					{
-						num = Math.Max(num, markers[i].time);
-					}
-				}
+				num = num.CombineHash(timelineClip.Hash());
 			}
 			return num;
 		}
@@ -793,7 +755,7 @@ namespace UnityEngine.Timeline
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
-			this.m_Version = 1;
+			this.m_Version = 2;
 			for (int i = this.m_Children.Count - 1; i >= 0; i--)
 			{
 				TrackAsset trackAsset = this.m_Children[i] as TrackAsset;
@@ -809,7 +771,7 @@ namespace UnityEngine.Timeline
 		{
 			this.m_ClipsCache = null;
 			this.Invalidate();
-			if (this.m_Version < 1)
+			if (this.m_Version < 2)
 			{
 				this.UpgradeToLatestVersion();
 				this.OnUpgradeFromVersion(this.m_Version);
@@ -868,7 +830,7 @@ namespace UnityEngine.Timeline
 		[HideInInspector]
 		protected internal List<TimelineClip> m_Clips = new List<TimelineClip>();
 
-		protected internal const int k_LatestVersion = 1;
+		protected internal const int k_LatestVersion = 2;
 
 		[SerializeField]
 		[HideInInspector]
@@ -877,7 +839,8 @@ namespace UnityEngine.Timeline
 		protected internal enum Versions
 		{
 			Initial,
-			RotationAsEuler
+			RotationAsEuler,
+			RootMotionUpgrade
 		}
 
 		private static class TrackAssetUpgrade

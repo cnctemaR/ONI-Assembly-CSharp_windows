@@ -30,7 +30,7 @@ public class ModifierSet : ScriptableObject
 
 	public static float ConvertValue(float value, Units units)
 	{
-		if (units == Units.PerDay)
+		if (Units.PerDay == units)
 		{
 			return value * 0.0016666667f;
 		}
@@ -68,17 +68,15 @@ public class ModifierSet : ScriptableObject
 			int num = Grid.PosToCell(go);
 			return Grid.IsValidCell(num) && Grid.IsGas(num);
 		};
-		Effect effect4 = this.effects.Get("WetFeet");
-		effect4.AddEmotePrecondition(reactablePrecondition);
-		Effect effect5 = this.effects.Get("SoakingWet");
-		effect5.AddEmotePrecondition(reactablePrecondition);
+		this.effects.Get("WetFeet").AddEmotePrecondition(reactablePrecondition);
+		this.effects.Get("SoakingWet").AddEmotePrecondition(reactablePrecondition);
 	}
 
 	public Trait CreateTrait(string id, string name, string description, string group_name, bool should_save, ChoreGroup[] disabled_chore_groups, bool positive_trait, bool is_valid_starter_trait)
 	{
 		Trait trait = new Trait(id, name, description, 0f, should_save, disabled_chore_groups, positive_trait, is_valid_starter_trait);
 		this.traits.Add(trait);
-		if (group_name == string.Empty || group_name == null)
+		if (group_name == "" || group_name == null)
 		{
 			group_name = "Default";
 		}

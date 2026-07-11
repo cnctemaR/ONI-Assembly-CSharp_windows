@@ -4,10 +4,10 @@ using System.Reflection.Emit;
 namespace System.Runtime.InteropServices
 {
 	[TypeLibImportClass(typeof(SignatureHelper))]
-	[CLSCompliant(false)]
-	[ComVisible(true)]
-	[Guid("7D13DD37-5A04-393C-BBCA-A5FEA802893D")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[ComVisible(true)]
+	[CLSCompliant(false)]
+	[Guid("7D13DD37-5A04-393C-BBCA-A5FEA802893D")]
 	public interface _SignatureHelper
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

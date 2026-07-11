@@ -151,12 +151,12 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 	public bool ReleaseProber(object prober)
 	{
 		object obj = this.access;
-		bool flag;
+		bool flag2;
 		lock (obj)
 		{
-			flag = this.valid_serial_nos.Remove(prober);
+			flag2 = this.valid_serial_nos.Remove(prober);
 		}
-		return flag;
+		return flag2;
 	}
 
 	private static MinionGroupProber Instance;

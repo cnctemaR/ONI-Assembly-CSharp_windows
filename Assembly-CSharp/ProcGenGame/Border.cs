@@ -27,8 +27,7 @@ namespace ProcGenGame
 			for (int i = 0; i < this.pathElements.Count; i++)
 			{
 				Vector2 vector = this.pathElements[i].e1 - this.pathElements[i].e0;
-				Vector2 vector2 = new Vector2(-vector.y, vector.x);
-				Vector2 normalized = vector2.normalized;
+				Vector2 normalized = new Vector2(-vector.y, vector.x).normalized;
 				List<Vector2I> line = global::ProcGen.Util.GetLine(this.pathElements[i].e0, this.pathElements[i].e1);
 				for (int j = 0; j < line.Count; j++)
 				{
@@ -42,8 +41,8 @@ namespace ProcGenGame
 					}
 					for (float num2 = 0.5f; num2 <= this.width; num2 += 1f)
 					{
-						Vector2 vector3 = line[j] + normalized * num2;
-						num = Grid.XYToCell((int)vector3.x, (int)vector3.y);
+						Vector2 vector2 = line[j] + normalized * num2;
+						num = Grid.XYToCell((int)vector2.x, (int)vector2.y);
 						if (Grid.IsValidCell(num))
 						{
 							Element element2 = ElementLoader.FindElementByName(WeightedRandom.Choose<WeightedSimHash>(this.element, rnd).element);
@@ -51,8 +50,8 @@ namespace ProcGenGame
 							defaultValues2.temperature = temperatureMin + world.heatOffset[num] * temperatureRange;
 							SetValues(num, element2, defaultValues2, invalid);
 						}
-						Vector2 vector4 = line[j] - normalized * num2;
-						num = Grid.XYToCell((int)vector4.x, (int)vector4.y);
+						Vector2 vector3 = line[j] - normalized * num2;
+						num = Grid.XYToCell((int)vector3.x, (int)vector3.y);
 						if (Grid.IsValidCell(num))
 						{
 							Element element3 = ElementLoader.FindElementByName(WeightedRandom.Choose<WeightedSimHash>(this.element, rnd).element);

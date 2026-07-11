@@ -32,6 +32,18 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		public bool loop
+		{
+			get
+			{
+				return this.m_Loop;
+			}
+			set
+			{
+				this.m_Loop = value;
+			}
+		}
+
 		public override double duration
 		{
 			get

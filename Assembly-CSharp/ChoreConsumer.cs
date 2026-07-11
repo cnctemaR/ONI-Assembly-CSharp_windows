@@ -93,6 +93,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			if (this.userDisabledChoreGroups.Remove(chore_group.IdHash))
 			{
 				this.choreRulesChanged.Signal();
+				return;
 			}
 		}
 		else if (!this.userDisabledChoreGroups.Contains(chore_group.IdHash))
@@ -114,6 +115,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			if (this.traitDisabledChoreGroups.Remove(chore_group.IdHash))
 			{
 				this.choreRulesChanged.Signal();
+				return;
 			}
 		}
 		else if (!this.traitDisabledChoreGroups.Contains(chore_group.IdHash))
@@ -145,21 +147,14 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		else
 		{
 			int interruptPriority = Db.Get().ChoreTypes.TopPriority.interruptPriority;
-			int num = ((currentChore.masterPriority.priority_class != PriorityScreen.PriorityClass.topPriority) ? currentChore.choreType.interruptPriority : interruptPriority);
+			int num = ((currentChore.masterPriority.priority_class == PriorityScreen.PriorityClass.topPriority) ? interruptPriority : currentChore.choreType.interruptPriority);
 			for (int j = succeeded_contexts.Count - 1; j >= 0; j--)
 			{
 				Chore.Precondition.Context context2 = succeeded_contexts[j];
-				if (context2.IsSuccess())
+				if (context2.IsSuccess() && ((context2.masterPriority.priority_class == PriorityScreen.PriorityClass.topPriority) ? interruptPriority : context2.interruptPriority) > num && !currentChore.choreType.interruptExclusion.Overlaps(context2.chore.choreType.tags))
 				{
-					int num2 = ((context2.masterPriority.priority_class != PriorityScreen.PriorityClass.topPriority) ? context2.interruptPriority : interruptPriority);
-					if (num2 > num)
-					{
-						if (!currentChore.choreType.interruptExclusion.Overlaps(context2.chore.choreType.tags))
-						{
-							out_context = context2;
-							return true;
-						}
-					}
+					out_context = context2;
+					return true;
 				}
 			}
 		}
@@ -170,8 +165,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	{
 		if (this.debug)
 		{
-			int num = 0;
-			num++;
+			int num = 0 + 1;
 		}
 		this.preconditionSnapshot.Clear();
 		this.consumerState.Refresh();
@@ -219,8 +213,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		{
 			for (int i = 0; i < this.providers.Count; i++)
 			{
-				ChoreProvider choreProvider = this.providers[i];
-				choreProvider.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
+				this.providers[i].CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
 			}
 		}
 		this.preconditionSnapshot.succeededContexts.Sort();
@@ -377,34 +370,28 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		bool flag = false;
 		foreach (Chore.Precondition.Context context in this.preconditionSnapshot.succeededContexts)
 		{
-			if (context.chore.showAvailabilityInHoverText)
+			if (context.chore.showAvailabilityInHoverText && !context.chore.target.isNull && !(context.chore.target.gameObject != hover_obj.gameObject))
 			{
-				if (!context.chore.target.isNull && !(context.chore.target.gameObject != hover_obj.gameObject))
+				if (!flag)
 				{
-					if (!flag)
-					{
-						drawer.NewLine(26);
-						drawer.DrawText(DUPLICANTS.CHORES.PRECONDITIONS.HEADER.ToString().Replace("{Selected}", this.GetProperName()), hover_text_card.Styles_BodyText.Standard);
-						flag = true;
-					}
-					this.ShowHoverTextOnHoveredItem(context, hover_obj, drawer, hover_text_card);
+					drawer.NewLine(26);
+					drawer.DrawText(DUPLICANTS.CHORES.PRECONDITIONS.HEADER.ToString().Replace("{Selected}", this.GetProperName()), hover_text_card.Styles_BodyText.Standard);
+					flag = true;
 				}
+				this.ShowHoverTextOnHoveredItem(context, hover_obj, drawer, hover_text_card);
 			}
 		}
 		foreach (Chore.Precondition.Context context2 in this.preconditionSnapshot.failedContexts)
 		{
-			if (context2.chore.showAvailabilityInHoverText)
+			if (context2.chore.showAvailabilityInHoverText && !context2.chore.target.isNull && !(context2.chore.target.gameObject != hover_obj.gameObject))
 			{
-				if (!context2.chore.target.isNull && !(context2.chore.target.gameObject != hover_obj.gameObject))
+				if (!flag)
 				{
-					if (!flag)
-					{
-						drawer.NewLine(26);
-						drawer.DrawText(DUPLICANTS.CHORES.PRECONDITIONS.HEADER.ToString().Replace("{Selected}", this.GetProperName()), hover_text_card.Styles_BodyText.Standard);
-						flag = true;
-					}
-					this.ShowHoverTextOnHoveredItem(context2, hover_obj, drawer, hover_text_card);
+					drawer.NewLine(26);
+					drawer.DrawText(DUPLICANTS.CHORES.PRECONDITIONS.HEADER.ToString().Replace("{Selected}", this.GetProperName()), hover_text_card.Styles_BodyText.Standard);
+					flag = true;
 				}
+				this.ShowHoverTextOnHoveredItem(context2, hover_obj, drawer, hover_text_card);
 			}
 		}
 	}
@@ -453,9 +440,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public int GetAssociatedSkillLevel(ChoreGroup group)
 	{
-		Klei.AI.Attributes attributes = this.GetAttributes();
-		float value = attributes.GetValue(group.attribute.Id);
-		return (int)value;
+		return (int)this.GetAttributes().GetValue(group.attribute.Id);
 	}
 
 	private void UpdateChoreTypePriorities(ChoreGroup group, int value)
@@ -468,12 +453,15 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			{
 				if (choreGroup.choreTypes != null)
 				{
-					foreach (ChoreType choreType2 in choreGroup.choreTypes)
+					using (List<ChoreType>.Enumerator enumerator3 = choreGroup.choreTypes.GetEnumerator())
 					{
-						if (choreType2.IdHash == choreType.IdHash)
+						while (enumerator3.MoveNext())
 						{
-							int personalPriority = this.GetPersonalPriority(choreGroup);
-							num = Mathf.Max(num, personalPriority);
+							if (enumerator3.Current.IdHash == choreType.IdHash)
+							{
+								int personalPriority = this.GetPersonalPriority(choreGroup);
+								num = Mathf.Max(num, personalPriority);
+							}
 						}
 					}
 				}
@@ -516,14 +504,14 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	public bool IsChoreGroupDisabled(ChoreGroup chore_group)
 	{
 		bool flag = false;
-		Traits component = base.gameObject.GetComponent<Traits>();
-		foreach (Trait trait in component.TraitList)
+		foreach (Trait trait in base.gameObject.GetComponent<Traits>().TraitList)
 		{
 			if (trait.disabledChoreGroups != null)
 			{
-				foreach (ChoreGroup choreGroup in trait.disabledChoreGroups)
+				ChoreGroup[] disabledChoreGroups = trait.disabledChoreGroups;
+				for (int i = 0; i < disabledChoreGroups.Length; i++)
 				{
-					if (choreGroup.IdHash == chore_group.IdHash)
+					if (disabledChoreGroups[i].IdHash == chore_group.IdHash)
 					{
 						flag = true;
 						break;

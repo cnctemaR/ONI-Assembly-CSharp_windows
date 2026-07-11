@@ -37,8 +37,7 @@ namespace System.Security.Cryptography
 					int num2 = ProtectedMemory.RtlEncryptMemory(userData, num, (uint)scope);
 					if (num2 < 0)
 					{
-						string text = Locale.GetText("Error. NTSTATUS = {0}.", new object[] { num2 });
-						throw new CryptographicException(text);
+						throw new CryptographicException(Locale.GetText("Error. NTSTATUS = {0}.", new object[] { num2 }));
 					}
 				}
 			}
@@ -77,8 +76,7 @@ namespace System.Security.Cryptography
 					int num2 = ProtectedMemory.RtlDecryptMemory(encryptedData, num, (uint)scope);
 					if (num2 < 0)
 					{
-						string text = Locale.GetText("Error. NTSTATUS = {0}.", new object[] { num2 });
-						throw new CryptographicException(text);
+						throw new CryptographicException(Locale.GetText("Error. NTSTATUS = {0}.", new object[] { num2 }));
 					}
 				}
 			}
@@ -96,55 +94,46 @@ namespace System.Security.Cryptography
 			if (platform != PlatformID.Win32NT)
 			{
 				ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Unsupported;
+				return;
 			}
-			else
+			Version version = osversion.Version;
+			if (version.Major < 5)
 			{
-				Version version = osversion.Version;
-				if (version.Major < 5)
-				{
-					ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Unsupported;
-				}
-				else if (version.Major == 5)
-				{
-					if (version.Minor < 2)
-					{
-						ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Win32RtlEncryptMemory;
-					}
-					else
-					{
-						ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Win32CryptoProtect;
-					}
-				}
-				else
-				{
-					ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Win32CryptoProtect;
-				}
+				ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Unsupported;
+				return;
 			}
+			if (version.Major != 5)
+			{
+				ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Win32CryptoProtect;
+				return;
+			}
+			if (version.Minor < 2)
+			{
+				ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Win32RtlEncryptMemory;
+				return;
+			}
+			ProtectedMemory.impl = ProtectedMemory.MemoryProtectionImplementation.Win32CryptoProtect;
 		}
 
 		private static void Check(int size, MemoryProtectionScope scope)
 		{
 			if (size % 16 != 0)
 			{
-				string text = Locale.GetText("Not a multiple of {0} bytes.", new object[] { 16 });
-				throw new CryptographicException(text);
+				throw new CryptographicException(Locale.GetText("Not a multiple of {0} bytes.", new object[] { 16 }));
 			}
 			if (scope < MemoryProtectionScope.SameProcess || scope > MemoryProtectionScope.SameLogon)
 			{
-				string text2 = Locale.GetText("Invalid enum value for '{0}'.", new object[] { "MemoryProtectionScope" });
-				throw new ArgumentException(text2, "scope");
+				throw new ArgumentException(Locale.GetText("Invalid enum value for '{0}'.", new object[] { "MemoryProtectionScope" }), "scope");
 			}
 			ProtectedMemory.MemoryProtectionImplementation memoryProtectionImplementation = ProtectedMemory.impl;
-			if (memoryProtectionImplementation != ProtectedMemory.MemoryProtectionImplementation.Unknown)
+			if (memoryProtectionImplementation == ProtectedMemory.MemoryProtectionImplementation.Unsupported)
 			{
-				if (memoryProtectionImplementation == ProtectedMemory.MemoryProtectionImplementation.Unsupported)
-				{
-					throw new PlatformNotSupportedException();
-				}
+				throw new PlatformNotSupportedException();
 			}
-			else
+			if (memoryProtectionImplementation == ProtectedMemory.MemoryProtectionImplementation.Unknown)
 			{
 				ProtectedMemory.Detect();
+				return;
 			}
 		}
 

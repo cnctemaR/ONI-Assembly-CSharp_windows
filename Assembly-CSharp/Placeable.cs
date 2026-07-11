@@ -62,8 +62,7 @@ public class Placeable : KMonoBehaviour
 	public void Place(int target)
 	{
 		Vector3 vector = Grid.CellToPosCBC(target, Grid.SceneLayer.Front);
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.spawnOnPlaceTag), vector, Grid.SceneLayer.Front, null, 0);
-		gameObject.SetActive(true);
+		GameUtil.KInstantiate(Assets.GetPrefab(this.spawnOnPlaceTag), vector, Grid.SceneLayer.Front, null, 0).SetActive(true);
 		this.DeleteObject();
 	}
 
@@ -74,25 +73,8 @@ public class Placeable : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (this.targetCell == -1)
-		{
-			string text = "action_deconstruct";
-			string text2 = UI.USERMENUACTIONS.RELOCATE.NAME;
-			global::System.Action action = new global::System.Action(this.OpenPlaceTool);
-			string text3 = UI.USERMENUACTIONS.RELOCATE.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_deconstruct";
-			string text2 = UI.USERMENUACTIONS.RELOCATE.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.CancelRelocation);
-			string text = UI.USERMENUACTIONS.RELOCATE.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = ((this.targetCell == -1) ? new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELOCATE.NAME, new global::System.Action(this.OpenPlaceTool), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.RELOCATE.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELOCATE.NAME_OFF, new global::System.Action(this.CancelRelocation), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.RELOCATE.TOOLTIP_OFF, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	private void CancelRelocation()

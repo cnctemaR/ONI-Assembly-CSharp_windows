@@ -5,6 +5,7 @@ namespace UnityEngine.Networking
 {
 	[AddComponentMenu("Network/NetworkProximityChecker")]
 	[RequireComponent(typeof(NetworkIdentity))]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkProximityChecker : NetworkBehaviour
 	{
 		private void Update()

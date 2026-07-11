@@ -1,256 +1,126 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Security.Policy;
 
 namespace System.CodeDom.Compiler
 {
-	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	[Serializable]
 	public class CompilerParameters
 	{
-		public CompilerParameters()
-		{
-		}
-
-		public CompilerParameters(string[] assemblyNames)
-		{
-			this.referencedAssemblies = new global::System.Collections.Specialized.StringCollection();
-			this.referencedAssemblies.AddRange(assemblyNames);
-		}
-
-		public CompilerParameters(string[] assemblyNames, string output)
-		{
-			this.referencedAssemblies = new global::System.Collections.Specialized.StringCollection();
-			this.referencedAssemblies.AddRange(assemblyNames);
-			this.outputAssembly = output;
-		}
-
-		public CompilerParameters(string[] assemblyNames, string output, bool includeDebugInfo)
-		{
-			this.referencedAssemblies = new global::System.Collections.Specialized.StringCollection();
-			this.referencedAssemblies.AddRange(assemblyNames);
-			this.outputAssembly = output;
-			this.includeDebugInformation = includeDebugInfo;
-		}
-
-		public string CompilerOptions
-		{
-			get
-			{
-				return this.compilerOptions;
-			}
-			set
-			{
-				this.compilerOptions = value;
-			}
-		}
-
+		[Obsolete("CAS policy is obsolete and will be removed in a future release of the .NET Framework. Please see http://go2.microsoft.com/fwlink/?LinkId=131738 for more information.")]
 		public Evidence Evidence
 		{
 			get
 			{
-				return this.evidence;
-			}
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"ControlEvidence\"/>\n</PermissionSet>\n")]
-			set
-			{
-				this.evidence = value;
-			}
-		}
-
-		public bool GenerateExecutable
-		{
-			get
-			{
-				return this.generateExecutable;
-			}
-			set
-			{
-				this.generateExecutable = value;
-			}
-		}
-
-		public bool GenerateInMemory
-		{
-			get
-			{
-				return this.generateInMemory;
-			}
-			set
-			{
-				this.generateInMemory = value;
-			}
-		}
-
-		public bool IncludeDebugInformation
-		{
-			get
-			{
-				return this.includeDebugInformation;
-			}
-			set
-			{
-				this.includeDebugInformation = value;
-			}
-		}
-
-		public string MainClass
-		{
-			get
-			{
-				return this.mainClass;
-			}
-			set
-			{
-				this.mainClass = value;
-			}
-		}
-
-		public string OutputAssembly
-		{
-			get
-			{
-				return this.outputAssembly;
-			}
-			set
-			{
-				this.outputAssembly = value;
-			}
-		}
-
-		public global::System.Collections.Specialized.StringCollection ReferencedAssemblies
-		{
-			get
-			{
-				if (this.referencedAssemblies == null)
+				Evidence evidence = this._evidence;
+				if (evidence == null)
 				{
-					this.referencedAssemblies = new global::System.Collections.Specialized.StringCollection();
+					return null;
 				}
-				return this.referencedAssemblies;
+				return evidence.Clone();
+			}
+			set
+			{
+				this._evidence = ((value != null) ? value.Clone() : null);
 			}
 		}
+
+		public CompilerParameters()
+			: this(null, null)
+		{
+		}
+
+		public CompilerParameters(string[] assemblyNames)
+			: this(assemblyNames, null, false)
+		{
+		}
+
+		public CompilerParameters(string[] assemblyNames, string outputName)
+			: this(assemblyNames, outputName, false)
+		{
+		}
+
+		public CompilerParameters(string[] assemblyNames, string outputName, bool includeDebugInformation)
+		{
+			if (assemblyNames != null)
+			{
+				this.ReferencedAssemblies.AddRange(assemblyNames);
+			}
+			this.OutputAssembly = outputName;
+			this.IncludeDebugInformation = includeDebugInformation;
+		}
+
+		public string CoreAssemblyFileName { get; set; } = string.Empty;
+
+		public bool GenerateExecutable { get; set; }
+
+		public bool GenerateInMemory { get; set; }
+
+		public StringCollection ReferencedAssemblies
+		{
+			get
+			{
+				return this._assemblyNames;
+			}
+		}
+
+		public string MainClass { get; set; }
+
+		public string OutputAssembly { get; set; }
 
 		public TempFileCollection TempFiles
 		{
 			get
 			{
-				if (this.tempFiles == null)
+				TempFileCollection tempFileCollection;
+				if ((tempFileCollection = this._tempFiles) == null)
 				{
-					this.tempFiles = new TempFileCollection();
+					tempFileCollection = (this._tempFiles = new TempFileCollection());
 				}
-				return this.tempFiles;
+				return tempFileCollection;
 			}
 			set
 			{
-				this.tempFiles = value;
+				this._tempFiles = value;
 			}
 		}
 
-		public bool TreatWarningsAsErrors
+		public bool IncludeDebugInformation { get; set; }
+
+		public bool TreatWarningsAsErrors { get; set; }
+
+		public int WarningLevel { get; set; } = -1;
+
+		public string CompilerOptions { get; set; }
+
+		public string Win32Resource { get; set; }
+
+		public StringCollection EmbeddedResources
 		{
 			get
 			{
-				return this.treatWarningsAsErrors;
-			}
-			set
-			{
-				this.treatWarningsAsErrors = value;
+				return this._embeddedResources;
 			}
 		}
 
-		public IntPtr UserToken
+		public StringCollection LinkedResources
 		{
 			get
 			{
-				return this.userToken;
-			}
-			set
-			{
-				this.userToken = value;
+				return this._linkedResources;
 			}
 		}
 
-		public int WarningLevel
-		{
-			get
-			{
-				return this.warningLevel;
-			}
-			set
-			{
-				this.warningLevel = value;
-			}
-		}
+		public IntPtr UserToken { get; set; }
 
-		public string Win32Resource
-		{
-			get
-			{
-				return this.win32Resource;
-			}
-			set
-			{
-				this.win32Resource = value;
-			}
-		}
+		private Evidence _evidence;
 
-		[ComVisible(false)]
-		public global::System.Collections.Specialized.StringCollection EmbeddedResources
-		{
-			get
-			{
-				if (this.embedded_resources == null)
-				{
-					this.embedded_resources = new global::System.Collections.Specialized.StringCollection();
-				}
-				return this.embedded_resources;
-			}
-		}
+		private readonly StringCollection _assemblyNames = new StringCollection();
 
-		[ComVisible(false)]
-		public global::System.Collections.Specialized.StringCollection LinkedResources
-		{
-			get
-			{
-				if (this.linked_resources == null)
-				{
-					this.linked_resources = new global::System.Collections.Specialized.StringCollection();
-				}
-				return this.linked_resources;
-			}
-		}
+		private readonly StringCollection _embeddedResources = new StringCollection();
 
-		private string compilerOptions;
+		private readonly StringCollection _linkedResources = new StringCollection();
 
-		private Evidence evidence;
-
-		private bool generateExecutable;
-
-		private bool generateInMemory;
-
-		private bool includeDebugInformation;
-
-		private string mainClass;
-
-		private string outputAssembly;
-
-		private global::System.Collections.Specialized.StringCollection referencedAssemblies;
-
-		private TempFileCollection tempFiles;
-
-		private bool treatWarningsAsErrors;
-
-		private IntPtr userToken = IntPtr.Zero;
-
-		private int warningLevel = -1;
-
-		private string win32Resource;
-
-		private global::System.Collections.Specialized.StringCollection embedded_resources;
-
-		private global::System.Collections.Specialized.StringCollection linked_resources;
+		private TempFileCollection _tempFiles;
 	}
 }

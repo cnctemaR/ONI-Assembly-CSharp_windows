@@ -15,13 +15,22 @@ namespace System.Net.NetworkInformation
 			byte[] array = new byte[num];
 			Win32IPGlobalProperties.GetTcpTable(array, ref num, true);
 			int num2 = Marshal.SizeOf(typeof(Win32IPGlobalProperties.Win32_MIB_TCPROW));
-			fixed (byte* ptr = (ref array != null && array.Length != 0 ? ref array[0] : ref *null))
+			fixed (byte[] array2 = array)
 			{
+				byte* ptr;
+				if (array == null || array2.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array2[0];
+				}
 				int num3 = Marshal.ReadInt32((IntPtr)((void*)ptr));
 				for (int i = 0; i < num3; i++)
 				{
 					Win32IPGlobalProperties.Win32_MIB_TCPROW win32_MIB_TCPROW = new Win32IPGlobalProperties.Win32_MIB_TCPROW();
-					Marshal.PtrToStructure((IntPtr)((void*)(ptr + i * num2 + 4)), win32_MIB_TCPROW);
+					Marshal.PtrToStructure<Win32IPGlobalProperties.Win32_MIB_TCPROW>((IntPtr)((void*)(ptr + i * num2 + 4)), win32_MIB_TCPROW);
 					tab4.Add(win32_MIB_TCPROW);
 				}
 			}
@@ -30,16 +39,25 @@ namespace System.Net.NetworkInformation
 			{
 				int num4 = 0;
 				Win32IPGlobalProperties.GetTcp6Table(null, ref num4, true);
-				byte[] array2 = new byte[num4];
-				Win32IPGlobalProperties.GetTcp6Table(array2, ref num4, true);
+				byte[] array3 = new byte[num4];
+				Win32IPGlobalProperties.GetTcp6Table(array3, ref num4, true);
 				int num5 = Marshal.SizeOf(typeof(Win32IPGlobalProperties.Win32_MIB_TCP6ROW));
-				fixed (byte* ptr2 = (ref array2 != null && array2.Length != 0 ? ref array2[0] : ref *null))
+				fixed (byte[] array2 = array3)
 				{
+					byte* ptr2;
+					if (array3 == null || array2.Length == 0)
+					{
+						ptr2 = null;
+					}
+					else
+					{
+						ptr2 = &array2[0];
+					}
 					int num6 = Marshal.ReadInt32((IntPtr)((void*)ptr2));
 					for (int j = 0; j < num6; j++)
 					{
 						Win32IPGlobalProperties.Win32_MIB_TCP6ROW win32_MIB_TCP6ROW = new Win32IPGlobalProperties.Win32_MIB_TCP6ROW();
-						Marshal.PtrToStructure((IntPtr)((void*)(ptr2 + j * num5 + 4)), win32_MIB_TCP6ROW);
+						Marshal.PtrToStructure<Win32IPGlobalProperties.Win32_MIB_TCP6ROW>((IntPtr)((void*)(ptr2 + j * num5 + 4)), win32_MIB_TCP6ROW);
 						tab6.Add(win32_MIB_TCP6ROW);
 					}
 				}
@@ -48,16 +66,7 @@ namespace System.Net.NetworkInformation
 
 		private bool IsListenerState(TcpState state)
 		{
-			switch (state)
-			{
-			case TcpState.Listen:
-			case TcpState.SynSent:
-			case TcpState.FinWait1:
-			case TcpState.FinWait2:
-			case TcpState.CloseWait:
-				return true;
-			}
-			return false;
+			return state - TcpState.Listen <= 1 || state - TcpState.FinWait1 <= 2;
 		}
 
 		public override TcpConnectionInformation[] GetActiveTcpConnections()
@@ -115,13 +124,22 @@ namespace System.Net.NetworkInformation
 			byte[] array = new byte[num];
 			Win32IPGlobalProperties.GetUdpTable(array, ref num, true);
 			int num2 = Marshal.SizeOf(typeof(Win32IPGlobalProperties.Win32_MIB_UDPROW));
-			fixed (byte* ptr = (ref array != null && array.Length != 0 ? ref array[0] : ref *null))
+			fixed (byte[] array2 = array)
 			{
+				byte* ptr;
+				if (array == null || array2.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array2[0];
+				}
 				int num3 = Marshal.ReadInt32((IntPtr)((void*)ptr));
 				for (int i = 0; i < num3; i++)
 				{
 					Win32IPGlobalProperties.Win32_MIB_UDPROW win32_MIB_UDPROW = new Win32IPGlobalProperties.Win32_MIB_UDPROW();
-					Marshal.PtrToStructure((IntPtr)((void*)(ptr + i * num2 + 4)), win32_MIB_UDPROW);
+					Marshal.PtrToStructure<Win32IPGlobalProperties.Win32_MIB_UDPROW>((IntPtr)((void*)(ptr + i * num2 + 4)), win32_MIB_UDPROW);
 					list.Add(win32_MIB_UDPROW.LocalEndPoint);
 				}
 			}
@@ -129,16 +147,25 @@ namespace System.Net.NetworkInformation
 			{
 				int num4 = 0;
 				Win32IPGlobalProperties.GetUdp6Table(null, ref num4, true);
-				byte[] array2 = new byte[num4];
-				Win32IPGlobalProperties.GetUdp6Table(array2, ref num4, true);
+				byte[] array3 = new byte[num4];
+				Win32IPGlobalProperties.GetUdp6Table(array3, ref num4, true);
 				int num5 = Marshal.SizeOf(typeof(Win32IPGlobalProperties.Win32_MIB_UDP6ROW));
-				fixed (byte* ptr2 = (ref array2 != null && array2.Length != 0 ? ref array2[0] : ref *null))
+				fixed (byte[] array2 = array3)
 				{
+					byte* ptr2;
+					if (array3 == null || array2.Length == 0)
+					{
+						ptr2 = null;
+					}
+					else
+					{
+						ptr2 = &array2[0];
+					}
 					int num6 = Marshal.ReadInt32((IntPtr)((void*)ptr2));
 					for (int j = 0; j < num6; j++)
 					{
 						Win32IPGlobalProperties.Win32_MIB_UDP6ROW win32_MIB_UDP6ROW = new Win32IPGlobalProperties.Win32_MIB_UDP6ROW();
-						Marshal.PtrToStructure((IntPtr)((void*)(ptr2 + j * num5 + 4)), win32_MIB_UDP6ROW);
+						Marshal.PtrToStructure<Win32IPGlobalProperties.Win32_MIB_UDP6ROW>((IntPtr)((void*)(ptr2 + j * num5 + 4)), win32_MIB_UDP6ROW);
 						list.Add(win32_MIB_UDP6ROW.LocalEndPoint);
 					}
 				}
@@ -148,7 +175,7 @@ namespace System.Net.NetworkInformation
 
 		public override IcmpV4Statistics GetIcmpV4Statistics()
 		{
-			if (!global::System.Net.Sockets.Socket.SupportsIPv4)
+			if (!Socket.OSSupportsIPv4)
 			{
 				throw new NetworkInformationException();
 			}
@@ -159,7 +186,7 @@ namespace System.Net.NetworkInformation
 
 		public override IcmpV6Statistics GetIcmpV6Statistics()
 		{
-			if (!global::System.Net.Sockets.Socket.OSSupportsIPv6)
+			if (!Socket.OSSupportsIPv6)
 			{
 				throw new NetworkInformationException();
 			}
@@ -170,29 +197,29 @@ namespace System.Net.NetworkInformation
 
 		public override IPGlobalStatistics GetIPv4GlobalStatistics()
 		{
-			if (!global::System.Net.Sockets.Socket.SupportsIPv4)
+			if (!Socket.OSSupportsIPv4)
 			{
 				throw new NetworkInformationException();
 			}
 			Win32_MIB_IPSTATS win32_MIB_IPSTATS;
-			Win32IPGlobalProperties.GetIPStatisticsEx(out win32_MIB_IPSTATS, 2);
+			Win32IPGlobalProperties.GetIpStatisticsEx(out win32_MIB_IPSTATS, 2);
 			return new Win32IPGlobalStatistics(win32_MIB_IPSTATS);
 		}
 
 		public override IPGlobalStatistics GetIPv6GlobalStatistics()
 		{
-			if (!global::System.Net.Sockets.Socket.OSSupportsIPv6)
+			if (!Socket.OSSupportsIPv6)
 			{
 				throw new NetworkInformationException();
 			}
 			Win32_MIB_IPSTATS win32_MIB_IPSTATS;
-			Win32IPGlobalProperties.GetIPStatisticsEx(out win32_MIB_IPSTATS, 23);
+			Win32IPGlobalProperties.GetIpStatisticsEx(out win32_MIB_IPSTATS, 23);
 			return new Win32IPGlobalStatistics(win32_MIB_IPSTATS);
 		}
 
 		public override TcpStatistics GetTcpIPv4Statistics()
 		{
-			if (!global::System.Net.Sockets.Socket.SupportsIPv4)
+			if (!Socket.OSSupportsIPv4)
 			{
 				throw new NetworkInformationException();
 			}
@@ -203,7 +230,7 @@ namespace System.Net.NetworkInformation
 
 		public override TcpStatistics GetTcpIPv6Statistics()
 		{
-			if (!global::System.Net.Sockets.Socket.OSSupportsIPv6)
+			if (!Socket.OSSupportsIPv6)
 			{
 				throw new NetworkInformationException();
 			}
@@ -214,7 +241,7 @@ namespace System.Net.NetworkInformation
 
 		public override UdpStatistics GetUdpIPv4Statistics()
 		{
-			if (!global::System.Net.Sockets.Socket.SupportsIPv4)
+			if (!Socket.OSSupportsIPv4)
 			{
 				throw new NetworkInformationException();
 			}
@@ -225,7 +252,7 @@ namespace System.Net.NetworkInformation
 
 		public override UdpStatistics GetUdpIPv6Statistics()
 		{
-			if (!global::System.Net.Sockets.Socket.OSSupportsIPv6)
+			if (!Socket.OSSupportsIPv6)
 			{
 				throw new NetworkInformationException();
 			}
@@ -238,7 +265,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.ScopeId;
+				return Win32NetworkInterface.FixedInfo.ScopeId;
 			}
 		}
 
@@ -246,7 +273,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.DomainName;
+				return Win32NetworkInterface.FixedInfo.DomainName;
 			}
 		}
 
@@ -254,7 +281,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.HostName;
+				return Win32NetworkInterface.FixedInfo.HostName;
 			}
 		}
 
@@ -262,7 +289,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.EnableProxy != 0U;
+				return Win32NetworkInterface.FixedInfo.EnableProxy > 0U;
 			}
 		}
 
@@ -270,36 +297,39 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.NodeType;
+				return Win32NetworkInterface.FixedInfo.NodeType;
 			}
 		}
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetTcpTable(byte[] pTcpTable, ref int pdwSize, bool bOrder);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetTcp6Table(byte[] TcpTable, ref int SizePointer, bool Order);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetUdpTable(byte[] pUdpTable, ref int pdwSize, bool bOrder);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetUdp6Table(byte[] Udp6Table, ref int SizePointer, bool Order);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetTcpStatisticsEx(out Win32_MIB_TCPSTATS pStats, int dwFamily);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetUdpStatisticsEx(out Win32_MIB_UDPSTATS pStats, int dwFamily);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetIcmpStatistics(out Win32_MIBICMPINFO pStats, int dwFamily);
 
-		[DllImport("Iphlpapi.dll")]
+		[DllImport("iphlpapi.dll")]
 		private static extern int GetIcmpStatisticsEx(out Win32_MIB_ICMP_EX pStats, int dwFamily);
 
-		[DllImport("Iphlpapi.dll")]
-		private static extern int GetIPStatisticsEx(out Win32_MIB_IPSTATS pStats, int dwFamily);
+		[DllImport("iphlpapi.dll")]
+		private static extern int GetIpStatisticsEx(out Win32_MIB_IPSTATS pStats, int dwFamily);
+
+		[DllImport("Ws2_32.dll")]
+		private static extern ushort ntohs(ushort netshort);
 
 		public const int AF_INET = 2;
 
@@ -320,7 +350,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new IPEndPoint((long)((ulong)this.LocalAddr), this.LocalPort);
+					return new IPEndPoint((long)((ulong)this.LocalAddr), (int)Win32IPGlobalProperties.ntohs((ushort)this.LocalPort));
 				}
 			}
 
@@ -328,7 +358,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new IPEndPoint((long)((ulong)this.RemoteAddr), this.RemotePort);
+					return new IPEndPoint((long)((ulong)this.RemoteAddr), (int)Win32IPGlobalProperties.ntohs((ushort)this.RemotePort));
 				}
 			}
 
@@ -336,7 +366,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new TcpConnectionInformationImpl(this.LocalEndPoint, this.RemoteEndPoint, this.State);
+					return new SystemTcpConnectionInformation(this.LocalEndPoint, this.RemoteEndPoint, this.State);
 				}
 			}
 
@@ -344,11 +374,11 @@ namespace System.Net.NetworkInformation
 
 			public uint LocalAddr;
 
-			public int LocalPort;
+			public uint LocalPort;
 
 			public uint RemoteAddr;
 
-			public int RemotePort;
+			public uint RemotePort;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -358,7 +388,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new IPEndPoint(new IPAddress(this.LocalAddr.Bytes, (long)((ulong)this.LocalScopeId)), this.LocalPort);
+					return new IPEndPoint(new IPAddress(this.LocalAddr.Bytes, (long)((ulong)this.LocalScopeId)), (int)Win32IPGlobalProperties.ntohs((ushort)this.LocalPort));
 				}
 			}
 
@@ -366,7 +396,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new IPEndPoint(new IPAddress(this.RemoteAddr.Bytes, (long)((ulong)this.RemoteScopeId)), this.RemotePort);
+					return new IPEndPoint(new IPAddress(this.RemoteAddr.Bytes, (long)((ulong)this.RemoteScopeId)), (int)Win32IPGlobalProperties.ntohs((ushort)this.RemotePort));
 				}
 			}
 
@@ -374,7 +404,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new TcpConnectionInformationImpl(this.LocalEndPoint, this.RemoteEndPoint, this.State);
+					return new SystemTcpConnectionInformation(this.LocalEndPoint, this.RemoteEndPoint, this.State);
 				}
 			}
 
@@ -384,13 +414,13 @@ namespace System.Net.NetworkInformation
 
 			public uint LocalScopeId;
 
-			public int LocalPort;
+			public uint LocalPort;
 
 			public Win32IPGlobalProperties.Win32_IN6_ADDR RemoteAddr;
 
 			public uint RemoteScopeId;
 
-			public int RemotePort;
+			public uint RemotePort;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -400,13 +430,13 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new IPEndPoint((long)((ulong)this.LocalAddr), this.LocalPort);
+					return new IPEndPoint((long)((ulong)this.LocalAddr), (int)Win32IPGlobalProperties.ntohs((ushort)this.LocalPort));
 				}
 			}
 
 			public uint LocalAddr;
 
-			public int LocalPort;
+			public uint LocalPort;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -416,7 +446,7 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					return new IPEndPoint(new IPAddress(this.LocalAddr.Bytes, (long)((ulong)this.LocalScopeId)), this.LocalPort);
+					return new IPEndPoint(new IPAddress(this.LocalAddr.Bytes, (long)((ulong)this.LocalScopeId)), (int)Win32IPGlobalProperties.ntohs((ushort)this.LocalPort));
 				}
 			}
 
@@ -424,7 +454,7 @@ namespace System.Net.NetworkInformation
 
 			public uint LocalScopeId;
 
-			public int LocalPort;
+			public uint LocalPort;
 		}
 	}
 }

@@ -8,83 +8,26 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The material class.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/Material.h")]
 	public class Material : Object
 	{
-		/// <summary>
-		///   <para>Create a temporary Material.</para>
-		/// </summary>
-		/// <param name="shader">Create a material with a given Shader.</param>
-		/// <param name="source">Create a material by copying all properties from another material.</param>
 		public Material(Shader shader)
 		{
 			Material.CreateWithShader(this, shader);
 		}
 
-		/// <summary>
-		///   <para>Create a temporary Material.</para>
-		/// </summary>
-		/// <param name="shader">Create a material with a given Shader.</param>
-		/// <param name="source">Create a material by copying all properties from another material.</param>
 		[RequiredByNativeCode]
 		public Material(Material source)
 		{
 			Material.CreateWithMaterial(this, source);
 		}
 
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="contents"></param>
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Material(string contents)
 		{
 			Material.CreateWithString(this);
-		}
-
-		/// <summary>
-		///   <para>Returns the names of all texture properties exposed on this material.</para>
-		/// </summary>
-		/// <param name="outNames">Names of all texture properties exposed on this material.</param>
-		/// <returns>
-		///   <para>Names of all texture properties exposed on this material.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string[] GetTexturePropertyNames();
-
-		/// <summary>
-		///   <para>Return the name IDs of all texture properties exposed on this material.</para>
-		/// </summary>
-		/// <param name="outNames">IDs of all texture properties exposed on this material.</param>
-		/// <returns>
-		///   <para>IDs of all texture properties exposed on this material.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int[] GetTexturePropertyNameIDs();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTexturePropertyNamesInternal(object outNames);
-
-		public void GetTexturePropertyNames(List<string> outNames)
-		{
-			this.GetTexturePropertyNamesInternal(outNames);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTexturePropertyNameIDsInternal(object outNames);
-
-		public void GetTexturePropertyNameIDs(List<int> outNames)
-		{
-			this.GetTexturePropertyNameIDsInternal(outNames);
 		}
 
 		[Obsolete("Creating materials from shader source string will be removed in the future. Use Shader assets instead.", false)]
@@ -114,9 +57,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Material GetDefaultLineMaterial();
 
-		/// <summary>
-		///   <para>The shader used by the material.</para>
-		/// </summary>
 		public extern Shader shader
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -125,9 +65,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The main material's color.</para>
-		/// </summary>
 		public Color color
 		{
 			get
@@ -140,9 +77,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The material's texture.</para>
-		/// </summary>
 		public Texture mainTexture
 		{
 			get
@@ -155,9 +89,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The texture offset of the main texture.</para>
-		/// </summary>
 		public Vector2 mainTextureOffset
 		{
 			get
@@ -170,9 +101,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The texture scale of the main texture.</para>
-		/// </summary>
 		public Vector2 mainTextureScale
 		{
 			get
@@ -185,28 +113,15 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Checks if material's shader has a property of a given name.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		[NativeName("HasPropertyFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool HasProperty(int nameID);
 
-		/// <summary>
-		///   <para>Checks if material's shader has a property of a given name.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public bool HasProperty(string name)
 		{
 			return this.HasProperty(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Render queue of this material.</para>
-		/// </summary>
 		public extern int renderQueue
 		{
 			[NativeName("GetActualRenderQueue")]
@@ -224,30 +139,15 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Sets a shader keyword that is enabled by this material.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void EnableKeyword(string keyword);
 
-		/// <summary>
-		///   <para>Unset a shader keyword.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void DisableKeyword(string keyword);
 
-		/// <summary>
-		///   <para>Is the shader keyword enabled on this material?</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsKeywordEnabled(string keyword);
 
-		/// <summary>
-		///   <para>Defines how the material should interact with lightmaps and lightprobes.</para>
-		/// </summary>
 		public extern MaterialGlobalIlluminationFlags globalIlluminationFlags
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -256,9 +156,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Gets and sets whether the Double Sided Global Illumination setting is enabled for this material.</para>
-		/// </summary>
 		public extern bool doubleSidedGI
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -267,9 +164,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Gets and sets whether GPU instancing is enabled for this material.</para>
-		/// </summary>
 		[NativeProperty("EnableInstancingVariants")]
 		public extern bool enableInstancing
 		{
@@ -279,54 +173,26 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>How many passes are in this material (Read Only).</para>
-		/// </summary>
 		public extern int passCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Enables or disables a Shader pass on a per-Material level.</para>
-		/// </summary>
-		/// <param name="passName">Shader pass name (case insensitive).</param>
-		/// <param name="enabled">Flag indicating whether this Shader pass should be enabled.</param>
 		[FreeFunction("MaterialScripting::SetShaderPassEnabled", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetShaderPassEnabled(string passName, bool enabled);
 
-		/// <summary>
-		///   <para>Checks whether a given Shader pass is enabled on this Material.</para>
-		/// </summary>
-		/// <param name="passName">Shader pass name (case insensitive).</param>
-		/// <returns>
-		///   <para>True if the Shader pass is enabled.</para>
-		/// </returns>
 		[FreeFunction("MaterialScripting::GetShaderPassEnabled", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool GetShaderPassEnabled(string passName);
 
-		/// <summary>
-		///   <para>Returns the name of the shader pass at index pass.</para>
-		/// </summary>
-		/// <param name="pass"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string GetPassName(int pass);
 
-		/// <summary>
-		///   <para>Returns the index of the pass passName.</para>
-		/// </summary>
-		/// <param name="passName"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int FindPass(string passName);
 
-		/// <summary>
-		///   <para>Sets an override tag/value on the material.</para>
-		/// </summary>
-		/// <param name="tag">Name of the tag to set.</param>
-		/// <param name="val">Name of the value to set. Empty string to clear the override flag.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetOverrideTag(string tag, string val);
 
@@ -334,53 +200,24 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string GetTagImpl(string tag, bool currentSubShaderOnly, string defaultValue);
 
-		/// <summary>
-		///   <para>Get the value of material's shader tag.</para>
-		/// </summary>
-		/// <param name="tag"></param>
-		/// <param name="searchFallbacks"></param>
-		/// <param name="defaultValue"></param>
 		public string GetTag(string tag, bool searchFallbacks, string defaultValue)
 		{
 			return this.GetTagImpl(tag, !searchFallbacks, defaultValue);
 		}
 
-		/// <summary>
-		///   <para>Get the value of material's shader tag.</para>
-		/// </summary>
-		/// <param name="tag"></param>
-		/// <param name="searchFallbacks"></param>
-		/// <param name="defaultValue"></param>
 		public string GetTag(string tag, bool searchFallbacks)
 		{
 			return this.GetTagImpl(tag, !searchFallbacks, "");
 		}
 
-		/// <summary>
-		///   <para>Interpolate properties between two materials.</para>
-		/// </summary>
-		/// <param name="start"></param>
-		/// <param name="end"></param>
-		/// <param name="t"></param>
 		[FreeFunction("MaterialScripting::Lerp", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Lerp(Material start, Material end, float t);
+		public extern void Lerp([NotNull] Material start, [NotNull] Material end, float t);
 
-		/// <summary>
-		///   <para>Activate the given pass for rendering.</para>
-		/// </summary>
-		/// <param name="pass">Shader pass number to setup.</param>
-		/// <returns>
-		///   <para>If false is returned, no rendering should be done.</para>
-		/// </returns>
 		[FreeFunction("MaterialScripting::SetPass", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool SetPass(int pass);
 
-		/// <summary>
-		///   <para>Copy properties from other material into this material.</para>
-		/// </summary>
-		/// <param name="mat"></param>
 		[FreeFunction("MaterialScripting::CopyPropertiesFrom", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void CopyPropertiesFromMaterial(Material mat);
@@ -393,9 +230,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetShaderKeywords(string[] names);
 
-		/// <summary>
-		///   <para>Additional shader keywords set by this material.</para>
-		/// </summary>
 		public string[] shaderKeywords
 		{
 			get
@@ -406,6 +240,32 @@ namespace UnityEngine
 			{
 				this.SetShaderKeywords(value);
 			}
+		}
+
+		[FreeFunction("MaterialScripting::GetTexturePropertyNames", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern string[] GetTexturePropertyNames();
+
+		[FreeFunction("MaterialScripting::GetTexturePropertyNameIDs", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int[] GetTexturePropertyNameIDs();
+
+		[FreeFunction("MaterialScripting::GetTexturePropertyNamesInternal", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetTexturePropertyNamesInternal(object outNames);
+
+		[FreeFunction("MaterialScripting::GetTexturePropertyNameIDsInternal", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetTexturePropertyNameIDsInternal(object outNames);
+
+		public void GetTexturePropertyNames(List<string> outNames)
+		{
+			this.GetTexturePropertyNamesInternal(outNames);
+		}
+
+		public void GetTexturePropertyNameIDs(List<int> outNames)
+		{
+			this.GetTexturePropertyNameIDsInternal(outNames);
 		}
 
 		[NativeName("SetFloatFromScript")]
@@ -668,155 +528,71 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets a named float value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="value">Float value to set.</param>
-		/// <param name="name">Property name, e.g. "_Glossiness".</param>
 		public void SetFloat(string name, float value)
 		{
 			this.SetFloatImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named float value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="value">Float value to set.</param>
-		/// <param name="name">Property name, e.g. "_Glossiness".</param>
 		public void SetFloat(int nameID, float value)
 		{
 			this.SetFloatImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named integer value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="value">Integer value to set.</param>
-		/// <param name="name">Property name, e.g. "_SrcBlend".</param>
 		public void SetInt(string name, int value)
 		{
 			this.SetFloatImpl(Shader.PropertyToID(name), (float)value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named integer value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="value">Integer value to set.</param>
-		/// <param name="name">Property name, e.g. "_SrcBlend".</param>
 		public void SetInt(int nameID, int value)
 		{
 			this.SetFloatImpl(nameID, (float)value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named color value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_Color".</param>
-		/// <param name="value">Color value to set.</param>
 		public void SetColor(string name, Color value)
 		{
 			this.SetColorImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named color value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_Color".</param>
-		/// <param name="value">Color value to set.</param>
 		public void SetColor(int nameID, Color value)
 		{
 			this.SetColorImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named vector value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_WaveAndDistance".</param>
-		/// <param name="value">Vector value to set.</param>
 		public void SetVector(string name, Vector4 value)
 		{
 			this.SetColorImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named vector value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_WaveAndDistance".</param>
-		/// <param name="value">Vector value to set.</param>
 		public void SetVector(int nameID, Vector4 value)
 		{
 			this.SetColorImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named matrix for the shader.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_CubemapRotation".</param>
-		/// <param name="value">Matrix value to set.</param>
 		public void SetMatrix(string name, Matrix4x4 value)
 		{
 			this.SetMatrixImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named matrix for the shader.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_CubemapRotation".</param>
-		/// <param name="value">Matrix value to set.</param>
 		public void SetMatrix(int nameID, Matrix4x4 value)
 		{
 			this.SetMatrixImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named texture.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_MainTex".</param>
-		/// <param name="value">Texture to set.</param>
 		public void SetTexture(string name, Texture value)
 		{
 			this.SetTextureImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named texture.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_MainTex".</param>
-		/// <param name="value">Texture to set.</param>
 		public void SetTexture(int nameID, Texture value)
 		{
 			this.SetTextureImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named ComputeBuffer value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name.</param>
-		/// <param name="value">The ComputeBuffer value to set.</param>
 		public void SetBuffer(string name, ComputeBuffer value)
 		{
 			this.SetBufferImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets a named ComputeBuffer value.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name.</param>
-		/// <param name="value">The ComputeBuffer value to set.</param>
 		public void SetBuffer(int nameID, ComputeBuffer value)
 		{
 			this.SetBufferImpl(nameID, value);
@@ -832,23 +608,11 @@ namespace UnityEngine
 			this.SetFloatArray(nameID, NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a float array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="nameID">Property name ID. Use Shader.PropertyToID to get this ID.</param>
-		/// <param name="values">Array of values to set.</param>
 		public void SetFloatArray(string name, float[] values)
 		{
 			this.SetFloatArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a float array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="nameID">Property name ID. Use Shader.PropertyToID to get this ID.</param>
-		/// <param name="values">Array of values to set.</param>
 		public void SetFloatArray(int nameID, float[] values)
 		{
 			this.SetFloatArray(nameID, values, values.Length);
@@ -864,23 +628,11 @@ namespace UnityEngine
 			this.SetColorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Color>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a color array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="values">Array of values to set.</param>
 		public void SetColorArray(string name, Color[] values)
 		{
 			this.SetColorArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a color array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="values">Array of values to set.</param>
 		public void SetColorArray(int nameID, Color[] values)
 		{
 			this.SetColorArray(nameID, values, values.Length);
@@ -896,23 +648,11 @@ namespace UnityEngine
 			this.SetVectorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a vector array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="values">Array of values to set.</param>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
 		public void SetVectorArray(string name, Vector4[] values)
 		{
 			this.SetVectorArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a vector array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="values">Array of values to set.</param>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
 		public void SetVectorArray(int nameID, Vector4[] values)
 		{
 			this.SetVectorArray(nameID, values, values.Length);
@@ -928,223 +668,111 @@ namespace UnityEngine
 			this.SetMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
 		}
 
-		/// <summary>
-		///   <para>Sets a matrix array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="values">Array of values to set.</param>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
 		public void SetMatrixArray(string name, Matrix4x4[] values)
 		{
 			this.SetMatrixArray(Shader.PropertyToID(name), values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Sets a matrix array property.</para>
-		/// </summary>
-		/// <param name="name">Property name.</param>
-		/// <param name="values">Array of values to set.</param>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
 		public void SetMatrixArray(int nameID, Matrix4x4[] values)
 		{
 			this.SetMatrixArray(nameID, values, values.Length);
 		}
 
-		/// <summary>
-		///   <para>Get a named float value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public float GetFloat(string name)
 		{
 			return this.GetFloatImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named float value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public float GetFloat(int nameID)
 		{
 			return this.GetFloatImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named integer value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public int GetInt(string name)
 		{
 			return (int)this.GetFloatImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named integer value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public int GetInt(int nameID)
 		{
 			return (int)this.GetFloatImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named color value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Color GetColor(string name)
 		{
 			return this.GetColorImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named color value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Color GetColor(int nameID)
 		{
 			return this.GetColorImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named vector value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Vector4 GetVector(string name)
 		{
 			return this.GetColorImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named vector value.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Vector4 GetVector(int nameID)
 		{
 			return this.GetColorImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named matrix value from the shader.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Matrix4x4 GetMatrix(string name)
 		{
 			return this.GetMatrixImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named matrix value from the shader.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Matrix4x4 GetMatrix(int nameID)
 		{
 			return this.GetMatrixImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named texture.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Texture GetTexture(string name)
 		{
 			return this.GetTextureImpl(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named texture.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Texture GetTexture(int nameID)
 		{
 			return this.GetTextureImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named float array.</para>
-		/// </summary>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
 		public float[] GetFloatArray(string name)
 		{
 			return this.GetFloatArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named float array.</para>
-		/// </summary>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
 		public float[] GetFloatArray(int nameID)
 		{
 			return (this.GetFloatArrayCountImpl(nameID) == 0) ? null : this.GetFloatArrayImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named color array.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Color[] GetColorArray(string name)
 		{
 			return this.GetColorArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named color array.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Color[] GetColorArray(int nameID)
 		{
 			return (this.GetColorArrayCountImpl(nameID) == 0) ? null : this.GetColorArrayImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named vector array.</para>
-		/// </summary>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
 		public Vector4[] GetVectorArray(string name)
 		{
 			return this.GetVectorArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named vector array.</para>
-		/// </summary>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
 		public Vector4[] GetVectorArray(int nameID)
 		{
 			return (this.GetVectorArrayCountImpl(nameID) == 0) ? null : this.GetVectorArrayImpl(nameID);
 		}
 
-		/// <summary>
-		///   <para>Get a named matrix array.</para>
-		/// </summary>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
 		public Matrix4x4[] GetMatrixArray(string name)
 		{
 			return this.GetMatrixArray(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Get a named matrix array.</para>
-		/// </summary>
-		/// <param name="name">The name of the property.</param>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
 		public Matrix4x4[] GetMatrixArray(int nameID)
 		{
 			return (this.GetMatrixArrayCountImpl(nameID) == 0) ? null : this.GetMatrixArrayImpl(nameID);
@@ -1190,86 +818,42 @@ namespace UnityEngine
 			this.ExtractMatrixArray(nameID, values);
 		}
 
-		/// <summary>
-		///   <para>Sets the placement offset of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, for example: "_MainTex".</param>
-		/// <param name="value">Texture placement offset.</param>
 		public void SetTextureOffset(string name, Vector2 value)
 		{
 			this.SetTextureOffsetImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets the placement offset of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, for example: "_MainTex".</param>
-		/// <param name="value">Texture placement offset.</param>
 		public void SetTextureOffset(int nameID, Vector2 value)
 		{
 			this.SetTextureOffsetImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Sets the placement scale of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_MainTex".</param>
-		/// <param name="value">Texture placement scale.</param>
 		public void SetTextureScale(string name, Vector2 value)
 		{
 			this.SetTextureScaleImpl(Shader.PropertyToID(name), value);
 		}
 
-		/// <summary>
-		///   <para>Sets the placement scale of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">Property name ID, use Shader.PropertyToID to get it.</param>
-		/// <param name="name">Property name, e.g. "_MainTex".</param>
-		/// <param name="value">Texture placement scale.</param>
 		public void SetTextureScale(int nameID, Vector2 value)
 		{
 			this.SetTextureScaleImpl(nameID, value);
 		}
 
-		/// <summary>
-		///   <para>Gets the placement offset of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Vector2 GetTextureOffset(string name)
 		{
 			return this.GetTextureOffset(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets the placement offset of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Vector2 GetTextureOffset(int nameID)
 		{
 			Vector4 textureScaleAndOffsetImpl = this.GetTextureScaleAndOffsetImpl(nameID);
 			return new Vector2(textureScaleAndOffsetImpl.z, textureScaleAndOffsetImpl.w);
 		}
 
-		/// <summary>
-		///   <para>Gets the placement scale of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Vector2 GetTextureScale(string name)
 		{
 			return this.GetTextureScale(Shader.PropertyToID(name));
 		}
 
-		/// <summary>
-		///   <para>Gets the placement scale of texture propertyName.</para>
-		/// </summary>
-		/// <param name="nameID">The name ID of the property retrieved by Shader.PropertyToID.</param>
-		/// <param name="name">The name of the property.</param>
 		public Vector2 GetTextureScale(int nameID)
 		{
 			Vector4 textureScaleAndOffsetImpl = this.GetTextureScaleAndOffsetImpl(nameID);

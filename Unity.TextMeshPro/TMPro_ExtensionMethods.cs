@@ -12,7 +12,7 @@ namespace TMPro
 			int num = 0;
 			while (num < chars.Length && chars[num] != '\0')
 			{
-				text += chars[num];
+				text += chars[num].ToString();
 				num++;
 			}
 			return text;
@@ -23,8 +23,7 @@ namespace TMPro
 			int instanceID = target.GetInstanceID();
 			for (int i = 0; i < list.Count; i++)
 			{
-				T t = list[i];
-				if (t.GetInstanceID() == instanceID)
+				if (list[i].GetInstanceID() == instanceID)
 				{
 					return i;
 				}

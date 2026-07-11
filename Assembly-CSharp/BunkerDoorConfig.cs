@@ -54,8 +54,7 @@ public class BunkerDoorConfig : IBuildingConfig
 		door.doorOpeningSoundEventName = "BunkerDoor_opening";
 		door.doorClosingSoundEventName = "BunkerDoor_closing";
 		door.verticalOrientation = Orientation.R90;
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 3f;
+		go.AddOrGet<Workable>().workTime = 3f;
 		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
 		component.initialAnim = "closed";
 		component.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
@@ -63,8 +62,7 @@ public class BunkerDoorConfig : IBuildingConfig
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
-		KPrefabID component2 = go.GetComponent<KPrefabID>();
-		component2.AddTag(GameTags.Bunker, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Bunker, false);
 	}
 
 	public const string ID = "BunkerDoor";

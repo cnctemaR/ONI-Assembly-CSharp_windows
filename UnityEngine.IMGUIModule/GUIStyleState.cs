@@ -5,9 +5,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Specialized values for the given states used by GUIStyle objects.</para>
-	/// </summary>
 	[NativeHeader("Modules/IMGUI/GUIStyle.bindings.h")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
@@ -24,9 +21,6 @@ namespace UnityEngine
 			this.m_Ptr = source;
 		}
 
-		/// <summary>
-		///   <para>The background image used by GUI elements in this given state.</para>
-		/// </summary>
 		[NativeProperty("Background", false, TargetType.Function)]
 		public extern Texture2D background
 		{
@@ -36,9 +30,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The text color used by GUI elements in this state.</para>
-		/// </summary>
 		[NativeProperty("textColor", false, TargetType.Field)]
 		public Color textColor
 		{

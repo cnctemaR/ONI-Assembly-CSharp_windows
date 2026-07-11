@@ -60,9 +60,10 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		public bool IsConsumableCell(int cell, out Element element)
 		{
 			element = Grid.Element[cell];
-			foreach (Diet.Info info in base.smi.def.diet.infos)
+			Diet.Info[] infos = base.smi.def.diet.infos;
+			for (int i = 0; i < infos.Length; i++)
 			{
-				if (info.IsMatch(element.tag))
+				if (infos[i].IsMatch(element.tag))
 				{
 					return true;
 				}
@@ -98,30 +99,28 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			{
 				return;
 			}
-			if (mcd.mass > 0f)
-			{
-				this.massUnavailableFrameCount = 0;
-				Diet.Info dietInfo = base.def.diet.GetDietInfo(this.targetElement.tag);
-				if (dietInfo == null)
-				{
-					return;
-				}
-				float num = dietInfo.ConvertConsumptionMassToCalories(mcd.mass);
-				CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
-				{
-					tag = this.targetElement.tag,
-					calories = num
-				};
-				base.Trigger(-2038961714, caloriesConsumedEvent);
-			}
-			else
+			if (mcd.mass <= 0f)
 			{
 				this.massUnavailableFrameCount++;
 				if (this.massUnavailableFrameCount >= 2)
 				{
 					base.Trigger(801383139, null);
 				}
+				return;
 			}
+			this.massUnavailableFrameCount = 0;
+			Diet.Info dietInfo = base.def.diet.GetDietInfo(this.targetElement.tag);
+			if (dietInfo == null)
+			{
+				return;
+			}
+			float num = dietInfo.ConvertConsumptionMassToCalories(mcd.mass);
+			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
+			{
+				tag = this.targetElement.tag,
+				calories = num
+			};
+			base.Trigger(-2038961714, caloriesConsumedEvent);
 		}
 
 		public int targetCell = -1;
@@ -145,7 +144,13 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		{
 			int num = Grid.CellAbove(cell);
 			this.success = this.smi.IsConsumableCell(cell, out this.targetElement) || (Grid.IsValidCell(num) && this.smi.IsConsumableCell(num, out this.targetElement));
-			return this.success || --this.maxIterations <= 0;
+			if (!this.success)
+			{
+				int num2 = this.maxIterations - 1;
+				this.maxIterations = num2;
+				return num2 <= 0;
+			}
+			return true;
 		}
 
 		public bool success;

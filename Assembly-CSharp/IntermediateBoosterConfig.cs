@@ -18,8 +18,7 @@ public class IntermediateBoosterConfig : IEntityConfig
 		{
 			new ComplexRecipe.RecipeElement("IntermediateBooster", 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2);
-		IntermediateBoosterConfig.recipe = new ComplexRecipe(text, array, array2)
+		IntermediateBoosterConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 100f,
 			description = ITEMS.PILLS.INTERMEDIATEBOOSTER.RECIPEDESC,

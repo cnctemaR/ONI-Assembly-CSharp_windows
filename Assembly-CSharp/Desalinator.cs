@@ -47,16 +47,10 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 		{
 			return;
 		}
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "status_item_desalinator_needs_emptying";
-		string text2 = UI.USERMENUACTIONS.EMPTYDESALINATOR.NAME;
-		global::System.Action action = delegate
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("status_item_desalinator_needs_emptying", UI.USERMENUACTIONS.EMPTYDESALINATOR.NAME, delegate
 		{
 			base.smi.GoTo(base.smi.sm.earlyEmpty);
-		};
-		string text3 = UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP, true), 1f);
 	}
 
 	private bool CheckCanConvert()

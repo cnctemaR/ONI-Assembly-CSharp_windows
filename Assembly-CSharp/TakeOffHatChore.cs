@@ -29,11 +29,9 @@ public class TakeOffHatChore : Chore<TakeOffHatChore.StatesInstance>
 				if (this.duplicant.Get(smi).GetComponent<MinionResume>().CurrentHat != null)
 				{
 					smi.GoTo(this.remove_hat);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.complete);
-				}
+				smi.GoTo(this.complete);
 			});
 			this.remove_hat.ToggleAnims("anim_hat_kanim", 0f).PlayAnim("hat_off").OnAnimQueueComplete(this.complete);
 			this.complete.Enter(delegate(TakeOffHatChore.StatesInstance smi)

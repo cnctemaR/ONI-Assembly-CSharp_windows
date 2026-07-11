@@ -8,7 +8,8 @@ namespace UnityEngine.Experimental.Animations
 		Float = 5,
 		Bool,
 		GameObjectActive,
-		Int = 10,
+		ObjectReference = 9,
+		Int,
 		DiscreetInt
 	}
 }

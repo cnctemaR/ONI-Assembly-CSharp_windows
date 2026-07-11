@@ -20,7 +20,12 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			return obj is BrowsableAttribute && (obj == this || ((BrowsableAttribute)obj).Browsable == this.browsable);
+			if (obj == this)
+			{
+				return true;
+			}
+			BrowsableAttribute browsableAttribute = obj as BrowsableAttribute;
+			return browsableAttribute != null && browsableAttribute.Browsable == this.browsable;
 		}
 
 		public override int GetHashCode()
@@ -30,15 +35,15 @@ namespace System.ComponentModel
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.browsable == BrowsableAttribute.Default.Browsable;
+			return this.Equals(BrowsableAttribute.Default);
 		}
 
-		private bool browsable;
-
-		public static readonly BrowsableAttribute Default = new BrowsableAttribute(true);
+		public static readonly BrowsableAttribute Yes = new BrowsableAttribute(true);
 
 		public static readonly BrowsableAttribute No = new BrowsableAttribute(false);
 
-		public static readonly BrowsableAttribute Yes = new BrowsableAttribute(true);
+		public static readonly BrowsableAttribute Default = BrowsableAttribute.Yes;
+
+		private bool browsable = true;
 	}
 }

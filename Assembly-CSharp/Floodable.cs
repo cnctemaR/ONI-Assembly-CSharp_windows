@@ -31,8 +31,7 @@ public class Floodable : KMonoBehaviour
 		bool flag = false;
 		for (int i = 0; i < this.building.PlacementCells.Length; i++)
 		{
-			int num = this.building.PlacementCells[i];
-			if (Grid.IsSubstantialLiquid(num, 0.35f))
+			if (Grid.IsSubstantialLiquid(this.building.PlacementCells[i], 0.35f))
 			{
 				flag = true;
 				break;

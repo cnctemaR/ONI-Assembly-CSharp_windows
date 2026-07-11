@@ -15,7 +15,7 @@ namespace Klei
 
 		public string GetRoot()
 		{
-			return string.Empty;
+			return "";
 		}
 
 		public byte[] ReadBytes(string filename)
@@ -36,12 +36,12 @@ namespace Klei
 				return;
 			}
 			string[] files = Directory.GetFiles(path);
-			foreach (string text in files)
+			for (int i = 0; i < files.Length; i++)
 			{
-				string text2 = FileSystem.Normalize(text);
-				if (re.IsMatch(text2))
+				string text = FileSystem.Normalize(files[i]);
+				if (re.IsMatch(text))
 				{
-					result.Add(text2);
+					result.Add(text);
 				}
 			}
 		}

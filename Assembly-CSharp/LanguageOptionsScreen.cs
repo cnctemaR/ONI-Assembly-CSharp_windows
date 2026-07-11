@@ -18,8 +18,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 	{
 		base.OnSpawn();
 		this.dismissButton.onClick += this.Deactivate;
-		LocText reference = this.dismissButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Title");
-		reference.SetText(UI.FRONTEND.OPTIONS_SCREEN.BACK);
+		this.dismissButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Title").SetText(UI.FRONTEND.OPTIONS_SCREEN.BACK);
 		this.closeButton.onClick += this.Deactivate;
 		this.workshopButton.onClick += delegate
 		{
@@ -52,7 +51,6 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 			while (enumerator.MoveNext())
 			{
 				string code = enumerator.Current;
-				LanguageOptionsScreen $this = this;
 				if (!(code != Localization.DEFAULT_LANGUAGE_CODE) || File.Exists(Localization.GetPreinstalledLocalizationFilePath(code)))
 				{
 					GameObject gameObject = Util.KInstantiateUI(this.languageButtonPrefab, this.preinstalledLanguagesContainer, false);
@@ -65,13 +63,11 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 					Texture2D preinstalledLocalizationImage = Localization.GetPreinstalledLocalizationImage(code);
 					if (preinstalledLocalizationImage != null)
 					{
-						Image reference2 = component.GetReference<Image>("Image");
-						reference2.sprite = Sprite.Create(preinstalledLocalizationImage, new Rect(Vector2.zero, new Vector2((float)preinstalledLocalizationImage.width, (float)preinstalledLocalizationImage.height)), Vector2.one * 0.5f);
+						component.GetReference<Image>("Image").sprite = Sprite.Create(preinstalledLocalizationImage, new Rect(Vector2.zero, new Vector2((float)preinstalledLocalizationImage.width, (float)preinstalledLocalizationImage.height)), Vector2.one * 0.5f);
 					}
-					KButton component2 = gameObject.GetComponent<KButton>();
-					component2.onClick += delegate
+					gameObject.GetComponent<KButton>().onClick += delegate
 					{
-						$this.ConfirmLanguageChoiceDialog((!(code != Localization.DEFAULT_LANGUAGE_CODE)) ? string.Empty : code, PublishedFileId_t.Invalid);
+						this.ConfirmLanguageChoiceDialog((code != Localization.DEFAULT_LANGUAGE_CODE) ? code : string.Empty, PublishedFileId_t.Invalid);
 					};
 					this.buttons.Add(gameObject);
 				}
@@ -114,21 +110,23 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		Localization.SetFont<ConfirmDialogScreen>(screen, font, locale.IsRightToLeft, excluded_members);
 		Func<LocString, string> func = delegate(LocString loc_string)
 		{
-			string text4;
-			return (!translated_strings.TryGetValue(loc_string.key.String, out text4)) ? loc_string : text4;
+			string text2;
+			if (!translated_strings.TryGetValue(loc_string.key.String, out text2))
+			{
+				return loc_string;
+			}
+			return text2;
 		};
 		ConfirmDialogScreen screen2 = screen;
 		string text = func(UI.CONFIRMDIALOG.DIALOG_HEADER);
-		string text2 = func(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT);
-		string text3 = UI.FRONTEND.TRANSLATIONS_SCREEN.CANCEL;
-		screen2.PopupConfirmDialog(text2, delegate
+		screen2.PopupConfirmDialog(func(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT), delegate
 		{
 			install_language();
 			App.instance.Restart();
 		}, delegate
 		{
 			Localization.SetFont<ConfirmDialogScreen>(screen, Localization.FontAsset, Localization.IsRightToLeft, excluded_members);
-		}, null, null, text, func(UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART), text3, null, true);
+		}, null, null, text, func(UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART), UI.FRONTEND.TRANSLATIONS_SCREEN.CANCEL, null, true);
 	}
 
 	private void ConfirmLanguageChoiceDialog(string selected_preinstalled_translation)
@@ -142,12 +140,12 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 				this.Deactivate();
 				return;
 			}
-			string preinstalledLocalizationFilePath = Localization.GetPreinstalledLocalizationFilePath(selected_preinstalled_translation);
-			string[] array = File.ReadAllLines(preinstalledLocalizationFilePath, Encoding.UTF8);
+			string[] array = File.ReadAllLines(Localization.GetPreinstalledLocalizationFilePath(selected_preinstalled_translation), Encoding.UTF8);
 			this.ConfirmLanguageChoiceDialog(array, false, delegate
 			{
 				Localization.LoadPreinstalledTranslation(selected_preinstalled_translation);
 			});
+			return;
 		}
 		else
 		{
@@ -156,43 +154,38 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 				this.Deactivate();
 				return;
 			}
-			string defaultLocalizationFilePath = Localization.GetDefaultLocalizationFilePath();
-			string[] array2 = File.ReadAllLines(defaultLocalizationFilePath, Encoding.UTF8);
+			string[] array2 = File.ReadAllLines(Localization.GetDefaultLocalizationFilePath(), Encoding.UTF8);
 			this.ConfirmLanguageChoiceDialog(array2, true, delegate
 			{
 				Localization.ClearLanguage();
 			});
+			return;
 		}
 	}
 
 	private void ConfirmLanguageChoiceDialog(string selected_preinstalled_translation, PublishedFileId_t selected_language_pack)
 	{
-		if (selected_language_pack != PublishedFileId_t.Invalid)
-		{
-			Localization.SelectedLanguageType selectedLanguageType = Localization.GetSelectedLanguageType();
-			if (selectedLanguageType == Localization.SelectedLanguageType.UGC && selected_language_pack == this.currentLanguage)
-			{
-				this.Deactivate();
-				return;
-			}
-			global::System.DateTime dateTime;
-			string languageFile = LanguageOptionsScreen.GetLanguageFile(selected_language_pack, out dateTime);
-			string[] array = languageFile.Split(new char[] { '\n' });
-			this.ConfirmLanguageChoiceDialog(array, false, delegate
-			{
-				this.SetCurrentLanguage(selected_language_pack);
-			});
-		}
-		else
+		if (!(selected_language_pack != PublishedFileId_t.Invalid))
 		{
 			this.ConfirmLanguageChoiceDialog(selected_preinstalled_translation);
+			return;
 		}
+		if (Localization.GetSelectedLanguageType() == Localization.SelectedLanguageType.UGC && selected_language_pack == this.currentLanguage)
+		{
+			this.Deactivate();
+			return;
+		}
+		global::System.DateTime dateTime;
+		string[] array = LanguageOptionsScreen.GetLanguageFile(selected_language_pack, out dateTime).Split(new char[] { '\n' });
+		this.ConfirmLanguageChoiceDialog(array, false, delegate
+		{
+			this.SetCurrentLanguage(selected_language_pack);
+		});
 	}
 
 	private ConfirmDialogScreen GetConfirmDialog()
 	{
-		GameObject gameObject = KScreenManager.AddChild(base.transform.parent.gameObject, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject);
-		KScreen component = gameObject.GetComponent<KScreen>();
+		KScreen component = KScreenManager.AddChild(base.transform.parent.gameObject, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<KScreen>();
 		component.Activate();
 		return component.GetComponent<ConfirmDialogScreen>();
 	}
@@ -205,7 +198,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		}
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
-			if ((byte)(mod.available_content & Content.Translation) != 0 && mod.status == Mod.Status.Installed)
+			if ((mod.available_content & Content.Translation) != (Content)0 && mod.status == Mod.Status.Installed)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.languageButtonPrefab, this.ugcLanguagesContainer, false);
 				gameObject.name = mod.title + "_button";
@@ -216,14 +209,12 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 				reference.SetText(string.Format(UI.FRONTEND.TRANSLATIONS_SCREEN.UGC_MOD_TITLE_FORMAT, mod.title));
 				reference.font = fontForLangage;
 				SteamUGCService.Mod mod2 = SteamUGCService.Instance.FindMod(file_id);
-				Texture2D texture2D = ((mod2 == null) ? null : mod2.previewImage);
+				Texture2D texture2D = ((mod2 != null) ? mod2.previewImage : null);
 				if (texture2D != null)
 				{
-					Image reference2 = component.GetReference<Image>("Image");
-					reference2.sprite = Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), Vector2.one * 0.5f);
+					component.GetReference<Image>("Image").sprite = Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), Vector2.one * 0.5f);
 				}
-				KButton component2 = gameObject.GetComponent<KButton>();
-				component2.onClick += delegate
+				gameObject.GetComponent<KButton>().onClick += delegate
 				{
 					this.ConfirmLanguageChoiceDialog(string.Empty, file_id);
 				};
@@ -235,18 +226,15 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 	private void InstallLanguage(PublishedFileId_t item)
 	{
 		this.SetCurrentLanguage(item);
-		ConfirmDialogScreen confirmDialog = this.GetConfirmDialog();
-		confirmDialog.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null, true);
+		this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null, true);
 	}
 
 	private void Uninstall()
 	{
-		ConfirmDialogScreen confirmDialog = this.GetConfirmDialog();
-		confirmDialog.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.ARE_YOU_SURE, delegate
+		this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.ARE_YOU_SURE, delegate
 		{
 			Localization.ClearLanguage();
-			ConfirmDialogScreen confirmDialog2 = this.GetConfirmDialog();
-			confirmDialog2.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null, true);
+			this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null, true);
 		}, delegate
 		{
 		}, null, null, null, null, null, null, true);
@@ -268,15 +256,12 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		if (removed.Contains(publishedFileId_t))
 		{
 			global::Debug.Log("Unsubscribe detected for currently installed font [" + publishedFileId_t + "]");
-			ConfirmDialogScreen confirmDialog = this.GetConfirmDialog();
-			string text = UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT;
-			string text2 = UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART;
-			confirmDialog.PopupConfirmDialog(text, delegate
+			this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, delegate
 			{
 				Localization.ClearLanguage();
 				this.currentLanguage = PublishedFileId_t.Invalid;
 				App.instance.Restart();
-			}, null, null, null, null, text2, null, null, true);
+			}, null, null, null, null, UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART, null, null, true);
 		}
 		if (updated.Contains(publishedFileId_t))
 		{
@@ -328,13 +313,12 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 
 	public static string GetInstalledLanguageCode(out PublishedFileId_t installed)
 	{
-		string text = string.Empty;
+		string text = "";
 		global::System.DateTime dateTime;
 		string languageFilename = LanguageOptionsScreen.GetLanguageFilename(out installed, out dateTime);
 		if (languageFilename != null && File.Exists(languageFilename))
 		{
-			string[] array = File.ReadAllLines(languageFilename, Encoding.UTF8);
-			Localization.Locale locale = Localization.GetLocale(array);
+			Localization.Locale locale = Localization.GetLocale(File.ReadAllLines(languageFilename, Encoding.UTF8));
 			if (locale != null)
 			{
 				text = locale.Code;
@@ -355,9 +339,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		string languageFile = LanguageOptionsScreen.GetLanguageFile(item, out dateTime);
 		if (languageFile != null && languageFile.Length > 0)
 		{
-			string[] array = languageFile.Split(new char[] { '\n' });
-			string fontForLocalisation = LanguageOptionsScreen.GetFontForLocalisation(array);
-			return Localization.GetFont(fontForLocalisation);
+			return Localization.GetFont(LanguageOptionsScreen.GetFontForLocalisation(languageFile.Split(new char[] { '\n' })));
 		}
 		return null;
 	}
@@ -417,14 +399,14 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		lastModified = global::System.DateTime.MinValue;
 		if (Global.Instance == null || Global.Instance.modManager == null)
 		{
-			global::Debug.LogFormat("Failed to load language file from local mod installation...too early in initialization flow.", new object[0]);
+			global::Debug.LogFormat("Failed to load language file from local mod installation...too early in initialization flow.", Array.Empty<object>());
 			return LanguageOptionsScreen.GetLanguageFileFromSteam(item, out lastModified);
 		}
 		string language_id = item.ToString();
 		Mod mod = Global.Instance.modManager.mods.Find((Mod candidate) => candidate.label.id == language_id);
 		if (string.IsNullOrEmpty(mod.label.id))
 		{
-			global::Debug.LogFormat("Failed to load language file from local mod installation...mod not found.", new object[0]);
+			global::Debug.LogFormat("Failed to load language file from local mod installation...mod not found.", Array.Empty<object>());
 			return LanguageOptionsScreen.GetLanguageFileFromSteam(item, out lastModified);
 		}
 		lastModified = mod.label.time_stamp;

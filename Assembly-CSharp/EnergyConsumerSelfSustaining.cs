@@ -6,7 +6,6 @@ using KSerialization;
 [DebuggerDisplay("{name} {WattsUsed}W")]
 public class EnergyConsumerSelfSustaining : EnergyConsumer
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action OnConnectionChanged;
 
 	public override bool IsPowered
@@ -33,26 +32,23 @@ public class EnergyConsumerSelfSustaining : EnergyConsumer
 	public override void SetConnectionStatus(CircuitManager.ConnectionStatus connection_status)
 	{
 		CircuitManager.ConnectionStatus connectionStatus = this.connectionStatus;
-		if (connection_status != CircuitManager.ConnectionStatus.NotConnected)
+		switch (connection_status)
 		{
-			if (connection_status != CircuitManager.ConnectionStatus.Unpowered)
-			{
-				if (connection_status == CircuitManager.ConnectionStatus.Powered)
-				{
-					if (this.connectionStatus != CircuitManager.ConnectionStatus.Powered)
-					{
-						this.connectionStatus = CircuitManager.ConnectionStatus.Powered;
-					}
-				}
-			}
-			else if (this.connectionStatus == CircuitManager.ConnectionStatus.Powered && base.GetComponent<Battery>() == null)
+		case CircuitManager.ConnectionStatus.NotConnected:
+			this.connectionStatus = CircuitManager.ConnectionStatus.NotConnected;
+			break;
+		case CircuitManager.ConnectionStatus.Unpowered:
+			if (this.connectionStatus == CircuitManager.ConnectionStatus.Powered && base.GetComponent<Battery>() == null)
 			{
 				this.connectionStatus = CircuitManager.ConnectionStatus.Unpowered;
 			}
-		}
-		else
-		{
-			this.connectionStatus = CircuitManager.ConnectionStatus.NotConnected;
+			break;
+		case CircuitManager.ConnectionStatus.Powered:
+			if (this.connectionStatus != CircuitManager.ConnectionStatus.Powered)
+			{
+				this.connectionStatus = CircuitManager.ConnectionStatus.Powered;
+			}
+			break;
 		}
 		this.UpdatePoweredStatus();
 		if (connectionStatus != this.connectionStatus && this.OnConnectionChanged != null)

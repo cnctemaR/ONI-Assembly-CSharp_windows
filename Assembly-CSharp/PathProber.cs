@@ -23,11 +23,9 @@ public class PathProber : KMonoBehaviour
 		if (max_probing_radius != 0)
 		{
 			this.PathGrid = new PathGrid(max_probing_radius * 2, max_probing_radius * 2, true, nav_types);
+			return;
 		}
-		else
-		{
-			this.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, nav_types);
-		}
+		this.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, nav_types);
 	}
 
 	public int GetCost(int cell)
@@ -59,10 +57,9 @@ public class PathProber : KMonoBehaviour
 			this.updateCount = 0;
 			bool flag3;
 			PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type, out flag3);
-			PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(cell, nav_type, flags);
-			PathFinder.AddPotential(potentialPath, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, this.Potentials, this.PathGrid, ref cell2);
+			PathFinder.AddPotential(new PathFinder.PotentialPath(cell, nav_type, flags), Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, this.Potentials, this.PathGrid, ref cell2);
 		}
-		int num = ((this.potentialCellsPerUpdate > 0 && !flag) ? this.potentialCellsPerUpdate : int.MaxValue);
+		int num = ((this.potentialCellsPerUpdate <= 0 || flag) ? int.MaxValue : this.potentialCellsPerUpdate);
 		this.updateCount++;
 		while (this.Potentials.Count > 0 && num > 0)
 		{
@@ -77,8 +74,9 @@ public class PathProber : KMonoBehaviour
 		}
 		bool flag4 = this.Potentials.Count == 0;
 		this.PathGrid.EndUpdate(flag4);
-		if (!flag4 || this.updateCount > 25)
+		if (flag4)
 		{
+			int num2 = this.updateCount;
 		}
 	}
 

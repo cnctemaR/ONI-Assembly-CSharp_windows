@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.AccessControl;
@@ -10,6 +10,298 @@ namespace System.IO
 	[ComVisible(true)]
 	public static class Directory
 	{
+		public static string[] GetFiles(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Directory.InternalGetFiles(path, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		public static string[] GetFiles(string path, string searchPattern)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			return Directory.InternalGetFiles(path, searchPattern, SearchOption.TopDirectoryOnly);
+		}
+
+		public static string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchOption != SearchOption.TopDirectoryOnly && searchOption != SearchOption.AllDirectories)
+			{
+				throw new ArgumentOutOfRangeException("searchOption", Environment.GetResourceString("Enum value was out of legal range."));
+			}
+			return Directory.InternalGetFiles(path, searchPattern, searchOption);
+		}
+
+		private static string[] InternalGetFiles(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.InternalGetFileDirectoryNames(path, path, searchPattern, true, false, searchOption, true);
+		}
+
+		[SecurityCritical]
+		internal static string[] UnsafeGetFiles(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.InternalGetFileDirectoryNames(path, path, searchPattern, true, false, searchOption, false);
+		}
+
+		public static string[] GetDirectories(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Directory.InternalGetDirectories(path, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		public static string[] GetDirectories(string path, string searchPattern)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			return Directory.InternalGetDirectories(path, searchPattern, SearchOption.TopDirectoryOnly);
+		}
+
+		public static string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchOption != SearchOption.TopDirectoryOnly && searchOption != SearchOption.AllDirectories)
+			{
+				throw new ArgumentOutOfRangeException("searchOption", Environment.GetResourceString("Enum value was out of legal range."));
+			}
+			return Directory.InternalGetDirectories(path, searchPattern, searchOption);
+		}
+
+		private static string[] InternalGetDirectories(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.InternalGetFileDirectoryNames(path, path, searchPattern, false, true, searchOption, true);
+		}
+
+		[SecurityCritical]
+		internal static string[] UnsafeGetDirectories(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.InternalGetFileDirectoryNames(path, path, searchPattern, false, true, searchOption, false);
+		}
+
+		public static string[] GetFileSystemEntries(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Directory.InternalGetFileSystemEntries(path, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		public static string[] GetFileSystemEntries(string path, string searchPattern)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			return Directory.InternalGetFileSystemEntries(path, searchPattern, SearchOption.TopDirectoryOnly);
+		}
+
+		public static string[] GetFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchOption != SearchOption.TopDirectoryOnly && searchOption != SearchOption.AllDirectories)
+			{
+				throw new ArgumentOutOfRangeException("searchOption", Environment.GetResourceString("Enum value was out of legal range."));
+			}
+			return Directory.InternalGetFileSystemEntries(path, searchPattern, searchOption);
+		}
+
+		private static string[] InternalGetFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.InternalGetFileDirectoryNames(path, path, searchPattern, true, true, searchOption, true);
+		}
+
+		internal static string[] InternalGetFileDirectoryNames(string path, string userPathOriginal, string searchPattern, bool includeFiles, bool includeDirs, SearchOption searchOption, bool checkHost)
+		{
+			return new List<string>(FileSystemEnumerableFactory.CreateFileNameIterator(path, userPathOriginal, searchPattern, includeFiles, includeDirs, searchOption, checkHost)).ToArray();
+		}
+
+		public static IEnumerable<string> EnumerateDirectories(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Directory.InternalEnumerateDirectories(path, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			return Directory.InternalEnumerateDirectories(path, searchPattern, SearchOption.TopDirectoryOnly);
+		}
+
+		public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchOption != SearchOption.TopDirectoryOnly && searchOption != SearchOption.AllDirectories)
+			{
+				throw new ArgumentOutOfRangeException("searchOption", Environment.GetResourceString("Enum value was out of legal range."));
+			}
+			return Directory.InternalEnumerateDirectories(path, searchPattern, searchOption);
+		}
+
+		private static IEnumerable<string> InternalEnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.EnumerateFileSystemNames(path, searchPattern, searchOption, false, true);
+		}
+
+		public static IEnumerable<string> EnumerateFiles(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Directory.InternalEnumerateFiles(path, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		public static IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			return Directory.InternalEnumerateFiles(path, searchPattern, SearchOption.TopDirectoryOnly);
+		}
+
+		public static IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchOption != SearchOption.TopDirectoryOnly && searchOption != SearchOption.AllDirectories)
+			{
+				throw new ArgumentOutOfRangeException("searchOption", Environment.GetResourceString("Enum value was out of legal range."));
+			}
+			return Directory.InternalEnumerateFiles(path, searchPattern, searchOption);
+		}
+
+		private static IEnumerable<string> InternalEnumerateFiles(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.EnumerateFileSystemNames(path, searchPattern, searchOption, true, false);
+		}
+
+		public static IEnumerable<string> EnumerateFileSystemEntries(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Directory.InternalEnumerateFileSystemEntries(path, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			return Directory.InternalEnumerateFileSystemEntries(path, searchPattern, SearchOption.TopDirectoryOnly);
+		}
+
+		public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (searchPattern == null)
+			{
+				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchOption != SearchOption.TopDirectoryOnly && searchOption != SearchOption.AllDirectories)
+			{
+				throw new ArgumentOutOfRangeException("searchOption", Environment.GetResourceString("Enum value was out of legal range."));
+			}
+			return Directory.InternalEnumerateFileSystemEntries(path, searchPattern, searchOption);
+		}
+
+		private static IEnumerable<string> InternalEnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
+		{
+			return Directory.EnumerateFileSystemNames(path, searchPattern, searchOption, true, true);
+		}
+
+		private static IEnumerable<string> EnumerateFileSystemNames(string path, string searchPattern, SearchOption searchOption, bool includeFiles, bool includeDirs)
+		{
+			return FileSystemEnumerableFactory.CreateFileNameIterator(path, path, searchPattern, includeFiles, includeDirs, searchOption, true);
+		}
+
+		public static string GetDirectoryRoot(string path)
+		{
+			Path.Validate(path);
+			return new string(Path.DirectorySeparatorChar, 1);
+		}
+
 		public static DirectoryInfo CreateDirectory(string path)
 		{
 			if (path == null)
@@ -32,14 +324,14 @@ namespace System.IO
 			{
 				throw new IOException("Cannot create " + path + " because a file with the same name already exists.");
 			}
-			if (path == ":")
+			if (Environment.IsRunningOnWindows && path == ":")
 			{
 				throw new ArgumentException("Only ':' In path");
 			}
 			return Directory.CreateDirectoriesInternal(path);
 		}
 
-		[MonoTODO("DirectorySecurity not implemented")]
+		[MonoLimitation("DirectorySecurity not implemented")]
 		public static DirectoryInfo CreateDirectory(string path, DirectorySecurity directorySecurity)
 		{
 			return Directory.CreateDirectory(path);
@@ -57,7 +349,7 @@ namespace System.IO
 				directoryInfo.Parent.Create();
 			}
 			MonoIOError monoIOError;
-			if (!MonoIO.CreateDirectory(path, out monoIOError) && monoIOError != MonoIOError.ERROR_ALREADY_EXISTS && monoIOError != MonoIOError.ERROR_FILE_EXISTS)
+			if (!MonoIO.CreateDirectory(directoryInfo.FullName, out monoIOError) && monoIOError != MonoIOError.ERROR_ALREADY_EXISTS && monoIOError != MonoIOError.ERROR_FILE_EXISTS)
 			{
 				throw MonoIO.GetException(path, monoIOError);
 			}
@@ -66,23 +358,8 @@ namespace System.IO
 
 		public static void Delete(string path)
 		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
-			if (path.Length == 0)
-			{
-				throw new ArgumentException("Path is empty");
-			}
-			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("Path contains invalid chars");
-			}
-			if (path.Trim().Length == 0)
-			{
-				throw new ArgumentException("Only blank characters in path");
-			}
-			if (path == ":")
+			Path.Validate(path);
+			if (Environment.IsRunningOnWindows && path == ":")
 			{
 				throw new NotSupportedException("Only ':' In path");
 			}
@@ -106,7 +383,7 @@ namespace System.IO
 			}
 			if (File.Exists(path))
 			{
-				throw new IOException("Directory does not exist, but a file of the same name exist.");
+				throw new IOException("Directory does not exist, but a file of the same name exists.");
 			}
 			throw new DirectoryNotFoundException("Directory does not exist.");
 		}
@@ -125,30 +402,46 @@ namespace System.IO
 					Directory.RecursiveDelete(text);
 				}
 			}
-			foreach (string text2 in Directory.GetFiles(path))
+			string[] array = Directory.GetFiles(path);
+			for (int i = 0; i < array.Length; i++)
 			{
-				File.Delete(text2);
+				File.Delete(array[i]);
 			}
 			Directory.Delete(path);
 		}
 
 		public static void Delete(string path, bool recursive)
 		{
-			Directory.CheckPathExceptions(path);
+			Path.Validate(path);
 			if (recursive)
 			{
 				Directory.RecursiveDelete(path);
+				return;
 			}
-			else
-			{
-				Directory.Delete(path);
-			}
+			Directory.Delete(path);
 		}
 
 		public static bool Exists(string path)
 		{
+			if (path == null)
+			{
+				return false;
+			}
+			if (!SecurityManager.CheckElevatedPermissions())
+			{
+				return false;
+			}
+			string fullPath;
+			try
+			{
+				fullPath = Path.GetFullPath(path);
+			}
+			catch
+			{
+				return false;
+			}
 			MonoIOError monoIOError;
-			return path != null && MonoIO.ExistsDirectory(path, out monoIOError);
+			return MonoIO.ExistsDirectory(fullPath, out monoIOError);
 		}
 
 		public static DateTime GetLastAccessTime(string path)
@@ -183,92 +476,23 @@ namespace System.IO
 
 		public static string GetCurrentDirectory()
 		{
+			string text = Directory.InsecureGetCurrentDirectory();
+			if (text != null && text.Length > 0 && SecurityManager.SecurityEnabled)
+			{
+				new FileIOPermission(FileIOPermissionAccess.PathDiscovery, text).Demand();
+			}
+			return text;
+		}
+
+		internal static string InsecureGetCurrentDirectory()
+		{
 			MonoIOError monoIOError;
 			string currentDirectory = MonoIO.GetCurrentDirectory(out monoIOError);
 			if (monoIOError != MonoIOError.ERROR_SUCCESS)
 			{
 				throw MonoIO.GetException(monoIOError);
 			}
-			if (currentDirectory != null && currentDirectory.Length > 0 && SecurityManager.SecurityEnabled)
-			{
-				new FileIOPermission(FileIOPermissionAccess.PathDiscovery, currentDirectory).Demand();
-			}
 			return currentDirectory;
-		}
-
-		public static string[] GetDirectories(string path)
-		{
-			return Directory.GetDirectories(path, "*");
-		}
-
-		public static string[] GetDirectories(string path, string searchPattern)
-		{
-			return Directory.GetFileSystemEntries(path, searchPattern, FileAttributes.Directory, FileAttributes.Directory);
-		}
-
-		public static string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
-		{
-			if (searchOption == SearchOption.TopDirectoryOnly)
-			{
-				return Directory.GetDirectories(path, searchPattern);
-			}
-			ArrayList arrayList = new ArrayList();
-			Directory.GetDirectoriesRecurse(path, searchPattern, arrayList);
-			return (string[])arrayList.ToArray(typeof(string));
-		}
-
-		private static void GetDirectoriesRecurse(string path, string searchPattern, ArrayList all)
-		{
-			all.AddRange(Directory.GetDirectories(path, searchPattern));
-			foreach (string text in Directory.GetDirectories(path))
-			{
-				Directory.GetDirectoriesRecurse(text, searchPattern, all);
-			}
-		}
-
-		public static string GetDirectoryRoot(string path)
-		{
-			return new string(Path.DirectorySeparatorChar, 1);
-		}
-
-		public static string[] GetFiles(string path)
-		{
-			return Directory.GetFiles(path, "*");
-		}
-
-		public static string[] GetFiles(string path, string searchPattern)
-		{
-			return Directory.GetFileSystemEntries(path, searchPattern, FileAttributes.Directory, (FileAttributes)0);
-		}
-
-		public static string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
-		{
-			if (searchOption == SearchOption.TopDirectoryOnly)
-			{
-				return Directory.GetFiles(path, searchPattern);
-			}
-			ArrayList arrayList = new ArrayList();
-			Directory.GetFilesRecurse(path, searchPattern, arrayList);
-			return (string[])arrayList.ToArray(typeof(string));
-		}
-
-		private static void GetFilesRecurse(string path, string searchPattern, ArrayList all)
-		{
-			all.AddRange(Directory.GetFiles(path, searchPattern));
-			foreach (string text in Directory.GetDirectories(path))
-			{
-				Directory.GetFilesRecurse(text, searchPattern, all);
-			}
-		}
-
-		public static string[] GetFileSystemEntries(string path)
-		{
-			return Directory.GetFileSystemEntries(path, "*");
-		}
-
-		public static string[] GetFileSystemEntries(string path, string searchPattern)
-		{
-			return Directory.GetFileSystemEntries(path, searchPattern, (FileAttributes)0, (FileAttributes)0);
 		}
 
 		public static string[] GetLogicalDrives()
@@ -283,18 +507,7 @@ namespace System.IO
 
 		public static DirectoryInfo GetParent(string path)
 		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
-			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("Path contains invalid characters");
-			}
-			if (path.Length == 0)
-			{
-				throw new ArgumentException("The Path do not have a valid format");
-			}
+			Path.Validate(path);
 			if (Directory.IsRootDirectory(path))
 			{
 				return null;
@@ -346,7 +559,11 @@ namespace System.IO
 
 		public static void SetAccessControl(string path, DirectorySecurity directorySecurity)
 		{
-			throw new NotImplementedException();
+			if (directorySecurity == null)
+			{
+				throw new ArgumentNullException("directorySecurity");
+			}
+			directorySecurity.PersistModifications(path);
 		}
 
 		public static void SetCreationTime(string path, DateTime creationTime)
@@ -359,7 +576,7 @@ namespace System.IO
 			Directory.SetCreationTime(path, creationTimeUtc.ToLocalTime());
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 		public static void SetCurrentDirectory(string path)
 		{
 			if (path == null)
@@ -402,98 +619,55 @@ namespace System.IO
 			Directory.SetLastWriteTime(path, lastWriteTimeUtc.ToLocalTime());
 		}
 
-		private static void CheckPathExceptions(string path)
+		public static DirectorySecurity GetAccessControl(string path, AccessControlSections includeSections)
 		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
-			if (path.Length == 0)
-			{
-				throw new ArgumentException("Path is Empty");
-			}
-			if (path.Trim().Length == 0)
-			{
-				throw new ArgumentException("Only blank characters in path");
-			}
-			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("Path contains invalid chars");
-			}
+			return new DirectorySecurity(path, includeSections);
 		}
 
-		private static string[] GetFileSystemEntries(string path, string searchPattern, FileAttributes mask, FileAttributes attrs)
+		public static DirectorySecurity GetAccessControl(string path)
 		{
-			if (path == null || searchPattern == null)
+			return Directory.GetAccessControl(path, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+		}
+
+		internal static string GetDemandDir(string fullPath, bool thisDirOnly)
+		{
+			string text;
+			if (thisDirOnly)
 			{
-				throw new ArgumentNullException();
-			}
-			if (searchPattern.Length == 0)
-			{
-				return new string[0];
-			}
-			if (path.Trim().Length == 0)
-			{
-				throw new ArgumentException("The Path does not have a valid format");
-			}
-			string text = Path.Combine(path, searchPattern);
-			string directoryName = Path.GetDirectoryName(text);
-			if (directoryName.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("Path contains invalid characters");
-			}
-			MonoIOError monoIOError;
-			if (directoryName.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				if (path.IndexOfAny(SearchPattern.InvalidChars) == -1)
+				if (fullPath.EndsWith(Path.DirectorySeparatorChar) || fullPath.EndsWith(Path.AltDirectorySeparatorChar))
 				{
-					throw new ArgumentException("Path contains invalid characters", "path");
+					text = fullPath + ".";
 				}
-				throw new ArgumentException("Pattern contains invalid characters", "pattern");
+				else
+				{
+					text = fullPath + Path.DirectorySeparatorCharAsString + ".";
+				}
 			}
-			else if (!MonoIO.ExistsDirectory(directoryName, out monoIOError))
+			else if (!fullPath.EndsWith(Path.DirectorySeparatorChar) && !fullPath.EndsWith(Path.AltDirectorySeparatorChar))
 			{
-				MonoIOError monoIOError2;
-				if (monoIOError == MonoIOError.ERROR_SUCCESS && MonoIO.ExistsFile(directoryName, out monoIOError2))
-				{
-					return new string[] { directoryName };
-				}
-				if (monoIOError != MonoIOError.ERROR_PATH_NOT_FOUND)
-				{
-					throw MonoIO.GetException(directoryName, monoIOError);
-				}
-				if (directoryName.IndexOfAny(SearchPattern.WildcardChars) == -1)
-				{
-					throw new DirectoryNotFoundException("Directory '" + directoryName + "' not found.");
-				}
-				if (path.IndexOfAny(SearchPattern.WildcardChars) == -1)
-				{
-					throw new ArgumentException("Pattern is invalid", "searchPattern");
-				}
-				throw new ArgumentException("Path is invalid", "path");
+				text = fullPath + Path.DirectorySeparatorCharAsString;
 			}
 			else
 			{
-				string text2 = Path.Combine(directoryName, searchPattern);
-				string[] fileSystemEntries = MonoIO.GetFileSystemEntries(path, text2, (int)attrs, (int)mask, out monoIOError);
-				if (monoIOError != MonoIOError.ERROR_SUCCESS)
-				{
-					throw MonoIO.GetException(directoryName, monoIOError);
-				}
-				return fileSystemEntries;
+				text = fullPath;
 			}
+			return text;
 		}
 
-		[MonoNotSupported("DirectorySecurity isn't implemented")]
-		public static DirectorySecurity GetAccessControl(string path, AccessControlSections includeSections)
+		internal sealed class SearchData
 		{
-			throw new PlatformNotSupportedException();
-		}
+			public SearchData(string fullPath, string userPath, SearchOption searchOption)
+			{
+				this.fullPath = fullPath;
+				this.userPath = userPath;
+				this.searchOption = searchOption;
+			}
 
-		[MonoNotSupported("DirectorySecurity isn't implemented")]
-		public static DirectorySecurity GetAccessControl(string path)
-		{
-			throw new PlatformNotSupportedException();
+			public readonly string fullPath;
+
+			public readonly string userPath;
+
+			public readonly SearchOption searchOption;
 		}
 	}
 }

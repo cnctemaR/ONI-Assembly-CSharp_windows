@@ -30,9 +30,8 @@ namespace System.Runtime.Remoting
 				}
 				else
 				{
-					ICustomAttributeProvider customAttributeProvider = (ICustomAttributeProvider)reflectionObject;
-					object[] customAttributes = customAttributeProvider.GetCustomAttributes(typeof(SoapAttribute), true);
-					if (customAttributes.Length > 0)
+					object[] customAttributes = ((ICustomAttributeProvider)reflectionObject).GetCustomAttributes(typeof(SoapAttribute), true);
+					if (customAttributes.Length != 0)
 					{
 						soapAttribute = (SoapAttribute)customAttributes[0];
 					}

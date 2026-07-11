@@ -29,11 +29,9 @@ namespace Database
 			if (attribute == null)
 			{
 				Debug.LogWarning("Attribute does not exist: " + attribute_name);
+				return;
 			}
-			else
-			{
-				personality.SetAttribute(attribute, value);
-			}
+			personality.SetAttribute(attribute, value);
 		}
 
 		public class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>

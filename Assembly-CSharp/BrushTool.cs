@@ -40,8 +40,7 @@ public class BrushTool : InterfaceTool
 		{
 			for (int j = 0; j < this.brushRadius * 2; j++)
 			{
-				float num = Vector2.Distance(new Vector2((float)i, (float)j), new Vector2((float)this.brushRadius, (float)this.brushRadius));
-				if (num < (float)this.brushRadius - 0.8f)
+				if (Vector2.Distance(new Vector2((float)i, (float)j), new Vector2((float)this.brushRadius, (float)this.brushRadius)) < (float)this.brushRadius - 0.8f)
 				{
 					this.brushOffsets.Add(new Vector2((float)(i - this.brushRadius), (float)(j - this.brushRadius)));
 				}
@@ -68,8 +67,7 @@ public class BrushTool : InterfaceTool
 			this.areaVisualizer = Util.KInstantiate(this.areaVisualizer, null, null);
 			this.areaVisualizer.SetActive(false);
 			this.areaVisualizer.GetComponent<RectTransform>().SetParent(base.transform);
-			Renderer component = this.areaVisualizer.GetComponent<Renderer>();
-			component.material.color = this.areaColour;
+			this.areaVisualizer.GetComponent<Renderer>().material.color = this.areaColour;
 		}
 	}
 
@@ -109,19 +107,18 @@ public class BrushTool : InterfaceTool
 		}
 		this.dragging = false;
 		BrushTool.DragAxis dragAxis = this.dragAxis;
-		if (dragAxis != BrushTool.DragAxis.Horizontal)
-		{
-			if (dragAxis == BrushTool.DragAxis.Vertical)
-			{
-				cursor_pos.x = this.downPos.x;
-				this.dragAxis = BrushTool.DragAxis.None;
-			}
-		}
-		else
+		if (dragAxis == BrushTool.DragAxis.Horizontal)
 		{
 			cursor_pos.y = this.downPos.y;
 			this.dragAxis = BrushTool.DragAxis.None;
+			return;
 		}
+		if (dragAxis != BrushTool.DragAxis.Vertical)
+		{
+			return;
+		}
+		cursor_pos.x = this.downPos.x;
+		this.dragAxis = BrushTool.DragAxis.None;
 	}
 
 	protected virtual string GetConfirmSound()
@@ -151,12 +148,9 @@ public class BrushTool : InterfaceTool
 	{
 		foreach (int num in this.cellsInRadius)
 		{
-			if (Grid.IsValidCell(num))
+			if (Grid.IsValidCell(num) && (!Grid.Foundation[num] || this.affectFoundation))
 			{
-				if (!Grid.Foundation[num] || this.affectFoundation)
-				{
-					this.OnPaintCell(num, Grid.GetCellDistance(this.currentCell, num));
-				}
+				this.OnPaintCell(num, Grid.GetCellDistance(this.currentCell, num));
 			}
 		}
 	}

@@ -6,14 +6,6 @@ namespace ProcGen.Noise
 {
 	public class Selector : NoiseBase
 	{
-		public Selector()
-		{
-			this.selectType = Selector.SelectType.Blend;
-			this.lower = 0f;
-			this.upper = 1f;
-			this.edge = 0.02f;
-		}
-
 		public override Type GetObjectType()
 		{
 			return typeof(Selector);
@@ -26,6 +18,14 @@ namespace ProcGen.Noise
 		public float upper { get; set; }
 
 		public float edge { get; set; }
+
+		public Selector()
+		{
+			this.selectType = Selector.SelectType.Blend;
+			this.lower = 0f;
+			this.upper = 1f;
+			this.edge = 0.02f;
+		}
 
 		public IModule3D CreateModule()
 		{

@@ -9,21 +9,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				throw null;
+				return this.m_IsFixedLength;
 			}
 			set
 			{
-			}
-		}
-
-		public bool IsNullable
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
+				this.m_IsFixedLength = value;
 			}
 		}
 
@@ -31,10 +21,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				throw null;
+				return this.m_MaxSize;
 			}
 			set
 			{
+				this.m_MaxSize = value;
 			}
 		}
 
@@ -42,10 +33,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				throw null;
+				return this.m_Precision;
 			}
 			set
 			{
+				this.m_Precision = value;
 			}
 		}
 
@@ -53,11 +45,34 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				throw null;
+				return this.m_Scale;
 			}
 			set
 			{
+				this.m_Scale = value;
 			}
 		}
+
+		public bool IsNullable
+		{
+			get
+			{
+				return this.m_IsNullable;
+			}
+			set
+			{
+				this.m_IsNullable = value;
+			}
+		}
+
+		private bool m_IsFixedLength;
+
+		private int m_MaxSize;
+
+		private int m_Scale;
+
+		private int m_Precision;
+
+		private bool m_IsNullable;
 	}
 }

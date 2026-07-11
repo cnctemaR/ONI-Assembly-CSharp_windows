@@ -7,5 +7,10 @@ namespace System.Net.NetworkInformation
 		public abstract int Index { get; }
 
 		public abstract int Mtu { get; }
+
+		public virtual long GetScopeId(ScopeLevel scopeLevel)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

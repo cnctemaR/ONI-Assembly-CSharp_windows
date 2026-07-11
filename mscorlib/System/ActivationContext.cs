@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using Unity;
 
 namespace System
 {
@@ -11,15 +12,6 @@ namespace System
 		private ActivationContext(ApplicationIdentity identity)
 		{
 			this._appid = identity;
-		}
-
-		[MonoTODO("Missing serialization support")]
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
 		}
 
 		~ActivationContext()
@@ -77,16 +69,45 @@ namespace System
 		{
 			if (this._disposed)
 			{
-				if (disposing)
-				{
-				}
 				this._disposed = true;
 			}
 		}
 
-		private ActivationContext.ContextForm _form;
+		[MonoTODO("Missing serialization support")]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+		}
+
+		internal ActivationContext()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		public byte[] ApplicationManifestBytes
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+		}
+
+		public byte[] DeploymentManifestBytes
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+		}
 
 		private ApplicationIdentity _appid;
+
+		private ActivationContext.ContextForm _form;
 
 		private bool _disposed;
 

@@ -8,11 +8,11 @@ namespace System.IO.IsolatedStorage
 	[ComVisible(true)]
 	public abstract class IsolatedStorage : MarshalByRefObject
 	{
-		[MonoTODO("requires manifest support")]
+		[MonoTODO("Does not currently use the manifest support")]
 		[ComVisible(false)]
 		public object ApplicationIdentity
 		{
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 			get
 			{
 				if ((this.storage_scope & IsolatedStorageScope.Application) == IsolatedStorageScope.None)
@@ -29,7 +29,7 @@ namespace System.IO.IsolatedStorage
 
 		public object AssemblyIdentity
 		{
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 			get
 			{
 				if ((this.storage_scope & IsolatedStorageScope.Assembly) == IsolatedStorageScope.None)
@@ -45,6 +45,7 @@ namespace System.IO.IsolatedStorage
 		}
 
 		[CLSCompliant(false)]
+		[Obsolete]
 		public virtual ulong CurrentSize
 		{
 			get
@@ -55,7 +56,7 @@ namespace System.IO.IsolatedStorage
 
 		public object DomainIdentity
 		{
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 			get
 			{
 				if ((this.storage_scope & IsolatedStorageScope.Domain) == IsolatedStorageScope.None)
@@ -70,6 +71,7 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
+		[Obsolete]
 		[CLSCompliant(false)]
 		public virtual ulong MaximumSize
 		{
@@ -84,6 +86,33 @@ namespace System.IO.IsolatedStorage
 			get
 			{
 				return this.storage_scope;
+			}
+		}
+
+		[ComVisible(false)]
+		public virtual long AvailableFreeSpace
+		{
+			get
+			{
+				throw new InvalidOperationException("This property is not defined for this store.");
+			}
+		}
+
+		[ComVisible(false)]
+		public virtual long Quota
+		{
+			get
+			{
+				throw new InvalidOperationException("This property is not defined for this store.");
+			}
+		}
+
+		[ComVisible(false)]
+		public virtual long UsedSize
+		{
+			get
+			{
+				throw new InvalidOperationException("This property is not defined for this store.");
 			}
 		}
 
@@ -107,10 +136,8 @@ namespace System.IO.IsolatedStorage
 
 		protected void InitStore(IsolatedStorageScope scope, Type domainEvidenceType, Type assemblyEvidenceType)
 		{
-			switch (scope)
+			if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Assembly) || scope == (IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly))
 			{
-			case IsolatedStorageScope.User | IsolatedStorageScope.Assembly:
-			case IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly:
 				throw new NotImplementedException(scope.ToString());
 			}
 			throw new ArgumentException(scope.ToString());
@@ -123,13 +150,17 @@ namespace System.IO.IsolatedStorage
 			{
 				throw new IsolatedStorageException(Locale.GetText("No ApplicationIdentity available for AppDomain."));
 			}
-			if (appEvidenceType == null)
-			{
-			}
+			appEvidenceType == null;
 			this.storage_scope = scope;
 		}
 
 		public abstract void Remove();
+
+		[ComVisible(false)]
+		public virtual bool IncreaseQuotaTo(long newQuotaSize)
+		{
+			return false;
+		}
 
 		internal IsolatedStorageScope storage_scope;
 

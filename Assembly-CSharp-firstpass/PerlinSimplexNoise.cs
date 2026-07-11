@@ -72,7 +72,11 @@ public static class PerlinSimplexNoise
 
 	private static int fastfloor(float x)
 	{
-		return (x <= 0f) ? ((int)x - 1) : ((int)x);
+		if (x <= 0f)
+		{
+			return (int)x - 1;
+		}
+		return (int)x;
 	}
 
 	private static float dot(int[] g, float x, float y)
@@ -297,8 +301,7 @@ public static class PerlinSimplexNoise
 			num26 *= num26;
 			num27 = num26 * num26 * PerlinSimplexNoise.dot(PerlinSimplexNoise.grad3[num21], num15, num16);
 		}
-		float num28 = 70f * (num23 + num25 + num27);
-		return (num28 + 1f) * 0.5f;
+		return (70f * (num23 + num25 + num27) + 1f) * 0.5f;
 	}
 
 	private static int[][] grad3;

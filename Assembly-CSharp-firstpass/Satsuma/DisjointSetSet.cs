@@ -4,13 +4,13 @@ namespace Satsuma
 {
 	public struct DisjointSetSet<T> : IEquatable<DisjointSetSet<T>>
 	{
+		public T Representative { get; private set; }
+
 		public DisjointSetSet(T representative)
 		{
 			this = default(DisjointSetSet<T>);
 			this.Representative = representative;
 		}
-
-		public T Representative { get; private set; }
 
 		public bool Equals(DisjointSetSet<T> other)
 		{

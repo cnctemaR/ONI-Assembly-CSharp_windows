@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
 	internal class WritableAttribute : Attribute
 	{
 	}

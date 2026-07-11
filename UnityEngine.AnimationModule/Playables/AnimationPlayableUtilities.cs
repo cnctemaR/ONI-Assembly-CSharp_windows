@@ -3,17 +3,8 @@ using UnityEngine.Animations;
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>Implements high-level utility methods to simplify use of the Playable API with Animations.</para>
-	/// </summary>
 	public static class AnimationPlayableUtilities
 	{
-		/// <summary>
-		///   <para>Plays the Playable on  the given Animator.</para>
-		/// </summary>
-		/// <param name="animator">Target Animator.</param>
-		/// <param name="playable">The Playable that will be played.</param>
-		/// <param name="graph">The Graph that owns the Playable.</param>
 		public static void Play(Animator animator, Playable playable, PlayableGraph graph)
 		{
 			AnimationPlayableOutput animationPlayableOutput = AnimationPlayableOutput.Create(graph, "AnimationClip", animator);

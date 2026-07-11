@@ -4,14 +4,6 @@ using UnityEngine;
 
 public class CmpFns
 {
-	public CmpFns(Type type)
-	{
-		Type[] array = new Type[] { type };
-		this.mFindOrAddFn = this.GetMethod("FindOrAddComponent", array);
-		this.mFindFn = this.GetMethod("FindComponent", array);
-		this.mRequireFn = this.GetMethod("RequireComponent", array);
-	}
-
 	public static Component FindComponent<T>(MonoBehaviour c) where T : Component
 	{
 		return c.FindComponent<T>();
@@ -27,6 +19,14 @@ public class CmpFns
 		return c.FindOrAddComponent<T>();
 	}
 
+	public CmpFns(Type type)
+	{
+		Type[] array = new Type[] { type };
+		this.mFindOrAddFn = this.GetMethod("FindOrAddComponent", array);
+		this.mFindFn = this.GetMethod("FindComponent", array);
+		this.mRequireFn = this.GetMethod("RequireComponent", array);
+	}
+
 	private Func<KMonoBehaviour, Component> GetMethod(string name, Type[] type_array)
 	{
 		MethodInfo method = typeof(CmpFns).GetMethod(name);
@@ -38,9 +38,9 @@ public class CmpFns
 		catch (Exception ex)
 		{
 			global::Debug.LogError(ex);
-			foreach (Type type in type_array)
+			for (int i = 0; i < type_array.Length; i++)
 			{
-				global::Debug.Log(type);
+				global::Debug.Log(type_array[i]);
 			}
 		}
 		return (Func<KMonoBehaviour, Component>)Delegate.CreateDelegate(typeof(Func<KMonoBehaviour, Component>), methodInfo);

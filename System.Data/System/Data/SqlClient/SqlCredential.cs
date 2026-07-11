@@ -6,24 +6,38 @@ namespace System.Data.SqlClient
 	[Serializable]
 	public sealed class SqlCredential
 	{
-		public SqlCredential(string user, SecureString password)
+		public SqlCredential(string userId, SecureString password)
 		{
-		}
-
-		public SecureString Password
-		{
-			get
+			if (userId == null)
 			{
-				throw null;
+				throw new ArgumentNullException("userId");
 			}
+			if (password == null)
+			{
+				throw new ArgumentNullException("password");
+			}
+			this.uid = userId;
+			this.pwd = password;
 		}
 
 		public string UserId
 		{
 			get
 			{
-				throw null;
+				return this.uid;
 			}
 		}
+
+		public SecureString Password
+		{
+			get
+			{
+				return this.pwd;
+			}
+		}
+
+		private string uid = "";
+
+		private SecureString pwd;
 	}
 }

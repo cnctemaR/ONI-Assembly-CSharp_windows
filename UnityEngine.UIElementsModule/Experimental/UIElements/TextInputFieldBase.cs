@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine.Experimental.UIElements.StyleSheets;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Abstract base class used for all text-based fields.</para>
-	/// </summary>
-	public abstract class TextInputFieldBase<T> : BaseTextControl<T>, ITextInputField, IEventHandler
+	public abstract class TextInputFieldBase<T> : BaseField<T>, ITextInputField, IEventHandler, ITextElement
 	{
 		public TextInputFieldBase(int maxLength, char maskChar)
 		{
+			base.requireMeasureFunction = true;
+			this.m_Text = "";
 			this.maxLength = maxLength;
 			this.maskChar = maskChar;
 			this.editorEngine = new TextEditorEngine(new TextEditorEngine.OnDetectFocusChangeFunction(this.OnDetectFocusChange), new TextEditorEngine.OnIndexChangeFunction(this.OnCursorIndexChange));
@@ -25,6 +23,23 @@ namespace UnityEngine.Experimental.UIElements
 				this.editorEventHandler = new KeyboardTextEditorEventHandler(this.editorEngine, this);
 			}
 			this.editorEngine.style = new GUIStyle(this.editorEngine.style);
+		}
+
+		public string text
+		{
+			get
+			{
+				return this.m_Text;
+			}
+			protected set
+			{
+				if (!(this.m_Text == value))
+				{
+					this.m_Text = value;
+					this.editorEngine.text = value;
+					base.IncrementVersion(VersionChangeType.Layout);
+				}
+			}
 		}
 
 		public void SelectAll()
@@ -43,7 +58,7 @@ namespace UnityEngine.Experimental.UIElements
 				{
 					pooled.target = this;
 					this.text = value;
-					UIElementsUtility.eventDispatcher.DispatchEvent(pooled, base.panel);
+					this.SendEvent(pooled);
 				}
 			}
 		}
@@ -71,6 +86,14 @@ namespace UnityEngine.Experimental.UIElements
 			get
 			{
 				return this.editorEngine.cursorIndex;
+			}
+		}
+
+		public int selectIndex
+		{
+			get
+			{
+				return this.editorEngine.selectIndex;
 			}
 		}
 
@@ -104,38 +127,29 @@ namespace UnityEngine.Experimental.UIElements
 
 		public char maskChar { get; set; }
 
-		public override string text
+		private DropdownMenu.MenuAction.StatusFlags CutCopyActionStatus(DropdownMenu.MenuAction a)
 		{
-			protected set
-			{
-				base.text = value;
-				this.editorEngine.text = value;
-			}
+			return (!this.editorEngine.hasSelection || this.isPasswordField) ? DropdownMenu.MenuAction.StatusFlags.Disabled : DropdownMenu.MenuAction.StatusFlags.Normal;
 		}
 
-		private ContextualMenu.MenuAction.StatusFlags CutCopyActionStatus(ContextualMenu.MenuAction a)
+		private DropdownMenu.MenuAction.StatusFlags PasteActionStatus(DropdownMenu.MenuAction a)
 		{
-			return (!this.editorEngine.hasSelection || this.isPasswordField) ? ContextualMenu.MenuAction.StatusFlags.Disabled : ContextualMenu.MenuAction.StatusFlags.Normal;
+			return (!this.editorEngine.CanPaste()) ? DropdownMenu.MenuAction.StatusFlags.Disabled : DropdownMenu.MenuAction.StatusFlags.Normal;
 		}
 
-		private ContextualMenu.MenuAction.StatusFlags PasteActionStatus(ContextualMenu.MenuAction a)
-		{
-			return (!this.editorEngine.CanPaste()) ? ContextualMenu.MenuAction.StatusFlags.Disabled : ContextualMenu.MenuAction.StatusFlags.Normal;
-		}
-
-		private void Cut(ContextualMenu.MenuAction a)
+		private void Cut(DropdownMenu.MenuAction a)
 		{
 			this.editorEngine.Cut();
 			this.editorEngine.text = this.CullString(this.editorEngine.text);
 			this.UpdateText(this.editorEngine.text);
 		}
 
-		private void Copy(ContextualMenu.MenuAction a)
+		private void Copy(DropdownMenu.MenuAction a)
 		{
 			this.editorEngine.Copy();
 		}
 
-		private void Paste(ContextualMenu.MenuAction a)
+		private void Paste(DropdownMenu.MenuAction a)
 		{
 			this.editorEngine.Paste();
 			this.editorEngine.text = this.CullString(this.editorEngine.text);
@@ -172,8 +186,9 @@ namespace UnityEngine.Experimental.UIElements
 			return text;
 		}
 
-		internal override void DoRepaint(IStylePainter painter)
+		protected override void DoRepaint(IStylePainter painter)
 		{
+			IStylePainterInternal stylePainterInternal = (IStylePainterInternal)painter;
 			if (this.touchScreenTextField)
 			{
 				TouchScreenTextEditorEventHandler touchScreenTextEditorEventHandler = this.editorEventHandler as TouchScreenTextEditorEventHandler;
@@ -191,20 +206,19 @@ namespace UnityEngine.Experimental.UIElements
 				{
 					text = "".PadRight(touchScreenTextEditorEventHandler.secureText.Length, this.maskChar);
 				}
-				base.DoRepaint(painter);
 				this.text = text;
 			}
 			else if (!this.hasFocus)
 			{
-				base.DoRepaint(painter);
+				stylePainterInternal.DrawText(this.text);
 			}
 			else
 			{
-				this.DrawWithTextSelectionAndCursor(painter, this.text);
+				this.DrawWithTextSelectionAndCursor(stylePainterInternal, this.text);
 			}
 		}
 
-		internal void DrawWithTextSelectionAndCursor(IStylePainter painter, string newText)
+		internal void DrawWithTextSelectionAndCursor(IStylePainterInternal painter, string newText)
 		{
 			KeyboardTextEditorEventHandler keyboardTextEditorEventHandler = this.editorEventHandler as KeyboardTextEditorEventHandler;
 			if (keyboardTextEditorEventHandler != null)
@@ -215,89 +229,91 @@ namespace UnityEngine.Experimental.UIElements
 				Rect localPosition = this.editorEngine.localPosition;
 				Vector2 scrollOffset = this.editorEngine.scrollOffset;
 				IStyle style = base.style;
-				TextStylePainterParameters textStylePainterParameters = painter.GetDefaultTextParameters(this);
+				float num = TextNative.ComputeTextScaling(base.worldTransform, GUIUtility.pixelsPerPoint);
+				TextStylePainterParameters textStylePainterParameters = TextStylePainterParameters.GetDefault(this, this.text);
 				textStylePainterParameters.text = " ";
 				textStylePainterParameters.wordWrapWidth = 0f;
 				textStylePainterParameters.wordWrap = false;
-				float num = painter.ComputeTextHeight(textStylePainterParameters);
-				float width = base.contentRect.width;
-				Input.compositionCursorPos = this.editorEngine.graphicalCursorPos - scrollOffset + new Vector2(localPosition.x, localPosition.y + num);
+				TextNativeSettings textNativeSettings = textStylePainterParameters.GetTextNativeSettings(num);
+				float num2 = TextNative.ComputeTextHeight(textNativeSettings);
+				float num3 = ((!this.editorEngine.multiline) ? 0f : base.contentRect.width);
+				Input.compositionCursorPos = this.editorEngine.graphicalCursorPos - scrollOffset + new Vector2(localPosition.x, localPosition.y + num2);
 				Color specifiedValueOrDefault = this.m_CursorColor.GetSpecifiedValueOrDefault(Color.grey);
-				int num2 = ((!string.IsNullOrEmpty(Input.compositionString)) ? (cursorIndex + Input.compositionString.Length) : selectIndex);
-				painter.DrawBackground(this);
-				if (cursorIndex != num2)
+				int num4 = ((!string.IsNullOrEmpty(Input.compositionString)) ? (cursorIndex + Input.compositionString.Length) : selectIndex);
+				if (cursorIndex != num4)
 				{
-					RectStylePainterParameters defaultRectParameters = painter.GetDefaultRectParameters(this);
-					defaultRectParameters.color = this.selectionColor;
-					defaultRectParameters.border.SetWidth(0f);
-					defaultRectParameters.border.SetRadius(0f);
-					int num3 = ((cursorIndex >= num2) ? num2 : cursorIndex);
-					int num4 = ((cursorIndex <= num2) ? num2 : cursorIndex);
-					CursorPositionStylePainterParameters cursorPositionStylePainterParameters = painter.GetDefaultCursorPositionParameters(this);
+					RectStylePainterParameters @default = RectStylePainterParameters.GetDefault(this);
+					@default.color = this.selectionColor;
+					@default.border.SetWidth(0f);
+					@default.border.SetRadius(0f);
+					int num5 = ((cursorIndex >= num4) ? num4 : cursorIndex);
+					int num6 = ((cursorIndex <= num4) ? num4 : cursorIndex);
+					CursorPositionStylePainterParameters cursorPositionStylePainterParameters = CursorPositionStylePainterParameters.GetDefault(this, this.text);
 					cursorPositionStylePainterParameters.text = this.editorEngine.text;
-					cursorPositionStylePainterParameters.wordWrapWidth = width;
-					cursorPositionStylePainterParameters.cursorIndex = num3;
-					Vector2 vector = painter.GetCursorPosition(cursorPositionStylePainterParameters);
-					cursorPositionStylePainterParameters.cursorIndex = num4;
-					Vector2 vector2 = painter.GetCursorPosition(cursorPositionStylePainterParameters);
+					cursorPositionStylePainterParameters.wordWrapWidth = num3;
+					cursorPositionStylePainterParameters.cursorIndex = num5;
+					textNativeSettings = cursorPositionStylePainterParameters.GetTextNativeSettings(num);
+					Vector2 vector = TextNative.GetCursorPosition(textNativeSettings, cursorPositionStylePainterParameters.rect, num5);
+					Vector2 vector2 = TextNative.GetCursorPosition(textNativeSettings, cursorPositionStylePainterParameters.rect, num6);
 					vector -= scrollOffset;
 					vector2 -= scrollOffset;
 					if (Mathf.Approximately(vector.y, vector2.y))
 					{
-						defaultRectParameters.rect = new Rect(vector.x, vector.y, vector2.x - vector.x, num);
-						painter.DrawRect(defaultRectParameters);
+						@default.rect = new Rect(vector.x, vector.y, vector2.x - vector.x, num2);
+						painter.DrawRect(@default);
 					}
 					else
 					{
-						defaultRectParameters.rect = new Rect(vector.x, vector.y, base.contentRect.xMax - vector.x, num);
-						painter.DrawRect(defaultRectParameters);
-						float num5 = vector2.y - vector.y - num;
-						if (num5 > 0f)
+						@default.rect = new Rect(vector.x, vector.y, base.contentRect.xMax - vector.x, num2);
+						painter.DrawRect(@default);
+						float num7 = vector2.y - vector.y - num2;
+						if (num7 > 0f)
 						{
-							defaultRectParameters.rect = new Rect(base.contentRect.x, vector.y + num, width, num5);
-							painter.DrawRect(defaultRectParameters);
+							@default.rect = new Rect(base.contentRect.x, vector.y + num2, num3, num7);
+							painter.DrawRect(@default);
 						}
 						if (vector2.x != base.contentRect.x)
 						{
-							defaultRectParameters.rect = new Rect(base.contentRect.x, vector2.y, vector2.x, num);
-							painter.DrawRect(defaultRectParameters);
+							@default.rect = new Rect(base.contentRect.x, vector2.y, vector2.x, num2);
+							painter.DrawRect(@default);
 						}
 					}
 				}
-				painter.DrawBorder(this);
 				if (!string.IsNullOrEmpty(this.editorEngine.text) && base.contentRect.width > 0f && base.contentRect.height > 0f)
 				{
-					textStylePainterParameters = painter.GetDefaultTextParameters(this);
+					textStylePainterParameters = TextStylePainterParameters.GetDefault(this, this.text);
 					textStylePainterParameters.rect = new Rect(base.contentRect.x - scrollOffset.x, base.contentRect.y - scrollOffset.y, base.contentRect.width, base.contentRect.height);
 					textStylePainterParameters.text = this.editorEngine.text;
 					painter.DrawText(textStylePainterParameters);
 				}
-				if (cursorIndex == num2 && style.font != null)
+				if (cursorIndex == num4 && style.font != null)
 				{
-					CursorPositionStylePainterParameters cursorPositionStylePainterParameters = painter.GetDefaultCursorPositionParameters(this);
+					CursorPositionStylePainterParameters cursorPositionStylePainterParameters = CursorPositionStylePainterParameters.GetDefault(this, this.text);
 					cursorPositionStylePainterParameters.text = this.editorEngine.text;
-					cursorPositionStylePainterParameters.wordWrapWidth = width;
+					cursorPositionStylePainterParameters.wordWrapWidth = num3;
 					cursorPositionStylePainterParameters.cursorIndex = cursorIndex;
-					Vector2 vector3 = painter.GetCursorPosition(cursorPositionStylePainterParameters);
+					textNativeSettings = cursorPositionStylePainterParameters.GetTextNativeSettings(num);
+					Vector2 vector3 = TextNative.GetCursorPosition(textNativeSettings, cursorPositionStylePainterParameters.rect, cursorPositionStylePainterParameters.cursorIndex);
 					vector3 -= scrollOffset;
 					RectStylePainterParameters rectStylePainterParameters = new RectStylePainterParameters
 					{
-						rect = new Rect(vector3.x, vector3.y, 1f, num),
+						rect = new Rect(vector3.x, vector3.y, 1f, num2),
 						color = specifiedValueOrDefault
 					};
 					painter.DrawRect(rectStylePainterParameters);
 				}
 				if (this.editorEngine.altCursorPosition != -1)
 				{
-					CursorPositionStylePainterParameters cursorPositionStylePainterParameters = painter.GetDefaultCursorPositionParameters(this);
+					CursorPositionStylePainterParameters cursorPositionStylePainterParameters = CursorPositionStylePainterParameters.GetDefault(this, this.text);
 					cursorPositionStylePainterParameters.text = this.editorEngine.text.Substring(0, this.editorEngine.altCursorPosition);
-					cursorPositionStylePainterParameters.wordWrapWidth = width;
+					cursorPositionStylePainterParameters.wordWrapWidth = num3;
 					cursorPositionStylePainterParameters.cursorIndex = this.editorEngine.altCursorPosition;
-					Vector2 vector4 = painter.GetCursorPosition(cursorPositionStylePainterParameters);
+					textNativeSettings = cursorPositionStylePainterParameters.GetTextNativeSettings(num);
+					Vector2 vector4 = TextNative.GetCursorPosition(textNativeSettings, cursorPositionStylePainterParameters.rect, cursorPositionStylePainterParameters.cursorIndex);
 					vector4 -= scrollOffset;
 					RectStylePainterParameters rectStylePainterParameters2 = new RectStylePainterParameters
 					{
-						rect = new Rect(vector4.x, vector4.y, 1f, num),
+						rect = new Rect(vector4.x, vector4.y, 1f, num2),
 						color = specifiedValueOrDefault
 					};
 					painter.DrawRect(rectStylePainterParameters2);
@@ -315,9 +331,9 @@ namespace UnityEngine.Experimental.UIElements
 		{
 			if (evt.target is TextInputFieldBase<T>)
 			{
-				evt.menu.AppendAction("Cut", new Action<ContextualMenu.MenuAction>(this.Cut), new Func<ContextualMenu.MenuAction, ContextualMenu.MenuAction.StatusFlags>(this.CutCopyActionStatus), null);
-				evt.menu.AppendAction("Copy", new Action<ContextualMenu.MenuAction>(this.Copy), new Func<ContextualMenu.MenuAction, ContextualMenu.MenuAction.StatusFlags>(this.CutCopyActionStatus), null);
-				evt.menu.AppendAction("Paste", new Action<ContextualMenu.MenuAction>(this.Paste), new Func<ContextualMenu.MenuAction, ContextualMenu.MenuAction.StatusFlags>(this.PasteActionStatus), null);
+				evt.menu.AppendAction("Cut", new Action<DropdownMenu.MenuAction>(this.Cut), new Func<DropdownMenu.MenuAction, DropdownMenu.MenuAction.StatusFlags>(this.CutCopyActionStatus), null);
+				evt.menu.AppendAction("Copy", new Action<DropdownMenu.MenuAction>(this.Copy), new Func<DropdownMenu.MenuAction, DropdownMenu.MenuAction.StatusFlags>(this.CutCopyActionStatus), null);
+				evt.menu.AppendAction("Paste", new Action<DropdownMenu.MenuAction>(this.Paste), new Func<DropdownMenu.MenuAction, DropdownMenu.MenuAction.StatusFlags>(this.PasteActionStatus), null);
 			}
 		}
 
@@ -335,7 +351,12 @@ namespace UnityEngine.Experimental.UIElements
 
 		private void OnCursorIndexChange()
 		{
-			base.Dirty(ChangeType.Repaint);
+			base.IncrementVersion(VersionChangeType.Repaint);
+		}
+
+		protected internal override Vector2 DoMeasure(float width, VisualElement.MeasureMode widthMode, float height, VisualElement.MeasureMode heightMode)
+		{
+			return TextElement.MeasureVisualElementTextSize(this, this.m_Text, width, widthMode, height, heightMode);
 		}
 
 		protected internal override void ExecuteDefaultActionAtTarget(EventBase evt)
@@ -372,11 +393,15 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		string ITextInputField.text
+		string ITextElement.text
 		{
 			get
 			{
-				return this.text;
+				return this.m_Text;
+			}
+			set
+			{
+				this.m_Text = value;
 			}
 		}
 
@@ -408,64 +433,49 @@ namespace UnityEngine.Experimental.UIElements
 
 		private StyleValue<Color> m_CursorColor;
 
+		private string m_Text;
+
 		internal const int kMaxLengthNone = -1;
 
-		/// <summary>
-		///   <para>UxmlTraits for the TextInputFieldBase.</para>
-		/// </summary>
-		public class TextInputFieldBaseUxmlTraits : BaseTextControl<T>.BaseTextControlUxmlTraits
+		public new class UxmlTraits : BaseField<T>.UxmlTraits
 		{
-			protected TextInputFieldBaseUxmlTraits()
-			{
-				this.m_MaxLength = new UxmlIntAttributeDescription
-				{
-					name = "maxLength",
-					defaultValue = -1
-				};
-				this.m_Password = new UxmlBoolAttributeDescription
-				{
-					name = "password"
-				};
-				this.m_MaskCharacter = new UxmlStringAttributeDescription
-				{
-					name = "maskCharacter",
-					defaultValue = "*"
-				};
-			}
-
-			public override IEnumerable<UxmlAttributeDescription> uxmlAttributesDescription
-			{
-				get
-				{
-					foreach (UxmlAttributeDescription attr in this.<get_uxmlAttributesDescription>__BaseCallProxy0())
-					{
-						yield return attr;
-					}
-					yield return this.m_MaxLength;
-					yield return this.m_Password;
-					yield return this.m_MaskCharacter;
-					yield break;
-				}
-			}
-
 			public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
 			{
 				base.Init(ve, bag, cc);
 				TextInputFieldBase<T> textInputFieldBase = (TextInputFieldBase<T>)ve;
-				textInputFieldBase.maxLength = this.m_MaxLength.GetValueFromBag(bag);
-				textInputFieldBase.isPasswordField = this.m_Password.GetValueFromBag(bag);
-				string valueFromBag = this.m_MaskCharacter.GetValueFromBag(bag);
+				textInputFieldBase.maxLength = this.m_MaxLength.GetValueFromBag(bag, cc);
+				textInputFieldBase.isPasswordField = this.m_Password.GetValueFromBag(bag, cc);
+				string valueFromBag = this.m_MaskCharacter.GetValueFromBag(bag, cc);
 				if (valueFromBag != null && valueFromBag.Length > 0)
 				{
 					textInputFieldBase.maskChar = valueFromBag[0];
 				}
+				((ITextElement)ve).text = this.m_Text.GetValueFromBag(bag, cc);
 			}
 
-			private UxmlIntAttributeDescription m_MaxLength;
+			private UxmlIntAttributeDescription m_MaxLength = new UxmlIntAttributeDescription
+			{
+				name = "max-length",
+				obsoleteNames = new string[] { "maxLength" },
+				defaultValue = -1
+			};
 
-			private UxmlBoolAttributeDescription m_Password;
+			private UxmlBoolAttributeDescription m_Password = new UxmlBoolAttributeDescription
+			{
+				name = "password"
+			};
 
-			private UxmlStringAttributeDescription m_MaskCharacter;
+			private UxmlStringAttributeDescription m_MaskCharacter = new UxmlStringAttributeDescription
+			{
+				name = "mask-character",
+				obsoleteNames = new string[] { "maskCharacter" },
+				defaultValue = "*"
+			};
+
+			private UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription
+			{
+				name = "text"
+			};
 		}
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 
@@ -14,10 +13,8 @@ public class KNumberInputField : KScreen
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onStartEdit;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onEndEdit;
 
 	protected override void OnSpawn()
@@ -49,11 +46,9 @@ public class KNumberInputField : KScreen
 		{
 			this.ProcessInput(input);
 			base.StartCoroutine(this.DelayedEndEdit());
+			return;
 		}
-		else
-		{
-			this.StopEditing();
-		}
+		this.StopEditing();
 	}
 
 	private IEnumerator DelayedEndEdit()
@@ -90,7 +85,7 @@ public class KNumberInputField : KScreen
 
 	private void ProcessInput(string input)
 	{
-		input = ((!(input == string.Empty)) ? input : this.minValue.ToString());
+		input = ((input == "") ? this.minValue.ToString() : input);
 		float num = this.minValue;
 		try
 		{
@@ -112,11 +107,9 @@ public class KNumberInputField : KScreen
 		if (this.isEditing)
 		{
 			e.Consumed = true;
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public override float GetSortKey()

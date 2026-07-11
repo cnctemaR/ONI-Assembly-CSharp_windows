@@ -4,22 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
 	public class ScaleBias : ModifierModule, IModule3D, IModule
 	{
-		public ScaleBias()
-		{
-		}
-
-		public ScaleBias(IModule source)
-			: base(source)
-		{
-		}
-
-		public ScaleBias(IModule source, float scale, float bias)
-			: base(source)
-		{
-			this._scale = scale;
-			this._bias = bias;
-		}
-
 		public float Scale
 		{
 			get
@@ -42,6 +26,22 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 			{
 				this._bias = value;
 			}
+		}
+
+		public ScaleBias()
+		{
+		}
+
+		public ScaleBias(IModule source)
+			: base(source)
+		{
+		}
+
+		public ScaleBias(IModule source, float scale, float bias)
+			: base(source)
+		{
+			this._scale = scale;
+			this._bias = bias;
 		}
 
 		public float GetValue(float x, float y, float z)

@@ -179,14 +179,18 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 
 		public Storage GetStorage()
 		{
-			return (!(base.transform.parent != null)) ? null : base.transform.parent.GetComponent<Storage>();
+			if (!(base.transform.parent != null))
+			{
+				return null;
+			}
+			return base.transform.parent.GetComponent<Storage>();
 		}
 
 		public void OnStore(object data)
 		{
 			Storage storage = data as Storage;
 			bool flag = storage || (data != null && (bool)data);
-			EggIncubator eggIncubator = ((!storage) ? null : storage.GetComponent<EggIncubator>());
+			EggIncubator eggIncubator = (storage ? storage.GetComponent<EggIncubator>() : null);
 			this.UpdateIncubationState(flag, eggIncubator);
 		}
 
@@ -194,7 +198,7 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		{
 			bool flag = base.gameObject.HasTag(GameTags.Stored);
 			Storage storage = this.GetStorage();
-			EggIncubator eggIncubator = ((!storage) ? null : storage.GetComponent<EggIncubator>());
+			EggIncubator eggIncubator = (storage ? storage.GetComponent<EggIncubator>() : null);
 			this.UpdateIncubationState(flag, eggIncubator);
 		}
 
@@ -204,7 +208,7 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 			base.smi.sm.inIncubator.Set(incubator != null, base.smi);
 			bool flag = stored && !incubator;
 			base.smi.sm.isSuppressed.Set(flag, base.smi);
-			Operational operational = ((!incubator) ? null : incubator.GetComponent<Operational>());
+			Operational operational = (incubator ? incubator.GetComponent<Operational>() : null);
 			bool flag2 = incubator && (operational == null || operational.IsOperational);
 			base.smi.sm.incubatorIsActive.Set(flag2, base.smi);
 		}

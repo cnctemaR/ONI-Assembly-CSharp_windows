@@ -4,8 +4,7 @@ using UnityEngine;
 public class DividerColumn : TableColumn
 {
 	public DividerColumn(Func<bool> revealed = null, string scrollerID = "")
-	{
-		Action<IAssignableIdentity, GameObject> action = delegate(IAssignableIdentity minion, GameObject widget_go)
+		: base(delegate(IAssignableIdentity minion, GameObject widget_go)
 		{
 			if (revealed != null)
 			{
@@ -14,23 +13,21 @@ public class DividerColumn : TableColumn
 					if (!widget_go.activeSelf)
 					{
 						widget_go.SetActive(true);
+						return;
 					}
 				}
 				else if (widget_go.activeSelf)
 				{
 					widget_go.SetActive(false);
+					return;
 				}
 			}
 			else
 			{
 				widget_go.SetActive(true);
 			}
-		};
-		Comparison<IAssignableIdentity> comparison = null;
-		Action<IAssignableIdentity, GameObject, ToolTip> action2 = null;
-		Action<IAssignableIdentity, GameObject, ToolTip> action3 = null;
-		Func<bool> revealed2 = revealed;
-		base..ctor(action, comparison, action2, action3, revealed2, false, scrollerID);
+		}, null, null, null, revealed, false, scrollerID)
+	{
 	}
 
 	public override GameObject GetDefaultWidget(GameObject parent)

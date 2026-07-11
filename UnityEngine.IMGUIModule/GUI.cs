@@ -6,16 +6,10 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The GUI class is the interface for Unity's GUI with manual positioning.</para>
-	/// </summary>
-	[NativeHeader("Modules/IMGUI/GUI.bindings.h")]
 	[NativeHeader("Modules/IMGUI/GUISkin.bindings.h")]
+	[NativeHeader("Modules/IMGUI/GUI.bindings.h")]
 	public class GUI
 	{
-		/// <summary>
-		///   <para>Global tinting color for the GUI.</para>
-		/// </summary>
 		public static Color color
 		{
 			get
@@ -30,9 +24,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Global tinting color for all background elements rendered by the GUI.</para>
-		/// </summary>
 		public static Color backgroundColor
 		{
 			get
@@ -47,9 +38,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Tinting color for all text rendered by the GUI.</para>
-		/// </summary>
 		public static Color contentColor
 		{
 			get
@@ -64,9 +52,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if any controls changed the value of the input data.</para>
-		/// </summary>
 		public static extern bool changed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -75,9 +60,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Is the GUI enabled?</para>
-		/// </summary>
 		public static extern bool enabled
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -86,9 +68,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The sorting depth of the currently executing GUI behaviour.</para>
-		/// </summary>
 		public static extern int depth
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -124,40 +103,23 @@ namespace UnityEngine
 			get;
 		}
 
-		private static void DoLabel(Rect position, GUIContent content, IntPtr style)
-		{
-			GUI.DoLabel_Injected(ref position, content, style);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GrabMouseControl(int id);
 
-		private static bool DoButton(Rect position, GUIContent content, IntPtr style)
-		{
-			return GUI.DoButton_Injected(ref position, content, style);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasMouseControl(int id);
 
-		internal static bool DoToggle(Rect position, int id, bool value, GUIContent content, IntPtr style)
-		{
-			return GUI.DoToggle_Injected(ref position, id, value, content, style);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseMouseControl();
 
-		/// <summary>
-		///   <para>Set the name of the next control.</para>
-		/// </summary>
-		/// <param name="name"></param>
 		[FreeFunction("GetGUIState().SetNameOfNextControl")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetNextControlName(string name);
 
-		/// <summary>
-		///   <para>Get the name of named control that has focus.</para>
-		/// </summary>
 		[FreeFunction("GetGUIState().GetNameOfFocusedControl")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetNameOfFocusedControl();
 
-		/// <summary>
-		///   <para>Move keyboard focus to a named control.</para>
-		/// </summary>
-		/// <param name="name">Name set using SetNextControlName.</param>
 		[FreeFunction("GetGUIState().FocusKeyboardControl")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void FocusControl(string name);
@@ -188,39 +150,20 @@ namespace UnityEngine
 			return rect;
 		}
 
-		/// <summary>
-		///   <para>Make a window draggable.</para>
-		/// </summary>
-		/// <param name="position">The part of the window that can be dragged. This is clipped to the actual window.</param>
 		public static void DragWindow(Rect position)
 		{
 			GUI.DragWindow_Injected(ref position);
 		}
 
-		/// <summary>
-		///   <para>Bring a specific window to front of the floating windows.</para>
-		/// </summary>
-		/// <param name="windowID">The identifier used when you created the window in the Window call.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void BringWindowToFront(int windowID);
 
-		/// <summary>
-		///   <para>Bring a specific window to back of the floating windows.</para>
-		/// </summary>
-		/// <param name="windowID">The identifier used when you created the window in the Window call.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void BringWindowToBack(int windowID);
 
-		/// <summary>
-		///   <para>Make a window become the active window.</para>
-		/// </summary>
-		/// <param name="windowID">The identifier used when you created the window in the Window call.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void FocusWindow(int windowID);
 
-		/// <summary>
-		///   <para>Remove focus from all windows.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UnfocusWindow();
 
@@ -237,9 +180,6 @@ namespace UnityEngine
 
 		internal static DateTime nextScrollStepTime { get; set; } = DateTime.Now;
 
-		/// <summary>
-		///   <para>The global skin to use.</para>
-		/// </summary>
 		public static GUISkin skin
 		{
 			get
@@ -273,9 +213,6 @@ namespace UnityEngine
 			GUIStyle.CleanupRoots();
 		}
 
-		/// <summary>
-		///   <para>The GUI transform matrix.</para>
-		/// </summary>
 		public static Matrix4x4 matrix
 		{
 			get
@@ -288,9 +225,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The tooltip of the control the mouse is currently over, or which has keyboard focus. (Read Only).</para>
-		/// </summary>
 		public static string tooltip
 		{
 			get
@@ -334,169 +268,63 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Make a text or texture label on screen.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the label.</param>
-		/// <param name="text">Text to display on the label.</param>
-		/// <param name="image">Texture to display on the label.</param>
-		/// <param name="content">Text, image and tooltip for this label.</param>
-		/// <param name="style">The style to use. If left out, the label style from the current GUISkin is used.</param>
 		public static void Label(Rect position, string text)
 		{
 			GUI.Label(position, GUIContent.Temp(text), GUI.s_Skin.label);
 		}
 
-		/// <summary>
-		///   <para>Make a text or texture label on screen.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the label.</param>
-		/// <param name="text">Text to display on the label.</param>
-		/// <param name="image">Texture to display on the label.</param>
-		/// <param name="content">Text, image and tooltip for this label.</param>
-		/// <param name="style">The style to use. If left out, the label style from the current GUISkin is used.</param>
 		public static void Label(Rect position, Texture image)
 		{
 			GUI.Label(position, GUIContent.Temp(image), GUI.s_Skin.label);
 		}
 
-		/// <summary>
-		///   <para>Make a text or texture label on screen.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the label.</param>
-		/// <param name="text">Text to display on the label.</param>
-		/// <param name="image">Texture to display on the label.</param>
-		/// <param name="content">Text, image and tooltip for this label.</param>
-		/// <param name="style">The style to use. If left out, the label style from the current GUISkin is used.</param>
 		public static void Label(Rect position, GUIContent content)
 		{
 			GUI.Label(position, content, GUI.s_Skin.label);
 		}
 
-		/// <summary>
-		///   <para>Make a text or texture label on screen.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the label.</param>
-		/// <param name="text">Text to display on the label.</param>
-		/// <param name="image">Texture to display on the label.</param>
-		/// <param name="content">Text, image and tooltip for this label.</param>
-		/// <param name="style">The style to use. If left out, the label style from the current GUISkin is used.</param>
 		public static void Label(Rect position, string text, GUIStyle style)
 		{
 			GUI.Label(position, GUIContent.Temp(text), style);
 		}
 
-		/// <summary>
-		///   <para>Make a text or texture label on screen.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the label.</param>
-		/// <param name="text">Text to display on the label.</param>
-		/// <param name="image">Texture to display on the label.</param>
-		/// <param name="content">Text, image and tooltip for this label.</param>
-		/// <param name="style">The style to use. If left out, the label style from the current GUISkin is used.</param>
 		public static void Label(Rect position, Texture image, GUIStyle style)
 		{
 			GUI.Label(position, GUIContent.Temp(image), style);
 		}
 
-		/// <summary>
-		///   <para>Make a text or texture label on screen.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the label.</param>
-		/// <param name="text">Text to display on the label.</param>
-		/// <param name="image">Texture to display on the label.</param>
-		/// <param name="content">Text, image and tooltip for this label.</param>
-		/// <param name="style">The style to use. If left out, the label style from the current GUISkin is used.</param>
 		public static void Label(Rect position, GUIContent content, GUIStyle style)
 		{
 			GUIUtility.CheckOnGUI();
-			GUI.DoLabel(position, content, style.m_Ptr);
+			GUI.DoLabel(position, content, style);
 		}
 
-		/// <summary>
-		///   <para>Draw a texture within a rectangle.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="scaleMode">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to apply alpha blending when drawing the image (enabled by default).</param>
-		/// <param name="imageAspect">Aspect ratio to use for the source image. If 0 (the default), the aspect ratio from the image is used.  Pass in w/h for the desired aspect ratio.  This allows the aspect ratio of the source image to be adjusted without changing the pixel width and height.</param>
 		public static void DrawTexture(Rect position, Texture image)
 		{
 			GUI.DrawTexture(position, image, ScaleMode.StretchToFill);
 		}
 
-		/// <summary>
-		///   <para>Draw a texture within a rectangle.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="scaleMode">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to apply alpha blending when drawing the image (enabled by default).</param>
-		/// <param name="imageAspect">Aspect ratio to use for the source image. If 0 (the default), the aspect ratio from the image is used.  Pass in w/h for the desired aspect ratio.  This allows the aspect ratio of the source image to be adjusted without changing the pixel width and height.</param>
 		public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode)
 		{
 			GUI.DrawTexture(position, image, scaleMode, true);
 		}
 
-		/// <summary>
-		///   <para>Draw a texture within a rectangle.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="scaleMode">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to apply alpha blending when drawing the image (enabled by default).</param>
-		/// <param name="imageAspect">Aspect ratio to use for the source image. If 0 (the default), the aspect ratio from the image is used.  Pass in w/h for the desired aspect ratio.  This allows the aspect ratio of the source image to be adjusted without changing the pixel width and height.</param>
 		public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend)
 		{
 			GUI.DrawTexture(position, image, scaleMode, alphaBlend, 0f);
 		}
 
-		/// <summary>
-		///   <para>Draw a texture within a rectangle.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="scaleMode">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to apply alpha blending when drawing the image (enabled by default).</param>
-		/// <param name="imageAspect">Aspect ratio to use for the source image. If 0 (the default), the aspect ratio from the image is used.  Pass in w/h for the desired aspect ratio.  This allows the aspect ratio of the source image to be adjusted without changing the pixel width and height.</param>
 		public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend, float imageAspect)
 		{
 			GUI.DrawTexture(position, image, scaleMode, alphaBlend, imageAspect, GUI.color, 0f, 0f);
 		}
 
-		/// <summary>
-		///   <para>Draws a border with rounded corners within a rectangle. The texture is used to pattern the border.  Note that this method only works on shader model 2.5 and above.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="scaleMode">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to apply alpha blending when drawing the image (enabled by default).</param>
-		/// <param name="imageAspect">Aspect ratio to use for the source image. If 0 (the default), the aspect ratio from the image is used.  Pass in w/h for the desired aspect ratio.  This allows the aspect ratio of the source image to be adjusted without changing the pixel width and height.</param>
-		/// <param name="color">A tint color to apply on the texture.</param>
-		/// <param name="borderWidth">The width of the border. If 0, the full texture is drawn.</param>
-		/// <param name="borderWidths">The width of the borders (left, top, right and bottom). If Vector4.zero, the full texture is drawn.</param>
-		/// <param name="borderRadius">The radius for rounded corners. If 0, corners will not be rounded.</param>
-		/// <param name="borderRadiuses">The radiuses for rounded corners (top-left, top-right, bottom-right and bottom-left). If Vector4.zero, corners will not be rounded.</param>
 		public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend, float imageAspect, Color color, float borderWidth, float borderRadius)
 		{
 			Vector4 vector = Vector4.one * borderWidth;
 			GUI.DrawTexture(position, image, scaleMode, alphaBlend, imageAspect, color, vector, borderRadius);
 		}
 
-		/// <summary>
-		///   <para>Draws a border with rounded corners within a rectangle. The texture is used to pattern the border.  Note that this method only works on shader model 2.5 and above.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="scaleMode">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to apply alpha blending when drawing the image (enabled by default).</param>
-		/// <param name="imageAspect">Aspect ratio to use for the source image. If 0 (the default), the aspect ratio from the image is used.  Pass in w/h for the desired aspect ratio.  This allows the aspect ratio of the source image to be adjusted without changing the pixel width and height.</param>
-		/// <param name="color">A tint color to apply on the texture.</param>
-		/// <param name="borderWidth">The width of the border. If 0, the full texture is drawn.</param>
-		/// <param name="borderWidths">The width of the borders (left, top, right and bottom). If Vector4.zero, the full texture is drawn.</param>
-		/// <param name="borderRadius">The radius for rounded corners. If 0, corners will not be rounded.</param>
-		/// <param name="borderRadiuses">The radiuses for rounded corners (top-left, top-right, bottom-right and bottom-left). If Vector4.zero, corners will not be rounded.</param>
 		public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend, float imageAspect, Color color, Vector4 borderWidths, float borderRadius)
 		{
 			Vector4 vector = Vector4.one * borderRadius;
@@ -595,25 +423,11 @@ namespace UnityEngine
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Draw a texture within a rectangle with the given texture coordinates.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="texCoords">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to alpha blend the image on to the display (the default). If false, the picture is drawn on to the display.</param>
 		public static void DrawTextureWithTexCoords(Rect position, Texture image, Rect texCoords)
 		{
 			GUI.DrawTextureWithTexCoords(position, image, texCoords, true);
 		}
 
-		/// <summary>
-		///   <para>Draw a texture within a rectangle with the given texture coordinates.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to draw the texture within.</param>
-		/// <param name="image">Texture to display.</param>
-		/// <param name="texCoords">How to scale the image when the aspect ratio of it doesn't fit the aspect ratio to be drawn within.</param>
-		/// <param name="alphaBlend">Whether to alpha blend the image on to the display (the default). If false, the picture is drawn on to the display.</param>
 		public static void DrawTextureWithTexCoords(Rect position, Texture image, Rect texCoords, bool alphaBlend)
 		{
 			GUIUtility.CheckOnGUI();
@@ -634,79 +448,31 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Create a Box on the GUI Layer.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the box.</param>
-		/// <param name="text">Text to display on the box.</param>
-		/// <param name="image">Texture to display on the box.</param>
-		/// <param name="content">Text, image and tooltip for this box.</param>
-		/// <param name="style">The style to use. If left out, the box style from the current GUISkin is used.</param>
 		public static void Box(Rect position, string text)
 		{
 			GUI.Box(position, GUIContent.Temp(text), GUI.s_Skin.box);
 		}
 
-		/// <summary>
-		///   <para>Create a Box on the GUI Layer.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the box.</param>
-		/// <param name="text">Text to display on the box.</param>
-		/// <param name="image">Texture to display on the box.</param>
-		/// <param name="content">Text, image and tooltip for this box.</param>
-		/// <param name="style">The style to use. If left out, the box style from the current GUISkin is used.</param>
 		public static void Box(Rect position, Texture image)
 		{
 			GUI.Box(position, GUIContent.Temp(image), GUI.s_Skin.box);
 		}
 
-		/// <summary>
-		///   <para>Create a Box on the GUI Layer.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the box.</param>
-		/// <param name="text">Text to display on the box.</param>
-		/// <param name="image">Texture to display on the box.</param>
-		/// <param name="content">Text, image and tooltip for this box.</param>
-		/// <param name="style">The style to use. If left out, the box style from the current GUISkin is used.</param>
 		public static void Box(Rect position, GUIContent content)
 		{
 			GUI.Box(position, content, GUI.s_Skin.box);
 		}
 
-		/// <summary>
-		///   <para>Create a Box on the GUI Layer.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the box.</param>
-		/// <param name="text">Text to display on the box.</param>
-		/// <param name="image">Texture to display on the box.</param>
-		/// <param name="content">Text, image and tooltip for this box.</param>
-		/// <param name="style">The style to use. If left out, the box style from the current GUISkin is used.</param>
 		public static void Box(Rect position, string text, GUIStyle style)
 		{
 			GUI.Box(position, GUIContent.Temp(text), style);
 		}
 
-		/// <summary>
-		///   <para>Create a Box on the GUI Layer.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the box.</param>
-		/// <param name="text">Text to display on the box.</param>
-		/// <param name="image">Texture to display on the box.</param>
-		/// <param name="content">Text, image and tooltip for this box.</param>
-		/// <param name="style">The style to use. If left out, the box style from the current GUISkin is used.</param>
 		public static void Box(Rect position, Texture image, GUIStyle style)
 		{
 			GUI.Box(position, GUIContent.Temp(image), style);
 		}
 
-		/// <summary>
-		///   <para>Create a Box on the GUI Layer.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the box.</param>
-		/// <param name="text">Text to display on the box.</param>
-		/// <param name="image">Texture to display on the box.</param>
-		/// <param name="content">Text, image and tooltip for this box.</param>
-		/// <param name="style">The style to use. If left out, the box style from the current GUISkin is used.</param>
 		public static void Box(Rect position, GUIContent content, GUIStyle style)
 		{
 			GUIUtility.CheckOnGUI();
@@ -717,194 +483,68 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Make a single press button. The user clicks them and something happens immediately.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>true when the users clicks the button.</para>
-		/// </returns>
 		public static bool Button(Rect position, string text)
 		{
 			return GUI.Button(position, GUIContent.Temp(text), GUI.s_Skin.button);
 		}
 
-		/// <summary>
-		///   <para>Make a single press button. The user clicks them and something happens immediately.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>true when the users clicks the button.</para>
-		/// </returns>
 		public static bool Button(Rect position, Texture image)
 		{
 			return GUI.Button(position, GUIContent.Temp(image), GUI.s_Skin.button);
 		}
 
-		/// <summary>
-		///   <para>Make a single press button. The user clicks them and something happens immediately.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>true when the users clicks the button.</para>
-		/// </returns>
 		public static bool Button(Rect position, GUIContent content)
 		{
 			return GUI.Button(position, content, GUI.s_Skin.button);
 		}
 
-		/// <summary>
-		///   <para>Make a single press button. The user clicks them and something happens immediately.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>true when the users clicks the button.</para>
-		/// </returns>
 		public static bool Button(Rect position, string text, GUIStyle style)
 		{
 			return GUI.Button(position, GUIContent.Temp(text), style);
 		}
 
-		/// <summary>
-		///   <para>Make a single press button. The user clicks them and something happens immediately.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>true when the users clicks the button.</para>
-		/// </returns>
 		public static bool Button(Rect position, Texture image, GUIStyle style)
 		{
 			return GUI.Button(position, GUIContent.Temp(image), style);
 		}
 
-		/// <summary>
-		///   <para>Make a single press button. The user clicks them and something happens immediately.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>true when the users clicks the button.</para>
-		/// </returns>
 		public static bool Button(Rect position, GUIContent content, GUIStyle style)
 		{
-			GUIUtility.CheckOnGUI();
-			return GUI.DoButton(position, content, style.m_Ptr);
+			int controlID = GUIUtility.GetControlID(GUI.s_ButonHash, FocusType.Passive, position);
+			return GUI.Button(position, controlID, content, style);
 		}
 
-		/// <summary>
-		///   <para>Make a button that is active as long as the user holds it down.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>True when the users clicks the button.</para>
-		/// </returns>
+		internal static bool Button(Rect position, int id, GUIContent content, GUIStyle style)
+		{
+			GUIUtility.CheckOnGUI();
+			return GUI.DoButton(position, id, content, style);
+		}
+
 		public static bool RepeatButton(Rect position, string text)
 		{
 			return GUI.DoRepeatButton(position, GUIContent.Temp(text), GUI.s_Skin.button, FocusType.Passive);
 		}
 
-		/// <summary>
-		///   <para>Make a button that is active as long as the user holds it down.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>True when the users clicks the button.</para>
-		/// </returns>
 		public static bool RepeatButton(Rect position, Texture image)
 		{
 			return GUI.DoRepeatButton(position, GUIContent.Temp(image), GUI.s_Skin.button, FocusType.Passive);
 		}
 
-		/// <summary>
-		///   <para>Make a button that is active as long as the user holds it down.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>True when the users clicks the button.</para>
-		/// </returns>
 		public static bool RepeatButton(Rect position, GUIContent content)
 		{
 			return GUI.DoRepeatButton(position, content, GUI.s_Skin.button, FocusType.Passive);
 		}
 
-		/// <summary>
-		///   <para>Make a button that is active as long as the user holds it down.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>True when the users clicks the button.</para>
-		/// </returns>
 		public static bool RepeatButton(Rect position, string text, GUIStyle style)
 		{
 			return GUI.DoRepeatButton(position, GUIContent.Temp(text), style, FocusType.Passive);
 		}
 
-		/// <summary>
-		///   <para>Make a button that is active as long as the user holds it down.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>True when the users clicks the button.</para>
-		/// </returns>
 		public static bool RepeatButton(Rect position, Texture image, GUIStyle style)
 		{
 			return GUI.DoRepeatButton(position, GUIContent.Temp(image), style, FocusType.Passive);
 		}
 
-		/// <summary>
-		///   <para>Make a button that is active as long as the user holds it down.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>True when the users clicks the button.</para>
-		/// </returns>
 		public static bool RepeatButton(Rect position, GUIContent content, GUIStyle style)
 		{
 			return GUI.DoRepeatButton(position, content, style, FocusType.Passive);
@@ -953,16 +593,6 @@ namespace UnityEngine
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Make a single-line text field where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextField(Rect position, string text)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -970,16 +600,6 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a single-line text field where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextField(Rect position, string text, int maxLength)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -987,16 +607,6 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a single-line text field where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextField(Rect position, string text, GUIStyle style)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -1004,16 +614,6 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a single-line text field where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextField(Rect position, string text, int maxLength, GUIStyle style)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -1021,65 +621,21 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a text field where the user can enter a password.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="password">Password to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maskChar">Character to mask the password with.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited password.</para>
-		/// </returns>
 		public static string PasswordField(Rect position, string password, char maskChar)
 		{
 			return GUI.PasswordField(position, password, maskChar, -1, GUI.skin.textField);
 		}
 
-		/// <summary>
-		///   <para>Make a text field where the user can enter a password.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="password">Password to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maskChar">Character to mask the password with.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited password.</para>
-		/// </returns>
 		public static string PasswordField(Rect position, string password, char maskChar, int maxLength)
 		{
 			return GUI.PasswordField(position, password, maskChar, maxLength, GUI.skin.textField);
 		}
 
-		/// <summary>
-		///   <para>Make a text field where the user can enter a password.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="password">Password to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maskChar">Character to mask the password with.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited password.</para>
-		/// </returns>
 		public static string PasswordField(Rect position, string password, char maskChar, GUIStyle style)
 		{
 			return GUI.PasswordField(position, password, maskChar, -1, style);
 		}
 
-		/// <summary>
-		///   <para>Make a text field where the user can enter a password.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="password">Password to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maskChar">Character to mask the password with.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textField style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited password.</para>
-		/// </returns>
 		public static string PasswordField(Rect position, string password, char maskChar, int maxLength, GUIStyle style)
 		{
 			GUIUtility.CheckOnGUI();
@@ -1105,16 +661,6 @@ namespace UnityEngine
 			return (Event.current.type != EventType.Repaint && Event.current.type != EventType.MouseDown) ? password : "".PadRight(password.Length, maskChar);
 		}
 
-		/// <summary>
-		///   <para>Make a Multi-line text area where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textArea style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextArea(Rect position, string text)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -1122,16 +668,6 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a Multi-line text area where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textArea style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextArea(Rect position, string text, int maxLength)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -1139,16 +675,6 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a Multi-line text area where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textArea style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextArea(Rect position, string text, GUIStyle style)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -1156,16 +682,6 @@ namespace UnityEngine
 			return guicontent.text;
 		}
 
-		/// <summary>
-		///   <para>Make a Multi-line text area where the user can edit a string.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the text field.</param>
-		/// <param name="text">Text to edit. The return value of this function should be assigned back to the string as shown in the example.</param>
-		/// <param name="maxLength">The maximum length of the string. If left out, the user can type for ever and ever.</param>
-		/// <param name="style">The style to use. If left out, the textArea style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The edited string.</para>
-		/// </returns>
 		public static string TextArea(Rect position, string text, int maxLength, GUIStyle style)
 		{
 			GUIContent guicontent = GUIContent.Temp(text);
@@ -1377,218 +893,68 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Make an on/off toggle button.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="value">Is this button on or off?</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the toggle style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The new value of the button.</para>
-		/// </returns>
 		public static bool Toggle(Rect position, bool value, string text)
 		{
 			return GUI.Toggle(position, value, GUIContent.Temp(text), GUI.s_Skin.toggle);
 		}
 
-		/// <summary>
-		///   <para>Make an on/off toggle button.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="value">Is this button on or off?</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the toggle style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The new value of the button.</para>
-		/// </returns>
 		public static bool Toggle(Rect position, bool value, Texture image)
 		{
 			return GUI.Toggle(position, value, GUIContent.Temp(image), GUI.s_Skin.toggle);
 		}
 
-		/// <summary>
-		///   <para>Make an on/off toggle button.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="value">Is this button on or off?</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the toggle style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The new value of the button.</para>
-		/// </returns>
 		public static bool Toggle(Rect position, bool value, GUIContent content)
 		{
 			return GUI.Toggle(position, value, content, GUI.s_Skin.toggle);
 		}
 
-		/// <summary>
-		///   <para>Make an on/off toggle button.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="value">Is this button on or off?</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the toggle style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The new value of the button.</para>
-		/// </returns>
 		public static bool Toggle(Rect position, bool value, string text, GUIStyle style)
 		{
 			return GUI.Toggle(position, value, GUIContent.Temp(text), style);
 		}
 
-		/// <summary>
-		///   <para>Make an on/off toggle button.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="value">Is this button on or off?</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the toggle style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The new value of the button.</para>
-		/// </returns>
 		public static bool Toggle(Rect position, bool value, Texture image, GUIStyle style)
 		{
 			return GUI.Toggle(position, value, GUIContent.Temp(image), style);
 		}
 
-		/// <summary>
-		///   <para>Make an on/off toggle button.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the button.</param>
-		/// <param name="value">Is this button on or off?</param>
-		/// <param name="text">Text to display on the button.</param>
-		/// <param name="image">Texture to display on the button.</param>
-		/// <param name="content">Text, image and tooltip for this button.</param>
-		/// <param name="style">The style to use. If left out, the toggle style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The new value of the button.</para>
-		/// </returns>
 		public static bool Toggle(Rect position, bool value, GUIContent content, GUIStyle style)
 		{
 			GUIUtility.CheckOnGUI();
-			return GUI.DoToggle(position, GUIUtility.GetControlID(GUI.s_ToggleHash, FocusType.Passive, position), value, content, style.m_Ptr);
+			return GUI.DoToggle(position, GUIUtility.GetControlID(GUI.s_ToggleHash, FocusType.Passive, position), value, content, style);
 		}
 
 		public static bool Toggle(Rect position, int id, bool value, GUIContent content, GUIStyle style)
 		{
 			GUIUtility.CheckOnGUI();
-			return GUI.DoToggle(position, id, value, content, style.m_Ptr);
+			return GUI.DoToggle(position, id, value, content, style);
 		}
 
-		/// <summary>
-		///   <para>Make a toolbar.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the toolbar.</param>
-		/// <param name="selected">The index of the selected button.</param>
-		/// <param name="texts">An array of strings to show on the toolbar buttons.</param>
-		/// <param name="images">An array of textures on the toolbar buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the toolbar buttons.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="buttonSize">Determines how toolbar button size is calculated.</param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int Toolbar(Rect position, int selected, string[] texts)
 		{
 			return GUI.Toolbar(position, selected, GUIContent.Temp(texts), GUI.s_Skin.button);
 		}
 
-		/// <summary>
-		///   <para>Make a toolbar.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the toolbar.</param>
-		/// <param name="selected">The index of the selected button.</param>
-		/// <param name="texts">An array of strings to show on the toolbar buttons.</param>
-		/// <param name="images">An array of textures on the toolbar buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the toolbar buttons.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="buttonSize">Determines how toolbar button size is calculated.</param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int Toolbar(Rect position, int selected, Texture[] images)
 		{
 			return GUI.Toolbar(position, selected, GUIContent.Temp(images), GUI.s_Skin.button);
 		}
 
-		/// <summary>
-		///   <para>Make a toolbar.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the toolbar.</param>
-		/// <param name="selected">The index of the selected button.</param>
-		/// <param name="texts">An array of strings to show on the toolbar buttons.</param>
-		/// <param name="images">An array of textures on the toolbar buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the toolbar buttons.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="buttonSize">Determines how toolbar button size is calculated.</param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int Toolbar(Rect position, int selected, GUIContent[] contents)
 		{
 			return GUI.Toolbar(position, selected, contents, GUI.s_Skin.button);
 		}
 
-		/// <summary>
-		///   <para>Make a toolbar.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the toolbar.</param>
-		/// <param name="selected">The index of the selected button.</param>
-		/// <param name="texts">An array of strings to show on the toolbar buttons.</param>
-		/// <param name="images">An array of textures on the toolbar buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the toolbar buttons.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="buttonSize">Determines how toolbar button size is calculated.</param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int Toolbar(Rect position, int selected, string[] texts, GUIStyle style)
 		{
 			return GUI.Toolbar(position, selected, GUIContent.Temp(texts), style);
 		}
 
-		/// <summary>
-		///   <para>Make a toolbar.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the toolbar.</param>
-		/// <param name="selected">The index of the selected button.</param>
-		/// <param name="texts">An array of strings to show on the toolbar buttons.</param>
-		/// <param name="images">An array of textures on the toolbar buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the toolbar buttons.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="buttonSize">Determines how toolbar button size is calculated.</param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int Toolbar(Rect position, int selected, Texture[] images, GUIStyle style)
 		{
 			return GUI.Toolbar(position, selected, GUIContent.Temp(images), style);
 		}
 
-		/// <summary>
-		///   <para>Make a toolbar.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the toolbar.</param>
-		/// <param name="selected">The index of the selected button.</param>
-		/// <param name="texts">An array of strings to show on the toolbar buttons.</param>
-		/// <param name="images">An array of textures on the toolbar buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the toolbar buttons.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="buttonSize">Determines how toolbar button size is calculated.</param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int Toolbar(Rect position, int selected, GUIContent[] contents, GUIStyle style)
 		{
 			return GUI.Toolbar(position, selected, contents, null, style, GUI.ToolbarButtonSize.Fixed);
@@ -1609,115 +975,31 @@ namespace UnityEngine
 			return GUI.DoButtonGrid(position, selected, contents, controlNames, contents.Length, style, guistyle, guistyle2, guistyle3, buttonSize);
 		}
 
-		/// <summary>
-		///   <para>Make a grid of buttons.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the grid.</param>
-		/// <param name="selected">The index of the selected grid button.</param>
-		/// <param name="texts">An array of strings to show on the grid buttons.</param>
-		/// <param name="images">An array of textures on the grid buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the grid button.</param>
-		/// <param name="xCount">How many elements to fit in the horizontal direction. The controls will be scaled to fit unless the style defines a fixedWidth to use.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="content"></param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int SelectionGrid(Rect position, int selected, string[] texts, int xCount)
 		{
 			return GUI.SelectionGrid(position, selected, GUIContent.Temp(texts), xCount, null);
 		}
 
-		/// <summary>
-		///   <para>Make a grid of buttons.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the grid.</param>
-		/// <param name="selected">The index of the selected grid button.</param>
-		/// <param name="texts">An array of strings to show on the grid buttons.</param>
-		/// <param name="images">An array of textures on the grid buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the grid button.</param>
-		/// <param name="xCount">How many elements to fit in the horizontal direction. The controls will be scaled to fit unless the style defines a fixedWidth to use.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="content"></param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int SelectionGrid(Rect position, int selected, Texture[] images, int xCount)
 		{
 			return GUI.SelectionGrid(position, selected, GUIContent.Temp(images), xCount, null);
 		}
 
-		/// <summary>
-		///   <para>Make a grid of buttons.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the grid.</param>
-		/// <param name="selected">The index of the selected grid button.</param>
-		/// <param name="texts">An array of strings to show on the grid buttons.</param>
-		/// <param name="images">An array of textures on the grid buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the grid button.</param>
-		/// <param name="xCount">How many elements to fit in the horizontal direction. The controls will be scaled to fit unless the style defines a fixedWidth to use.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="content"></param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int SelectionGrid(Rect position, int selected, GUIContent[] content, int xCount)
 		{
 			return GUI.SelectionGrid(position, selected, content, xCount, null);
 		}
 
-		/// <summary>
-		///   <para>Make a grid of buttons.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the grid.</param>
-		/// <param name="selected">The index of the selected grid button.</param>
-		/// <param name="texts">An array of strings to show on the grid buttons.</param>
-		/// <param name="images">An array of textures on the grid buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the grid button.</param>
-		/// <param name="xCount">How many elements to fit in the horizontal direction. The controls will be scaled to fit unless the style defines a fixedWidth to use.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="content"></param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int SelectionGrid(Rect position, int selected, string[] texts, int xCount, GUIStyle style)
 		{
 			return GUI.SelectionGrid(position, selected, GUIContent.Temp(texts), xCount, style);
 		}
 
-		/// <summary>
-		///   <para>Make a grid of buttons.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the grid.</param>
-		/// <param name="selected">The index of the selected grid button.</param>
-		/// <param name="texts">An array of strings to show on the grid buttons.</param>
-		/// <param name="images">An array of textures on the grid buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the grid button.</param>
-		/// <param name="xCount">How many elements to fit in the horizontal direction. The controls will be scaled to fit unless the style defines a fixedWidth to use.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="content"></param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int SelectionGrid(Rect position, int selected, Texture[] images, int xCount, GUIStyle style)
 		{
 			return GUI.SelectionGrid(position, selected, GUIContent.Temp(images), xCount, style);
 		}
 
-		/// <summary>
-		///   <para>Make a grid of buttons.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the grid.</param>
-		/// <param name="selected">The index of the selected grid button.</param>
-		/// <param name="texts">An array of strings to show on the grid buttons.</param>
-		/// <param name="images">An array of textures on the grid buttons.</param>
-		/// <param name="contents">An array of text, image and tooltips for the grid button.</param>
-		/// <param name="xCount">How many elements to fit in the horizontal direction. The controls will be scaled to fit unless the style defines a fixedWidth to use.</param>
-		/// <param name="style">The style to use. If left out, the button style from the current GUISkin is used.</param>
-		/// <param name="content"></param>
-		/// <returns>
-		///   <para>The index of the selected button.</para>
-		/// </returns>
 		public static int SelectionGrid(Rect position, int selected, GUIContent[] contents, int xCount, GUIStyle style)
 		{
 			if (style == null)
@@ -1756,6 +1038,74 @@ namespace UnityEngine
 				num = Mathf.Max(firstStyle.margin.right, midStyle.margin.left) + Mathf.Max(midStyle.margin.right, lastStyle.margin.left) + num2 * (xCount - 3);
 			}
 			return num;
+		}
+
+		private static bool DoControl(Rect position, int id, bool on, GUIContent content, GUIStyle style)
+		{
+			Event current = Event.current;
+			switch (current.type)
+			{
+			case EventType.MouseDown:
+				if (position.Contains(current.mousePosition))
+				{
+					GUI.GrabMouseControl(id);
+					current.Use();
+				}
+				break;
+			case EventType.MouseUp:
+				if (GUI.HasMouseControl(id))
+				{
+					GUI.ReleaseMouseControl();
+					current.Use();
+					if (position.Contains(current.mousePosition))
+					{
+						GUI.changed = true;
+						return !on;
+					}
+				}
+				break;
+			case EventType.MouseDrag:
+				if (GUI.HasMouseControl(id))
+				{
+					current.Use();
+				}
+				break;
+			case EventType.KeyDown:
+				if (current.character == ' ' && GUIUtility.keyboardControl == id)
+				{
+					current.Use();
+					GUI.changed = true;
+					return !on;
+				}
+				break;
+			case EventType.Repaint:
+				style.Draw(position, content, id, on);
+				break;
+			}
+			return on;
+		}
+
+		private static void DoLabel(Rect position, GUIContent content, GUIStyle style)
+		{
+			Event current = Event.current;
+			if (current.type == EventType.Repaint)
+			{
+				style.Draw(position, content, false, false, false, false);
+				if (!string.IsNullOrEmpty(content.tooltip) && position.Contains(current.mousePosition) && GUIClip.visibleRect.Contains(current.mousePosition))
+				{
+					GUIStyle.SetMouseTooltip(content.tooltip, position);
+				}
+			}
+		}
+
+		internal static bool DoToggle(Rect position, int id, bool value, GUIContent content, GUIStyle style)
+		{
+			return GUI.DoControl(position, id, value, content, style);
+		}
+
+		internal static bool DoButton(Rect position, int id, GUIContent content, GUIStyle style)
+		{
+			return GUI.DoControl(position, id, false, content, style);
 		}
 
 		private static int DoButtonGrid(Rect position, int selected, GUIContent[] contents, string[] controlNames, int xCount, GUIStyle style, GUIStyle firstStyle, GUIStyle midStyle, GUIStyle lastStyle, GUI.ToolbarButtonSize buttonSize)
@@ -1903,14 +1253,13 @@ namespace UnityEngine
 				{
 					array[i] = guistyle.margin.Add(new Rect(num3, num4, num5, elemHeight));
 				}
-				array[i].width = Mathf.Round(array[i].xMax) - Mathf.Round(array[i].x);
-				array[i].x = Mathf.Round(array[i].x);
+				array[i] = GUIUtility.AlignRectToDevice(array[i]);
 				GUIStyle guistyle2 = midStyle;
 				if (i == num - 2 || i == xCount - 2)
 				{
 					guistyle2 = lastStyle;
 				}
-				num3 += num5 + (float)Mathf.Max(guistyle.margin.right, guistyle2.margin.left);
+				num3 = array[i].xMax + (float)Mathf.Max(guistyle.margin.right, guistyle2.margin.left);
 				num2++;
 				if (num2 >= xCount)
 				{
@@ -1924,69 +1273,21 @@ namespace UnityEngine
 			return array;
 		}
 
-		/// <summary>
-		///   <para>A horizontal slider the user can drag to change a value between a min and a max.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the slider.</param>
-		/// <param name="value">The value the slider shows. This determines the position of the draggable thumb.</param>
-		/// <param name="leftValue">The value at the left end of the slider.</param>
-		/// <param name="rightValue">The value at the right end of the slider.</param>
-		/// <param name="slider">The GUIStyle to use for displaying the dragging area. If left out, the horizontalSlider style from the current GUISkin is used.</param>
-		/// <param name="thumb">The GUIStyle to use for displaying draggable thumb. If left out, the horizontalSliderThumb style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The value that has been set by the user.</para>
-		/// </returns>
 		public static float HorizontalSlider(Rect position, float value, float leftValue, float rightValue)
 		{
 			return GUI.Slider(position, value, 0f, leftValue, rightValue, GUI.skin.horizontalSlider, GUI.skin.horizontalSliderThumb, true, 0);
 		}
 
-		/// <summary>
-		///   <para>A horizontal slider the user can drag to change a value between a min and a max.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the slider.</param>
-		/// <param name="value">The value the slider shows. This determines the position of the draggable thumb.</param>
-		/// <param name="leftValue">The value at the left end of the slider.</param>
-		/// <param name="rightValue">The value at the right end of the slider.</param>
-		/// <param name="slider">The GUIStyle to use for displaying the dragging area. If left out, the horizontalSlider style from the current GUISkin is used.</param>
-		/// <param name="thumb">The GUIStyle to use for displaying draggable thumb. If left out, the horizontalSliderThumb style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The value that has been set by the user.</para>
-		/// </returns>
 		public static float HorizontalSlider(Rect position, float value, float leftValue, float rightValue, GUIStyle slider, GUIStyle thumb)
 		{
 			return GUI.Slider(position, value, 0f, leftValue, rightValue, slider, thumb, true, 0);
 		}
 
-		/// <summary>
-		///   <para>A vertical slider the user can drag to change a value between a min and a max.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the slider.</param>
-		/// <param name="value">The value the slider shows. This determines the position of the draggable thumb.</param>
-		/// <param name="topValue">The value at the top end of the slider.</param>
-		/// <param name="bottomValue">The value at the bottom end of the slider.</param>
-		/// <param name="slider">The GUIStyle to use for displaying the dragging area. If left out, the horizontalSlider style from the current GUISkin is used.</param>
-		/// <param name="thumb">The GUIStyle to use for displaying draggable thumb. If left out, the horizontalSliderThumb style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The value that has been set by the user.</para>
-		/// </returns>
 		public static float VerticalSlider(Rect position, float value, float topValue, float bottomValue)
 		{
 			return GUI.Slider(position, value, 0f, topValue, bottomValue, GUI.skin.verticalSlider, GUI.skin.verticalSliderThumb, false, 0);
 		}
 
-		/// <summary>
-		///   <para>A vertical slider the user can drag to change a value between a min and a max.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the slider.</param>
-		/// <param name="value">The value the slider shows. This determines the position of the draggable thumb.</param>
-		/// <param name="topValue">The value at the top end of the slider.</param>
-		/// <param name="bottomValue">The value at the bottom end of the slider.</param>
-		/// <param name="slider">The GUIStyle to use for displaying the dragging area. If left out, the horizontalSlider style from the current GUISkin is used.</param>
-		/// <param name="thumb">The GUIStyle to use for displaying draggable thumb. If left out, the horizontalSliderThumb style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The value that has been set by the user.</para>
-		/// </returns>
 		public static float VerticalSlider(Rect position, float value, float topValue, float bottomValue, GUIStyle slider, GUIStyle thumb)
 		{
 			return GUI.Slider(position, value, 0f, topValue, bottomValue, slider, thumb, false, 0);
@@ -2003,35 +1304,11 @@ namespace UnityEngine
 			return sliderHandler.Handle();
 		}
 
-		/// <summary>
-		///   <para>Make a horizontal scrollbar. Scrollbars are what you use to scroll through a document. Most likely, you want to use scrollViews instead.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the scrollbar.</param>
-		/// <param name="value">The position between min and max.</param>
-		/// <param name="size">How much can we see?</param>
-		/// <param name="leftValue">The value at the left end of the scrollbar.</param>
-		/// <param name="rightValue">The value at the right end of the scrollbar.</param>
-		/// <param name="style">The style to use for the scrollbar background. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The modified value. This can be changed by the user by dragging the scrollbar, or clicking the arrows at the end.</para>
-		/// </returns>
 		public static float HorizontalScrollbar(Rect position, float value, float size, float leftValue, float rightValue)
 		{
 			return GUI.Scroller(position, value, size, leftValue, rightValue, GUI.skin.horizontalScrollbar, GUI.skin.horizontalScrollbarThumb, GUI.skin.horizontalScrollbarLeftButton, GUI.skin.horizontalScrollbarRightButton, true);
 		}
 
-		/// <summary>
-		///   <para>Make a horizontal scrollbar. Scrollbars are what you use to scroll through a document. Most likely, you want to use scrollViews instead.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the scrollbar.</param>
-		/// <param name="value">The position between min and max.</param>
-		/// <param name="size">How much can we see?</param>
-		/// <param name="leftValue">The value at the left end of the scrollbar.</param>
-		/// <param name="rightValue">The value at the right end of the scrollbar.</param>
-		/// <param name="style">The style to use for the scrollbar background. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The modified value. This can be changed by the user by dragging the scrollbar, or clicking the arrows at the end.</para>
-		/// </returns>
 		public static float HorizontalScrollbar(Rect position, float value, float size, float leftValue, float rightValue, GUIStyle style)
 		{
 			return GUI.Scroller(position, value, size, leftValue, rightValue, style, GUI.skin.GetStyle(style.name + "thumb"), GUI.skin.GetStyle(style.name + "leftbutton"), GUI.skin.GetStyle(style.name + "rightbutton"), true);
@@ -2062,35 +1339,11 @@ namespace UnityEngine
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Make a vertical scrollbar. Scrollbars are what you use to scroll through a document. Most likely, you want to use scrollViews instead.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the scrollbar.</param>
-		/// <param name="value">The position between min and max.</param>
-		/// <param name="size">How much can we see?</param>
-		/// <param name="topValue">The value at the top of the scrollbar.</param>
-		/// <param name="bottomValue">The value at the bottom of the scrollbar.</param>
-		/// <param name="style">The style to use for the scrollbar background. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The modified value. This can be changed by the user by dragging the scrollbar, or clicking the arrows at the end.</para>
-		/// </returns>
 		public static float VerticalScrollbar(Rect position, float value, float size, float topValue, float bottomValue)
 		{
 			return GUI.Scroller(position, value, size, topValue, bottomValue, GUI.skin.verticalScrollbar, GUI.skin.verticalScrollbarThumb, GUI.skin.verticalScrollbarUpButton, GUI.skin.verticalScrollbarDownButton, false);
 		}
 
-		/// <summary>
-		///   <para>Make a vertical scrollbar. Scrollbars are what you use to scroll through a document. Most likely, you want to use scrollViews instead.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the scrollbar.</param>
-		/// <param name="value">The position between min and max.</param>
-		/// <param name="size">How much can we see?</param>
-		/// <param name="topValue">The value at the top of the scrollbar.</param>
-		/// <param name="bottomValue">The value at the bottom of the scrollbar.</param>
-		/// <param name="style">The style to use for the scrollbar background. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <returns>
-		///   <para>The modified value. This can be changed by the user by dragging the scrollbar, or clicking the arrows at the end.</para>
-		/// </returns>
 		public static float VerticalScrollbar(Rect position, float value, float size, float topValue, float bottomValue, GUIStyle style)
 		{
 			return GUI.Scroller(position, value, size, topValue, bottomValue, style, GUI.skin.GetStyle(style.name + "thumb"), GUI.skin.GetStyle(style.name + "upbutton"), GUI.skin.GetStyle(style.name + "downbutton"), false);
@@ -2146,105 +1399,41 @@ namespace UnityEngine
 			GUIClip.Push(position, scrollOffset, renderOffset, resetOffset);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position)
 		{
 			GUI.BeginGroup(position, GUIContent.none, GUIStyle.none);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, string text)
 		{
 			GUI.BeginGroup(position, GUIContent.Temp(text), GUIStyle.none);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, Texture image)
 		{
 			GUI.BeginGroup(position, GUIContent.Temp(image), GUIStyle.none);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, GUIContent content)
 		{
 			GUI.BeginGroup(position, content, GUIStyle.none);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, GUIStyle style)
 		{
 			GUI.BeginGroup(position, GUIContent.none, style);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, string text, GUIStyle style)
 		{
 			GUI.BeginGroup(position, GUIContent.Temp(text), style);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, Texture image, GUIStyle style)
 		{
 			GUI.BeginGroup(position, GUIContent.Temp(image), style);
 		}
 
-		/// <summary>
-		///   <para>Begin a group. Must be matched with a call to EndGroup.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the group.</param>
-		/// <param name="text">Text to display on the group.</param>
-		/// <param name="image">Texture to display on the group.</param>
-		/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-		/// <param name="style">The style to use for the background.</param>
 		public static void BeginGroup(Rect position, GUIContent content, GUIStyle style)
 		{
 			GUI.BeginGroup(position, content, style, Vector2.zero);
@@ -2272,9 +1461,6 @@ namespace UnityEngine
 			GUIClip.Push(position, scrollOffset, Vector2.zero, false);
 		}
 
-		/// <summary>
-		///   <para>End a group.</para>
-		/// </summary>
 		public static void EndGroup()
 		{
 			GUIUtility.CheckOnGUI();
@@ -2293,73 +1479,21 @@ namespace UnityEngine
 			GUIClip.Pop();
 		}
 
-		/// <summary>
-		///   <para>Begin a scrolling view inside your GUI.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-		/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-		/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-		/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when viewRect is wider than position.</param>
-		/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when viewRect is taller than position.</param>
-		/// <returns>
-		///   <para>The modified scrollPosition. Feed this back into the variable you pass in, as shown in the example.</para>
-		/// </returns>
 		public static Vector2 BeginScrollView(Rect position, Vector2 scrollPosition, Rect viewRect)
 		{
 			return GUI.BeginScrollView(position, scrollPosition, viewRect, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.scrollView);
 		}
 
-		/// <summary>
-		///   <para>Begin a scrolling view inside your GUI.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-		/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-		/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-		/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when viewRect is wider than position.</param>
-		/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when viewRect is taller than position.</param>
-		/// <returns>
-		///   <para>The modified scrollPosition. Feed this back into the variable you pass in, as shown in the example.</para>
-		/// </returns>
 		public static Vector2 BeginScrollView(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, bool alwaysShowVertical)
 		{
 			return GUI.BeginScrollView(position, scrollPosition, viewRect, alwaysShowHorizontal, alwaysShowVertical, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.scrollView);
 		}
 
-		/// <summary>
-		///   <para>Begin a scrolling view inside your GUI.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-		/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-		/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-		/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when viewRect is wider than position.</param>
-		/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when viewRect is taller than position.</param>
-		/// <returns>
-		///   <para>The modified scrollPosition. Feed this back into the variable you pass in, as shown in the example.</para>
-		/// </returns>
 		public static Vector2 BeginScrollView(Rect position, Vector2 scrollPosition, Rect viewRect, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar)
 		{
 			return GUI.BeginScrollView(position, scrollPosition, viewRect, false, false, horizontalScrollbar, verticalScrollbar, GUI.skin.scrollView);
 		}
 
-		/// <summary>
-		///   <para>Begin a scrolling view inside your GUI.</para>
-		/// </summary>
-		/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-		/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-		/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-		/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
-		/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when viewRect is wider than position.</param>
-		/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when viewRect is taller than position.</param>
-		/// <returns>
-		///   <para>The modified scrollPosition. Feed this back into the variable you pass in, as shown in the example.</para>
-		/// </returns>
 		public static Vector2 BeginScrollView(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar)
 		{
 			return GUI.BeginScrollView(position, scrollPosition, viewRect, alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, GUI.skin.scrollView);
@@ -2453,19 +1587,11 @@ namespace UnityEngine
 			return scrollPosition;
 		}
 
-		/// <summary>
-		///   <para>Ends a scrollview started with a call to BeginScrollView.</para>
-		/// </summary>
-		/// <param name="handleScrollWheel"></param>
 		public static void EndScrollView()
 		{
 			GUI.EndScrollView(true);
 		}
 
-		/// <summary>
-		///   <para>Ends a scrollview started with a call to BeginScrollView.</para>
-		/// </summary>
-		/// <param name="handleScrollWheel"></param>
 		public static void EndScrollView(bool handleScrollWheel)
 		{
 			GUIUtility.CheckOnGUI();
@@ -2503,10 +1629,6 @@ namespace UnityEngine
 			return scrollViewState;
 		}
 
-		/// <summary>
-		///   <para>Scrolls all enclosing scrollviews so they try to make position visible.</para>
-		/// </summary>
-		/// <param name="position"></param>
 		public static void ScrollTo(Rect position)
 		{
 			ScrollViewState topScrollView = GUI.GetTopScrollView();
@@ -2638,9 +1760,6 @@ namespace UnityEngine
 			GUI.skin = skin;
 		}
 
-		/// <summary>
-		///   <para>If you want to have the entire window background to act as a drag area, use the version of DragWindow that takes no parameters and put it at the end of the window function.</para>
-		/// </summary>
 		public static void DragWindow()
 		{
 			GUI.DragWindow(new Rect(0f, 0f, 10000f, 10000f));
@@ -2689,15 +1808,6 @@ namespace UnityEngine
 		private static extern void set_contentColor_Injected(ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DoLabel_Injected(ref Rect position, GUIContent content, IntPtr style);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool DoButton_Injected(ref Rect position, GUIContent content, IntPtr style);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool DoToggle_Injected(ref Rect position, int id, bool value, GUIContent content, IntPtr style);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_DoModalWindow_Injected(int id, int instanceID, ref Rect clientRect, GUI.WindowFunction func, GUIContent content, GUIStyle style, object skin, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2713,6 +1823,8 @@ namespace UnityEngine
 		private static int s_HotTextField = -1;
 
 		private static readonly int s_BoxHash = "Box".GetHashCode();
+
+		private static readonly int s_ButonHash = "Button".GetHashCode();
 
 		private static readonly int s_RepeatButtonHash = "repeatButton".GetHashCode();
 
@@ -2732,25 +1844,12 @@ namespace UnityEngine
 
 		private static readonly GenericStack s_ScrollViewStates = new GenericStack();
 
-		/// <summary>
-		///   <para>Determines how toolbar button size is calculated.</para>
-		/// </summary>
 		public enum ToolbarButtonSize
 		{
-			/// <summary>
-			///   <para>Calculates the button size by dividing the available width by the number of buttons. The minimum size is the maximum content width.</para>
-			/// </summary>
 			Fixed,
-			/// <summary>
-			///   <para>The width of each toolbar button is calculated based on the width of its content.</para>
-			/// </summary>
 			FitToContents
 		}
 
-		/// <summary>
-		///   <para>Callback to draw GUI within a window (used with GUI.Window).</para>
-		/// </summary>
-		/// <param name="id"></param>
 		public delegate void WindowFunction(int id);
 
 		public abstract class Scope : IDisposable
@@ -2780,97 +1879,38 @@ namespace UnityEngine
 			private bool m_Disposed;
 		}
 
-		/// <summary>
-		///   <para>Disposable helper class for managing BeginGroup / EndGroup.</para>
-		/// </summary>
 		public class GroupScope : GUI.Scope
 		{
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position)
 			{
 				GUI.BeginGroup(position);
 			}
 
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position, string text)
 			{
 				GUI.BeginGroup(position, text);
 			}
 
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position, Texture image)
 			{
 				GUI.BeginGroup(position, image);
 			}
 
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position, GUIContent content)
 			{
 				GUI.BeginGroup(position, content);
 			}
 
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position, GUIStyle style)
 			{
 				GUI.BeginGroup(position, style);
 			}
 
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position, string text, GUIStyle style)
 			{
 				GUI.BeginGroup(position, text, style);
 			}
 
-			/// <summary>
-			///   <para>Create a new GroupScope and begin the corresponding group.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the group.</param>
-			/// <param name="text">Text to display on the group.</param>
-			/// <param name="image">Texture to display on the group.</param>
-			/// <param name="content">Text, image and tooltip for this group. If supplied, any mouse clicks are "captured" by the group and not If left out, no background is rendered, and mouse clicks are passed.</param>
-			/// <param name="style">The style to use for the background.</param>
 			public GroupScope(Rect position, Texture image, GUIStyle style)
 			{
 				GUI.BeginGroup(position, image, style);
@@ -2882,69 +1922,26 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Disposable helper class for managing BeginScrollView / EndScrollView.</para>
-		/// </summary>
 		public class ScrollViewScope : GUI.Scope
 		{
-			/// <summary>
-			///   <para>Create a new ScrollViewScope and begin the corresponding ScrollView.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-			/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-			/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-			/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when clientRect is wider than position.</param>
-			/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when clientRect is taller than position.</param>
-			/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-			/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
 			public ScrollViewScope(Rect position, Vector2 scrollPosition, Rect viewRect)
 			{
 				this.handleScrollWheel = true;
 				this.scrollPosition = GUI.BeginScrollView(position, scrollPosition, viewRect);
 			}
 
-			/// <summary>
-			///   <para>Create a new ScrollViewScope and begin the corresponding ScrollView.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-			/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-			/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-			/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when clientRect is wider than position.</param>
-			/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when clientRect is taller than position.</param>
-			/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-			/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
 			public ScrollViewScope(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, bool alwaysShowVertical)
 			{
 				this.handleScrollWheel = true;
 				this.scrollPosition = GUI.BeginScrollView(position, scrollPosition, viewRect, alwaysShowHorizontal, alwaysShowVertical);
 			}
 
-			/// <summary>
-			///   <para>Create a new ScrollViewScope and begin the corresponding ScrollView.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-			/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-			/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-			/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when clientRect is wider than position.</param>
-			/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when clientRect is taller than position.</param>
-			/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-			/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
 			public ScrollViewScope(Rect position, Vector2 scrollPosition, Rect viewRect, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar)
 			{
 				this.handleScrollWheel = true;
 				this.scrollPosition = GUI.BeginScrollView(position, scrollPosition, viewRect, horizontalScrollbar, verticalScrollbar);
 			}
 
-			/// <summary>
-			///   <para>Create a new ScrollViewScope and begin the corresponding ScrollView.</para>
-			/// </summary>
-			/// <param name="position">Rectangle on the screen to use for the ScrollView.</param>
-			/// <param name="scrollPosition">The pixel distance that the view is scrolled in the X and Y directions.</param>
-			/// <param name="viewRect">The rectangle used inside the scrollview.</param>
-			/// <param name="alwaysShowHorizontal">Optional parameter to always show the horizontal scrollbar. If false or left out, it is only shown when clientRect is wider than position.</param>
-			/// <param name="alwaysShowVertical">Optional parameter to always show the vertical scrollbar. If false or left out, it is only shown when clientRect is taller than position.</param>
-			/// <param name="horizontalScrollbar">Optional GUIStyle to use for the horizontal scrollbar. If left out, the horizontalScrollbar style from the current GUISkin is used.</param>
-			/// <param name="verticalScrollbar">Optional GUIStyle to use for the vertical scrollbar. If left out, the verticalScrollbar style from the current GUISkin is used.</param>
 			public ScrollViewScope(Rect position, Vector2 scrollPosition, Rect viewRect, bool alwaysShowHorizontal, bool alwaysShowVertical, GUIStyle horizontalScrollbar, GUIStyle verticalScrollbar)
 			{
 				this.handleScrollWheel = true;
@@ -2957,14 +1954,8 @@ namespace UnityEngine
 				this.scrollPosition = GUI.BeginScrollView(position, scrollPosition, viewRect, alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, background);
 			}
 
-			/// <summary>
-			///   <para>The modified scrollPosition. Feed this back into the variable you pass in, as shown in the example.</para>
-			/// </summary>
 			public Vector2 scrollPosition { get; private set; }
 
-			/// <summary>
-			///   <para>Whether this ScrollView should handle scroll wheel events. (default: true).</para>
-			/// </summary>
 			public bool handleScrollWheel { get; set; }
 
 			protected override void CloseScope()
@@ -2980,10 +1971,43 @@ namespace UnityEngine
 				GUI.BeginClip(position);
 			}
 
+			internal ClipScope(Rect position, Vector2 scrollOffset)
+			{
+				GUI.BeginClip(position, scrollOffset, default(Vector2), false);
+			}
+
 			protected override void CloseScope()
 			{
 				GUI.EndClip();
 			}
+		}
+
+		internal struct ColorScope : IDisposable
+		{
+			public ColorScope(Color newColor)
+			{
+				this.m_Disposed = false;
+				this.m_PreviousColor = GUI.color;
+				GUI.color = newColor;
+			}
+
+			public ColorScope(float r, float g, float b, float a = 1f)
+			{
+				this = new GUI.ColorScope(new Color(r, g, b, a));
+			}
+
+			public void Dispose()
+			{
+				if (!this.m_Disposed)
+				{
+					this.m_Disposed = true;
+					GUI.color = this.m_PreviousColor;
+				}
+			}
+
+			private bool m_Disposed;
+
+			private Color m_PreviousColor;
 		}
 	}
 }

@@ -5,16 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A sphere-shaped primitive collider.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Dynamics/SphereCollider.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Dynamics/SphereCollider.h")]
 	public class SphereCollider : Collider
 	{
-		/// <summary>
-		///   <para>The center of the sphere in the object's local space.</para>
-		/// </summary>
 		public Vector3 center
 		{
 			get
@@ -29,9 +23,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The radius of the sphere measured in the object's local space.</para>
-		/// </summary>
 		public extern float radius
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

@@ -75,38 +75,37 @@ namespace UnityEngine
 						else
 						{
 							vector = mousePosition;
-							if (!camera.pixelRect.Contains(vector))
-							{
-								goto IL_0361;
-							}
 						}
-						SendMouseEvents.HitTestLegacyGUI(camera, vector, ref SendMouseEvents.m_CurrentHit[0]);
-						if (camera.eventMask != 0)
+						if (camera.pixelRect.Contains(vector))
 						{
-							Ray ray = camera.ScreenPointToRay(vector);
-							float z = ray.direction.z;
-							float num4 = ((!Mathf.Approximately(0f, z)) ? Mathf.Abs((camera.farClipPlane - camera.nearClipPlane) / z) : float.PositiveInfinity);
-							GameObject gameObject = camera.RaycastTry(ray, num4, camera.cullingMask & camera.eventMask);
-							if (gameObject != null)
+							SendMouseEvents.HitTestLegacyGUI(camera, vector, ref SendMouseEvents.m_CurrentHit[0]);
+							if (camera.eventMask != 0)
 							{
-								SendMouseEvents.m_CurrentHit[1].target = gameObject;
-								SendMouseEvents.m_CurrentHit[1].camera = camera;
-							}
-							else if (camera.clearFlags == CameraClearFlags.Skybox || camera.clearFlags == CameraClearFlags.Color)
-							{
-								SendMouseEvents.m_CurrentHit[1].target = null;
-								SendMouseEvents.m_CurrentHit[1].camera = null;
-							}
-							GameObject gameObject2 = camera.RaycastTry2D(ray, num4, camera.cullingMask & camera.eventMask);
-							if (gameObject2 != null)
-							{
-								SendMouseEvents.m_CurrentHit[2].target = gameObject2;
-								SendMouseEvents.m_CurrentHit[2].camera = camera;
-							}
-							else if (camera.clearFlags == CameraClearFlags.Skybox || camera.clearFlags == CameraClearFlags.Color)
-							{
-								SendMouseEvents.m_CurrentHit[2].target = null;
-								SendMouseEvents.m_CurrentHit[2].camera = null;
+								Ray ray = camera.ScreenPointToRay(vector);
+								float z = ray.direction.z;
+								float num4 = ((!Mathf.Approximately(0f, z)) ? Mathf.Abs((camera.farClipPlane - camera.nearClipPlane) / z) : float.PositiveInfinity);
+								GameObject gameObject = camera.RaycastTry(ray, num4, camera.cullingMask & camera.eventMask);
+								if (gameObject != null)
+								{
+									SendMouseEvents.m_CurrentHit[1].target = gameObject;
+									SendMouseEvents.m_CurrentHit[1].camera = camera;
+								}
+								else if (camera.clearFlags == CameraClearFlags.Skybox || camera.clearFlags == CameraClearFlags.Color)
+								{
+									SendMouseEvents.m_CurrentHit[1].target = null;
+									SendMouseEvents.m_CurrentHit[1].camera = null;
+								}
+								GameObject gameObject2 = camera.RaycastTry2D(ray, num4, camera.cullingMask & camera.eventMask);
+								if (gameObject2 != null)
+								{
+									SendMouseEvents.m_CurrentHit[2].target = gameObject2;
+									SendMouseEvents.m_CurrentHit[2].camera = camera;
+								}
+								else if (camera.clearFlags == CameraClearFlags.Skybox || camera.clearFlags == CameraClearFlags.Color)
+								{
+									SendMouseEvents.m_CurrentHit[2].target = null;
+									SendMouseEvents.m_CurrentHit[2].camera = null;
+								}
 							}
 						}
 					}

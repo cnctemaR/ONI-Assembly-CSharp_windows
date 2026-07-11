@@ -25,17 +25,14 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 
 	private void OnSelect(object data)
 	{
-		bool flag = (bool)data;
-		if (flag)
+		if ((bool)data)
 		{
 			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_form", false), base.transform.position, 1f);
 			this.UpdateVisualizers();
+			return;
 		}
-		else
-		{
-			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_disappear", false), base.transform.position, 1f);
-			this.ClearVisualizers();
-		}
+		SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_disappear", false), base.transform.position, 1f);
+		this.ClearVisualizers();
 	}
 
 	private void OnRotated(object data)
@@ -57,10 +54,9 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 			rotatedCellOffset = this.rotatable.GetRotatedCellOffset(this.vision_offset);
 		}
 		int num = Grid.PosToCell(base.transform.gameObject);
-		int num2 = Grid.OffsetCell(num, rotatedCellOffset);
+		int num2;
 		int num3;
-		int num4;
-		Grid.CellToXY(num2, out num3, out num4);
+		Grid.CellToXY(Grid.OffsetCell(num, rotatedCellOffset), out num2, out num3);
 		for (int i = 0; i < this.height; i++)
 		{
 			for (int j = 0; j < this.width; j++)
@@ -70,15 +66,15 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 				{
 					rotatedCellOffset2 = this.rotatable.GetRotatedCellOffset(rotatedCellOffset2);
 				}
-				int num5 = Grid.OffsetCell(num, rotatedCellOffset2);
-				if (Grid.IsValidCell(num5))
+				int num4 = Grid.OffsetCell(num, rotatedCellOffset2);
+				if (Grid.IsValidCell(num4))
 				{
+					int num5;
 					int num6;
-					int num7;
-					Grid.CellToXY(num5, out num6, out num7);
-					if (Grid.TestLineOfSight(num3, num4, num6, num7, this.blocking_cb, this.blocking_tile_visible))
+					Grid.CellToXY(num4, out num5, out num6);
+					if (Grid.TestLineOfSight(num2, num3, num5, num6, this.blocking_cb, this.blocking_tile_visible))
 					{
-						this.newCells.Add(num5);
+						this.newCells.Add(num4);
 					}
 				}
 			}

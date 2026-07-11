@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class LCIDConversionAttribute : Attribute
 	{
 		public LCIDConversionAttribute(int lcid)
 		{
-			this.id = lcid;
+			this._val = lcid;
 		}
 
 		public int Value
 		{
 			get
 			{
-				return this.id;
+				return this._val;
 			}
 		}
 
-		private int id;
+		internal int _val;
 	}
 }

@@ -117,7 +117,7 @@ public class AssignableSideScreenRow : KMonoBehaviour
 				component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGN_TOOLTIP, this.targetIdentity.GetProperName()), null);
 			}
 		}
-		return string.Empty;
+		return "";
 	}
 
 	[SerializeField]

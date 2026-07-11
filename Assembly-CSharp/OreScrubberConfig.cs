@@ -13,8 +13,12 @@ public class OreScrubberConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		string[] array = new string[] { "Metal" };
+		float[] array2 = new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] };
+		string[] array3 = array;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] }, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.UtilityInputOffset = new CellOffset(1, 1);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.InputConduitType = ConduitType.Gas;
@@ -37,11 +41,10 @@ public class OreScrubberConfig : IBuildingConfig
 		go.AddOrGet<DirectionControl>();
 		OreScrubber.Work work = go.AddOrGet<OreScrubber.Work>();
 		work.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_ore_scrubber_kanim") };
-		work.workTime = 10.2f;
+		work.workTime = 10.200001f;
 		work.trackUses = true;
 		work.workLayer = Grid.SceneLayer.BuildingUse;
-		Storage storage = go.AddOrGet<Storage>();
-		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		go.AddOrGet<Storage>().SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

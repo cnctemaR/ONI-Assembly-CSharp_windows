@@ -50,6 +50,7 @@ public class AutoDisinfectable : Workable
 			{
 				this.chore.Cancel("Autodisinfect Disabled");
 				this.chore = null;
+				return;
 			}
 		}
 		else if (this.chore == null || !(this.chore.driver != null))
@@ -58,8 +59,9 @@ public class AutoDisinfectable : Workable
 			if (this.chore == null && diseaseCount > SaveGame.Instance.minGermCountForDisinfect)
 			{
 				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+				return;
 			}
-			else if (diseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
+			if (diseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
 			{
 				this.chore.Cancel("AutoDisinfectable.Update");
 				this.chore = null;
@@ -108,19 +110,11 @@ public class AutoDisinfectable : Workable
 		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.enableAutoDisinfect)
 		{
-			string text = "action_disinfect";
-			string text2 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME;
-			global::System.Action action = new global::System.Action(this.EnableAutoDisinfect);
-			string text3 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_disinfect", global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME, new global::System.Action(this.EnableAutoDisinfect), global::Action.NumActions, null, null, null, global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP, true);
 		}
 		else
 		{
-			string text3 = "action_disinfect";
-			string text2 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME;
-			global::System.Action action = new global::System.Action(this.DisableAutoDisinfect);
-			string text = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_disinfect", global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME, new global::System.Action(this.DisableAutoDisinfect), global::Action.NumActions, null, null, null, global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP, true);
 		}
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 10f);
 	}

@@ -9,6 +9,10 @@ namespace Satsuma.IO.GraphML
 {
 	public sealed class GraphMLFormat
 	{
+		public IGraph Graph { get; set; }
+
+		public IList<GraphMLProperty> Properties { get; private set; }
+
 		public GraphMLFormat()
 		{
 			this.Properties = new List<GraphMLProperty>();
@@ -22,10 +26,6 @@ namespace Satsuma.IO.GraphML
 			list.Add((XElement x) => new NodeGraphicsProperty(x));
 			this.PropertyLoaders = list;
 		}
-
-		public IGraph Graph { get; set; }
-
-		public IList<GraphMLProperty> Properties { get; private set; }
 
 		public void RegisterPropertyLoader(Func<XElement, GraphMLProperty> loader)
 		{
@@ -72,7 +72,7 @@ namespace Satsuma.IO.GraphML
 				}
 			}
 			XElement xelement2 = Utils.ElementLocal(root, "graph");
-			Directedness directedness = ((!(xelement2.Attribute("edgedefault").Value == "directed")) ? Directedness.Undirected : Directedness.Directed);
+			Directedness directedness = ((xelement2.Attribute("edgedefault").Value == "directed") ? Directedness.Directed : Directedness.Undirected);
 			GraphMLFormat.ReadProperties(dictionary, xelement2, this.Graph);
 			Dictionary<string, Node> dictionary2 = new Dictionary<string, Node>();
 			foreach (XElement xelement3 in Utils.ElementsLocal(xelement2, "node"))
@@ -89,7 +89,7 @@ namespace Satsuma.IO.GraphML
 				XAttribute xattribute = xelement4.Attribute("directed");
 				if (xattribute != null)
 				{
-					directedness2 = ((!(xattribute.Value == "true")) ? Directedness.Undirected : Directedness.Directed);
+					directedness2 = ((xattribute.Value == "true") ? Directedness.Directed : Directedness.Undirected);
 				}
 				Arc arc = buildableGraph.AddArc(node2, node3, directedness2);
 				GraphMLFormat.ReadProperties(dictionary, xelement4, arc);

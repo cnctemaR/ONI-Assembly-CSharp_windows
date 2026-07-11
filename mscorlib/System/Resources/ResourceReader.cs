@@ -1,18 +1,36 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Permissions;
+using System.Security;
 using System.Text;
 
 namespace System.Resources
 {
 	[ComVisible(true)]
-	public sealed class ResourceReader : IEnumerable, IDisposable, IResourceReader
+	public sealed class ResourceReader : IResourceReader, IEnumerable, IDisposable
 	{
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecuritySafeCritical]
+		public ResourceReader(string fileName)
+		{
+			this._resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
+			this._store = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.RandomAccess, Path.GetFileName(fileName), false, false, false), Encoding.UTF8);
+			try
+			{
+				this.ReadResources();
+			}
+			catch
+			{
+				this._store.Close();
+				throw;
+			}
+		}
+
+		[SecurityCritical]
 		public ResourceReader(Stream stream)
 		{
 			if (stream == null)
@@ -21,334 +39,21 @@ namespace System.Resources
 			}
 			if (!stream.CanRead)
 			{
-				throw new ArgumentException("Stream was not readable.");
+				throw new ArgumentException(Environment.GetResourceString("Stream was not readable."));
 			}
-			this.reader = new BinaryReader(stream, Encoding.UTF8);
-			this.formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File | StreamingContextStates.Persistence));
-			this.ReadHeaders();
+			this._resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
+			this._store = new BinaryReader(stream, Encoding.UTF8);
+			this._ums = stream as UnmanagedMemoryStream;
+			this.ReadResources();
 		}
 
-		public ResourceReader(string fileName)
+		[SecurityCritical]
+		internal ResourceReader(Stream stream, Dictionary<string, ResourceLocator> resCache)
 		{
-			this.reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-			this.formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File | StreamingContextStates.Persistence));
-			this.ReadHeaders();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return ((IResourceReader)this).GetEnumerator();
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		private void ReadHeaders()
-		{
-			try
-			{
-				int num = this.reader.ReadInt32();
-				if (num != ResourceManager.MagicNumber)
-				{
-					throw new ArgumentException(string.Format("Stream is not a valid .resources file, magic=0x{0:x}", num));
-				}
-				int num2 = this.reader.ReadInt32();
-				int num3 = this.reader.ReadInt32();
-				if (num2 > ResourceManager.HeaderVersionNumber)
-				{
-					this.reader.BaseStream.Seek((long)num3, SeekOrigin.Current);
-				}
-				else
-				{
-					string text = this.reader.ReadString();
-					if (!text.StartsWith("System.Resources.ResourceReader"))
-					{
-						throw new NotSupportedException("This .resources file requires reader class " + text);
-					}
-					string text2 = this.reader.ReadString();
-					if (!text2.StartsWith(typeof(ResourceSet).FullName) && !text2.StartsWith("System.Resources.RuntimeResourceSet"))
-					{
-						throw new NotSupportedException("This .resources file requires set class " + text2);
-					}
-				}
-				this.resource_ver = this.reader.ReadInt32();
-				if (this.resource_ver != 1 && this.resource_ver != 2)
-				{
-					throw new NotSupportedException("This .resources file requires unsupported set class version: " + this.resource_ver.ToString());
-				}
-				this.resourceCount = this.reader.ReadInt32();
-				this.typeCount = this.reader.ReadInt32();
-				this.typeNames = new string[this.typeCount];
-				for (int i = 0; i < this.typeCount; i++)
-				{
-					this.typeNames[i] = this.reader.ReadString();
-				}
-				int num4 = (int)(this.reader.BaseStream.Position & 7L);
-				int num5 = 0;
-				if (num4 != 0)
-				{
-					num5 = 8 - num4;
-				}
-				for (int j = 0; j < num5; j++)
-				{
-					byte b = this.reader.ReadByte();
-					if ((char)b != "PAD"[j % 3])
-					{
-						throw new ArgumentException("Malformed .resources file (padding values incorrect)");
-					}
-				}
-				this.hashes = new int[this.resourceCount];
-				for (int k = 0; k < this.resourceCount; k++)
-				{
-					this.hashes[k] = this.reader.ReadInt32();
-				}
-				long[] array = new long[this.resourceCount];
-				for (int l = 0; l < this.resourceCount; l++)
-				{
-					array[l] = (long)this.reader.ReadInt32();
-				}
-				this.dataSectionOffset = this.reader.ReadInt32();
-				this.nameSectionOffset = this.reader.BaseStream.Position;
-				long position = this.reader.BaseStream.Position;
-				this.infos = new ResourceReader.ResourceInfo[this.resourceCount];
-				for (int m = 0; m < this.resourceCount; m++)
-				{
-					this.CreateResourceInfo(array[m], ref this.infos[m]);
-				}
-				this.reader.BaseStream.Seek(position, SeekOrigin.Begin);
-			}
-			catch (EndOfStreamException ex)
-			{
-				throw new ArgumentException("Stream is not a valid .resources file!  It was possibly truncated.", ex);
-			}
-		}
-
-		private void CreateResourceInfo(long position, ref ResourceReader.ResourceInfo info)
-		{
-			long num = position + this.nameSectionOffset;
-			this.reader.BaseStream.Seek(num, SeekOrigin.Begin);
-			int num2 = this.Read7BitEncodedInt();
-			byte[] array = new byte[num2];
-			this.reader.Read(array, 0, num2);
-			string @string = Encoding.Unicode.GetString(array);
-			long num3 = (long)(this.reader.ReadInt32() + this.dataSectionOffset);
-			this.reader.BaseStream.Seek(num3, SeekOrigin.Begin);
-			int num4 = this.Read7BitEncodedInt();
-			info = new ResourceReader.ResourceInfo(@string, this.reader.BaseStream.Position, num4);
-		}
-
-		private int Read7BitEncodedInt()
-		{
-			int num = 0;
-			int num2 = 0;
-			byte b;
-			do
-			{
-				b = this.reader.ReadByte();
-				num |= (int)(b & 127) << num2;
-				num2 += 7;
-			}
-			while ((b & 128) == 128);
-			return num;
-		}
-
-		private object ReadValueVer2(int type_index)
-		{
-			switch (type_index)
-			{
-			case 0:
-				return null;
-			case 1:
-				return this.reader.ReadString();
-			case 2:
-				return this.reader.ReadBoolean();
-			case 3:
-				return (char)this.reader.ReadUInt16();
-			case 4:
-				return this.reader.ReadByte();
-			case 5:
-				return this.reader.ReadSByte();
-			case 6:
-				return this.reader.ReadInt16();
-			case 7:
-				return this.reader.ReadUInt16();
-			case 8:
-				return this.reader.ReadInt32();
-			case 9:
-				return this.reader.ReadUInt32();
-			case 10:
-				return this.reader.ReadInt64();
-			case 11:
-				return this.reader.ReadUInt64();
-			case 12:
-				return this.reader.ReadSingle();
-			case 13:
-				return this.reader.ReadDouble();
-			case 14:
-				return this.reader.ReadDecimal();
-			case 15:
-				return new DateTime(this.reader.ReadInt64());
-			case 16:
-				return new TimeSpan(this.reader.ReadInt64());
-			case 32:
-				return this.reader.ReadBytes(this.reader.ReadInt32());
-			case 33:
-			{
-				byte[] array = new byte[this.reader.ReadUInt32()];
-				this.reader.Read(array, 0, array.Length);
-				return new MemoryStream(array);
-			}
-			}
-			type_index -= 64;
-			return this.ReadNonPredefinedValue(Type.GetType(this.typeNames[type_index], true));
-		}
-
-		private object ReadValueVer1(Type type)
-		{
-			if (type == typeof(string))
-			{
-				return this.reader.ReadString();
-			}
-			if (type == typeof(int))
-			{
-				return this.reader.ReadInt32();
-			}
-			if (type == typeof(byte))
-			{
-				return this.reader.ReadByte();
-			}
-			if (type == typeof(double))
-			{
-				return this.reader.ReadDouble();
-			}
-			if (type == typeof(short))
-			{
-				return this.reader.ReadInt16();
-			}
-			if (type == typeof(long))
-			{
-				return this.reader.ReadInt64();
-			}
-			if (type == typeof(sbyte))
-			{
-				return this.reader.ReadSByte();
-			}
-			if (type == typeof(float))
-			{
-				return this.reader.ReadSingle();
-			}
-			if (type == typeof(TimeSpan))
-			{
-				return new TimeSpan(this.reader.ReadInt64());
-			}
-			if (type == typeof(ushort))
-			{
-				return this.reader.ReadUInt16();
-			}
-			if (type == typeof(uint))
-			{
-				return this.reader.ReadUInt32();
-			}
-			if (type == typeof(ulong))
-			{
-				return this.reader.ReadUInt64();
-			}
-			if (type == typeof(decimal))
-			{
-				return this.reader.ReadDecimal();
-			}
-			if (type == typeof(DateTime))
-			{
-				return new DateTime(this.reader.ReadInt64());
-			}
-			return this.ReadNonPredefinedValue(type);
-		}
-
-		private object ReadNonPredefinedValue(Type exp_type)
-		{
-			object obj = this.formatter.Deserialize(this.reader.BaseStream);
-			if (obj.GetType() != exp_type)
-			{
-				throw new InvalidOperationException("Deserialized object is wrong type");
-			}
-			return obj;
-		}
-
-		private void LoadResourceValues(ResourceReader.ResourceCacheItem[] store)
-		{
-			object obj = this.readerLock;
-			lock (obj)
-			{
-				for (int i = 0; i < this.resourceCount; i++)
-				{
-					ResourceReader.ResourceInfo resourceInfo = this.infos[i];
-					if (resourceInfo.TypeIndex == -1)
-					{
-						store[i] = new ResourceReader.ResourceCacheItem(resourceInfo.ResourceName, null);
-					}
-					else
-					{
-						this.reader.BaseStream.Seek(resourceInfo.ValuePosition, SeekOrigin.Begin);
-						object obj2;
-						if (this.resource_ver == 2)
-						{
-							obj2 = this.ReadValueVer2(resourceInfo.TypeIndex);
-						}
-						else
-						{
-							obj2 = this.ReadValueVer1(Type.GetType(this.typeNames[resourceInfo.TypeIndex], true));
-						}
-						store[i] = new ResourceReader.ResourceCacheItem(resourceInfo.ResourceName, obj2);
-					}
-				}
-			}
-		}
-
-		internal unsafe UnmanagedMemoryStream ResourceValueAsStream(string name, int index)
-		{
-			ResourceReader.ResourceInfo resourceInfo = this.infos[index];
-			if (resourceInfo.TypeIndex != 33)
-			{
-				throw new InvalidOperationException(string.Format("Resource '{0}' was not a Stream. Use GetObject() instead.", name));
-			}
-			object obj = this.readerLock;
-			UnmanagedMemoryStream unmanagedMemoryStream2;
-			lock (obj)
-			{
-				this.reader.BaseStream.Seek(resourceInfo.ValuePosition, SeekOrigin.Begin);
-				long num = (long)this.reader.ReadInt32();
-				UnmanagedMemoryStream unmanagedMemoryStream = this.reader.BaseStream as UnmanagedMemoryStream;
-				if (unmanagedMemoryStream != null)
-				{
-					unmanagedMemoryStream2 = new UnmanagedMemoryStream(unmanagedMemoryStream.PositionPointer, num);
-				}
-				else
-				{
-					IntPtr ptr = Marshal.AllocHGlobal((int)num);
-					byte* ptr2 = (byte*)ptr.ToPointer();
-					UnmanagedMemoryStream unmanagedMemoryStream3 = new UnmanagedMemoryStream(ptr2, num, num, FileAccess.ReadWrite);
-					unmanagedMemoryStream3.Closed += delegate(object o, EventArgs e)
-					{
-						Marshal.FreeHGlobal(ptr);
-					};
-					byte[] array = new byte[(num >= 1024L) ? 1024L : num];
-					while (num > 0L)
-					{
-						int num2 = this.reader.Read(array, 0, (int)Math.Min((long)array.Length, num));
-						if (num2 == 0)
-						{
-							throw new FormatException("The resource data is corrupt. Resource stream ended");
-						}
-						unmanagedMemoryStream3.Write(array, 0, num2);
-						num -= (long)num2;
-					}
-					unmanagedMemoryStream3.Seek(0L, SeekOrigin.Begin);
-					unmanagedMemoryStream2 = unmanagedMemoryStream3;
-				}
-			}
-			return unmanagedMemoryStream2;
+			this._resCache = resCache;
+			this._store = new BinaryReader(stream, Encoding.UTF8);
+			this._ums = stream as UnmanagedMemoryStream;
+			this.ReadResources();
 		}
 
 		public void Close()
@@ -356,13 +61,756 @@ namespace System.Resources
 			this.Dispose(true);
 		}
 
+		public void Dispose()
+		{
+			this.Close();
+		}
+
+		[SecuritySafeCritical]
+		private void Dispose(bool disposing)
+		{
+			if (this._store != null)
+			{
+				this._resCache = null;
+				if (disposing)
+				{
+					BinaryReader store = this._store;
+					this._store = null;
+					if (store != null)
+					{
+						store.Close();
+					}
+				}
+				this._store = null;
+				this._namePositions = null;
+				this._nameHashes = null;
+				this._ums = null;
+				this._namePositionsPtr = null;
+				this._nameHashesPtr = null;
+			}
+		}
+
+		[SecurityCritical]
+		internal unsafe static int ReadUnalignedI4(int* p)
+		{
+			return (int)(*(byte*)p) | ((int)((byte*)p)[1] << 8) | ((int)((byte*)p)[2] << 16) | ((int)((byte*)p)[3] << 24);
+		}
+
+		private void SkipInt32()
+		{
+			this._store.BaseStream.Seek(4L, SeekOrigin.Current);
+		}
+
+		private void SkipString()
+		{
+			int num = this._store.Read7BitEncodedInt();
+			if (num < 0)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. String length must be non-negative."));
+			}
+			this._store.BaseStream.Seek((long)num, SeekOrigin.Current);
+		}
+
+		[SecuritySafeCritical]
+		private int GetNameHash(int index)
+		{
+			if (this._ums == null)
+			{
+				return this._nameHashes[index];
+			}
+			return ResourceReader.ReadUnalignedI4(this._nameHashesPtr + index);
+		}
+
+		[SecuritySafeCritical]
+		private int GetNamePosition(int index)
+		{
+			int num;
+			if (this._ums == null)
+			{
+				num = this._namePositions[index];
+			}
+			else
+			{
+				num = ResourceReader.ReadUnalignedI4(this._namePositionsPtr + index);
+			}
+			if (num < 0 || (long)num > this._dataSectionOffset - this._nameSectionOffset)
+			{
+				throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into name section.", new object[] { num }));
+			}
+			return num;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
 		public IDictionaryEnumerator GetEnumerator()
 		{
-			if (this.reader == null)
+			if (this._resCache == null)
 			{
-				throw new InvalidOperationException("ResourceReader is closed.");
+				throw new InvalidOperationException(Environment.GetResourceString("ResourceReader is closed."));
 			}
 			return new ResourceReader.ResourceEnumerator(this);
+		}
+
+		internal ResourceReader.ResourceEnumerator GetEnumeratorInternal()
+		{
+			return new ResourceReader.ResourceEnumerator(this);
+		}
+
+		internal int FindPosForResource(string name)
+		{
+			int num = FastResourceComparer.HashFunction(name);
+			int i = 0;
+			int num2 = this._numResources - 1;
+			int num3 = -1;
+			bool flag = false;
+			while (i <= num2)
+			{
+				num3 = i + num2 >> 1;
+				int nameHash = this.GetNameHash(num3);
+				int num4;
+				if (nameHash == num)
+				{
+					num4 = 0;
+				}
+				else if (nameHash < num)
+				{
+					num4 = -1;
+				}
+				else
+				{
+					num4 = 1;
+				}
+				if (num4 == 0)
+				{
+					flag = true;
+					break;
+				}
+				if (num4 < 0)
+				{
+					i = num3 + 1;
+				}
+				else
+				{
+					num2 = num3 - 1;
+				}
+			}
+			if (!flag)
+			{
+				return -1;
+			}
+			if (i != num3)
+			{
+				i = num3;
+				while (i > 0 && this.GetNameHash(i - 1) == num)
+				{
+					i--;
+				}
+			}
+			if (num2 != num3)
+			{
+				num2 = num3;
+				while (num2 < this._numResources - 1 && this.GetNameHash(num2 + 1) == num)
+				{
+					num2++;
+				}
+			}
+			lock (this)
+			{
+				int j = i;
+				while (j <= num2)
+				{
+					this._store.BaseStream.Seek(this._nameSectionOffset + (long)this.GetNamePosition(j), SeekOrigin.Begin);
+					if (this.CompareStringEqualsName(name))
+					{
+						int num5 = this._store.ReadInt32();
+						if (num5 < 0 || (long)num5 >= this._store.BaseStream.Length - this._dataSectionOffset)
+						{
+							throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into data section.", new object[] { num5 }));
+						}
+						return num5;
+					}
+					else
+					{
+						j++;
+					}
+				}
+			}
+			return -1;
+		}
+
+		[SecuritySafeCritical]
+		private unsafe bool CompareStringEqualsName(string name)
+		{
+			int num = this._store.Read7BitEncodedInt();
+			if (num < 0)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. String length must be non-negative."));
+			}
+			if (this._ums == null)
+			{
+				byte[] array = new byte[num];
+				int num2;
+				for (int i = num; i > 0; i -= num2)
+				{
+					num2 = this._store.Read(array, num - i, i);
+					if (num2 == 0)
+					{
+						throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. A resource name extends past the end of the stream."));
+					}
+				}
+				return FastResourceComparer.CompareOrdinal(array, num / 2, name) == 0;
+			}
+			byte* positionPointer = this._ums.PositionPointer;
+			this._ums.Seek((long)num, SeekOrigin.Current);
+			if (this._ums.Position > this._ums.Length)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Resource name extends past the end of the file."));
+			}
+			return FastResourceComparer.CompareOrdinal(positionPointer, num, name) == 0;
+		}
+
+		[SecurityCritical]
+		private unsafe string AllocateStringForNameIndex(int index, out int dataOffset)
+		{
+			long num = (long)this.GetNamePosition(index);
+			int num2;
+			byte[] array3;
+			lock (this)
+			{
+				this._store.BaseStream.Seek(num + this._nameSectionOffset, SeekOrigin.Begin);
+				num2 = this._store.Read7BitEncodedInt();
+				if (num2 < 0)
+				{
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. String length must be non-negative."));
+				}
+				if (this._ums != null)
+				{
+					if (this._ums.Position > this._ums.Length - (long)num2)
+					{
+						throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. String for name index '{0}' extends past the end of the file.", new object[] { index }));
+					}
+					char* positionPointer = (char*)this._ums.PositionPointer;
+					string text;
+					if (!BitConverter.IsLittleEndian)
+					{
+						byte* ptr = (byte*)positionPointer;
+						byte[] array = new byte[num2];
+						for (int i = 0; i < num2; i += 2)
+						{
+							array[i] = (ptr + i)[1];
+							array[i + 1] = ptr[i];
+						}
+						byte[] array2;
+						byte* ptr2;
+						if ((array2 = array) == null || array2.Length == 0)
+						{
+							ptr2 = null;
+						}
+						else
+						{
+							ptr2 = &array2[0];
+						}
+						text = new string((char*)ptr2, 0, num2 / 2);
+						array2 = null;
+					}
+					else
+					{
+						text = new string(positionPointer, 0, num2 / 2);
+					}
+					this._ums.Position += (long)num2;
+					dataOffset = this._store.ReadInt32();
+					if (dataOffset < 0 || (long)dataOffset >= this._store.BaseStream.Length - this._dataSectionOffset)
+					{
+						throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into data section.", new object[] { dataOffset }));
+					}
+					return text;
+				}
+				else
+				{
+					array3 = new byte[num2];
+					int num3;
+					for (int j = num2; j > 0; j -= num3)
+					{
+						num3 = this._store.Read(array3, num2 - j, j);
+						if (num3 == 0)
+						{
+							throw new EndOfStreamException(Environment.GetResourceString("Corrupt .resources file. The resource name for name index {0} extends past the end of the stream.", new object[] { index }));
+						}
+					}
+					dataOffset = this._store.ReadInt32();
+					if (dataOffset < 0 || (long)dataOffset >= this._store.BaseStream.Length - this._dataSectionOffset)
+					{
+						throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into data section.", new object[] { dataOffset }));
+					}
+				}
+			}
+			return Encoding.Unicode.GetString(array3, 0, num2);
+		}
+
+		private object GetValueForNameIndex(int index)
+		{
+			long num = (long)this.GetNamePosition(index);
+			object obj;
+			lock (this)
+			{
+				this._store.BaseStream.Seek(num + this._nameSectionOffset, SeekOrigin.Begin);
+				this.SkipString();
+				int num2 = this._store.ReadInt32();
+				if (num2 < 0 || (long)num2 >= this._store.BaseStream.Length - this._dataSectionOffset)
+				{
+					throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into data section.", new object[] { num2 }));
+				}
+				if (this._version == 1)
+				{
+					obj = this.LoadObjectV1(num2);
+				}
+				else
+				{
+					ResourceTypeCode resourceTypeCode;
+					obj = this.LoadObjectV2(num2, out resourceTypeCode);
+				}
+			}
+			return obj;
+		}
+
+		internal string LoadString(int pos)
+		{
+			this._store.BaseStream.Seek(this._dataSectionOffset + (long)pos, SeekOrigin.Begin);
+			string text = null;
+			int num = this._store.Read7BitEncodedInt();
+			if (this._version == 1)
+			{
+				if (num == -1)
+				{
+					return null;
+				}
+				if (this.FindType(num) != typeof(string))
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Resource was of type '{0}' instead of String - call GetObject instead.", new object[] { this.FindType(num).FullName }));
+				}
+				text = this._store.ReadString();
+			}
+			else
+			{
+				ResourceTypeCode resourceTypeCode = (ResourceTypeCode)num;
+				if (resourceTypeCode != ResourceTypeCode.String && resourceTypeCode != ResourceTypeCode.Null)
+				{
+					string text2;
+					if (resourceTypeCode < ResourceTypeCode.StartOfUserTypes)
+					{
+						text2 = resourceTypeCode.ToString();
+					}
+					else
+					{
+						text2 = this.FindType(resourceTypeCode - ResourceTypeCode.StartOfUserTypes).FullName;
+					}
+					throw new InvalidOperationException(Environment.GetResourceString("Resource was of type '{0}' instead of String - call GetObject instead.", new object[] { text2 }));
+				}
+				if (resourceTypeCode == ResourceTypeCode.String)
+				{
+					text = this._store.ReadString();
+				}
+			}
+			return text;
+		}
+
+		internal object LoadObject(int pos)
+		{
+			if (this._version == 1)
+			{
+				return this.LoadObjectV1(pos);
+			}
+			ResourceTypeCode resourceTypeCode;
+			return this.LoadObjectV2(pos, out resourceTypeCode);
+		}
+
+		internal object LoadObject(int pos, out ResourceTypeCode typeCode)
+		{
+			if (this._version == 1)
+			{
+				object obj = this.LoadObjectV1(pos);
+				typeCode = ((obj is string) ? ResourceTypeCode.String : ResourceTypeCode.StartOfUserTypes);
+				return obj;
+			}
+			return this.LoadObjectV2(pos, out typeCode);
+		}
+
+		internal object LoadObjectV1(int pos)
+		{
+			object obj;
+			try
+			{
+				obj = this._LoadObjectV1(pos);
+			}
+			catch (EndOfStreamException ex)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't match the available data in the stream."), ex);
+			}
+			catch (ArgumentOutOfRangeException ex2)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't match the available data in the stream."), ex2);
+			}
+			return obj;
+		}
+
+		[SecuritySafeCritical]
+		private object _LoadObjectV1(int pos)
+		{
+			this._store.BaseStream.Seek(this._dataSectionOffset + (long)pos, SeekOrigin.Begin);
+			int num = this._store.Read7BitEncodedInt();
+			if (num == -1)
+			{
+				return null;
+			}
+			RuntimeType runtimeType = this.FindType(num);
+			if (runtimeType == typeof(string))
+			{
+				return this._store.ReadString();
+			}
+			if (runtimeType == typeof(int))
+			{
+				return this._store.ReadInt32();
+			}
+			if (runtimeType == typeof(byte))
+			{
+				return this._store.ReadByte();
+			}
+			if (runtimeType == typeof(sbyte))
+			{
+				return this._store.ReadSByte();
+			}
+			if (runtimeType == typeof(short))
+			{
+				return this._store.ReadInt16();
+			}
+			if (runtimeType == typeof(long))
+			{
+				return this._store.ReadInt64();
+			}
+			if (runtimeType == typeof(ushort))
+			{
+				return this._store.ReadUInt16();
+			}
+			if (runtimeType == typeof(uint))
+			{
+				return this._store.ReadUInt32();
+			}
+			if (runtimeType == typeof(ulong))
+			{
+				return this._store.ReadUInt64();
+			}
+			if (runtimeType == typeof(float))
+			{
+				return this._store.ReadSingle();
+			}
+			if (runtimeType == typeof(double))
+			{
+				return this._store.ReadDouble();
+			}
+			if (runtimeType == typeof(DateTime))
+			{
+				return new DateTime(this._store.ReadInt64());
+			}
+			if (runtimeType == typeof(TimeSpan))
+			{
+				return new TimeSpan(this._store.ReadInt64());
+			}
+			if (runtimeType == typeof(decimal))
+			{
+				int[] array = new int[4];
+				for (int i = 0; i < array.Length; i++)
+				{
+					array[i] = this._store.ReadInt32();
+				}
+				return new decimal(array);
+			}
+			return this.DeserializeObject(num);
+		}
+
+		internal object LoadObjectV2(int pos, out ResourceTypeCode typeCode)
+		{
+			object obj;
+			try
+			{
+				obj = this._LoadObjectV2(pos, out typeCode);
+			}
+			catch (EndOfStreamException ex)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't match the available data in the stream."), ex);
+			}
+			catch (ArgumentOutOfRangeException ex2)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't match the available data in the stream."), ex2);
+			}
+			return obj;
+		}
+
+		[SecuritySafeCritical]
+		private object _LoadObjectV2(int pos, out ResourceTypeCode typeCode)
+		{
+			this._store.BaseStream.Seek(this._dataSectionOffset + (long)pos, SeekOrigin.Begin);
+			typeCode = (ResourceTypeCode)this._store.Read7BitEncodedInt();
+			switch (typeCode)
+			{
+			case ResourceTypeCode.Null:
+				return null;
+			case ResourceTypeCode.String:
+				return this._store.ReadString();
+			case ResourceTypeCode.Boolean:
+				return this._store.ReadBoolean();
+			case ResourceTypeCode.Char:
+				return (char)this._store.ReadUInt16();
+			case ResourceTypeCode.Byte:
+				return this._store.ReadByte();
+			case ResourceTypeCode.SByte:
+				return this._store.ReadSByte();
+			case ResourceTypeCode.Int16:
+				return this._store.ReadInt16();
+			case ResourceTypeCode.UInt16:
+				return this._store.ReadUInt16();
+			case ResourceTypeCode.Int32:
+				return this._store.ReadInt32();
+			case ResourceTypeCode.UInt32:
+				return this._store.ReadUInt32();
+			case ResourceTypeCode.Int64:
+				return this._store.ReadInt64();
+			case ResourceTypeCode.UInt64:
+				return this._store.ReadUInt64();
+			case ResourceTypeCode.Single:
+				return this._store.ReadSingle();
+			case ResourceTypeCode.Double:
+				return this._store.ReadDouble();
+			case ResourceTypeCode.Decimal:
+				return this._store.ReadDecimal();
+			case ResourceTypeCode.DateTime:
+				return DateTime.FromBinary(this._store.ReadInt64());
+			case ResourceTypeCode.TimeSpan:
+				return new TimeSpan(this._store.ReadInt64());
+			case ResourceTypeCode.ByteArray:
+			{
+				int num = this._store.ReadInt32();
+				if (num < 0)
+				{
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified data length '{0}' is not a valid position in the stream.", new object[] { num }));
+				}
+				if (this._ums == null)
+				{
+					if ((long)num > this._store.BaseStream.Length)
+					{
+						throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified data length '{0}' is not a valid position in the stream.", new object[] { num }));
+					}
+					return this._store.ReadBytes(num);
+				}
+				else
+				{
+					if ((long)num > this._ums.Length - this._ums.Position)
+					{
+						throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified data length '{0}' is not a valid position in the stream.", new object[] { num }));
+					}
+					byte[] array = new byte[num];
+					this._ums.Read(array, 0, num);
+					return array;
+				}
+				break;
+			}
+			case ResourceTypeCode.Stream:
+			{
+				int num2 = this._store.ReadInt32();
+				if (num2 < 0)
+				{
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified data length '{0}' is not a valid position in the stream.", new object[] { num2 }));
+				}
+				if (this._ums == null)
+				{
+					return new PinnedBufferMemoryStream(this._store.ReadBytes(num2));
+				}
+				if ((long)num2 > this._ums.Length - this._ums.Position)
+				{
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified data length '{0}' is not a valid position in the stream.", new object[] { num2 }));
+				}
+				return new UnmanagedMemoryStream(this._ums.PositionPointer, (long)num2, (long)num2, FileAccess.Read, true);
+			}
+			}
+			if (typeCode < ResourceTypeCode.StartOfUserTypes)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't match the available data in the stream."));
+			}
+			int num3 = typeCode - ResourceTypeCode.StartOfUserTypes;
+			return this.DeserializeObject(num3);
+		}
+
+		[SecurityCritical]
+		private object DeserializeObject(int typeIndex)
+		{
+			RuntimeType runtimeType = this.FindType(typeIndex);
+			object obj = this._objFormatter.Deserialize(this._store.BaseStream);
+			if (obj.GetType() != runtimeType)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("The type serialized in the .resources file was not the same type that the .resources file said it contained. Expected '{0}' but read '{1}'.", new object[]
+				{
+					runtimeType.FullName,
+					obj.GetType().FullName
+				}));
+			}
+			return obj;
+		}
+
+		[SecurityCritical]
+		private void ReadResources()
+		{
+			BinaryFormatter binaryFormatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File | StreamingContextStates.Persistence));
+			this._objFormatter = binaryFormatter;
+			try
+			{
+				this._ReadResources();
+			}
+			catch (EndOfStreamException ex)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."), ex);
+			}
+			catch (IndexOutOfRangeException ex2)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."), ex2);
+			}
+		}
+
+		[SecurityCritical]
+		private unsafe void _ReadResources()
+		{
+			if (this._store.ReadInt32() != ResourceManager.MagicNumber)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Stream is not a valid resource file."));
+			}
+			int num = this._store.ReadInt32();
+			int num2 = this._store.ReadInt32();
+			if (num2 < 0 || num < 0)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+			}
+			if (num > 1)
+			{
+				this._store.BaseStream.Seek((long)num2, SeekOrigin.Current);
+			}
+			else
+			{
+				string text = this._store.ReadString();
+				AssemblyName assemblyName = new AssemblyName(ResourceManager.MscorlibName);
+				if (!ResourceManager.CompareNames(text, ResourceManager.ResReaderTypeName, assemblyName))
+				{
+					throw new NotSupportedException(Environment.GetResourceString("This .resources file should not be read with this reader. The resource reader type is \"{0}\".", new object[] { text }));
+				}
+				this.SkipString();
+			}
+			int num3 = this._store.ReadInt32();
+			if (num3 != 2 && num3 != 1)
+			{
+				throw new ArgumentException(Environment.GetResourceString("The ResourceReader class does not know how to read this version of .resources files. Expected version: {0}  This file: {1}", new object[] { 2, num3 }));
+			}
+			this._version = num3;
+			this._numResources = this._store.ReadInt32();
+			if (this._numResources < 0)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+			}
+			int num4 = this._store.ReadInt32();
+			if (num4 < 0)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+			}
+			this._typeTable = new RuntimeType[num4];
+			this._typeNamePositions = new int[num4];
+			for (int i = 0; i < num4; i++)
+			{
+				this._typeNamePositions[i] = (int)this._store.BaseStream.Position;
+				this.SkipString();
+			}
+			int num5 = (int)this._store.BaseStream.Position & 7;
+			if (num5 != 0)
+			{
+				for (int j = 0; j < 8 - num5; j++)
+				{
+					this._store.ReadByte();
+				}
+			}
+			if (this._ums == null)
+			{
+				this._nameHashes = new int[this._numResources];
+				for (int k = 0; k < this._numResources; k++)
+				{
+					this._nameHashes[k] = this._store.ReadInt32();
+				}
+			}
+			else
+			{
+				if (((long)this._numResources & (long)((ulong)(-536870912))) != 0L)
+				{
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+				}
+				int num6 = 4 * this._numResources;
+				this._nameHashesPtr = (int*)this._ums.PositionPointer;
+				this._ums.Seek((long)num6, SeekOrigin.Current);
+				byte* positionPointer = this._ums.PositionPointer;
+			}
+			if (this._ums == null)
+			{
+				this._namePositions = new int[this._numResources];
+				for (int l = 0; l < this._numResources; l++)
+				{
+					int num7 = this._store.ReadInt32();
+					if (num7 < 0)
+					{
+						throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+					}
+					this._namePositions[l] = num7;
+				}
+			}
+			else
+			{
+				if (((long)this._numResources & (long)((ulong)(-536870912))) != 0L)
+				{
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+				}
+				int num8 = 4 * this._numResources;
+				this._namePositionsPtr = (int*)this._ums.PositionPointer;
+				this._ums.Seek((long)num8, SeekOrigin.Current);
+				byte* positionPointer2 = this._ums.PositionPointer;
+			}
+			this._dataSectionOffset = (long)this._store.ReadInt32();
+			if (this._dataSectionOffset < 0L)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+			}
+			this._nameSectionOffset = this._store.BaseStream.Position;
+			if (this._dataSectionOffset < this._nameSectionOffset)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file. Unable to read resources from this file because of invalid header information. Try regenerating the .resources file."));
+			}
+		}
+
+		private RuntimeType FindType(int typeIndex)
+		{
+			if (typeIndex < 0 || typeIndex >= this._typeTable.Length)
+			{
+				throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't exist."));
+			}
+			if (this._typeTable[typeIndex] == null)
+			{
+				long position = this._store.BaseStream.Position;
+				try
+				{
+					this._store.BaseStream.Position = (long)this._typeNamePositions[typeIndex];
+					string text = this._store.ReadString();
+					this._typeTable[typeIndex] = (RuntimeType)Type.GetType(text, true);
+				}
+				finally
+				{
+					this._store.BaseStream.Position = position;
+				}
+			}
+			return this._typeTable[typeIndex];
 		}
 
 		public void GetResourceData(string resourceName, out string resourceType, out byte[] resourceData)
@@ -371,205 +819,147 @@ namespace System.Resources
 			{
 				throw new ArgumentNullException("resourceName");
 			}
-			ResourceReader.ResourceEnumerator resourceEnumerator = new ResourceReader.ResourceEnumerator(this);
-			while (resourceEnumerator.MoveNext())
+			if (this._resCache == null)
 			{
-				if ((string)resourceEnumerator.Key == resourceName)
-				{
-					this.GetResourceDataAt(resourceEnumerator.Index, out resourceType, out resourceData);
-					return;
-				}
+				throw new InvalidOperationException(Environment.GetResourceString("ResourceReader is closed."));
 			}
-			throw new ArgumentException(string.Format("Specified resource not found: {0}", resourceName));
-		}
-
-		private void GetResourceDataAt(int index, out string resourceType, out byte[] data)
-		{
-			ResourceReader.ResourceInfo resourceInfo = this.infos[index];
-			int typeIndex = resourceInfo.TypeIndex;
-			if (typeIndex == -1)
+			int[] array = new int[this._numResources];
+			int num = this.FindPosForResource(resourceName);
+			if (num == -1)
 			{
-				throw new FormatException("The resource data is corrupt");
+				throw new ArgumentException(Environment.GetResourceString("The specified resource name \"{0}\" does not exist in the resource file.", new object[] { resourceName }));
 			}
-			object obj = this.readerLock;
-			lock (obj)
+			lock (this)
 			{
-				this.reader.BaseStream.Seek(resourceInfo.ValuePosition, SeekOrigin.Begin);
-				long position = this.reader.BaseStream.Position;
-				if (this.resource_ver == 2)
+				for (int i = 0; i < this._numResources; i++)
 				{
-					if (typeIndex >= 64)
+					this._store.BaseStream.Position = this._nameSectionOffset + (long)this.GetNamePosition(i);
+					int num2 = this._store.Read7BitEncodedInt();
+					if (num2 < 0)
 					{
-						int num = typeIndex - 64;
-						if (num >= this.typeNames.Length)
-						{
-							throw new FormatException("The resource data is corrupt. Invalid index to types");
-						}
-						resourceType = this.typeNames[num];
+						throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into name section.", new object[] { num2 }));
 					}
-					else
+					this._store.BaseStream.Position += (long)num2;
+					int num3 = this._store.ReadInt32();
+					if (num3 < 0 || (long)num3 >= this._store.BaseStream.Length - this._dataSectionOffset)
 					{
-						resourceType = "ResourceTypeCode." + (PredefinedResourceType)typeIndex;
+						throw new FormatException(Environment.GetResourceString("Corrupt .resources file. Invalid offset '{0}' into data section.", new object[] { num3 }));
 					}
-					this.ReadValueVer2(typeIndex);
+					array[i] = num3;
 				}
-				else
+				Array.Sort<int>(array);
+				int num4 = Array.BinarySearch<int>(array, num);
+				int num5 = (int)(((num4 < this._numResources - 1) ? ((long)array[num4 + 1] + this._dataSectionOffset) : this._store.BaseStream.Length) - ((long)num + this._dataSectionOffset));
+				this._store.BaseStream.Position = this._dataSectionOffset + (long)num;
+				ResourceTypeCode resourceTypeCode = (ResourceTypeCode)this._store.Read7BitEncodedInt();
+				if (resourceTypeCode < ResourceTypeCode.Null || resourceTypeCode >= ResourceTypeCode.StartOfUserTypes + this._typeTable.Length)
 				{
-					resourceType = "ResourceTypeCode.Null";
-					this.ReadValueVer1(Type.GetType(this.typeNames[typeIndex], true));
+					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified type doesn't exist."));
 				}
-				int num2 = (int)(this.reader.BaseStream.Position - position);
-				this.reader.BaseStream.Seek((long)(-(long)num2), SeekOrigin.Current);
-				data = new byte[num2];
-				this.reader.BaseStream.Read(data, 0, num2);
-			}
-		}
-
-		private void Dispose(bool disposing)
-		{
-			if (disposing && this.reader != null)
-			{
-				this.reader.Close();
-			}
-			this.reader = null;
-			this.hashes = null;
-			this.infos = null;
-			this.typeNames = null;
-			this.cache = null;
-		}
-
-		private BinaryReader reader;
-
-		private object readerLock = new object();
-
-		private IFormatter formatter;
-
-		internal int resourceCount;
-
-		private int typeCount;
-
-		private string[] typeNames;
-
-		private int[] hashes;
-
-		private ResourceReader.ResourceInfo[] infos;
-
-		private int dataSectionOffset;
-
-		private long nameSectionOffset;
-
-		private int resource_ver;
-
-		private ResourceReader.ResourceCacheItem[] cache;
-
-		private object cache_lock = new object();
-
-		private struct ResourceInfo
-		{
-			public ResourceInfo(string resourceName, long valuePosition, int type_index)
-			{
-				this.ValuePosition = valuePosition;
-				this.ResourceName = resourceName;
-				this.TypeIndex = type_index;
-			}
-
-			public readonly long ValuePosition;
-
-			public readonly string ResourceName;
-
-			public readonly int TypeIndex;
-		}
-
-		private struct ResourceCacheItem
-		{
-			public ResourceCacheItem(string name, object value)
-			{
-				this.ResourceName = name;
-				this.ResourceValue = value;
-			}
-
-			public readonly string ResourceName;
-
-			public readonly object ResourceValue;
-		}
-
-		internal sealed class ResourceEnumerator : IEnumerator, IDictionaryEnumerator
-		{
-			internal ResourceEnumerator(ResourceReader readerToEnumerate)
-			{
-				this.reader = readerToEnumerate;
-				this.FillCache();
-			}
-
-			public int Index
-			{
-				get
+				resourceType = this.TypeNameFromTypeCode(resourceTypeCode);
+				num5 -= (int)(this._store.BaseStream.Position - (this._dataSectionOffset + (long)num));
+				byte[] array2 = this._store.ReadBytes(num5);
+				if (array2.Length != num5)
 				{
-					return this.index;
+					throw new FormatException(Environment.GetResourceString("Corrupt .resources file. A resource name extends past the end of the stream."));
 				}
+				resourceData = array2;
+			}
+		}
+
+		private string TypeNameFromTypeCode(ResourceTypeCode typeCode)
+		{
+			if (typeCode < ResourceTypeCode.StartOfUserTypes)
+			{
+				return "ResourceTypeCode." + typeCode.ToString();
+			}
+			int num = typeCode - ResourceTypeCode.StartOfUserTypes;
+			long position = this._store.BaseStream.Position;
+			string text;
+			try
+			{
+				this._store.BaseStream.Position = (long)this._typeNamePositions[num];
+				text = this._store.ReadString();
+			}
+			finally
+			{
+				this._store.BaseStream.Position = position;
+			}
+			return text;
+		}
+
+		private const int DefaultFileStreamBufferSize = 4096;
+
+		private BinaryReader _store;
+
+		internal Dictionary<string, ResourceLocator> _resCache;
+
+		private long _nameSectionOffset;
+
+		private long _dataSectionOffset;
+
+		private int[] _nameHashes;
+
+		[SecurityCritical]
+		private unsafe int* _nameHashesPtr;
+
+		private int[] _namePositions;
+
+		[SecurityCritical]
+		private unsafe int* _namePositionsPtr;
+
+		private RuntimeType[] _typeTable;
+
+		private int[] _typeNamePositions;
+
+		private BinaryFormatter _objFormatter;
+
+		private int _numResources;
+
+		private UnmanagedMemoryStream _ums;
+
+		private int _version;
+
+		internal sealed class ResourceEnumerator : IDictionaryEnumerator, IEnumerator
+		{
+			internal ResourceEnumerator(ResourceReader reader)
+			{
+				this._currentName = -1;
+				this._reader = reader;
+				this._dataPosition = -2;
 			}
 
-			public DictionaryEntry Entry
+			public bool MoveNext()
 			{
-				get
+				if (this._currentName == this._reader._numResources - 1 || this._currentName == -2147483648)
 				{
-					if (this.reader.reader == null)
-					{
-						throw new InvalidOperationException("ResourceReader is closed.");
-					}
-					if (this.index < 0)
-					{
-						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
-					}
-					return new DictionaryEntry(this.Key, this.Value);
+					this._currentIsValid = false;
+					this._currentName = int.MinValue;
+					return false;
 				}
+				this._currentIsValid = true;
+				this._currentName++;
+				return true;
 			}
 
 			public object Key
 			{
+				[SecuritySafeCritical]
 				get
 				{
-					if (this.reader.reader == null)
+					if (this._currentName == -2147483648)
 					{
-						throw new InvalidOperationException("ResourceReader is closed.");
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
 					}
-					if (this.index < 0)
+					if (!this._currentIsValid)
 					{
-						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
 					}
-					return this.reader.cache[this.index].ResourceName;
-				}
-			}
-
-			public object Value
-			{
-				get
-				{
-					if (this.reader.reader == null)
+					if (this._reader._resCache == null)
 					{
-						throw new InvalidOperationException("ResourceReader is closed.");
+						throw new InvalidOperationException(Environment.GetResourceString("ResourceReader is closed."));
 					}
-					if (this.index < 0)
-					{
-						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
-					}
-					return this.reader.cache[this.index].ResourceValue;
-				}
-			}
-
-			public UnmanagedMemoryStream ValueAsStream
-			{
-				get
-				{
-					if (this.reader.reader == null)
-					{
-						throw new InvalidOperationException("ResourceReader is closed.");
-					}
-					if (this.index < 0)
-					{
-						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
-					}
-					return this.reader.ResourceValueAsStream((string)this.Key, this.index);
+					return this._reader.AllocateStringForNameIndex(this._currentName, out this._dataPosition);
 				}
 			}
 
@@ -581,57 +971,103 @@ namespace System.Resources
 				}
 			}
 
-			public bool MoveNext()
+			internal int DataPosition
 			{
-				if (this.reader.reader == null)
+				get
 				{
-					throw new InvalidOperationException("ResourceReader is closed.");
+					return this._dataPosition;
 				}
-				if (this.finished)
+			}
+
+			public DictionaryEntry Entry
+			{
+				[SecuritySafeCritical]
+				get
 				{
-					return false;
+					if (this._currentName == -2147483648)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					}
+					if (!this._currentIsValid)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+					}
+					if (this._reader._resCache == null)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("ResourceReader is closed."));
+					}
+					object obj = null;
+					ResourceReader reader = this._reader;
+					string text;
+					lock (reader)
+					{
+						Dictionary<string, ResourceLocator> resCache = this._reader._resCache;
+						lock (resCache)
+						{
+							text = this._reader.AllocateStringForNameIndex(this._currentName, out this._dataPosition);
+							ResourceLocator resourceLocator;
+							if (this._reader._resCache.TryGetValue(text, out resourceLocator))
+							{
+								obj = resourceLocator.Value;
+							}
+							if (obj == null)
+							{
+								if (this._dataPosition == -1)
+								{
+									obj = this._reader.GetValueForNameIndex(this._currentName);
+								}
+								else
+								{
+									obj = this._reader.LoadObject(this._dataPosition);
+								}
+							}
+						}
+					}
+					return new DictionaryEntry(text, obj);
 				}
-				if (++this.index < this.reader.resourceCount)
+			}
+
+			public object Value
+			{
+				get
 				{
-					return true;
+					if (this._currentName == -2147483648)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					}
+					if (!this._currentIsValid)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+					}
+					if (this._reader._resCache == null)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("ResourceReader is closed."));
+					}
+					return this._reader.GetValueForNameIndex(this._currentName);
 				}
-				this.finished = true;
-				return false;
 			}
 
 			public void Reset()
 			{
-				if (this.reader.reader == null)
+				if (this._reader._resCache == null)
 				{
-					throw new InvalidOperationException("ResourceReader is closed.");
+					throw new InvalidOperationException(Environment.GetResourceString("ResourceReader is closed."));
 				}
-				this.index = -1;
-				this.finished = false;
+				this._currentIsValid = false;
+				this._currentName = -1;
 			}
 
-			private void FillCache()
-			{
-				if (this.reader.cache != null)
-				{
-					return;
-				}
-				object cache_lock = this.reader.cache_lock;
-				lock (cache_lock)
-				{
-					if (this.reader.cache == null)
-					{
-						ResourceReader.ResourceCacheItem[] array = new ResourceReader.ResourceCacheItem[this.reader.resourceCount];
-						this.reader.LoadResourceValues(array);
-						this.reader.cache = array;
-					}
-				}
-			}
+			private const int ENUM_DONE = -2147483648;
 
-			private ResourceReader reader;
+			private const int ENUM_NOT_STARTED = -1;
 
-			private int index = -1;
+			private ResourceReader _reader;
 
-			private bool finished;
+			private bool _currentIsValid;
+
+			private int _currentName;
+
+			private int _dataPosition;
 		}
 	}
 }

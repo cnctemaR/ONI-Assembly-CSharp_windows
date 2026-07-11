@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using Mono.Xml;
+using Unity;
 
 namespace System.Security.Policy
 {
@@ -42,19 +43,18 @@ namespace System.Security.Policy
 					{
 						SecurityManager.ResolvingPolicyLevel = this;
 						this.FromXml(this.xml);
+						goto IL_008A;
 					}
 					finally
 					{
 						SecurityManager.ResolvingPolicyLevel = this;
 					}
 				}
-				else
-				{
-					this.CreateDefaultFullTrustAssemblies();
-					this.CreateDefaultNamedPermissionSets();
-					this.CreateDefaultLevel(this._type);
-					this.Save();
-				}
+				this.CreateDefaultFullTrustAssemblies();
+				this.CreateDefaultNamedPermissionSets();
+				this.CreateDefaultLevel(this._type);
+				this.Save();
+				IL_008A:;
 			}
 			catch
 			{
@@ -173,12 +173,14 @@ namespace System.Security.Policy
 			{
 				throw new ArgumentNullException("snMC");
 			}
-			foreach (object obj in this.full_trust_assemblies)
+			using (IEnumerator enumerator = this.full_trust_assemblies.GetEnumerator())
 			{
-				StrongNameMembershipCondition strongNameMembershipCondition = (StrongNameMembershipCondition)obj;
-				if (strongNameMembershipCondition.Equals(snMC))
+				while (enumerator.MoveNext())
 				{
-					throw new ArgumentException(Locale.GetText("sn already has full trust."));
+					if (((StrongNameMembershipCondition)enumerator.Current).Equals(snMC))
+					{
+						throw new ArgumentException(Locale.GetText("sn already has full trust."));
+					}
 				}
 			}
 			this.full_trust_assemblies.Add(snMC);
@@ -265,8 +267,7 @@ namespace System.Security.Policy
 					{
 						throw new ArgumentException(Locale.GetText("Invalid XML"));
 					}
-					string text = securityElement4.Attribute("class");
-					if (text.IndexOf("StrongNameMembershipCondition") < 0)
+					if (securityElement4.Attribute("class").IndexOf("StrongNameMembershipCondition") < 0)
 					{
 						throw new ArgumentException(Locale.GetText("Invalid XML - must be StrongNameMembershipCondition"));
 					}
@@ -316,23 +317,20 @@ namespace System.Security.Policy
 		{
 			if (this._location == null)
 			{
-				string text = Locale.GetText("Only file based policies may be recovered.");
-				throw new PolicyException(text);
+				throw new PolicyException(Locale.GetText("Only file based policies may be recovered."));
 			}
-			string text2 = this._location + ".backup";
-			if (!File.Exists(text2))
+			string text = this._location + ".backup";
+			if (!File.Exists(text))
 			{
-				string text3 = Locale.GetText("No policy backup exists.");
-				throw new PolicyException(text3);
+				throw new PolicyException(Locale.GetText("No policy backup exists."));
 			}
 			try
 			{
-				File.Copy(text2, this._location, true);
+				File.Copy(text, this._location, true);
 			}
 			catch (Exception ex)
 			{
-				string text4 = Locale.GetText("Couldn't replace the policy file with it's backup.");
-				throw new PolicyException(text4, ex);
+				throw new PolicyException(Locale.GetText("Couldn't replace the policy file with it's backup."), ex);
 			}
 		}
 
@@ -390,8 +388,7 @@ namespace System.Security.Policy
 					return namedPermissionSet;
 				}
 			}
-			string text = string.Format(Locale.GetText("Name '{0}' cannot be found."), name);
-			throw new ArgumentException(text, "name");
+			throw new ArgumentException(string.Format(Locale.GetText("Name '{0}' cannot be found."), name), "name");
 		}
 
 		public void Reset()
@@ -415,12 +412,10 @@ namespace System.Security.Policy
 					}
 				}
 				this.LoadFromFile(this._location);
+				return;
 			}
-			else
-			{
-				this.CreateDefaultFullTrustAssemblies();
-				this.CreateDefaultNamedPermissionSets();
-			}
+			this.CreateDefaultFullTrustAssemblies();
+			this.CreateDefaultNamedPermissionSets();
 		}
 
 		public PolicyStatement Resolve(Evidence evidence)
@@ -430,7 +425,11 @@ namespace System.Security.Policy
 				throw new ArgumentNullException("evidence");
 			}
 			PolicyStatement policyStatement = this.root_code_group.Resolve(evidence);
-			return (policyStatement == null) ? PolicyStatement.Empty() : policyStatement;
+			if (policyStatement == null)
+			{
+				return PolicyStatement.Empty();
+			}
+			return policyStatement;
 		}
 
 		public CodeGroup ResolveMatchingCodeGroups(Evidence evidence)
@@ -440,7 +439,11 @@ namespace System.Security.Policy
 				throw new ArgumentNullException("evidence");
 			}
 			CodeGroup codeGroup = this.root_code_group.ResolveMatchingCodeGroups(evidence);
-			return (codeGroup == null) ? null : codeGroup;
+			if (codeGroup == null)
+			{
+				return null;
+			}
+			return codeGroup;
 		}
 
 		public SecurityElement ToXml()
@@ -531,7 +534,7 @@ namespace System.Security.Policy
 			case PolicyLevelType.AppDomain:
 				this.root_code_group = new UnionCodeGroup(new AllMembershipCondition(), policyStatement);
 				this.root_code_group.Name = "All_Code";
-				break;
+				return;
 			case PolicyLevelType.Machine:
 			{
 				PolicyStatement policyStatement2 = new PolicyStatement(DefaultPolicies.Nothing);
@@ -553,8 +556,10 @@ namespace System.Security.Policy
 				UnionCodeGroup unionCodeGroup5 = new UnionCodeGroup(new ZoneMembershipCondition(SecurityZone.Trusted), policyStatement3);
 				unionCodeGroup5.Name = "Trusted_Zone";
 				this.root_code_group.AddChild(unionCodeGroup5);
-				break;
+				return;
 			}
+			default:
+				return;
 			}
 		}
 
@@ -605,18 +610,24 @@ namespace System.Security.Policy
 
 		internal bool IsFullTrustAssembly(Assembly a)
 		{
-			AssemblyName assemblyName = a.UnprotectedGetName();
-			StrongNamePublicKeyBlob strongNamePublicKeyBlob = new StrongNamePublicKeyBlob(assemblyName.GetPublicKey());
-			StrongNameMembershipCondition strongNameMembershipCondition = new StrongNameMembershipCondition(strongNamePublicKeyBlob, assemblyName.Name, assemblyName.Version);
-			foreach (object obj in this.full_trust_assemblies)
+			AssemblyName name = a.GetName();
+			StrongNameMembershipCondition strongNameMembershipCondition = new StrongNameMembershipCondition(new StrongNamePublicKeyBlob(name.GetPublicKey()), name.Name, name.Version);
+			using (IEnumerator enumerator = this.full_trust_assemblies.GetEnumerator())
 			{
-				StrongNameMembershipCondition strongNameMembershipCondition2 = (StrongNameMembershipCondition)obj;
-				if (strongNameMembershipCondition2.Equals(strongNameMembershipCondition))
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (((StrongNameMembershipCondition)enumerator.Current).Equals(strongNameMembershipCondition))
+					{
+						return true;
+					}
 				}
 			}
 			return false;
+		}
+
+		internal PolicyLevel()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private string label;

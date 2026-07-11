@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 
 namespace System.Security.Principal
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class GenericPrincipal : IPrincipal
+	public class GenericPrincipal : ClaimsPrincipal
 	{
 		public GenericPrincipal(IIdentity identity, string[] roles)
 		{
@@ -24,7 +25,15 @@ namespace System.Security.Principal
 			}
 		}
 
-		public virtual IIdentity Identity
+		internal string[] Roles
+		{
+			get
+			{
+				return this.m_roles;
+			}
+		}
+
+		public override IIdentity Identity
 		{
 			get
 			{
@@ -32,7 +41,7 @@ namespace System.Security.Principal
 			}
 		}
 
-		public virtual bool IsInRole(string role)
+		public override bool IsInRole(string role)
 		{
 			if (this.m_roles == null)
 			{

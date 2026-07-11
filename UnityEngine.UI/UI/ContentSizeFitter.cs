@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("Layout/Content Size Fitter", 141)]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	public class ContentSizeFitter : UIBehaviour, ILayoutSelfController, ILayoutController
 	{

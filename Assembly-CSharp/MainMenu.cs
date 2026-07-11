@@ -26,7 +26,7 @@ public class MainMenu : KScreen
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
 		{
-			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, string.Empty);
+			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, "");
 		}, 14));
 		if (DistributionPlatform.Initialized)
 		{
@@ -89,11 +89,9 @@ public class MainMenu : KScreen
 				{
 					Application.OpenURL(response.image_link_url);
 				});
+				return;
 			}
-			else
-			{
-				global::Debug.LogWarning("Motd Request error: " + error);
-			}
+			global::Debug.LogWarning("Motd Request error: " + error);
 		});
 		this.lastUpdateTime = Time.unscaledTime;
 		this.activateOnSpawn = true;
@@ -104,6 +102,60 @@ public class MainMenu : KScreen
 		if (this.refreshResumeButton)
 		{
 			this.RefreshResumeButton();
+		}
+	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		base.OnKeyDown(e);
+		if (e.Consumed)
+		{
+			return;
+		}
+		KKeyCode kkeyCode;
+		switch (this.m_cheatInputCounter)
+		{
+		case 0:
+			kkeyCode = KKeyCode.K;
+			break;
+		case 1:
+			kkeyCode = KKeyCode.L;
+			break;
+		case 2:
+			kkeyCode = KKeyCode.E;
+			break;
+		case 3:
+			kkeyCode = KKeyCode.I;
+			break;
+		case 4:
+			kkeyCode = KKeyCode.P;
+			break;
+		case 5:
+			kkeyCode = KKeyCode.L;
+			break;
+		case 6:
+			kkeyCode = KKeyCode.A;
+			break;
+		default:
+			kkeyCode = KKeyCode.Y;
+			break;
+		}
+		if (e.Controller.GetKeyDown(kkeyCode))
+		{
+			e.Consumed = true;
+			this.m_cheatInputCounter++;
+			if (this.m_cheatInputCounter >= 8)
+			{
+				global::Debug.Log("Cheat Detected - enabling Debug Mode");
+				DebugHandler.SetDebugEnabled(true);
+				this.buildWatermark.RefreshText();
+				this.m_cheatInputCounter = 0;
+				return;
+			}
+		}
+		else
+		{
+			this.m_cheatInputCounter = 0;
 		}
 	}
 
@@ -121,6 +173,7 @@ public class MainMenu : KScreen
 	{
 		global::Debug.Log("-- MAIN MENU -- ");
 		base.OnSpawn();
+		this.m_cheatInputCounter = 0;
 		Canvas.ForceUpdateCanvases();
 		this.ShowLanguageConfirmation();
 		string savePrefix = SaveLoader.GetSavePrefix();
@@ -149,8 +202,7 @@ public class MainMenu : KScreen
 				text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix);
 			}
 			string text3 = string.Format(text2, savePrefix);
-			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null, true);
+			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(text3, null, null, null, null, null, null, null, null, true);
 		}
 		Global.Instance.modManager.Report(base.gameObject);
 		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
@@ -190,8 +242,7 @@ public class MainMenu : KScreen
 	{
 		if (SteamManager.Initialized)
 		{
-			string steamUILanguage = SteamUtils.GetSteamUILanguage();
-			if (steamUILanguage != "schinese")
+			if (SteamUtils.GetSteamUILanguage() != "schinese")
 			{
 				return;
 			}
@@ -206,7 +257,7 @@ public class MainMenu : KScreen
 
 	private void ResumeGame()
 	{
-		string text = ((!string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame)) ? GenericGameSettings.instance.performanceCapture.saveGame : SaveLoader.GetLatestSaveFile());
+		string text = (string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame) ? SaveLoader.GetLatestSaveFile() : GenericGameSettings.instance.performanceCapture.saveGame);
 		if (!string.IsNullOrEmpty(text))
 		{
 			KCrashReporter.MOST_RECENT_SAVEFILE = text;
@@ -227,8 +278,7 @@ public class MainMenu : KScreen
 	{
 		if (LoadScreen.Instance == null)
 		{
-			GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true);
-			LoadScreen component = gameObject.GetComponent<LoadScreen>();
+			LoadScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true).GetComponent<LoadScreen>();
 			component.requireConfirmation = false;
 			component.SetBackgroundActive(true);
 		}
@@ -264,8 +314,7 @@ public class MainMenu : KScreen
 
 	private void SpawnVideoScreen()
 	{
-		GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.VideoScreen.gameObject, base.gameObject, false);
-		VideoScreen.Instance = gameObject.GetComponent<VideoScreen>();
+		VideoScreen.Instance = Util.KInstantiateUI(ScreenPrefabs.Instance.VideoScreen.gameObject, base.gameObject, false).GetComponent<VideoScreen>();
 	}
 
 	private void Update()
@@ -309,7 +358,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 383949U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 393231U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -332,23 +381,19 @@ public class MainMenu : KScreen
 		if (this.Button_ResumeGame != null && this.Button_ResumeGame.gameObject != null)
 		{
 			this.Button_ResumeGame.gameObject.SetActive(flag);
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning("Why is the resume game button null?");
-		}
+		global::Debug.LogWarning("Why is the resume game button null?");
 	}
 
 	private void Translations()
 	{
-		LanguageOptionsScreen languageOptionsScreen = Util.KInstantiateUI<LanguageOptionsScreen>(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, base.transform.parent.gameObject, false);
-		languageOptionsScreen.SetBackgroundActive(true);
+		Util.KInstantiateUI<LanguageOptionsScreen>(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, base.transform.parent.gameObject, false).SetBackgroundActive(true);
 	}
 
 	private void Mods()
 	{
-		ModsScreen modsScreen = Util.KInstantiateUI<ModsScreen>(ScreenPrefabs.Instance.modsMenu.gameObject, base.transform.parent.gameObject, false);
-		modsScreen.SetBackgroundActive(true);
+		Util.KInstantiateUI<ModsScreen>(ScreenPrefabs.Instance.modsMenu.gameObject, base.transform.parent.gameObject, false).SetBackgroundActive(true);
 	}
 
 	private void Options()
@@ -380,18 +425,10 @@ public class MainMenu : KScreen
 	{
 		if (!KFMOD.didFmodInitializeSuccessfully)
 		{
-			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
-			string text = UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS;
-			global::System.Action action = null;
-			global::System.Action action2 = null;
-			string text2 = UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO;
-			global::System.Action action3 = delegate
+			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO, delegate
 			{
 				Application.OpenURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
-			};
-			Sprite sadDupeAudio = GlobalResources.Instance().sadDupeAudio;
-			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, text2, action3, null, null, null, sadDupeAudio, true);
+			}, null, null, null, GlobalResources.Instance().sadDupeAudio, true);
 		}
 	}
 
@@ -400,19 +437,13 @@ public class MainMenu : KScreen
 		if (KPlayerPrefs.HasCorruptedFlag())
 		{
 			KPlayerPrefs.ResetCorruptedFlag();
-			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
-			string text = UI.FRONTEND.SUPPORTWARNINGS.PLAYER_PREFS_CORRUPTED;
-			global::System.Action action = null;
-			global::System.Action action2 = null;
-			Sprite sadDupe = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, null, null, null, null, null, sadDupe, true);
+			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.PLAYER_PREFS_CORRUPTED, null, null, null, null, null, null, null, GlobalResources.Instance().sadDupe, true);
 		}
 	}
 
 	private void CheckDoubleBoundKeys()
 	{
-		string text = string.Empty;
+		string text = "";
 		HashSet<BindingEntry> hashSet = new HashSet<BindingEntry>();
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
@@ -430,24 +461,17 @@ public class MainMenu : KScreen
 							{
 								string mGroup = GameInputMapping.KeyBindings[i].mGroup;
 								string mGroup2 = GameInputMapping.KeyBindings[j].mGroup;
-								if (mGroup == "Root" || mGroup2 == "Root" || mGroup == mGroup2)
+								if ((mGroup == "Root" || mGroup2 == "Root" || mGroup == mGroup2) && (!(mGroup == "Root") || !bindingEntry.mIgnoreRootConflics) && (!(mGroup2 == "Root") || !bindingEntry2.mIgnoreRootConflics))
 								{
-									if (!(mGroup == "Root") || !bindingEntry.mIgnoreRootConflics)
-									{
-										if (!(mGroup2 == "Root") || !bindingEntry2.mIgnoreRootConflics)
-										{
-											string text2 = text;
-											text = string.Concat(new object[] { text2, "\n\n", bindingEntry2.mAction, ": <b>", bindingEntry2.mKeyCode, "</b>\n", bindingEntry.mAction, ": <b>", bindingEntry.mKeyCode, "</b>" });
-											BindingEntry bindingEntry3 = bindingEntry2;
-											bindingEntry3.mKeyCode = KKeyCode.None;
-											bindingEntry3.mModifier = Modifier.None;
-											GameInputMapping.KeyBindings[i] = bindingEntry3;
-											bindingEntry3 = bindingEntry;
-											bindingEntry3.mKeyCode = KKeyCode.None;
-											bindingEntry3.mModifier = Modifier.None;
-											GameInputMapping.KeyBindings[j] = bindingEntry3;
-										}
-									}
+									text = string.Concat(new object[] { text, "\n\n", bindingEntry2.mAction, ": <b>", bindingEntry2.mKeyCode, "</b>\n", bindingEntry.mAction, ": <b>", bindingEntry.mKeyCode, "</b>" });
+									BindingEntry bindingEntry3 = bindingEntry2;
+									bindingEntry3.mKeyCode = KKeyCode.None;
+									bindingEntry3.mModifier = Modifier.None;
+									GameInputMapping.KeyBindings[i] = bindingEntry3;
+									bindingEntry3 = bindingEntry;
+									bindingEntry3.mKeyCode = KKeyCode.None;
+									bindingEntry3.mModifier = Modifier.None;
+									GameInputMapping.KeyBindings[j] = bindingEntry3;
 								}
 							}
 						}
@@ -456,15 +480,9 @@ public class MainMenu : KScreen
 				hashSet.Add(GameInputMapping.KeyBindings[i]);
 			}
 		}
-		if (text != string.Empty)
+		if (text != "")
 		{
-			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
-			string text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text);
-			global::System.Action action = null;
-			global::System.Action action2 = null;
-			Sprite sadDupe = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, null, null, null, sadDupe, true);
+			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text), null, null, null, null, null, null, null, GlobalResources.Instance().sadDupe, true);
 		}
 	}
 
@@ -512,9 +530,14 @@ public class MainMenu : KScreen
 	[SerializeField]
 	private NextUpdateTimer nextUpdateTimer;
 
-	private static bool HasAutoresumedOnce;
+	[SerializeField]
+	private BuildWatermark buildWatermark;
+
+	private static bool HasAutoresumedOnce = false;
 
 	private bool refreshResumeButton = true;
+
+	private int m_cheatInputCounter;
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class DebugCellDrawer : KMonoBehaviour
 {
@@ -10,8 +9,7 @@ public class DebugCellDrawer : KMonoBehaviour
 		{
 			if (this.cells[i] != PathFinder.InvalidCell)
 			{
-				Vector3 vector = Grid.CellToPosCCF(this.cells[i], Grid.SceneLayer.Background);
-				DebugExtension.DebugPoint(vector, 1f, 0f, true);
+				DebugExtension.DebugPoint(Grid.CellToPosCCF(this.cells[i], Grid.SceneLayer.Background), 1f, 0f, true);
 			}
 		}
 	}

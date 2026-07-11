@@ -12,23 +12,15 @@ namespace UnityEngine.Experimental.UIElements
 			GUIUtility.processEvent = (Func<int, IntPtr, bool>)Delegate.Combine(GUIUtility.processEvent, new Func<int, IntPtr, bool>(UIElementsUtility.ProcessEvent));
 			GUIUtility.cleanupRoots = (Action)Delegate.Combine(GUIUtility.cleanupRoots, new Action(UIElementsUtility.CleanupRoots));
 			GUIUtility.endContainerGUIFromException = (Func<Exception, bool>)Delegate.Combine(GUIUtility.endContainerGUIFromException, new Func<Exception, bool>(UIElementsUtility.EndContainerGUIFromException));
+			GUIUtility.enabledStateChanged = (Action)Delegate.Combine(GUIUtility.enabledStateChanged, new Action(UIElementsUtility.EnabledStateChanged));
 		}
 
-		internal static IEventDispatcher eventDispatcher
+		private static void EnabledStateChanged()
 		{
-			get
+			if (UIElementsUtility.s_ContainerStack.Count > 0)
 			{
-				if (UIElementsUtility.s_EventDispatcher == null)
-				{
-					UIElementsUtility.s_EventDispatcher = new EventDispatcher();
-				}
-				return UIElementsUtility.s_EventDispatcher;
+				UIElementsUtility.s_ContainerStack.Peek().MarkDirtyLayout();
 			}
-		}
-
-		internal static void ClearDispatcher()
-		{
-			UIElementsUtility.s_EventDispatcher = null;
 		}
 
 		private static void TakeCapture()
@@ -36,17 +28,17 @@ namespace UnityEngine.Experimental.UIElements
 			if (UIElementsUtility.s_ContainerStack.Count > 0)
 			{
 				IMGUIContainer imguicontainer = UIElementsUtility.s_ContainerStack.Peek();
-				if (MouseCaptureController.IsMouseCaptureTaken() && !imguicontainer.HasMouseCapture())
+				if (MouseCaptureController.IsMouseCaptured() && !imguicontainer.HasMouseCapture())
 				{
 					Debug.Log("Should not grab hot control with an active capture");
 				}
-				imguicontainer.TakeMouseCapture();
+				imguicontainer.CaptureMouse();
 			}
 		}
 
 		private static void ReleaseCapture()
 		{
-			MouseCaptureController.ReleaseMouseCapture();
+			MouseCaptureController.ReleaseMouse();
 		}
 
 		private static bool ProcessEvent(int instanceID, IntPtr nativeEventPtr)
@@ -73,7 +65,7 @@ namespace UnityEngine.Experimental.UIElements
 		private static void CleanupRoots()
 		{
 			UIElementsUtility.s_EventInstance = null;
-			UIElementsUtility.s_EventDispatcher = null;
+			EventDispatcher.ClearDispatcher();
 			UIElementsUtility.s_UIElementsCache = null;
 			UIElementsUtility.s_ContainerStack = null;
 		}
@@ -101,13 +93,20 @@ namespace UnityEngine.Experimental.UIElements
 			UIElementsUtility.s_ContainerStack.Push(container);
 			GUIUtility.s_SkinMode = (int)container.contextType;
 			GUIUtility.s_OriginalID = container.elementPanel.ownerObject.GetInstanceID();
-			Event.current = evt;
+			if (Event.current == null)
+			{
+				Event.current = evt;
+			}
+			else
+			{
+				Event.current.CopyFrom(evt);
+			}
 			GUI.enabled = container.enabledInHierarchy;
 			GUILayoutUtility.BeginContainer(cache);
 			GUIUtility.ResetGlobalState();
 		}
 
-		internal static void EndContainerGUI()
+		internal static void EndContainerGUI(Event evt)
 		{
 			if (Event.current.type == EventType.Layout && UIElementsUtility.s_ContainerStack.Count > 0)
 			{
@@ -116,6 +115,10 @@ namespace UnityEngine.Experimental.UIElements
 			}
 			GUILayoutUtility.SelectIDList(GUIUtility.s_OriginalID, false);
 			GUIContent.ClearStaticCache();
+			if (UIElementsUtility.s_ContainerStack.Count > 0)
+			{
+			}
+			evt.CopyFrom(Event.current);
 			if (UIElementsUtility.s_ContainerStack.Count > 0)
 			{
 				GUIUtility.EndContainer();
@@ -176,16 +179,7 @@ namespace UnityEngine.Experimental.UIElements
 			bool flag;
 			if (UIElementsUtility.s_EventInstance.type == EventType.Repaint)
 			{
-				bool sRGBWrite = GL.sRGBWrite;
-				if (sRGBWrite)
-				{
-					GL.sRGBWrite = false;
-				}
 				panel.Repaint(UIElementsUtility.s_EventInstance);
-				if (sRGBWrite)
-				{
-					GL.sRGBWrite = true;
-				}
 				flag = panel.IMGUIContainersCount > 0;
 			}
 			else
@@ -193,11 +187,11 @@ namespace UnityEngine.Experimental.UIElements
 				panel.ValidateLayout();
 				using (EventBase eventBase = UIElementsUtility.CreateEvent(UIElementsUtility.s_EventInstance))
 				{
-					UIElementsUtility.s_EventDispatcher.DispatchEvent(eventBase, panel);
-					UIElementsUtility.s_EventInstance.mousePosition = eventBase.originalMousePosition;
+					bool flag2 = UIElementsUtility.s_EventInstance.type == EventType.Used || UIElementsUtility.s_EventInstance.type == EventType.Layout || UIElementsUtility.s_EventInstance.type == EventType.ExecuteCommand || UIElementsUtility.s_EventInstance.type == EventType.ValidateCommand;
+					panel.SendEvent(eventBase, (!flag2) ? DispatchMode.Default : DispatchMode.Immediate);
 					if (eventBase.isPropagationStopped)
 					{
-						panel.visualTree.Dirty(ChangeType.Repaint);
+						panel.visualTree.IncrementVersion(VersionChangeType.Repaint);
 					}
 					flag = eventBase.isPropagationStopped;
 				}
@@ -215,7 +209,7 @@ namespace UnityEngine.Experimental.UIElements
 			Panel panel;
 			if (!UIElementsUtility.s_UIElementsCache.TryGetValue(ownerObject.GetInstanceID(), out panel))
 			{
-				panel = new Panel(ownerObject, contextType, dataWatch, UIElementsUtility.eventDispatcher);
+				panel = new Panel(ownerObject, contextType, dataWatch, null);
 				UIElementsUtility.s_UIElementsCache.Add(ownerObject.GetInstanceID(), panel);
 			}
 			else
@@ -236,6 +230,6 @@ namespace UnityEngine.Experimental.UIElements
 
 		private static Event s_EventInstance = new Event();
 
-		private static EventDispatcher s_EventDispatcher;
+		internal static Color editorPlayModeTintColor = Color.white;
 	}
 }

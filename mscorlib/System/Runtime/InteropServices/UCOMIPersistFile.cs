@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
+	[Guid("0000010b-0000-0000-c000-000000000046")]
 	[Obsolete]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("0000010b-0000-0000-c000-000000000046")]
 	[ComImport]
 	public interface UCOMIPersistFile
 	{

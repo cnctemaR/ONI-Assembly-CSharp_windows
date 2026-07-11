@@ -32,7 +32,7 @@ public class ProgressBarsConfig : ScriptableObject
 
 	public string GetBarDescription(string barName)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (this.IsBarNameValid(barName))
 		{
 			text = Strings.Get(this.barColorMap[barName].barDescriptionKey);

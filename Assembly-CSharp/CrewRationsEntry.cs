@@ -19,14 +19,12 @@ public class CrewRationsEntry : CrewListEntry
 		{
 			return;
 		}
-		Amounts amounts = this.identity.GetAmounts();
-		foreach (AmountInstance amountInstance in amounts)
+		foreach (AmountInstance amountInstance in this.identity.GetAmounts())
 		{
 			float min = amountInstance.GetMin();
 			float max = amountInstance.GetMax();
 			float num = max - min;
-			float num2 = (num - (max - amountInstance.value)) / num;
-			string text = Mathf.RoundToInt(num2 * 100f).ToString();
+			string text = Mathf.RoundToInt((num - (max - amountInstance.value)) / num * 100f).ToString();
 			if (amountInstance.amount == Db.Get().Amounts.Stress)
 			{
 				this.currentStressText.text = amountInstance.GetValueString();

@@ -4,18 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 {
 	public class Displace : TransformerModule, IModule3D, IModule
 	{
-		public Displace()
-		{
-		}
-
-		public Displace(IModule source, IModule xDisplaceModule, IModule yDisplaceModule, IModule zDisplaceModule)
-		{
-			this._sourceModule = source;
-			this._xDisplaceModule = xDisplaceModule;
-			this._yDisplaceModule = yDisplaceModule;
-			this._zDisplaceModule = zDisplaceModule;
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -62,6 +50,18 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 			{
 				this._zDisplaceModule = value;
 			}
+		}
+
+		public Displace()
+		{
+		}
+
+		public Displace(IModule source, IModule xDisplaceModule, IModule yDisplaceModule, IModule zDisplaceModule)
+		{
+			this._sourceModule = source;
+			this._xDisplaceModule = xDisplaceModule;
+			this._yDisplaceModule = yDisplaceModule;
+			this._zDisplaceModule = zDisplaceModule;
 		}
 
 		public float GetValue(float x, float y, float z)

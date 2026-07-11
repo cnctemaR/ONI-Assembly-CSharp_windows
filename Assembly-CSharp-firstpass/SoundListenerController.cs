@@ -22,11 +22,9 @@ public class SoundListenerController : MonoBehaviour
 		if (RuntimeManager.IsInitialized)
 		{
 			RuntimeManager.StudioSystem.getVCA("vca:/Looping", out this.loopingVCA);
+			return;
 		}
-		else
-		{
-			base.enabled = false;
-		}
+		base.enabled = false;
 	}
 
 	public void SetLoopingVolume(float volume)

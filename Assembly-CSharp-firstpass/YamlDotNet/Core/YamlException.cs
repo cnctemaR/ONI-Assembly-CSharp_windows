@@ -5,6 +5,10 @@ namespace YamlDotNet.Core
 	[Serializable]
 	public class YamlException : Exception
 	{
+		public Mark Start { get; private set; }
+
+		public Mark End { get; private set; }
+
 		public YamlException()
 		{
 		}
@@ -30,9 +34,5 @@ namespace YamlDotNet.Core
 			: base(message, inner)
 		{
 		}
-
-		public Mark Start { get; private set; }
-
-		public Mark End { get; private set; }
 	}
 }

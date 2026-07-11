@@ -3,17 +3,14 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	public interface IPanel
+	public interface IPanel : IDisposable
 	{
 		VisualElement visualTree { get; }
 
-		IEventDispatcher dispatcher { get; }
+		EventDispatcher dispatcher { get; }
 
 		ContextType contextType { get; }
 
-		/// <summary>
-		///   <para>Return the focus controller for this panel.</para>
-		/// </summary>
 		FocusController focusController { get; }
 
 		VisualElement Pick(Vector2 point);

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace System.Data.SqlClient
 {
-	[ListBindable(false)]
 	[Serializable]
 	public sealed class SqlErrorCollection : ICollection, IEnumerable
 	{
@@ -12,27 +11,21 @@ namespace System.Data.SqlClient
 		{
 		}
 
+		public void CopyTo(Array array, int index)
+		{
+			((ICollection)this._errors).CopyTo(array, index);
+		}
+
+		public void CopyTo(SqlError[] array, int index)
+		{
+			this._errors.CopyTo(array, index);
+		}
+
 		public int Count
 		{
 			get
 			{
-				throw null;
-			}
-		}
-
-		public SqlError this[int index]
-		{
-			get
-			{
-				throw null;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				throw null;
+				return this._errors.Count;
 			}
 		}
 
@@ -40,21 +33,36 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				throw null;
+				return this;
 			}
 		}
 
-		public void CopyTo(Array array, int index)
+		bool ICollection.IsSynchronized
 		{
+			get
+			{
+				return false;
+			}
 		}
 
-		public void CopyTo(SqlError[] array, int index)
+		public SqlError this[int index]
 		{
+			get
+			{
+				return (SqlError)this._errors[index];
+			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			throw null;
+			return this._errors.GetEnumerator();
 		}
+
+		internal void Add(SqlError error)
+		{
+			this._errors.Add(error);
+		}
+
+		private readonly List<object> _errors = new List<object>();
 	}
 }

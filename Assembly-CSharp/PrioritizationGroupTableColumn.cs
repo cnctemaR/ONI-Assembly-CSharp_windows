@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class PrioritizationGroupTableColumn : TableColumn
 {
 	public PrioritizationGroupTableColumn(object user_data, Action<IAssignableIdentity, GameObject> on_load_action, Action<object, int> on_change_priority, Func<object, string> on_hover_widget, Action<object, int> on_change_header_priority, Func<object, string> on_hover_header_option_selector, Action<object> on_sort_clicked, Func<object, string> on_sort_hovered)
-		: base(on_load_action, null, null, null, null, false, string.Empty)
+		: base(on_load_action, null, null, null, null, false, "")
 	{
 		this.userData = user_data;
 		this.onChangePriority = on_change_priority;
@@ -37,9 +37,15 @@ public class PrioritizationGroupTableColumn : TableColumn
 		ToolTip[] componentsInChildren = widget_go.transform.GetComponentsInChildren<ToolTip>();
 		if (componentsInChildren != null)
 		{
+			Func<string> <>9__1;
 			foreach (ToolTip toolTip in componentsInChildren)
 			{
-				toolTip.OnToolTip = () => this.onHoverWidget(widget_go);
+				Func<string> func;
+				if ((func = <>9__1) == null)
+				{
+					func = (<>9__1 = () => this.onHoverWidget(widget_go));
+				}
+				toolTip.OnToolTip = func;
 			}
 		}
 		return widget_go;
@@ -50,17 +56,13 @@ public class PrioritizationGroupTableColumn : TableColumn
 		GameObject widget_go = Util.KInstantiateUI(Assets.UIPrefabs.TableScreenWidgets.PriorityGroupSelectorHeader, parent, true);
 		HierarchyReferences component = widget_go.GetComponent<HierarchyReferences>();
 		LayoutElement component2 = widget_go.GetComponentInChildren<LocText>().GetComponent<LayoutElement>();
-		LayoutElement layoutElement = component2;
-		float num = 63f;
-		component2.minWidth = num;
-		layoutElement.preferredWidth = num;
+		component2.preferredWidth = (component2.minWidth = 63f);
 		Component reference = component.GetReference("Label");
-		LocText component3 = reference.GetComponent<LocText>();
-		component3.raycastTarget = true;
-		ToolTip component4 = reference.GetComponent<ToolTip>();
-		if (component4 != null)
+		reference.GetComponent<LocText>().raycastTarget = true;
+		ToolTip component3 = reference.GetComponent<ToolTip>();
+		if (component3 != null)
 		{
-			component4.OnToolTip = () => this.onHoverWidget(widget_go);
+			component3.OnToolTip = () => this.onHoverWidget(widget_go);
 		}
 		MultiToggle componentInChildren = widget_go.GetComponentInChildren<MultiToggle>(true);
 		this.column_sort_toggle = componentInChildren;
@@ -69,16 +71,15 @@ public class PrioritizationGroupTableColumn : TableColumn
 		{
 			this.onSortClicked(widget_go);
 		}));
-		ToolTip component5 = componentInChildren.GetComponent<ToolTip>();
+		ToolTip component4 = componentInChildren.GetComponent<ToolTip>();
+		if (component4 != null)
+		{
+			component4.OnToolTip = () => this.onSortHovered(widget_go);
+		}
+		ToolTip component5 = (component.GetReference("PrioritizeButton") as KButton).GetComponent<ToolTip>();
 		if (component5 != null)
 		{
-			component5.OnToolTip = () => this.onSortHovered(widget_go);
-		}
-		KButton kbutton = component.GetReference("PrioritizeButton") as KButton;
-		ToolTip component6 = kbutton.GetComponent<ToolTip>();
-		if (component6 != null)
-		{
-			component6.OnToolTip = () => this.onHoverHeaderOptionSelector(widget_go);
+			component5.OnToolTip = () => this.onHoverHeaderOptionSelector(widget_go);
 		}
 		return widget_go;
 	}

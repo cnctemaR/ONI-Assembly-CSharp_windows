@@ -6,13 +6,13 @@ using UnityEngine;
 
 public class StandardAttributeFormatter : IAttributeFormatter
 {
+	public GameUtil.TimeSlice DeltaTimeSlice { get; set; }
+
 	public StandardAttributeFormatter(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice)
 	{
 		this.unitClass = unitClass;
 		this.DeltaTimeSlice = deltaTimeSlice;
 	}
-
-	public GameUtil.TimeSlice DeltaTimeSlice { get; set; }
 
 	public virtual string GetFormattedAttribute(AttributeInstance instance)
 	{
@@ -31,7 +31,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 		case GameUtil.UnitClass.SimpleInteger:
 			return GameUtil.GetFormattedInt(value, timeSlice);
 		case GameUtil.UnitClass.Temperature:
-			return GameUtil.GetFormattedTemperature(value, timeSlice, (timeSlice != GameUtil.TimeSlice.None) ? GameUtil.TemperatureInterpretation.Relative : GameUtil.TemperatureInterpretation.Absolute, true, false);
+			return GameUtil.GetFormattedTemperature(value, timeSlice, (timeSlice == GameUtil.TimeSlice.None) ? GameUtil.TemperatureInterpretation.Absolute : GameUtil.TemperatureInterpretation.Relative, true, false);
 		case GameUtil.UnitClass.Mass:
 			return GameUtil.GetFormattedMass(value, timeSlice, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 		case GameUtil.UnitClass.Calories:
@@ -74,7 +74,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);
 			}
 		}
-		string text2 = string.Empty;
+		string text2 = "";
 		AttributeConverters component = instance.gameObject.GetComponent<AttributeConverters>();
 		if (component != null && master.converters.Count > 0)
 		{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Security.Cryptography.X509Certificates
 {
@@ -8,6 +9,24 @@ namespace System.Security.Cryptography.X509Certificates
 		internal X509Certificate2Enumerator(X509Certificate2Collection collection)
 		{
 			this.enumerator = ((IEnumerable)collection).GetEnumerator();
+		}
+
+		public X509Certificate2 Current
+		{
+			get
+			{
+				return (X509Certificate2)this.enumerator.Current;
+			}
+		}
+
+		public bool MoveNext()
+		{
+			return this.enumerator.MoveNext();
+		}
+
+		public void Reset()
+		{
+			this.enumerator.Reset();
 		}
 
 		object IEnumerator.Current
@@ -28,22 +47,9 @@ namespace System.Security.Cryptography.X509Certificates
 			this.enumerator.Reset();
 		}
 
-		public X509Certificate2 Current
+		internal X509Certificate2Enumerator()
 		{
-			get
-			{
-				return (X509Certificate2)this.enumerator.Current;
-			}
-		}
-
-		public bool MoveNext()
-		{
-			return this.enumerator.MoveNext();
-		}
-
-		public void Reset()
-		{
-			this.enumerator.Reset();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private IEnumerator enumerator;

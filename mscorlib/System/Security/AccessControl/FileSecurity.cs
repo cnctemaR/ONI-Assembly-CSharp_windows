@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.Security.AccessControl
 {
@@ -7,13 +8,16 @@ namespace System.Security.AccessControl
 		public FileSecurity()
 			: base(false)
 		{
-			throw new PlatformNotSupportedException();
 		}
 
 		public FileSecurity(string fileName, AccessControlSections includeSections)
 			: base(false, fileName, includeSections)
 		{
-			throw new PlatformNotSupportedException();
+		}
+
+		internal FileSecurity(SafeHandle handle, AccessControlSections includeSections)
+			: base(false, handle, includeSections)
+		{
 		}
 	}
 }

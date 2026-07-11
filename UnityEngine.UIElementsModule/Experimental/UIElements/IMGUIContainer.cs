@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace UnityEngine.Experimental.UIElements
 {
@@ -16,6 +17,7 @@ namespace UnityEngine.Experimental.UIElements
 			this.contextType = ContextType.Editor;
 			this.focusIndex = 0;
 			base.requireMeasureFunction = true;
+			base.style.overflow = Overflow.Hidden;
 		}
 
 		internal ObjectGUIState guiState
@@ -55,11 +57,11 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		internal override void DoRepaint(IStylePainter painter)
+		protected override void DoRepaint(IStylePainter painter)
 		{
-			base.DoRepaint();
-			this.lastWorldClip = painter.currentWorldClip;
-			this.HandleIMGUIEvent(painter.repaintEvent);
+			this.lastWorldClip = base.elementPanel.repaintData.currentWorldClip;
+			IStylePainterInternal stylePainterInternal = (IStylePainterInternal)painter;
+			stylePainterInternal.DrawImmediate(new Action(this.HandleIMGUIEvent));
 		}
 
 		private void SaveGlobals()
@@ -90,20 +92,21 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		private void DoOnGUI(Event evt, bool isComputingLayout = false)
+		private void DoOnGUI(Event evt, Matrix4x4 worldTransform, Rect clippingRect, bool isComputingLayout = false)
 		{
 			if (this.m_OnGUIHandler != null && base.panel != null)
 			{
 				int num = GUIClip.Internal_GetCount();
 				this.SaveGlobals();
 				UIElementsUtility.BeginContainerGUI(this.cache, evt, this);
-				if (evt.type != EventType.Layout)
+				GUI.color = UIElementsUtility.editorPlayModeTintColor;
+				if (Event.current.type != EventType.Layout)
 				{
 					if (this.lostFocus)
 					{
 						if (this.focusController != null)
 						{
-							if (this.focusController.focusedElement == null || this.focusController.focusedElement == this || !(this.focusController.focusedElement is IMGUIContainer))
+							if (this.focusController.focusedElement == null || this.focusController.focusedElement == this || !(this.focusController.focusedElement is IMGUIContainer) || this.useUIElementsFocusStyle)
 							{
 								GUIUtility.keyboardControl = 0;
 								this.focusController.imguiKeyboardControl = 0;
@@ -124,6 +127,17 @@ namespace UnityEngine.Experimental.UIElements
 								GUIUtility.SetKeyboardControlToFirstControlId();
 							}
 						}
+						else if (this.useUIElementsFocusStyle)
+						{
+							if (this.focusController == null || this.focusController.imguiKeyboardControl == 0)
+							{
+								GUIUtility.SetKeyboardControlToFirstControlId();
+							}
+							else
+							{
+								GUIUtility.keyboardControl = this.focusController.imguiKeyboardControl;
+							}
+						}
 						this.receivedFocus = false;
 						this.focusChangeDirection = FocusChangeDirection.unspecified;
 						if (this.focusController != null)
@@ -138,10 +152,7 @@ namespace UnityEngine.Experimental.UIElements
 				{
 					if (!isComputingLayout)
 					{
-						Matrix4x4 matrix4x;
-						Rect rect;
-						IMGUIContainer.GetCurrentTransformAndClip(this, evt, out matrix4x, out rect);
-						using (new GUIClip.ParentClipScope(matrix4x, rect))
+						using (new GUIClip.ParentClipScope(worldTransform, clippingRect))
 						{
 							this.m_OnGUIHandler();
 						}
@@ -165,10 +176,10 @@ namespace UnityEngine.Experimental.UIElements
 				}
 				finally
 				{
-					if (evt.type != EventType.Layout)
+					if (Event.current.type != EventType.Layout)
 					{
 						int keyboardControl = GUIUtility.keyboardControl;
-						int num2 = GUIUtility.CheckForTabEvent(evt);
+						int num2 = GUIUtility.CheckForTabEvent(Event.current);
 						if (this.focusController != null)
 						{
 							if (num2 < 0)
@@ -211,26 +222,37 @@ namespace UnityEngine.Experimental.UIElements
 								{
 									this.focusController.SyncIMGUIFocus(GUIUtility.keyboardControl, this);
 								}
+								else if (GUIUtility.keyboardControl != this.focusController.imguiKeyboardControl)
+								{
+									this.newKeyboardFocusControlID = GUIUtility.keyboardControl;
+									if (this.focusController.focusedElement == this)
+									{
+										this.focusController.imguiKeyboardControl = GUIUtility.keyboardControl;
+									}
+									else
+									{
+										this.focusController.SyncIMGUIFocus(GUIUtility.keyboardControl, this);
+									}
+								}
 							}
 						}
 						this.hasFocusableControls = GUIUtility.HasFocusableControls();
 					}
 				}
-				EventType type2 = Event.current.type;
-				UIElementsUtility.EndContainerGUI();
+				UIElementsUtility.EndContainerGUI(evt);
 				this.RestoreGlobals();
 				if (!flag)
 				{
-					if (type2 != EventType.Ignore && type2 != EventType.Used)
+					if (evt.type != EventType.Ignore && evt.type != EventType.Used)
 					{
 						int num3 = GUIClip.Internal_GetCount();
 						if (num3 > num)
 						{
-							Debug.LogError("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced)");
+							Debug.LogError("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced.");
 						}
 						else if (num3 < num)
 						{
-							Debug.LogError("GUI Error: You are popping more GUIClips than you are pushing. Make sure they are balanced)");
+							Debug.LogError("GUI Error: You are popping more GUIClips than you are pushing. Make sure they are balanced.");
 						}
 					}
 				}
@@ -238,11 +260,16 @@ namespace UnityEngine.Experimental.UIElements
 				{
 					GUIClip.Internal_Pop();
 				}
-				if (type2 == EventType.Used)
+				if (evt.type == EventType.Used)
 				{
-					base.Dirty(ChangeType.Repaint);
+					base.IncrementVersion(VersionChangeType.Repaint);
 				}
 			}
+		}
+
+		public void MarkDirtyLayout()
+		{
+			base.IncrementVersion(VersionChangeType.Layout);
 		}
 
 		public override void HandleEvent(EventBase evt)
@@ -264,7 +291,21 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		internal void HandleIMGUIEvent()
+		{
+			Matrix4x4 currentOffset = base.elementPanel.repaintData.currentOffset;
+			this.HandleIMGUIEvent(base.elementPanel.repaintData.repaintEvent, currentOffset * base.worldTransform, VisualElement.ComputeAAAlignedBound(base.worldClip, currentOffset));
+		}
+
 		internal bool HandleIMGUIEvent(Event e)
+		{
+			Matrix4x4 matrix4x;
+			Rect rect;
+			IMGUIContainer.GetCurrentTransformAndClip(this, e, out matrix4x, out rect);
+			return this.HandleIMGUIEvent(e, matrix4x, rect);
+		}
+
+		internal bool HandleIMGUIEvent(Event e, Matrix4x4 worldTransform, Rect clippingRect)
 		{
 			bool flag;
 			if (e == null || this.m_OnGUIHandler == null || base.elementPanel == null || !base.elementPanel.IMGUIEventInterests.WantsEvent(e.type))
@@ -275,9 +316,9 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				EventType type = e.type;
 				e.type = EventType.Layout;
-				this.DoOnGUI(e, false);
+				this.DoOnGUI(e, worldTransform, clippingRect, false);
 				e.type = type;
-				this.DoOnGUI(e, false);
+				this.DoOnGUI(e, worldTransform, clippingRect, false);
 				if (this.newKeyboardFocusControlID > 0)
 				{
 					this.newKeyboardFocusControlID = 0;
@@ -311,12 +352,7 @@ namespace UnityEngine.Experimental.UIElements
 		{
 			if (evt.GetEventTypeId() == EventBase<BlurEvent>.TypeId())
 			{
-				BlurEvent blurEvent = evt as BlurEvent;
-				VisualElement visualElement = blurEvent.relatedTarget as VisualElement;
-				if (visualElement != null && (blurEvent.relatedTarget.canGrabFocus || visualElement.parent == base.panel.visualTree))
-				{
-					this.lostFocus = true;
-				}
+				this.lostFocus = true;
 			}
 			else if (evt.GetEventTypeId() == EventBase<FocusEvent>.TypeId())
 			{
@@ -346,10 +382,11 @@ namespace UnityEngine.Experimental.UIElements
 			float num2 = float.NaN;
 			if (widthMode != VisualElement.MeasureMode.Exactly || heightMode != VisualElement.MeasureMode.Exactly)
 			{
-				this.DoOnGUI(new Event
+				Event @event = new Event
 				{
 					type = EventType.Layout
-				}, true);
+				};
+				this.DoOnGUI(@event, Matrix4x4.identity, Rect.zero, true);
 				num = this.m_Cache.topLevel.minWidth;
 				num2 = this.m_Cache.topLevel.minHeight;
 			}
@@ -386,9 +423,9 @@ namespace UnityEngine.Experimental.UIElements
 				clipRect = container.worldBound;
 			}
 			transform = container.worldTransform;
-			if (evt.type == EventType.Repaint && container.elementPanel != null && container.elementPanel.stylePainter != null)
+			if (evt.type == EventType.Repaint && container.elementPanel != null)
 			{
-				transform = container.elementPanel.stylePainter.currentTransform;
+				transform = container.elementPanel.repaintData.currentOffset * container.worldTransform;
 			}
 		}
 
@@ -399,6 +436,8 @@ namespace UnityEngine.Experimental.UIElements
 		internal bool useOwnerObjectGUIState;
 
 		private GUILayoutUtility.LayoutCache m_Cache = null;
+
+		internal bool useUIElementsFocusStyle;
 
 		private bool lostFocus = false;
 
@@ -412,29 +451,17 @@ namespace UnityEngine.Experimental.UIElements
 
 		private IMGUIContainer.GUIGlobals m_GUIGlobals;
 
-		/// <summary>
-		///   <para>Instantiates an IMGUIContainer using the data read from a UXML file.</para>
-		/// </summary>
-		public class IMGUIContainerFactory : UxmlFactory<IMGUIContainer, IMGUIContainer.IMGUIContainerUxmlTraits>
+		public new class UxmlFactory : UxmlFactory<IMGUIContainer, IMGUIContainer.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the IMGUIContainer.</para>
-		/// </summary>
-		public class IMGUIContainerUxmlTraits : VisualElement.VisualElementUxmlTraits
+		public new class UxmlTraits : VisualElement.UxmlTraits
 		{
-			/// <summary>
-			///   <para>Constructor.</para>
-			/// </summary>
-			public IMGUIContainerUxmlTraits()
+			public UxmlTraits()
 			{
 				this.m_FocusIndex.defaultValue = 0;
 			}
 
-			/// <summary>
-			///   <para>Returns an empty enumerable, as IMGUIContainer cannot have VisualElement children.</para>
-			/// </summary>
 			public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
 			{
 				get

@@ -4,13 +4,13 @@ namespace Satsuma
 {
 	public struct Arc : IEquatable<Arc>
 	{
+		public long Id { get; private set; }
+
 		public Arc(long id)
 		{
 			this = default(Arc);
 			this.Id = id;
 		}
-
-		public long Id { get; private set; }
 
 		public static Arc Invalid
 		{

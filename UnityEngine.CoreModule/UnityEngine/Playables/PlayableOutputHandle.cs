@@ -5,19 +5,17 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
 	public struct PlayableOutputHandle : IEquatable<PlayableOutputHandle>
 	{
 		public static PlayableOutputHandle Null
 		{
 			get
 			{
-				return new PlayableOutputHandle
-				{
-					m_Version = uint.MaxValue
-				};
+				return PlayableOutputHandle.m_Null;
 			}
 		}
 
@@ -69,31 +67,37 @@ namespace UnityEngine.Playables
 			return PlayableOutputHandle.IsValid_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::GetPlayableOutputType", HasExplicitThis = true, ThrowsException = true)]
 		internal Type GetPlayableOutputType()
 		{
 			return PlayableOutputHandle.GetPlayableOutputType_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::GetReferenceObject", HasExplicitThis = true, ThrowsException = true)]
 		internal Object GetReferenceObject()
 		{
 			return PlayableOutputHandle.GetReferenceObject_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::SetReferenceObject", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetReferenceObject(Object target)
 		{
 			PlayableOutputHandle.SetReferenceObject_Injected(ref this, target);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::GetUserData", HasExplicitThis = true, ThrowsException = true)]
 		internal Object GetUserData()
 		{
 			return PlayableOutputHandle.GetUserData_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::SetUserData", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetUserData([Writable] Object target)
 		{
 			PlayableOutputHandle.SetUserData_Injected(ref this, target);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::GetSourcePlayable", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableHandle GetSourcePlayable()
 		{
 			PlayableHandle playableHandle;
@@ -101,29 +105,58 @@ namespace UnityEngine.Playables
 			return playableHandle;
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::SetSourcePlayable", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetSourcePlayable(PlayableHandle target)
 		{
 			PlayableOutputHandle.SetSourcePlayable_Injected(ref this, ref target);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::GetSourceOutputPort", HasExplicitThis = true, ThrowsException = true)]
 		internal int GetSourceOutputPort()
 		{
 			return PlayableOutputHandle.GetSourceOutputPort_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::SetSourceOutputPort", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetSourceOutputPort(int port)
 		{
 			PlayableOutputHandle.SetSourceOutputPort_Injected(ref this, port);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::GetWeight", HasExplicitThis = true, ThrowsException = true)]
 		internal float GetWeight()
 		{
 			return PlayableOutputHandle.GetWeight_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableOutputHandleBindings::SetWeight", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetWeight(float weight)
 		{
 			PlayableOutputHandle.SetWeight_Injected(ref this, weight);
+		}
+
+		[FreeFunction("PlayableOutputHandleBindings::PushNotification", HasExplicitThis = true, ThrowsException = true)]
+		internal void PushNotification(PlayableHandle origin, INotification notification, object context)
+		{
+			PlayableOutputHandle.PushNotification_Injected(ref this, ref origin, notification, context);
+		}
+
+		[FreeFunction("PlayableOutputHandleBindings::GetNotificationReceivers", HasExplicitThis = true, ThrowsException = true)]
+		internal INotificationReceiver[] GetNotificationReceivers()
+		{
+			return PlayableOutputHandle.GetNotificationReceivers_Injected(ref this);
+		}
+
+		[FreeFunction("PlayableOutputHandleBindings::AddNotificationReceiver", HasExplicitThis = true, ThrowsException = true)]
+		internal void AddNotificationReceiver(INotificationReceiver receiver)
+		{
+			PlayableOutputHandle.AddNotificationReceiver_Injected(ref this, receiver);
+		}
+
+		[FreeFunction("PlayableOutputHandleBindings::RemoveNotificationReceiver", HasExplicitThis = true, ThrowsException = true)]
+		internal void RemoveNotificationReceiver(INotificationReceiver receiver)
+		{
+			PlayableOutputHandle.RemoveNotificationReceiver_Injected(ref this, receiver);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -165,8 +198,22 @@ namespace UnityEngine.Playables
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetWeight_Injected(ref PlayableOutputHandle _unity_self, float weight);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void PushNotification_Injected(ref PlayableOutputHandle _unity_self, ref PlayableHandle origin, INotification notification, object context);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern INotificationReceiver[] GetNotificationReceivers_Injected(ref PlayableOutputHandle _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddNotificationReceiver_Injected(ref PlayableOutputHandle _unity_self, INotificationReceiver receiver);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveNotificationReceiver_Injected(ref PlayableOutputHandle _unity_self, INotificationReceiver receiver);
+
 		internal IntPtr m_Handle;
 
 		internal uint m_Version;
+
+		private static readonly PlayableOutputHandle m_Null = default(PlayableOutputHandle);
 	}
 }

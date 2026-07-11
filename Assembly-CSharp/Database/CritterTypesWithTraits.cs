@@ -49,9 +49,9 @@ namespace Database
 			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
 			{
 				writer.WriteKleiString(keyValuePair.Key.ToString());
-				writer.Write((!keyValuePair.Value) ? 0 : 1);
+				writer.Write(keyValuePair.Value ? 1 : 0);
 			}
-			writer.Write((!this.hasTrait) ? 0 : 1);
+			writer.Write(this.hasTrait ? 1 : 0);
 		}
 
 		public override void Deserialize(IReader reader)
@@ -61,10 +61,10 @@ namespace Database
 			for (int i = 0; i < num; i++)
 			{
 				string text = reader.ReadKleiString();
-				bool flag = reader.ReadByte() != 0;
+				bool flag = reader.ReadByte() > 0;
 				this.critterTypesToCheck.Add(new Tag(text), flag);
 			}
-			this.hasTrait = reader.ReadByte() != 0;
+			this.hasTrait = reader.ReadByte() > 0;
 			this.trait = GameTags.Creatures.Wild;
 		}
 

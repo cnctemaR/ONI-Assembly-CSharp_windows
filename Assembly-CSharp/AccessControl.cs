@@ -34,7 +34,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 		}
 		base.Subscribe<AccessControl>(279163026, AccessControl.OnControlStateChangedDelegate);
 		base.Subscribe<AccessControl>(-905833192, AccessControl.OnCopySettingsDelegate);
@@ -49,7 +49,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			this.SetGridRestrictions(keyValuePair.Key.Get(), keyValuePair.Value);
 		}
-		ListPool<Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.PooledList pooledList = ListPool<Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.Allocate();
+		ListPool<global::Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.PooledList pooledList = ListPool<global::Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.Allocate();
 		for (int i = this.savedPermissions.Count - 1; i >= 0; i--)
 		{
 			KPrefabID kprefabID = this.savedPermissions[i].Key.Get();
@@ -58,13 +58,13 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 				MinionIdentity component = kprefabID.GetComponent<MinionIdentity>();
 				if (component != null)
 				{
-					pooledList.Add(new Tuple<MinionAssignablesProxy, AccessControl.Permission>(component.assignableProxy.Get(), this.savedPermissions[i].Value));
+					pooledList.Add(new global::Tuple<MinionAssignablesProxy, AccessControl.Permission>(component.assignableProxy.Get(), this.savedPermissions[i].Value));
 					this.savedPermissions.RemoveAt(i);
 					this.ClearGridRestrictions(kprefabID);
 				}
 			}
 		}
-		foreach (Tuple<MinionAssignablesProxy, AccessControl.Permission> tuple in pooledList)
+		foreach (global::Tuple<MinionAssignablesProxy, AccessControl.Permission> tuple in pooledList)
 		{
 			this.SetPermission(tuple.first, tuple.second);
 		}
@@ -85,8 +85,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		AccessControl component = gameObject.GetComponent<AccessControl>();
+		AccessControl component = ((GameObject)data).GetComponent<AccessControl>();
 		if (component != null)
 		{
 			this.savedPermissions.Clear();
@@ -135,21 +134,22 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			return;
 		}
+		int[] array;
 		if (register)
 		{
 			Rotatable component2 = base.GetComponent<Rotatable>();
-			Grid.Restriction.Orientation orientation = ((!(component2 == null) && component2.GetOrientation() != Orientation.Neutral) ? Grid.Restriction.Orientation.Horizontal : Grid.Restriction.Orientation.Vertical);
-			foreach (int num in component.PlacementCells)
+			Grid.Restriction.Orientation orientation = ((component2 == null || component2.GetOrientation() == Orientation.Neutral) ? Grid.Restriction.Orientation.Vertical : Grid.Restriction.Orientation.Horizontal);
+			array = component.PlacementCells;
+			for (int i = 0; i < array.Length; i++)
 			{
-				Grid.RegisterRestriction(num, orientation);
+				Grid.RegisterRestriction(array[i], orientation);
 			}
+			return;
 		}
-		else
+		array = component.PlacementCells;
+		for (int i = 0; i < array.Length; i++)
 		{
-			foreach (int num2 in component.PlacementCells)
-			{
-				Grid.UnregisterRestriction(num2);
-			}
+			Grid.UnregisterRestriction(array[i]);
 		}
 	}
 
@@ -160,7 +160,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			return;
 		}
-		int num = ((!(kpid != null)) ? (-1) : kpid.InstanceID);
+		int num = ((kpid != null) ? kpid.InstanceID : (-1));
 		Grid.Restriction.Directions directions = (Grid.Restriction.Directions)0;
 		switch (permission)
 		{
@@ -177,9 +177,10 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 			directions = Grid.Restriction.Directions.Left | Grid.Restriction.Directions.Right;
 			break;
 		}
-		foreach (int num2 in component.PlacementCells)
+		int[] placementCells = component.PlacementCells;
+		for (int i = 0; i < placementCells.Length; i++)
 		{
-			Grid.SetRestriction(num2, num, directions);
+			Grid.SetRestriction(placementCells[i], num, directions);
 		}
 	}
 
@@ -190,31 +191,31 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			return;
 		}
-		int num = ((!(kpid != null)) ? (-1) : kpid.InstanceID);
-		foreach (int num2 in component.PlacementCells)
+		int num = ((kpid != null) ? kpid.InstanceID : (-1));
+		int[] placementCells = component.PlacementCells;
+		for (int i = 0; i < placementCells.Length; i++)
 		{
-			Grid.ClearRestriction(num2, num);
+			Grid.ClearRestriction(placementCells[i], num);
 		}
 	}
 
 	public AccessControl.Permission GetPermission(Navigator minion)
 	{
 		Door.ControlState controlState = this.overrideAccess;
+		if (controlState == Door.ControlState.Opened)
+		{
+			return AccessControl.Permission.Both;
+		}
 		if (controlState == Door.ControlState.Locked)
 		{
 			return AccessControl.Permission.Neither;
 		}
-		if (controlState != Door.ControlState.Opened)
-		{
-			return this.GetSetPermission(this.GetKeyForNavigator(minion));
-		}
-		return AccessControl.Permission.Both;
+		return this.GetSetPermission(this.GetKeyForNavigator(minion));
 	}
 
 	private MinionAssignablesProxy GetKeyForNavigator(Navigator minion)
 	{
-		MinionIdentity component = minion.GetComponent<MinionIdentity>();
-		return component.assignableProxy.Get();
+		return minion.GetComponent<MinionIdentity>().assignableProxy.Get();
 	}
 
 	public AccessControl.Permission GetSetPermission(MinionAssignablesProxy key)
@@ -280,11 +281,9 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		if (this._defaultPermission != AccessControl.Permission.Both || this.savedPermissions.Count > 0)
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, AccessControl.accessControlActive, null);
+			return;
 		}
-		else
-		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, null, null);
-		}
+		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, null, null);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

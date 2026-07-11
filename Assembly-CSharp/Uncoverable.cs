@@ -8,8 +8,7 @@ public class Uncoverable : KMonoBehaviour
 	private bool IsAnyCellShowing()
 	{
 		int num = Grid.PosToCell(this);
-		bool flag = this.occupyArea.TestArea(num, null, new Func<int, object, bool>(Uncoverable.IsCellBlocked));
-		return !flag;
+		return !this.occupyArea.TestArea(num, null, new Func<int, object, bool>(Uncoverable.IsCellBlocked));
 	}
 
 	private static bool IsCellBlocked(int cell, object data)
@@ -39,14 +38,13 @@ public class Uncoverable : KMonoBehaviour
 
 	private void OnSolidChanged(object data)
 	{
-		bool flag = this.IsAnyCellShowing();
-		if (flag && !this.hasBeenUncovered && this.partitionerEntry.IsValid())
+		if (this.IsAnyCellShowing() && !this.hasBeenUncovered && this.partitionerEntry.IsValid())
 		{
 			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 			this.hasBeenUncovered = true;
 			base.GetComponent<KSelectable>().IsSelectable = true;
 			Notification notification = new Notification(MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null, null);
-			base.gameObject.AddOrGet<Notifier>().Add(notification, string.Empty);
+			base.gameObject.AddOrGet<Notifier>().Add(notification, "");
 		}
 	}
 

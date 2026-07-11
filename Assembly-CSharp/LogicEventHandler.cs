@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
 
-internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicNetworkConnection, IUniformGridObject
+internal class LogicEventHandler : ILogicEventReceiver, ILogicNetworkConnection, ILogicUIElement, IUniformGridObject
 {
 	public LogicEventHandler(int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
 	{
@@ -89,7 +89,7 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 				logicSoundRegister[id].playedIndex = 0;
 				logicSoundRegister[id].lastPlayed = Time.time;
 			}
-			float num = (Time.time - logicSoundPair.lastPlayed) / 5f;
+			float num = (Time.time - logicSoundPair.lastPlayed) / 3f;
 			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), Grid.CellToPos(this.cell), 1f);
 			eventInstance.setParameterValue("logic_volumeModifer", num);
 			eventInstance.setParameterValue("wireCount", (float)(networkForCell.Wires.Count % 24));

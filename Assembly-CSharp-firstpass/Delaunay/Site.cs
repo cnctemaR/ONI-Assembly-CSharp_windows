@@ -8,11 +8,6 @@ namespace Delaunay
 {
 	public sealed class Site : ICoord, IComparable
 	{
-		private Site(Vector2 p, uint index, float weight, uint color)
-		{
-			this.Init(p, index, weight, color);
-		}
-
 		public uint color { get; private set; }
 
 		public float weight { get; private set; }
@@ -98,6 +93,11 @@ namespace Delaunay
 		private static bool CloseEnough(Vector2 p0, Vector2 p1)
 		{
 			return Vector2.Distance(p0, p1) < Site.EPSILON;
+		}
+
+		private Site(Vector2 p, uint index, float weight, uint color)
+		{
+			this.Init(p, index, weight, color);
 		}
 
 		private Site Init(Vector2 p, uint index, float weight, uint color)

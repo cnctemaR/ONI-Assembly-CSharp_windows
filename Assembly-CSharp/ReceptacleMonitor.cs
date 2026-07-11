@@ -31,12 +31,10 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		{
 			base.smi.sm.receptacle.Set(null, base.smi);
 			this.replanted = false;
+			return;
 		}
-		else
-		{
-			base.smi.sm.receptacle.Set(plot, base.smi);
-			this.replanted = true;
-		}
+		base.smi.sm.receptacle.Set(plot, base.smi);
+		this.replanted = true;
 	}
 
 	public void Sim1000ms(float dt)
@@ -50,15 +48,14 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		if (component == null)
 		{
 			base.smi.GoTo(base.smi.sm.operational);
+			return;
 		}
-		else if (component.IsOperational)
+		if (component.IsOperational)
 		{
 			base.smi.GoTo(base.smi.sm.operational);
+			return;
 		}
-		else
-		{
-			base.smi.GoTo(base.smi.sm.inoperational);
-		}
+		base.smi.GoTo(base.smi.sm.inoperational);
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -73,7 +70,7 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 	{
 		get
 		{
-			string text = string.Empty;
+			string text = "";
 			if (base.smi.IsInsideState(base.smi.sm.inoperational))
 			{
 				text += CREATURES.STATUSITEMS.RECEPTACLEINOPERATIONAL.NAME;

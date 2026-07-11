@@ -6,12 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A class you can derive from if you want to create objects that don't need to be attached to game objects.</para>
-	/// </summary>
-	[RequiredByNativeCode]
 	[NativeClass(null)]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
+	[RequiredByNativeCode]
+	[ExtensionOfNativeClass]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ScriptableObject : Object
 	{
@@ -20,32 +18,16 @@ namespace UnityEngine
 			ScriptableObject.CreateScriptableObject(this);
 		}
 
-		[NativeConditional("ENABLE_MONO")]
 		[Obsolete("Use EditorUtility.SetDirty instead")]
+		[NativeConditional("ENABLE_MONO")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetDirty();
 
-		/// <summary>
-		///   <para>Creates an instance of a scriptable object.</para>
-		/// </summary>
-		/// <param name="className">The type of the ScriptableObject to create, as the name of the type.</param>
-		/// <param name="type">The type of the ScriptableObject to create, as a System.Type instance.</param>
-		/// <returns>
-		///   <para>The created ScriptableObject.</para>
-		/// </returns>
 		public static ScriptableObject CreateInstance(string className)
 		{
 			return ScriptableObject.CreateScriptableObjectInstanceFromName(className);
 		}
 
-		/// <summary>
-		///   <para>Creates an instance of a scriptable object.</para>
-		/// </summary>
-		/// <param name="className">The type of the ScriptableObject to create, as the name of the type.</param>
-		/// <param name="type">The type of the ScriptableObject to create, as a System.Type instance.</param>
-		/// <returns>
-		///   <para>The created ScriptableObject.</para>
-		/// </returns>
 		public static ScriptableObject CreateInstance(Type type)
 		{
 			return ScriptableObject.CreateScriptableObjectInstanceFromType(type);

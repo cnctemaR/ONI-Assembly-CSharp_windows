@@ -48,7 +48,7 @@ namespace Database
 			}
 			writer.Write((double)this.amountProduced);
 			writer.Write((double)this.amountToProduce);
-			writer.Write((!this.usedDisallowedBuilding) ? 0 : 1);
+			writer.Write(this.usedDisallowedBuilding ? 1 : 0);
 		}
 
 		public override void Deserialize(IReader reader)
@@ -62,7 +62,7 @@ namespace Database
 			}
 			this.amountProduced = (float)reader.ReadDouble();
 			this.amountToProduce = (float)reader.ReadDouble();
-			this.usedDisallowedBuilding = reader.ReadByte() != 0;
+			this.usedDisallowedBuilding = reader.ReadByte() > 0;
 		}
 
 		public float GetProductionAmount(bool complete)
@@ -75,7 +75,11 @@ namespace Database
 					num += keyValuePair.Value;
 				}
 			}
-			return (!complete) ? num : this.amountToProduce;
+			if (!complete)
+			{
+				return num;
+			}
+			return this.amountToProduce;
 		}
 
 		public List<Tag> disallowedBuildings = new List<Tag>();

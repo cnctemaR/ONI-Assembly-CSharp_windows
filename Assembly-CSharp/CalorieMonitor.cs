@@ -59,8 +59,7 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 
 		public bool IsEatTime()
 		{
-			Schedulable component = base.master.GetComponent<Schedulable>();
-			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Eat);
+			return base.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Eat);
 		}
 
 		public bool IsHungry()
@@ -96,8 +95,7 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 
 		public void Kill()
 		{
-			DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
-			if (smi != null)
+			if (base.gameObject.GetSMI<DeathMonitor.Instance>() != null)
 			{
 				base.gameObject.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Starvation);
 			}

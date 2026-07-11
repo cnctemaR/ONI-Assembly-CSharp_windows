@@ -18,11 +18,11 @@ namespace Klei.AI
 				underPopulationDeathRate = new float?(2.6666667f),
 				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(12000f),
-				maxCountPerKG = new float?(500f),
+				maxCountPerKG = new float?((float)500),
 				overPopulationHalfLife = new float?(1200f),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
-				minDiffusionInfestationTickCount = new byte?(1)
+				minDiffusionInfestationTickCount = new byte?((byte)1)
 			});
 			base.AddGrowthRule(new StateGrowthRule(Element.State.Solid)
 			{
@@ -43,7 +43,7 @@ namespace Klei.AI
 					underPopulationDeathRate = new float?(0f),
 					populationHalfLife = new float?(float.PositiveInfinity),
 					overPopulationHalfLife = new float?(3000f),
-					maxCountPerKG = new float?(1000f),
+					maxCountPerKG = new float?((float)1000),
 					diffusionScale = new float?(0.005f)
 				});
 			}
@@ -59,7 +59,7 @@ namespace Klei.AI
 				minCountPerKG = new float?(250f),
 				populationHalfLife = new float?(12000f),
 				overPopulationHalfLife = new float?(1200f),
-				maxCountPerKG = new float?(10000f),
+				maxCountPerKG = new float?((float)10000),
 				minDiffusionCount = new int?(5100),
 				diffusionScale = new float?(0.005f)
 			});
@@ -89,7 +89,7 @@ namespace Klei.AI
 				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(1200f),
 				overPopulationHalfLife = new float?(300f),
-				maxCountPerKG = new float?(100f),
+				maxCountPerKG = new float?((float)100),
 				diffusionScale = new float?(0.01f)
 			});
 			foreach (SimHashes simHashes3 in new SimHashes[]
@@ -104,7 +104,7 @@ namespace Klei.AI
 				{
 					populationHalfLife = new float?(float.PositiveInfinity),
 					overPopulationHalfLife = new float?(6000f),
-					maxCountPerKG = new float?(1000f),
+					maxCountPerKG = new float?((float)1000),
 					diffusionScale = new float?(0.005f)
 				});
 			}

@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class FilteredStorage
 {
+	public void SetHasMeter(bool has_meter)
+	{
+		this.hasMeter = has_meter;
+	}
+
 	public FilteredStorage(KMonoBehaviour root, Tag[] required_tags, Tag[] forbidden_tags, IUserControlledCapacity capacity_control, bool use_logic_meter, ChoreType fetch_chore_type)
 	{
 		this.root = root;
@@ -20,7 +25,7 @@ public class FilteredStorage
 		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		if (FilteredStorage.capacityStatusItem == null)
 		{
-			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				FilteredStorage filteredStorage = (FilteredStorage)data;
@@ -58,11 +63,6 @@ public class FilteredStorage
 		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
 	}
 
-	public void SetHasMeter(bool has_meter)
-	{
-		this.hasMeter = has_meter;
-	}
-
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
 	{
 		this.OnFilterChanged(this.filterable.GetTags());
@@ -83,7 +83,7 @@ public class FilteredStorage
 		{
 			return;
 		}
-		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
+		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 	}
 
 	public void CleanUp()
@@ -184,12 +184,12 @@ public class FilteredStorage
 
 	private void OnFilterChanged(Tag[] tags)
 	{
-		KBatchedAnimController component = this.root.GetComponent<KBatchedAnimController>();
+		KAnimControllerBase component = this.root.GetComponent<KBatchedAnimController>();
 		bool flag = tags != null && tags.Length != 0;
-		component.TintColour = ((!flag) ? this.noFilterTint : this.filterTint);
+		component.TintColour = (flag ? this.filterTint : this.noFilterTint);
 		if (this.fetchList != null)
 		{
-			this.fetchList.Cancel(string.Empty);
+			this.fetchList.Cancel("");
 			this.fetchList = null;
 		}
 		float maxCapacityMinusStorageMargin = this.GetMaxCapacityMinusStorageMargin();
@@ -210,7 +210,7 @@ public class FilteredStorage
 	{
 		if (this.logicMeter != null)
 		{
-			this.logicMeter.SetPositionPercent((!on) ? 0f : 1f);
+			this.logicMeter.SetPositionPercent(on ? 1f : 0f);
 		}
 	}
 

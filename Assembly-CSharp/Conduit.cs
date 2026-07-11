@@ -50,8 +50,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		BuildingDef def = base.GetComponent<Building>().Def;
 		if (def != null && def.ThermalConductivity != 1f)
 		{
-			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.AddThermalConductivity(Grid.PosToCell(base.transform.GetPosition()), def.ThermalConductivity);
+			this.GetFlowVisualizer().AddThermalConductivity(Grid.PosToCell(base.transform.GetPosition()), def.ThermalConductivity);
 		}
 	}
 
@@ -62,8 +61,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 		BuildingDef def = base.GetComponent<Building>().Def;
 		if (def != null && def.ThermalConductivity != 1f)
 		{
-			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.RemoveThermalConductivity(Grid.PosToCell(base.transform.GetPosition()), def.ThermalConductivity);
+			this.GetFlowVisualizer().RemoveThermalConductivity(Grid.PosToCell(base.transform.GetPosition()), def.ThermalConductivity);
 		}
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		this.GetNetworkManager().RemoveFromNetworks(num, this, false);
@@ -78,27 +76,47 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	private ConduitFlowVisualizer GetFlowVisualizer()
 	{
-		return (this.type != ConduitType.Gas) ? Game.Instance.liquidFlowVisualizer : Game.Instance.gasFlowVisualizer;
+		if (this.type != ConduitType.Gas)
+		{
+			return Game.Instance.liquidFlowVisualizer;
+		}
+		return Game.Instance.gasFlowVisualizer;
 	}
 
 	public IUtilityNetworkMgr GetNetworkManager()
 	{
-		return (this.type != ConduitType.Gas) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem;
+		if (this.type != ConduitType.Gas)
+		{
+			return Game.Instance.liquidConduitSystem;
+		}
+		return Game.Instance.gasConduitSystem;
 	}
 
 	public ConduitFlow GetFlowManager()
 	{
-		return (this.type != ConduitType.Gas) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow;
+		if (this.type != ConduitType.Gas)
+		{
+			return Game.Instance.liquidConduitFlow;
+		}
+		return Game.Instance.gasConduitFlow;
 	}
 
 	public static ConduitFlow GetFlowManager(ConduitType type)
 	{
-		return (type != ConduitType.Gas) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow;
+		if (type != ConduitType.Gas)
+		{
+			return Game.Instance.liquidConduitFlow;
+		}
+		return Game.Instance.gasConduitFlow;
 	}
 
 	public static IUtilityNetworkMgr GetNetworkManager(ConduitType type)
 	{
-		return (type != ConduitType.Gas) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem;
+		if (type != ConduitType.Gas)
+		{
+			return Game.Instance.liquidConduitSystem;
+		}
+		return Game.Instance.gasConduitSystem;
 	}
 
 	public void AddNetworks(ICollection<UtilityNetwork> networks)
@@ -123,10 +141,8 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	private void OnHighlighted(object data)
 	{
-		bool flag = (bool)data;
-		int num = ((!flag) ? (-1) : Grid.PosToCell(base.transform.GetPosition()));
-		ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-		flowVisualizer.SetHighlightedCell(num);
+		int num = (((bool)data) ? Grid.PosToCell(base.transform.GetPosition()) : (-1));
+		this.GetFlowVisualizer().SetHighlightedCell(num);
 	}
 
 	private void OnConduitFrozen(object data)
@@ -136,8 +152,8 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 			damage = 1,
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_FROZE,
 			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_FROZE,
-			takeDamageEffect = ((this.ConduitType != ConduitType.Gas) ? SpawnFXHashes.BuildingFreeze : SpawnFXHashes.BuildingLeakLiquid),
-			fullDamageEffectName = ((this.ConduitType != ConduitType.Gas) ? "ice_damage_kanim" : "water_damage_kanim")
+			takeDamageEffect = ((this.ConduitType == ConduitType.Gas) ? SpawnFXHashes.BuildingLeakLiquid : SpawnFXHashes.BuildingFreeze),
+			fullDamageEffectName = ((this.ConduitType == ConduitType.Gas) ? "water_damage_kanim" : "ice_damage_kanim")
 		});
 		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.GetPosition()));
 	}

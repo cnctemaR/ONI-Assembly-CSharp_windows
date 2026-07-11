@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
+using Unity;
 
 namespace System.Security.Cryptography.Xml
 {
@@ -15,6 +17,7 @@ namespace System.Security.Cryptography.Xml
 			this.m_signature = new Signature();
 			this.m_signature.SignedInfo = new SignedInfo();
 			this.hashes = new Hashtable(2);
+			this._context = null;
 		}
 
 		public SignedXml(XmlDocument document)
@@ -25,6 +28,7 @@ namespace System.Security.Cryptography.Xml
 				throw new ArgumentNullException("document");
 			}
 			this.envdoc = document;
+			this._context = document.DocumentElement;
 		}
 
 		public SignedXml(XmlElement elem)
@@ -35,6 +39,7 @@ namespace System.Security.Cryptography.Xml
 				throw new ArgumentNullException("elem");
 			}
 			this.envdoc = new XmlDocument();
+			this._context = elem;
 			this.envdoc.LoadXml(elem.OuterXml);
 		}
 
@@ -131,6 +136,23 @@ namespace System.Security.Cryptography.Xml
 			}
 		}
 
+		public XmlResolver Resolver
+		{
+			set
+			{
+				this._xmlResolver = value;
+				this._bResolverSet = true;
+			}
+		}
+
+		internal bool ResolverSet
+		{
+			get
+			{
+				return this._bResolverSet;
+			}
+		}
+
 		public void AddObject(DataObject dataObject)
 		{
 			this.m_signature.AddObject(dataObject);
@@ -197,13 +219,13 @@ namespace System.Security.Cryptography.Xml
 					{
 						throw new CryptographicException("Manifest targeted by Reference was not found: " + r.Uri.Substring(1));
 					}
-					xmlDocument.LoadXml(idElement.OuterXml);
+					xmlDocument.AppendChild(xmlDocument.ImportNode(idElement, true));
 					this.FixupNamespaceNodes(idElement, xmlDocument.DocumentElement, false);
 				}
 			}
-			else if (this.xmlResolver != null)
+			else if (this._xmlResolver != null)
 			{
-				Stream stream = (Stream)this.xmlResolver.GetEntity(new Uri(r.Uri), null, typeof(Stream));
+				Stream stream = (Stream)this._xmlResolver.GetEntity(new Uri(r.Uri), null, typeof(Stream));
 				xmlDocument.Load(stream);
 			}
 			if (xmlDocument.FirstChild != null)
@@ -223,12 +245,9 @@ namespace System.Security.Cryptography.Xml
 			foreach (object obj in src.SelectNodes("namespace::*"))
 			{
 				XmlAttribute xmlAttribute = (XmlAttribute)obj;
-				if (!(xmlAttribute.LocalName == "xml"))
+				if (!(xmlAttribute.LocalName == "xml") && (!ignoreDefault || !(xmlAttribute.LocalName == "xmlns")))
 				{
-					if (!ignoreDefault || !(xmlAttribute.LocalName == "xmlns"))
-					{
-						dst.SetAttributeNode(dst.OwnerDocument.ImportNode(xmlAttribute, true) as XmlAttribute);
-					}
+					dst.SetAttributeNode(dst.OwnerDocument.ImportNode(xmlAttribute, true) as XmlAttribute);
 				}
 			}
 		}
@@ -252,7 +271,7 @@ namespace System.Security.Cryptography.Xml
 				string text = null;
 				if (r.Uri.StartsWith("#xpointer"))
 				{
-					string text2 = string.Join(string.Empty, r.Uri.Substring(9).Split(SignedXml.whitespaceChars));
+					string text2 = string.Join("", r.Uri.Substring(9).Split(SignedXml.whitespaceChars));
 					if (text2.Length < 2 || text2[0] != '(' || text2[text2.Length - 1] != ')')
 					{
 						text2 = string.Empty;
@@ -274,12 +293,12 @@ namespace System.Security.Cryptography.Xml
 				{
 					text = r.Uri.Substring(1);
 				}
-				else if (this.xmlResolver != null)
+				else if (this._xmlResolver != null)
 				{
 					try
 					{
 						Uri uri = new Uri(r.Uri);
-						stream = (Stream)this.xmlResolver.GetEntity(uri, null, typeof(Stream));
+						stream = (Stream)this._xmlResolver.GetEntity(uri, null, typeof(Stream));
 					}
 					catch
 					{
@@ -296,16 +315,20 @@ namespace System.Security.Cryptography.Xml
 						{
 							xmlElement = dataObject.GetXml();
 							xmlElement.SetAttribute("xmlns", "http://www.w3.org/2000/09/xmldsig#");
-							xmlDocument.LoadXml(xmlElement.OuterXml);
-							foreach (object obj2 in xmlElement.ChildNodes)
+							xmlDocument.AppendChild(xmlDocument.ImportNode(xmlElement, true));
+							using (IEnumerator enumerator2 = xmlElement.ChildNodes.GetEnumerator())
 							{
-								XmlNode xmlNode = (XmlNode)obj2;
-								if (xmlNode.NodeType == XmlNodeType.Element)
+								while (enumerator2.MoveNext())
 								{
-									this.FixupNamespaceNodes(xmlNode as XmlElement, xmlDocument.DocumentElement, true);
+									object obj2 = enumerator2.Current;
+									XmlNode xmlNode = (XmlNode)obj2;
+									if (xmlNode.NodeType == XmlNodeType.Element)
+									{
+										this.FixupNamespaceNodes(xmlNode as XmlElement, xmlDocument.DocumentElement, true);
+									}
 								}
+								break;
 							}
-							break;
 						}
 					}
 					if (xmlElement == null && this.envdoc != null)
@@ -313,7 +336,8 @@ namespace System.Security.Cryptography.Xml
 						xmlElement = this.GetIdElement(this.envdoc, text);
 						if (xmlElement != null)
 						{
-							xmlDocument.LoadXml(xmlElement.OuterXml);
+							xmlDocument.AppendChild(xmlDocument.ImportNode(xmlElement, true));
+							this.FixupNamespaceNodes(xmlElement, xmlDocument.DocumentElement, false);
 						}
 					}
 					if (xmlElement == null)
@@ -324,29 +348,34 @@ namespace System.Security.Cryptography.Xml
 			}
 			if (r.TransformChain.Count > 0)
 			{
-				foreach (object obj3 in r.TransformChain)
+				using (IEnumerator enumerator = r.TransformChain.GetEnumerator())
 				{
-					Transform transform = (Transform)obj3;
-					if (stream == null)
+					while (enumerator.MoveNext())
 					{
-						stream = this.ApplyTransform(transform, xmlDocument);
-					}
-					else
-					{
-						transform.LoadInput(stream);
-						object output = transform.GetOutput();
-						if (output is Stream)
+						object obj3 = enumerator.Current;
+						Transform transform = (Transform)obj3;
+						if (stream == null)
 						{
-							stream = (Stream)output;
+							stream = this.ApplyTransform(transform, xmlDocument);
 						}
 						else
 						{
-							stream = this.CanonicalizeOutput(output);
+							transform.LoadInput(stream);
+							object output = transform.GetOutput();
+							if (output is Stream)
+							{
+								stream = (Stream)output;
+							}
+							else
+							{
+								stream = this.CanonicalizeOutput(output);
+							}
 						}
 					}
+					goto IL_0383;
 				}
 			}
-			else if (stream == null)
+			if (stream == null)
 			{
 				if (r.Uri[0] != '#')
 				{
@@ -358,8 +387,13 @@ namespace System.Security.Cryptography.Xml
 					stream = this.ApplyTransform(new XmlDsigC14NTransform(), xmlDocument);
 				}
 			}
+			IL_0383:
 			HashAlgorithm hash = this.GetHash(r.DigestMethod, check_hmac);
-			return (hash != null) ? hash.ComputeHash(stream) : null;
+			if (hash != null)
+			{
+				return hash.ComputeHash(stream);
+			}
+			return null;
 		}
 
 		private void DigestReferences()
@@ -398,12 +432,9 @@ namespace System.Security.Cryptography.Xml
 					foreach (object obj in this.envdoc.DocumentElement.SelectNodes("namespace::*"))
 					{
 						XmlAttribute xmlAttribute = (XmlAttribute)obj;
-						if (!(xmlAttribute.LocalName == "xml"))
+						if (!(xmlAttribute.LocalName == "xml") && !(xmlAttribute.Prefix == xmlDocument.DocumentElement.Prefix))
 						{
-							if (!(xmlAttribute.Prefix == xmlDocument.DocumentElement.Prefix))
-							{
-								xmlDocument.DocumentElement.SetAttributeNode(xmlDocument.ImportNode(xmlAttribute, true) as XmlAttribute);
-							}
+							xmlDocument.DocumentElement.SetAttributeNode(xmlDocument.ImportNode(xmlAttribute, true) as XmlAttribute);
 						}
 					}
 				}
@@ -415,30 +446,21 @@ namespace System.Security.Cryptography.Xml
 				StringWriter stringWriter = new StringWriter();
 				XmlTextWriter xmlTextWriter = new XmlTextWriter(stringWriter);
 				xmlTextWriter.WriteStartElement(xmlElement.Prefix, xmlElement.LocalName, xmlElement.NamespaceURI);
-				XmlNodeList xmlNodeList = xmlElement.SelectNodes("namespace::*");
-				foreach (object obj2 in xmlNodeList)
+				foreach (object obj2 in xmlElement.SelectNodes("namespace::*"))
 				{
 					XmlAttribute xmlAttribute2 = (XmlAttribute)obj2;
-					if (xmlAttribute2.ParentNode != xmlElement)
+					if (xmlAttribute2.ParentNode != xmlElement && !(xmlAttribute2.LocalName == "xml") && !(xmlAttribute2.Prefix == xmlElement.Prefix))
 					{
-						if (!(xmlAttribute2.LocalName == "xml"))
-						{
-							if (!(xmlAttribute2.Prefix == xmlElement.Prefix))
-							{
-								xmlAttribute2.WriteTo(xmlTextWriter);
-							}
-						}
+						xmlAttribute2.WriteTo(xmlTextWriter);
 					}
 				}
 				foreach (object obj3 in xmlElement.Attributes)
 				{
-					XmlNode xmlNode = (XmlNode)obj3;
-					xmlNode.WriteTo(xmlTextWriter);
+					((XmlNode)obj3).WriteTo(xmlTextWriter);
 				}
 				foreach (object obj4 in xmlElement.ChildNodes)
 				{
-					XmlNode xmlNode2 = (XmlNode)obj4;
-					xmlNode2.WriteTo(xmlTextWriter);
+					((XmlNode)obj4).WriteTo(xmlTextWriter);
 				}
 				xmlTextWriter.WriteEndElement();
 				byte[] bytes = Encoding.UTF8.GetBytes(stringWriter.ToString());
@@ -521,12 +543,8 @@ namespace System.Security.Cryptography.Xml
 				{
 					return null;
 				}
-				while ((key = this.GetPublicKey()) != null)
+				while ((key = this.GetPublicKey()) != null && !this.CheckSignatureWithKey(key))
 				{
-					if (this.CheckSignatureWithKey(key))
-					{
-						break;
-					}
 				}
 				this.pkEnumerator = null;
 				if (key == null)
@@ -661,37 +679,39 @@ namespace System.Security.Cryptography.Xml
 
 		public void ComputeSignature()
 		{
-			if (this.key != null)
+			this.DigestReferences();
+			if (this.key == null)
 			{
-				if (this.m_signature.SignedInfo.SignatureMethod == null)
-				{
-					this.m_signature.SignedInfo.SignatureMethod = this.key.SignatureAlgorithm;
-				}
-				else if (this.m_signature.SignedInfo.SignatureMethod != this.key.SignatureAlgorithm)
-				{
-					throw new CryptographicException("Specified SignatureAlgorithm is not supported by the signing key.");
-				}
-				this.DigestReferences();
-				AsymmetricSignatureFormatter asymmetricSignatureFormatter = null;
+				throw new CryptographicException("Signing key is not loaded.");
+			}
+			if (this.SignedInfo.SignatureMethod == null)
+			{
 				if (this.key is DSA)
 				{
-					asymmetricSignatureFormatter = new DSASignatureFormatter(this.key);
+					this.SignedInfo.SignatureMethod = "http://www.w3.org/2000/09/xmldsig#dsa-sha1";
 				}
-				else if (this.key is RSA)
+				else
 				{
-					asymmetricSignatureFormatter = new RSAPKCS1SignatureFormatter(this.key);
+					if (!(this.key is RSA))
+					{
+						throw new CryptographicException("Failed to create signing key.");
+					}
+					this.SignedInfo.SignatureMethod = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
 				}
-				if (asymmetricSignatureFormatter != null)
-				{
-					SignatureDescription signatureDescription = (SignatureDescription)CryptoConfig.CreateFromName(this.m_signature.SignedInfo.SignatureMethod);
-					HashAlgorithm hash = this.GetHash(signatureDescription.DigestAlgorithm, false);
-					byte[] array = hash.ComputeHash(this.SignedInfoTransformed());
-					asymmetricSignatureFormatter.SetHashAlgorithm("SHA1");
-					this.m_signature.SignatureValue = asymmetricSignatureFormatter.CreateSignature(array);
-				}
-				return;
 			}
-			throw new CryptographicException("signing key is not specified");
+			SignatureDescription signatureDescription = CryptoConfig.CreateFromName(this.SignedInfo.SignatureMethod) as SignatureDescription;
+			if (signatureDescription == null)
+			{
+				throw new CryptographicException("SignatureDescription could not be created for the signature algorithm supplied.");
+			}
+			HashAlgorithm hashAlgorithm = signatureDescription.CreateDigest();
+			if (hashAlgorithm == null)
+			{
+				throw new CryptographicException("Could not create hash algorithm object.");
+			}
+			hashAlgorithm.ComputeHash(this.SignedInfoTransformed());
+			AsymmetricSignatureFormatter asymmetricSignatureFormatter = signatureDescription.CreateFormatter(this.key);
+			this.m_signature.SignatureValue = asymmetricSignatureFormatter.CreateSignature(hashAlgorithm);
 		}
 
 		public void ComputeSignature(KeyedHashAlgorithm macAlg)
@@ -740,8 +760,73 @@ namespace System.Security.Cryptography.Xml
 			if (xmlElement == null)
 			{
 				xmlElement = (XmlElement)document.SelectSingleNode("//*[@Id='" + idValue + "']");
+				if (xmlElement == null)
+				{
+					xmlElement = (XmlElement)document.SelectSingleNode("//*[@ID='" + idValue + "']");
+					if (xmlElement == null)
+					{
+						xmlElement = (XmlElement)document.SelectSingleNode("//*[@id='" + idValue + "']");
+					}
+				}
 			}
 			return xmlElement;
+		}
+
+		internal static XmlElement DefaultGetIdElement(XmlDocument document, string idValue)
+		{
+			if (document == null)
+			{
+				return null;
+			}
+			try
+			{
+				XmlConvert.VerifyNCName(idValue);
+			}
+			catch
+			{
+				return null;
+			}
+			XmlElement xmlElement = document.GetElementById(idValue);
+			if (xmlElement != null)
+			{
+				XmlDocument xmlDocument = (XmlDocument)document.CloneNode(true);
+				XmlElement elementById = xmlDocument.GetElementById(idValue);
+				if (elementById != null)
+				{
+					elementById.Attributes.RemoveAll();
+					if (xmlDocument.GetElementById(idValue) != null)
+					{
+						throw new CryptographicException("Malformed reference element.");
+					}
+				}
+				return xmlElement;
+			}
+			xmlElement = SignedXml.GetSingleReferenceTarget(document, "Id", idValue);
+			if (xmlElement != null)
+			{
+				return xmlElement;
+			}
+			xmlElement = SignedXml.GetSingleReferenceTarget(document, "id", idValue);
+			if (xmlElement != null)
+			{
+				return xmlElement;
+			}
+			return SignedXml.GetSingleReferenceTarget(document, "ID", idValue);
+		}
+
+		private static XmlElement GetSingleReferenceTarget(XmlDocument document, string idAttributeName, string idValue)
+		{
+			string text = string.Concat(new string[] { "//*[@", idAttributeName, "=\"", idValue, "\"]" });
+			XmlNodeList xmlNodeList = document.SelectNodes(text);
+			if (xmlNodeList == null || xmlNodeList.Count == 0)
+			{
+				return null;
+			}
+			if (xmlNodeList.Count == 1)
+			{
+				return xmlNodeList[0] as XmlElement;
+			}
+			throw new CryptographicException("Malformed reference element.");
 		}
 
 		protected virtual AsymmetricAlgorithm GetPublicKey()
@@ -758,8 +843,7 @@ namespace System.Security.Cryptography.Xml
 			{
 				if (this._x509Enumerator.MoveNext())
 				{
-					X509Certificate x509Certificate = (X509Certificate)this._x509Enumerator.Current;
-					return new X509Certificate2(x509Certificate.GetRawCertData()).PublicKey.Key;
+					return new X509Certificate2(((X509Certificate)this._x509Enumerator.Current).GetRawCertData()).PublicKey.Key;
 				}
 				this._x509Enumerator = null;
 			}
@@ -785,8 +869,7 @@ namespace System.Security.Cryptography.Xml
 					this._x509Enumerator = ((KeyInfoX509Data)keyInfoClause).Certificates.GetEnumerator();
 					if (this._x509Enumerator.MoveNext())
 					{
-						X509Certificate x509Certificate2 = (X509Certificate)this._x509Enumerator.Current;
-						return new X509Certificate2(x509Certificate2.GetRawCertData()).PublicKey.Key;
+						return new X509Certificate2(((X509Certificate)this._x509Enumerator.Current).GetRawCertData()).PublicKey.Key;
 					}
 				}
 			}
@@ -806,10 +889,13 @@ namespace System.Security.Cryptography.Xml
 			}
 			this.signatureElement = value;
 			this.m_signature.LoadXml(value);
+			if (this._context == null)
+			{
+				this._context = value;
+			}
 			foreach (object obj in this.m_signature.SignedInfo.References)
 			{
-				Reference reference = (Reference)obj;
-				foreach (object obj2 in reference.TransformChain)
+				foreach (object obj2 in ((Reference)obj).TransformChain)
 				{
 					Transform transform = (Transform)obj2;
 					if (transform is XmlDecryptionTransform)
@@ -820,48 +906,73 @@ namespace System.Security.Cryptography.Xml
 			}
 		}
 
-		[ComVisible(false)]
-		public XmlResolver Resolver
+		public Collection<string> SafeCanonicalizationMethods
 		{
-			set
+			get
 			{
-				this.xmlResolver = value;
+				ThrowStub.ThrowNotSupportedException();
+				return 0;
 			}
 		}
+
+		public Func<SignedXml, bool> SignatureFormatValidator
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return 0;
+			}
+			set
+			{
+				ThrowStub.ThrowNotSupportedException();
+			}
+		}
+
+		public const string XmlDsigNamespaceUrl = "http://www.w3.org/2000/09/xmldsig#";
+
+		public const string XmlDsigMinimalCanonicalizationUrl = "http://www.w3.org/2000/09/xmldsig#minimal";
 
 		public const string XmlDsigCanonicalizationUrl = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
 
 		public const string XmlDsigCanonicalizationWithCommentsUrl = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
 
+		public const string XmlDsigSHA1Url = "http://www.w3.org/2000/09/xmldsig#sha1";
+
 		public const string XmlDsigDSAUrl = "http://www.w3.org/2000/09/xmldsig#dsa-sha1";
-
-		public const string XmlDsigHMACSHA1Url = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
-
-		public const string XmlDsigMinimalCanonicalizationUrl = "http://www.w3.org/2000/09/xmldsig#minimal";
-
-		public const string XmlDsigNamespaceUrl = "http://www.w3.org/2000/09/xmldsig#";
 
 		public const string XmlDsigRSASHA1Url = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
 
-		public const string XmlDsigSHA1Url = "http://www.w3.org/2000/09/xmldsig#sha1";
+		public const string XmlDsigHMACSHA1Url = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
 
-		public const string XmlDecryptionTransformUrl = "http://www.w3.org/2002/07/decrypt#XML";
+		public const string XmlDsigSHA256Url = "http://www.w3.org/2001/04/xmlenc#sha256";
 
-		public const string XmlDsigBase64TransformUrl = "http://www.w3.org/2000/09/xmldsig#base64";
+		public const string XmlDsigRSASHA256Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+
+		public const string XmlDsigSHA384Url = "http://www.w3.org/2001/04/xmldsig-more#sha384";
+
+		public const string XmlDsigRSASHA384Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
+
+		public const string XmlDsigSHA512Url = "http://www.w3.org/2001/04/xmlenc#sha512";
+
+		public const string XmlDsigRSASHA512Url = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
 		public const string XmlDsigC14NTransformUrl = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
 
 		public const string XmlDsigC14NWithCommentsTransformUrl = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
 
-		public const string XmlDsigEnvelopedSignatureTransformUrl = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
-
 		public const string XmlDsigExcC14NTransformUrl = "http://www.w3.org/2001/10/xml-exc-c14n#";
 
 		public const string XmlDsigExcC14NWithCommentsTransformUrl = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
 
+		public const string XmlDsigBase64TransformUrl = "http://www.w3.org/2000/09/xmldsig#base64";
+
 		public const string XmlDsigXPathTransformUrl = "http://www.w3.org/TR/1999/REC-xpath-19991116";
 
 		public const string XmlDsigXsltTransformUrl = "http://www.w3.org/TR/1999/REC-xslt-19991116";
+
+		public const string XmlDsigEnvelopedSignatureTransformUrl = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
+
+		public const string XmlDecryptionTransformUrl = "http://www.w3.org/2002/07/decrypt#XML";
 
 		public const string XmlLicenseTransformUrl = "urn:mpeg:mpeg21:2003:01-REL-R-NS:licenseTransform";
 
@@ -881,7 +992,11 @@ namespace System.Security.Cryptography.Xml
 
 		private Hashtable hashes;
 
-		private XmlResolver xmlResolver = new XmlUrlResolver();
+		internal XmlResolver _xmlResolver = new XmlUrlResolver();
+
+		private bool _bResolverSet = true;
+
+		internal XmlElement _context;
 
 		private ArrayList manifests;
 

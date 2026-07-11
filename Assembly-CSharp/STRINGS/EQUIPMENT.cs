@@ -110,7 +110,7 @@ namespace STRINGS
 
 				public static LocString GENERICNAME = "Equipment";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = "Allows Duplicants to breathe in hazardous environments.\n\nDoes not work when submerged in <style=\"liquid\">Liquid</style>.";
 
@@ -123,7 +123,7 @@ namespace STRINGS
 
 				public static LocString GENERICNAME = "Equipment";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = "Allows Duplicants to breathe while submerged in <style=\"liquid\">Liquid</style>.\n\nDoes not work outside of liquid.";
 

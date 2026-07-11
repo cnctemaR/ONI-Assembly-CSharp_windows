@@ -16,8 +16,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 		}
 		GameObject gameObject = EntityTemplates.CreateEntity("GeyserGeneric", "Random Geyser Spawner", true);
 		gameObject.AddOrGet<SaveLoadRoot>();
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.prefabInitFn += delegate(GameObject inst)
+		gameObject.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
 			int num = 0;
 			if (SaveLoader.Instance.worldDetailSave != null)
@@ -29,10 +28,8 @@ public class GeyserGenericConfig : IMultiEntityConfig
 				global::Debug.LogWarning("Could not load global world seed for geysers");
 			}
 			num = num + (int)inst.transform.GetPosition().x + (int)inst.transform.GetPosition().y;
-			global::System.Random random = new global::System.Random(num);
-			int num2 = random.Next(0, configs.Count);
-			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(configs[num2].id), inst.transform.GetPosition(), Grid.SceneLayer.BuildingBack, null, 0);
-			gameObject2.SetActive(true);
+			int num2 = new global::System.Random(num).Next(0, configs.Count);
+			GameUtil.KInstantiate(Assets.GetPrefab(configs[num2].id), inst.transform.GetPosition(), Grid.SceneLayer.BuildingBack, null, 0).SetActive(true);
 			inst.DeleteObject();
 		};
 		list.Add(gameObject);
@@ -42,17 +39,17 @@ public class GeyserGenericConfig : IMultiEntityConfig
 	public GameObject CreateGeyser(string id, string anim, int width, int height, string name, string desc, HashedString presetType)
 	{
 		float num = 2000f;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim), "inactive", Grid.SceneLayer.BuildingBack, width, height, BUILDINGS.DECOR.BONUS.TIER1, NOISE_POLLUTION.NOISY.TIER6, SimHashes.Creature, null, 293f);
+		EffectorValues tier = BUILDINGS.DECOR.BONUS.TIER1;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER6;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim), "inactive", Grid.SceneLayer.BuildingBack, width, height, tier, tier2, SimHashes.Creature, null, 293f);
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Katairite);
 		component.Temperature = 372.15f;
 		gameObject.AddOrGet<Prioritizable>();
 		gameObject.AddOrGet<Uncoverable>();
-		Geyser geyser = gameObject.AddOrGet<Geyser>();
-		geyser.outputOffset = new Vector2I(0, 1);
-		GeyserConfigurator geyserConfigurator = gameObject.AddOrGet<GeyserConfigurator>();
-		geyserConfigurator.presetType = presetType;
+		gameObject.AddOrGet<Geyser>().outputOffset = new Vector2I(0, 1);
+		gameObject.AddOrGet<GeyserConfigurator>().presetType = presetType;
 		Studyable studyable = gameObject.AddOrGet<Studyable>();
 		studyable.meterTrackerSymbol = "geotracker_target";
 		studyable.meterAnim = "tracker";

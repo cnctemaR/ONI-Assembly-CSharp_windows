@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	[Serializable]
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbError
 	{
 		internal OleDbError()
@@ -13,7 +14,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -21,7 +22,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -29,7 +30,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -37,14 +38,13 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
-		[MonoTODO]
 		public override string ToString()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 	}
 }

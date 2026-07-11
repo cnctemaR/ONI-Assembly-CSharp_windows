@@ -1,30 +1,36 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Xml.Schema
 {
 	public sealed class XmlSchemaCollectionEnumerator : IEnumerator
 	{
-		internal XmlSchemaCollectionEnumerator(ICollection col)
+		internal XmlSchemaCollectionEnumerator(Hashtable collection)
 		{
-			this.xenum = col.GetEnumerator();
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			return this.xenum.MoveNext();
+			this.enumerator = collection.GetEnumerator();
 		}
 
 		void IEnumerator.Reset()
 		{
-			this.xenum.Reset();
+			this.enumerator.Reset();
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			return this.enumerator.MoveNext();
+		}
+
+		public bool MoveNext()
+		{
+			return this.enumerator.MoveNext();
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				return this.xenum.Current;
+				return this.Current;
 			}
 		}
 
@@ -32,15 +38,28 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return (XmlSchema)this.xenum.Current;
+				XmlSchemaCollectionNode xmlSchemaCollectionNode = (XmlSchemaCollectionNode)this.enumerator.Value;
+				if (xmlSchemaCollectionNode != null)
+				{
+					return xmlSchemaCollectionNode.Schema;
+				}
+				return null;
 			}
 		}
 
-		public bool MoveNext()
+		internal XmlSchemaCollectionNode CurrentNode
 		{
-			return this.xenum.MoveNext();
+			get
+			{
+				return (XmlSchemaCollectionNode)this.enumerator.Value;
+			}
 		}
 
-		private IEnumerator xenum;
+		internal XmlSchemaCollectionEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		private IDictionaryEnumerator enumerator;
 	}
 }

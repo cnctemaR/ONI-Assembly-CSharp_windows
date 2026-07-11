@@ -7,24 +7,23 @@ namespace Klei
 {
 	public static class YamlIO
 	{
-		public static void Save<T>(T some_object, string filename, List<Tuple<string, Type>> tagMappings = null)
+		public static void Save<T>(T some_object, string filename, List<global::Tuple<string, Type>> tagMappings = null)
 		{
 			using (StreamWriter streamWriter = new StreamWriter(filename))
 			{
 				SerializerBuilder serializerBuilder = new SerializerBuilder();
 				if (tagMappings != null)
 				{
-					foreach (Tuple<string, Type> tuple in tagMappings)
+					foreach (global::Tuple<string, Type> tuple in tagMappings)
 					{
 						serializerBuilder = serializerBuilder.WithTagMapping(tuple.first, tuple.second);
 					}
 				}
-				Serializer serializer = serializerBuilder.Build();
-				serializer.Serialize(streamWriter, some_object);
+				serializerBuilder.Build().Serialize(streamWriter, some_object);
 			}
 		}
 
-		public static void SaveOrWarnUser<T>(T some_object, string filename, List<Tuple<string, Type>> tagMappings = null)
+		public static void SaveOrWarnUser<T>(T some_object, string filename, List<global::Tuple<string, Type>> tagMappings = null)
 		{
 			FileUtil.DoIODialog(delegate
 			{
@@ -32,51 +31,39 @@ namespace Klei
 			}, filename, 0);
 		}
 
-		public static T LoadFile<T>(FileHandle filehandle, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
+		public static T LoadFile<T>(FileHandle filehandle, YamlIO.ErrorHandler handle_error = null, List<global::Tuple<string, Type>> tagMappings = null)
 		{
 			return YamlIO.Parse<T>(FileSystem.ConvertToText(filehandle.source.ReadBytes(filehandle.full_path)), filehandle, handle_error, tagMappings);
 		}
 
-		public static T LoadFile<T>(string filename, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
+		public static T LoadFile<T>(string filename, YamlIO.ErrorHandler handle_error = null, List<global::Tuple<string, Type>> tagMappings = null)
 		{
-			FileHandle fileHandle = FileSystem.FindFileHandle(filename);
-			return YamlIO.LoadFile<T>(fileHandle, handle_error, tagMappings);
+			return YamlIO.LoadFile<T>(FileSystem.FindFileHandle(filename), handle_error, tagMappings);
 		}
 
 		public static void LogError(YamlIO.Error error, bool force_log_as_warning)
 		{
-			YamlIO.ErrorLogger errorLogger;
-			if (force_log_as_warning || error.severity == YamlIO.Error.Severity.Recoverable)
-			{
-				errorLogger = new YamlIO.ErrorLogger(Debug.LogWarningFormat);
-			}
-			else
-			{
-				errorLogger = new YamlIO.ErrorLogger(Debug.LogErrorFormat);
-			}
-			YamlIO.ErrorLogger errorLogger2 = errorLogger;
+			YamlIO.ErrorLogger errorLogger = ((force_log_as_warning || error.severity == YamlIO.Error.Severity.Recoverable) ? new YamlIO.ErrorLogger(Debug.LogWarningFormat) : new YamlIO.ErrorLogger(Debug.LogErrorFormat));
 			if (error.inner_exception == null)
 			{
-				errorLogger2("{0} parse error in {1}\n{2}", new object[]
+				errorLogger("{0} parse error in {1}\n{2}", new object[]
 				{
 					error.severity,
 					error.file.full_path,
 					error.message
 				});
+				return;
 			}
-			else
+			errorLogger("{0} parse error in {1}\n{2}\n{3}", new object[]
 			{
-				errorLogger2("{0} parse error in {1}\n{2}\n{3}", new object[]
-				{
-					error.severity,
-					error.file.full_path,
-					error.message,
-					error.inner_exception.Message
-				});
-			}
+				error.severity,
+				error.file.full_path,
+				error.message,
+				error.inner_exception.Message
+			});
 		}
 
-		public static T Parse<T>(string readText, FileHandle debugFileHandle, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
+		public static T Parse<T>(string readText, FileHandle debugFileHandle, YamlIO.ErrorHandler handle_error = null, List<global::Tuple<string, Type>> tagMappings = null)
 		{
 			try
 			{
@@ -99,7 +86,7 @@ namespace Klei
 				deserializerBuilder.IgnoreUnmatchedProperties(action);
 				if (tagMappings != null)
 				{
-					foreach (Tuple<string, Type> tuple in tagMappings)
+					foreach (global::Tuple<string, Type> tuple in tagMappings)
 					{
 						deserializerBuilder = deserializerBuilder.WithTagMapping(tuple.first, tuple.second);
 					}

@@ -6,6 +6,16 @@ namespace Satsuma
 {
 	public sealed class Kruskal<TCost> where TCost : IComparable<TCost>
 	{
+		public IGraph Graph { get; private set; }
+
+		public Func<Arc, TCost> Cost { get; private set; }
+
+		public Func<Node, int> MaxDegree { get; private set; }
+
+		public HashSet<Arc> Forest { get; private set; }
+
+		public Dictionary<Node, int> Degree { get; private set; }
+
 		public Kruskal(IGraph graph, Func<Arc, TCost> cost, Func<Node, int> maxDegree = null)
 		{
 			this.Graph = graph;
@@ -27,16 +37,6 @@ namespace Satsuma
 			this.arcsToGo = this.Graph.NodeCount() - new ConnectedComponents(this.Graph, ConnectedComponents.Flags.None).Count;
 			this.components = new DisjointSet<Node>();
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public Func<Arc, TCost> Cost { get; private set; }
-
-		public Func<Node, int> MaxDegree { get; private set; }
-
-		public HashSet<Arc> Forest { get; private set; }
-
-		public Dictionary<Node, int> Degree { get; private set; }
 
 		public bool Step()
 		{
@@ -76,11 +76,14 @@ namespace Satsuma
 			}
 			this.Forest.Add(arc);
 			this.components.Union(disjointSetSet, disjointSetSet2);
-			Dictionary<Node, int> dictionary;
-			Node node3;
-			(dictionary = this.Degree)[node3 = node] = dictionary[node3] + 1;
-			Node node4;
-			(dictionary = this.Degree)[node4 = node2] = dictionary[node4] + 1;
+			Dictionary<Node, int> degree = this.Degree;
+			Node node3 = node;
+			int num = degree[node3];
+			degree[node3] = num + 1;
+			Dictionary<Node, int> degree2 = this.Degree;
+			node3 = node2;
+			num = degree2[node3];
+			degree2[node3] = num + 1;
 			this.arcsToGo--;
 			return true;
 		}

@@ -7,11 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Class for handling 3D Textures, Use this to create.</para>
-	/// </summary>
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/Texture3D.h")]
+	[ExcludeFromPreset]
 	public sealed class Texture3D : Texture
 	{
 		[RequiredByNativeCode]
@@ -23,96 +20,24 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Create a new empty 3D Texture.</para>
-		/// </summary>
-		/// <param name="width">Width of texture in pixels.</param>
-		/// <param name="height">Height of texture in pixels.</param>
-		/// <param name="depth">Depth of texture in pixels.</param>
-		/// <param name="format">Texture data format.</param>
-		/// <param name="mipmap">Should the texture have mipmaps?</param>
-		/// <param name="textureFormat"></param>
-		/// <param name="mipChain"></param>
 		public Texture3D(int width, int height, int depth, TextureFormat textureFormat, bool mipChain)
 		{
-			GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, false);
-			TextureCreationFlags textureCreationFlags = TextureCreationFlags.None;
-			if (mipChain)
+			if (base.ValidateFormat(textureFormat))
 			{
-				textureCreationFlags |= TextureCreationFlags.MipChain;
+				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, false);
+				TextureCreationFlags textureCreationFlags = TextureCreationFlags.None;
+				if (mipChain)
+				{
+					textureCreationFlags |= TextureCreationFlags.MipChain;
+				}
+				if (GraphicsFormatUtility.IsCrunchFormat(textureFormat))
+				{
+					textureCreationFlags |= TextureCreationFlags.Crunch;
+				}
+				Texture3D.Internal_Create(this, width, height, depth, graphicsFormat, textureCreationFlags);
 			}
-			if (GraphicsFormatUtility.IsCrunchFormat(textureFormat))
-			{
-				textureCreationFlags |= TextureCreationFlags.Crunch;
-			}
-			Texture3D.Internal_Create(this, width, height, depth, graphicsFormat, textureCreationFlags);
 		}
 
-		/// <summary>
-		///   <para>Returns an array of pixel colors representing one mip level of the 3D texture.</para>
-		/// </summary>
-		/// <param name="miplevel"></param>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color[] GetPixels([DefaultValue("0")] int miplevel);
-
-		[ExcludeFromDocs]
-		public Color[] GetPixels()
-		{
-			int num = 0;
-			return this.GetPixels(num);
-		}
-
-		/// <summary>
-		///   <para>Returns an array of pixel colors representing one mip level of the 3D texture.</para>
-		/// </summary>
-		/// <param name="miplevel"></param>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32([DefaultValue("0")] int miplevel);
-
-		[ExcludeFromDocs]
-		public Color32[] GetPixels32()
-		{
-			int num = 0;
-			return this.GetPixels32(num);
-		}
-
-		/// <summary>
-		///   <para>Sets pixel colors of a 3D texture.</para>
-		/// </summary>
-		/// <param name="colors">The colors to set the pixels to.</param>
-		/// <param name="miplevel">The mipmap level to be affected by the new colors.</param>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels(Color[] colors, [DefaultValue("0")] int miplevel);
-
-		[ExcludeFromDocs]
-		public void SetPixels(Color[] colors)
-		{
-			int num = 0;
-			this.SetPixels(colors, num);
-		}
-
-		/// <summary>
-		///   <para>Sets pixel colors of a 3D texture.</para>
-		/// </summary>
-		/// <param name="colors">The colors to set the pixels to.</param>
-		/// <param name="miplevel">The mipmap level to be affected by the new colors.</param>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels32(Color32[] colors, [DefaultValue("0")] int miplevel);
-
-		[ExcludeFromDocs]
-		public void SetPixels32(Color32[] colors)
-		{
-			int num = 0;
-			this.SetPixels32(colors, num);
-		}
-
-		/// <summary>
-		///   <para>The depth of the texture (Read Only).</para>
-		/// </summary>
 		public extern int depth
 		{
 			[NativeName("GetTextureLayerCount")]
@@ -120,9 +45,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The format of the pixel data in the texture (Read Only).</para>
-		/// </summary>
 		public extern TextureFormat format
 		{
 			[NativeName("GetTextureFormat")]
@@ -130,9 +52,11 @@ namespace UnityEngine
 			get;
 		}
 
-		[NativeName("GetIsReadable")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsReadable();
+		public override extern bool isReadable
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
 		[FreeFunction("Texture3DScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -150,14 +74,45 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable);
 
-		/// <summary>
-		///   <para>Actually apply all previous SetPixels changes.</para>
-		/// </summary>
-		/// <param name="updateMipmaps">When set to true, mipmap levels are recalculated.</param>
-		/// <param name="makeNoLongerReadable">When set to true, system memory copy of a texture is released.</param>
+		[FreeFunction(Name = "Texture3DScripting::GetPixels", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern Color[] GetPixels(int miplevel);
+
+		public Color[] GetPixels()
+		{
+			return this.GetPixels(0);
+		}
+
+		[FreeFunction(Name = "Texture3DScripting::GetPixels32", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern Color32[] GetPixels32(int miplevel);
+
+		public Color32[] GetPixels32()
+		{
+			return this.GetPixels32(0);
+		}
+
+		[FreeFunction(Name = "Texture3DScripting::SetPixels", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetPixels(Color[] colors, int miplevel);
+
+		public void SetPixels(Color[] colors)
+		{
+			this.SetPixels(colors, 0);
+		}
+
+		[FreeFunction(Name = "Texture3DScripting::SetPixels32", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetPixels32(Color32[] colors, int miplevel);
+
+		public void SetPixels32(Color32[] colors)
+		{
+			this.SetPixels32(colors, 0);
+		}
+
 		public void Apply([DefaultValue("true")] bool updateMipmaps, [DefaultValue("false")] bool makeNoLongerReadable)
 		{
-			if (!this.IsReadable())
+			if (!this.isReadable)
 			{
 				throw base.CreateNonReadableException(this);
 			}

@@ -42,11 +42,6 @@ namespace System.Security.Permissions
 			}
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 12;
-		}
-
 		public string Name
 		{
 			get
@@ -142,16 +137,18 @@ namespace System.Security.Permissions
 			this._list.Clear();
 			if (e.Children != null && e.Children.Count > 0)
 			{
-				foreach (object obj in e.Children)
+				using (IEnumerator enumerator = e.Children.GetEnumerator())
 				{
-					SecurityElement securityElement = (SecurityElement)obj;
-					this._list.Add(this.FromSecurityElement(securityElement));
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						SecurityElement securityElement = (SecurityElement)obj;
+						this._list.Add(this.FromSecurityElement(securityElement));
+					}
+					return;
 				}
 			}
-			else
-			{
-				this._list.Add(this.FromSecurityElement(e));
-			}
+			this._list.Add(this.FromSecurityElement(e));
 		}
 
 		private StrongNameIdentityPermission.SNIP FromSecurityElement(SecurityElement se)
@@ -159,7 +156,7 @@ namespace System.Security.Permissions
 			string text = se.Attribute("Name");
 			StrongNamePublicKeyBlob strongNamePublicKeyBlob = StrongNamePublicKeyBlob.FromString(se.Attribute("PublicKeyBlob"));
 			string text2 = se.Attribute("AssemblyVersion");
-			Version version = ((text2 != null) ? new Version(text2) : null);
+			Version version = ((text2 == null) ? null : new Version(text2));
 			return new StrongNameIdentityPermission.SNIP(strongNamePublicKeyBlob, text, version);
 		}
 
@@ -182,7 +179,7 @@ namespace System.Security.Permissions
 			{
 				return null;
 			}
-			string text = ((this.Name.Length >= strongNameIdentityPermission.Name.Length) ? strongNameIdentityPermission.Name : this.Name);
+			string text = ((this.Name.Length < strongNameIdentityPermission.Name.Length) ? this.Name : strongNameIdentityPermission.Name);
 			if (!this.Version.Equals(strongNameIdentityPermission.Version))
 			{
 				return null;
@@ -233,15 +230,20 @@ namespace System.Security.Permissions
 			SecurityElement securityElement = base.Element(1);
 			if (this._list.Count > 1)
 			{
-				foreach (object obj in this._list)
+				using (IEnumerator enumerator = this._list.GetEnumerator())
 				{
-					StrongNameIdentityPermission.SNIP snip = (StrongNameIdentityPermission.SNIP)obj;
-					SecurityElement securityElement2 = new SecurityElement("StrongName");
-					this.ToSecurityElement(securityElement2, snip);
-					securityElement.AddChild(securityElement2);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						StrongNameIdentityPermission.SNIP snip = (StrongNameIdentityPermission.SNIP)obj;
+						SecurityElement securityElement2 = new SecurityElement("StrongName");
+						this.ToSecurityElement(securityElement2, snip);
+						securityElement.AddChild(securityElement2);
+					}
+					return securityElement;
 				}
 			}
-			else if (this._list.Count == 1)
+			if (this._list.Count == 1)
 			{
 				StrongNameIdentityPermission.SNIP snip2 = (StrongNameIdentityPermission.SNIP)this._list[0];
 				if (!this.IsEmpty(snip2))
@@ -289,6 +291,11 @@ namespace System.Security.Permissions
 				}
 			}
 			return strongNameIdentityPermission2;
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 12;
 		}
 
 		private bool IsUnrestricted()

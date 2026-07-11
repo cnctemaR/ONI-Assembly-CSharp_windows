@@ -37,8 +37,9 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			if (this.navigator.IsValidNavType(NavType.Floor))
 			{
 				this.navigator.SetCurrentNavType(NavType.Floor);
+				return;
 			}
-			else if (this.navigator.IsValidNavType(NavType.Hover))
+			if (this.navigator.IsValidNavType(NavType.Hover))
 			{
 				this.navigator.SetCurrentNavType(NavType.Hover);
 			}
@@ -52,8 +53,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			}
 			Vector3 position = base.smi.transform.GetPosition();
 			int num = Grid.PosToCell(position);
-			bool flag = Grid.IsValidCell(num) && Grid.Solid[num];
-			if (flag)
+			if (Grid.IsValidCell(num) && Grid.Solid[num])
 			{
 				return false;
 			}
@@ -67,8 +67,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			}
 			if (this.navigator.CurrentNavType != NavType.Swim)
 			{
-				bool flag2 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
-				if (flag2)
+				if (this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType))
 				{
 					return false;
 				}
@@ -88,8 +87,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			Vector3 vector = position;
 			vector.y += CreatureFallMonitor.FLOOR_DISTANCE;
 			int num2 = Grid.PosToCell(vector);
-			bool flag3 = Grid.IsValidCell(num2) && Grid.Solid[num2];
-			return !flag3;
+			return !Grid.IsValidCell(num2) || !Grid.Solid[num2];
 		}
 
 		public bool CanSwimAtCurrentLocation(bool check_head)
@@ -103,8 +101,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 					num = 0.5f;
 				}
 				position.y += base.transform.GetComponent<KBoxCollider2D>().size.y * num;
-				int num2 = Grid.PosToCell(position);
-				if (Grid.IsSubstantialLiquid(num2, 0.35f))
+				if (Grid.IsSubstantialLiquid(Grid.PosToCell(position), 0.35f))
 				{
 					if (!GameComps.Gravities.Has(base.gameObject))
 					{

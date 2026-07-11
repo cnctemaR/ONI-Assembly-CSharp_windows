@@ -11,23 +11,22 @@ namespace KSerialization
 	{
 		public static bool IsUserDefinedType(SerializationTypeInfo type_info)
 		{
-			return (byte)(type_info & SerializationTypeInfo.VALUE_MASK) == 0;
+			return (type_info & SerializationTypeInfo.VALUE_MASK) == SerializationTypeInfo.UserDefined;
 		}
 
 		public static bool IsArray(SerializationTypeInfo type_info)
 		{
-			SerializationTypeInfo serializationTypeInfo = type_info & SerializationTypeInfo.VALUE_MASK;
-			return serializationTypeInfo == SerializationTypeInfo.Array;
+			return (type_info & SerializationTypeInfo.VALUE_MASK) == SerializationTypeInfo.Array;
 		}
 
 		public static bool IsGenericType(SerializationTypeInfo type_info)
 		{
-			return (byte)(type_info & SerializationTypeInfo.IS_GENERIC_TYPE) != 0;
+			return (type_info & SerializationTypeInfo.IS_GENERIC_TYPE) > SerializationTypeInfo.UserDefined;
 		}
 
 		public static bool IsValueType(SerializationTypeInfo type_info)
 		{
-			return (byte)(type_info & SerializationTypeInfo.IS_VALUE_TYPE) != 0;
+			return (type_info & SerializationTypeInfo.IS_VALUE_TYPE) > SerializationTypeInfo.UserDefined;
 		}
 
 		public static SerializationTypeInfo EncodeSerializationType(Type type)
@@ -147,89 +146,86 @@ namespace KSerialization
 
 		public static void WriteValue(this BinaryWriter writer, TypeInfo type_info, object value)
 		{
-			switch ((byte)(type_info.info & SerializationTypeInfo.VALUE_MASK))
+			switch (type_info.info & SerializationTypeInfo.VALUE_MASK)
 			{
-			case 0:
+			case SerializationTypeInfo.UserDefined:
 				if (value != null)
 				{
 					long position = writer.BaseStream.Position;
 					writer.Write(0);
 					long position2 = writer.BaseStream.Position;
-					SerializationTemplate serializationTemplate = Manager.GetSerializationTemplate(type_info.type);
-					serializationTemplate.SerializeData(value, writer);
+					Manager.GetSerializationTemplate(type_info.type).SerializeData(value, writer);
 					long position3 = writer.BaseStream.Position;
 					long num = position3 - position2;
 					writer.BaseStream.Position = position;
 					writer.Write((int)num);
 					writer.BaseStream.Position = position3;
+					return;
 				}
-				else
-				{
-					writer.Write(-1);
-				}
-				break;
-			case 1:
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.SByte:
 				writer.Write((sbyte)value);
-				break;
-			case 2:
+				return;
+			case SerializationTypeInfo.Byte:
 				writer.Write((byte)value);
-				break;
-			case 3:
-				writer.Write((!(bool)value) ? 0 : 1);
-				break;
-			case 4:
+				return;
+			case SerializationTypeInfo.Boolean:
+				writer.Write(((bool)value) ? 1 : 0);
+				return;
+			case SerializationTypeInfo.Int16:
 				writer.Write((short)value);
-				break;
-			case 5:
+				return;
+			case SerializationTypeInfo.UInt16:
 				writer.Write((ushort)value);
-				break;
-			case 6:
+				return;
+			case SerializationTypeInfo.Int32:
 				writer.Write((int)value);
-				break;
-			case 7:
+				return;
+			case SerializationTypeInfo.UInt32:
 				writer.Write((uint)value);
-				break;
-			case 8:
+				return;
+			case SerializationTypeInfo.Int64:
 				writer.Write((long)value);
-				break;
-			case 9:
+				return;
+			case SerializationTypeInfo.UInt64:
 				writer.Write((ulong)value);
-				break;
-			case 10:
+				return;
+			case SerializationTypeInfo.Single:
 				writer.Write((float)value);
-				break;
-			case 11:
+				return;
+			case SerializationTypeInfo.Double:
 				writer.Write((double)value);
-				break;
-			case 12:
+				return;
+			case SerializationTypeInfo.String:
 				writer.WriteKleiString((string)value);
-				break;
-			case 13:
+				return;
+			case SerializationTypeInfo.Enumeration:
 				writer.Write((int)value);
-				break;
-			case 14:
+				return;
+			case SerializationTypeInfo.Vector2I:
 			{
 				Vector2I vector2I = (Vector2I)value;
 				writer.Write(vector2I.x);
 				writer.Write(vector2I.y);
-				break;
+				return;
 			}
-			case 15:
+			case SerializationTypeInfo.Vector2:
 			{
 				Vector2 vector = (Vector2)value;
 				writer.Write(vector.x);
 				writer.Write(vector.y);
-				break;
+				return;
 			}
-			case 16:
+			case SerializationTypeInfo.Vector3:
 			{
 				Vector3 vector2 = (Vector3)value;
 				writer.Write(vector2.x);
 				writer.Write(vector2.y);
 				writer.Write(vector2.z);
-				break;
+				return;
 			}
-			case 17:
+			case SerializationTypeInfo.Array:
 				if (value != null)
 				{
 					Array array = value as Array;
@@ -244,10 +240,10 @@ namespace KSerialization
 					}
 					else if (Helper.IsValueType(typeInfo.info))
 					{
-						SerializationTemplate serializationTemplate2 = Manager.GetSerializationTemplate(typeInfo.type);
+						SerializationTemplate serializationTemplate = Manager.GetSerializationTemplate(typeInfo.type);
 						for (int i = 0; i < array.Length; i++)
 						{
-							serializationTemplate2.SerializeData(array.GetValue(i), writer);
+							serializationTemplate.SerializeData(array.GetValue(i), writer);
 						}
 					}
 					else
@@ -262,14 +258,12 @@ namespace KSerialization
 					writer.BaseStream.Position = position4;
 					writer.Write((int)num2);
 					writer.BaseStream.Position = position6;
+					return;
 				}
-				else
-				{
-					writer.Write(4);
-					writer.Write(-1);
-				}
-				break;
-			case 18:
+				writer.Write(4);
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.Pair:
 				if (value != null)
 				{
 					PropertyInfo property = type_info.type.GetProperty("Key");
@@ -288,14 +282,12 @@ namespace KSerialization
 					writer.BaseStream.Position = position7;
 					writer.Write((int)num3);
 					writer.BaseStream.Position = position9;
+					return;
 				}
-				else
-				{
-					writer.Write(4);
-					writer.Write(-1);
-				}
-				break;
-			case 19:
+				writer.Write(4);
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.Dictionary:
 				if (value != null)
 				{
 					TypeInfo typeInfo4 = type_info.subTypes[0];
@@ -307,53 +299,25 @@ namespace KSerialization
 					writer.Write(0);
 					writer.Write(values.Count);
 					long position11 = writer.BaseStream.Position;
-					IEnumerator enumerator = values.GetEnumerator();
-					try
+					foreach (object obj in values)
 					{
-						while (enumerator.MoveNext())
-						{
-							object obj = enumerator.Current;
-							writer.WriteValue(typeInfo5, obj);
-						}
+						writer.WriteValue(typeInfo5, obj);
 					}
-					finally
+					foreach (object obj2 in keys)
 					{
-						IDisposable disposable;
-						if ((disposable = enumerator as IDisposable) != null)
-						{
-							disposable.Dispose();
-						}
-					}
-					IEnumerator enumerator2 = keys.GetEnumerator();
-					try
-					{
-						while (enumerator2.MoveNext())
-						{
-							object obj2 = enumerator2.Current;
-							writer.WriteValue(typeInfo4, obj2);
-						}
-					}
-					finally
-					{
-						IDisposable disposable2;
-						if ((disposable2 = enumerator2 as IDisposable) != null)
-						{
-							disposable2.Dispose();
-						}
+						writer.WriteValue(typeInfo4, obj2);
 					}
 					long position12 = writer.BaseStream.Position;
 					long num4 = position12 - position11;
 					writer.BaseStream.Position = position10;
 					writer.Write((int)num4);
 					writer.BaseStream.Position = position12;
+					return;
 				}
-				else
-				{
-					writer.Write(4);
-					writer.Write(-1);
-				}
-				break;
-			case 20:
+				writer.Write(4);
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.List:
 				if (value != null)
 				{
 					TypeInfo typeInfo6 = type_info.subTypes[0];
@@ -366,60 +330,38 @@ namespace KSerialization
 					{
 						Helper.WriteListPOD(writer, typeInfo6, collection);
 					}
-					else if (Helper.IsValueType(typeInfo6.info))
-					{
-						SerializationTemplate serializationTemplate3 = Manager.GetSerializationTemplate(typeInfo6.type);
-						IEnumerator enumerator3 = collection.GetEnumerator();
-						try
-						{
-							while (enumerator3.MoveNext())
-							{
-								object obj3 = enumerator3.Current;
-								serializationTemplate3.SerializeData(obj3, writer);
-							}
-						}
-						finally
-						{
-							IDisposable disposable3;
-							if ((disposable3 = enumerator3 as IDisposable) != null)
-							{
-								disposable3.Dispose();
-							}
-						}
-					}
 					else
 					{
-						IEnumerator enumerator4 = collection.GetEnumerator();
-						try
+						if (Helper.IsValueType(typeInfo6.info))
 						{
-							while (enumerator4.MoveNext())
+							SerializationTemplate serializationTemplate2 = Manager.GetSerializationTemplate(typeInfo6.type);
+							using (IEnumerator enumerator = collection.GetEnumerator())
 							{
-								object obj4 = enumerator4.Current;
-								writer.WriteValue(typeInfo6, obj4);
+								while (enumerator.MoveNext())
+								{
+									object obj3 = enumerator.Current;
+									serializationTemplate2.SerializeData(obj3, writer);
+								}
+								goto IL_05A9;
 							}
 						}
-						finally
+						foreach (object obj4 in collection)
 						{
-							IDisposable disposable4;
-							if ((disposable4 = enumerator4 as IDisposable) != null)
-							{
-								disposable4.Dispose();
-							}
+							writer.WriteValue(typeInfo6, obj4);
 						}
 					}
+					IL_05A9:
 					long position15 = writer.BaseStream.Position;
 					long num5 = position15 - position14;
 					writer.BaseStream.Position = position13;
 					writer.Write((int)num5);
 					writer.BaseStream.Position = position15;
+					return;
 				}
-				else
-				{
-					writer.Write(4);
-					writer.Write(-1);
-				}
-				break;
-			case 21:
+				writer.Write(4);
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.HashSet:
 				if (value != null)
 				{
 					TypeInfo typeInfo7 = type_info.subTypes[0];
@@ -431,61 +373,36 @@ namespace KSerialization
 					IEnumerable enumerable = value as IEnumerable;
 					if (Helper.IsValueType(typeInfo7.info))
 					{
-						SerializationTemplate serializationTemplate4 = Manager.GetSerializationTemplate(typeInfo7.type);
-						IEnumerator enumerator5 = enumerable.GetEnumerator();
-						try
+						SerializationTemplate serializationTemplate3 = Manager.GetSerializationTemplate(typeInfo7.type);
+						using (IEnumerator enumerator = enumerable.GetEnumerator())
 						{
-							while (enumerator5.MoveNext())
+							while (enumerator.MoveNext())
 							{
-								object obj5 = enumerator5.Current;
-								serializationTemplate4.SerializeData(obj5, writer);
+								object obj5 = enumerator.Current;
+								serializationTemplate3.SerializeData(obj5, writer);
 								num6++;
 							}
-						}
-						finally
-						{
-							IDisposable disposable5;
-							if ((disposable5 = enumerator5 as IDisposable) != null)
-							{
-								disposable5.Dispose();
-							}
+							goto IL_045F;
 						}
 					}
-					else
+					foreach (object obj6 in enumerable)
 					{
-						IEnumerator enumerator6 = enumerable.GetEnumerator();
-						try
-						{
-							while (enumerator6.MoveNext())
-							{
-								object obj6 = enumerator6.Current;
-								writer.WriteValue(typeInfo7, obj6);
-								num6++;
-							}
-						}
-						finally
-						{
-							IDisposable disposable6;
-							if ((disposable6 = enumerator6 as IDisposable) != null)
-							{
-								disposable6.Dispose();
-							}
-						}
+						writer.WriteValue(typeInfo7, obj6);
+						num6++;
 					}
+					IL_045F:
 					long position18 = writer.BaseStream.Position;
 					long num7 = position18 - position17;
 					writer.BaseStream.Position = position16;
 					writer.Write((int)num7);
 					writer.Write(num6);
 					writer.BaseStream.Position = position18;
+					return;
 				}
-				else
-				{
-					writer.Write(4);
-					writer.Write(-1);
-				}
-				break;
-			case 22:
+				writer.Write(4);
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.Queue:
 				if (value != null)
 				{
 					TypeInfo typeInfo8 = type_info.subTypes[0];
@@ -498,67 +415,45 @@ namespace KSerialization
 					{
 						Helper.WriteListPOD(writer, typeInfo8, collection2);
 					}
-					else if (Helper.IsValueType(typeInfo8.info))
-					{
-						SerializationTemplate serializationTemplate5 = Manager.GetSerializationTemplate(typeInfo8.type);
-						IEnumerator enumerator7 = collection2.GetEnumerator();
-						try
-						{
-							while (enumerator7.MoveNext())
-							{
-								object obj7 = enumerator7.Current;
-								serializationTemplate5.SerializeData(obj7, writer);
-							}
-						}
-						finally
-						{
-							IDisposable disposable7;
-							if ((disposable7 = enumerator7 as IDisposable) != null)
-							{
-								disposable7.Dispose();
-							}
-						}
-					}
 					else
 					{
-						IEnumerator enumerator8 = collection2.GetEnumerator();
-						try
+						if (Helper.IsValueType(typeInfo8.info))
 						{
-							while (enumerator8.MoveNext())
+							SerializationTemplate serializationTemplate4 = Manager.GetSerializationTemplate(typeInfo8.type);
+							using (IEnumerator enumerator = collection2.GetEnumerator())
 							{
-								object obj8 = enumerator8.Current;
-								writer.WriteValue(typeInfo8, obj8);
+								while (enumerator.MoveNext())
+								{
+									object obj7 = enumerator.Current;
+									serializationTemplate4.SerializeData(obj7, writer);
+								}
+								goto IL_08D7;
 							}
 						}
-						finally
+						foreach (object obj8 in collection2)
 						{
-							IDisposable disposable8;
-							if ((disposable8 = enumerator8 as IDisposable) != null)
-							{
-								disposable8.Dispose();
-							}
+							writer.WriteValue(typeInfo8, obj8);
 						}
 					}
+					IL_08D7:
 					long position21 = writer.BaseStream.Position;
 					long num8 = position21 - position20;
 					writer.BaseStream.Position = position19;
 					writer.Write((int)num8);
 					writer.BaseStream.Position = position21;
+					return;
 				}
-				else
-				{
-					writer.Write(4);
-					writer.Write(-1);
-				}
-				break;
-			case 23:
+				writer.Write(4);
+				writer.Write(-1);
+				return;
+			case SerializationTypeInfo.Colour:
 			{
 				Color color = (Color)value;
 				writer.Write((byte)(color.r * 255f));
 				writer.Write((byte)(color.g * 255f));
 				writer.Write((byte)(color.b * 255f));
 				writer.Write((byte)(color.a * 255f));
-				break;
+				return;
 			}
 			default:
 				throw new ArgumentException("Don't know how to serialize type: " + type_info.type.ToString());
@@ -663,214 +558,123 @@ namespace KSerialization
 			{
 			case SerializationTypeInfo.SByte:
 			{
-				IEnumerator enumerator = collection.GetEnumerator();
-				try
+				using (IEnumerator enumerator = collection.GetEnumerator())
 				{
 					while (enumerator.MoveNext())
 					{
 						object obj = enumerator.Current;
 						writer.Write((sbyte)obj);
 					}
-				}
-				finally
-				{
-					IDisposable disposable;
-					if ((disposable = enumerator as IDisposable) != null)
-					{
-						disposable.Dispose();
-					}
+					return;
 				}
 				break;
 			}
 			case SerializationTypeInfo.Byte:
-			{
-				IEnumerator enumerator2 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator2.MoveNext())
-					{
-						object obj2 = enumerator2.Current;
-						writer.Write((byte)obj2);
-					}
-				}
-				finally
-				{
-					IDisposable disposable2;
-					if ((disposable2 = enumerator2 as IDisposable) != null)
-					{
-						disposable2.Dispose();
-					}
-				}
 				break;
-			}
+			case SerializationTypeInfo.Boolean:
+				return;
 			case SerializationTypeInfo.Int16:
-			{
-				IEnumerator enumerator3 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator3.MoveNext())
-					{
-						object obj3 = enumerator3.Current;
-						writer.Write((short)obj3);
-					}
-				}
-				finally
-				{
-					IDisposable disposable3;
-					if ((disposable3 = enumerator3 as IDisposable) != null)
-					{
-						disposable3.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_00B2;
 			case SerializationTypeInfo.UInt16:
-			{
-				IEnumerator enumerator4 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator4.MoveNext())
-					{
-						object obj4 = enumerator4.Current;
-						writer.Write((ushort)obj4);
-					}
-				}
-				finally
-				{
-					IDisposable disposable4;
-					if ((disposable4 = enumerator4 as IDisposable) != null)
-					{
-						disposable4.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_00EE;
 			case SerializationTypeInfo.Int32:
-			{
-				IEnumerator enumerator5 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator5.MoveNext())
-					{
-						object obj5 = enumerator5.Current;
-						writer.Write((int)obj5);
-					}
-				}
-				finally
-				{
-					IDisposable disposable5;
-					if ((disposable5 = enumerator5 as IDisposable) != null)
-					{
-						disposable5.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_012A;
 			case SerializationTypeInfo.UInt32:
-			{
-				IEnumerator enumerator6 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator6.MoveNext())
-					{
-						object obj6 = enumerator6.Current;
-						writer.Write((uint)obj6);
-					}
-				}
-				finally
-				{
-					IDisposable disposable6;
-					if ((disposable6 = enumerator6 as IDisposable) != null)
-					{
-						disposable6.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_0166;
 			case SerializationTypeInfo.Int64:
-			{
-				IEnumerator enumerator7 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator7.MoveNext())
-					{
-						object obj7 = enumerator7.Current;
-						writer.Write((long)obj7);
-					}
-				}
-				finally
-				{
-					IDisposable disposable7;
-					if ((disposable7 = enumerator7 as IDisposable) != null)
-					{
-						disposable7.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_01A2;
 			case SerializationTypeInfo.UInt64:
-			{
-				IEnumerator enumerator8 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator8.MoveNext())
-					{
-						object obj8 = enumerator8.Current;
-						writer.Write((ulong)obj8);
-					}
-				}
-				finally
-				{
-					IDisposable disposable8;
-					if ((disposable8 = enumerator8 as IDisposable) != null)
-					{
-						disposable8.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_01DE;
 			case SerializationTypeInfo.Single:
-			{
-				IEnumerator enumerator9 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator9.MoveNext())
-					{
-						object obj9 = enumerator9.Current;
-						writer.Write((float)obj9);
-					}
-				}
-				finally
-				{
-					IDisposable disposable9;
-					if ((disposable9 = enumerator9 as IDisposable) != null)
-					{
-						disposable9.Dispose();
-					}
-				}
-				break;
-			}
+				goto IL_021A;
 			case SerializationTypeInfo.Double:
-			{
-				IEnumerator enumerator10 = collection.GetEnumerator();
-				try
-				{
-					while (enumerator10.MoveNext())
-					{
-						object obj10 = enumerator10.Current;
-						writer.Write((double)obj10);
-					}
-				}
-				finally
-				{
-					IDisposable disposable10;
-					if ((disposable10 = enumerator10 as IDisposable) != null)
-					{
-						disposable10.Dispose();
-					}
-				}
-				break;
+				goto IL_0253;
+			default:
+				return;
 			}
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj2 = enumerator.Current;
+					writer.Write((byte)obj2);
+				}
+				return;
+			}
+			IL_00B2:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj3 = enumerator.Current;
+					writer.Write((short)obj3);
+				}
+				return;
+			}
+			IL_00EE:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj4 = enumerator.Current;
+					writer.Write((ushort)obj4);
+				}
+				return;
+			}
+			IL_012A:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj5 = enumerator.Current;
+					writer.Write((int)obj5);
+				}
+				return;
+			}
+			IL_0166:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj6 = enumerator.Current;
+					writer.Write((uint)obj6);
+				}
+				return;
+			}
+			IL_01A2:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj7 = enumerator.Current;
+					writer.Write((long)obj7);
+				}
+				return;
+			}
+			IL_01DE:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj8 = enumerator.Current;
+					writer.Write((ulong)obj8);
+				}
+				return;
+			}
+			IL_021A:
+			using (IEnumerator enumerator = collection.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj9 = enumerator.Current;
+					writer.Write((float)obj9);
+				}
+				return;
+			}
+			IL_0253:
+			foreach (object obj10 in collection)
+			{
+				writer.Write((double)obj10);
 			}
 		}
 
@@ -897,21 +701,7 @@ namespace KSerialization
 
 		public static bool IsPOD(SerializationTypeInfo info)
 		{
-			switch (info)
-			{
-			case SerializationTypeInfo.SByte:
-			case SerializationTypeInfo.Byte:
-			case SerializationTypeInfo.Int16:
-			case SerializationTypeInfo.UInt16:
-			case SerializationTypeInfo.Int32:
-			case SerializationTypeInfo.UInt32:
-			case SerializationTypeInfo.Int64:
-			case SerializationTypeInfo.UInt64:
-			case SerializationTypeInfo.Single:
-			case SerializationTypeInfo.Double:
-				return true;
-			}
-			return false;
+			return info - SerializationTypeInfo.SByte <= 1 || info - SerializationTypeInfo.Int16 <= 7;
 		}
 
 		public static bool IsPOD(Type type)

@@ -27,11 +27,9 @@ public class BuildingConduitEndpoints : KMonoBehaviour
 			if (def.OutputConduitType == ConduitType.Solid)
 			{
 				Game.Instance.solidConduitSystem.AddToNetworks(utilityOutputCell, this.itemOutput, true);
+				return;
 			}
-			else
-			{
-				Conduit.GetNetworkManager(def.OutputConduitType).AddToNetworks(utilityOutputCell, this.itemOutput, true);
-			}
+			Conduit.GetNetworkManager(def.OutputConduitType).AddToNetworks(utilityOutputCell, this.itemOutput, true);
 		}
 	}
 

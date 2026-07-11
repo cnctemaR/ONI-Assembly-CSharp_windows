@@ -14,12 +14,12 @@ namespace UnityEngine.EventSystems
 
 		public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
 		{
-			if (!(this.eventCamera == null))
+			Ray ray = default(Ray);
+			float num = 0f;
+			int num2 = 0;
+			if (base.ComputeRayAndDistance(eventData, ref ray, ref num2, ref num))
 			{
-				Ray ray;
-				float num;
-				base.ComputeRayAndDistance(eventData, out ray, out num);
-				int num2;
+				int num3;
 				if (base.maxRayIntersections == 0)
 				{
 					if (ReflectionMethodsCache.Singleton.getRayIntersectionAll == null)
@@ -27,7 +27,7 @@ namespace UnityEngine.EventSystems
 						return;
 					}
 					this.m_Hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, num, base.finalEventMask);
-					num2 = this.m_Hits.Length;
+					num3 = this.m_Hits.Length;
 				}
 				else
 				{
@@ -40,13 +40,13 @@ namespace UnityEngine.EventSystems
 						this.m_Hits = new RaycastHit2D[base.maxRayIntersections];
 						this.m_LastMaxRayIntersections = this.m_MaxRayIntersections;
 					}
-					num2 = ReflectionMethodsCache.Singleton.getRayIntersectionAllNonAlloc(ray, this.m_Hits, num, base.finalEventMask);
+					num3 = ReflectionMethodsCache.Singleton.getRayIntersectionAllNonAlloc(ray, this.m_Hits, num, base.finalEventMask);
 				}
-				if (num2 != 0)
+				if (num3 != 0)
 				{
 					int i = 0;
-					int num3 = num2;
-					while (i < num3)
+					int num4 = num3;
+					while (i < num4)
 					{
 						SpriteRenderer component = this.m_Hits[i].collider.gameObject.GetComponent<SpriteRenderer>();
 						RaycastResult raycastResult = new RaycastResult
@@ -57,6 +57,7 @@ namespace UnityEngine.EventSystems
 							worldPosition = this.m_Hits[i].point,
 							worldNormal = this.m_Hits[i].normal,
 							screenPosition = eventData.position,
+							displayIndex = num2,
 							index = (float)resultAppendList.Count,
 							sortingLayer = ((!(component != null)) ? 0 : component.sortingLayerID),
 							sortingOrder = ((!(component != null)) ? 0 : component.sortingOrder)

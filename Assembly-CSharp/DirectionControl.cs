@@ -74,8 +74,7 @@ public class DirectionControl : KMonoBehaviour
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		DirectionControl component = gameObject.GetComponent<DirectionControl>();
+		DirectionControl component = ((GameObject)data).GetComponent<DirectionControl>();
 		this.SetAllowedDirection(component.allowedDirection);
 	}
 
@@ -83,13 +82,7 @@ public class DirectionControl : KMonoBehaviour
 	{
 		int num = (int)((WorkableReactable.AllowedDirection.Left + (int)this.allowedDirection) % (WorkableReactable.AllowedDirection)this.directionInfos.Length);
 		DirectionControl.DirectionInfo directionInfo = this.directionInfos[num];
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string iconName = directionInfo.iconName;
-		string name = directionInfo.name;
-		global::System.Action action = new global::System.Action(this.OnChangeWorkableDirection);
-		string tooltip = directionInfo.tooltip;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(iconName, name, action, global::Action.NumActions, null, null, null, tooltip, true), 0f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo(directionInfo.iconName, directionInfo.name, new global::System.Action(this.OnChangeWorkableDirection), global::Action.NumActions, null, null, null, directionInfo.tooltip, true), 0.4f);
 	}
 
 	[Serialize]

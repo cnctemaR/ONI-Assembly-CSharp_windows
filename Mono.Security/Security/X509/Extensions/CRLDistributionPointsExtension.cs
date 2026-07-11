@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Mono.Security.X509.Extensions
@@ -9,7 +9,7 @@ namespace Mono.Security.X509.Extensions
 		public CRLDistributionPointsExtension()
 		{
 			this.extnOid = "2.5.29.31";
-			this.dps = new ArrayList();
+			this.dps = new List<CRLDistributionPointsExtension.DistributionPoint>();
 		}
 
 		public CRLDistributionPointsExtension(ASN1 asn1)
@@ -24,7 +24,7 @@ namespace Mono.Security.X509.Extensions
 
 		protected override void Decode()
 		{
-			this.dps = new ArrayList();
+			this.dps = new List<CRLDistributionPointsExtension.DistributionPoint>();
 			ASN1 asn = new ASN1(this.extnValue.Value);
 			if (asn.Tag != 48)
 			{
@@ -32,7 +32,7 @@ namespace Mono.Security.X509.Extensions
 			}
 			for (int i = 0; i < asn.Count; i++)
 			{
-				this.dps.Add(new CRLDistributionPointsExtension.DP(asn[i]));
+				this.dps.Add(new CRLDistributionPointsExtension.DistributionPoint(asn[i]));
 			}
 		}
 
@@ -44,13 +44,20 @@ namespace Mono.Security.X509.Extensions
 			}
 		}
 
+		public IEnumerable<CRLDistributionPointsExtension.DistributionPoint> DistributionPoints
+		{
+			get
+			{
+				return this.dps;
+			}
+		}
+
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			int num = 1;
-			foreach (object obj in this.dps)
+			foreach (CRLDistributionPointsExtension.DistributionPoint distributionPoint in this.dps)
 			{
-				CRLDistributionPointsExtension.DP dp = (CRLDistributionPointsExtension.DP)obj;
 				stringBuilder.Append("[");
 				stringBuilder.Append(num++);
 				stringBuilder.Append("]CRL Distribution Point");
@@ -59,24 +66,30 @@ namespace Mono.Security.X509.Extensions
 				stringBuilder.Append("\t\tFull Name:");
 				stringBuilder.Append(Environment.NewLine);
 				stringBuilder.Append("\t\t\t");
-				stringBuilder.Append(dp.DistributionPoint);
+				stringBuilder.Append(distributionPoint.Name);
 				stringBuilder.Append(Environment.NewLine);
 			}
 			return stringBuilder.ToString();
 		}
 
-		private ArrayList dps;
+		private List<CRLDistributionPointsExtension.DistributionPoint> dps;
 
-		internal class DP
+		public class DistributionPoint
 		{
-			public DP(string dp, CRLDistributionPointsExtension.ReasonFlags reasons, string issuer)
+			public string Name { get; private set; }
+
+			public CRLDistributionPointsExtension.ReasonFlags Reasons { get; private set; }
+
+			public string CRLIssuer { get; private set; }
+
+			public DistributionPoint(string dp, CRLDistributionPointsExtension.ReasonFlags reasons, string issuer)
 			{
-				this.DistributionPoint = dp;
+				this.Name = dp;
 				this.Reasons = reasons;
 				this.CRLIssuer = issuer;
 			}
 
-			public DP(ASN1 dp)
+			public DistributionPoint(ASN1 dp)
 			{
 				for (int i = 0; i < dp.Count; i++)
 				{
@@ -90,7 +103,7 @@ namespace Mono.Security.X509.Extensions
 							ASN1 asn2 = asn[j];
 							if (asn2.Tag == 160)
 							{
-								this.DistributionPoint = new GeneralNames(asn2).ToString();
+								this.Name = new GeneralNames(asn2).ToString();
 							}
 						}
 						break;
@@ -98,12 +111,6 @@ namespace Mono.Security.X509.Extensions
 					}
 				}
 			}
-
-			public string DistributionPoint;
-
-			public CRLDistributionPointsExtension.ReasonFlags Reasons;
-
-			public string CRLIssuer;
 		}
 
 		[Flags]

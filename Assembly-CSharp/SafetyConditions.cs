@@ -9,22 +9,20 @@ public class SafetyConditions
 		this.IsNearby = new SafetyChecker.Condition("IsNearby", num *= 2, (int cell, int cost, SafetyChecker.Context context) => cost > 5);
 		this.IsNotLedge = new SafetyChecker.Condition("IsNotLedge", num *= 2, delegate(int cell, int cost, SafetyChecker.Context context)
 		{
-			int num2 = Grid.CellLeft(cell);
-			int num3 = Grid.CellBelow(num2);
-			if (Grid.Solid[num3])
+			int num2 = Grid.CellBelow(Grid.CellLeft(cell));
+			if (Grid.Solid[num2])
 			{
 				return false;
 			}
-			int num4 = Grid.CellRight(cell);
-			int num5 = Grid.CellBelow(num4);
-			return Grid.Solid[num5];
+			int num3 = Grid.CellBelow(Grid.CellRight(cell));
+			return Grid.Solid[num3];
 		});
 		this.IsNotLiquid = new SafetyChecker.Condition("IsNotLiquid", num *= 2, (int cell, int cost, SafetyChecker.Context context) => !Grid.Element[cell].IsLiquid);
 		this.IsNotLadder = new SafetyChecker.Condition("IsNotLadder", num *= 2, (int cell, int cost, SafetyChecker.Context context) => !context.navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !context.navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole));
 		this.IsNotDoor = new SafetyChecker.Condition("IsNotDoor", num *= 2, delegate(int cell, int cost, SafetyChecker.Context context)
 		{
-			int num6 = Grid.CellAbove(cell);
-			return !Grid.HasDoor[cell] && Grid.IsValidCell(num6) && !Grid.HasDoor[num6];
+			int num4 = Grid.CellAbove(cell);
+			return !Grid.HasDoor[cell] && Grid.IsValidCell(num4) && !Grid.HasDoor[num4];
 		});
 		this.IsCorrectTemperature = new SafetyChecker.Condition("IsCorrectTemperature", num *= 2, (int cell, int cost, SafetyChecker.Context context) => Grid.Temperature[cell] > 285.15f && Grid.Temperature[cell] < 303.15f);
 		this.IsWarming = new SafetyChecker.Condition("IsWarming", num *= 2, (int cell, int cost, SafetyChecker.Context context) => true);

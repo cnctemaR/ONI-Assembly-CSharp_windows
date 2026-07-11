@@ -14,63 +14,63 @@ namespace KMod
 			case EventType.LoadError:
 				title = UI.FRONTEND.MOD_EVENTS.REQUIRED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.REQUIRED;
-				break;
+				return;
 			case EventType.NotFound:
 				title = UI.FRONTEND.MOD_EVENTS.NOT_FOUND;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.NOT_FOUND;
-				break;
+				return;
 			case EventType.InstallInfoInaccessible:
 				title = UI.FRONTEND.MOD_EVENTS.INSTALL_INFO_INACCESSIBLE;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.INSTALL_INFO_INACCESSIBLE;
-				break;
+				return;
 			case EventType.OutOfOrder:
 				title = UI.FRONTEND.MOD_EVENTS.OUT_OF_ORDER;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.OUT_OF_ORDER;
-				break;
+				return;
 			case EventType.ExpectedActive:
 				title = UI.FRONTEND.MOD_EVENTS.EXPECTED_ENABLED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.EXPECTED_ENABLED;
-				break;
+				return;
 			case EventType.ExpectedInactive:
 				title = UI.FRONTEND.MOD_EVENTS.EXPECTED_DISABLED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.EXPECTED_DISABLED;
-				break;
+				return;
 			case EventType.ActiveDuringCrash:
 				title = UI.FRONTEND.MOD_EVENTS.ACTIVE_DURING_CRASH;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.ACTIVE_DURING_CRASH;
-				break;
+				return;
 			case EventType.InstallFailed:
 				title = UI.FRONTEND.MOD_EVENTS.INSTALL_FAILED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.INSTALL_FAILED;
-				break;
+				return;
 			case EventType.Installed:
 				title = UI.FRONTEND.MOD_EVENTS.INSTALLED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.INSTALLED;
-				break;
+				return;
 			case EventType.Uninstalled:
 				title = UI.FRONTEND.MOD_EVENTS.UNINSTALLED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.UNINSTALLED;
-				break;
+				return;
 			case EventType.VersionUpdate:
 				title = UI.FRONTEND.MOD_EVENTS.VERSION_UPDATE;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.VERSION_UPDATE;
-				break;
+				return;
 			case EventType.AvailableContentChanged:
 				title = UI.FRONTEND.MOD_EVENTS.AVAILABLE_CONTENT_CHANGED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.AVAILABLE_CONTENT_CHANGED;
-				break;
+				return;
 			case EventType.RestartRequested:
 				title = UI.FRONTEND.MOD_EVENTS.REQUIRES_RESTART;
 				title_tooltip = UI.FRONTEND.MODS.REQUIRES_RESTART;
-				break;
+				return;
 			case EventType.BadWorldGen:
 				title = UI.FRONTEND.MOD_EVENTS.BAD_WORLD_GEN;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.BAD_WORLD_GEN;
-				break;
+				return;
 			case EventType.Deactivated:
 				title = UI.FRONTEND.MOD_EVENTS.DEACTIVATED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.DEACTIVATED;
-				break;
+				return;
 			default:
 				throw new ArgumentOutOfRangeException();
 			}

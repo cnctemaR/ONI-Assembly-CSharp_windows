@@ -43,12 +43,19 @@ namespace ProcGen
 		{
 			ListPool<FileHandle, Worlds>.PooledList pooledList = ListPool<FileHandle, Worlds>.Allocate();
 			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "worlds")), "*.yaml", pooledList);
+			YamlIO.ErrorHandler <>9__0;
 			foreach (FileHandle fileHandle in pooledList)
 			{
-				World world = YamlIO.LoadFile<World>(fileHandle.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
+				string full_path = fileHandle.full_path;
+				YamlIO.ErrorHandler errorHandler;
+				if ((errorHandler = <>9__0) == null)
 				{
-					errors.Add(error);
-				}, null);
+					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					{
+						errors.Add(error);
+					});
+				}
+				World world = YamlIO.LoadFile<World>(full_path, errorHandler, null);
 				if (world == null)
 				{
 					DebugUtil.LogWarningArgs(new object[] { "Failed to load world: ", fileHandle.full_path });

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System
 {
@@ -13,7 +14,17 @@ namespace System
 
 		internal static bool DefaultEquals(object o1, object o2)
 		{
-			if (o2 == null)
+			if (o1 == null && o2 == null)
+			{
+				return true;
+			}
+			if (o1 == null || o2 == null)
+			{
+				return false;
+			}
+			RuntimeType runtimeType = (RuntimeType)o1.GetType();
+			RuntimeType runtimeType2 = (RuntimeType)o2.GetType();
+			if (runtimeType != runtimeType2)
 			{
 				return false;
 			}
@@ -67,9 +78,27 @@ namespace System
 			return num;
 		}
 
+		internal static int GetHashCodeOfPtr(IntPtr ptr)
+		{
+			int num = (int)ptr;
+			int num2 = ValueType.Internal.hash_code_of_ptr_seed;
+			if (num2 == 0)
+			{
+				num2 = num;
+				Interlocked.CompareExchange(ref ValueType.Internal.hash_code_of_ptr_seed, num2, 0);
+				num2 = ValueType.Internal.hash_code_of_ptr_seed;
+			}
+			return num - num2;
+		}
+
 		public override string ToString()
 		{
 			return base.GetType().FullName;
+		}
+
+		private static class Internal
+		{
+			public static int hash_code_of_ptr_seed;
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Activation;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Contexts;
+using System.Security;
 
 namespace System.Runtime.Remoting.Proxies
 {
@@ -12,8 +13,7 @@ namespace System.Runtime.Remoting.Proxies
 	{
 		public virtual MarshalByRefObject CreateInstance(Type serverType)
 		{
-			RemotingProxy remotingProxy = new RemotingProxy(serverType, ChannelServices.CrossContextUrl, null);
-			return (MarshalByRefObject)remotingProxy.GetTransparentProxy();
+			return (MarshalByRefObject)new RemotingProxy(serverType, ChannelServices.CrossContextUrl, null).GetTransparentProxy();
 		}
 
 		public virtual RealProxy CreateProxy(ObjRef objRef, Type serverType, object serverObject, Context serverContext)
@@ -21,12 +21,14 @@ namespace System.Runtime.Remoting.Proxies
 			return RemotingServices.GetRealProxy(RemotingServices.GetProxyForRemoteObject(objRef, serverType));
 		}
 
+		[SecurityCritical]
 		[ComVisible(true)]
 		public void GetPropertiesForNewContext(IConstructionCallMessage msg)
 		{
 		}
 
 		[ComVisible(true)]
+		[SecurityCritical]
 		public bool IsContextOK(Context ctx, IConstructionCallMessage msg)
 		{
 			return true;

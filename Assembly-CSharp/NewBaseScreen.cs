@@ -20,8 +20,7 @@ public class NewBaseScreen : KScreen
 	public static Vector2I SetInitialCamera()
 	{
 		Vector2I baseStartPos = SaveLoader.Instance.cachedGSD.baseStartPos;
-		int num = Grid.OffsetCell(0, baseStartPos.x, baseStartPos.y);
-		Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(num, 0, -2), Grid.SceneLayer.Background);
+		Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.OffsetCell(0, baseStartPos.x, baseStartPos.y), 0, -2), Grid.SceneLayer.Background);
 		CameraController.Instance.SetMaxOrthographicSize(40f);
 		CameraController.Instance.SnapTo(vector);
 		CameraController.Instance.SetTargetPos(vector, 20f, false);
@@ -81,12 +80,10 @@ public class NewBaseScreen : KScreen
 		};
 		if (!e.Consumed)
 		{
-			for (int i = 0; i < array.Length; i++)
+			int num = 0;
+			while (num < array.Length && !e.TryConsume(array[num]))
 			{
-				if (e.TryConsume(array[i]))
-				{
-					break;
-				}
+				num++;
 			}
 		}
 	}
@@ -120,6 +117,7 @@ public class NewBaseScreen : KScreen
 		int baseLeft = SaveGame.Instance.worldGen.BaseLeft;
 		int baseRight = SaveGame.Instance.worldGen.BaseRight;
 		Effect a_new_hope = Db.Get().effects.Get("AnewHope");
+		Action<object> <>9__0;
 		for (int i = 0; i < this.minionStartingStats.Length; i++)
 		{
 			int num3 = num + i % (baseRight - baseLeft) + 1;
@@ -130,15 +128,23 @@ public class NewBaseScreen : KScreen
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			((MinionStartingStats)this.minionStartingStats[i]).Apply(gameObject);
-			GameScheduler.Instance.Schedule("ANewHope", 3f + 0.5f * (float)i, delegate(object m)
+			GameScheduler instance = GameScheduler.Instance;
+			string text = "ANewHope";
+			float num6 = 3f + 0.5f * (float)i;
+			Action<object> action;
+			if ((action = <>9__0) == null)
 			{
-				GameObject gameObject2 = m as GameObject;
-				if (gameObject2 == null)
+				action = (<>9__0 = delegate(object m)
 				{
-					return;
-				}
-				gameObject2.GetComponent<Effects>().Add(a_new_hope, true);
-			}, gameObject, null);
+					GameObject gameObject2 = m as GameObject;
+					if (gameObject2 == null)
+					{
+						return;
+					}
+					gameObject2.GetComponent<Effects>().Add(a_new_hope, true);
+				});
+			}
+			instance.Schedule(text, num6, action, gameObject, null);
 		}
 	}
 

@@ -44,8 +44,7 @@ public class LogicElementSensorLiquidConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, LogicElementSensorLiquidConfig.OUTPUT_PORT);
-		Filterable filterable = go.AddOrGet<Filterable>();
-		filterable.filterElementState = Filterable.ElementState.Liquid;
+		go.AddOrGet<Filterable>().filterElementState = Filterable.ElementState.Liquid;
 		LogicElementSensor logicElementSensor = go.AddOrGet<LogicElementSensor>();
 		logicElementSensor.manuallyControlled = false;
 		logicElementSensor.desiredState = Element.State.Liquid;

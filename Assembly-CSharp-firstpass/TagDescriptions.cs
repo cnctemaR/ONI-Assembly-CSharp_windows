@@ -34,8 +34,7 @@ public class TagDescriptions
 				{
 					break;
 				}
-				string text3 = text.Substring(num + 1, num2 - num - 1);
-				string description = TagDescriptions.GetDescription(text3);
+				string description = TagDescriptions.GetDescription(text.Substring(num + 1, num2 - num - 1));
 				stringBuilder.Append(description);
 				num3 = num2 + 1;
 				num = text.IndexOf('{', num2);

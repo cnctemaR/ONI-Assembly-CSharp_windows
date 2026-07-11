@@ -18,10 +18,8 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		this.workables = new SocialGatheringPointWorkable[this.socializeOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
-			int num = Grid.OffsetCell(Grid.PosToCell(this), this.socializeOffsets[i]);
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
-			GameObject gameObject = ChoreHelpers.CreateLocator("WaterCoolerWorkable", vector);
-			SocialGatheringPointWorkable socialGatheringPointWorkable = gameObject.AddOrGet<SocialGatheringPointWorkable>();
+			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(this), this.socializeOffsets[i]), Grid.SceneLayer.Move);
+			SocialGatheringPointWorkable socialGatheringPointWorkable = ChoreHelpers.CreateLocator("WaterCoolerWorkable", vector).AddOrGet<SocialGatheringPointWorkable>();
 			socialGatheringPointWorkable.specificEffect = "Socialized";
 			socialGatheringPointWorkable.SetWorkTime(this.workTime);
 			this.workables[i] = socialGatheringPointWorkable;
@@ -60,8 +58,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		{
 			CellOffset cellOffset = this.socializeOffsets[i];
 			Chore chore = this.chores[i];
-			bool flag = num2 < this.choreCount && this.IsOffsetValid(cellOffset) && num >= 1f;
-			if (flag)
+			if (num2 < this.choreCount && this.IsOffsetValid(cellOffset) && num >= 1f)
 			{
 				num2++;
 				num -= 1f;
@@ -94,10 +91,9 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 	private bool IsOffsetValid(CellOffset offset)
 	{
-		int num = Grid.PosToCell(this);
-		int num2 = Grid.OffsetCell(num, offset);
-		int num3 = Grid.CellBelow(num2);
-		return GameNavGrids.FloorValidator.IsWalkableCell(num2, num3, false);
+		int num = Grid.OffsetCell(Grid.PosToCell(this), offset);
+		int num2 = Grid.CellBelow(num);
+		return GameNavGrids.FloorValidator.IsWalkableCell(num, num2, false);
 	}
 
 	private void OnChoreEnd(Chore chore)
@@ -142,11 +138,6 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		Effect.AddModifierDescriptions(base.gameObject, list, "Socialized", true);
 		this.AddRequirementDesc(list, GameTags.Water, 1f);
 		return list;
-	}
-
-	Transform IApproachable.get_transform()
-	{
-		return base.transform;
 	}
 
 	public const float DRINK_MASS = 1f;

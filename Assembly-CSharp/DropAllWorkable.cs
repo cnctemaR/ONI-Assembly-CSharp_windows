@@ -18,6 +18,7 @@ public class DropAllWorkable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
 		this.synchronizeAnims = false;
 		base.SetWorkTime(0.1f);
+		Prioritizable.AddRef(base.gameObject);
 	}
 
 	private Storage[] GetStorages()
@@ -40,18 +41,17 @@ public class DropAllWorkable : Workable
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.OnCompleteWork(null);
+			return;
 		}
-		else if (this.chore == null)
+		if (this.chore == null)
 		{
 			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			return;
 		}
-		else
-		{
-			this.chore.Cancel("Cancelled emptying");
-			this.chore = null;
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.workerStatusItem, false);
-			base.ShowProgressBar(false);
-		}
+		this.chore.Cancel("Cancelled emptying");
+		this.chore = null;
+		base.GetComponent<KSelectable>().RemoveStatusItem(this.workerStatusItem, false);
+		base.ShowProgressBar(false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -81,25 +81,8 @@ public class DropAllWorkable : Workable
 	{
 		if (this.showCmd)
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo;
-			if (this.chore == null)
-			{
-				string text = "action_empty_contents";
-				string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME;
-				global::System.Action action = new global::System.Action(this.DropAll);
-				string text3 = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-				buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-			}
-			else
-			{
-				string text3 = "action_empty_contents";
-				string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF;
-				global::System.Action action = new global::System.Action(this.DropAll);
-				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF;
-				buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-			}
-			KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+			KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore == null) ? new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF, true));
+			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 		}
 	}
 
@@ -129,6 +112,9 @@ public class DropAllWorkable : Workable
 	private bool showCmd;
 
 	private Storage[] storages;
+
+	[MyCmpAdd]
+	private Prioritizable _prioritizable;
 
 	private static readonly EventSystem.IntraObjectHandler<DropAllWorkable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<DropAllWorkable>(delegate(DropAllWorkable component, object data)
 	{

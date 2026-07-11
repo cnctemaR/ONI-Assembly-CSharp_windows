@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace UnityEngine.VR
 {
 	[Obsolete("InputTracking has been moved.  Use UnityEngine.XR.InputTracking instead (UnityUpgradable) -> UnityEngine.XR.InputTracking", true)]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public static class InputTracking
 	{
 		public static Vector3 GetLocalPosition(VRNode node)

@@ -16,8 +16,7 @@ public class ConditionHasAstronaut : RocketLaunchCondition
 
 	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
-		MinionStorage component = this.module.GetComponent<MinionStorage>();
-		List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
+		List<MinionStorage.Info> storedMinionInfo = this.module.GetComponent<MinionStorage>().GetStoredMinionInfo();
 		if (storedMinionInfo.Count > 0 && storedMinionInfo[0].serializedMinion != null)
 		{
 			return RocketLaunchCondition.LaunchStatus.Ready;

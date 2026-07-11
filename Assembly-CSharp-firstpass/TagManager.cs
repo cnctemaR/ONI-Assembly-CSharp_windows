@@ -9,7 +9,7 @@ public class TagManager
 		tag.Name = tag_string;
 		if (!TagManager.ProperNames.ContainsKey(tag))
 		{
-			TagManager.ProperNames[tag] = string.Empty;
+			TagManager.ProperNames[tag] = "";
 		}
 		return tag;
 	}

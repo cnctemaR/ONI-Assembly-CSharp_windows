@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeAttributeDeclaration
 	{
@@ -24,33 +21,20 @@ namespace System.CodeDom
 		}
 
 		public CodeAttributeDeclaration(CodeTypeReference attributeType)
+			: this(attributeType, null)
 		{
-			this.attribute = attributeType;
-			if (attributeType != null)
-			{
-				this.name = attributeType.BaseType;
-			}
 		}
 
 		public CodeAttributeDeclaration(CodeTypeReference attributeType, params CodeAttributeArgument[] arguments)
 		{
-			this.attribute = attributeType;
+			this._attributeType = attributeType;
 			if (attributeType != null)
 			{
-				this.name = attributeType.BaseType;
+				this._name = attributeType.BaseType;
 			}
-			this.Arguments.AddRange(arguments);
-		}
-
-		public CodeAttributeArgumentCollection Arguments
-		{
-			get
+			if (arguments != null)
 			{
-				if (this.arguments == null)
-				{
-					this.arguments = new CodeAttributeArgumentCollection();
-				}
-				return this.arguments;
+				this.Arguments.AddRange(arguments);
 			}
 		}
 
@@ -58,16 +42,20 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.name == null)
-				{
-					return string.Empty;
-				}
-				return this.name;
+				return this._name ?? string.Empty;
 			}
 			set
 			{
-				this.name = value;
-				this.attribute = new CodeTypeReference(this.name);
+				this._name = value;
+				this._attributeType = new CodeTypeReference(this._name);
+			}
+		}
+
+		public CodeAttributeArgumentCollection Arguments
+		{
+			get
+			{
+				return this._arguments;
 			}
 		}
 
@@ -75,14 +63,14 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this.attribute;
+				return this._attributeType;
 			}
 		}
 
-		private string name;
+		private string _name;
 
-		private CodeAttributeArgumentCollection arguments;
+		private readonly CodeAttributeArgumentCollection _arguments = new CodeAttributeArgumentCollection();
 
-		private CodeTypeReference attribute;
+		private CodeTypeReference _attributeType;
 	}
 }

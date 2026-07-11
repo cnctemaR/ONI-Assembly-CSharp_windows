@@ -4,17 +4,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A set of options that control how physics operates when using the job system to multithread the physics simulation.</para>
-	/// </summary>
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeHeader("Modules/Physics2D/Public/Physics2DSettings.h")]
 	[NativeClass("PhysicsJobOptions2D", "struct PhysicsJobOptions2D;")]
+	[NativeHeader("Modules/Physics2D/Public/Physics2DSettings.h")]
 	public struct PhysicsJobOptions2D
 	{
-		/// <summary>
-		///   <para>Should physics simulation use multithreading?</para>
-		/// </summary>
 		public bool useMultithreading
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Should physics simulation sort multi-threaded results to maintain processing order consistency?</para>
-		/// </summary>
 		public bool useConsistencySorting
 		{
 			get
@@ -42,9 +33,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of Rigidbody2D being interpolated in each simulation job.</para>
-		/// </summary>
 		public int interpolationPosesPerJob
 		{
 			get
@@ -57,9 +45,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of new contacts to find in each simulation job.</para>
-		/// </summary>
 		public int newContactsPerJob
 		{
 			get
@@ -72,9 +57,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of contacts to collide in each simulation job.</para>
-		/// </summary>
 		public int collideContactsPerJob
 		{
 			get
@@ -87,9 +69,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of flags to be cleared in each simulation job.</para>
-		/// </summary>
 		public int clearFlagsPerJob
 		{
 			get
@@ -102,9 +81,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of bodies to be cleared in each simulation job.</para>
-		/// </summary>
 		public int clearBodyForcesPerJob
 		{
 			get
@@ -117,9 +93,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of fixtures to synchronize in the broadphase during discrete island solving in each simulation job.</para>
-		/// </summary>
 		public int syncDiscreteFixturesPerJob
 		{
 			get
@@ -132,9 +105,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of fixtures to synchronize in the broadphase during continuous island solving in each simulation job.</para>
-		/// </summary>
 		public int syncContinuousFixturesPerJob
 		{
 			get
@@ -147,9 +117,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of nearest contacts to find in each simulation job.</para>
-		/// </summary>
 		public int findNearestContactsPerJob
 		{
 			get
@@ -162,9 +129,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of trigger contacts to update in each simulation job.</para>
-		/// </summary>
 		public int updateTriggerContactsPerJob
 		{
 			get
@@ -177,9 +141,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimum threshold cost of all bodies, contacts and joints in an island during discrete island solving.</para>
-		/// </summary>
 		public int islandSolverCostThreshold
 		{
 			get
@@ -192,9 +153,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Scales the cost of each body during discrete island solving.</para>
-		/// </summary>
 		public int islandSolverBodyCostScale
 		{
 			get
@@ -207,9 +165,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Scales the cost of each contact during discrete island solving.</para>
-		/// </summary>
 		public int islandSolverContactCostScale
 		{
 			get
@@ -222,9 +177,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Scales the cost of each joint during discrete island solving.</para>
-		/// </summary>
 		public int islandSolverJointCostScale
 		{
 			get
@@ -237,9 +189,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of bodies to solve in each simulation job when performing island solving.</para>
-		/// </summary>
 		public int islandSolverBodiesPerJob
 		{
 			get
@@ -252,9 +201,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the minimum number of contacts to solve in each simulation job when performing island solving.</para>
-		/// </summary>
 		public int islandSolverContactsPerJob
 		{
 			get

@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KTreeItem : MonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KTreeItem.StateChanged onOpenChanged;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KTreeItem.StateChanged onCheckChanged;
 
 	public string text
@@ -120,7 +117,7 @@ public class KTreeItem : MonoBehaviour
 
 	private void UpdateOpened()
 	{
-		this.openedImage.sprite = ((!this.opened) ? this.spriteClosed : this.spriteOpen);
+		this.openedImage.sprite = (this.opened ? this.spriteOpen : this.spriteClosed);
 		this.childrenRoot.SetActive(this.opened);
 	}
 

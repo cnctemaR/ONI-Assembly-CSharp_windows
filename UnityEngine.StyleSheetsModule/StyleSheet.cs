@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.StyleSheets
@@ -60,7 +61,7 @@ namespace UnityEngine.StyleSheets
 			{
 				Debug.LogErrorFormat("Trying to read value of type {0} while reading a value of type {1}", new object[] { type, handle.valueType });
 			}
-			else if (handle.valueIndex < 0 && handle.valueIndex >= list.Length)
+			else if (list == null || handle.valueIndex < 0 || handle.valueIndex >= list.Length)
 			{
 				Debug.LogError("Accessing invalid property");
 			}
@@ -73,6 +74,7 @@ namespace UnityEngine.StyleSheets
 
 		private void OnEnable()
 		{
+			this.hasSelectorsCached = false;
 			this.SetupReferences();
 		}
 
@@ -80,13 +82,59 @@ namespace UnityEngine.StyleSheets
 		{
 			if (this.complexSelectors != null && this.rules != null)
 			{
-				for (int i = 0; i < this.complexSelectors.Length; i++)
+				this.orderedClassSelectors = new Dictionary<string, StyleComplexSelector>(StringComparer.Ordinal);
+				this.orderedNameSelectors = new Dictionary<string, StyleComplexSelector>(StringComparer.Ordinal);
+				this.orderedTypeSelectors = new Dictionary<string, StyleComplexSelector>(StringComparer.Ordinal);
+				int i = 0;
+				while (i < this.complexSelectors.Length)
 				{
 					StyleComplexSelector styleComplexSelector = this.complexSelectors[i];
 					if (styleComplexSelector.ruleIndex < this.rules.Length)
 					{
 						styleComplexSelector.rule = this.rules[styleComplexSelector.ruleIndex];
 					}
+					styleComplexSelector.orderInStyleSheet = i;
+					StyleSelector styleSelector = styleComplexSelector.selectors[styleComplexSelector.selectors.Length - 1];
+					StyleSelectorPart styleSelectorPart = styleSelector.parts[0];
+					string text = styleSelectorPart.value;
+					Dictionary<string, StyleComplexSelector> dictionary = null;
+					switch (styleSelectorPart.type)
+					{
+					case StyleSelectorType.Wildcard:
+					case StyleSelectorType.Type:
+						text = styleSelectorPart.value ?? "*";
+						dictionary = this.orderedTypeSelectors;
+						break;
+					case StyleSelectorType.Class:
+						dictionary = this.orderedClassSelectors;
+						break;
+					case StyleSelectorType.PseudoClass:
+						text = "*";
+						dictionary = this.orderedTypeSelectors;
+						break;
+					case StyleSelectorType.RecursivePseudoClass:
+						goto IL_013B;
+					case StyleSelectorType.ID:
+						dictionary = this.orderedNameSelectors;
+						break;
+					default:
+						goto IL_013B;
+					}
+					IL_015B:
+					if (dictionary != null)
+					{
+						StyleComplexSelector styleComplexSelector2;
+						if (dictionary.TryGetValue(text, out styleComplexSelector2))
+						{
+							styleComplexSelector.nextInTable = styleComplexSelector2;
+						}
+						dictionary[text] = styleComplexSelector;
+					}
+					i++;
+					continue;
+					IL_013B:
+					Debug.LogError(string.Format("Invalid first part type {0}", styleSelectorPart.type));
+					goto IL_015B;
 				}
 			}
 		}
@@ -146,6 +194,16 @@ namespace UnityEngine.StyleSheets
 			return StyleSheet.TryCheckAccess<string>(this.strings, StyleValueType.ResourcePath, handles, index, out value);
 		}
 
+		public Object ReadAssetReference(StyleValueHandle handle)
+		{
+			return StyleSheet.CheckAccess<Object>(this.assets, StyleValueType.AssetReference, handle);
+		}
+
+		public bool TryReadAssetReference(StyleValueHandle[] handles, int index, out Object value)
+		{
+			return StyleSheet.TryCheckAccess<Object>(this.assets, StyleValueType.AssetReference, handles, index, out value);
+		}
+
 		[SerializeField]
 		private StyleRule[] m_Rules;
 
@@ -160,5 +218,24 @@ namespace UnityEngine.StyleSheets
 
 		[SerializeField]
 		internal string[] strings;
+
+		[SerializeField]
+		internal Object[] assets;
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[NonSerialized]
+		internal Dictionary<string, StyleComplexSelector> orderedNameSelectors;
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[NonSerialized]
+		internal Dictionary<string, StyleComplexSelector> orderedTypeSelectors;
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[NonSerialized]
+		internal Dictionary<string, StyleComplexSelector> orderedClassSelectors;
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[NonSerialized]
+		internal bool hasSelectorsCached;
 	}
 }

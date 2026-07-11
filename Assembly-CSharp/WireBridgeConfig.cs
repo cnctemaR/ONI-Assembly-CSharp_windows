@@ -47,23 +47,20 @@ public class WireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
-		wireUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
-		wireUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
-		wireUtilityNetworkLink.visualizeOnly = false;
+		this.AddNetworkLink(go).visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 

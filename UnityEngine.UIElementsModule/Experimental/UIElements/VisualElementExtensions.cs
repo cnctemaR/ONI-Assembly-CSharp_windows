@@ -3,9 +3,6 @@ using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>VisualElementExtensions is a set of extension methods useful for VisualElement.</para>
-	/// </summary>
 	public static class VisualElementExtensions
 	{
 		public static Vector2 WorldToLocal(this VisualElement ele, Vector2 p)
@@ -55,10 +52,6 @@ namespace UnityEngine.Experimental.UIElements
 			style.positionBottom = 0f;
 		}
 
-		/// <summary>
-		///   <para>The given VisualElement's left and right edges will be aligned with the corresponding edges of the parent element.</para>
-		/// </summary>
-		/// <param name="elem"></param>
 		public static void StretchToParentWidth(this VisualElement elem)
 		{
 			IStyle style = elem.style;
@@ -67,11 +60,6 @@ namespace UnityEngine.Experimental.UIElements
 			style.positionRight = 0f;
 		}
 
-		/// <summary>
-		///   <para>Add a manipulator associated to a VisualElement.</para>
-		/// </summary>
-		/// <param name="ele">VisualElement associated to the manipulator.</param>
-		/// <param name="manipulator">Manipulator to be added to the VisualElement.</param>
 		public static void AddManipulator(this VisualElement ele, IManipulator manipulator)
 		{
 			if (manipulator != null)
@@ -80,11 +68,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Remove a manipulator associated to a VisualElement.</para>
-		/// </summary>
-		/// <param name="ele">VisualElement associated to the manipulator.</param>
-		/// <param name="manipulator">Manipulator to be removed from the VisualElement.</param>
 		public static void RemoveManipulator(this VisualElement ele, IManipulator manipulator)
 		{
 			if (manipulator != null)

@@ -2,19 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	/// <summary>
-	///   <para>Native Slice.</para>
-	/// </summary>
-	[NativeContainerSupportsMinMaxWriteRestriction]
-	[DebuggerTypeProxy(typeof(NativeSliceDebugView<>))]
-	[DebuggerDisplay("Length = {Length}")]
 	[NativeContainer]
-	public struct NativeSlice<T> : IEnumerable<T>, IEnumerable where T : struct
+	[NativeContainerSupportsMinMaxWriteRestriction]
+	[DebuggerDisplay("Length = {Length}")]
+	[DebuggerTypeProxy(typeof(NativeSliceDebugView<>))]
+	public struct NativeSlice<T> : IEnumerable<T>, IEquatable<NativeSlice<T>>, IEnumerable where T : struct
 	{
 		public NativeSlice(NativeSlice<T> slice, int start)
 		{
@@ -136,6 +134,7 @@ namespace Unity.Collections
 
 		public int Stride
 		{
+			[CompilerGenerated]
 			get
 			{
 				return this.m_Stride;
@@ -144,6 +143,7 @@ namespace Unity.Collections
 
 		public int Length
 		{
+			[CompilerGenerated]
 			get
 			{
 				return this.m_Length;
@@ -163,6 +163,33 @@ namespace Unity.Collections
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.GetEnumerator();
+		}
+
+		public bool Equals(NativeSlice<T> other)
+		{
+			return this.m_Buffer == other.m_Buffer && this.m_Stride == other.m_Stride && this.m_Length == other.m_Length;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return !object.ReferenceEquals(null, obj) && obj is NativeSlice<T> && this.Equals((NativeSlice<T>)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			int num = this.m_Buffer;
+			num = (num * 397) ^ this.m_Stride;
+			return (num * 397) ^ this.m_Length;
+		}
+
+		public static bool operator ==(NativeSlice<T> left, NativeSlice<T> right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(NativeSlice<T> left, NativeSlice<T> right)
+		{
+			return !left.Equals(right);
 		}
 
 		[NativeDisableUnsafePtrRestriction]
@@ -198,6 +225,7 @@ namespace Unity.Collections
 
 			public T Current
 			{
+				[CompilerGenerated]
 				get
 				{
 					return this.m_Array[this.m_Index];
@@ -206,6 +234,7 @@ namespace Unity.Collections
 
 			object IEnumerator.Current
 			{
+				[CompilerGenerated]
 				get
 				{
 					return this.Current;

@@ -26,8 +26,7 @@ public class Weapon : KMonoBehaviour
 
 	public void AttackArea(Vector3 centerPoint)
 	{
-		Vector3 vector = centerPoint;
-		Vector3 vector2 = Vector3.zero;
+		Vector3 vector = Vector3.zero;
 		this.alignment = base.GetComponent<FactionAlignment>();
 		if (this.alignment == null)
 		{
@@ -36,25 +35,16 @@ public class Weapon : KMonoBehaviour
 		List<GameObject> list = new List<GameObject>();
 		foreach (Health health in Components.Health.Items)
 		{
-			if (!(health.gameObject == base.gameObject))
+			if (!(health.gameObject == base.gameObject) && !health.IsDefeated())
 			{
-				if (!health.IsDefeated())
+				FactionAlignment component = health.GetComponent<FactionAlignment>();
+				if (!(component == null) && component.IsAlignmentActive() && FactionManager.Instance.GetDisposition(this.alignment.Alignment, component.Alignment) == FactionManager.Disposition.Attack)
 				{
-					FactionAlignment component = health.GetComponent<FactionAlignment>();
-					if (!(component == null))
+					vector = health.transform.GetPosition();
+					vector.z = centerPoint.z;
+					if (Vector3.Distance(centerPoint, vector) <= this.properties.aoe_radius)
 					{
-						if (component.IsAlignmentActive())
-						{
-							if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, component.Alignment) == FactionManager.Disposition.Attack)
-							{
-								vector2 = health.transform.GetPosition();
-								vector2.z = vector.z;
-								if (Vector3.Distance(vector, vector2) <= this.properties.aoe_radius)
-								{
-									list.Add(health.gameObject);
-								}
-							}
-						}
+						list.Add(health.gameObject);
 					}
 				}
 			}

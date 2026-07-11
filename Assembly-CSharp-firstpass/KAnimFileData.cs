@@ -4,6 +4,10 @@ using System.Diagnostics;
 [DebuggerDisplay("{name}")]
 public class KAnimFileData
 {
+	public string name { get; private set; }
+
+	public KAnimHashedString hashName { get; private set; }
+
 	public KAnimFileData(string name)
 	{
 		this.name = name;
@@ -16,10 +20,6 @@ public class KAnimFileData
 		this.maxVisSymbolFrames = 0;
 		this.hashName = new KAnimHashedString(name);
 	}
-
-	public string name { get; private set; }
-
-	public KAnimHashedString hashName { get; private set; }
 
 	public KAnim.Build build
 	{
@@ -70,8 +70,7 @@ public class KAnimFileData
 
 	public KAnim.Anim.FrameElement FindAnimFrameElement(KAnimHashedString symbolName)
 	{
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
-		return batchGroupData.frameElements.Find((KAnim.Anim.FrameElement match) => match.symbol == symbolName);
+		return KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag).frameElements.Find((KAnim.Anim.FrameElement match) => match.symbol == symbolName);
 	}
 
 	public const int NO_RECORD = -1;

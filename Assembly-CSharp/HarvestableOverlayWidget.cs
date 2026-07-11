@@ -47,7 +47,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 			{
 				this.bar.SetActive(!target_harvestable.CanBeHarvested());
 			}
-			float num2 = ((!target_harvestable.CanBeHarvested()) ? (19f - 19f * num + 3f) : 3f);
+			float num2 = (target_harvestable.CanBeHarvested() ? 3f : (19f - 19f * num + 3f));
 			image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
 		}
 		else if (this.bar.activeSelf)
@@ -65,28 +65,27 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 			{
 				keyValuePair.Value.SetActive(false);
 			}
-			if (component.IsWilting())
-			{
-				this.vertical_container.SetActive(true);
-				image.color = HarvestableOverlayWidget.wilting_color;
-				List<WiltCondition.Condition> list = component.CurrentWiltSources();
-				if (list.Count > 0)
-				{
-					for (int j = 0; j < list.Count; j++)
-					{
-						if (this.condition_icons.ContainsKey(list[j]))
-						{
-							this.condition_icons[list[j]].SetActive(true);
-							this.horizontal_containers[j / 2].SetActive(true);
-							this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
-						}
-					}
-				}
-			}
-			else
+			if (!component.IsWilting())
 			{
 				this.vertical_container.SetActive(false);
 				image.color = HarvestableOverlayWidget.growing_color;
+				return;
+			}
+			this.vertical_container.SetActive(true);
+			image.color = HarvestableOverlayWidget.wilting_color;
+			List<WiltCondition.Condition> list = component.CurrentWiltSources();
+			if (list.Count > 0)
+			{
+				for (int j = 0; j < list.Count; j++)
+				{
+					if (this.condition_icons.ContainsKey(list[j]))
+					{
+						this.condition_icons[list[j]].SetActive(true);
+						this.horizontal_containers[j / 2].SetActive(true);
+						this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
+					}
+				}
+				return;
 			}
 		}
 		else

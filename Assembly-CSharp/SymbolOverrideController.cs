@@ -173,7 +173,8 @@ public class SymbolOverrideController : KMonoBehaviour
 		{
 			this.animController.SetDirty();
 		}
-		this.version++;
+		int num = this.version + 1;
+		this.version = num;
 		this.requiresSorting = true;
 	}
 

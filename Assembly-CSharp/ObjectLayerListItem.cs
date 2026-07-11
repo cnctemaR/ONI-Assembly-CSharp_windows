@@ -3,18 +3,18 @@ using UnityEngine;
 
 public class ObjectLayerListItem
 {
+	public ObjectLayerListItem previousItem { get; private set; }
+
+	public ObjectLayerListItem nextItem { get; private set; }
+
+	public GameObject gameObject { get; private set; }
+
 	public ObjectLayerListItem(GameObject gameObject, ObjectLayer layer, int new_cell)
 	{
 		this.gameObject = gameObject;
 		this.layer = layer;
 		this.Refresh(new_cell);
 	}
-
-	public ObjectLayerListItem previousItem { get; private set; }
-
-	public ObjectLayerListItem nextItem { get; private set; }
-
-	public GameObject gameObject { get; private set; }
 
 	public void Clear()
 	{

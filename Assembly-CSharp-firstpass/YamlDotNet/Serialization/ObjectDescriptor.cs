@@ -5,6 +5,14 @@ namespace YamlDotNet.Serialization
 {
 	public sealed class ObjectDescriptor : IObjectDescriptor
 	{
+		public object Value { get; private set; }
+
+		public Type Type { get; private set; }
+
+		public Type StaticType { get; private set; }
+
+		public ScalarStyle ScalarStyle { get; private set; }
+
 		public ObjectDescriptor(object value, Type type, Type staticType)
 			: this(value, type, staticType, ScalarStyle.Any)
 		{
@@ -25,13 +33,5 @@ namespace YamlDotNet.Serialization
 			this.StaticType = staticType;
 			this.ScalarStyle = scalarStyle;
 		}
-
-		public object Value { get; private set; }
-
-		public Type Type { get; private set; }
-
-		public Type StaticType { get; private set; }
-
-		public ScalarStyle ScalarStyle { get; private set; }
 	}
 }

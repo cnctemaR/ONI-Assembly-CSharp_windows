@@ -48,28 +48,13 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			}
 			foreach (Edible edible2 in Components.Edibles.Items)
 			{
-				if (!(edible2 == null))
+				if (!(edible2 == null) && !(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)) && !edible2.isBeingConsumed && edible2.GetComponent<Pickupable>().UnreservedAmount > 0f && edible2.GetComponent<Pickupable>().CouldBePickedUpByMinion(base.gameObject))
 				{
-					if (!(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)))
+					int navigationCost = component.GetNavigationCost(edible2);
+					if (navigationCost != -1 && navigationCost < num)
 					{
-						if (!edible2.isBeingConsumed)
-						{
-							if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
-							{
-								if (edible2.GetComponent<Pickupable>().CouldBePickedUpByMinion(base.gameObject))
-								{
-									int navigationCost = component.GetNavigationCost(edible2);
-									if (navigationCost != -1)
-									{
-										if (navigationCost < num)
-										{
-											num = navigationCost;
-											edible = edible2;
-										}
-									}
-								}
-							}
-						}
+						num = navigationCost;
+						edible = edible2;
 					}
 				}
 			}
@@ -78,11 +63,9 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			if (edible == null)
 			{
 				this.GoTo(base.sm.cantFindFood);
+				return;
 			}
-			else
-			{
-				this.GoTo(base.sm.fetch);
-			}
+			this.GoTo(base.sm.fetch);
 		}
 
 		public bool IsBingeEating()

@@ -6,6 +6,21 @@ namespace MIConvexHull
 {
 	internal class ConvexHullAlgorithm
 	{
+		internal static ConvexHull<TVertex, TFace> GetConvexHull<TVertex, TFace>(IList<TVertex> data, double PlaneDistanceTolerance) where TVertex : IVertex where TFace : ConvexFace<TVertex, TFace>, new()
+		{
+			ConvexHullAlgorithm convexHullAlgorithm = new ConvexHullAlgorithm(data.Cast<IVertex>().ToArray<IVertex>(), false, PlaneDistanceTolerance);
+			convexHullAlgorithm.GetConvexHull();
+			if (convexHullAlgorithm.NumOfDimensions == 2)
+			{
+				return convexHullAlgorithm.Return2DResultInOrder<TVertex, TFace>(data);
+			}
+			return new ConvexHull<TVertex, TFace>
+			{
+				Points = convexHullAlgorithm.GetHullVertices<TVertex>(data),
+				Faces = convexHullAlgorithm.GetConvexFaces<TVertex, TFace>()
+			};
+		}
+
 		private ConvexHullAlgorithm(IVertex[] vertices, bool lift, double PlaneDistanceTolerance)
 		{
 			this.IsLifted = lift;
@@ -50,21 +65,6 @@ namespace MIConvexHull
 			this.minima = new double[this.NumOfDimensions];
 			this.maxima = new double[this.NumOfDimensions];
 			this.mathHelper = new MathHelper(this.NumOfDimensions, this.Positions);
-		}
-
-		internal static ConvexHull<TVertex, TFace> GetConvexHull<TVertex, TFace>(IList<TVertex> data, double PlaneDistanceTolerance) where TVertex : IVertex where TFace : ConvexFace<TVertex, TFace>, new()
-		{
-			ConvexHullAlgorithm convexHullAlgorithm = new ConvexHullAlgorithm(data.Cast<IVertex>().ToArray<IVertex>(), false, PlaneDistanceTolerance);
-			convexHullAlgorithm.GetConvexHull();
-			if (convexHullAlgorithm.NumOfDimensions == 2)
-			{
-				return convexHullAlgorithm.Return2DResultInOrder<TVertex, TFace>(data);
-			}
-			return new ConvexHull<TVertex, TFace>
-			{
-				Points = convexHullAlgorithm.GetHullVertices<TVertex>(data),
-				Faces = convexHullAlgorithm.GetConvexFaces<TVertex, TFace>()
-			};
 		}
 
 		private int DetermineDimension()
@@ -128,15 +128,13 @@ namespace MIConvexHull
 					}
 					this.Positions[num++] = num2;
 				}
+				return;
 			}
-			else
+			foreach (IVertex vertex2 in this.Vertices)
 			{
-				foreach (IVertex vertex2 in this.Vertices)
+				for (int k = 0; k < this.NumOfDimensions; k++)
 				{
-					for (int l = 0; l < this.NumOfDimensions; l++)
-					{
-						this.Positions[num++] = vertex2.Position[l];
-					}
+					this.Positions[num++] = vertex2.Position[k];
 				}
 			}
 		}
@@ -146,12 +144,15 @@ namespace MIConvexHull
 			this.indexOfDimensionWithLeastExtremes = -1;
 			int num = int.MaxValue;
 			int i;
-			for (i = 0; i < this.NumOfDimensions; i++)
+			int i2;
+			for (i = 0; i < this.NumOfDimensions; i = i2 + 1)
 			{
 				List<int> list = new List<int>();
 				List<int> list2 = new List<int>();
 				double min = double.PositiveInfinity;
 				double num2 = double.NegativeInfinity;
+				Predicate<int> <>9__0;
+				Predicate<int> <>9__1;
 				for (int j = 0; j < this.NumberOfVertices; j++)
 				{
 					double coordinate = this.GetCoordinate(j, i);
@@ -165,7 +166,13 @@ namespace MIConvexHull
 					else if (num3 > 0.0)
 					{
 						min = coordinate;
-						list.RemoveAll((int index) => min - this.GetCoordinate(index, i) > this.PlaneDistanceTolerance);
+						List<int> list3 = list;
+						Predicate<int> predicate;
+						if ((predicate = <>9__0) == null)
+						{
+							predicate = (<>9__0 = (int index) => min - this.GetCoordinate(index, i) > this.PlaneDistanceTolerance);
+						}
+						list3.RemoveAll(predicate);
 						list.Add(j);
 					}
 					else if (num3 > -this.PlaneDistanceTolerance)
@@ -182,7 +189,13 @@ namespace MIConvexHull
 					else if (num3 > 0.0)
 					{
 						num2 = coordinate;
-						list2.RemoveAll((int index) => min - this.GetCoordinate(index, i) > this.PlaneDistanceTolerance);
+						List<int> list4 = list2;
+						Predicate<int> predicate2;
+						if ((predicate2 = <>9__1) == null)
+						{
+							predicate2 = (<>9__1 = (int index) => min - this.GetCoordinate(index, i) > this.PlaneDistanceTolerance);
+						}
+						list4.RemoveAll(predicate2);
 						list2.Add(j);
 					}
 					else if (num3 > -this.PlaneDistanceTolerance)
@@ -199,6 +212,7 @@ namespace MIConvexHull
 					this.indexOfDimensionWithLeastExtremes = i;
 				}
 				this.boundingBoxPoints[i] = list;
+				i2 = i;
 			}
 		}
 
@@ -208,7 +222,7 @@ namespace MIConvexHull
 			if (this.IsLifted)
 			{
 				int num2 = this.NumOfDimensions - 1;
-				double num3 = 2.0 / (this.minima.Sum<double>(new Func<double, double>(Math.Abs)) + this.maxima.Sum<double>(new Func<double, double>(Math.Abs)) - Math.Abs(this.maxima[num2]) - Math.Abs(this.minima[num2]));
+				double num3 = 2.0 / (this.minima.Sum<double>((double x) => Math.Abs(x)) + this.maxima.Sum<double>((double x) => Math.Abs(x)) - Math.Abs(this.maxima[num2]) - Math.Abs(this.minima[num2]));
 				this.minima[num2] *= num3;
 				this.maxima[num2] *= num3;
 				for (int i = num2; i < num; i += this.NumOfDimensions)
@@ -249,11 +263,9 @@ namespace MIConvexHull
 					{
 						if (j == list.Count)
 						{
-							int num2 = 0;
-							num2++;
 						}
-						int num3 = list[j];
-						array2[num++] = num3;
+						int num2 = list[j];
+						array2[num++] = num2;
 					}
 					j++;
 				}
@@ -270,9 +282,9 @@ namespace MIConvexHull
 					this.UpdateAdjacency(this.FacePool[array[k]], this.FacePool[array[l]]);
 				}
 			}
-			foreach (int num4 in array)
+			foreach (int num3 in array)
 			{
-				ConvexFaceInternal convexFaceInternal2 = this.FacePool[num4];
+				ConvexFaceInternal convexFaceInternal2 = this.FacePool[num3];
 				this.FindBeyondVertices(convexFaceInternal2);
 				if (convexFaceInternal2.VerticesBeyond.Count == 0)
 				{
@@ -283,9 +295,9 @@ namespace MIConvexHull
 					this.UnprocessedFaces.Add(convexFaceInternal2);
 				}
 			}
-			foreach (int num5 in list)
+			foreach (int num4 in list)
 			{
-				this.VertexVisited[num5] = false;
+				this.VertexVisited[num4] = false;
 			}
 		}
 
@@ -444,12 +456,10 @@ namespace MIConvexHull
 			{
 				this.VertexVisited[vertices2[i]] = true;
 			}
-			for (i = 0; i < vertices.Length; i++)
+			i = 0;
+			while (i < vertices.Length && this.VertexVisited[vertices[i]])
 			{
-				if (!this.VertexVisited[vertices[i]])
-				{
-					break;
-				}
+				i++;
 			}
 			if (i == this.NumOfDimensions)
 			{
@@ -467,12 +477,10 @@ namespace MIConvexHull
 			{
 				this.VertexVisited[vertices[i]] = false;
 			}
-			for (i = 0; i < vertices2.Length; i++)
+			i = 0;
+			while (i < vertices2.Length && !this.VertexVisited[vertices2[i]])
 			{
-				if (this.VertexVisited[vertices2[i]])
-				{
-					break;
-				}
+				i++;
 			}
 			r.AdjacentFaces[i] = l.Index;
 		}
@@ -534,7 +542,7 @@ namespace MIConvexHull
 		private void ConnectFace(FaceConnector connector)
 		{
 			uint num = connector.HashCode % 2017U;
-			ConnectorList connectorList = this.ConnectorTable[(int)((UIntPtr)num)];
+			ConnectorList connectorList = this.ConnectorTable[(int)num];
 			for (FaceConnector faceConnector = connectorList.First; faceConnector != null; faceConnector = faceConnector.Next)
 			{
 				if (FaceConnector.AreConnectable(connector, faceConnector, this.NumOfDimensions))
@@ -807,7 +815,7 @@ namespace MIConvexHull
 				this.Center[i] *= (double)this.ConvexHullSize;
 			}
 			this.ConvexHullSize--;
-			double num = ((this.ConvexHullSize <= 0) ? 0.0 : (1.0 / (double)this.ConvexHullSize));
+			double num = ((this.ConvexHullSize > 0) ? (1.0 / (double)this.ConvexHullSize) : 0.0);
 			int num2 = this.CurrentVertex * this.NumOfDimensions;
 			for (int j = 0; j < this.NumOfDimensions; j++)
 			{
@@ -887,7 +895,7 @@ namespace MIConvexHull
 				TFace tface = new TFace();
 				tface.Vertices = array2;
 				tface.Adjacency = new TFace[this.NumOfDimensions];
-				tface.Normal = ((!this.IsLifted) ? convexFaceInternal.Normal : null);
+				tface.Normal = (this.IsLifted ? null : convexFaceInternal.Normal);
 				array3[num] = tface;
 				convexFaceInternal.Tag = i;
 			}
@@ -941,26 +949,26 @@ namespace MIConvexHull
 				TVertex tvertex3 = list[num2];
 				if (num4 < tvertex3.Position[0])
 				{
-					goto IL_015F;
+					goto IL_0149;
 				}
 				double num5 = tvertex2.Position[0];
-				TVertex tvertex4 = list[num2];
-				if (num5 == tvertex4.Position[0])
+				tvertex3 = list[num2];
+				if (num5 == tvertex3.Position[0])
 				{
 					double num6 = tvertex2.Position[1];
-					TVertex tvertex5 = list[num2];
-					if (num6 <= tvertex5.Position[1])
+					tvertex3 = list[num2];
+					if (num6 <= tvertex3.Position[1])
 					{
-						goto IL_015F;
+						goto IL_0149;
 					}
 				}
-				IL_0163:
+				IL_014D:
 				num3++;
 				tvertex2 = tface2.Vertices[0];
 				continue;
-				IL_015F:
+				IL_0149:
 				num2 = num3;
-				goto IL_0163;
+				goto IL_014D;
 			}
 			TVertex[] array2 = new TVertex[num];
 			for (int j = 0; j < num; j++)

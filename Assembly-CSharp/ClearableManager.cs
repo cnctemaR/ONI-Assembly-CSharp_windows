@@ -41,7 +41,7 @@ internal class ClearableManager
 	{
 		ChoreType transport = Db.Get().ChoreTypes.Transport;
 		int personalPriority = consumer_state.consumer.GetPersonalPriority(transport);
-		int num = ((!Game.Instance.advancedPersonalPriorities) ? transport.priority : transport.explicitPriority);
+		int num = (Game.Instance.advancedPersonalPriorities ? transport.explicitPriority : transport.priority);
 		ClearableManager.CollectSortedClearables(consumer_state.navigator, this.markedClearables, this.sortedClearables);
 		bool flag = false;
 		foreach (ClearableManager.SortedClearable sortedClearable in this.sortedClearables)
@@ -54,8 +54,7 @@ internal class ClearableManager
 			kprefabID.UpdateTagBits();
 			foreach (GlobalChoreProvider.Fetch fetch in GlobalChoreProvider.Instance.fetches)
 			{
-				bool flag2 = kprefabID.HasAnyTags_AssumeLaundered(ref fetch.chore.tagBits);
-				if (flag2)
+				if (kprefabID.HasAnyTags_AssumeLaundered(ref fetch.chore.tagBits))
 				{
 					context.Set(fetch.chore, consumer_state, false, pickupable);
 					context.choreTypeForPermission = transport;

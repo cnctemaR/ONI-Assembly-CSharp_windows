@@ -95,29 +95,29 @@ namespace System.Diagnostics
 			return CounterSampleCalculator.ComputeCounterValue(counterSample, nextCounterSample);
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object o)
 		{
-			return obj is CounterSample && this.Equals((CounterSample)obj);
+			return o is CounterSample && this.Equals((CounterSample)o);
 		}
 
-		public bool Equals(CounterSample other)
+		public bool Equals(CounterSample sample)
 		{
-			return this.rawValue == other.rawValue && this.baseValue == other.counterFrequency && this.counterFrequency == other.counterFrequency && this.systemFrequency == other.systemFrequency && this.timeStamp == other.timeStamp && this.timeStamp100nSec == other.timeStamp100nSec && this.counterTimeStamp == other.counterTimeStamp && this.counterType == other.counterType;
+			return this.rawValue == sample.rawValue && this.baseValue == sample.counterFrequency && this.counterFrequency == sample.counterFrequency && this.systemFrequency == sample.systemFrequency && this.timeStamp == sample.timeStamp && this.timeStamp100nSec == sample.timeStamp100nSec && this.counterTimeStamp == sample.counterTimeStamp && this.counterType == sample.counterType;
+		}
+
+		public static bool operator ==(CounterSample a, CounterSample b)
+		{
+			return a.Equals(b);
+		}
+
+		public static bool operator !=(CounterSample a, CounterSample b)
+		{
+			return !a.Equals(b);
 		}
 
 		public override int GetHashCode()
 		{
 			return (int)((this.rawValue << 28) ^ ((this.baseValue << 24) ^ ((this.counterFrequency << 20) ^ ((this.systemFrequency << 16) ^ ((this.timeStamp << 8) ^ ((this.timeStamp100nSec << 4) ^ (this.counterTimeStamp ^ (long)this.counterType)))))));
-		}
-
-		public static bool operator ==(CounterSample obj1, CounterSample obj2)
-		{
-			return obj1.Equals(obj2);
-		}
-
-		public static bool operator !=(CounterSample obj1, CounterSample obj2)
-		{
-			return !obj1.Equals(obj2);
 		}
 
 		private long rawValue;

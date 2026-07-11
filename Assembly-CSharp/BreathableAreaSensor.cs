@@ -20,11 +20,9 @@ public class BreathableAreaSensor : Sensor
 			if (this.isBreathable)
 			{
 				base.Trigger(99949694, null);
+				return;
 			}
-			else
-			{
-				base.Trigger(-1189351068, null);
-			}
+			base.Trigger(-1189351068, null);
 		}
 	}
 

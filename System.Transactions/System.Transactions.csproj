@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF5A}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935665}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>System</RootNamespace>
+    <RootNamespace>System.Transactions</RootNamespace>
     <AssemblyName>System.Transactions</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net20</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultItems>False</EnableDefaultItems>
@@ -15,51 +15,63 @@
   <ItemGroup>
     <Compile Include="Consts.cs" />
     <Compile Include="Locale.cs" />
-    <Compile Include="MonoDocumentationNoteAttribute.cs" />
-    <Compile Include="MonoExtensionAttribute.cs" />
-    <Compile Include="MonoInternalNoteAttribute.cs" />
-    <Compile Include="MonoLimitationAttribute.cs" />
-    <Compile Include="MonoNotSupportedAttribute.cs" />
-    <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transactions\CommittableTransaction.cs" />
-    <Compile Include="Transactions\DependentCloneOption.cs" />
-    <Compile Include="Transactions\DependentTransaction.cs" />
-    <Compile Include="Transactions\Enlistment.cs" />
-    <Compile Include="Transactions\EnlistmentOptions.cs" />
-    <Compile Include="Transactions\EnterpriseServicesInteropOption.cs" />
-    <Compile Include="Transactions\HostCurrentTransactionCallback.cs" />
-    <Compile Include="Transactions\IDtcTransaction.cs" />
-    <Compile Include="Transactions\IEnlistmentNotification.cs" />
-    <Compile Include="Transactions\IPromotableSinglePhaseNotification.cs" />
-    <Compile Include="Transactions\ISimpleTransactionSuperior.cs" />
-    <Compile Include="Transactions\ISinglePhaseNotification.cs" />
-    <Compile Include="Transactions\IsolationLevel.cs" />
-    <Compile Include="Transactions\ITransactionPromoter.cs" />
-    <Compile Include="Transactions\PreparingEnlistment.cs" />
-    <Compile Include="Transactions\SinglePhaseEnlistment.cs" />
-    <Compile Include="Transactions\SubordinateTransaction.cs" />
-    <Compile Include="Transactions\Transaction.cs" />
-    <Compile Include="Transactions\TransactionAbortedException.cs" />
-    <Compile Include="Transactions\TransactionCompletedEventHandler.cs" />
-    <Compile Include="Transactions\TransactionEventArgs.cs" />
-    <Compile Include="Transactions\TransactionException.cs" />
-    <Compile Include="Transactions\TransactionInDoubtException.cs" />
-    <Compile Include="Transactions\TransactionInformation.cs" />
-    <Compile Include="Transactions\TransactionInterop.cs" />
-    <Compile Include="Transactions\TransactionManager.cs" />
-    <Compile Include="Transactions\TransactionManagerCommunicationException.cs" />
-    <Compile Include="Transactions\TransactionOptions.cs" />
-    <Compile Include="Transactions\TransactionPromotionException.cs" />
-    <Compile Include="Transactions\TransactionScope.cs" />
-    <Compile Include="Transactions\TransactionScopeOption.cs" />
-    <Compile Include="Transactions\TransactionStartedEventHandler.cs" />
-    <Compile Include="Transactions\TransactionStatus.cs" />
+    <Compile Include="System\MonoDocumentationNoteAttribute.cs" />
+    <Compile Include="System\MonoExtensionAttribute.cs" />
+    <Compile Include="System\MonoInternalNoteAttribute.cs" />
+    <Compile Include="System\MonoLimitationAttribute.cs" />
+    <Compile Include="System\MonoNotSupportedAttribute.cs" />
+    <Compile Include="System\MonoTODOAttribute.cs" />
+    <Compile Include="System\Transactions\CommittableTransaction.cs" />
+    <Compile Include="System\Transactions\Configuration\DefaultSettingsSection.cs" />
+    <Compile Include="System\Transactions\Configuration\MachineSettingsSection.cs" />
+    <Compile Include="System\Transactions\Configuration\TransactionsSectionGroup.cs" />
+    <Compile Include="System\Transactions\DependentCloneOption.cs" />
+    <Compile Include="System\Transactions\DependentTransaction.cs" />
+    <Compile Include="System\Transactions\DistributedTransactionPermission.cs" />
+    <Compile Include="System\Transactions\DistributedTransactionPermissionAttribute.cs" />
+    <Compile Include="System\Transactions\Enlistment.cs" />
+    <Compile Include="System\Transactions\EnlistmentOptions.cs" />
+    <Compile Include="System\Transactions\EnterpriseServicesInteropOption.cs" />
+    <Compile Include="System\Transactions\HostCurrentTransactionCallback.cs" />
+    <Compile Include="System\Transactions\IDtcTransaction.cs" />
+    <Compile Include="System\Transactions\IEnlistmentNotification.cs" />
+    <Compile Include="System\Transactions\IPromotableSinglePhaseNotification.cs" />
+    <Compile Include="System\Transactions\ISimpleTransactionSuperior.cs" />
+    <Compile Include="System\Transactions\ISinglePhaseNotification.cs" />
+    <Compile Include="System\Transactions\IsolationLevel.cs" />
+    <Compile Include="System\Transactions\ITransactionPromoter.cs" />
+    <Compile Include="System\Transactions\PreparingEnlistment.cs" />
+    <Compile Include="System\Transactions\SinglePhaseEnlistment.cs" />
+    <Compile Include="System\Transactions\SubordinateTransaction.cs" />
+    <Compile Include="System\Transactions\Transaction.cs" />
+    <Compile Include="System\Transactions\TransactionAbortedException.cs" />
+    <Compile Include="System\Transactions\TransactionCompletedEventHandler.cs" />
+    <Compile Include="System\Transactions\TransactionEventArgs.cs" />
+    <Compile Include="System\Transactions\TransactionException.cs" />
+    <Compile Include="System\Transactions\TransactionInDoubtException.cs" />
+    <Compile Include="System\Transactions\TransactionInformation.cs" />
+    <Compile Include="System\Transactions\TransactionInterop.cs" />
+    <Compile Include="System\Transactions\TransactionManager.cs" />
+    <Compile Include="System\Transactions\TransactionManagerCommunicationException.cs" />
+    <Compile Include="System\Transactions\TransactionOptions.cs" />
+    <Compile Include="System\Transactions\TransactionPromotionException.cs" />
+    <Compile Include="System\Transactions\TransactionScope.cs" />
+    <Compile Include="System\Transactions\TransactionScopeAsyncFlowOption.cs" />
+    <Compile Include="System\Transactions\TransactionScopeOption.cs" />
+    <Compile Include="System\Transactions\TransactionStartedEventHandler.cs" />
+    <Compile Include="System\Transactions\TransactionStatus.cs" />
+    <Compile Include="Unity\ThrowStub.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC93565A}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC93565C}</Project>
+      <Name>System.Configuration</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

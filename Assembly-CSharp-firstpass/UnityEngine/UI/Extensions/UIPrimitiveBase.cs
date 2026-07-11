@@ -23,7 +23,11 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
-				return (!(this.m_OverrideSprite == null)) ? this.m_OverrideSprite : this.sprite;
+				if (!(this.m_OverrideSprite == null))
+				{
+					return this.m_OverrideSprite;
+				}
+				return this.sprite;
 			}
 			set
 			{
@@ -215,11 +219,11 @@ namespace UnityEngine.UI.Extensions
 				{
 					float num2 = rect.size[i] / num;
 					ref Vector4 ptr = ref border;
-					int num3;
-					border[num3 = i] = ptr[num3] * num2;
+					int num3 = i;
+					ptr[num3] *= num2;
 					ptr = ref border;
-					int num4;
-					border[num4 = i + 2] = ptr[num4] * num2;
+					num3 = i + 2;
+					ptr[num3] *= num2;
 				}
 			}
 			return border;

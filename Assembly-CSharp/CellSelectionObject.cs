@@ -171,26 +171,24 @@ public class CellSelectionObject : KMonoBehaviour
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, true);
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalMass, true);
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalDisease, true);
+			return;
 		}
-		else
+		if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalCategory))
 		{
-			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalCategory))
-			{
-				Func<Element> func = () => this.element;
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalCategory, func);
-			}
-			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalTemperature))
-			{
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, this);
-			}
-			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalMass))
-			{
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalMass, this);
-			}
-			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalDisease))
-			{
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalDisease, this);
-			}
+			Func<Element> func = () => this.element;
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalCategory, func);
+		}
+		if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalTemperature))
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, this);
+		}
+		if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalMass))
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalMass, this);
+		}
+		if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalDisease))
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalDisease, this);
 		}
 	}
 

@@ -10,12 +10,8 @@ namespace TMPro
 {
 	[AddComponentMenu("UI/TMP Dropdown", 35)]
 	[RequireComponent(typeof(RectTransform))]
-	public class TMP_Dropdown : Selectable, IPointerClickHandler, ISubmitHandler, ICancelHandler, IEventSystemHandler
+	public class TMP_Dropdown : Selectable, IPointerClickHandler, IEventSystemHandler, ISubmitHandler, ICancelHandler
 	{
-		protected TMP_Dropdown()
-		{
-		}
-
 		public RectTransform template
 		{
 			get
@@ -132,6 +128,10 @@ namespace TMPro
 			}
 		}
 
+		protected TMP_Dropdown()
+		{
+		}
+
 		protected override void Awake()
 		{
 			this.m_AlphaTweenRunner = new TweenRunner<FloatTween>();
@@ -161,7 +161,7 @@ namespace TMPro
 				}
 				else
 				{
-					this.m_CaptionText.text = string.Empty;
+					this.m_CaptionText.text = "";
 				}
 			}
 			if (this.m_CaptionImage)
@@ -313,8 +313,7 @@ namespace TMPro
 			RectTransform rectTransform = this.m_Dropdown.transform as RectTransform;
 			rectTransform.SetParent(this.m_Template.transform.parent, false);
 			TMP_Dropdown.DropdownItem componentInChildren = this.m_Dropdown.GetComponentInChildren<TMP_Dropdown.DropdownItem>();
-			GameObject gameObject = componentInChildren.rectTransform.parent.gameObject;
-			RectTransform rectTransform2 = gameObject.transform as RectTransform;
+			RectTransform rectTransform2 = componentInChildren.rectTransform.parent.gameObject.transform as RectTransform;
 			componentInChildren.rectTransform.gameObject.SetActive(true);
 			Rect rect = rectTransform2.rect;
 			Rect rect2 = componentInChildren.rectTransform.rect;
@@ -411,10 +410,8 @@ namespace TMPro
 			canvas.sortingLayerID = component.sortingLayerID;
 			canvas.sortingOrder = component.sortingOrder - 1;
 			gameObject.AddComponent<GraphicRaycaster>();
-			Image image = gameObject.AddComponent<Image>();
-			image.color = Color.clear;
-			Button button = gameObject.AddComponent<Button>();
-			button.onClick.AddListener(new UnityAction(this.Hide));
+			gameObject.AddComponent<Image>().color = Color.clear;
+			gameObject.AddComponent<Button>().onClick.AddListener(new UnityAction(this.Hide));
 			return gameObject;
 		}
 
@@ -447,7 +444,7 @@ namespace TMPro
 			TMP_Dropdown.DropdownItem dropdownItem = this.CreateItem(itemTemplate);
 			dropdownItem.rectTransform.SetParent(itemTemplate.rectTransform.parent, false);
 			dropdownItem.gameObject.SetActive(true);
-			dropdownItem.gameObject.name = "Item " + items.Count + ((data.text == null) ? string.Empty : (": " + data.text));
+			dropdownItem.gameObject.name = "Item " + items.Count + ((data.text != null) ? (": " + data.text) : "");
 			if (dropdownItem.toggle != null)
 			{
 				dropdownItem.toggle.isOn = false;
@@ -494,8 +491,7 @@ namespace TMPro
 			{
 				return;
 			}
-			CanvasGroup component = this.m_Dropdown.GetComponent<CanvasGroup>();
-			component.alpha = alpha;
+			this.m_Dropdown.GetComponent<CanvasGroup>().alpha = alpha;
 		}
 
 		public void Hide()
@@ -600,7 +596,7 @@ namespace TMPro
 
 		private static TMP_Dropdown.OptionData s_NoOptionData = new TMP_Dropdown.OptionData();
 
-		protected internal class DropdownItem : MonoBehaviour, IPointerEnterHandler, ICancelHandler, IEventSystemHandler
+		protected internal class DropdownItem : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, ICancelHandler
 		{
 			public TMP_Text text
 			{
@@ -680,26 +676,6 @@ namespace TMPro
 		[Serializable]
 		public class OptionData
 		{
-			public OptionData()
-			{
-			}
-
-			public OptionData(string text)
-			{
-				this.text = text;
-			}
-
-			public OptionData(Sprite image)
-			{
-				this.image = image;
-			}
-
-			public OptionData(string text, Sprite image)
-			{
-				this.text = text;
-				this.image = image;
-			}
-
 			public string text
 			{
 				get
@@ -724,6 +700,26 @@ namespace TMPro
 				}
 			}
 
+			public OptionData()
+			{
+			}
+
+			public OptionData(string text)
+			{
+				this.text = text;
+			}
+
+			public OptionData(Sprite image)
+			{
+				this.image = image;
+			}
+
+			public OptionData(string text, Sprite image)
+			{
+				this.text = text;
+				this.image = image;
+			}
+
 			[SerializeField]
 			private string m_Text;
 
@@ -734,11 +730,6 @@ namespace TMPro
 		[Serializable]
 		public class OptionDataList
 		{
-			public OptionDataList()
-			{
-				this.options = new List<TMP_Dropdown.OptionData>();
-			}
-
 			public List<TMP_Dropdown.OptionData> options
 			{
 				get
@@ -749,6 +740,11 @@ namespace TMPro
 				{
 					this.m_Options = value;
 				}
+			}
+
+			public OptionDataList()
+			{
+				this.options = new List<TMP_Dropdown.OptionData>();
 			}
 
 			[SerializeField]

@@ -3,9 +3,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>A IPlayableOutput implementation that contains a script output for the a PlayableGraph.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	public struct ScriptPlayableOutput : IPlayableOutput
 	{
@@ -21,14 +18,6 @@ namespace UnityEngine.Playables
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates a new ScriptPlayableOutput in the associated PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph that will contain the ScriptPlayableOutput.</param>
-		/// <param name="name">The name of this ScriptPlayableOutput.</param>
-		/// <returns>
-		///   <para>The created ScriptPlayableOutput.</para>
-		/// </returns>
 		public static ScriptPlayableOutput Create(PlayableGraph graph, string name)
 		{
 			PlayableOutputHandle playableOutputHandle;
@@ -44,9 +33,6 @@ namespace UnityEngine.Playables
 			return scriptPlayableOutput;
 		}
 
-		/// <summary>
-		///   <para>Returns an invalid ScriptPlayableOutput.</para>
-		/// </summary>
 		public static ScriptPlayableOutput Null
 		{
 			get

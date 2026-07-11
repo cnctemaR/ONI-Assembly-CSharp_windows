@@ -5,9 +5,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Data of a lightmap.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/LightmapData.h")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -26,9 +23,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Lightmap storing color of incoming light.</para>
-		/// </summary>
 		public Texture2D lightmapColor
 		{
 			get
@@ -41,9 +35,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Lightmap storing dominant direction of incoming light.</para>
-		/// </summary>
 		public Texture2D lightmapDir
 		{
 			get
@@ -56,9 +47,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Texture storing occlusion mask per light (ShadowMask, up to four lights).</para>
-		/// </summary>
 		public Texture2D shadowMask
 		{
 			get

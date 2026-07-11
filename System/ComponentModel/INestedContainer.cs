@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel
 {
-	public interface INestedContainer : IDisposable, IContainer
+	public interface INestedContainer : IContainer, IDisposable
 	{
 		IComponent Owner { get; }
 	}

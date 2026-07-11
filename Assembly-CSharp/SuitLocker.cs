@@ -37,12 +37,9 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			if (!(gameObject == null))
 			{
 				KPrefabID component = gameObject.GetComponent<KPrefabID>();
-				if (!(component == null))
+				if (!(component == null) && component.HasAnyTags(this.OutfitTags))
 				{
-					if (component.HasAnyTags(this.OutfitTags))
-					{
-						return component;
-					}
+					return component;
 				}
 			}
 		}
@@ -105,12 +102,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private void CreateFetchChore()
 	{
-		ChoreType storageFetch = Db.Get().ChoreTypes.StorageFetch;
-		Storage component = base.GetComponent<Storage>();
-		float num = 1f;
-		Tag[] outfitTags = this.OutfitTags;
-		Tag[] array = new Tag[] { GameTags.Assigned };
-		this.fetchChore = new FetchChore(storageFetch, component, num, outfitTags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.StorageFetch, base.GetComponent<Storage>(), 1f, this.OutfitTags, null, new Tag[] { GameTags.Assigned }, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
 		this.fetchChore.allowMultifetch = false;
 	}
 
@@ -274,19 +266,14 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		{
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoSuitMarker, false);
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SuitMarkerWrongSide, false);
-			if (suitMarkerState != SuitLocker.SuitMarkerState.HasMarker)
+			switch (suitMarkerState)
 			{
-				if (suitMarkerState != SuitLocker.SuitMarkerState.NoMarker)
-				{
-					if (suitMarkerState == SuitLocker.SuitMarkerState.WrongSide)
-					{
-						base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SuitMarkerWrongSide, null);
-					}
-				}
-				else
-				{
-					base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoSuitMarker, null);
-				}
+			case SuitLocker.SuitMarkerState.NoMarker:
+				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoSuitMarker, null);
+				break;
+			case SuitLocker.SuitMarkerState.WrongSide:
+				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SuitMarkerWrongSide, null);
+				break;
 			}
 			this.suitMarkerState = suitMarkerState;
 		}
@@ -304,12 +291,9 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		for (;;)
 		{
 			int num2 = Grid.OffsetCell(cell, num, 0);
-			if (Grid.IsValidCell(num2))
+			if (Grid.IsValidCell(num2) && !SuitLocker.GatherSuitBuildingsOnCell(num2, suit_lockers, suit_markers))
 			{
-				if (!SuitLocker.GatherSuitBuildingsOnCell(num2, suit_lockers, suit_markers))
-				{
-					break;
-				}
+				break;
 			}
 			num += dir;
 		}
@@ -439,37 +423,6 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	public class ReturnSuitWorkable : Workable
 	{
-		public ReturnSuitWorkable()
-		{
-			Chore.Precondition precondition = default(Chore.Precondition);
-			precondition.id = "IsValid";
-			precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER;
-			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-			{
-				SuitLocker suitLocker = (SuitLocker)data;
-				return suitLocker.suitMarkerState == SuitLocker.SuitMarkerState.HasMarker;
-			};
-			this.HasSuitMarker = precondition;
-			Chore.Precondition precondition2 = default(Chore.Precondition);
-			precondition2.id = "IsValid";
-			precondition2.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER;
-			precondition2.fn = delegate(ref Chore.Precondition.Context context, object data)
-			{
-				SuitLocker suitLocker2 = (SuitLocker)data;
-				Equipment equipment = context.consumerState.equipment;
-				AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
-				if (slot.assignable == null)
-				{
-					return false;
-				}
-				bool flag = slot.assignable.GetComponent<JetSuitTank>() != null;
-				bool flag2 = suitLocker2.GetComponent<JetSuitLocker>() != null;
-				return flag == flag2;
-			};
-			this.SuitTypeMatchesLocker = precondition2;
-			base..ctor();
-		}
-
 		protected override void OnPrefabInit()
 		{
 			base.OnPrefabInit();
@@ -523,15 +476,13 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			Equipment equipment = worker.GetComponent<MinionIdentity>().GetEquipment();
 			if (equipment.IsSlotOccupied(Db.Get().AssignableSlots.Suit))
 			{
-				SuitLocker component = base.GetComponent<SuitLocker>();
-				if (component.CanDropOffSuit())
+				if (base.GetComponent<SuitLocker>().CanDropOffSuit())
 				{
 					base.GetComponent<SuitLocker>().UnequipFrom(equipment);
 				}
 				else
 				{
-					Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
-					assignable.Unassign();
+					equipment.GetAssignable(Db.Get().AssignableSlots.Suit).Unassign();
 				}
 			}
 			if (this.urgentChore != null)
@@ -549,14 +500,42 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			};
 		}
 
+		public ReturnSuitWorkable()
+		{
+			Chore.Precondition precondition = default(Chore.Precondition);
+			precondition.id = "IsValid";
+			precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER;
+			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				return ((SuitLocker)data).suitMarkerState == SuitLocker.SuitMarkerState.HasMarker;
+			};
+			this.HasSuitMarker = precondition;
+			precondition = default(Chore.Precondition);
+			precondition.id = "IsValid";
+			precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_SUIT_MARKER;
+			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				SuitLocker suitLocker = (SuitLocker)data;
+				AssignableSlotInstance slot = context.consumerState.equipment.GetSlot(Db.Get().AssignableSlots.Suit);
+				if (slot.assignable == null)
+				{
+					return false;
+				}
+				bool flag = slot.assignable.GetComponent<JetSuitTank>() != null;
+				bool flag2 = suitLocker.GetComponent<JetSuitLocker>() != null;
+				return flag == flag2;
+			};
+			this.SuitTypeMatchesLocker = precondition;
+			base..ctor();
+		}
+
 		public static readonly Chore.Precondition DoesSuitNeedRechargingUrgent = new Chore.Precondition
 		{
 			id = "DoesSuitNeedRechargingUrgent",
 			description = DUPLICANTS.CHORES.PRECONDITIONS.DOES_SUIT_NEED_RECHARGING_URGENT,
 			fn = delegate(ref Chore.Precondition.Context context, object data)
 			{
-				Equipment equipment = context.consumerState.equipment;
-				AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
+				AssignableSlotInstance slot = context.consumerState.equipment.GetSlot(Db.Get().AssignableSlots.Suit);
 				if (slot.assignable == null)
 				{
 					return false;
@@ -581,14 +560,8 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			description = DUPLICANTS.CHORES.PRECONDITIONS.DOES_SUIT_NEED_RECHARGING_IDLE,
 			fn = delegate(ref Chore.Precondition.Context context, object data)
 			{
-				Equipment equipment2 = context.consumerState.equipment;
-				AssignableSlotInstance slot2 = equipment2.GetSlot(Db.Get().AssignableSlots.Suit);
-				if (slot2.assignable == null)
-				{
-					return false;
-				}
-				SuitTank component3 = slot2.assignable.GetComponent<SuitTank>();
-				return !(component3 == null);
+				AssignableSlotInstance slot2 = context.consumerState.equipment.GetSlot(Db.Get().AssignableSlots.Suit);
+				return !(slot2.assignable == null) && !(slot2.assignable.GetComponent<SuitTank>() == null);
 			}
 		};
 
@@ -631,20 +604,9 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				})
 				.PlayAnim("no_suit_pre")
 				.QueueAnim("no_suit", false, null);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state = this.empty.notconfigured.ParamTransition<bool>(this.isConfigured, this.empty.configured, GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.IsTrue);
-			string text = BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.NAME;
-			string text2 = BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.TOOLTIP;
-			string text3 = "status_item_no_filter_set";
-			StatusItem.IconType iconType = StatusItem.IconType.Custom;
-			NotificationType notificationType = NotificationType.BadMinor;
-			StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state.ToggleStatusItem(text, text2, text3, iconType, notificationType, false, default(HashedString), 0, null, null, statusItemCategory);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state2 = this.empty.configured.RefreshUserMenuOnEnter();
-			text3 = BUILDING.STATUSITEMS.SUIT_LOCKER.READY.NAME;
-			text2 = BUILDING.STATUSITEMS.SUIT_LOCKER.READY.TOOLTIP;
-			statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state2.ToggleStatusItem(text3, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state3 = this.waitingforsuit.EventTransition(GameHashes.OnStorageChange, this.charging, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() != null).Enter("CreateFetchChore", delegate(SuitLocker.StatesInstance smi)
+			this.empty.notconfigured.ParamTransition<bool>(this.isConfigured, this.empty.configured, GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.IsTrue).ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.TOOLTIP, "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+			this.empty.configured.RefreshUserMenuOnEnter().ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.READY.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.READY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+			this.waitingforsuit.EventTransition(GameHashes.OnStorageChange, this.charging, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() != null).Enter("CreateFetchChore", delegate(SuitLocker.StatesInstance smi)
 			{
 				smi.master.CreateFetchChore();
 			}).ParamTransition<bool>(this.isWaitingForSuit, this.empty, GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.IsFalse)
@@ -658,25 +620,20 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				.Exit("CancelFetchChore", delegate(SuitLocker.StatesInstance smi)
 				{
 					smi.master.CancelFetchChore();
-				});
-			text2 = BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.NAME;
-			text3 = BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.TOOLTIP;
-			statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state3.ToggleStatusItem(text2, text3, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
+				})
+				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 			this.charging.DefaultState(this.charging.pre).RefreshUserMenuOnEnter().EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null);
 			this.charging.pre.Enter(delegate(SuitLocker.StatesInstance smi)
 			{
 				if (smi.master.IsSuitFullyCharged())
 				{
 					smi.GoTo(this.suitfullycharged);
+					return;
 				}
-				else
-				{
-					smi.GetComponent<KBatchedAnimController>().Play("no_suit_pst", KAnim.PlayMode.Once, 1f, 0f);
-					smi.GetComponent<KBatchedAnimController>().Queue("charging_pre", KAnim.PlayMode.Once, 1f, 0f);
-				}
+				smi.GetComponent<KBatchedAnimController>().Play("no_suit_pst", KAnim.PlayMode.Once, 1f, 0f);
+				smi.GetComponent<KBatchedAnimController>().Queue("charging_pre", KAnim.PlayMode.Once, 1f, 0f);
 			}).OnAnimQueueComplete(this.charging.operational);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state4 = this.charging.operational.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.nooxygen, (SuitLocker.StatesInstance smi) => !smi.master.HasOxygen(), UpdateRate.SIM_200ms).PlayAnim("charging_loop", KAnim.PlayMode.Loop)
+			this.charging.operational.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.nooxygen, (SuitLocker.StatesInstance smi) => !smi.master.HasOxygen(), UpdateRate.SIM_200ms).PlayAnim("charging_loop", KAnim.PlayMode.Loop)
 				.Enter("SetActive", delegate(SuitLocker.StatesInstance smi)
 				{
 					smi.master.GetComponent<Operational>().SetActive(true, false);
@@ -689,31 +646,16 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				.Exit("ClearActive", delegate(SuitLocker.StatesInstance smi)
 				{
 					smi.master.GetComponent<Operational>().SetActive(false, false);
-				});
-			text3 = BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.NAME;
-			text2 = BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.TOOLTIP;
-			statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state4.ToggleStatusItem(text3, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state5 = this.charging.nooxygen.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.operational, (SuitLocker.StatesInstance smi) => smi.master.HasOxygen(), UpdateRate.SIM_200ms).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms)
-				.PlayAnim("no_o2_loop", KAnim.PlayMode.Loop);
-			text2 = BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.NAME;
-			text3 = BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.TOOLTIP;
-			text = "status_item_suit_locker_no_oxygen";
-			iconType = StatusItem.IconType.Custom;
-			notificationType = NotificationType.BadMinor;
-			statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state5.ToggleStatusItem(text2, text3, text, iconType, notificationType, false, default(HashedString), 0, null, null, statusItemCategory);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state6 = this.charging.notoperational.TagTransition(GameTags.Operational, this.charging.operational, false).PlayAnim("not_charging_loop", KAnim.PlayMode.Loop).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms);
-			text = BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.NAME;
-			text3 = BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.TOOLTIP;
-			statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state6.ToggleStatusItem(text, text3, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
+				})
+				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+			this.charging.nooxygen.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.operational, (SuitLocker.StatesInstance smi) => smi.master.HasOxygen(), UpdateRate.SIM_200ms).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms)
+				.PlayAnim("no_o2_loop", KAnim.PlayMode.Loop)
+				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.TOOLTIP, "status_item_suit_locker_no_oxygen", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+			this.charging.notoperational.TagTransition(GameTags.Operational, this.charging.operational, false).PlayAnim("not_charging_loop", KAnim.PlayMode.Loop).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms)
+				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 			this.charging.pst.PlayAnim("charging_pst").OnAnimQueueComplete(this.suitfullycharged);
-			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state7 = this.suitfullycharged.EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null).PlayAnim("has_suit").RefreshUserMenuOnEnter();
-			text3 = BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.NAME;
-			text = BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.TOOLTIP;
-			statusItemCategory = Db.Get().StatusItemCategories.Main;
-			state7.ToggleStatusItem(text3, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
+			this.suitfullycharged.EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null).PlayAnim("has_suit").RefreshUserMenuOnEnter()
+				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		}
 
 		public SuitLocker.States.EmptyStates empty;

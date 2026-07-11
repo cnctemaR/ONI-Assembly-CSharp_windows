@@ -32,21 +32,17 @@ public class Fashionable : StateMachineComponent<Fashionable.StatesInstance>
 				if (smi.master.IsUncomfortable())
 				{
 					smi.GoTo(this.suffering);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.satisfied);
-				}
+				smi.GoTo(this.satisfied);
 			}).EventHandler(GameHashes.UnequippedItemEquipper, delegate(Fashionable.StatesInstance smi)
 			{
 				if (smi.master.IsUncomfortable())
 				{
 					smi.GoTo(this.suffering);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.satisfied);
-				}
+				smi.GoTo(this.satisfied);
 			});
 			this.suffering.AddEffect("UnfashionableClothing").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();

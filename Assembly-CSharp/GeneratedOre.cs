@@ -12,42 +12,37 @@ public class GeneratedOre
 		{
 			if (typeFromHandle.IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
 			{
-				object obj = Activator.CreateInstance(type);
-				IOreConfig oreConfig = obj as IOreConfig;
+				IOreConfig oreConfig = Activator.CreateInstance(type) as IOreConfig;
 				SimHashes elementID = oreConfig.ElementID;
 				if (elementID != SimHashes.Void)
 				{
 					hashSet.Add(elementID);
 				}
-				GameObject gameObject = oreConfig.CreatePrefab();
-				KPrefabID component = gameObject.GetComponent<KPrefabID>();
-				Assets.AddPrefab(component);
+				Assets.AddPrefab(oreConfig.CreatePrefab().GetComponent<KPrefabID>());
 			}
 		}
-		List<Element> elements = ElementLoader.elements;
-		foreach (Element element in elements)
+		foreach (Element element in ElementLoader.elements)
 		{
 			if (element != null && !hashSet.Contains(element.id))
 			{
 				if (element.substance != null && element.substance.anim != null)
 				{
-					GameObject gameObject2 = null;
+					GameObject gameObject = null;
 					if (element.IsSolid)
 					{
-						gameObject2 = EntityTemplates.CreateSolidOreEntity(element.id, null);
+						gameObject = EntityTemplates.CreateSolidOreEntity(element.id, null);
 					}
 					else if (element.IsLiquid)
 					{
-						gameObject2 = EntityTemplates.CreateLiquidOreEntity(element.id, null);
+						gameObject = EntityTemplates.CreateLiquidOreEntity(element.id, null);
 					}
 					else if (element.IsGas)
 					{
-						gameObject2 = EntityTemplates.CreateGasOreEntity(element.id, null);
+						gameObject = EntityTemplates.CreateGasOreEntity(element.id, null);
 					}
-					if (gameObject2 != null)
+					if (gameObject != null)
 					{
-						KPrefabID component2 = gameObject2.GetComponent<KPrefabID>();
-						Assets.AddPrefab(component2);
+						Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 					}
 				}
 				else
@@ -76,8 +71,7 @@ public class GeneratedOre
 		component2.Mass = mass;
 		component2.Temperature = temperature;
 		component2.AddDisease(diseaseIdx, diseaseCount, "GeneratedOre.CreateChunk");
-		KPrefabID component3 = component.GetComponent<KPrefabID>();
-		component3.InitializeTags();
+		component.GetComponent<KPrefabID>().InitializeTags();
 		return component;
 	}
 }

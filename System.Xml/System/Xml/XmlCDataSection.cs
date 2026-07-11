@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.XPath;
 
 namespace System.Xml
 {
@@ -9,19 +10,19 @@ namespace System.Xml
 		{
 		}
 
-		public override string LocalName
-		{
-			get
-			{
-				return "#cdata-section";
-			}
-		}
-
 		public override string Name
 		{
 			get
 			{
-				return "#cdata-section";
+				return this.OwnerDocument.strCDataSectionName;
+			}
+		}
+
+		public override string LocalName
+		{
+			get
+			{
+				return this.OwnerDocument.strCDataSectionName;
 			}
 		}
 
@@ -37,22 +38,67 @@ namespace System.Xml
 		{
 			get
 			{
-				return base.ParentNode;
+				XmlNodeType nodeType = this.parentNode.NodeType;
+				if (nodeType - XmlNodeType.Text > 1)
+				{
+					if (nodeType == XmlNodeType.Document)
+					{
+						return null;
+					}
+					if (nodeType - XmlNodeType.Whitespace > 1)
+					{
+						return this.parentNode;
+					}
+				}
+				XmlNode xmlNode = this.parentNode.parentNode;
+				while (xmlNode.IsText)
+				{
+					xmlNode = xmlNode.parentNode;
+				}
+				return xmlNode;
 			}
 		}
 
 		public override XmlNode CloneNode(bool deep)
 		{
-			return new XmlCDataSection(this.Data, this.OwnerDocument);
+			return this.OwnerDocument.CreateCDataSection(this.Data);
+		}
+
+		public override void WriteTo(XmlWriter w)
+		{
+			w.WriteCData(this.Data);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
-		public override void WriteTo(XmlWriter w)
+		internal override XPathNodeType XPNodeType
 		{
-			w.WriteCData(this.Data);
+			get
+			{
+				return XPathNodeType.Text;
+			}
+		}
+
+		internal override bool IsText
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public override XmlNode PreviousText
+		{
+			get
+			{
+				if (this.parentNode.IsText)
+				{
+					return this.parentNode;
+				}
+				return null;
+			}
 		}
 	}
 }

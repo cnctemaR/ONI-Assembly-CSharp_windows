@@ -25,7 +25,8 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 
 	protected override void OnSpawn(HandleVector<int>.Handle handle)
 	{
-		OreSizeVisualizerComponents.OnMassChanged(handle, base.GetData(handle).primaryElement.GetComponent<Pickupable>());
+		OreSizeVisualizerData data = base.GetData(handle);
+		OreSizeVisualizerComponents.OnMassChanged(handle, data.primaryElement.GetComponent<Pickupable>());
 	}
 
 	protected override void OnCleanUp(HandleVector<int>.Handle handle)
@@ -45,8 +46,7 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		float num = primaryElement.Mass;
 		if (other_data != null)
 		{
-			Pickupable pickupable = (Pickupable)other_data;
-			PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
+			PrimaryElement component = ((Pickupable)other_data).GetComponent<PrimaryElement>();
 			num += component.Mass;
 		}
 		OreSizeVisualizerComponents.MassTier massTier = default(OreSizeVisualizerComponents.MassTier);
@@ -58,12 +58,11 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 				break;
 			}
 		}
-		KBatchedAnimController component2 = primaryElement.GetComponent<KBatchedAnimController>();
-		component2.Play(massTier.animName, KAnim.PlayMode.Once, 1f, 0f);
-		KCircleCollider2D component3 = primaryElement.GetComponent<KCircleCollider2D>();
-		if (component3 != null)
+		primaryElement.GetComponent<KBatchedAnimController>().Play(massTier.animName, KAnim.PlayMode.Once, 1f, 0f);
+		KCircleCollider2D component2 = primaryElement.GetComponent<KCircleCollider2D>();
+		if (component2 != null)
 		{
-			component3.radius = massTier.colliderRadius;
+			component2.radius = massTier.colliderRadius;
 		}
 		primaryElement.Trigger(1807976145, null);
 	}

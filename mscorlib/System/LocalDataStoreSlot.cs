@@ -1,58 +1,40 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading;
+using Unity;
 
 namespace System
 {
 	[ComVisible(true)]
 	public sealed class LocalDataStoreSlot
 	{
-		internal LocalDataStoreSlot(bool in_thread)
+		internal LocalDataStoreSlot(LocalDataStoreMgr mgr, int slot, long cookie)
 		{
-			this.thread_local = in_thread;
-			object obj = LocalDataStoreSlot.lock_obj;
-			lock (obj)
+			this.m_mgr = mgr;
+			this.m_slot = slot;
+			this.m_cookie = cookie;
+		}
+
+		internal LocalDataStoreMgr Manager
+		{
+			get
 			{
-				bool[] array;
-				if (in_thread)
-				{
-					array = LocalDataStoreSlot.slot_bitmap_thread;
-				}
-				else
-				{
-					array = LocalDataStoreSlot.slot_bitmap_context;
-				}
-				int i;
-				if (array != null)
-				{
-					for (i = 0; i < array.Length; i++)
-					{
-						if (!array[i])
-						{
-							this.slot = i;
-							array[i] = true;
-							return;
-						}
-					}
-					bool[] array2 = new bool[i + 2];
-					array.CopyTo(array2, 0);
-					array = array2;
-				}
-				else
-				{
-					array = new bool[2];
-					i = 0;
-				}
-				array[i] = true;
-				this.slot = i;
-				if (in_thread)
-				{
-					LocalDataStoreSlot.slot_bitmap_thread = array;
-				}
-				else
-				{
-					LocalDataStoreSlot.slot_bitmap_context = array;
-				}
+				return this.m_mgr;
+			}
+		}
+
+		internal int Slot
+		{
+			get
+			{
+				return this.m_slot;
+			}
+		}
+
+		internal long Cookie
+		{
+			get
+			{
+				return this.m_cookie;
 			}
 		}
 
@@ -60,18 +42,12 @@ namespace System
 		{
 			try
 			{
-				Thread.FreeLocalSlotValues(this.slot, this.thread_local);
-				object obj = LocalDataStoreSlot.lock_obj;
-				lock (obj)
+				LocalDataStoreMgr mgr = this.m_mgr;
+				if (mgr != null)
 				{
-					if (this.thread_local)
-					{
-						LocalDataStoreSlot.slot_bitmap_thread[this.slot] = false;
-					}
-					else
-					{
-						LocalDataStoreSlot.slot_bitmap_context[this.slot] = false;
-					}
+					int slot = this.m_slot;
+					this.m_slot = -1;
+					mgr.FreeDataSlot(slot, this.m_cookie);
 				}
 			}
 			finally
@@ -80,14 +56,15 @@ namespace System
 			}
 		}
 
-		internal int slot;
+		internal LocalDataStoreSlot()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
 
-		internal bool thread_local;
+		private LocalDataStoreMgr m_mgr;
 
-		private static object lock_obj = new object();
+		private int m_slot;
 
-		private static bool[] slot_bitmap_thread;
-
-		private static bool[] slot_bitmap_context;
+		private long m_cookie;
 	}
 }

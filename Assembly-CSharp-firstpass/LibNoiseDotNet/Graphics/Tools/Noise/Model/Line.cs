@@ -4,15 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Model
 {
 	public class Line : AbstractModel
 	{
-		public Line()
-		{
-		}
-
-		public Line(IModule module)
-			: base(module)
-		{
-		}
-
 		public bool Attenuate
 		{
 			get
@@ -23,6 +14,15 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Model
 			{
 				this._attenuate = value;
 			}
+		}
+
+		public Line()
+		{
+		}
+
+		public Line(IModule module)
+			: base(module)
+		{
 		}
 
 		public void SetStartPoint(float x, float y, float z)

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.Hosting;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
+using Unity;
 
 namespace System.Security
 {
@@ -43,13 +44,11 @@ namespace System.Security
 			}
 			if (activationArguments == null)
 			{
-				string text = Locale.GetText("No {0} found in {1}.");
-				throw new ArgumentException(string.Format(text, "ActivationArguments", "Evidence"), "applicationEvidence");
+				throw new ArgumentException(string.Format(Locale.GetText("No {0} found in {1}."), "ActivationArguments", "Evidence"), "applicationEvidence");
 			}
 			if (activationArguments.ActivationContext == null)
 			{
-				string text2 = Locale.GetText("No {0} found in {1}.");
-				throw new ArgumentException(string.Format(text2, "ActivationContext", "ActivationArguments"), "applicationEvidence");
+				throw new ArgumentException(string.Format(Locale.GetText("No {0} found in {1}."), "ActivationContext", "ActivationArguments"), "applicationEvidence");
 			}
 			if (!ApplicationSecurityManager.DetermineApplicationTrust(activationArguments.ActivationContext, context))
 			{
@@ -79,6 +78,30 @@ namespace System.Security
 				throw new NullReferenceException("evidence");
 			}
 			return SecurityManager.ResolvePolicy(evidence);
+		}
+
+		public virtual EvidenceBase GenerateAppDomainEvidence(Type evidenceType)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		public virtual EvidenceBase GenerateAssemblyEvidence(Type evidenceType, Assembly assembly)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		public virtual Type[] GetHostSuppliedAppDomainEvidenceTypes()
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		public virtual Type[] GetHostSuppliedAssemblyEvidenceTypes(Assembly assembly)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
 		}
 	}
 }

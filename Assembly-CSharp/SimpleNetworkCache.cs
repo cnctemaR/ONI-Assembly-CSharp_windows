@@ -12,53 +12,63 @@ public static class SimpleNetworkCache
 		string version_filepath = cache_prefix + "_version";
 		string data_filepath = cache_prefix + "_data";
 		UnityWebRequest version_wr = new UnityWebRequest(new Uri(version_filepath, UriKind.Absolute), "GET", new DownloadHandlerBuffer(), null);
-		AsyncOperation asyncOperation = version_wr.SendWebRequest();
-		asyncOperation.completed += delegate(AsyncOperation op)
+		Action<AsyncOperation> <>9__1;
+		Action<AsyncOperation> <>9__2;
+		version_wr.SendWebRequest().completed += delegate(AsyncOperation op)
 		{
-			int versionFromWebRequest = SimpleNetworkCache.GetVersionFromWebRequest(version_wr);
-			if (versionFromWebRequest == version)
+			if (SimpleNetworkCache.GetVersionFromWebRequest(version_wr) == version)
 			{
 				data_wr.uri = new Uri(data_filepath, UriKind.Absolute);
-				AsyncOperation asyncOperation2 = data_wr.SendWebRequest();
-				asyncOperation2.completed += delegate(AsyncOperation fileOp)
+				AsyncOperation asyncOperation = data_wr.SendWebRequest();
+				Action<AsyncOperation> action;
+				if ((action = <>9__1) == null)
 				{
-					if (!string.IsNullOrEmpty(data_wr.error))
+					action = (<>9__1 = delegate(AsyncOperation fileOp)
 					{
-						global::Debug.LogWarning("Failure to read cached file: " + data_filepath);
-						try
+						if (!string.IsNullOrEmpty(data_wr.error))
 						{
-							File.Delete(version_filepath);
-							File.Delete(data_filepath);
+							global::Debug.LogWarning("Failure to read cached file: " + data_filepath);
+							try
+							{
+								File.Delete(version_filepath);
+								File.Delete(data_filepath);
+							}
+							catch
+							{
+								global::Debug.LogWarning("Failed to delete cached files");
+							}
 						}
-						catch
-						{
-							global::Debug.LogWarning("Failed to delete cached files");
-						}
-					}
-					callback(data_wr);
-				};
+						callback(data_wr);
+					});
+				}
+				asyncOperation.completed += action;
 			}
 			else
 			{
 				data_wr.url = url;
-				AsyncOperation asyncOperation3 = data_wr.SendWebRequest();
-				asyncOperation3.completed += delegate(AsyncOperation webOp)
+				AsyncOperation asyncOperation2 = data_wr.SendWebRequest();
+				Action<AsyncOperation> action2;
+				if ((action2 = <>9__2) == null)
 				{
-					if (string.IsNullOrEmpty(data_wr.error))
+					action2 = (<>9__2 = delegate(AsyncOperation webOp)
 					{
-						try
+						if (string.IsNullOrEmpty(data_wr.error))
 						{
-							Directory.CreateDirectory(cache_folder);
-							File.WriteAllBytes(data_filepath, data_wr.downloadHandler.data);
-							File.WriteAllText(version_filepath, version.ToString());
+							try
+							{
+								Directory.CreateDirectory(cache_folder);
+								File.WriteAllBytes(data_filepath, data_wr.downloadHandler.data);
+								File.WriteAllText(version_filepath, version.ToString());
+							}
+							catch
+							{
+								global::Debug.LogWarning("Failed to write cache files to: " + cache_prefix);
+							}
 						}
-						catch
-						{
-							global::Debug.LogWarning("Failed to write cache files to: " + cache_prefix);
-						}
-					}
-					callback(data_wr);
-				};
+						callback(data_wr);
+					});
+				}
+				asyncOperation2.completed += action2;
 			}
 			version_wr.Dispose();
 		};

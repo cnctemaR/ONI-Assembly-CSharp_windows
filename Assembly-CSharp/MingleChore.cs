@@ -12,8 +12,7 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_MINGLE_CELL;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			MingleChore mingleChore = (MingleChore)data;
-			return mingleChore.smi.HasMingleCell();
+			return ((MingleChore)data).smi.HasMingleCell();
 		};
 		this.HasMingleCell = precondition;
 		base..ctor(Db.Get().ChoreTypes.Relax, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime);
@@ -82,8 +81,7 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 
 		public bool IsRecTime()
 		{
-			Schedulable component = base.master.GetComponent<Schedulable>();
-			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
+			return base.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
 		}
 
 		public int GetMingleCell()

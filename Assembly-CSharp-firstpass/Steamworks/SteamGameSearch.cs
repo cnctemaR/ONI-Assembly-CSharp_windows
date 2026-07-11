@@ -48,7 +48,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cubConnectionDetails);
 			EGameSearchErrorCode_t egameSearchErrorCode_t = NativeMethods.ISteamGameSearch_RetrieveConnectionDetails(CSteamAPIContext.GetSteamGameSearch(), steamIDHost, intPtr, cubConnectionDetails);
-			pchConnectionDetails = ((egameSearchErrorCode_t == (EGameSearchErrorCode_t)0) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchConnectionDetails = ((egameSearchErrorCode_t != (EGameSearchErrorCode_t)0) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return egameSearchErrorCode_t;
 		}

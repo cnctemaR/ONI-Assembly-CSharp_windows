@@ -78,7 +78,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 					{
 						this.accumulatedCO2 -= this.minCO2ToEmit;
 						Vector3 position = base.transform.GetPosition();
-						position.x += ((!this.facing.GetFacing()) ? this.mouthOffset.x : (-this.mouthOffset.x));
+						position.x += (this.facing.GetFacing() ? (-this.mouthOffset.x) : this.mouthOffset.x);
 						position.y += this.mouthOffset.y;
 						position.z -= 0.5f;
 						CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
@@ -106,6 +106,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 				if (this.hasAirTimer.TryStop(2f))
 				{
 					this.hasAir = flag;
+					return;
 				}
 			}
 			else
@@ -171,8 +172,11 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 			return SimHashes.Vacuum;
 		}
 		Element element = Grid.Element[mouthCellAtCell];
-		bool flag = element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Mass[mouthCellAtCell] > this.noOxygenThreshold;
-		return (!flag) ? SimHashes.Vacuum : element.id;
+		if (!element.IsGas || !element.HasTag(GameTags.Breathable) || Grid.Mass[mouthCellAtCell] <= this.noOxygenThreshold)
+		{
+			return SimHashes.Vacuum;
+		}
+		return element.id;
 	}
 
 	public bool IsUnderLiquid
@@ -209,13 +213,9 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	private float GetOxygenPressure(int cell)
 	{
-		if (Grid.IsValidCell(cell))
+		if (Grid.IsValidCell(cell) && Grid.Element[cell].HasTag(GameTags.Breathable))
 		{
-			Element element = Grid.Element[cell];
-			if (element.HasTag(GameTags.Breathable))
-			{
-				return Grid.Mass[cell];
-			}
+			return Grid.Mass[cell];
 		}
 		return 0f;
 	}

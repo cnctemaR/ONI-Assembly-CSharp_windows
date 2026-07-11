@@ -57,8 +57,7 @@ public class WashSinkConfig : IBuildingConfig
 		storage.doDiseaseTransfer = false;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<LoopingSounds>();
-		RequireOutputs requireOutputs = go.AddOrGet<RequireOutputs>();
-		requireOutputs.ignoreFullPipe = true;
+		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

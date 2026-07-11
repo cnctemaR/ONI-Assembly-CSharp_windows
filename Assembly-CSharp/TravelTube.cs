@@ -67,8 +67,9 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.dirtyNavCellUpdatedEntry = GameScenePartitioner.Instance.Add("TravelTube.OnDirtyNavCellUpdated", this, num, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, new Action<object>(this.OnDirtyNavCellUpdated));
 			this.OnDirtyNavCellUpdated(null);
+			return;
 		}
-		else if (!enable && this.dirtyNavCellUpdatedEntry.IsValid())
+		if (!enable && this.dirtyNavCellUpdatedEntry.IsValid())
 		{
 			GameScenePartitioner.Instance.Free(ref this.dirtyNavCellUpdatedEntry);
 		}
@@ -115,8 +116,9 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 		if (!this.isExitTube || this.hasValidExitTransitions)
 		{
 			this.connectedStatus = this.selectable.RemoveStatusItem(this.connectedStatus, false);
+			return;
 		}
-		else if (this.connectedStatus == Guid.Empty)
+		if (this.connectedStatus == Guid.Empty)
 		{
 			this.connectedStatus = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.NoTubeExits, null);
 		}

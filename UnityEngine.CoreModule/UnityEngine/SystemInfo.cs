@@ -6,19 +6,13 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Access system and hardware information.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Misc/SystemInfo.h")]
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
+	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
+	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	public sealed class SystemInfo
 	{
-		/// <summary>
-		///   <para>The current battery level (Read Only).</para>
-		/// </summary>
 		[NativeProperty]
 		public static float batteryLevel
 		{
@@ -28,9 +22,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the current status of the device's battery (Read Only).</para>
-		/// </summary>
 		public static BatteryStatus batteryStatus
 		{
 			get
@@ -39,9 +30,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Operating system name with version (Read Only).</para>
-		/// </summary>
 		public static string operatingSystem
 		{
 			get
@@ -50,9 +38,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the operating system family the game is running on (Read Only).</para>
-		/// </summary>
 		public static OperatingSystemFamily operatingSystemFamily
 		{
 			get
@@ -61,9 +46,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Processor name (Read Only).</para>
-		/// </summary>
 		public static string processorType
 		{
 			get
@@ -72,9 +54,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Processor frequency in MHz (Read Only).</para>
-		/// </summary>
 		public static int processorFrequency
 		{
 			get
@@ -83,9 +62,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Number of processors present (Read Only).</para>
-		/// </summary>
 		public static int processorCount
 		{
 			get
@@ -94,9 +70,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Amount of system memory present (Read Only).</para>
-		/// </summary>
 		public static int systemMemorySize
 		{
 			get
@@ -105,9 +78,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>A unique device identifier. It is guaranteed to be unique for every device (Read Only).</para>
-		/// </summary>
 		public static string deviceUniqueIdentifier
 		{
 			get
@@ -116,9 +86,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The user defined name of the device (Read Only).</para>
-		/// </summary>
 		public static string deviceName
 		{
 			get
@@ -127,9 +94,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The model of the device (Read Only).</para>
-		/// </summary>
 		public static string deviceModel
 		{
 			get
@@ -138,9 +102,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is an accelerometer available on the device?</para>
-		/// </summary>
 		public static bool supportsAccelerometer
 		{
 			get
@@ -149,9 +110,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is a gyroscope available on the device?</para>
-		/// </summary>
 		public static bool supportsGyroscope
 		{
 			get
@@ -160,9 +118,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the device capable of reporting its location?</para>
-		/// </summary>
 		public static bool supportsLocationService
 		{
 			get
@@ -171,9 +126,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the device capable of providing the user haptic feedback by vibration?</para>
-		/// </summary>
 		public static bool supportsVibration
 		{
 			get
@@ -182,9 +134,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is there an Audio device available for playback?</para>
-		/// </summary>
 		public static bool supportsAudio
 		{
 			get
@@ -193,9 +142,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the kind of device the application is running on (Read Only).</para>
-		/// </summary>
 		public static DeviceType deviceType
 		{
 			get
@@ -204,9 +150,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Amount of video memory present (Read Only).</para>
-		/// </summary>
 		public static int graphicsMemorySize
 		{
 			get
@@ -215,9 +158,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The name of the graphics device (Read Only).</para>
-		/// </summary>
 		public static string graphicsDeviceName
 		{
 			get
@@ -226,9 +166,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The vendor of the graphics device (Read Only).</para>
-		/// </summary>
 		public static string graphicsDeviceVendor
 		{
 			get
@@ -237,9 +174,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The identifier code of the graphics device (Read Only).</para>
-		/// </summary>
 		public static int graphicsDeviceID
 		{
 			get
@@ -248,9 +182,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The identifier code of the graphics device vendor (Read Only).</para>
-		/// </summary>
 		public static int graphicsDeviceVendorID
 		{
 			get
@@ -259,9 +190,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The graphics API type used by the graphics device (Read Only).</para>
-		/// </summary>
 		public static GraphicsDeviceType graphicsDeviceType
 		{
 			get
@@ -270,9 +198,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the texture UV coordinate convention for this platform has Y starting at the top of the image.</para>
-		/// </summary>
 		public static bool graphicsUVStartsAtTop
 		{
 			get
@@ -281,9 +206,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The graphics API type and driver version used by the graphics device (Read Only).</para>
-		/// </summary>
 		public static string graphicsDeviceVersion
 		{
 			get
@@ -292,9 +214,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Graphics device shader capability level (Read Only).</para>
-		/// </summary>
 		public static int graphicsShaderLevel
 		{
 			get
@@ -303,9 +222,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is graphics device using multi-threaded rendering (Read Only)?</para>
-		/// </summary>
 		public static bool graphicsMultiThreaded
 		{
 			get
@@ -314,9 +230,22 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are built-in shadows supported? (Read Only)</para>
-		/// </summary>
+		public static bool hasHiddenSurfaceRemovalOnGPU
+		{
+			get
+			{
+				return SystemInfo.HasHiddenSurfaceRemovalOnGPU();
+			}
+		}
+
+		public static bool hasDynamicUniformArrayIndexingInFragmentShaders
+		{
+			get
+			{
+				return SystemInfo.HasDynamicUniformArrayIndexingInFragmentShaders();
+			}
+		}
+
 		public static bool supportsShadows
 		{
 			get
@@ -325,9 +254,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is sampling raw depth from shadowmaps supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsRawShadowDepthSampling
 		{
 			get
@@ -336,9 +262,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are render textures supported? (Read Only)</para>
-		/// </summary>
 		[Obsolete("supportsRenderTextures always returns true, no need to call it")]
 		public static bool supportsRenderTextures
 		{
@@ -348,9 +271,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Whether motion vectors are supported on this platform.</para>
-		/// </summary>
 		public static bool supportsMotionVectors
 		{
 			get
@@ -359,9 +279,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are cubemap render textures supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsRenderToCubemap
 		{
 			get
@@ -370,9 +287,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are image effects supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsImageEffects
 		{
 			get
@@ -381,9 +295,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are 3D (volume) textures supported? (Read Only)</para>
-		/// </summary>
 		public static bool supports3DTextures
 		{
 			get
@@ -392,9 +303,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are 2D Array textures supported? (Read Only)</para>
-		/// </summary>
 		public static bool supports2DArrayTextures
 		{
 			get
@@ -403,9 +311,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are 3D (volume) RenderTextures supported? (Read Only)</para>
-		/// </summary>
 		public static bool supports3DRenderTextures
 		{
 			get
@@ -414,9 +319,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are Cubemap Array textures supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsCubemapArrayTextures
 		{
 			get
@@ -425,9 +327,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Support for various Graphics.CopyTexture cases (Read Only).</para>
-		/// </summary>
 		public static CopyTextureSupport copyTextureSupport
 		{
 			get
@@ -436,9 +335,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are compute shaders supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsComputeShaders
 		{
 			get
@@ -447,9 +343,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is GPU draw call instancing supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsInstancing
 		{
 			get
@@ -458,9 +351,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Does the hardware support quad topology? (Read Only)</para>
-		/// </summary>
 		public static bool supportsHardwareQuadTopology
 		{
 			get
@@ -469,9 +359,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are 32-bit index buffers supported? (Read Only)</para>
-		/// </summary>
 		public static bool supports32bitsIndexBuffer
 		{
 			get
@@ -480,9 +367,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are sparse textures supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsSparseTextures
 		{
 			get
@@ -491,14 +375,19 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>How many simultaneous render targets (MRTs) are supported? (Read Only)</para>
-		/// </summary>
 		public static int supportedRenderTargetCount
 		{
 			get
 			{
 				return SystemInfo.SupportedRenderTargetCount();
+			}
+		}
+
+		public static bool supportsSeparatedRenderTargetsBlend
+		{
+			get
+			{
+				return SystemInfo.SupportsSeparatedRenderTargetsBlend();
 			}
 		}
 
@@ -510,9 +399,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Are multisampled textures supported? (Read Only)</para>
-		/// </summary>
 		public static int supportsMultisampledTextures
 		{
 			get
@@ -521,9 +407,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if multisampled textures are resolved automatically</para>
-		/// </summary>
 		public static bool supportsMultisampleAutoResolve
 		{
 			get
@@ -532,9 +415,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the 'Mirror Once' texture wrap mode is supported. (Read Only)</para>
-		/// </summary>
 		public static int supportsTextureWrapMirrorOnce
 		{
 			get
@@ -543,9 +423,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>This property is true if the current platform uses a reversed depth buffer (where values range from 1 at the near plane and 0 at far plane), and false if the depth buffer is normal (0 is near, 1 is far). (Read Only)</para>
-		/// </summary>
 		public static bool usesReversedZBuffer
 		{
 			get
@@ -554,9 +431,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the stencil buffer supported? (Read Only)</para>
-		/// </summary>
 		[Obsolete("supportsStencil always returns true, no need to call it")]
 		public static int supportsStencil
 		{
@@ -571,13 +445,6 @@ namespace UnityEngine
 			return Enum.IsDefined(value.GetType(), value);
 		}
 
-		/// <summary>
-		///   <para>Is render texture format supported?</para>
-		/// </summary>
-		/// <param name="format">The format to look up.</param>
-		/// <returns>
-		///   <para>True if the format is supported.</para>
-		/// </returns>
 		public static bool SupportsRenderTextureFormat(RenderTextureFormat format)
 		{
 			if (!SystemInfo.IsValidEnumValue(format))
@@ -587,13 +454,6 @@ namespace UnityEngine
 			return SystemInfo.HasRenderTextureNative(format);
 		}
 
-		/// <summary>
-		///   <para>Is blending supported on render texture format?</para>
-		/// </summary>
-		/// <param name="format">The format to look up.</param>
-		/// <returns>
-		///   <para>True if blending is supported on the given format.</para>
-		/// </returns>
 		public static bool SupportsBlendingOnRenderTextureFormat(RenderTextureFormat format)
 		{
 			if (!SystemInfo.IsValidEnumValue(format))
@@ -603,13 +463,6 @@ namespace UnityEngine
 			return SystemInfo.SupportsBlendingOnRenderTextureFormatNative(format);
 		}
 
-		/// <summary>
-		///   <para>Is texture format supported on this device?</para>
-		/// </summary>
-		/// <param name="format">The TextureFormat format to look up.</param>
-		/// <returns>
-		///   <para>True if the format is supported.</para>
-		/// </returns>
 		public static bool SupportsTextureFormat(TextureFormat format)
 		{
 			if (!SystemInfo.IsValidEnumValue(format))
@@ -619,9 +472,6 @@ namespace UnityEngine
 			return SystemInfo.SupportsTextureFormatNative(format);
 		}
 
-		/// <summary>
-		///   <para>What NPOT (non-power of two size) texture support does the GPU provide? (Read Only)</para>
-		/// </summary>
 		public static NPOTSupport npotSupport
 		{
 			get
@@ -630,9 +480,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Maximum texture size (Read Only).</para>
-		/// </summary>
 		public static int maxTextureSize
 		{
 			get
@@ -641,9 +488,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Maximum Cubemap texture size (Read Only).</para>
-		/// </summary>
 		public static int maxCubemapSize
 		{
 			get
@@ -660,11 +504,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true when the platform supports asynchronous compute queues and false if otherwise.
-		///
-		/// Note that asynchronous compute queues are only supported on PS4.</para>
-		/// </summary>
 		public static bool supportsAsyncCompute
 		{
 			get
@@ -673,11 +512,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true when the platform supports GPUFences and false if otherwise.
-		///
-		/// Note that GPUFences are only supported on PS4.</para>
-		/// </summary>
 		public static bool supportsGPUFence
 		{
 			get
@@ -686,9 +520,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if asynchronous readback of GPU data is available for this device and false otherwise.</para>
-		/// </summary>
 		public static bool supportsAsyncGPUReadback
 		{
 			get
@@ -697,9 +528,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is streaming of texture mip maps supported? (Read Only)</para>
-		/// </summary>
 		public static bool supportsMipStreaming
 		{
 			get
@@ -834,6 +662,14 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetGraphicsMultiThreaded();
 
+		[FreeFunction("ScriptingGraphicsCaps::HasHiddenSurfaceRemovalOnGPU")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasHiddenSurfaceRemovalOnGPU();
+
+		[FreeFunction("ScriptingGraphicsCaps::HasDynamicUniformArrayIndexingInFragmentShaders")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasDynamicUniformArrayIndexingInFragmentShaders();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsShadows")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsShadows();
@@ -897,6 +733,10 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::SupportedRenderTargetCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int SupportedRenderTargetCount();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsSeparatedRenderTargetsBlend")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsSeparatedRenderTargetsBlend();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportedRandomWriteTargetCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -966,9 +806,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsFormatSupported(GraphicsFormat format, FormatUsage usage);
 
-		/// <summary>
-		///   <para>Value returned by SystemInfo string properties which are not supported on the current platform.</para>
-		/// </summary>
 		public const string unsupportedIdentifier = "n/a";
 	}
 }

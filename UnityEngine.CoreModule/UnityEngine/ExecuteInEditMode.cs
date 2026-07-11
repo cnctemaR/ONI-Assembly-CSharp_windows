@@ -1,10 +1,9 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Makes all instances of a script execute in edit mode.</para>
-	/// </summary>
+	[UsedByNativeCode]
 	public sealed class ExecuteInEditMode : Attribute
 	{
 	}

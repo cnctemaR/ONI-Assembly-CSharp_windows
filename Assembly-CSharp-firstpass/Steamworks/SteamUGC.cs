@@ -52,7 +52,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchURLSize);
 			bool flag = NativeMethods.ISteamUGC_GetQueryUGCPreviewURL(CSteamAPIContext.GetSteamUGC(), handle, index, intPtr, cchURLSize);
-			pchURL = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchURL = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}
@@ -62,7 +62,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchMetadatasize);
 			bool flag = NativeMethods.ISteamUGC_GetQueryUGCMetadata(CSteamAPIContext.GetSteamUGC(), handle, index, intPtr, cchMetadatasize);
-			pchMetadata = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchMetadata = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}
@@ -91,9 +91,9 @@ namespace Steamworks
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchURLSize);
 			IntPtr intPtr2 = Marshal.AllocHGlobal((int)cchOriginalFileNameSize);
 			bool flag = NativeMethods.ISteamUGC_GetQueryUGCAdditionalPreview(CSteamAPIContext.GetSteamUGC(), handle, index, previewIndex, intPtr, cchURLSize, intPtr2, cchOriginalFileNameSize, out pPreviewType);
-			pchURLOrVideoID = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchURLOrVideoID = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
-			pchOriginalFileName = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr2));
+			pchOriginalFileName = (flag ? InteropHelp.PtrToStringUTF8(intPtr2) : null);
 			Marshal.FreeHGlobal(intPtr2);
 			return flag;
 		}
@@ -110,9 +110,9 @@ namespace Steamworks
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchKeySize);
 			IntPtr intPtr2 = Marshal.AllocHGlobal((int)cchValueSize);
 			bool flag = NativeMethods.ISteamUGC_GetQueryUGCKeyValueTag(CSteamAPIContext.GetSteamUGC(), handle, index, keyValueTagIndex, intPtr, cchKeySize, intPtr2, cchValueSize);
-			pchKey = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchKey = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
-			pchValue = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr2));
+			pchValue = (flag ? InteropHelp.PtrToStringUTF8(intPtr2) : null);
 			Marshal.FreeHGlobal(intPtr2);
 			return flag;
 		}
@@ -125,7 +125,7 @@ namespace Steamworks
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchKey))
 			{
 				bool flag = NativeMethods.ISteamUGC_GetQueryUGCKeyValueTag0(CSteamAPIContext.GetSteamUGC(), handle, index, utf8StringHandle, intPtr, cchValueSize);
-				pchValue = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+				pchValue = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 				Marshal.FreeHGlobal(intPtr);
 				flag2 = flag;
 			}
@@ -532,7 +532,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchFolderSize);
 			bool flag = NativeMethods.ISteamUGC_GetItemInstallInfo(CSteamAPIContext.GetSteamUGC(), nPublishedFileID, out punSizeOnDisk, intPtr, cchFolderSize, out punTimeStamp);
-			pchFolder = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchFolder = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}

@@ -28,11 +28,9 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			if (value == null)
 			{
 				this.occupyObjectRef.Set(null);
+				return;
 			}
-			else
-			{
-				this.occupyObjectRef.Set(value.GetComponent<KSelectable>());
-			}
+			this.occupyObjectRef.Set(value.GetComponent<KSelectable>());
 		}
 	}
 
@@ -116,33 +114,29 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, null, null);
 			return;
 		}
-		if (this.fetchChore != null)
-		{
-			bool flag = this.fetchChore.fetcher != null;
-			if (!flag)
-			{
-				foreach (Tag tag in this.fetchChore.tags)
-				{
-					if (WorldInventory.Instance.GetTotalAmount(tag) > 0f)
-					{
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (flag)
-			{
-				component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemAwaitingDelivery, null);
-			}
-			else
-			{
-				component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNoneAvailable, null);
-			}
-		}
-		else
+		if (this.fetchChore == null)
 		{
 			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNeed, null);
+			return;
 		}
+		bool flag = this.fetchChore.fetcher != null;
+		if (!flag)
+		{
+			foreach (Tag tag in this.fetchChore.tags)
+			{
+				if (WorldInventory.Instance.GetTotalAmount(tag) > 0f)
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		if (flag)
+		{
+			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemAwaitingDelivery, null);
+			return;
+		}
+		component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNoneAvailable, null);
 	}
 
 	protected void CreateFetchChore(Tag entityTag)
@@ -191,8 +185,9 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.SetPreview(Tag.Invalid, false);
 	}
 
-	private void ClearOccupantEventHandler(object data)
+	private void OnOccupantDestroyed(object data)
 	{
+		this.occupyingObject = null;
 		this.ClearOccupant();
 		if (this.autoReplaceEntity && this.requestedEntityTag.IsValid && this.requestedEntityTag != GameTags.Empty)
 		{
@@ -204,7 +199,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.occupyingObject != null)
 		{
-			base.Subscribe(this.occupyingObject, 1969584890, new Action<object>(this.ClearOccupantEventHandler));
+			base.Subscribe(this.occupyingObject, 1969584890, new Action<object>(this.OnOccupantDestroyed));
 		}
 	}
 
@@ -212,7 +207,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.occupyingObject != null)
 		{
-			base.Unsubscribe(this.occupyingObject, 1969584890, new Action<object>(this.ClearOccupantEventHandler));
+			base.Unsubscribe(this.occupyingObject, 1969584890, new Action<object>(this.OnOccupantDestroyed));
 		}
 	}
 
@@ -284,11 +279,9 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		if (this.rotatable != null)
 		{
 			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition));
+			return;
 		}
-		else
-		{
-			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.occupyingObjectRelativePosition);
-		}
+		this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.occupyingObjectRelativePosition);
 	}
 
 	private void UpdateActive()
@@ -312,7 +305,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.UpdateActive();
 		if (this.occupyingObject)
 		{
-			this.occupyingObject.Trigger((!this.operational.IsOperational) ? 960378201 : 1628751838, null);
+			this.occupyingObject.Trigger(this.operational.IsOperational ? 1628751838 : 960378201, null);
 		}
 	}
 

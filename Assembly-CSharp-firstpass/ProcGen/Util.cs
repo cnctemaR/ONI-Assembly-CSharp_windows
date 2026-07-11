@@ -161,13 +161,13 @@ namespace ProcGen
 			points.AddRange(list);
 			if (x != y)
 			{
-				vector = new Vector2(c.x - y, c.y + x);
+				Vector2 vector5 = new Vector2(c.x - y, c.y + x);
 				vector2 = new Vector2(c.x + y, c.y + x);
-				list = Util.GetLine(vector, vector2);
+				list = Util.GetLine(vector5, vector2);
 				points.AddRange(list);
-				vector3 = new Vector2(c.x - y, c.y - x);
+				Vector2 vector6 = new Vector2(c.x - y, c.y - x);
 				vector4 = new Vector2(c.x + y, c.y - x);
-				list = Util.GetLine(vector3, vector4);
+				list = Util.GetLine(vector6, vector4);
 				points.AddRange(list);
 			}
 		}
@@ -213,9 +213,9 @@ namespace ProcGen
 			circle.ShuffleSeeded<Vector2>(rng);
 			for (int i = 0; i < circle.Count; i++)
 			{
-				List<Vector2> list;
-				int num;
-				(list = circle)[num = i] = list[num] + Util.RandomInUnitCircle(rng) * radius;
+				List<Vector2> list = circle;
+				int num = i;
+				list[num] += Util.RandomInUnitCircle(rng) * radius;
 			}
 			HashSet<Vector2> pointsOnCatmullRomSpline = Util.GetPointsOnCatmullRomSpline(circle, (int)(2f * radius * radius));
 			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();
@@ -229,17 +229,15 @@ namespace ProcGen
 		public static List<Vector2I> GetSplat(Vector2 center, float radius, global::System.Random rng)
 		{
 			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();
-			float num = 6.2831855f * radius;
-			int num2 = Mathf.RoundToInt(num * 1f);
-			for (int i = 0; i < num2; i++)
+			int num = Mathf.RoundToInt(6.2831855f * radius * 1f);
+			for (int i = 0; i < num; i++)
 			{
-				float num3 = (float)rng.NextDouble();
-				num3 *= num3;
-				float num4 = num3 * radius;
-				float num5 = 6.2831855f * ((float)i / (float)num2);
-				float num6 = Mathf.Sin(num5) * num4;
-				float num7 = Mathf.Cos(num5) * num4;
-				foreach (Vector2I vector2I in Util.GetLine(center, new Vector2(num6, num7) + center))
+				float num2 = (float)rng.NextDouble();
+				float num3 = num2 * num2 * radius;
+				float num4 = 6.2831855f * ((float)i / (float)num);
+				float num5 = Mathf.Sin(num4) * num3;
+				float num6 = Mathf.Cos(num4) * num3;
+				foreach (Vector2I vector2I in Util.GetLine(center, new Vector2(num5, num6) + center))
 				{
 					hashSet.Add(vector2I);
 				}
@@ -256,18 +254,17 @@ namespace ProcGen
 			{
 				Vector2I vector2I = enumerator.Current;
 				int x = vector2I.x;
-				Vector2I vector2I2 = enumerator.Current;
-				int y = vector2I2.y;
+				int y = enumerator.Current.y;
 				for (int i = x - radius; i <= x + radius; i++)
 				{
 					for (int j = y - radius; j <= y + radius; j++)
 					{
 						if (i != x || j != y)
 						{
-							Vector2I vector2I3 = new Vector2I(i, j);
-							if (!sourcePoints.Contains(vector2I3))
+							Vector2I vector2I2 = new Vector2I(i, j);
+							if (!sourcePoints.Contains(vector2I2))
 							{
-								hashSet.Add(vector2I3);
+								hashSet.Add(vector2I2);
 							}
 						}
 					}

@@ -9,12 +9,6 @@ namespace ProcGen.Noise
 {
 	public class NoiseTreeFiles
 	{
-		public NoiseTreeFiles()
-		{
-			this.trees = new Dictionary<string, Tree>();
-			this.tree_files = new List<string>();
-		}
-
 		public static string GetPath()
 		{
 			return Path.Combine(Application.streamingAssetsPath, "worldgen/" + NoiseTreeFiles.NOISE_FILE + ".yaml");
@@ -31,6 +25,12 @@ namespace ProcGen.Noise
 		{
 			this.tree_files.Clear();
 			this.trees.Clear();
+		}
+
+		public NoiseTreeFiles()
+		{
+			this.trees = new Dictionary<string, Tree>();
+			this.tree_files = new List<string>();
 		}
 
 		public void LoadAllTrees()

@@ -351,12 +351,16 @@ namespace UnityEngine.UI
 			RectTransform rectTransform = this.m_HandleContainerRect ?? this.m_FillContainerRect;
 			if (rectTransform != null && rectTransform.rect.size[(int)this.axis] > 0f)
 			{
-				Vector2 vector;
-				if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, eventData.position, cam, out vector))
+				Vector2 zero = Vector2.zero;
+				if (MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
 				{
-					vector -= rectTransform.rect.position;
-					float num = Mathf.Clamp01((vector - this.m_Offset)[(int)this.axis] / rectTransform.rect.size[(int)this.axis]);
-					this.normalizedValue = ((!this.reverseValue) ? num : (1f - num));
+					Vector2 vector;
+					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, zero, cam, out vector))
+					{
+						vector -= rectTransform.rect.position;
+						float num = Mathf.Clamp01((vector - this.m_Offset)[(int)this.axis] / rectTransform.rect.size[(int)this.axis]);
+						this.normalizedValue = ((!this.reverseValue) ? num : (1f - num));
+					}
 				}
 			}
 		}
@@ -372,10 +376,10 @@ namespace UnityEngine.UI
 			{
 				base.OnPointerDown(eventData);
 				this.m_Offset = Vector2.zero;
-				if (this.m_HandleContainerRect != null && RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.position, eventData.enterEventCamera))
+				if (this.m_HandleContainerRect != null && RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
 				{
 					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.position, eventData.pressEventCamera, out vector))
+					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
 					{
 						this.m_Offset = vector;
 					}

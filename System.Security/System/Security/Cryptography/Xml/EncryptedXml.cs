@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 using System.Text;
@@ -11,81 +11,54 @@ namespace System.Security.Cryptography.Xml
 {
 	public class EncryptedXml
 	{
-		[MonoTODO]
 		public EncryptedXml()
+			: this(new XmlDocument())
 		{
 		}
 
-		[MonoTODO]
 		public EncryptedXml(XmlDocument document)
+			: this(document, null)
 		{
-			this.document = document;
 		}
 
-		[MonoTODO]
 		public EncryptedXml(XmlDocument document, Evidence evidence)
 		{
-			this.document = document;
-			this.DocumentEvidence = evidence;
+			this._document = document;
+			this._evidence = evidence;
+			this._xmlResolver = null;
+			this._padding = PaddingMode.ISO10126;
+			this._mode = CipherMode.CBC;
+			this._encoding = Encoding.UTF8;
+			this._keyNameMapping = new Hashtable(4);
+			this._xmlDsigSearchDepth = 20;
+		}
+
+		private bool IsOverXmlDsigRecursionLimit()
+		{
+			return this._xmlDsigSearchDepthCounter > this.XmlDSigSearchDepth;
+		}
+
+		public int XmlDSigSearchDepth
+		{
+			get
+			{
+				return this._xmlDsigSearchDepth;
+			}
+			set
+			{
+				this._xmlDsigSearchDepth = value;
+			}
 		}
 
 		public Evidence DocumentEvidence
 		{
 			get
 			{
-				return this.documentEvidence;
+				return this._evidence;
 			}
 			set
 			{
-				this.documentEvidence = value;
-			}
-		}
-
-		public Encoding Encoding
-		{
-			get
-			{
-				return this.encoding;
-			}
-			set
-			{
-				this.encoding = value;
-			}
-		}
-
-		public CipherMode Mode
-		{
-			get
-			{
-				return this.mode;
-			}
-			set
-			{
-				this.mode = value;
-			}
-		}
-
-		public PaddingMode Padding
-		{
-			get
-			{
-				return this.padding;
-			}
-			set
-			{
-				this.padding = value;
-			}
-		}
-
-		public string Recipient
-		{
-			get
-			{
-				return this.recipient;
-			}
-			set
-			{
-				this.recipient = value;
+				this._evidence = value;
 			}
 		}
 
@@ -93,59 +66,241 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this.resolver;
+				return this._xmlResolver;
 			}
 			set
 			{
-				this.resolver = value;
+				this._xmlResolver = value;
 			}
 		}
 
-		public void AddKeyNameMapping(string keyName, object keyObject)
+		public PaddingMode Padding
 		{
-			this.keyNameMapping[keyName] = keyObject;
+			get
+			{
+				return this._padding;
+			}
+			set
+			{
+				this._padding = value;
+			}
 		}
 
-		public void ClearKeyNameMappings()
+		public CipherMode Mode
 		{
-			this.keyNameMapping.Clear();
+			get
+			{
+				return this._mode;
+			}
+			set
+			{
+				this._mode = value;
+			}
 		}
 
-		public byte[] DecryptData(EncryptedData encryptedData, SymmetricAlgorithm symAlg)
+		public Encoding Encoding
+		{
+			get
+			{
+				return this._encoding;
+			}
+			set
+			{
+				this._encoding = value;
+			}
+		}
+
+		public string Recipient
+		{
+			get
+			{
+				if (this._recipient == null)
+				{
+					this._recipient = string.Empty;
+				}
+				return this._recipient;
+			}
+			set
+			{
+				this._recipient = value;
+			}
+		}
+
+		private byte[] GetCipherValue(CipherData cipherData)
+		{
+			if (cipherData == null)
+			{
+				throw new ArgumentNullException("cipherData");
+			}
+			WebResponse webResponse = null;
+			Stream stream = null;
+			if (cipherData.CipherValue != null)
+			{
+				return cipherData.CipherValue;
+			}
+			if (cipherData.CipherReference == null)
+			{
+				throw new CryptographicException("Cipher data is not specified.");
+			}
+			if (cipherData.CipherReference.CipherValue != null)
+			{
+				return cipherData.CipherReference.CipherValue;
+			}
+			Stream stream2;
+			if (cipherData.CipherReference.Uri.Length == 0)
+			{
+				string text = ((this._document == null) ? null : this._document.BaseURI);
+				stream2 = cipherData.CipherReference.TransformChain.TransformToOctetStream(this._document, this._xmlResolver, text);
+			}
+			else
+			{
+				if (cipherData.CipherReference.Uri[0] != '#')
+				{
+					throw new CryptographicException("Unable to resolve Uri {0}.", cipherData.CipherReference.Uri);
+				}
+				string text2 = Utils.ExtractIdFromLocalUri(cipherData.CipherReference.Uri);
+				stream = new MemoryStream(this._encoding.GetBytes(this.GetIdElement(this._document, text2).OuterXml));
+				string text3 = ((this._document == null) ? null : this._document.BaseURI);
+				stream2 = cipherData.CipherReference.TransformChain.TransformToOctetStream(stream, this._xmlResolver, text3);
+			}
+			byte[] array = null;
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				Utils.Pump(stream2, memoryStream);
+				array = memoryStream.ToArray();
+				if (webResponse != null)
+				{
+					webResponse.Close();
+				}
+				if (stream != null)
+				{
+					stream.Close();
+				}
+				stream2.Close();
+			}
+			cipherData.CipherReference.CipherValue = array;
+			return array;
+		}
+
+		public virtual XmlElement GetIdElement(XmlDocument document, string idValue)
+		{
+			return SignedXml.DefaultGetIdElement(document, idValue);
+		}
+
+		public virtual byte[] GetDecryptionIV(EncryptedData encryptedData, string symmetricAlgorithmUri)
 		{
 			if (encryptedData == null)
 			{
 				throw new ArgumentNullException("encryptedData");
 			}
-			if (symAlg == null)
+			if (symmetricAlgorithmUri == null)
 			{
-				throw new ArgumentNullException("symAlg");
+				if (encryptedData.EncryptionMethod == null)
+				{
+					throw new CryptographicException("Symmetric algorithm is not specified.");
+				}
+				symmetricAlgorithmUri = encryptedData.EncryptionMethod.KeyAlgorithm;
 			}
-			PaddingMode paddingMode = symAlg.Padding;
-			byte[] array;
-			try
+			int num;
+			if (!(symmetricAlgorithmUri == "http://www.w3.org/2001/04/xmlenc#des-cbc") && !(symmetricAlgorithmUri == "http://www.w3.org/2001/04/xmlenc#tripledes-cbc"))
 			{
-				symAlg.Padding = this.Padding;
-				array = this.Transform(encryptedData.CipherData.CipherValue, symAlg.CreateDecryptor(), symAlg.BlockSize / 8, true);
+				if (!(symmetricAlgorithmUri == "http://www.w3.org/2001/04/xmlenc#aes128-cbc") && !(symmetricAlgorithmUri == "http://www.w3.org/2001/04/xmlenc#aes192-cbc") && !(symmetricAlgorithmUri == "http://www.w3.org/2001/04/xmlenc#aes256-cbc"))
+				{
+					throw new CryptographicException(" The specified Uri is not supported.");
+				}
+				num = 16;
 			}
-			finally
+			else
 			{
-				symAlg.Padding = paddingMode;
+				num = 8;
 			}
+			byte[] array = new byte[num];
+			Buffer.BlockCopy(this.GetCipherValue(encryptedData.CipherData), 0, array, 0, array.Length);
 			return array;
 		}
 
-		public void DecryptDocument()
+		public virtual SymmetricAlgorithm GetDecryptionKey(EncryptedData encryptedData, string symmetricAlgorithmUri)
 		{
-			XmlNodeList elementsByTagName = this.document.GetElementsByTagName("EncryptedData", "http://www.w3.org/2001/04/xmlenc#");
-			foreach (object obj in elementsByTagName)
+			if (encryptedData == null)
 			{
-				XmlNode xmlNode = (XmlNode)obj;
-				EncryptedData encryptedData = new EncryptedData();
-				encryptedData.LoadXml((XmlElement)xmlNode);
-				SymmetricAlgorithm decryptionKey = this.GetDecryptionKey(encryptedData, encryptedData.EncryptionMethod.KeyAlgorithm);
-				this.ReplaceData((XmlElement)xmlNode, this.DecryptData(encryptedData, decryptionKey));
+				throw new ArgumentNullException("encryptedData");
 			}
+			if (encryptedData.KeyInfo == null)
+			{
+				return null;
+			}
+			IEnumerator enumerator = encryptedData.KeyInfo.GetEnumerator();
+			EncryptedKey encryptedKey = null;
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				KeyInfoName keyInfoName = obj as KeyInfoName;
+				if (keyInfoName != null)
+				{
+					string value = keyInfoName.Value;
+					if ((SymmetricAlgorithm)this._keyNameMapping[value] != null)
+					{
+						return (SymmetricAlgorithm)this._keyNameMapping[value];
+					}
+					XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(this._document.NameTable);
+					xmlNamespaceManager.AddNamespace("enc", "http://www.w3.org/2001/04/xmlenc#");
+					XmlNodeList xmlNodeList = this._document.SelectNodes("//enc:EncryptedKey", xmlNamespaceManager);
+					if (xmlNodeList == null)
+					{
+						break;
+					}
+					using (IEnumerator enumerator2 = xmlNodeList.GetEnumerator())
+					{
+						while (enumerator2.MoveNext())
+						{
+							object obj2 = enumerator2.Current;
+							XmlElement xmlElement = ((XmlNode)obj2) as XmlElement;
+							EncryptedKey encryptedKey2 = new EncryptedKey();
+							encryptedKey2.LoadXml(xmlElement);
+							if (encryptedKey2.CarriedKeyName == value && encryptedKey2.Recipient == this.Recipient)
+							{
+								encryptedKey = encryptedKey2;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				KeyInfoRetrievalMethod keyInfoRetrievalMethod = enumerator.Current as KeyInfoRetrievalMethod;
+				if (keyInfoRetrievalMethod != null)
+				{
+					string text = Utils.ExtractIdFromLocalUri(keyInfoRetrievalMethod.Uri);
+					encryptedKey = new EncryptedKey();
+					encryptedKey.LoadXml(this.GetIdElement(this._document, text));
+					break;
+				}
+				KeyInfoEncryptedKey keyInfoEncryptedKey = enumerator.Current as KeyInfoEncryptedKey;
+				if (keyInfoEncryptedKey != null)
+				{
+					encryptedKey = keyInfoEncryptedKey.EncryptedKey;
+					break;
+				}
+			}
+			if (encryptedKey == null)
+			{
+				return null;
+			}
+			if (symmetricAlgorithmUri == null)
+			{
+				if (encryptedData.EncryptionMethod == null)
+				{
+					throw new CryptographicException("Symmetric algorithm is not specified.");
+				}
+				symmetricAlgorithmUri = encryptedData.EncryptionMethod.KeyAlgorithm;
+			}
+			byte[] array = this.DecryptEncryptedKey(encryptedKey);
+			if (array == null)
+			{
+				throw new CryptographicException("Unable to retrieve the decryption key.");
+			}
+			SymmetricAlgorithm symmetricAlgorithm = (SymmetricAlgorithm)CryptoHelpers.CreateFromName(symmetricAlgorithmUri);
+			symmetricAlgorithm.Key = array;
+			return symmetricAlgorithm;
 		}
 
 		public virtual byte[] DecryptEncryptedKey(EncryptedKey encryptedKey)
@@ -154,365 +309,325 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("encryptedKey");
 			}
-			object obj = null;
-			foreach (object obj2 in encryptedKey.KeyInfo)
+			if (encryptedKey.KeyInfo == null)
 			{
-				KeyInfoClause keyInfoClause = (KeyInfoClause)obj2;
-				if (keyInfoClause is KeyInfoName)
+				return null;
+			}
+			foreach (object obj in encryptedKey.KeyInfo)
+			{
+				KeyInfoName keyInfoName = obj as KeyInfoName;
+				bool flag;
+				if (keyInfoName == null)
 				{
-					obj = this.keyNameMapping[((KeyInfoName)keyInfoClause).Value];
+					IEnumerator enumerator;
+					KeyInfoX509Data keyInfoX509Data = enumerator.Current as KeyInfoX509Data;
+					if (keyInfoX509Data != null)
+					{
+						foreach (X509Certificate2 x509Certificate in Utils.BuildBagOfCerts(keyInfoX509Data, CertUsageType.Decryption))
+						{
+							using (RSA rsaprivateKey = x509Certificate.GetRSAPrivateKey())
+							{
+								if (rsaprivateKey != null)
+								{
+									flag = encryptedKey.EncryptionMethod != null && encryptedKey.EncryptionMethod.KeyAlgorithm == "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
+									return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, rsaprivateKey, flag);
+								}
+							}
+						}
+						break;
+					}
+					KeyInfoRetrievalMethod keyInfoRetrievalMethod = enumerator.Current as KeyInfoRetrievalMethod;
+					EncryptedKey encryptedKey2;
+					if (keyInfoRetrievalMethod != null)
+					{
+						string text = Utils.ExtractIdFromLocalUri(keyInfoRetrievalMethod.Uri);
+						encryptedKey2 = new EncryptedKey();
+						encryptedKey2.LoadXml(this.GetIdElement(this._document, text));
+						try
+						{
+							this._xmlDsigSearchDepthCounter++;
+							if (this.IsOverXmlDsigRecursionLimit())
+							{
+								throw new CryptoSignedXmlRecursionException();
+							}
+							return this.DecryptEncryptedKey(encryptedKey2);
+						}
+						finally
+						{
+							this._xmlDsigSearchDepthCounter--;
+						}
+					}
+					KeyInfoEncryptedKey keyInfoEncryptedKey = enumerator.Current as KeyInfoEncryptedKey;
+					if (keyInfoEncryptedKey == null)
+					{
+						continue;
+					}
+					encryptedKey2 = keyInfoEncryptedKey.EncryptedKey;
+					byte[] array = this.DecryptEncryptedKey(encryptedKey2);
+					if (array != null)
+					{
+						SymmetricAlgorithm symmetricAlgorithm = (SymmetricAlgorithm)CryptoHelpers.CreateFromName(encryptedKey.EncryptionMethod.KeyAlgorithm);
+						symmetricAlgorithm.Key = array;
+						return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, symmetricAlgorithm);
+					}
+					continue;
+				}
+				string value = keyInfoName.Value;
+				object obj2 = this._keyNameMapping[value];
+				if (obj2 == null)
+				{
 					break;
 				}
-			}
-			string keyAlgorithm = encryptedKey.EncryptionMethod.KeyAlgorithm;
-			if (keyAlgorithm != null)
-			{
-				if (EncryptedXml.<>f__switch$map8 == null)
+				if (obj2 is SymmetricAlgorithm)
 				{
-					EncryptedXml.<>f__switch$map8 = new Dictionary<string, int>(2)
-					{
-						{ "http://www.w3.org/2001/04/xmlenc#rsa-1_5", 0 },
-						{ "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", 1 }
-					};
+					return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, (SymmetricAlgorithm)obj2);
 				}
-				int num;
-				if (EncryptedXml.<>f__switch$map8.TryGetValue(keyAlgorithm, out num))
-				{
-					if (num == 0)
-					{
-						return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, (RSA)obj, false);
-					}
-					if (num == 1)
-					{
-						return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, (RSA)obj, true);
-					}
-				}
+				flag = encryptedKey.EncryptionMethod != null && encryptedKey.EncryptionMethod.KeyAlgorithm == "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
+				return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, (RSA)obj2, flag);
 			}
-			return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, (SymmetricAlgorithm)obj);
+			return null;
 		}
 
-		public static byte[] DecryptKey(byte[] keyData, SymmetricAlgorithm symAlg)
+		public void AddKeyNameMapping(string keyName, object keyObject)
 		{
-			if (keyData == null)
+			if (keyName == null)
 			{
-				throw new ArgumentNullException("keyData");
+				throw new ArgumentNullException("keyName");
 			}
-			if (symAlg == null)
+			if (keyObject == null)
 			{
-				throw new ArgumentNullException("symAlg");
+				throw new ArgumentNullException("keyObject");
 			}
-			if (symAlg is TripleDES)
+			if (!(keyObject is SymmetricAlgorithm) && !(keyObject is RSA))
 			{
-				return SymmetricKeyWrap.TripleDESKeyWrapDecrypt(symAlg.Key, keyData);
+				throw new CryptographicException("The specified cryptographic transform is not supported.");
 			}
-			if (symAlg is Rijndael)
-			{
-				return SymmetricKeyWrap.AESKeyWrapDecrypt(symAlg.Key, keyData);
-			}
-			throw new CryptographicException("The specified cryptographic transform is not supported.");
+			this._keyNameMapping.Add(keyName, keyObject);
 		}
 
-		[MonoTODO("Test this.")]
-		public static byte[] DecryptKey(byte[] keyData, RSA rsa, bool fOAEP)
+		public void ClearKeyNameMappings()
 		{
-			AsymmetricKeyExchangeDeformatter asymmetricKeyExchangeDeformatter;
-			if (fOAEP)
-			{
-				asymmetricKeyExchangeDeformatter = new RSAOAEPKeyExchangeDeformatter(rsa);
-			}
-			else
-			{
-				asymmetricKeyExchangeDeformatter = new RSAPKCS1KeyExchangeDeformatter(rsa);
-			}
-			return asymmetricKeyExchangeDeformatter.DecryptKeyExchange(keyData);
+			this._keyNameMapping.Clear();
 		}
 
-		public EncryptedData Encrypt(XmlElement inputElement, string keyName)
-		{
-			SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create("Rijndael");
-			symmetricAlgorithm.KeySize = 256;
-			symmetricAlgorithm.GenerateKey();
-			symmetricAlgorithm.GenerateIV();
-			EncryptedData encryptedData = new EncryptedData();
-			EncryptedKey encryptedKey = new EncryptedKey();
-			object obj = this.keyNameMapping[keyName];
-			encryptedKey.EncryptionMethod = new EncryptionMethod(EncryptedXml.GetKeyWrapAlgorithmUri(obj));
-			if (obj is RSA)
-			{
-				encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key, (RSA)obj, false));
-			}
-			else
-			{
-				encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key, (SymmetricAlgorithm)obj));
-			}
-			encryptedKey.KeyInfo = new KeyInfo();
-			encryptedKey.KeyInfo.AddClause(new KeyInfoName(keyName));
-			encryptedData.Type = "http://www.w3.org/2001/04/xmlenc#Element";
-			encryptedData.EncryptionMethod = new EncryptionMethod(EncryptedXml.GetAlgorithmUri(symmetricAlgorithm));
-			encryptedData.KeyInfo = new KeyInfo();
-			encryptedData.KeyInfo.AddClause(new KeyInfoEncryptedKey(encryptedKey));
-			encryptedData.CipherData = new CipherData(this.EncryptData(inputElement, symmetricAlgorithm, false));
-			return encryptedData;
-		}
-
-		[MonoTODO]
 		public EncryptedData Encrypt(XmlElement inputElement, X509Certificate2 certificate)
-		{
-			throw new NotImplementedException();
-		}
-
-		public byte[] EncryptData(byte[] plainText, SymmetricAlgorithm symAlg)
-		{
-			if (plainText == null)
-			{
-				throw new ArgumentNullException("plainText");
-			}
-			if (symAlg == null)
-			{
-				throw new ArgumentNullException("symAlg");
-			}
-			PaddingMode paddingMode = symAlg.Padding;
-			byte[] array;
-			try
-			{
-				symAlg.Padding = this.Padding;
-				array = this.EncryptDataCore(plainText, symAlg);
-			}
-			finally
-			{
-				symAlg.Padding = paddingMode;
-			}
-			return array;
-		}
-
-		private byte[] EncryptDataCore(byte[] plainText, SymmetricAlgorithm symAlg)
-		{
-			MemoryStream memoryStream = new MemoryStream();
-			BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-			binaryWriter.Write(symAlg.IV);
-			binaryWriter.Write(this.Transform(plainText, symAlg.CreateEncryptor()));
-			binaryWriter.Flush();
-			byte[] array = memoryStream.ToArray();
-			binaryWriter.Close();
-			memoryStream.Close();
-			return array;
-		}
-
-		public byte[] EncryptData(XmlElement inputElement, SymmetricAlgorithm symAlg, bool content)
 		{
 			if (inputElement == null)
 			{
 				throw new ArgumentNullException("inputElement");
 			}
-			if (content)
+			if (certificate == null)
 			{
-				return this.EncryptData(this.Encoding.GetBytes(inputElement.InnerXml), symAlg);
+				throw new ArgumentNullException("certificate");
 			}
-			return this.EncryptData(this.Encoding.GetBytes(inputElement.OuterXml), symAlg);
+			EncryptedData encryptedData2;
+			using (RSA rsapublicKey = certificate.GetRSAPublicKey())
+			{
+				if (rsapublicKey == null)
+				{
+					throw new NotSupportedException("The certificate key algorithm is not supported.");
+				}
+				EncryptedData encryptedData = new EncryptedData();
+				encryptedData.Type = "http://www.w3.org/2001/04/xmlenc#Element";
+				encryptedData.EncryptionMethod = new EncryptionMethod("http://www.w3.org/2001/04/xmlenc#aes256-cbc");
+				EncryptedKey encryptedKey = new EncryptedKey();
+				encryptedKey.EncryptionMethod = new EncryptionMethod("http://www.w3.org/2001/04/xmlenc#rsa-1_5");
+				encryptedKey.KeyInfo.AddClause(new KeyInfoX509Data(certificate));
+				RijndaelManaged rijndaelManaged = new RijndaelManaged();
+				encryptedKey.CipherData.CipherValue = EncryptedXml.EncryptKey(rijndaelManaged.Key, rsapublicKey, false);
+				KeyInfoEncryptedKey keyInfoEncryptedKey = new KeyInfoEncryptedKey(encryptedKey);
+				encryptedData.KeyInfo.AddClause(keyInfoEncryptedKey);
+				encryptedData.CipherData.CipherValue = this.EncryptData(inputElement, rijndaelManaged, false);
+				encryptedData2 = encryptedData;
+			}
+			return encryptedData2;
 		}
 
-		public static byte[] EncryptKey(byte[] keyData, SymmetricAlgorithm symAlg)
+		public EncryptedData Encrypt(XmlElement inputElement, string keyName)
 		{
-			if (keyData == null)
+			if (inputElement == null)
 			{
-				throw new ArgumentNullException("keyData");
+				throw new ArgumentNullException("inputElement");
 			}
-			if (symAlg == null)
+			if (keyName == null)
 			{
-				throw new ArgumentNullException("symAlg");
+				throw new ArgumentNullException("keyName");
 			}
-			if (symAlg is TripleDES)
+			object obj = null;
+			if (this._keyNameMapping != null)
 			{
-				return SymmetricKeyWrap.TripleDESKeyWrapEncrypt(symAlg.Key, keyData);
+				obj = this._keyNameMapping[keyName];
 			}
-			if (symAlg is Rijndael)
+			if (obj == null)
 			{
-				return SymmetricKeyWrap.AESKeyWrapEncrypt(symAlg.Key, keyData);
+				throw new CryptographicException("Unable to retrieve the encryption key.");
 			}
-			throw new CryptographicException("The specified cryptographic transform is not supported.");
-		}
-
-		[MonoTODO("Test this.")]
-		public static byte[] EncryptKey(byte[] keyData, RSA rsa, bool fOAEP)
-		{
-			AsymmetricKeyExchangeFormatter asymmetricKeyExchangeFormatter;
-			if (fOAEP)
+			SymmetricAlgorithm symmetricAlgorithm = obj as SymmetricAlgorithm;
+			RSA rsa = obj as RSA;
+			EncryptedData encryptedData = new EncryptedData();
+			encryptedData.Type = "http://www.w3.org/2001/04/xmlenc#Element";
+			encryptedData.EncryptionMethod = new EncryptionMethod("http://www.w3.org/2001/04/xmlenc#aes256-cbc");
+			string text = null;
+			if (symmetricAlgorithm == null)
 			{
-				asymmetricKeyExchangeFormatter = new RSAOAEPKeyExchangeFormatter(rsa);
+				text = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
+			}
+			else if (symmetricAlgorithm is TripleDES)
+			{
+				text = "http://www.w3.org/2001/04/xmlenc#kw-tripledes";
 			}
 			else
 			{
-				asymmetricKeyExchangeFormatter = new RSAPKCS1KeyExchangeFormatter(rsa);
-			}
-			return asymmetricKeyExchangeFormatter.CreateKeyExchange(keyData);
-		}
-
-		private static SymmetricAlgorithm GetAlgorithm(string symAlgUri)
-		{
-			if (symAlgUri != null)
-			{
-				if (EncryptedXml.<>f__switch$map9 == null)
+				if (!(symmetricAlgorithm is Rijndael) && !(symmetricAlgorithm is Aes))
 				{
-					EncryptedXml.<>f__switch$map9 = new Dictionary<string, int>(9)
-					{
-						{ "http://www.w3.org/2001/04/xmlenc#aes128-cbc", 0 },
-						{ "http://www.w3.org/2001/04/xmlenc#kw-aes128", 0 },
-						{ "http://www.w3.org/2001/04/xmlenc#aes192-cbc", 1 },
-						{ "http://www.w3.org/2001/04/xmlenc#kw-aes192", 1 },
-						{ "http://www.w3.org/2001/04/xmlenc#aes256-cbc", 2 },
-						{ "http://www.w3.org/2001/04/xmlenc#kw-aes256", 2 },
-						{ "http://www.w3.org/2001/04/xmlenc#des-cbc", 3 },
-						{ "http://www.w3.org/2001/04/xmlenc#tripledes-cbc", 4 },
-						{ "http://www.w3.org/2001/04/xmlenc#kw-tripledes", 4 }
-					};
+					throw new CryptographicException("The specified cryptographic transform is not supported.");
 				}
-				int num;
-				if (EncryptedXml.<>f__switch$map9.TryGetValue(symAlgUri, out num))
+				int keySize = symmetricAlgorithm.KeySize;
+				if (keySize != 128)
 				{
-					SymmetricAlgorithm symmetricAlgorithm;
-					switch (num)
+					if (keySize != 192)
 					{
-					case 0:
-						symmetricAlgorithm = SymmetricAlgorithm.Create("Rijndael");
-						symmetricAlgorithm.KeySize = 128;
-						break;
-					case 1:
-						symmetricAlgorithm = SymmetricAlgorithm.Create("Rijndael");
-						symmetricAlgorithm.KeySize = 192;
-						break;
-					case 2:
-						symmetricAlgorithm = SymmetricAlgorithm.Create("Rijndael");
-						symmetricAlgorithm.KeySize = 256;
-						break;
-					case 3:
-						symmetricAlgorithm = SymmetricAlgorithm.Create("DES");
-						break;
-					case 4:
-						symmetricAlgorithm = SymmetricAlgorithm.Create("TripleDES");
-						break;
-					default:
-						goto IL_0130;
+						if (keySize == 256)
+						{
+							text = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
+						}
 					}
-					return symmetricAlgorithm;
+					else
+					{
+						text = "http://www.w3.org/2001/04/xmlenc#kw-aes192";
+					}
+				}
+				else
+				{
+					text = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
 				}
 			}
-			IL_0130:
-			throw new CryptographicException("symAlgUri");
+			EncryptedKey encryptedKey = new EncryptedKey();
+			encryptedKey.EncryptionMethod = new EncryptionMethod(text);
+			encryptedKey.KeyInfo.AddClause(new KeyInfoName(keyName));
+			RijndaelManaged rijndaelManaged = new RijndaelManaged();
+			encryptedKey.CipherData.CipherValue = ((symmetricAlgorithm == null) ? EncryptedXml.EncryptKey(rijndaelManaged.Key, rsa, false) : EncryptedXml.EncryptKey(rijndaelManaged.Key, symmetricAlgorithm));
+			KeyInfoEncryptedKey keyInfoEncryptedKey = new KeyInfoEncryptedKey(encryptedKey);
+			encryptedData.KeyInfo.AddClause(keyInfoEncryptedKey);
+			encryptedData.CipherData.CipherValue = this.EncryptData(inputElement, rijndaelManaged, false);
+			return encryptedData;
 		}
 
-		private static string GetAlgorithmUri(SymmetricAlgorithm symAlg)
+		public void DecryptDocument()
 		{
-			if (symAlg is Rijndael)
+			XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(this._document.NameTable);
+			xmlNamespaceManager.AddNamespace("enc", "http://www.w3.org/2001/04/xmlenc#");
+			XmlNodeList xmlNodeList = this._document.SelectNodes("//enc:EncryptedData", xmlNamespaceManager);
+			if (xmlNodeList != null)
 			{
-				int keySize = symAlg.KeySize;
-				if (keySize == 128)
+				foreach (object obj in xmlNodeList)
 				{
-					return "http://www.w3.org/2001/04/xmlenc#aes128-cbc";
+					XmlElement xmlElement = ((XmlNode)obj) as XmlElement;
+					EncryptedData encryptedData = new EncryptedData();
+					encryptedData.LoadXml(xmlElement);
+					SymmetricAlgorithm decryptionKey = this.GetDecryptionKey(encryptedData, null);
+					if (decryptionKey == null)
+					{
+						throw new CryptographicException("Unable to retrieve the decryption key.");
+					}
+					byte[] array = this.DecryptData(encryptedData, decryptionKey);
+					this.ReplaceData(xmlElement, array);
 				}
-				if (keySize == 192)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#aes192-cbc";
-				}
-				if (keySize == 256)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
-				}
+			}
+		}
+
+		public byte[] EncryptData(byte[] plaintext, SymmetricAlgorithm symmetricAlgorithm)
+		{
+			if (plaintext == null)
+			{
+				throw new ArgumentNullException("plaintext");
+			}
+			if (symmetricAlgorithm == null)
+			{
+				throw new ArgumentNullException("symmetricAlgorithm");
+			}
+			CipherMode mode = symmetricAlgorithm.Mode;
+			PaddingMode padding = symmetricAlgorithm.Padding;
+			byte[] array = null;
+			try
+			{
+				symmetricAlgorithm.Mode = this._mode;
+				symmetricAlgorithm.Padding = this._padding;
+				array = symmetricAlgorithm.CreateEncryptor().TransformFinalBlock(plaintext, 0, plaintext.Length);
+			}
+			finally
+			{
+				symmetricAlgorithm.Mode = mode;
+				symmetricAlgorithm.Padding = padding;
+			}
+			byte[] array2;
+			if (this._mode == CipherMode.ECB)
+			{
+				array2 = array;
 			}
 			else
 			{
-				if (symAlg is DES)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#des-cbc";
-				}
-				if (symAlg is TripleDES)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#tripledes-cbc";
-				}
+				byte[] iv = symmetricAlgorithm.IV;
+				array2 = new byte[array.Length + iv.Length];
+				Buffer.BlockCopy(iv, 0, array2, 0, iv.Length);
+				Buffer.BlockCopy(array, 0, array2, iv.Length, array.Length);
 			}
-			throw new ArgumentException("symAlg");
+			return array2;
 		}
 
-		private static string GetKeyWrapAlgorithmUri(object keyAlg)
+		public byte[] EncryptData(XmlElement inputElement, SymmetricAlgorithm symmetricAlgorithm, bool content)
 		{
-			if (keyAlg is Rijndael)
+			if (inputElement == null)
 			{
-				int keySize = ((Rijndael)keyAlg).KeySize;
-				if (keySize == 128)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#kw-aes128";
-				}
-				if (keySize == 192)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#kw-aes192";
-				}
-				if (keySize == 256)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#kw-aes256";
-				}
+				throw new ArgumentNullException("inputElement");
 			}
-			else
+			if (symmetricAlgorithm == null)
 			{
-				if (keyAlg is RSA)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
-				}
-				if (keyAlg is TripleDES)
-				{
-					return "http://www.w3.org/2001/04/xmlenc#kw-tripledes";
-				}
+				throw new ArgumentNullException("symmetricAlgorithm");
 			}
-			throw new ArgumentException("keyAlg");
+			byte[] array = (content ? this._encoding.GetBytes(inputElement.InnerXml) : this._encoding.GetBytes(inputElement.OuterXml));
+			return this.EncryptData(array, symmetricAlgorithm);
 		}
 
-		public virtual byte[] GetDecryptionIV(EncryptedData encryptedData, string symAlgUri)
+		public byte[] DecryptData(EncryptedData encryptedData, SymmetricAlgorithm symmetricAlgorithm)
 		{
 			if (encryptedData == null)
 			{
 				throw new ArgumentNullException("encryptedData");
 			}
-			SymmetricAlgorithm algorithm = EncryptedXml.GetAlgorithm(symAlgUri);
-			byte[] array = new byte[algorithm.BlockSize / 8];
-			Buffer.BlockCopy(encryptedData.CipherData.CipherValue, 0, array, 0, array.Length);
-			return array;
-		}
-
-		public virtual SymmetricAlgorithm GetDecryptionKey(EncryptedData encryptedData, string symAlgUri)
-		{
-			if (encryptedData == null)
+			if (symmetricAlgorithm == null)
 			{
-				throw new ArgumentNullException("encryptedData");
+				throw new ArgumentNullException("symmetricAlgorithm");
 			}
-			if (symAlgUri == null)
+			byte[] cipherValue = this.GetCipherValue(encryptedData.CipherData);
+			CipherMode mode = symmetricAlgorithm.Mode;
+			PaddingMode padding = symmetricAlgorithm.Padding;
+			byte[] iv = symmetricAlgorithm.IV;
+			byte[] array = null;
+			if (this._mode != CipherMode.ECB)
 			{
-				return null;
+				array = this.GetDecryptionIV(encryptedData, null);
 			}
-			SymmetricAlgorithm algorithm = EncryptedXml.GetAlgorithm(symAlgUri);
-			algorithm.IV = this.GetDecryptionIV(encryptedData, encryptedData.EncryptionMethod.KeyAlgorithm);
-			KeyInfo keyInfo = encryptedData.KeyInfo;
-			foreach (object obj in keyInfo)
+			byte[] array2 = null;
+			try
 			{
-				KeyInfoClause keyInfoClause = (KeyInfoClause)obj;
-				if (keyInfoClause is KeyInfoEncryptedKey)
+				int num = 0;
+				if (array != null)
 				{
-					algorithm.Key = this.DecryptEncryptedKey(((KeyInfoEncryptedKey)keyInfoClause).EncryptedKey);
-					break;
+					symmetricAlgorithm.IV = array;
+					num = array.Length;
 				}
+				symmetricAlgorithm.Mode = this._mode;
+				symmetricAlgorithm.Padding = this._padding;
+				array2 = symmetricAlgorithm.CreateDecryptor().TransformFinalBlock(cipherValue, num, cipherValue.Length - num);
 			}
-			return algorithm;
-		}
-
-		public virtual XmlElement GetIdElement(XmlDocument document, string idValue)
-		{
-			if (document == null || idValue == null)
+			finally
 			{
-				return null;
+				symmetricAlgorithm.Mode = mode;
+				symmetricAlgorithm.Padding = padding;
+				symmetricAlgorithm.IV = iv;
 			}
-			XmlElement xmlElement = document.GetElementById(idValue);
-			if (xmlElement == null)
-			{
-				xmlElement = (XmlElement)document.SelectSingleNode("//*[@Id='" + idValue + "']");
-			}
-			return xmlElement;
+			return array2;
 		}
 
 		public void ReplaceData(XmlElement inputElement, byte[] decryptedData)
@@ -525,11 +640,42 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("decryptedData");
 			}
-			XmlDocument ownerDocument = inputElement.OwnerDocument;
-			XmlTextReader xmlTextReader = new XmlTextReader(new StringReader(this.Encoding.GetString(decryptedData, 0, decryptedData.Length)));
-			xmlTextReader.MoveToContent();
-			XmlNode xmlNode = ownerDocument.ReadNode(xmlTextReader);
-			inputElement.ParentNode.ReplaceChild(xmlNode, inputElement);
+			XmlNode parentNode = inputElement.ParentNode;
+			if (parentNode.NodeType == XmlNodeType.Document)
+			{
+				XmlDocument xmlDocument = new XmlDocument();
+				xmlDocument.PreserveWhitespace = true;
+				using (StringReader stringReader = new StringReader(this._encoding.GetString(decryptedData)))
+				{
+					using (XmlReader xmlReader = XmlReader.Create(stringReader, Utils.GetSecureXmlReaderSettings(this._xmlResolver)))
+					{
+						xmlDocument.Load(xmlReader);
+					}
+				}
+				XmlNode xmlNode = inputElement.OwnerDocument.ImportNode(xmlDocument.DocumentElement, true);
+				parentNode.RemoveChild(inputElement);
+				parentNode.AppendChild(xmlNode);
+				return;
+			}
+			XmlNode xmlNode2 = parentNode.OwnerDocument.CreateElement(parentNode.Prefix, parentNode.LocalName, parentNode.NamespaceURI);
+			try
+			{
+				parentNode.AppendChild(xmlNode2);
+				xmlNode2.InnerXml = this._encoding.GetString(decryptedData);
+				XmlNode xmlNode3 = xmlNode2.FirstChild;
+				XmlNode nextSibling = inputElement.NextSibling;
+				while (xmlNode3 != null)
+				{
+					XmlNode nextSibling2 = xmlNode3.NextSibling;
+					parentNode.InsertBefore(xmlNode3, nextSibling);
+					xmlNode3 = nextSibling2;
+				}
+			}
+			finally
+			{
+				parentNode.RemoveChild(xmlNode2);
+			}
+			parentNode.RemoveChild(inputElement);
 		}
 
 		public static void ReplaceElement(XmlElement inputElement, EncryptedData encryptedData, bool content)
@@ -542,88 +688,152 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("encryptedData");
 			}
-			XmlDocument ownerDocument = inputElement.OwnerDocument;
-			inputElement.ParentNode.ReplaceChild(encryptedData.GetXml(ownerDocument), inputElement);
-		}
-
-		private byte[] Transform(byte[] data, ICryptoTransform transform)
-		{
-			return this.Transform(data, transform, 0, false);
-		}
-
-		private byte[] Transform(byte[] data, ICryptoTransform transform, int blockOctetCount, bool trimPadding)
-		{
-			MemoryStream memoryStream = new MemoryStream();
-			CryptoStream cryptoStream = new CryptoStream(memoryStream, transform, CryptoStreamMode.Write);
-			cryptoStream.Write(data, 0, data.Length);
-			cryptoStream.FlushFinalBlock();
-			int num = 0;
-			checked
+			XmlElement xml = encryptedData.GetXml(inputElement.OwnerDocument);
+			if (content)
 			{
-				if (trimPadding)
+				if (content)
 				{
-					num = (int)memoryStream.GetBuffer()[(int)((IntPtr)(unchecked(memoryStream.Length - 1L)))];
-				}
-				if (num > blockOctetCount)
-				{
-					num = 0;
+					Utils.RemoveAllChildren(inputElement);
+					inputElement.AppendChild(xml);
+					return;
 				}
 			}
-			byte[] array = new byte[memoryStream.Length - (long)blockOctetCount - (long)num];
-			Array.Copy(memoryStream.GetBuffer(), blockOctetCount, array, 0, array.Length);
-			cryptoStream.Close();
-			memoryStream.Close();
-			return array;
+			else
+			{
+				inputElement.ParentNode.ReplaceChild(xml, inputElement);
+			}
 		}
 
-		public const string XmlEncAES128KeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
+		public static byte[] EncryptKey(byte[] keyData, SymmetricAlgorithm symmetricAlgorithm)
+		{
+			if (keyData == null)
+			{
+				throw new ArgumentNullException("keyData");
+			}
+			if (symmetricAlgorithm == null)
+			{
+				throw new ArgumentNullException("symmetricAlgorithm");
+			}
+			if (symmetricAlgorithm is TripleDES)
+			{
+				return SymmetricKeyWrap.TripleDESKeyWrapEncrypt(symmetricAlgorithm.Key, keyData);
+			}
+			if (symmetricAlgorithm is Rijndael || symmetricAlgorithm is Aes)
+			{
+				return SymmetricKeyWrap.AESKeyWrapEncrypt(symmetricAlgorithm.Key, keyData);
+			}
+			throw new CryptographicException("The specified cryptographic transform is not supported.");
+		}
 
-		public const string XmlEncAES128Url = "http://www.w3.org/2001/04/xmlenc#aes128-cbc";
+		public static byte[] EncryptKey(byte[] keyData, RSA rsa, bool useOAEP)
+		{
+			if (keyData == null)
+			{
+				throw new ArgumentNullException("keyData");
+			}
+			if (rsa == null)
+			{
+				throw new ArgumentNullException("rsa");
+			}
+			if (useOAEP)
+			{
+				return new RSAOAEPKeyExchangeFormatter(rsa).CreateKeyExchange(keyData);
+			}
+			return new RSAPKCS1KeyExchangeFormatter(rsa).CreateKeyExchange(keyData);
+		}
 
-		public const string XmlEncAES192KeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-aes192";
+		public static byte[] DecryptKey(byte[] keyData, SymmetricAlgorithm symmetricAlgorithm)
+		{
+			if (keyData == null)
+			{
+				throw new ArgumentNullException("keyData");
+			}
+			if (symmetricAlgorithm == null)
+			{
+				throw new ArgumentNullException("symmetricAlgorithm");
+			}
+			if (symmetricAlgorithm is TripleDES)
+			{
+				return SymmetricKeyWrap.TripleDESKeyWrapDecrypt(symmetricAlgorithm.Key, keyData);
+			}
+			if (symmetricAlgorithm is Rijndael || symmetricAlgorithm is Aes)
+			{
+				return SymmetricKeyWrap.AESKeyWrapDecrypt(symmetricAlgorithm.Key, keyData);
+			}
+			throw new CryptographicException("The specified cryptographic transform is not supported.");
+		}
 
-		public const string XmlEncAES192Url = "http://www.w3.org/2001/04/xmlenc#aes192-cbc";
+		public static byte[] DecryptKey(byte[] keyData, RSA rsa, bool useOAEP)
+		{
+			if (keyData == null)
+			{
+				throw new ArgumentNullException("keyData");
+			}
+			if (rsa == null)
+			{
+				throw new ArgumentNullException("rsa");
+			}
+			if (useOAEP)
+			{
+				return new RSAOAEPKeyExchangeDeformatter(rsa).DecryptKeyExchange(keyData);
+			}
+			return new RSAPKCS1KeyExchangeDeformatter(rsa).DecryptKeyExchange(keyData);
+		}
 
-		public const string XmlEncAES256KeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
-
-		public const string XmlEncAES256Url = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
-
-		public const string XmlEncDESUrl = "http://www.w3.org/2001/04/xmlenc#des-cbc";
-
-		public const string XmlEncElementContentUrl = "http://www.w3.org/2001/04/xmlenc#Content";
+		public const string XmlEncNamespaceUrl = "http://www.w3.org/2001/04/xmlenc#";
 
 		public const string XmlEncElementUrl = "http://www.w3.org/2001/04/xmlenc#Element";
 
+		public const string XmlEncElementContentUrl = "http://www.w3.org/2001/04/xmlenc#Content";
+
 		public const string XmlEncEncryptedKeyUrl = "http://www.w3.org/2001/04/xmlenc#EncryptedKey";
 
-		public const string XmlEncNamespaceUrl = "http://www.w3.org/2001/04/xmlenc#";
+		public const string XmlEncDESUrl = "http://www.w3.org/2001/04/xmlenc#des-cbc";
+
+		public const string XmlEncTripleDESUrl = "http://www.w3.org/2001/04/xmlenc#tripledes-cbc";
+
+		public const string XmlEncAES128Url = "http://www.w3.org/2001/04/xmlenc#aes128-cbc";
+
+		public const string XmlEncAES256Url = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
+
+		public const string XmlEncAES192Url = "http://www.w3.org/2001/04/xmlenc#aes192-cbc";
 
 		public const string XmlEncRSA15Url = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
 
 		public const string XmlEncRSAOAEPUrl = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
 
+		public const string XmlEncTripleDESKeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-tripledes";
+
+		public const string XmlEncAES128KeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
+
+		public const string XmlEncAES256KeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
+
+		public const string XmlEncAES192KeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-aes192";
+
 		public const string XmlEncSHA256Url = "http://www.w3.org/2001/04/xmlenc#sha256";
 
 		public const string XmlEncSHA512Url = "http://www.w3.org/2001/04/xmlenc#sha512";
 
-		public const string XmlEncTripleDESKeyWrapUrl = "http://www.w3.org/2001/04/xmlenc#kw-tripledes";
+		private XmlDocument _document;
 
-		public const string XmlEncTripleDESUrl = "http://www.w3.org/2001/04/xmlenc#tripledes-cbc";
+		private Evidence _evidence;
 
-		private Evidence documentEvidence;
+		private XmlResolver _xmlResolver;
 
-		private Encoding encoding = Encoding.UTF8;
+		private const int _capacity = 4;
 
-		internal Hashtable keyNameMapping = new Hashtable();
+		private Hashtable _keyNameMapping;
 
-		private CipherMode mode = CipherMode.CBC;
+		private PaddingMode _padding;
 
-		private PaddingMode padding = PaddingMode.ISO10126;
+		private CipherMode _mode;
 
-		private string recipient;
+		private Encoding _encoding;
 
-		private XmlResolver resolver;
+		private string _recipient;
 
-		private XmlDocument document;
+		private int _xmlDsigSearchDepthCounter;
+
+		private int _xmlDsigSearchDepth;
 	}
 }

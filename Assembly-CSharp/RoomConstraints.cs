@@ -6,7 +6,7 @@ public static class RoomConstraints
 {
 	public static string RoomCriteriaString(Room room)
 	{
-		string text = string.Empty;
+		string text = "";
 		RoomType roomType = room.roomType;
 		if (roomType != Db.Get().RoomTypes.Neutral)
 		{
@@ -30,19 +30,18 @@ public static class RoomConstraints
 		else
 		{
 			RoomType[] possibleRoomTypes = Db.Get().RoomTypes.GetPossibleRoomTypes(room);
-			text += ((possibleRoomTypes.Length <= 1) ? string.Empty : ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>"));
+			text += ((possibleRoomTypes.Length > 1) ? ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>") : "");
 			foreach (RoomType roomType2 in possibleRoomTypes)
 			{
 				if (roomType2 != Db.Get().RoomTypes.Neutral)
 				{
-					if (text != string.Empty)
+					if (text != "")
 					{
 						text += "\n";
 					}
-					string text2 = text;
 					text = string.Concat(new string[]
 					{
-						text2,
+						text,
 						"<b><color=#BCBCBC>    • ",
 						roomType2.Name,
 						"</b> (",
@@ -73,13 +72,10 @@ public static class RoomConstraints
 						bool flag2 = false;
 						foreach (RoomType roomType3 in Db.Get().RoomTypes.resources)
 						{
-							if (roomType3 != roomType2 && roomType3 != Db.Get().RoomTypes.Neutral)
+							if (roomType3 != roomType2 && roomType3 != Db.Get().RoomTypes.Neutral && Db.Get().RoomTypes.HasAmbiguousRoomType(room, roomType2, roomType3))
 							{
-								if (Db.Get().RoomTypes.HasAmbiguousRoomType(room, roomType2, roomType3))
-								{
-									flag2 = true;
-									break;
-								}
+								flag2 = true;
+								break;
 							}
 						}
 						if (flag2)
@@ -91,71 +87,6 @@ public static class RoomConstraints
 			}
 		}
 		return text;
-	}
-
-	// Note: this type is marked as 'beforefieldinit'.
-	static RoomConstraints()
-	{
-		Func<KPrefabID, bool> func = null;
-		Func<Room, bool> func2 = delegate(Room room)
-		{
-			int num2 = 0;
-			foreach (KPrefabID kprefabID6 in room.cavity.creatures)
-			{
-				if (kprefabID6.HasTag(GameTags.Creatures.Wild))
-				{
-					num2++;
-				}
-			}
-			return num2 >= 2;
-		};
-		string text = ROOMS.CRITERIA.WILDANIMALS.NAME;
-		RoomConstraints.WILDANIMALS = new RoomConstraints.Constraint(func, func2, 1, text, ROOMS.CRITERIA.WILDANIMALS.DESCRIPTION, null);
-		func = null;
-		func2 = delegate(Room room)
-		{
-			int num3 = 0;
-			foreach (KPrefabID kprefabID7 in room.cavity.plants)
-			{
-				if (kprefabID7 != null)
-				{
-					BasicForagePlantPlanted component4 = kprefabID7.GetComponent<BasicForagePlantPlanted>();
-					ReceptacleMonitor component5 = kprefabID7.GetComponent<ReceptacleMonitor>();
-					if (component5 != null && !component5.Replanted)
-					{
-						num3++;
-					}
-					else if (component4 != null)
-					{
-						num3++;
-					}
-				}
-			}
-			return num3 >= 2;
-		};
-		text = ROOMS.CRITERIA.WILDPLANT.NAME;
-		RoomConstraints.WILDPLANT = new RoomConstraints.Constraint(func, func2, 1, text, ROOMS.CRITERIA.WILDPLANT.DESCRIPTION, null);
-		RoomConstraints.WILDPLANTS = new RoomConstraints.Constraint(null, delegate(Room room)
-		{
-			int num4 = 0;
-			foreach (KPrefabID kprefabID8 in room.cavity.plants)
-			{
-				if (kprefabID8 != null)
-				{
-					BasicForagePlantPlanted component6 = kprefabID8.GetComponent<BasicForagePlantPlanted>();
-					ReceptacleMonitor component7 = kprefabID8.GetComponent<ReceptacleMonitor>();
-					if (component7 != null && !component7.Replanted)
-					{
-						num4++;
-					}
-					else if (component6 != null)
-					{
-						num4++;
-					}
-				}
-			}
-			return num4 >= 4;
-		}, 1, ROOMS.CRITERIA.WILDPLANTS.NAME, ROOMS.CRITERIA.WILDPLANTS.DESCRIPTION, null);
 	}
 
 	public static RoomConstraints.Constraint CEILING_HEIGHT_4 = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 4, 1, string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.NAME, "4"), string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.DESCRIPTION, "4"), null);
@@ -174,11 +105,14 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint NO_INDUSTRIAL_MACHINERY = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		foreach (KPrefabID kprefabID in room.buildings)
+		using (List<KPrefabID>.Enumerator enumerator = room.buildings.GetEnumerator())
 		{
-			if (kprefabID.HasTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (enumerator.Current.HasTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -186,9 +120,9 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint NO_COTS = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		foreach (KPrefabID kprefabID2 in room.buildings)
+		foreach (KPrefabID kprefabID in room.buildings)
 		{
-			if (kprefabID2.HasTag(RoomConstraints.ConstraintTags.Bed) && !kprefabID2.HasTag(RoomConstraints.ConstraintTags.LuxuryBed))
+			if (kprefabID.HasTag(RoomConstraints.ConstraintTags.Bed) && !kprefabID.HasTag(RoomConstraints.ConstraintTags.LuxuryBed))
 			{
 				return false;
 			}
@@ -198,9 +132,9 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint NO_OUTHOUSES = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		foreach (KPrefabID kprefabID3 in room.buildings)
+		foreach (KPrefabID kprefabID2 in room.buildings)
 		{
-			if (kprefabID3.HasTag(RoomConstraints.ConstraintTags.Toilet) && !kprefabID3.HasTag(RoomConstraints.ConstraintTags.FlushToilet))
+			if (kprefabID2.HasTag(RoomConstraints.ConstraintTags.Toilet) && !kprefabID2.HasTag(RoomConstraints.ConstraintTags.FlushToilet))
 			{
 				return false;
 			}
@@ -236,21 +170,21 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint LIGHT = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		foreach (KPrefabID kprefabID4 in room.cavity.creatures)
+		foreach (KPrefabID kprefabID3 in room.cavity.creatures)
 		{
-			if (kprefabID4 != null && kprefabID4.GetComponent<Light2D>() != null)
+			if (kprefabID3 != null && kprefabID3.GetComponent<Light2D>() != null)
 			{
 				return true;
 			}
 		}
-		foreach (KPrefabID kprefabID5 in room.buildings)
+		foreach (KPrefabID kprefabID4 in room.buildings)
 		{
-			if (!(kprefabID5 == null))
+			if (!(kprefabID4 == null))
 			{
-				Light2D component2 = kprefabID5.GetComponent<Light2D>();
+				Light2D component2 = kprefabID4.GetComponent<Light2D>();
 				if (component2 != null)
 				{
-					RequireInputs component3 = kprefabID5.GetComponent<RequireInputs>();
+					RequireInputs component3 = kprefabID4.GetComponent<RequireInputs>();
 					return component2.enabled || (component3 != null && component3.RequirementsMet);
 				}
 			}
@@ -283,19 +217,69 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint PARK_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.Park), null, 1, ROOMS.CRITERIA.PARK_BUILDING.NAME, ROOMS.CRITERIA.PARK_BUILDING.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint ORIGINALTILES = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 4, 1, string.Empty, string.Empty, null);
+	public static RoomConstraints.Constraint ORIGINALTILES = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 4, 1, "", "", null);
 
-	public static RoomConstraints.Constraint WILDANIMAL = new RoomConstraints.Constraint(null, delegate(Room room)
+	public static RoomConstraints.Constraint WILDANIMAL = new RoomConstraints.Constraint(null, (Room room) => room.cavity.creatures.Count + room.cavity.eggs.Count > 0, 1, ROOMS.CRITERIA.WILDANIMAL.NAME, ROOMS.CRITERIA.WILDANIMAL.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint WILDANIMALS = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num = room.cavity.creatures.Count + room.cavity.eggs.Count;
-		return num > 0;
-	}, 1, ROOMS.CRITERIA.WILDANIMAL.NAME, ROOMS.CRITERIA.WILDANIMAL.DESCRIPTION, null);
+		int num = 0;
+		using (List<KPrefabID>.Enumerator enumerator5 = room.cavity.creatures.GetEnumerator())
+		{
+			while (enumerator5.MoveNext())
+			{
+				if (enumerator5.Current.HasTag(GameTags.Creatures.Wild))
+				{
+					num++;
+				}
+			}
+		}
+		return num >= 2;
+	}, 1, ROOMS.CRITERIA.WILDANIMALS.NAME, ROOMS.CRITERIA.WILDANIMALS.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint WILDANIMALS;
+	public static RoomConstraints.Constraint WILDPLANT = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		int num2 = 0;
+		foreach (KPrefabID kprefabID5 in room.cavity.plants)
+		{
+			if (kprefabID5 != null)
+			{
+				BasicForagePlantPlanted component4 = kprefabID5.GetComponent<BasicForagePlantPlanted>();
+				ReceptacleMonitor component5 = kprefabID5.GetComponent<ReceptacleMonitor>();
+				if (component5 != null && !component5.Replanted)
+				{
+					num2++;
+				}
+				else if (component4 != null)
+				{
+					num2++;
+				}
+			}
+		}
+		return num2 >= 2;
+	}, 1, ROOMS.CRITERIA.WILDPLANT.NAME, ROOMS.CRITERIA.WILDPLANT.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint WILDPLANT;
-
-	public static RoomConstraints.Constraint WILDPLANTS;
+	public static RoomConstraints.Constraint WILDPLANTS = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		int num3 = 0;
+		foreach (KPrefabID kprefabID6 in room.cavity.plants)
+		{
+			if (kprefabID6 != null)
+			{
+				BasicForagePlantPlanted component6 = kprefabID6.GetComponent<BasicForagePlantPlanted>();
+				ReceptacleMonitor component7 = kprefabID6.GetComponent<ReceptacleMonitor>();
+				if (component7 != null && !component7.Replanted)
+				{
+					num3++;
+				}
+				else if (component6 != null)
+				{
+					num3++;
+				}
+			}
+		}
+		return num3 >= 4;
+	}, 1, ROOMS.CRITERIA.WILDPLANTS.NAME, ROOMS.CRITERIA.WILDPLANTS.DESCRIPTION, null);
 
 	public static class ConstraintTags
 	{
@@ -371,22 +355,16 @@ public static class RoomConstraints
 			{
 				foreach (KPrefabID kprefabID in room.buildings)
 				{
-					if (!(kprefabID == null))
+					if (!(kprefabID == null) && this.building_criteria(kprefabID))
 					{
-						if (this.building_criteria(kprefabID))
-						{
-							num++;
-						}
+						num++;
 					}
 				}
 				foreach (KPrefabID kprefabID2 in room.plants)
 				{
-					if (!(kprefabID2 == null))
+					if (!(kprefabID2 == null) && this.building_criteria(kprefabID2))
 					{
-						if (this.building_criteria(kprefabID2))
-						{
-							num++;
-						}
+						num++;
 					}
 				}
 			}

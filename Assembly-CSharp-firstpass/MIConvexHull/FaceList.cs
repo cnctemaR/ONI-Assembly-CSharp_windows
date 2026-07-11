@@ -31,19 +31,17 @@ namespace MIConvexHull
 				this.First.Previous = face;
 				face.Next = this.First;
 				this.First = face;
+				return;
 			}
-			else
+			if (this.last != null)
 			{
-				if (this.last != null)
-				{
-					this.last.Next = face;
-				}
-				face.Previous = this.last;
-				this.last = face;
-				if (this.First == null)
-				{
-					this.First = face;
-				}
+				this.last.Next = face;
+			}
+			face.Previous = this.last;
+			this.last = face;
+			if (this.First == null)
+			{
+				this.First = face;
 			}
 		}
 

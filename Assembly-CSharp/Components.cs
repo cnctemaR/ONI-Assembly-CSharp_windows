@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 public class Components
 {
@@ -117,13 +116,6 @@ public class Components
 
 	public class Cmps<T> : ICollection, IEnumerable
 	{
-		public Cmps()
-		{
-			App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.Clear));
-			this.items = new KCompactedVector<T>(0);
-			this.table = new Dictionary<T, HandleVector<int>.Handle>();
-		}
-
 		public List<T> Items
 		{
 			get
@@ -138,6 +130,13 @@ public class Components
 			{
 				return this.items.Count;
 			}
+		}
+
+		public Cmps()
+		{
+			App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.Clear));
+			this.items = new KCompactedVector<T>(0);
+			this.table = new Dictionary<T, HandleVector<int>.Handle>();
 		}
 
 		public T this[int idx]
@@ -196,10 +195,8 @@ public class Components
 			this.OnRemove -= on_remove;
 		}
 
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<T> OnAdd;
 
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<T> OnRemove;
 
 		public bool IsSynchronized

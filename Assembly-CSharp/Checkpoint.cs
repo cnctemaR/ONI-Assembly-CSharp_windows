@@ -20,7 +20,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		base.smi.StartSM();
 		if (Checkpoint.infoStatusItem_Logic == null)
 		{
-			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			Checkpoint.infoStatusItem_Logic.resolveStringCallback = new Func<string, object, string>(Checkpoint.ResolveInfoStatusItem_Logic);
 		}
 		this.Refresh(this.redLight);
@@ -47,16 +47,13 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 
 	private LogicCircuitNetwork GetNetwork()
 	{
-		LogicPorts component = base.GetComponent<LogicPorts>();
-		int portCell = component.GetPortCell(Checkpoint.PORT_ID);
-		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-		return logicCircuitManager.GetNetworkForCell(portCell);
+		int portCell = base.GetComponent<LogicPorts>().GetPortCell(Checkpoint.PORT_ID);
+		return Game.Instance.logicCircuitManager.GetNetworkForCell(portCell);
 	}
 
 	private static string ResolveInfoStatusItem_Logic(string format_str, object data)
 	{
-		Checkpoint checkpoint = (Checkpoint)data;
-		return (!checkpoint.RedLight) ? BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_OPEN : BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_CLOSED;
+		return ((Checkpoint)data).RedLight ? BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_CLOSED : BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_OPEN;
 	}
 
 	private void CreateNewReactable()
@@ -120,11 +117,9 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		if (this.redLight)
 		{
 			this.CreateNewReactable();
+			return;
 		}
-		else
-		{
-			this.ClearReactable();
-		}
+		this.ClearReactable();
 	}
 
 	[MyCmpReq]
@@ -205,22 +200,18 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 			if (this.checkpoint == null || !this.checkpoint.RedLight || this.reactor_navigator == null)
 			{
 				base.Cleanup();
+				return;
 			}
-			else
+			this.reactor_navigator.AdvancePath(false);
+			if (!this.reactor_navigator.path.IsValid())
 			{
-				this.reactor_navigator.AdvancePath(false);
-				if (!this.reactor_navigator.path.IsValid())
-				{
-					base.Cleanup();
-				}
-				else
-				{
-					NavGrid.Transition nextTransition = this.reactor_navigator.GetNextTransition();
-					if (!((!this.rotated) ? ((int)nextTransition.x > 0) : ((int)nextTransition.x < 0)))
-					{
-						base.Cleanup();
-					}
-				}
+				base.Cleanup();
+				return;
+			}
+			NavGrid.Transition nextTransition = this.reactor_navigator.GetNextTransition();
+			if (!(this.rotated ? (nextTransition.x < 0) : (nextTransition.x > 0)))
+			{
+				base.Cleanup();
 			}
 		}
 

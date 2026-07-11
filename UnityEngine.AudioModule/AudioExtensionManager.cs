@@ -7,10 +7,6 @@ namespace UnityEngine
 {
 	internal sealed class AudioExtensionManager
 	{
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Object GetAudioListener();
-
 		internal static bool IsListenerSpatializerExtensionRegistered()
 		{
 			foreach (AudioSpatializerExtensionDefinition audioSpatializerExtensionDefinition in AudioExtensionManager.m_ListenerSpatializerExtensionDefinitions)
@@ -397,6 +393,10 @@ namespace UnityEngine
 			AudioExtensionManager.m_SourceAmbisonicDecoderExtensionDefinitions.Add(audioAmbisonicExtensionDefinition2);
 			return true;
 		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern Object GetAudioListener();
 
 		private static List<AudioSpatializerExtensionDefinition> m_ListenerSpatializerExtensionDefinitions = new List<AudioSpatializerExtensionDefinition>();
 

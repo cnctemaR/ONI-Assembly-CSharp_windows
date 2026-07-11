@@ -61,6 +61,24 @@ public class UserMenu
 		}
 	}
 
+	public const float DECONSTRUCT_PRIORITY = 0f;
+
+	public const float DRAWPATHS_PRIORITY = 0.1f;
+
+	public const float FOLLOWCAM_PRIORITY = 0.3f;
+
+	public const float SETDIRECTION_PRIORITY = 0.4f;
+
+	public const float AUTOBOTTLE_PRIORITY = 0.4f;
+
+	public const float AUTOREPAIR_PRIORITY = 0.5f;
+
+	public const float DEFAULT_PRIORITY = 1f;
+
+	public const float SUITEQUIP_PRIORITY = 2f;
+
+	public const float AUTODISINFECT_PRIORITY = 10f;
+
 	private List<KeyValuePair<KIconButtonMenu.ButtonInfo, float>> buttons = new List<KeyValuePair<KIconButtonMenu.ButtonInfo, float>>();
 
 	private List<UserMenu.SliderInfo> sliders = new List<UserMenu.SliderInfo>();

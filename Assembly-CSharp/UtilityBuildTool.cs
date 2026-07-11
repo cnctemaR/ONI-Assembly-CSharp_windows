@@ -32,8 +32,7 @@ public class UtilityBuildTool : BaseUtilityBuildTool
 				{
 					UtilityConnections utilityConnections2 = utilityConnections.InverseDirection();
 					string text;
-					bool flag = this.conduitMgr.CanAddConnection(utilityConnections, cell, false, out text) && this.conduitMgr.CanAddConnection(utilityConnections2, cell2, false, out text);
-					if (flag)
+					if (this.conduitMgr.CanAddConnection(utilityConnections, cell, false, out text) && this.conduitMgr.CanAddConnection(utilityConnections2, cell2, false, out text))
 					{
 						this.conduitMgr.AddConnection(utilityConnections, cell, false);
 						this.conduitMgr.AddConnection(utilityConnections2, cell2, false);

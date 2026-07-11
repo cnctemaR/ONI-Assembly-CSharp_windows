@@ -13,13 +13,11 @@ public class ScheduleBlockButton : KMonoBehaviour
 		this.paintStyles = paintStyles;
 		if (idx < TRAITS.EARLYBIRD_SCHEDULEBLOCK)
 		{
-			HierarchyReferences component = base.GetComponent<HierarchyReferences>();
-			component.GetReference<RectTransform>("MorningIcon").gameObject.SetActive(true);
+			base.GetComponent<HierarchyReferences>().GetReference<RectTransform>("MorningIcon").gameObject.SetActive(true);
 		}
 		else if (idx >= totalBlocks - 3)
 		{
-			HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
-			component2.GetReference<RectTransform>("NightIcon").gameObject.SetActive(true);
+			base.GetComponent<HierarchyReferences>().GetReference<RectTransform>("NightIcon").gameObject.SetActive(true);
 		}
 		base.gameObject.name = "ScheduleBlock_" + idx.ToString();
 	}
@@ -32,11 +30,9 @@ public class ScheduleBlockButton : KMonoBehaviour
 			this.image.colorStyleSetting = this.paintStyles[scheduleGroup.Id];
 			this.image.ApplyColorStyleSetting();
 			this.toolTip.SetSimpleTooltip(scheduleGroup.GetTooltip());
+			return;
 		}
-		else
-		{
-			this.toolTip.SetSimpleTooltip("UNKNOWN");
-		}
+		this.toolTip.SetSimpleTooltip("UNKNOWN");
 	}
 
 	[SerializeField]

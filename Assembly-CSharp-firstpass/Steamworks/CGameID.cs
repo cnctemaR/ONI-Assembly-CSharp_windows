@@ -66,11 +66,11 @@ namespace Steamworks
 			case CGameID.EGameIDType.k_EGameIDTypeApp:
 				return this.AppID() != AppId_t.Invalid;
 			case CGameID.EGameIDType.k_EGameIDTypeGameMod:
-				return this.AppID() != AppId_t.Invalid && (this.ModID() & 2147483648U) != 0U;
+				return this.AppID() != AppId_t.Invalid && (this.ModID() & 2147483648U) > 0U;
 			case CGameID.EGameIDType.k_EGameIDTypeShortcut:
-				return (this.ModID() & 2147483648U) != 0U;
+				return (this.ModID() & 2147483648U) > 0U;
 			case CGameID.EGameIDType.k_EGameIDTypeP2P:
-				return this.AppID() == AppId_t.Invalid && (this.ModID() & 2147483648U) != 0U;
+				return this.AppID() == AppId_t.Invalid && (this.ModID() & 2147483648U) > 0U;
 			default:
 				return false;
 			}
@@ -88,7 +88,7 @@ namespace Steamworks
 
 		private void SetAppID(AppId_t other)
 		{
-			this.m_GameID = (this.m_GameID & 18446744073692774400UL) | (((ulong)(uint)other & 16777215UL) << 0);
+			this.m_GameID = (this.m_GameID & 18446744073692774400UL) | ((ulong)(uint)other & 16777215UL);
 		}
 
 		private void SetType(CGameID.EGameIDType other)

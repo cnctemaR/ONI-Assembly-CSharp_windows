@@ -6,19 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>Use the PlayableGraph to manage Playable creations and destructions.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	public struct PlayableGraph
 	{
-		/// <summary>
-		///   <para>Returns the Playable with no output connections at the given index.</para>
-		/// </summary>
-		/// <param name="index">The index of the root Playable.</param>
 		public Playable GetRootPlayable(int index)
 		{
 			PlayableHandle rootPlayableInternal = this.GetRootPlayableInternal(index);
@@ -55,13 +49,6 @@ namespace UnityEngine.Playables
 			return this.GetOutputCountByTypeInternal(typeof(T));
 		}
 
-		/// <summary>
-		///   <para>Get PlayableOutput at the given index in the graph.</para>
-		/// </summary>
-		/// <param name="index">The output index.</param>
-		/// <returns>
-		///   <para>The PlayableOutput at this given index, otherwise null.</para>
-		/// </returns>
 		public PlayableOutput GetOutput(int index)
 		{
 			PlayableOutputHandle playableOutputHandle;
@@ -92,34 +79,16 @@ namespace UnityEngine.Playables
 			return playableOutput;
 		}
 
-		/// <summary>
-		///   <para>Evaluates all the PlayableOutputs in the graph, and updates all the connected Playables in the graph.</para>
-		/// </summary>
-		/// <param name="deltaTime">The time in seconds by which to advance each Playable in the graph.</param>
 		public void Evaluate()
 		{
 			this.Evaluate(0f);
 		}
 
-		/// <summary>
-		///   <para>Creates a PlayableGraph.</para>
-		/// </summary>
-		/// <param name="name">The name of the graph.</param>
-		/// <returns>
-		///   <para>The newly created PlayableGraph.</para>
-		/// </returns>
 		public static PlayableGraph Create()
 		{
 			return PlayableGraph.Create(null);
 		}
 
-		/// <summary>
-		///   <para>Creates a PlayableGraph.</para>
-		/// </summary>
-		/// <param name="name">The name of the graph.</param>
-		/// <returns>
-		///   <para>The newly created PlayableGraph.</para>
-		/// </returns>
 		public static PlayableGraph Create(string name)
 		{
 			PlayableGraph playableGraph;
@@ -127,133 +96,90 @@ namespace UnityEngine.Playables
 			return playableGraph;
 		}
 
-		/// <summary>
-		///   <para>Destroys the graph.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::Destroy", HasExplicitThis = true, ThrowsException = true)]
 		public void Destroy()
 		{
 			PlayableGraph.Destroy_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Returns true if the PlayableGraph has been properly constructed using PlayableGraph.CreateGraph and is not deleted.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>A boolean indicating if the graph is invalid or not.</para>
-		/// </returns>
 		public bool IsValid()
 		{
 			return PlayableGraph.IsValid_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Indicates that a graph is presently running.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>A boolean indicating if the graph is playing or not.</para>
-		/// </returns>
+		[FreeFunction("PlayableGraphBindings::IsPlaying", HasExplicitThis = true, ThrowsException = true)]
 		public bool IsPlaying()
 		{
 			return PlayableGraph.IsPlaying_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Indicates that a graph has completed its operations.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>A boolean indicating if the graph is done playing or not.</para>
-		/// </returns>
+		[FreeFunction("PlayableGraphBindings::IsDone", HasExplicitThis = true, ThrowsException = true)]
 		public bool IsDone()
 		{
 			return PlayableGraph.IsDone_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Plays the graph.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::Play", HasExplicitThis = true, ThrowsException = true)]
 		public void Play()
 		{
 			PlayableGraph.Play_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Stops the graph, if it is playing.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::Stop", HasExplicitThis = true, ThrowsException = true)]
 		public void Stop()
 		{
 			PlayableGraph.Stop_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Evaluates all the PlayableOutputs in the graph, and updates all the connected Playables in the graph.</para>
-		/// </summary>
-		/// <param name="deltaTime">The time in seconds by which to advance each Playable in the graph.</param>
+		[FreeFunction("PlayableGraphBindings::Evaluate", HasExplicitThis = true, ThrowsException = true)]
 		public void Evaluate([DefaultValue("0")] float deltaTime)
 		{
 			PlayableGraph.Evaluate_Injected(ref this, deltaTime);
 		}
 
-		/// <summary>
-		///   <para>Returns how time is incremented when playing back.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::GetTimeUpdateMode", HasExplicitThis = true, ThrowsException = true)]
 		public DirectorUpdateMode GetTimeUpdateMode()
 		{
 			return PlayableGraph.GetTimeUpdateMode_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Changes how time is incremented when playing back.</para>
-		/// </summary>
-		/// <param name="value">The new DirectorUpdateMode.</param>
+		[FreeFunction("PlayableGraphBindings::SetTimeUpdateMode", HasExplicitThis = true, ThrowsException = true)]
 		public void SetTimeUpdateMode(DirectorUpdateMode value)
 		{
 			PlayableGraph.SetTimeUpdateMode_Injected(ref this, value);
 		}
 
-		/// <summary>
-		///   <para>Returns the table used by the graph to resolve ExposedReferences.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::GetResolver", HasExplicitThis = true, ThrowsException = true)]
 		public IExposedPropertyTable GetResolver()
 		{
 			return PlayableGraph.GetResolver_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Changes the table used by the graph to resolve ExposedReferences.</para>
-		/// </summary>
-		/// <param name="value"></param>
+		[FreeFunction("PlayableGraphBindings::SetResolver", HasExplicitThis = true, ThrowsException = true)]
 		public void SetResolver(IExposedPropertyTable value)
 		{
 			PlayableGraph.SetResolver_Injected(ref this, value);
 		}
 
-		/// <summary>
-		///   <para>Returns the number of Playable owned by the Graph.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::GetPlayableCount", HasExplicitThis = true, ThrowsException = true)]
 		public int GetPlayableCount()
 		{
 			return PlayableGraph.GetPlayableCount_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Returns the number of Playable owned by the Graph that have no connected outputs.</para>
-		/// </summary>
+		[FreeFunction("PlayableGraphBindings::GetRootPlayableCount", HasExplicitThis = true, ThrowsException = true)]
 		public int GetRootPlayableCount()
 		{
 			return PlayableGraph.GetRootPlayableCount_Injected(ref this);
 		}
 
-		/// <summary>
-		///   <para>Returns the number of PlayableOutput in the graph.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The number of PlayableOutput in the graph.</para>
-		/// </returns>
+		[FreeFunction("PlayableGraphBindings::GetOutputCount", HasExplicitThis = true, ThrowsException = true)]
 		public int GetOutputCount()
 		{
 			return PlayableGraph.GetOutputCount_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableGraphBindings::CreatePlayableHandle", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableHandle CreatePlayableHandle()
 		{
 			PlayableHandle playableHandle;
@@ -261,11 +187,13 @@ namespace UnityEngine.Playables
 			return playableHandle;
 		}
 
+		[FreeFunction("PlayableGraphBindings::CreateScriptOutputInternal", HasExplicitThis = true, ThrowsException = true)]
 		internal bool CreateScriptOutputInternal(string name, out PlayableOutputHandle handle)
 		{
 			return PlayableGraph.CreateScriptOutputInternal_Injected(ref this, name, out handle);
 		}
 
+		[FreeFunction("PlayableGraphBindings::GetRootPlayableInternal", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableHandle GetRootPlayableInternal(int index)
 		{
 			PlayableHandle playableHandle;
@@ -273,41 +201,49 @@ namespace UnityEngine.Playables
 			return playableHandle;
 		}
 
+		[FreeFunction("PlayableGraphBindings::DestroyOutputInternal", HasExplicitThis = true, ThrowsException = true)]
 		internal void DestroyOutputInternal(PlayableOutputHandle handle)
 		{
 			PlayableGraph.DestroyOutputInternal_Injected(ref this, ref handle);
 		}
 
+		[FreeFunction("PlayableGraphBindings::GetOutputInternal", HasExplicitThis = true, ThrowsException = true)]
 		private bool GetOutputInternal(int index, out PlayableOutputHandle handle)
 		{
 			return PlayableGraph.GetOutputInternal_Injected(ref this, index, out handle);
 		}
 
+		[FreeFunction("PlayableGraphBindings::GetOutputCountByTypeInternal", HasExplicitThis = true, ThrowsException = true)]
 		private int GetOutputCountByTypeInternal(Type outputType)
 		{
 			return PlayableGraph.GetOutputCountByTypeInternal_Injected(ref this, outputType);
 		}
 
+		[FreeFunction("PlayableGraphBindings::GetOutputByTypeInternal", HasExplicitThis = true, ThrowsException = true)]
 		private bool GetOutputByTypeInternal(Type outputType, int index, out PlayableOutputHandle handle)
 		{
 			return PlayableGraph.GetOutputByTypeInternal_Injected(ref this, outputType, index, out handle);
 		}
 
+		[FreeFunction("PlayableGraphBindings::ConnectInternal", HasExplicitThis = true, ThrowsException = true)]
 		private bool ConnectInternal(PlayableHandle source, int sourceOutputPort, PlayableHandle destination, int destinationInputPort)
 		{
 			return PlayableGraph.ConnectInternal_Injected(ref this, ref source, sourceOutputPort, ref destination, destinationInputPort);
 		}
 
+		[FreeFunction("PlayableGraphBindings::DisconnectInternal", HasExplicitThis = true, ThrowsException = true)]
 		private void DisconnectInternal(PlayableHandle playable, int inputPort)
 		{
 			PlayableGraph.DisconnectInternal_Injected(ref this, ref playable, inputPort);
 		}
 
+		[FreeFunction("PlayableGraphBindings::DestroyPlayableInternal", HasExplicitThis = true, ThrowsException = true)]
 		private void DestroyPlayableInternal(PlayableHandle playable)
 		{
 			PlayableGraph.DestroyPlayableInternal_Injected(ref this, ref playable);
 		}
 
+		[FreeFunction("PlayableGraphBindings::DestroySubgraphInternal", HasExplicitThis = true, ThrowsException = true)]
 		private void DestroySubgraphInternal(PlayableHandle playable)
 		{
 			PlayableGraph.DestroySubgraphInternal_Injected(ref this, ref playable);

@@ -2,97 +2,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	/// <summary>
-	///   <para>A collection of methods and properties for interacting with the XR tracking system.</para>
-	/// </summary>
+	[StaticAccessor("XRInputTrackingFacade::Get()", StaticAccessorType.Dot)]
+	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTrackingFacade.h")]
 	[RequiredByNativeCode]
+	[NativeConditional("ENABLE_VR")]
 	public static class InputTracking
 	{
-		/// <summary>
-		///   <para>Gets the position of a specific node.</para>
-		/// </summary>
-		/// <param name="node">Specifies which node's position should be returned.</param>
-		/// <returns>
-		///   <para>The position of the node in its local tracking space.</para>
-		/// </returns>
-		public static Vector3 GetLocalPosition(XRNode node)
-		{
-			Vector3 vector;
-			InputTracking.INTERNAL_CALL_GetLocalPosition(node, out vector);
-			return vector;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_GetLocalPosition(XRNode node, out Vector3 value);
-
-		/// <summary>
-		///   <para>Gets the rotation of a specific node.</para>
-		/// </summary>
-		/// <param name="node">Specifies which node's rotation should be returned.</param>
-		/// <returns>
-		///   <para>The rotation of the node in its local tracking space.</para>
-		/// </returns>
-		public static Quaternion GetLocalRotation(XRNode node)
-		{
-			Quaternion quaternion;
-			InputTracking.INTERNAL_CALL_GetLocalRotation(node, out quaternion);
-			return quaternion;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_GetLocalRotation(XRNode node, out Quaternion value);
-
-		/// <summary>
-		///   <para>Center tracking to the current position and orientation of the HMD.</para>
-		/// </summary>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Recenter();
-
-		/// <summary>
-		///   <para>Accepts the unique identifier for a tracked node and returns a friendly name for it.</para>
-		/// </summary>
-		/// <param name="uniqueID">The unique identifier for the Node index.</param>
-		/// <returns>
-		///   <para>The name of the tracked node if the given 64-bit identifier maps to a currently tracked node. Empty string otherwise.</para>
-		/// </returns>
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetNodeName(ulong uniqueID);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetNodeStatesInternal(object nodeStates);
-
-		public static void GetNodeStates(List<XRNodeState> nodeStates)
-		{
-			if (nodeStates == null)
-			{
-				throw new ArgumentNullException("nodeStates");
-			}
-			nodeStates.Clear();
-			InputTracking.GetNodeStatesInternal(nodeStates);
-		}
-
-		/// <summary>
-		///   <para>Disables positional tracking in XR. This takes effect the next time the head pose is sampled.  If set to true the camera only tracks headset rotation state.</para>
-		/// </summary>
-		public static extern bool disablePositionalTracking
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<XRNodeState> trackingAcquired;
 
@@ -136,6 +56,77 @@ namespace UnityEngine.XR
 			}
 		}
 
+		[NativeConditional("ENABLE_VR", "Vector3f::zero")]
+		public static Vector3 GetLocalPosition(XRNode node)
+		{
+			Vector3 vector;
+			InputTracking.GetLocalPosition_Injected(node, out vector);
+			return vector;
+		}
+
+		[NativeConditional("ENABLE_VR", "Quaternionf::identity()")]
+		public static Quaternion GetLocalRotation(XRNode node)
+		{
+			Quaternion quaternion;
+			InputTracking.GetLocalRotation_Injected(node, out quaternion);
+			return quaternion;
+		}
+
+		[NativeConditional("ENABLE_VR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Recenter();
+
+		[NativeConditional("ENABLE_VR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern string GetNodeName(ulong uniqueId);
+
+		public static void GetNodeStates(List<XRNodeState> nodeStates)
+		{
+			if (nodeStates == null)
+			{
+				throw new ArgumentNullException("nodeStates");
+			}
+			nodeStates.Clear();
+			InputTracking.GetNodeStates_Internal(nodeStates);
+		}
+
+		[NativeConditional("ENABLE_VR && !ENABLE_DOTNET")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetNodeStates_Internal(List<XRNodeState> nodeStates);
+
+		[NativeConditional("ENABLE_VR && ENABLE_DOTNET")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern XRNodeState[] GetNodeStates_Internal_WinRT();
+
+		[NativeConditional("ENABLE_VR")]
+		public static extern bool disablePositionalTracking
+		{
+			[NativeName("GetPositionalTrackingDisabled")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeName("SetPositionalTrackingDisabled")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool SendHapticImpulse(ulong deviceId, uint channel, float amplitude, float duration);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool SendHapticBuffer(ulong deviceId, uint channel, byte[] buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool TryGetHapticCapabilities(ulong deviceId, out HapticCapabilities capabilities);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void StopHaptics(ulong deviceId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsDeviceValid(ulong deviceId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern ulong GetDeviceIdAtXRNode(XRNode node);
+
 		// Note: this type is marked as 'beforefieldinit'.
 		static InputTracking()
 		{
@@ -144,6 +135,12 @@ namespace UnityEngine.XR
 			InputTracking.nodeAdded = null;
 			InputTracking.nodeRemoved = null;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLocalPosition_Injected(XRNode node, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLocalRotation_Injected(XRNode node, out Quaternion ret);
 
 		private enum TrackingStateEventType
 		{

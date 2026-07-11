@@ -7,20 +7,21 @@ namespace System.ComponentModel
 	{
 		public DefaultEventAttribute(string name)
 		{
-			this.eventName = name;
+			this.name = name;
 		}
 
 		public string Name
 		{
 			get
 			{
-				return this.eventName;
+				return this.name;
 			}
 		}
 
-		public override bool Equals(object o)
+		public override bool Equals(object obj)
 		{
-			return o is DefaultEventAttribute && ((DefaultEventAttribute)o).eventName == this.eventName;
+			DefaultEventAttribute defaultEventAttribute = obj as DefaultEventAttribute;
+			return defaultEventAttribute != null && defaultEventAttribute.Name == this.name;
 		}
 
 		public override int GetHashCode()
@@ -28,7 +29,7 @@ namespace System.ComponentModel
 			return base.GetHashCode();
 		}
 
-		private string eventName;
+		private readonly string name;
 
 		public static readonly DefaultEventAttribute Default = new DefaultEventAttribute(null);
 	}

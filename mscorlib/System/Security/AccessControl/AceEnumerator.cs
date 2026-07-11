@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Security.AccessControl
 {
@@ -7,7 +8,21 @@ namespace System.Security.AccessControl
 	{
 		internal AceEnumerator(GenericAcl owner)
 		{
+			this.current = -1;
+			base..ctor();
 			this.owner = owner;
+		}
+
+		public GenericAce Current
+		{
+			get
+			{
+				if (this.current >= 0)
+				{
+					return this.owner[this.current];
+				}
+				return null;
+			}
 		}
 
 		object IEnumerator.Current
@@ -15,14 +30,6 @@ namespace System.Security.AccessControl
 			get
 			{
 				return this.Current;
-			}
-		}
-
-		public GenericAce Current
-		{
-			get
-			{
-				return (this.current >= 0) ? this.owner[this.current] : null;
 			}
 		}
 
@@ -41,8 +48,13 @@ namespace System.Security.AccessControl
 			this.current = -1;
 		}
 
+		internal AceEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
 		private GenericAcl owner;
 
-		private int current = -1;
+		private int current;
 	}
 }

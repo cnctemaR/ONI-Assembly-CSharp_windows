@@ -10,15 +10,6 @@ namespace Klei.AI
 	[DebuggerDisplay("{amount.Name} {value} ({deltaAttribute.value}/{minAttribute.value}/{maxAttribute.value})")]
 	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadable, ISim200ms
 	{
-		public AmountInstance(Amount amount, GameObject game_object)
-			: base(game_object, amount)
-		{
-			Attributes attributes = game_object.GetAttributes();
-			this.minAttribute = attributes.Add(amount.minAttribute);
-			this.maxAttribute = attributes.Add(amount.maxAttribute);
-			this.deltaAttribute = attributes.Add(amount.deltaAttribute);
-		}
-
 		public Amount amount
 		{
 			get
@@ -39,11 +30,9 @@ namespace Klei.AI
 				if (this._paused)
 				{
 					this.Deactivate();
+					return;
 				}
-				else
-				{
-					this.Activate();
-				}
+				this.Activate();
 			}
 		}
 
@@ -60,6 +49,15 @@ namespace Klei.AI
 		public float GetDelta()
 		{
 			return this.deltaAttribute.GetTotalValue();
+		}
+
+		public AmountInstance(Amount amount, GameObject game_object)
+			: base(game_object, amount)
+		{
+			Attributes attributes = game_object.GetAttributes();
+			this.minAttribute = attributes.Add(amount.minAttribute);
+			this.maxAttribute = attributes.Add(amount.maxAttribute);
+			this.deltaAttribute = attributes.Add(amount.deltaAttribute);
 		}
 
 		public float SetValue(float value)

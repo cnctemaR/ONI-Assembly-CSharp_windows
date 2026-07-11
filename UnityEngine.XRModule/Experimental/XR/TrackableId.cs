@@ -4,19 +4,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.XR
 {
-	/// <summary>
-	///   <para>A session-unique identifier for trackables in the environment, e.g., planes and feature points.</para>
-	/// </summary>
-	[UsedByNativeCode]
 	[NativeHeader("Modules/XR/XRManagedBindings.h")]
+	[UsedByNativeCode]
 	public struct TrackableId : IEquatable<TrackableId>
 	{
-		/// <summary>
-		///   <para>Generates a nicely formatted version of the id.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>A string unique to this id</para>
-		/// </returns>
 		public override string ToString()
 		{
 			return string.Format("{0}-{1}", this.m_SubId1.ToString("X16"), this.m_SubId2.ToString("X16"));
@@ -47,9 +38,6 @@ namespace UnityEngine.Experimental.XR
 			return id1.m_SubId1 != id2.m_SubId1 || id1.m_SubId2 != id2.m_SubId2;
 		}
 
-		/// <summary>
-		///   <para>Represents an invalid id.</para>
-		/// </summary>
 		public static TrackableId InvalidId
 		{
 			get

@@ -36,24 +36,77 @@ namespace System.Security.Cryptography.X509Certificates
 
 		internal static string GetInformation(X509ChainStatusFlags flags)
 		{
-			switch (flags)
+			if (flags <= X509ChainStatusFlags.InvalidNameConstraints)
 			{
-			case X509ChainStatusFlags.NoError:
-				goto IL_00FF;
-			case X509ChainStatusFlags.NotTimeValid:
-			case X509ChainStatusFlags.NotTimeNested:
-			case X509ChainStatusFlags.Revoked:
-			case X509ChainStatusFlags.NotSignatureValid:
-				break;
-			default:
-				if (flags != X509ChainStatusFlags.NotValidForUsage && flags != X509ChainStatusFlags.UntrustedRoot && flags != X509ChainStatusFlags.RevocationStatusUnknown && flags != X509ChainStatusFlags.Cyclic && flags != X509ChainStatusFlags.InvalidExtension && flags != X509ChainStatusFlags.InvalidPolicyConstraints && flags != X509ChainStatusFlags.InvalidBasicConstraints && flags != X509ChainStatusFlags.InvalidNameConstraints && flags != X509ChainStatusFlags.HasNotSupportedNameConstraint && flags != X509ChainStatusFlags.HasNotDefinedNameConstraint && flags != X509ChainStatusFlags.HasNotPermittedNameConstraint && flags != X509ChainStatusFlags.HasExcludedNameConstraint && flags != X509ChainStatusFlags.PartialChain && flags != X509ChainStatusFlags.CtlNotTimeValid && flags != X509ChainStatusFlags.CtlNotSignatureValid && flags != X509ChainStatusFlags.CtlNotValidForUsage && flags != X509ChainStatusFlags.OfflineRevocation && flags != X509ChainStatusFlags.NoIssuanceChainPolicy)
+				if (flags <= X509ChainStatusFlags.RevocationStatusUnknown)
 				{
-					goto IL_00FF;
+					if (flags <= X509ChainStatusFlags.NotValidForUsage)
+					{
+						switch (flags)
+						{
+						case X509ChainStatusFlags.NoError:
+						case X509ChainStatusFlags.NotTimeValid | X509ChainStatusFlags.NotTimeNested:
+						case X509ChainStatusFlags.NotTimeValid | X509ChainStatusFlags.Revoked:
+						case X509ChainStatusFlags.NotTimeNested | X509ChainStatusFlags.Revoked:
+						case X509ChainStatusFlags.NotTimeValid | X509ChainStatusFlags.NotTimeNested | X509ChainStatusFlags.Revoked:
+							goto IL_0125;
+						case X509ChainStatusFlags.NotTimeValid:
+						case X509ChainStatusFlags.NotTimeNested:
+						case X509ChainStatusFlags.Revoked:
+						case X509ChainStatusFlags.NotSignatureValid:
+							break;
+						default:
+							if (flags != X509ChainStatusFlags.NotValidForUsage)
+							{
+								goto IL_0125;
+							}
+							break;
+						}
+					}
+					else if (flags != X509ChainStatusFlags.UntrustedRoot && flags != X509ChainStatusFlags.RevocationStatusUnknown)
+					{
+						goto IL_0125;
+					}
 				}
-				break;
+				else if (flags <= X509ChainStatusFlags.InvalidExtension)
+				{
+					if (flags != X509ChainStatusFlags.Cyclic && flags != X509ChainStatusFlags.InvalidExtension)
+					{
+						goto IL_0125;
+					}
+				}
+				else if (flags != X509ChainStatusFlags.InvalidPolicyConstraints && flags != X509ChainStatusFlags.InvalidBasicConstraints && flags != X509ChainStatusFlags.InvalidNameConstraints)
+				{
+					goto IL_0125;
+				}
+			}
+			else if (flags <= X509ChainStatusFlags.PartialChain)
+			{
+				if (flags <= X509ChainStatusFlags.HasNotDefinedNameConstraint)
+				{
+					if (flags != X509ChainStatusFlags.HasNotSupportedNameConstraint && flags != X509ChainStatusFlags.HasNotDefinedNameConstraint)
+					{
+						goto IL_0125;
+					}
+				}
+				else if (flags != X509ChainStatusFlags.HasNotPermittedNameConstraint && flags != X509ChainStatusFlags.HasExcludedNameConstraint && flags != X509ChainStatusFlags.PartialChain)
+				{
+					goto IL_0125;
+				}
+			}
+			else if (flags <= X509ChainStatusFlags.CtlNotSignatureValid)
+			{
+				if (flags != X509ChainStatusFlags.CtlNotTimeValid && flags != X509ChainStatusFlags.CtlNotSignatureValid)
+				{
+					goto IL_0125;
+				}
+			}
+			else if (flags != X509ChainStatusFlags.CtlNotValidForUsage && flags != X509ChainStatusFlags.OfflineRevocation && flags != X509ChainStatusFlags.NoIssuanceChainPolicy)
+			{
+				goto IL_0125;
 			}
 			return global::Locale.GetText(flags.ToString());
-			IL_00FF:
+			IL_0125:
 			return string.Empty;
 		}
 

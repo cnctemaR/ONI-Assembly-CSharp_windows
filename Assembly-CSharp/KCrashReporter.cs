@@ -14,7 +14,6 @@ using UnityEngine.UI;
 
 public class KCrashReporter : MonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public static event Action<string> onCrashReported;
 
 	public static bool hasReportedError { get; private set; }
@@ -29,8 +28,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			MD5 md = MD5.Create();
-			string text2 = File.ReadAllText(text);
-			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(text2);
+			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(text));
 			if (dictionary.Count > 0)
 			{
 				bool flag = true;
@@ -39,16 +37,13 @@ public class KCrashReporter : MonoBehaviour
 					string key = keyValuePair.Key;
 					string value = keyValuePair.Value;
 					stringBuilder.Length = 0;
-					string text3 = Path.Combine(KCrashReporter.dataRoot, key);
-					using (FileStream fileStream = new FileStream(text3, FileMode.Open, FileAccess.Read))
+					using (FileStream fileStream = new FileStream(Path.Combine(KCrashReporter.dataRoot, key), FileMode.Open, FileAccess.Read))
 					{
-						byte[] array = md.ComputeHash(fileStream);
-						foreach (byte b in array)
+						foreach (byte b in md.ComputeHash(fileStream))
 						{
 							stringBuilder.AppendFormat("{0:x2}", b);
 						}
-						string text4 = stringBuilder.ToString();
-						if (text4 != value)
+						if (stringBuilder.ToString() != value)
 						{
 							flag = false;
 							break;
@@ -119,8 +114,7 @@ public class KCrashReporter : MonoBehaviour
 			string text = stack_trace;
 			if (string.IsNullOrEmpty(text))
 			{
-				StackTrace stackTrace = new StackTrace(5, true);
-				text = stackTrace.ToString();
+				text = new StackTrace(5, true).ToString();
 			}
 			if (App.isLoading)
 			{
@@ -131,6 +125,7 @@ public class KCrashReporter : MonoBehaviour
 						msg = msg,
 						stack_trace = text
 					};
+					return;
 				}
 			}
 			else
@@ -196,7 +191,7 @@ public class KCrashReporter : MonoBehaviour
 		global::Debug.Log(string.Format("Save_file: {0}", save_file));
 		if (KPrivacyPrefs.instance.disableDataCollection)
 		{
-			return string.Empty;
+			return "";
 		}
 		if (save_file != null && File.Exists(save_file))
 		{
@@ -207,11 +202,11 @@ public class KCrashReporter : MonoBehaviour
 				byte[] array = File.ReadAllBytes(save_file);
 				string text = "----" + global::System.DateTime.Now.Ticks.ToString("x");
 				webClient.Headers.Add("Content-Type", "multipart/form-data; boundary=" + text);
-				string text2 = string.Empty;
+				string text2 = "";
 				string text3;
 				using (SHA1CryptoServiceProvider sha1CryptoServiceProvider = new SHA1CryptoServiceProvider())
 				{
-					text3 = BitConverter.ToString(sha1CryptoServiceProvider.ComputeHash(array)).Replace("-", string.Empty);
+					text3 = BitConverter.ToString(sha1CryptoServiceProvider.ComputeHash(array)).Replace("-", "");
 				}
 				text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", text, "hash", text3);
 				if (metadata != null)
@@ -236,11 +231,11 @@ public class KCrashReporter : MonoBehaviour
 				catch (Exception ex)
 				{
 					global::Debug.Log(ex);
-					return string.Empty;
+					return "";
 				}
 			}
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private static string GetUserID()
@@ -261,7 +256,7 @@ public class KCrashReporter : MonoBehaviour
 
 	private static string GetLogContents()
 	{
-		string text = string.Empty;
+		string text;
 		if (Application.platform == RuntimePlatform.WindowsEditor)
 		{
 			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Unity/Editor/Editor.log");
@@ -282,7 +277,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			if (Application.platform != RuntimePlatform.LinuxPlayer)
 			{
-				return string.Empty;
+				return "";
 			}
 			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "unity3d/Klei/Oxygen Not Included/Player.log");
 		}
@@ -296,7 +291,7 @@ public class KCrashReporter : MonoBehaviour
 				}
 			}
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public static void ReportError(string msg, string stack_trace, string save_file_hash, ConfirmDialogScreen confirm_prefab, GameObject confirm_parent, string userMessage = "")
@@ -319,7 +314,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		string text7;
+		string text8;
 		using (WebClient webClient = new WebClient())
 		{
 			webClient.Encoding = Encoding.UTF8;
@@ -337,7 +332,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "RP-" + 383949U.ToString();
+				string text3 = "RP-" + 393231U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -376,7 +371,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (userMessage == UI.CRASHSCREEN.BODY.text)
 			{
-				userMessage = string.Empty;
+				userMessage = "";
 			}
 			KCrashReporter.Error error = new KCrashReporter.Error();
 			error.user = KCrashReporter.GetUserID();
@@ -386,7 +381,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 383949;
+			error.build = 393231;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -399,7 +394,7 @@ public class KCrashReporter : MonoBehaviour
 				error.steam64_verified = DistributionPlatform.Inst.LocalUser.Id.ToInt64();
 			}
 			string text6 = JsonConvert.SerializeObject(error);
-			string empty = string.Empty;
+			string text7 = "";
 			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
 			global::Debug.Log("Submitting crash:");
 			try
@@ -412,14 +407,13 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (confirm_prefab != null && confirm_parent != null)
 			{
-				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent);
-				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null, true);
+				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null, true);
 			}
-			text7 = empty;
+			text8 = text7;
 		}
 		if (KCrashReporter.onCrashReported != null)
 		{
-			KCrashReporter.onCrashReported(text7);
+			KCrashReporter.onCrashReported(text8);
 		}
 	}
 
@@ -431,7 +425,7 @@ public class KCrashReporter : MonoBehaviour
 			"user",
 			KCrashReporter.GetUserID()
 		} });
-		KCrashReporter.ReportError(msg, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, confirmParent, string.Empty);
+		KCrashReporter.ReportError(msg, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, confirmParent, "");
 	}
 
 	public static void Assert(bool condition, string message)
@@ -439,7 +433,7 @@ public class KCrashReporter : MonoBehaviour
 		if (!condition && !KCrashReporter.hasReportedError)
 		{
 			StackTrace stackTrace = new StackTrace(1, true);
-			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, string.Empty);
+			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, "");
 		}
 	}
 
@@ -464,7 +458,7 @@ public class KCrashReporter : MonoBehaviour
 				KCrashReporter.GetUserID()
 			} });
 		}
-		KCrashReporter.ReportError(msg, stack_trace, text, null, null, string.Empty);
+		KCrashReporter.ReportError(msg, stack_trace, text, null, null, "");
 		if (dmp_filename != null)
 		{
 			File.Move(text3, text2);
@@ -516,20 +510,20 @@ public class KCrashReporter : MonoBehaviour
 
 		public ulong steam64_verified;
 
-		public string callstack = string.Empty;
+		public string callstack = "";
 
-		public string fullstack = string.Empty;
+		public string fullstack = "";
 
-		public string log = string.Empty;
+		public string log = "";
 
-		public string summaryline = string.Empty;
+		public string summaryline = "";
 
-		public string user_message = string.Empty;
+		public string user_message = "";
 
 		public bool is_server;
 
 		public bool is_dedicated;
 
-		public string save_hash = string.Empty;
+		public string save_hash = "";
 	}
 }

@@ -77,12 +77,11 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		if (component != null)
 		{
 			string text = this.connectionManager.GetVisualizerString(num);
-			BuildingUnderConstruction component2 = base.GetComponent<BuildingUnderConstruction>();
-			if (component2 != null && component.HasAnimation(text + "_place"))
+			if (base.GetComponent<BuildingUnderConstruction>() != null && component.HasAnimation(text + "_place"))
 			{
 				text += "_place";
 			}
-			if (text != null && text != string.Empty)
+			if (text != null && text != "")
 			{
 				component.Play(text, KAnim.PlayMode.Once, 1f, 0f);
 			}
@@ -92,7 +91,11 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	public int GetNetworkID()
 	{
 		UtilityNetwork network = this.GetNetwork();
-		return (network == null) ? (-1) : network.id;
+		if (network == null)
+		{
+			return -1;
+		}
+		return network.id;
 	}
 
 	private UtilityNetwork GetNetwork()

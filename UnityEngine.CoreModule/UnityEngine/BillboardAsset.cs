@@ -1,105 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>BillboardAsset describes how a billboard is rendered.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Graphics/Billboard/BillboardAsset.h")]
+	[NativeHeader("Runtime/Export/BillboardRenderer.bindings.h")]
 	public sealed class BillboardAsset : Object
 	{
-		/// <summary>
-		///   <para>Constructs a new BillboardAsset.</para>
-		/// </summary>
 		public BillboardAsset()
 		{
 			BillboardAsset.Internal_Create(this);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::Internal_Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] BillboardAsset obj);
 
-		/// <summary>
-		///   <para>Width of the billboard.</para>
-		/// </summary>
 		public extern float width
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		/// <summary>
-		///   <para>Height of the billboard.</para>
-		/// </summary>
 		public extern float height
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		/// <summary>
-		///   <para>Height of the billboard that is below ground.</para>
-		/// </summary>
 		public extern float bottom
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		/// <summary>
-		///   <para>Number of pre-rendered images that can be switched when the billboard is viewed from different angles.</para>
-		/// </summary>
 		public extern int imageCount
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeMethod("GetNumImages")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of vertices in the billboard mesh.</para>
-		/// </summary>
 		public extern int vertexCount
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeMethod("GetNumVertices")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of indices in the billboard mesh.</para>
-		/// </summary>
 		public extern int indexCount
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeMethod("GetNumIndices")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The material used for rendering.</para>
-		/// </summary>
 		public extern Material material
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -113,15 +80,11 @@ namespace UnityEngine
 			this.GetImageTexCoordsInternal(imageTexCoords);
 		}
 
-		/// <summary>
-		///   <para>Get the array of billboard image texture coordinate data.</para>
-		/// </summary>
-		/// <param name="imageTexCoords">The list that receives the array.</param>
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod("GetBillboardDataReadonly().GetImageTexCoords")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Vector4[] GetImageTexCoords();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::GetImageTexCoordsInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void GetImageTexCoordsInternal(object list);
 
@@ -134,15 +97,11 @@ namespace UnityEngine
 			this.SetImageTexCoordsInternalList(imageTexCoords);
 		}
 
-		/// <summary>
-		///   <para>Set the array of billboard image texture coordinate data.</para>
-		/// </summary>
-		/// <param name="imageTexCoords">The array of data to set.</param>
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::SetImageTexCoords", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetImageTexCoords(Vector4[] imageTexCoords);
+		public extern void SetImageTexCoords([NotNull] Vector4[] imageTexCoords);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::SetImageTexCoordsInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetImageTexCoordsInternalList(object list);
 
@@ -155,15 +114,11 @@ namespace UnityEngine
 			this.GetVerticesInternal(vertices);
 		}
 
-		/// <summary>
-		///   <para>Get the vertices of the billboard mesh.</para>
-		/// </summary>
-		/// <param name="vertices">The list that receives the array.</param>
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod("GetBillboardDataReadonly().GetVertices")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Vector2[] GetVertices();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::GetVerticesInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void GetVerticesInternal(object list);
 
@@ -176,15 +131,11 @@ namespace UnityEngine
 			this.SetVerticesInternalList(vertices);
 		}
 
-		/// <summary>
-		///   <para>Set the vertices of the billboard mesh.</para>
-		/// </summary>
-		/// <param name="vertices">The array of data to set.</param>
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVertices", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetVertices(Vector2[] vertices);
+		public extern void SetVertices([NotNull] Vector2[] vertices);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVerticesInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetVerticesInternalList(object list);
 
@@ -197,15 +148,11 @@ namespace UnityEngine
 			this.GetIndicesInternal(indices);
 		}
 
-		/// <summary>
-		///   <para>Get the indices of the billboard mesh.</para>
-		/// </summary>
-		/// <param name="indices">The list that receives the array.</param>
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod("GetBillboardDataReadonly().GetIndices")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern ushort[] GetIndices();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::GetIndicesInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void GetIndicesInternal(object list);
 
@@ -218,19 +165,15 @@ namespace UnityEngine
 			this.SetIndicesInternalList(indices);
 		}
 
-		/// <summary>
-		///   <para>Set the indices of the billboard mesh.</para>
-		/// </summary>
-		/// <param name="indices">The array of data to set.</param>
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::SetIndices", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetIndices(ushort[] indices);
+		public extern void SetIndices([NotNull] ushort[] indices);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::SetIndicesInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetIndicesInternalList(object list);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "BillboardRenderer_Bindings::MakeMaterialProperties", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void MakeMaterialProperties(MaterialPropertyBlock properties, Camera camera);
 	}

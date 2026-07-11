@@ -5,16 +5,10 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Control of an object's position through physics simulation.</para>
-	/// </summary>
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Dynamics/Rigidbody.h")]
+	[RequireComponent(typeof(Transform))]
 	public class Rigidbody : Component
 	{
-		/// <summary>
-		///   <para>The velocity vector of the rigidbody.</para>
-		/// </summary>
 		public Vector3 velocity
 		{
 			get
@@ -29,9 +23,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The angular velocity vector of the rigidbody measured in radians per second.</para>
-		/// </summary>
 		public Vector3 angularVelocity
 		{
 			get
@@ -46,9 +37,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The drag of the object.</para>
-		/// </summary>
 		public extern float drag
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -57,9 +45,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The angular drag of the object.</para>
-		/// </summary>
 		public extern float angularDrag
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -68,9 +53,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The mass of the rigidbody.</para>
-		/// </summary>
 		public extern float mass
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -79,16 +61,9 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Sets the mass based on the attached colliders assuming a constant density.</para>
-		/// </summary>
-		/// <param name="density"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetDensity(float density);
 
-		/// <summary>
-		///   <para>Controls whether gravity affects this rigidbody.</para>
-		/// </summary>
 		public extern bool useGravity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -97,9 +72,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Maximum velocity of a rigidbody when moving out of penetrating state.</para>
-		/// </summary>
 		public extern float maxDepenetrationVelocity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -108,9 +80,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Controls whether physics affects the rigidbody.</para>
-		/// </summary>
 		public extern bool isKinematic
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -119,9 +88,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Controls whether physics will change the rotation of the object.</para>
-		/// </summary>
 		public extern bool freezeRotation
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -130,9 +96,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Controls which degrees of freedom are allowed for the simulation of this Rigidbody.</para>
-		/// </summary>
 		public extern RigidbodyConstraints constraints
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -141,9 +104,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The Rigidbody's collision detection mode.</para>
-		/// </summary>
 		public extern CollisionDetectionMode collisionDetectionMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -152,9 +112,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The center of mass relative to the transform's origin.</para>
-		/// </summary>
 		public Vector3 centerOfMass
 		{
 			get
@@ -169,9 +126,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The center of mass of the rigidbody in world space (Read Only).</para>
-		/// </summary>
 		public Vector3 worldCenterOfMass
 		{
 			get
@@ -182,9 +136,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of the inertia tensor.</para>
-		/// </summary>
 		public Quaternion inertiaTensorRotation
 		{
 			get
@@ -199,9 +150,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The diagonal inertia tensor of mass relative to the center of mass.</para>
-		/// </summary>
 		public Vector3 inertiaTensor
 		{
 			get
@@ -216,9 +164,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Should collision detection be enabled? (By default always enabled).</para>
-		/// </summary>
 		public extern bool detectCollisions
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -227,9 +172,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The position of the rigidbody.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			get
@@ -244,9 +186,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The rotation of the rigidbody.</para>
-		/// </summary>
 		public Quaternion rotation
 		{
 			get
@@ -261,9 +200,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Interpolation allows you to smooth out the effect of running physics at a fixed frame rate.</para>
-		/// </summary>
 		public extern RigidbodyInterpolation interpolation
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -272,9 +208,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The solverIterations determines how accurately Rigidbody joints and collision contacts are resolved. Overrides Physics.defaultSolverIterations. Must be positive.</para>
-		/// </summary>
 		public extern int solverIterations
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -283,9 +216,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The mass-normalized energy threshold, below which objects start going to sleep.</para>
-		/// </summary>
 		public extern float sleepThreshold
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -294,9 +224,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The maximimum angular velocity of the rigidbody. (Default 7) range { 0, infinity }.</para>
-		/// </summary>
 		public extern float maxAngularVelocity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -305,58 +232,31 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Moves the rigidbody to position.</para>
-		/// </summary>
-		/// <param name="position">The new position for the Rigidbody object.</param>
 		public void MovePosition(Vector3 position)
 		{
 			this.MovePosition_Injected(ref position);
 		}
 
-		/// <summary>
-		///   <para>Rotates the rigidbody to rotation.</para>
-		/// </summary>
-		/// <param name="rot">The new rotation for the Rigidbody.</param>
 		public void MoveRotation(Quaternion rot)
 		{
 			this.MoveRotation_Injected(ref rot);
 		}
 
-		/// <summary>
-		///   <para>Forces a rigidbody to sleep at least one frame.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Sleep();
 
-		/// <summary>
-		///   <para>Is the rigidbody sleeping?</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsSleeping();
 
-		/// <summary>
-		///   <para>Forces a rigidbody to wake up.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void WakeUp();
 
-		/// <summary>
-		///   <para>Reset the center of mass of the rigidbody.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ResetCenterOfMass();
 
-		/// <summary>
-		///   <para>Reset the inertia tensor value and rotation.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ResetInertiaTensor();
 
-		/// <summary>
-		///   <para>The velocity relative to the rigidbody at the point relativePoint.</para>
-		/// </summary>
-		/// <param name="relativePoint"></param>
 		public Vector3 GetRelativePointVelocity(Vector3 relativePoint)
 		{
 			Vector3 vector;
@@ -364,10 +264,6 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>The velocity of the rigidbody at the point worldPoint in global space.</para>
-		/// </summary>
-		/// <param name="worldPoint"></param>
 		public Vector3 GetPointVelocity(Vector3 worldPoint)
 		{
 			Vector3 vector;
@@ -375,9 +271,6 @@ namespace UnityEngine
 			return vector;
 		}
 
-		/// <summary>
-		///   <para>The solverVelocityIterations affects how how accurately Rigidbody joints and collision contacts are resolved. Overrides Physics.defaultSolverVelocityIterations. Must be positive.</para>
-		/// </summary>
 		public extern int solverVelocityIterations
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -386,9 +279,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The linear velocity below which objects start going to sleep. (Default 0.14) range { 0, infinity }.</para>
-		/// </summary>
 		[Obsolete("The sleepVelocity is no longer supported. Use sleepThreshold. Note that sleepThreshold is energy but not velocity.")]
 		public extern float sleepVelocity
 		{
@@ -398,9 +288,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The angular velocity below which objects start going to sleep.  (Default 0.14) range { 0, infinity }.</para>
-		/// </summary>
 		[Obsolete("The sleepAngularVelocity is no longer supported. Set Use sleepThreshold to specify energy.")]
 		public extern float sleepAngularVelocity
 		{
@@ -416,9 +303,6 @@ namespace UnityEngine
 			this.maxAngularVelocity = a;
 		}
 
-		/// <summary>
-		///   <para>Force cone friction to be used for this rigidbody.</para>
-		/// </summary>
 		[Obsolete("Cone friction is no longer supported.")]
 		public bool useConeFriction
 		{
@@ -457,248 +341,116 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the Rigidbody.</para>
-		/// </summary>
-		/// <param name="force">Force vector in world coordinates.</param>
-		/// <param name="mode">Type of force to apply.</param>
 		public void AddForce(Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddForce_Injected(ref force, mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the Rigidbody.</para>
-		/// </summary>
-		/// <param name="force">Force vector in world coordinates.</param>
-		/// <param name="mode">Type of force to apply.</param>
 		[ExcludeFromDocs]
 		public void AddForce(Vector3 force)
 		{
 			this.AddForce(force, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the Rigidbody.</para>
-		/// </summary>
-		/// <param name="x">Size of force along the world x-axis.</param>
-		/// <param name="y">Size of force along the world y-axis.</param>
-		/// <param name="z">Size of force along the world z-axis.</param>
-		/// <param name="mode">Type of force to apply.</param>
 		public void AddForce(float x, float y, float z, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddForce(new Vector3(x, y, z), mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the Rigidbody.</para>
-		/// </summary>
-		/// <param name="x">Size of force along the world x-axis.</param>
-		/// <param name="y">Size of force along the world y-axis.</param>
-		/// <param name="z">Size of force along the world z-axis.</param>
-		/// <param name="mode">Type of force to apply.</param>
 		[ExcludeFromDocs]
 		public void AddForce(float x, float y, float z)
 		{
 			this.AddForce(new Vector3(x, y, z), ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="force">Force vector in local coordinates.</param>
-		/// <param name="mode"></param>
 		public void AddRelativeForce(Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddRelativeForce_Injected(ref force, mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="force">Force vector in local coordinates.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddRelativeForce(Vector3 force)
 		{
 			this.AddRelativeForce(force, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="x">Size of force along the local x-axis.</param>
-		/// <param name="y">Size of force along the local y-axis.</param>
-		/// <param name="z">Size of force along the local z-axis.</param>
-		/// <param name="mode"></param>
 		public void AddRelativeForce(float x, float y, float z, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddRelativeForce(new Vector3(x, y, z), mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a force to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="x">Size of force along the local x-axis.</param>
-		/// <param name="y">Size of force along the local y-axis.</param>
-		/// <param name="z">Size of force along the local z-axis.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddRelativeForce(float x, float y, float z)
 		{
 			this.AddRelativeForce(new Vector3(x, y, z), ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody.</para>
-		/// </summary>
-		/// <param name="torque">Torque vector in world coordinates.</param>
-		/// <param name="mode"></param>
 		public void AddTorque(Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddTorque_Injected(ref torque, mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody.</para>
-		/// </summary>
-		/// <param name="torque">Torque vector in world coordinates.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddTorque(Vector3 torque)
 		{
 			this.AddTorque(torque, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody.</para>
-		/// </summary>
-		/// <param name="x">Size of torque along the world x-axis.</param>
-		/// <param name="y">Size of torque along the world y-axis.</param>
-		/// <param name="z">Size of torque along the world z-axis.</param>
-		/// <param name="mode"></param>
 		public void AddTorque(float x, float y, float z, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddTorque(new Vector3(x, y, z), mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody.</para>
-		/// </summary>
-		/// <param name="x">Size of torque along the world x-axis.</param>
-		/// <param name="y">Size of torque along the world y-axis.</param>
-		/// <param name="z">Size of torque along the world z-axis.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddTorque(float x, float y, float z)
 		{
 			this.AddTorque(new Vector3(x, y, z), ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="torque">Torque vector in local coordinates.</param>
-		/// <param name="mode"></param>
 		public void AddRelativeTorque(Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddRelativeTorque_Injected(ref torque, mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="torque">Torque vector in local coordinates.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddRelativeTorque(Vector3 torque)
 		{
 			this.AddRelativeTorque(torque, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="x">Size of torque along the local x-axis.</param>
-		/// <param name="y">Size of torque along the local y-axis.</param>
-		/// <param name="z">Size of torque along the local z-axis.</param>
-		/// <param name="mode"></param>
 		public void AddRelativeTorque(float x, float y, float z, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddRelativeTorque(new Vector3(x, y, z), mode);
 		}
 
-		/// <summary>
-		///   <para>Adds a torque to the rigidbody relative to its coordinate system.</para>
-		/// </summary>
-		/// <param name="x">Size of torque along the local x-axis.</param>
-		/// <param name="y">Size of torque along the local y-axis.</param>
-		/// <param name="z">Size of torque along the local z-axis.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddRelativeTorque(float x, float y, float z)
 		{
 			this.AddRelativeTorque(x, y, z, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Applies force at position. As a result this will apply a torque and force on the object.</para>
-		/// </summary>
-		/// <param name="force">Force vector in world coordinates.</param>
-		/// <param name="position">Position in world coordinates.</param>
-		/// <param name="mode"></param>
 		public void AddForceAtPosition(Vector3 force, Vector3 position, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
 			this.AddForceAtPosition_Injected(ref force, ref position, mode);
 		}
 
-		/// <summary>
-		///   <para>Applies force at position. As a result this will apply a torque and force on the object.</para>
-		/// </summary>
-		/// <param name="force">Force vector in world coordinates.</param>
-		/// <param name="position">Position in world coordinates.</param>
-		/// <param name="mode"></param>
 		[ExcludeFromDocs]
 		public void AddForceAtPosition(Vector3 force, Vector3 position)
 		{
 			this.AddForceAtPosition(force, position, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Applies a force to a rigidbody that simulates explosion effects.</para>
-		/// </summary>
-		/// <param name="explosionForce">The force of the explosion (which may be modified by distance).</param>
-		/// <param name="explosionPosition">The centre of the sphere within which the explosion has its effect.</param>
-		/// <param name="explosionRadius">The radius of the sphere within which the explosion has its effect.</param>
-		/// <param name="upwardsModifier">Adjustment to the apparent position of the explosion to make it seem to lift objects.</param>
-		/// <param name="mode">The method used to apply the force to its targets.</param>
 		public void AddExplosionForce(float explosionForce, Vector3 explosionPosition, float explosionRadius, [DefaultValue("0.0f")] float upwardsModifier, [DefaultValue("ForceMode.Force)")] ForceMode mode)
 		{
 			this.AddExplosionForce_Injected(explosionForce, ref explosionPosition, explosionRadius, upwardsModifier, mode);
 		}
 
-		/// <summary>
-		///   <para>Applies a force to a rigidbody that simulates explosion effects.</para>
-		/// </summary>
-		/// <param name="explosionForce">The force of the explosion (which may be modified by distance).</param>
-		/// <param name="explosionPosition">The centre of the sphere within which the explosion has its effect.</param>
-		/// <param name="explosionRadius">The radius of the sphere within which the explosion has its effect.</param>
-		/// <param name="upwardsModifier">Adjustment to the apparent position of the explosion to make it seem to lift objects.</param>
-		/// <param name="mode">The method used to apply the force to its targets.</param>
 		[ExcludeFromDocs]
 		public void AddExplosionForce(float explosionForce, Vector3 explosionPosition, float explosionRadius, float upwardsModifier)
 		{
 			this.AddExplosionForce(explosionForce, explosionPosition, explosionRadius, upwardsModifier, ForceMode.Force);
 		}
 
-		/// <summary>
-		///   <para>Applies a force to a rigidbody that simulates explosion effects.</para>
-		/// </summary>
-		/// <param name="explosionForce">The force of the explosion (which may be modified by distance).</param>
-		/// <param name="explosionPosition">The centre of the sphere within which the explosion has its effect.</param>
-		/// <param name="explosionRadius">The radius of the sphere within which the explosion has its effect.</param>
-		/// <param name="upwardsModifier">Adjustment to the apparent position of the explosion to make it seem to lift objects.</param>
-		/// <param name="mode">The method used to apply the force to its targets.</param>
 		[ExcludeFromDocs]
 		public void AddExplosionForce(float explosionForce, Vector3 explosionPosition, float explosionRadius)
 		{
@@ -711,10 +463,6 @@ namespace UnityEngine
 			this.Internal_ClosestPointOnBounds_Injected(ref point, ref outPos, ref distance);
 		}
 
-		/// <summary>
-		///   <para>The closest point to the bounding box of the attached colliders.</para>
-		/// </summary>
-		/// <param name="position"></param>
 		public Vector3 ClosestPointOnBounds(Vector3 position)
 		{
 			float num = 0f;
@@ -767,15 +515,6 @@ namespace UnityEngine
 			return this.Internal_SweepTestAll_Injected(ref direction, maxDistance, queryTriggerInteraction);
 		}
 
-		/// <summary>
-		///   <para>Like Rigidbody.SweepTest, but returns all hits.</para>
-		/// </summary>
-		/// <param name="direction">The direction into which to sweep the rigidbody.</param>
-		/// <param name="maxDistance">The length of the sweep.</param>
-		/// <param name="queryTriggerInteraction">Specifies whether this query should hit Triggers.</param>
-		/// <returns>
-		///   <para>An array of all colliders hit in the sweep.</para>
-		/// </returns>
 		public RaycastHit[] SweepTestAll(Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
 		{
 			float magnitude = direction.magnitude;

@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class FetchManager : KMonoBehaviour, ISim1000ms
 {
+	private static int QuantizeRotValue(float rot_value)
+	{
+		return (int)(4f * rot_value);
+	}
+
 	[Conditional("ENABLE_FETCH_PROFILING")]
 	private static void BeginDetailedSample(string region_name)
 	{
@@ -133,8 +138,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 	{
 		foreach (Pickupable pickupable in pickupables)
 		{
-			bool flag = FetchManager.IsFetchablePickup(pickupable, ref tag_bits, ref required_tags, ref forbid_tags, destination);
-			if (flag)
+			if (FetchManager.IsFetchablePickup(pickupable, ref tag_bits, ref required_tags, ref forbid_tags, destination))
 			{
 				return pickupable;
 			}
@@ -146,8 +150,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 	{
 		foreach (FetchManager.Pickup pickup in this.pickups)
 		{
-			bool flag = FetchManager.IsFetchablePickup(pickup.pickupable, ref tag_bits, ref required_tags, ref forbid_tags, destination);
-			if (flag)
+			if (FetchManager.IsFetchablePickup(pickup.pickupable, ref tag_bits, ref required_tags, ref forbid_tags, destination))
 			{
 				return pickup.pickupable;
 			}
@@ -160,15 +163,14 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		FetchManager.Pickup pickup = new FetchManager.Pickup
 		{
 			PathCost = ushort.MaxValue,
-			foodQuality = 0
+			foodQuality = int.MinValue
 		};
 		int num = int.MaxValue;
 		foreach (FetchManager.Pickup pickup2 in this.pickups)
 		{
-			bool flag = FetchManager.IsFetchablePickup(pickup2.pickupable, ref tag_bits, ref required_tags, ref forbid_tags, destination);
-			if (flag)
+			if (FetchManager.IsFetchablePickup(pickup2.pickupable, ref tag_bits, ref required_tags, ref forbid_tags, destination))
 			{
-				int num2 = (int)(pickup2.PathCost + (ushort)((5 - pickup2.foodQuality) * 50));
+				int num2 = (int)pickup2.PathCost + (5 - pickup2.foodQuality) * 50;
 				if (num2 < num)
 				{
 					pickup = pickup2;
@@ -199,11 +201,11 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 		public int tagBitsHash;
 
-		public byte masterPriority;
+		public int masterPriority;
 
-		public byte freshness;
+		public int freshness;
 
-		public byte foodQuality;
+		public int foodQuality;
 	}
 
 	[DebuggerDisplay("{pickupable.name}")]
@@ -215,35 +217,38 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 		public ushort PathCost;
 
-		public byte masterPriority;
+		public int masterPriority;
 
-		public byte freshness;
+		public int freshness;
 
-		public byte foodQuality;
+		public int foodQuality;
 	}
 
 	private class PickupComparerIncludingPriority : IComparer<FetchManager.Pickup>
 	{
 		public int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
 		{
-			int num = a.tagBitsHash - b.tagBitsHash;
+			int num = a.tagBitsHash.CompareTo(b.tagBitsHash);
 			if (num != 0)
 			{
 				return num;
 			}
-			if (a.masterPriority != b.masterPriority)
+			num = b.masterPriority.CompareTo(a.masterPriority);
+			if (num != 0)
 			{
-				return (int)(b.masterPriority - a.masterPriority);
+				return num;
 			}
-			if (a.PathCost != b.PathCost)
+			num = a.PathCost.CompareTo(b.PathCost);
+			if (num != 0)
 			{
-				return (int)(a.PathCost - b.PathCost);
+				return num;
 			}
-			if (a.foodQuality != b.foodQuality)
+			num = b.foodQuality.CompareTo(a.foodQuality);
+			if (num != 0)
 			{
-				return (int)(b.foodQuality - a.foodQuality);
+				return num;
 			}
-			return (int)(b.freshness - a.freshness);
+			return b.freshness.CompareTo(a.freshness);
 		}
 	}
 
@@ -251,20 +256,24 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 	{
 		public int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
 		{
-			if (a.PathCost != b.PathCost)
+			int num = a.PathCost.CompareTo(b.PathCost);
+			if (num != 0)
 			{
-				return (int)(a.PathCost - b.PathCost);
+				return num;
 			}
-			if (a.foodQuality != b.foodQuality)
+			num = b.foodQuality.CompareTo(a.foodQuality);
+			if (num != 0)
 			{
-				return (int)(b.foodQuality - a.foodQuality);
+				return num;
 			}
-			return (int)(b.freshness - a.freshness);
+			return b.freshness.CompareTo(a.freshness);
 		}
 	}
 
 	public class FetchablesByPrefabId
 	{
+		public Tag prefabId { get; private set; }
+
 		public FetchablesByPrefabId(Tag prefab_id)
 		{
 			this.prefabId = prefab_id;
@@ -273,30 +282,28 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			this.finalPickups = new List<FetchManager.Pickup>();
 		}
 
-		public Tag prefabId { get; private set; }
-
 		public HandleVector<int>.Handle AddPickupable(Pickupable pickupable)
 		{
-			byte b = 5;
+			int num = 5;
 			Edible component = pickupable.GetComponent<Edible>();
 			if (component != null)
 			{
-				b = (byte)component.GetQuality();
+				num = component.GetQuality();
 			}
-			byte b2 = 0;
+			int num2 = 0;
 			if (pickupable.storage != null)
 			{
 				Prioritizable prioritizable = pickupable.storage.prioritizable;
 				if (prioritizable != null)
 				{
-					b2 = (byte)prioritizable.GetMasterPriority().priority_value;
+					num2 = prioritizable.GetMasterPriority().priority_value;
 				}
 			}
 			Rottable.Instance smi = pickupable.GetSMI<Rottable.Instance>();
-			byte b3 = 0;
+			int num3 = 0;
 			if (!smi.IsNullOrStopped())
 			{
-				b3 = FetchManager.FetchablesByPrefabId.QuantizeRotValue(smi.RotValue);
+				num3 = FetchManager.QuantizeRotValue(smi.RotValue);
 			}
 			KPrefabID component2 = pickupable.GetComponent<KPrefabID>();
 			TagBits tagBits = new TagBits(ref FetchManager.disallowedTagMask);
@@ -304,9 +311,9 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			HandleVector<int>.Handle handle = this.fetchables.Allocate(new FetchManager.Fetchable
 			{
 				pickupable = pickupable,
-				foodQuality = b,
-				freshness = b3,
-				masterPriority = b2,
+				foodQuality = num,
+				freshness = num3,
+				masterPriority = num2,
 				tagBitsHash = tagBits.GetHashCode()
 			});
 			if (!smi.IsNullOrStopped())
@@ -430,17 +437,17 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		public void UpdateStorage(HandleVector<int>.Handle fetchable_handle, Storage storage)
 		{
 			FetchManager.Fetchable data = this.fetchables.GetData(fetchable_handle);
-			byte b = 0;
+			int num = 0;
 			Pickupable pickupable = data.pickupable;
 			if (pickupable.storage != null)
 			{
 				Prioritizable prioritizable = pickupable.storage.prioritizable;
 				if (prioritizable != null)
 				{
-					b = (byte)prioritizable.GetMasterPriority().priority_value;
+					num = prioritizable.GetMasterPriority().priority_value;
 				}
 			}
-			data.masterPriority = b;
+			data.masterPriority = num;
 			this.fetchables.SetData(fetchable_handle, data);
 		}
 
@@ -460,14 +467,9 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 				HandleVector<int>.Handle key = keyValuePair.Key;
 				Rottable.Instance value = keyValuePair.Value;
 				FetchManager.Fetchable data = this.fetchables.GetData(key);
-				data.freshness = FetchManager.FetchablesByPrefabId.QuantizeRotValue(value.RotValue);
+				data.freshness = FetchManager.QuantizeRotValue(value.RotValue);
 				this.fetchables.SetData(key, data);
 			}
-		}
-
-		private static byte QuantizeRotValue(float rot_value)
-		{
-			return (byte)(4f * rot_value);
 		}
 
 		public KCompactedVector<FetchManager.Fetchable> fetchables;

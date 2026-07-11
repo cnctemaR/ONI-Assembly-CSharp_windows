@@ -69,7 +69,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		internal bool removeStartOffset
+		public bool removeStartOffset
 		{
 			get
 			{
@@ -80,6 +80,28 @@ namespace UnityEngine.Timeline
 				this.m_RemoveStartOffset = value;
 			}
 		}
+
+		public bool applyFootIK
+		{
+			get
+			{
+				return this.m_ApplyFootIK;
+			}
+			set
+			{
+				this.m_ApplyFootIK = value;
+			}
+		}
+
+		internal bool hasRootTransforms
+		{
+			get
+			{
+				return this.m_Clip != null && AnimationPlayableAsset.HasRootTransforms(this.m_Clip);
+			}
+		}
+
+		internal AppliedOffsetMode appliedOffsetMode { get; set; }
 
 		public AnimationClip clip
 		{
@@ -138,10 +160,10 @@ namespace UnityEngine.Timeline
 
 		public override Playable CreatePlayable(PlayableGraph graph, GameObject go)
 		{
-			return AnimationPlayableAsset.CreatePlayable(graph, this.m_Clip, this.position, this.eulerAngles, this.removeStartOffset);
+			return AnimationPlayableAsset.CreatePlayable(graph, this.m_Clip, this.position, this.eulerAngles, this.removeStartOffset, this.appliedOffsetMode, this.applyFootIK);
 		}
 
-		internal static Playable CreatePlayable(PlayableGraph graph, AnimationClip clip, Vector3 positionOffset, Vector3 eulerOffset, bool removeStartOffset)
+		internal static Playable CreatePlayable(PlayableGraph graph, AnimationClip clip, Vector3 positionOffset, Vector3 eulerOffset, bool removeStartOffset, AppliedOffsetMode mode, bool applyFootIK)
 		{
 			Playable playable;
 			if (clip == null || clip.legacy)
@@ -152,11 +174,19 @@ namespace UnityEngine.Timeline
 			{
 				AnimationClipPlayable animationClipPlayable = AnimationClipPlayable.Create(graph, clip);
 				animationClipPlayable.SetRemoveStartOffset(removeStartOffset);
+				animationClipPlayable.SetApplyFootIK(applyFootIK);
 				Playable playable2 = animationClipPlayable;
-				if (AnimationPlayableAsset.ShouldApplyRootMotion(positionOffset, eulerOffset, clip))
+				if (AnimationPlayableAsset.ShouldApplyScaleRemove(mode))
+				{
+					AnimationRemoveScalePlayable animationRemoveScalePlayable = AnimationRemoveScalePlayable.Create(graph, 1);
+					graph.Connect<Playable, AnimationRemoveScalePlayable>(playable2, 0, animationRemoveScalePlayable, 0);
+					animationRemoveScalePlayable.SetInputWeight(0, 1f);
+					playable2 = animationRemoveScalePlayable;
+				}
+				if (AnimationPlayableAsset.ShouldApplyOffset(mode, clip))
 				{
 					AnimationOffsetPlayable animationOffsetPlayable = AnimationOffsetPlayable.Create(graph, positionOffset, Quaternion.Euler(eulerOffset), 1);
-					graph.Connect<AnimationClipPlayable, AnimationOffsetPlayable>(animationClipPlayable, 0, animationOffsetPlayable, 0);
+					graph.Connect<Playable, AnimationOffsetPlayable>(playable2, 0, animationOffsetPlayable, 0);
 					animationOffsetPlayable.SetInputWeight(0, 1f);
 					playable2 = animationOffsetPlayable;
 				}
@@ -165,9 +195,14 @@ namespace UnityEngine.Timeline
 			return playable;
 		}
 
-		private static bool ShouldApplyRootMotion(Vector3 position, Vector3 rotation, AnimationClip clip)
+		private static bool ShouldApplyOffset(AppliedOffsetMode mode, AnimationClip clip)
 		{
-			return position != Vector3.zero || rotation != Vector3.zero || (clip != null && clip.hasRootMotion);
+			return mode != AppliedOffsetMode.NoRootTransform && mode != AppliedOffsetMode.SceneOffsetLegacy && AnimationPlayableAsset.HasRootTransforms(clip);
+		}
+
+		private static bool ShouldApplyScaleRemove(AppliedOffsetMode mode)
+		{
+			return mode == AppliedOffsetMode.SceneOffsetLegacyEditor || mode == AppliedOffsetMode.SceneOffsetLegacy || mode == AppliedOffsetMode.TransformOffsetLegacy;
 		}
 
 		public ClipCaps clipCaps
@@ -207,6 +242,11 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		internal static bool HasRootTransforms(AnimationClip clip)
+		{
+			return !(clip == null) && !clip.empty && (clip.hasRootMotion || clip.hasGenericRootTransform || clip.hasMotionCurves || clip.hasRootCurves);
+		}
+
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
 			this.m_Version = AnimationPlayableAsset.k_LatestVersion;
@@ -238,13 +278,16 @@ namespace UnityEngine.Timeline
 		private Vector3 m_EulerAngles = Vector3.zero;
 
 		[SerializeField]
-		private bool m_UseTrackMatchFields = false;
+		private bool m_UseTrackMatchFields = true;
 
 		[SerializeField]
 		private MatchTargetFields m_MatchTargetFields = MatchTargetFieldConstants.All;
 
 		[SerializeField]
 		private bool m_RemoveStartOffset = true;
+
+		[SerializeField]
+		private bool m_ApplyFootIK = true;
 
 		private static readonly int k_LatestVersion = 1;
 

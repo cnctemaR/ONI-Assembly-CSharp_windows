@@ -11,6 +11,7 @@ namespace UnityEngine.Experimental.Rendering
 		NeedsLighting = 4,
 		NeedsReflectionProbes = 8,
 		Stereo = 16,
-		DisablePerObjectCulling = 32
+		DisablePerObjectCulling = 32,
+		ShadowCasters = 64
 	}
 }

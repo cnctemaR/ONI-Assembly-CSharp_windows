@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class ResourceLoader<T> where T : Resource, new()
 {
+	public IEnumerator<T> GetEnumerator()
+	{
+		return this.resources.GetEnumerator();
+	}
+
 	public ResourceLoader()
 	{
 	}
@@ -17,11 +22,6 @@ public class ResourceLoader<T> where T : Resource, new()
 	public ResourceLoader(string text, string name)
 	{
 		this.Load(text, name);
-	}
-
-	public IEnumerator<T> GetEnumerator()
-	{
-		return this.resources.GetEnumerator();
 	}
 
 	public void Load(string text, string name)

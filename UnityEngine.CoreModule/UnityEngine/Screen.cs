@@ -6,17 +6,11 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Access to display information.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	public sealed class Screen
 	{
-		/// <summary>
-		///   <para>The current width of the screen window in pixels (Read Only).</para>
-		/// </summary>
 		public static extern int width
 		{
 			[NativeMethod(Name = "GetWidth", IsThreadSafe = true)]
@@ -24,9 +18,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The current height of the screen window in pixels (Read Only).</para>
-		/// </summary>
 		public static extern int height
 		{
 			[NativeMethod(Name = "GetHeight", IsThreadSafe = true)]
@@ -34,9 +25,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The current DPI of the screen / device (Read Only).</para>
-		/// </summary>
 		public static extern float dpi
 		{
 			[NativeName("GetDPI")]
@@ -50,9 +38,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern ScreenOrientation GetScreenOrientation();
 
-		/// <summary>
-		///   <para>Specifies logical orientation of the screen.</para>
-		/// </summary>
 		public static ScreenOrientation orientation
 		{
 			get
@@ -70,9 +55,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>A power saving setting, allowing the screen to dim some time after the last active user interaction.</para>
-		/// </summary>
 		[NativeProperty("ScreenTimeout")]
 		public static extern int sleepTimeout
 		{
@@ -90,9 +72,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetOrientationEnabled(EnabledOrientation orient, bool enabled);
 
-		/// <summary>
-		///   <para>Allow auto-rotation to portrait?</para>
-		/// </summary>
 		public static bool autorotateToPortrait
 		{
 			get
@@ -105,9 +84,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Allow auto-rotation to portrait, upside down?</para>
-		/// </summary>
 		public static bool autorotateToPortraitUpsideDown
 		{
 			get
@@ -120,9 +96,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Allow auto-rotation to landscape left?</para>
-		/// </summary>
 		public static bool autorotateToLandscapeLeft
 		{
 			get
@@ -135,9 +108,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Allow auto-rotation to landscape right?</para>
-		/// </summary>
 		public static bool autorotateToLandscapeRight
 		{
 			get
@@ -150,9 +120,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The current screen resolution (Read Only).</para>
-		/// </summary>
 		public static Resolution currentResolution
 		{
 			get
@@ -163,9 +130,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Is the game running full-screen?</para>
-		/// </summary>
 		public static extern bool fullScreen
 		{
 			[NativeName("IsFullscreen")]
@@ -176,9 +140,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Set this property to one of the values in FullScreenMode to change the display mode of your application.</para>
-		/// </summary>
 		public static extern FullScreenMode fullScreenMode
 		{
 			[NativeName("GetFullscreenMode")]
@@ -189,9 +150,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Returns the safe area of the screen in pixels (Read Only).</para>
-		/// </summary>
 		public static Rect safeArea
 		{
 			get
@@ -202,14 +160,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Switches the screen resolution.</para>
-		/// </summary>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <param name="fullscreen"></param>
-		/// <param name="preferredRefreshRate"></param>
-		/// <param name="fullscreenMode"></param>
 		[NativeName("RequestResolution")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetResolution(int width, int height, FullScreenMode fullscreenMode, [UnityEngine.Internal.DefaultValue("0")] int preferredRefreshRate);
@@ -219,35 +169,16 @@ namespace UnityEngine
 			Screen.SetResolution(width, height, fullscreenMode, 0);
 		}
 
-		/// <summary>
-		///   <para>Switches the screen resolution.</para>
-		/// </summary>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <param name="fullscreen"></param>
-		/// <param name="preferredRefreshRate"></param>
-		/// <param name="fullscreenMode"></param>
 		public static void SetResolution(int width, int height, bool fullscreen, [UnityEngine.Internal.DefaultValue("0")] int preferredRefreshRate)
 		{
 			Screen.SetResolution(width, height, (!fullscreen) ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow, preferredRefreshRate);
 		}
 
-		/// <summary>
-		///   <para>Switches the screen resolution.</para>
-		/// </summary>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <param name="fullscreen"></param>
-		/// <param name="preferredRefreshRate"></param>
-		/// <param name="fullscreenMode"></param>
 		public static void SetResolution(int width, int height, bool fullscreen)
 		{
 			Screen.SetResolution(width, height, fullscreen, 0);
 		}
 
-		/// <summary>
-		///   <para>All full-screen resolutions supported by the monitor (Read Only).</para>
-		/// </summary>
 		public static extern Resolution[] resolutions
 		{
 			[FreeFunction("ScreenScripting::GetResolutions")]
@@ -255,9 +186,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Should the cursor be locked?</para>
-		/// </summary>
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Cursor.lockState and Cursor.visible instead.", false)]
 		public static bool lockCursor

@@ -4,16 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Character Joints are mainly used for Ragdoll effects.</para>
-	/// </summary>
 	[NativeClass("Unity::CharacterJoint")]
 	[NativeHeader("Runtime/Dynamics/CharacterJoint.h")]
 	public class CharacterJoint : Joint
 	{
-		/// <summary>
-		///   <para>The secondary axis around which the joint can rotate.</para>
-		/// </summary>
 		public Vector3 swingAxis
 		{
 			get
@@ -28,9 +22,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The configuration of the spring attached to the twist limits of the joint.</para>
-		/// </summary>
 		public SoftJointLimitSpring twistLimitSpring
 		{
 			get
@@ -45,9 +36,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The configuration of the spring attached to the swing limits of the joint.</para>
-		/// </summary>
 		public SoftJointLimitSpring swingLimitSpring
 		{
 			get
@@ -62,9 +50,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The lower limit around the primary axis of the character joint.</para>
-		/// </summary>
 		public SoftJointLimit lowTwistLimit
 		{
 			get
@@ -79,9 +64,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The upper limit around the primary axis of the character joint.</para>
-		/// </summary>
 		public SoftJointLimit highTwistLimit
 		{
 			get
@@ -96,9 +78,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The angular limit of rotation (in degrees) around the primary axis of the character joint.</para>
-		/// </summary>
 		public SoftJointLimit swing1Limit
 		{
 			get
@@ -113,9 +92,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The angular limit of rotation (in degrees) around the primary axis of the character joint.</para>
-		/// </summary>
 		public SoftJointLimit swing2Limit
 		{
 			get
@@ -130,9 +106,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Brings violated constraints back into alignment even when the solver fails.</para>
-		/// </summary>
 		public extern bool enableProjection
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -141,9 +114,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Set the linear tolerance threshold for projection.</para>
-		/// </summary>
 		public extern float projectionDistance
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -152,9 +122,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Set the angular tolerance threshold (in degrees) for projection.</para>
-		/// </summary>
 		public extern float projectionAngle
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

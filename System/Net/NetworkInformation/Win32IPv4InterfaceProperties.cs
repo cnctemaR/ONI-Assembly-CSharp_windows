@@ -5,9 +5,12 @@ namespace System.Net.NetworkInformation
 {
 	internal sealed class Win32IPv4InterfaceProperties : IPv4InterfaceProperties
 	{
-		public Win32IPv4InterfaceProperties(Win32_IP_ADAPTER_INFO ainfo, Win32_MIB_IFROW mib)
+		[DllImport("iphlpapi.dll")]
+		private static extern int GetPerAdapterInfo(int IfIndex, Win32_IP_PER_ADAPTER_INFO pPerAdapterInfo, ref int pOutBufLen);
+
+		public Win32IPv4InterfaceProperties(Win32_IP_ADAPTER_ADDRESSES addr, Win32_MIB_IFROW mib)
 		{
-			this.ainfo = ainfo;
+			this.addr = addr;
 			this.mib = mib;
 			int num = 0;
 			Win32IPv4InterfaceProperties.GetPerAdapterInfo(mib.Index, null, ref num);
@@ -18,9 +21,6 @@ namespace System.Net.NetworkInformation
 				throw new NetworkInformationException(perAdapterInfo);
 			}
 		}
-
-		[DllImport("iphlpapi.dll")]
-		private static extern int GetPerAdapterInfo(int IfIndex, Win32_IP_PER_ADAPTER_INFO pPerAdapterInfo, ref int pOutBufLen);
 
 		public override int Index
 		{
@@ -34,7 +34,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.painfo.AutoconfigActive != 0U;
+				return this.painfo.AutoconfigActive > 0U;
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.painfo.AutoconfigEnabled != 0U;
+				return this.painfo.AutoconfigEnabled > 0U;
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.ainfo.DhcpEnabled != 0U;
+				return this.addr.DhcpEnabled;
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32_FIXED_INFO.Instance.EnableRouting != 0U;
+				return Win32NetworkInterface.FixedInfo.EnableRouting > 0U;
 			}
 		}
 
@@ -74,11 +74,11 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.ainfo.HaveWins;
+				return this.addr.FirstWinsServerAddress != IntPtr.Zero;
 			}
 		}
 
-		private Win32_IP_ADAPTER_INFO ainfo;
+		private Win32_IP_ADAPTER_ADDRESSES addr;
 
 		private Win32_IP_PER_ADAPTER_INFO painfo;
 

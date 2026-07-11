@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Shader pass name identifier.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Export/ScriptableRenderLoop/ScriptableRenderLoop.bindings.h")]
 	public struct ShaderPassName
 	{
-		/// <summary>
-		///   <para>Create shader pass name identifier.</para>
-		/// </summary>
-		/// <param name="name">Pass name.</param>
 		public ShaderPassName(string name)
 		{
 			this.m_NameIndex = ShaderPassName.Init(name);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("ScriptableRenderLoop_Bindings::InitShaderPassName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Init(string name);
 

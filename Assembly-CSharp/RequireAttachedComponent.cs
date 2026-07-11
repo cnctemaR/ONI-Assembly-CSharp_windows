@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -6,13 +7,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class RequireAttachedComponent : RocketLaunchCondition
 {
-	public RequireAttachedComponent(AttachableBuilding myAttachable, Type required_type, string type_name_string)
-	{
-		this.myAttachable = myAttachable;
-		this.requiredType = required_type;
-		this.typeNameString = type_name_string;
-	}
-
 	public Type RequiredType
 	{
 		get
@@ -26,15 +20,25 @@ public class RequireAttachedComponent : RocketLaunchCondition
 		}
 	}
 
+	public RequireAttachedComponent(AttachableBuilding myAttachable, Type required_type, string type_name_string)
+	{
+		this.myAttachable = myAttachable;
+		this.requiredType = required_type;
+		this.typeNameString = type_name_string;
+	}
+
 	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
 		if (this.myAttachable != null)
 		{
-			foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.myAttachable))
+			using (List<GameObject>.Enumerator enumerator = AttachableBuilding.GetAttachedNetwork(this.myAttachable).GetEnumerator())
 			{
-				if (gameObject.GetComponent(this.requiredType))
+				while (enumerator.MoveNext())
 				{
-					return RocketLaunchCondition.LaunchStatus.Ready;
+					if (enumerator.Current.GetComponent(this.requiredType))
+					{
+						return RocketLaunchCondition.LaunchStatus.Ready;
+					}
 				}
 			}
 			return RocketLaunchCondition.LaunchStatus.Failure;

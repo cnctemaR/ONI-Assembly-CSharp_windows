@@ -10,9 +10,9 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			property.Apply(new StyleValue<T>(val, specificity), StylePropertyApplyMode.CopyIfEqualOrGreaterSpecificity);
 		}
 
-		public static void ApplyDefault<T>(int specificity, ref StyleValue<T> property)
+		public static void ApplyValue<T>(int specificity, ref StyleValue<T> property, T value = default(T))
 		{
-			StyleSheetApplicator.Apply<T>(default(T), specificity, ref property);
+			StyleSheetApplicator.Apply<T>(value, specificity, ref property);
 		}
 
 		public static void ApplyBool(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<bool> property)
@@ -25,6 +25,21 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 		{
 			float num = sheet.ReadFloat(handles[0]);
 			StyleSheetApplicator.Apply<float>(num, specificity, ref property);
+		}
+
+		public static void ApplyFloatOrKeyword(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<FloatOrKeyword> property)
+		{
+			StyleValueHandle styleValueHandle = handles[0];
+			FloatOrKeyword floatOrKeyword;
+			if (styleValueHandle.valueType == StyleValueType.Keyword)
+			{
+				floatOrKeyword = new FloatOrKeyword((StyleValueKeyword)styleValueHandle.valueIndex);
+			}
+			else
+			{
+				floatOrKeyword = new FloatOrKeyword(sheet.ReadFloat(styleValueHandle));
+			}
+			StyleSheetApplicator.Apply<FloatOrKeyword>(floatOrKeyword, specificity, ref property);
 		}
 
 		public static void ApplyInt(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<int> property)
@@ -45,63 +60,230 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			StyleSheetApplicator.Apply<Color>(color, specificity, ref property);
 		}
 
-		public static void ApplyCursor(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<CursorStyle> property)
+		public static void CompileCursor(StyleSheet sheet, StyleValueHandle[] handles, out float hotspotX, out float hotspotY, out int cursorId, out Texture2D texture)
 		{
 			StyleValueHandle styleValueHandle = handles[0];
-			bool flag = styleValueHandle.valueType == StyleValueType.ResourcePath;
+			int num = 0;
+			bool flag = styleValueHandle.valueType == StyleValueType.ResourcePath || styleValueHandle.valueType == StyleValueType.AssetReference;
+			cursorId = 0;
+			texture = null;
+			hotspotX = 0f;
+			hotspotY = 0f;
 			if (flag)
 			{
-				string text = sheet.ReadResourcePath(handles[0]);
-				Texture2D texture2D = Panel.loadResourceFunc(text, typeof(Texture2D)) as Texture2D;
-				if (texture2D != null)
+				if (StyleSheetApplicator.TryGetSourceFromHandle(sheet, handles[num++], out texture))
 				{
-					Vector2 zero = Vector2.zero;
-					sheet.TryReadFloat(handles, 1, out zero.x);
-					sheet.TryReadFloat(handles, 2, out zero.y);
-					CursorStyle cursorStyle = new CursorStyle
+					if (num < handles.Length && handles[num].valueType == StyleValueType.Float && sheet.TryReadFloat(handles, num++, out hotspotX))
 					{
-						texture = texture2D,
-						hotspot = zero
-					};
-					StyleSheetApplicator.Apply<CursorStyle>(cursorStyle, specificity, ref property);
+						if (!sheet.TryReadFloat(handles, num++, out hotspotY))
+						{
+						}
+					}
+				}
+				if (num < handles.Length)
+				{
+					if (StyleSheetApplicator.getCursorIdFunc != null)
+					{
+						cursorId = StyleSheetApplicator.getCursorIdFunc(sheet, handles[num]);
+					}
 				}
 			}
-			else if (StyleSheetApplicator.createDefaultCursorStyleFunc != null)
+			else if (StyleSheetApplicator.getCursorIdFunc != null)
 			{
-				CursorStyle cursorStyle2 = StyleSheetApplicator.createDefaultCursorStyleFunc(sheet, styleValueHandle);
-				StyleSheetApplicator.Apply<CursorStyle>(cursorStyle2, specificity, ref property);
+				cursorId = StyleSheetApplicator.getCursorIdFunc(sheet, styleValueHandle);
 			}
 		}
 
-		public static void ApplyResource<T>(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<T> property) where T : Object
+		public static void ApplyCursor(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<CursorStyle> property)
+		{
+			float num;
+			float num2;
+			int num3;
+			Texture2D texture2D;
+			StyleSheetApplicator.CompileCursor(sheet, handles, out num, out num2, out num3, out texture2D);
+			CursorStyle cursorStyle = new CursorStyle
+			{
+				texture = texture2D,
+				hotspot = new Vector2(num, num2),
+				defaultCursorId = num3
+			};
+			StyleSheetApplicator.Apply<CursorStyle>(cursorStyle, specificity, ref property);
+		}
+
+		public static void ApplyFont(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<Font> property)
 		{
 			StyleValueHandle styleValueHandle = handles[0];
-			if (styleValueHandle.valueType == StyleValueType.Keyword && styleValueHandle.valueIndex == 5)
+			Font font = null;
+			StyleValueType valueType = styleValueHandle.valueType;
+			if (valueType != StyleValueType.ResourcePath)
 			{
-				StyleSheetApplicator.Apply<T>((T)((object)null), specificity, ref property);
+				if (valueType != StyleValueType.AssetReference)
+				{
+					Debug.LogWarning("Invalid value for font " + styleValueHandle.valueType);
+				}
+				else
+				{
+					font = sheet.ReadAssetReference(styleValueHandle) as Font;
+					if (font == null)
+					{
+						Debug.LogWarning("Invalid font reference");
+					}
+				}
 			}
 			else
 			{
-				T t = (T)((object)null);
 				string text = sheet.ReadResourcePath(styleValueHandle);
 				if (!string.IsNullOrEmpty(text))
 				{
-					t = Panel.loadResourceFunc(text, typeof(T)) as T;
-					if (t != null)
-					{
-						StyleSheetApplicator.Apply<T>(t, specificity, ref property);
-					}
-					else
-					{
-						Debug.LogWarning(string.Format("{0} resource/file not found for path: {1}", typeof(T).Name, text));
-					}
+					font = Panel.loadResourceFunc(text, typeof(Font)) as Font;
 				}
+				if (font == null)
+				{
+					Debug.LogWarning(string.Format("Font not found for path: {0}", text));
+				}
+			}
+			if (font != null)
+			{
+				StyleSheetApplicator.Apply<Font>(font, specificity, ref property);
 			}
 		}
 
-		internal static StyleSheetApplicator.CreateDefaultCursorStyleFunction createDefaultCursorStyleFunc = null;
+		public static void ApplyImage(StyleSheet sheet, StyleValueHandle[] handles, int specificity, ref StyleValue<Texture2D> property)
+		{
+			Texture2D texture2D = null;
+			StyleValueHandle styleValueHandle = handles[0];
+			if (styleValueHandle.valueType == StyleValueType.Keyword)
+			{
+				if (styleValueHandle.valueIndex != 5)
+				{
+					Debug.LogWarning("Invalid keyword for image source " + (StyleValueKeyword)styleValueHandle.valueIndex);
+				}
+			}
+			else if (!StyleSheetApplicator.TryGetSourceFromHandle(sheet, styleValueHandle, out texture2D))
+			{
+				return;
+			}
+			StyleSheetApplicator.Apply<Texture2D>(texture2D, specificity, ref property);
+		}
 
-		internal delegate CursorStyle CreateDefaultCursorStyleFunction(StyleSheet sheet, StyleValueHandle handle);
+		private static bool TryGetSourceFromHandle(StyleSheet sheet, StyleValueHandle handle, out Texture2D source)
+		{
+			source = null;
+			StyleValueType valueType = handle.valueType;
+			if (valueType != StyleValueType.ResourcePath)
+			{
+				if (valueType != StyleValueType.AssetReference)
+				{
+					Debug.LogWarning("Invalid value for image source " + handle.valueType);
+					return false;
+				}
+				source = sheet.ReadAssetReference(handle) as Texture2D;
+				if (source == null)
+				{
+					Debug.LogWarning("Invalid texture specified");
+					return false;
+				}
+			}
+			else
+			{
+				string text = sheet.ReadResourcePath(handle);
+				if (!string.IsNullOrEmpty(text))
+				{
+					source = Panel.loadResourceFunc(text, typeof(Texture2D)) as Texture2D;
+				}
+				if (source == null)
+				{
+					Debug.LogWarning(string.Format("Texture not found for path: {0}", text));
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public static bool CompileFlexShorthand(StyleSheet sheet, StyleValueHandle[] handles, out float grow, out float shrink, out FloatOrKeyword basis)
+		{
+			grow = 0f;
+			shrink = 0f;
+			basis = new FloatOrKeyword(StyleValueKeyword.Auto);
+			bool flag = false;
+			if (handles.Length == 1 && handles[0].valueType == StyleValueType.Keyword && handles[0].valueIndex == 2)
+			{
+				flag = true;
+				grow = 0f;
+				shrink = 1f;
+				basis = new FloatOrKeyword(StyleValueKeyword.Auto);
+			}
+			else if (handles.Length == 1 && handles[0].valueType == StyleValueType.Keyword && handles[0].valueIndex == 5)
+			{
+				flag = true;
+				grow = 0f;
+				shrink = 0f;
+				basis = new FloatOrKeyword(StyleValueKeyword.Auto);
+			}
+			else if (handles.Length <= 3 && handles[0].valueType == StyleValueType.Keyword && handles[0].valueIndex == 1)
+			{
+				flag = true;
+				basis = new FloatOrKeyword(StyleValueKeyword.Auto);
+				grow = 1f;
+				shrink = 1f;
+				if (handles.Length > 1)
+				{
+					grow = sheet.ReadFloat(handles[1]);
+					if (handles.Length > 2)
+					{
+						shrink = sheet.ReadFloat(handles[2]);
+					}
+				}
+			}
+			else if (handles.Length <= 3 && handles[0].valueType == StyleValueType.Float)
+			{
+				flag = true;
+				grow = sheet.ReadFloat(handles[0]);
+				shrink = 1f;
+				basis = new FloatOrKeyword(0f);
+				if (handles.Length > 1)
+				{
+					if (handles[1].valueType == StyleValueType.Float)
+					{
+						shrink = sheet.ReadFloat(handles[1]);
+						if (handles.Length > 2)
+						{
+							if (handles[2].valueType == StyleValueType.Keyword && handles[2].valueIndex == 1)
+							{
+								basis = new FloatOrKeyword(StyleValueKeyword.Auto);
+							}
+							else if (handles[2].valueType == StyleValueType.Float)
+							{
+								basis = new FloatOrKeyword(sheet.ReadFloat(handles[2]));
+							}
+						}
+					}
+					else if (handles[1].valueType == StyleValueType.Keyword && handles[1].valueIndex == 1)
+					{
+						basis = new FloatOrKeyword(StyleValueKeyword.Auto);
+					}
+				}
+			}
+			return flag;
+		}
+
+		public static void ApplyFlexShorthand(StyleSheet sheet, StyleValueHandle[] handles, int specificity, VisualElementStylesData styleData)
+		{
+			float num;
+			float num2;
+			FloatOrKeyword floatOrKeyword;
+			bool flag = StyleSheetApplicator.CompileFlexShorthand(sheet, handles, out num, out num2, out floatOrKeyword);
+			if (flag)
+			{
+				StyleSheetApplicator.ApplyValue<float>(specificity, ref styleData.flexGrow, num);
+				StyleSheetApplicator.ApplyValue<float>(specificity, ref styleData.flexShrink, num2);
+				StyleSheetApplicator.ApplyValue<FloatOrKeyword>(specificity, ref styleData.flexBasis, floatOrKeyword);
+			}
+		}
+
+		internal static StyleSheetApplicator.GetCursorIdFunction getCursorIdFunc = null;
+
+		internal delegate int GetCursorIdFunction(StyleSheet sheet, StyleValueHandle handle);
 
 		public static class Shorthand
 		{

@@ -82,20 +82,18 @@ public class MinionStatsPanel : TargetScreen
 
 	private void RefreshAttributes()
 	{
-		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
-		if (!component)
+		if (!this.selectedTarget.GetComponent<MinionIdentity>())
 		{
 			this.attributesPanel.SetActive(false);
 			return;
 		}
 		this.attributesPanel.SetActive(true);
 		this.attributesPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES;
-		List<AttributeInstance> list = new List<AttributeInstance>(this.selectedTarget.GetAttributes().AttributeTable);
-		List<AttributeInstance> list2 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill);
+		List<AttributeInstance> list = new List<AttributeInstance>(this.selectedTarget.GetAttributes().AttributeTable).FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill);
 		this.attributesDrawer.BeginDrawing();
-		if (list2.Count > 0)
+		if (list.Count > 0)
 		{
-			foreach (AttributeInstance attributeInstance in list2)
+			foreach (AttributeInstance attributeInstance in list)
 			{
 				this.attributesDrawer.NewLabel(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue())).Tooltip(attributeInstance.GetAttributeValueTooltip());
 			}
@@ -132,7 +130,7 @@ public class MinionStatsPanel : TargetScreen
 		{
 			foreach (Skill skill2 in list)
 			{
-				string text = string.Empty;
+				string text = "";
 				foreach (SkillPerk skillPerk in skill2.perks)
 				{
 					text = text + "  • " + skillPerk.Name + "\n";

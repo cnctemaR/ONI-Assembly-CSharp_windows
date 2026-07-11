@@ -44,14 +44,14 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 	public new class Instance : GameStateMachine<RanchStation, RanchStation.Instance, IStateMachineTarget, RanchStation.Def>.GameInstance
 	{
+		public RanchableMonitor.Instance targetRanchable { get; private set; }
+
+		public bool shouldCreatureGoGetRanched { get; private set; }
+
 		public Instance(IStateMachineTarget master, RanchStation.Def def)
 			: base(master, def)
 		{
 		}
-
-		public RanchableMonitor.Instance targetRanchable { get; private set; }
-
-		public bool shouldCreatureGoGetRanched { get; private set; }
 
 		public Chore CreateChore()
 		{
@@ -104,12 +104,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			}
 			int num = Grid.PosToCell(ranchable.transform.GetPosition());
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
-			if (cavityForCell == null || cavityForCell != ranch_cavity_info)
-			{
-				return false;
-			}
-			int navigationCost = ranchable.GetComponent<Navigator>().GetNavigationCost(ranch_cell);
-			return navigationCost != -1;
+			return cavityForCell != null && cavityForCell == ranch_cavity_info && ranchable.GetComponent<Navigator>().GetNavigationCost(ranch_cell) != -1;
 		}
 
 		public void FindRanchable()
@@ -136,13 +131,10 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 						if (!(kprefabID == null))
 						{
 							RanchableMonitor.Instance smi = kprefabID.GetSMI<RanchableMonitor.Instance>();
-							if (!smi.IsNullOrStopped())
+							if (!smi.IsNullOrStopped() && RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(smi, this, cavityForCell2, targetRanchCell))
 							{
-								if (RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(smi, this, cavityForCell2, targetRanchCell))
-								{
-									instance = smi;
-									break;
-								}
+								instance = smi;
+								break;
 							}
 						}
 					}

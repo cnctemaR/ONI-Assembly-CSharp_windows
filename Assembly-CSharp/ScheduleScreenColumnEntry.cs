@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IEventSystemHandler
+public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerDownHandler
 {
 	public void OnPointerEnter(PointerEventData event_data)
 	{

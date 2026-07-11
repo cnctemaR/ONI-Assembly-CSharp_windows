@@ -7,6 +7,7 @@ using UnityEngine.Networking.Types;
 namespace UnityEngine.Networking
 {
 	[AddComponentMenu("Network/NetworkMigrationManager")]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkMigrationManager : MonoBehaviour
 	{
 		private void AddPendingPlayer(GameObject obj, int connectionId, NetworkInstanceId netId, short playerControllerId)
@@ -290,7 +291,7 @@ namespace UnityEngine.Networking
 						NetworkID networkID;
 						NodeID nodeID;
 						byte b;
-						NetworkTransport.GetConnectionInfo(NetworkServer.serverHostId, networkConnection.connectionId, out text, out num, out networkID, out nodeID, out b);
+						NetworkManager.activeTransport.GetConnectionInfo(NetworkServer.serverHostId, networkConnection.connectionId, out text, out num, out networkID, out nodeID, out b);
 						peerInfoMessage.connectionId = networkConnection.connectionId;
 						peerInfoMessage.port = num;
 						if (i == 0)
@@ -619,7 +620,7 @@ namespace UnityEngine.Networking
 				this.m_DisconnectedFromHost = true;
 				this.DisablePlayerObjects();
 				byte b;
-				NetworkTransport.Disconnect(this.m_Client.hostId, this.m_Client.connection.connectionId, out b);
+				NetworkManager.activeTransport.Disconnect(this.m_Client.hostId, this.m_Client.connection.connectionId, out b);
 				if (this.m_OldServerConnectionId != -1)
 				{
 					NetworkMigrationManager.SceneChangeOption sceneChangeOption;
@@ -766,46 +767,39 @@ namespace UnityEngine.Networking
 				newHostInfo.port = 0;
 				int num = -1;
 				youAreNewHost = false;
-				if (this.m_Peers == null)
+				for (int i = 0; i < this.m_Peers.Length; i++)
+				{
+					PeerInfoMessage peerInfoMessage = this.m_Peers[i];
+					if (peerInfoMessage.connectionId != 0)
+					{
+						if (!peerInfoMessage.isHost)
+						{
+							if (peerInfoMessage.isYou)
+							{
+								num = peerInfoMessage.connectionId;
+							}
+							if (peerInfoMessage.connectionId < newHostInfo.connectionId)
+							{
+								newHostInfo = peerInfoMessage;
+							}
+						}
+					}
+				}
+				if (newHostInfo.connectionId == 50000)
 				{
 					flag = false;
 				}
 				else
 				{
-					for (int i = 0; i < this.m_Peers.Length; i++)
+					if (newHostInfo.connectionId == num)
 					{
-						PeerInfoMessage peerInfoMessage = this.m_Peers[i];
-						if (peerInfoMessage.connectionId != 0)
-						{
-							if (!peerInfoMessage.isHost)
-							{
-								if (peerInfoMessage.isYou)
-								{
-									num = peerInfoMessage.connectionId;
-								}
-								if (peerInfoMessage.connectionId < newHostInfo.connectionId)
-								{
-									newHostInfo = peerInfoMessage;
-								}
-							}
-						}
+						youAreNewHost = true;
 					}
-					if (newHostInfo.connectionId == 50000)
+					if (LogFilter.logDev)
 					{
-						flag = false;
+						Debug.Log("FindNewHost new host is " + newHostInfo.address);
 					}
-					else
-					{
-						if (newHostInfo.connectionId == num)
-						{
-							youAreNewHost = true;
-						}
-						if (LogFilter.logDev)
-						{
-							Debug.Log("FindNewHost new host is " + newHostInfo.address);
-						}
-						flag = true;
-					}
+					flag = true;
 				}
 			}
 			return flag;

@@ -7,8 +7,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Filterable component = base.GetComponent<Filterable>();
-		component.onFilterChanged += this.OnElementSelected;
+		base.GetComponent<Filterable>().onFilterChanged += this.OnElementSelected;
 	}
 
 	protected override void OnSpawn()
@@ -32,9 +31,10 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		}
 		this.sampleIdx = 0;
 		bool flag = true;
-		foreach (bool flag2 in this.samples)
+		bool[] array = this.samples;
+		for (int i = 0; i < array.Length; i++)
 		{
-			flag = flag2 && flag;
+			flag = array[i] && flag;
 		}
 		if (base.IsSwitchedOn != flag)
 		{
@@ -51,7 +51,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 	private void UpdateLogicCircuit()
 	{
 		bool flag = this.switchedOn && base.GetComponent<Operational>().IsOperational;
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!flag) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, flag ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -60,8 +60,8 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		{
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
@@ -89,7 +89,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 

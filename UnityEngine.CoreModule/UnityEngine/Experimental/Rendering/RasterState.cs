@@ -3,9 +3,6 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Values for the raster state.</para>
-	/// </summary>
 	public struct RasterState
 	{
 		public RasterState(CullMode cullingMode = CullMode.Back, int offsetUnits = 0, float offsetFactor = 0f, bool depthClip = true)
@@ -19,9 +16,6 @@ namespace UnityEngine.Experimental.Rendering
 			this.m_Padding3 = 0;
 		}
 
-		/// <summary>
-		///   <para>Controls which sides of polygons should be culled (not drawn).</para>
-		/// </summary>
 		public CullMode cullingMode
 		{
 			get
@@ -34,9 +28,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Enable clipping based on depth.</para>
-		/// </summary>
 		public bool depthClip
 		{
 			get
@@ -49,9 +40,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Scales the minimum resolvable depth buffer value.</para>
-		/// </summary>
 		public int offsetUnits
 		{
 			get
@@ -64,9 +52,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Scales the maximum Z slope.</para>
-		/// </summary>
 		public float offsetFactor
 		{
 			get
@@ -79,9 +64,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Default values for the raster state.</para>
-		/// </summary>
 		public static readonly RasterState Default = new RasterState(CullMode.Back, 0, 0f, true);
 
 		private CullMode m_CullingMode;

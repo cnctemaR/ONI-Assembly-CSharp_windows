@@ -8,30 +8,52 @@ namespace System.Data.SqlClient
 	[Serializable]
 	public sealed class SqlClientPermission : DBDataPermission
 	{
-		[Obsolete("Use SqlClientPermission(PermissionState.None)", true)]
+		[Obsolete("SqlClientPermission() has been deprecated.  Use the SqlClientPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
 		public SqlClientPermission()
-			: base(null)
+			: this(PermissionState.None)
 		{
 		}
 
 		public SqlClientPermission(PermissionState state)
-			: base(null)
+			: base(state)
 		{
 		}
 
-		[Obsolete("Use SqlClientPermission(PermissionState.None)", true)]
+		[Obsolete("SqlClientPermission(PermissionState state, Boolean allowBlankPassword) has been deprecated.  Use the SqlClientPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
 		public SqlClientPermission(PermissionState state, bool allowBlankPassword)
-			: base(null)
+			: this(state)
 		{
+			base.AllowBlankPassword = allowBlankPassword;
+		}
+
+		private SqlClientPermission(SqlClientPermission permission)
+			: base(permission)
+		{
+		}
+
+		internal SqlClientPermission(SqlClientPermissionAttribute permissionAttribute)
+			: base(permissionAttribute)
+		{
+		}
+
+		internal SqlClientPermission(SqlConnectionString constr)
+			: base(constr)
+		{
+			if (constr == null || constr.IsEmpty)
+			{
+				base.Add(ADP.StrEmpty, ADP.StrEmpty, KeyRestrictionBehavior.AllowOnly);
+			}
 		}
 
 		public override void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior)
 		{
+			DBConnectionString dbconnectionString = new DBConnectionString(connectionString, restrictions, behavior, SqlConnectionString.GetParseSynonyms(), false);
+			base.AddPermissionEntry(dbconnectionString);
 		}
 
 		public override IPermission Copy()
 		{
-			throw null;
+			return new SqlClientPermission(this);
 		}
 	}
 }

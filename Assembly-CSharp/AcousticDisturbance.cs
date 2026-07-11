@@ -20,11 +20,10 @@ public class AcousticDisturbance
 			if (minionIdentity.gameObject != gameObject.gameObject)
 			{
 				Vector2 vector2 = minionIdentity.transform.GetPosition();
-				float num4 = Vector2.SqrMagnitude(vector - vector2);
-				if (num4 <= (float)num2)
+				if (Vector2.SqrMagnitude(vector - vector2) <= (float)num2)
 				{
-					int num5 = Grid.PosToCell(vector2);
-					if (AcousticDisturbance.cellsInRange.Contains(num5) && minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
+					int num4 = Grid.PosToCell(vector2);
+					if (AcousticDisturbance.cellsInRange.Contains(num4) && minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
 					{
 						minionIdentity.Trigger(-527751701, data);
 						minionIdentity.Trigger(1621815900, data);
@@ -88,27 +87,28 @@ public class AcousticDisturbance
 			int num3 = Grid.CellAbove(cell);
 			int num4 = cell - 1;
 			int num5 = cell + 1;
-			bool flag = Grid.IsValidCell(num2) && !Grid.Solid[num2];
-			bool flag2 = Grid.IsValidCell(num3) && !Grid.Solid[num3];
-			bool flag3 = Grid.IsValidCell(num4) && !Grid.Solid[num4];
-			bool flag4 = Grid.IsValidCell(num5) && !Grid.Solid[num5];
-			if (flag || flag3)
+			object obj = Grid.IsValidCell(num2) && !Grid.Solid[num2];
+			bool flag = Grid.IsValidCell(num3) && !Grid.Solid[num3];
+			bool flag2 = Grid.IsValidCell(num4) && !Grid.Solid[num4];
+			bool flag3 = Grid.IsValidCell(num5) && !Grid.Solid[num5];
+			object obj2 = obj;
+			if ((obj2 | flag2) != null)
 			{
 				AcousticDisturbance.DetermineCellsInRadius(num2 - 1, num, max_depth, cells_in_range);
 			}
 			AcousticDisturbance.DetermineCellsInRadius(num2, num, max_depth, cells_in_range);
-			if (flag || flag4)
+			if ((obj2 | flag3) != null)
 			{
 				AcousticDisturbance.DetermineCellsInRadius(num2 + 1, num, max_depth, cells_in_range);
 			}
 			AcousticDisturbance.DetermineCellsInRadius(num4, num, max_depth, cells_in_range);
 			AcousticDisturbance.DetermineCellsInRadius(num5, num, max_depth, cells_in_range);
-			if (flag2 || flag3)
+			if (flag || flag2)
 			{
 				AcousticDisturbance.DetermineCellsInRadius(num3 - 1, num, max_depth, cells_in_range);
 			}
 			AcousticDisturbance.DetermineCellsInRadius(num3, num, max_depth, AcousticDisturbance.cellsInRange);
-			if (flag2 || flag4)
+			if (flag || flag3)
 			{
 				AcousticDisturbance.DetermineCellsInRadius(num3 + 1, num, max_depth, cells_in_range);
 			}

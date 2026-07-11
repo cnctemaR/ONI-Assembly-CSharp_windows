@@ -26,9 +26,7 @@ public class GeyserConfigurator : KMonoBehaviour
 
 	private GeyserConfigurator.GeyserInstanceConfiguration CreateRandomInstance(HashedString typeId, float min, float max)
 	{
-		int num = SaveLoader.Instance.worldDetailSave.globalWorldSeed;
-		num = num + (int)base.transform.GetPosition().x + (int)base.transform.GetPosition().y;
-		global::System.Random random = new global::System.Random(num);
+		global::System.Random random = new global::System.Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed + (int)base.transform.GetPosition().x + (int)base.transform.GetPosition().y);
 		return new GeyserConfigurator.GeyserInstanceConfiguration
 		{
 			typeId = typeId,
@@ -179,8 +177,7 @@ public class GeyserConfigurator : KMonoBehaviour
 		public float GetEmitRate()
 		{
 			float num = 600f / this.GetIterationLength();
-			float num2 = this.GetMassPerCycle() / num;
-			return num2 / this.GetOnDuration();
+			return this.GetMassPerCycle() / num / this.GetOnDuration();
 		}
 
 		public float GetYearLength()
@@ -230,9 +227,7 @@ public class GeyserConfigurator : KMonoBehaviour
 			float num = 6f;
 			float num2 = 0.002472623f;
 			float num3 = t * (1f - num2 * 2f) + num2;
-			float num4 = -Mathf.Log(1f / num3 - 1f);
-			num4 = (num4 + num) / (num * 2f);
-			return num4 * (max - min) + min;
+			return (-Mathf.Log(1f / num3 - 1f) + num) / (num * 2f) * (max - min) + min;
 		}
 
 		public HashedString typeId;

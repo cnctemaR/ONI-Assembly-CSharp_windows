@@ -6,7 +6,34 @@ namespace System.Net.NetworkInformation
 {
 	internal class Win32NetworkInterface2 : NetworkInterface
 	{
-		private Win32NetworkInterface2(Win32_IP_ADAPTER_ADDRESSES addr)
+		[DllImport("iphlpapi.dll", SetLastError = true)]
+		private static extern int GetAdaptersInfo(IntPtr info, ref int size);
+
+		[DllImport("iphlpapi.dll", SetLastError = true)]
+		private static extern int GetIfEntry(ref Win32_MIB_IFROW row);
+
+		private static Win32_IP_ADAPTER_INFO[] GetAdaptersInfo()
+		{
+			int num = 0;
+			Win32NetworkInterface2.GetAdaptersInfo(IntPtr.Zero, ref num);
+			IntPtr intPtr = Marshal.AllocHGlobal(num);
+			int adaptersInfo = Win32NetworkInterface2.GetAdaptersInfo(intPtr, ref num);
+			if (adaptersInfo != 0)
+			{
+				throw new NetworkInformationException(adaptersInfo);
+			}
+			List<Win32_IP_ADAPTER_INFO> list = new List<Win32_IP_ADAPTER_INFO>();
+			IntPtr intPtr2 = intPtr;
+			while (intPtr2 != IntPtr.Zero)
+			{
+				Win32_IP_ADAPTER_INFO win32_IP_ADAPTER_INFO = Marshal.PtrToStructure<Win32_IP_ADAPTER_INFO>(intPtr2);
+				list.Add(win32_IP_ADAPTER_INFO);
+				intPtr2 = win32_IP_ADAPTER_INFO.Next;
+			}
+			return list.ToArray();
+		}
+
+		internal Win32NetworkInterface2(Win32_IP_ADAPTER_ADDRESSES addr)
 		{
 			this.addr = addr;
 			this.mib4 = default(Win32_MIB_IFROW);
@@ -23,90 +50,6 @@ namespace System.Net.NetworkInformation
 			}
 			this.ip4stats = new Win32IPv4InterfaceStatistics(this.mib4);
 			this.ip_if_props = new Win32IPInterfaceProperties2(addr, this.mib4, this.mib6);
-		}
-
-		[DllImport("iphlpapi.dll", SetLastError = true)]
-		private static extern int GetAdaptersInfo(byte[] info, ref int size);
-
-		[DllImport("iphlpapi.dll", SetLastError = true)]
-		private static extern int GetAdaptersAddresses(uint family, uint flags, IntPtr reserved, byte[] info, ref int size);
-
-		[DllImport("iphlpapi.dll", SetLastError = true)]
-		private static extern int GetIfEntry(ref Win32_MIB_IFROW row);
-
-		public static NetworkInterface[] ImplGetAllNetworkInterfaces()
-		{
-			Win32_IP_ADAPTER_ADDRESSES[] adaptersAddresses = Win32NetworkInterface2.GetAdaptersAddresses();
-			NetworkInterface[] array = new NetworkInterface[adaptersAddresses.Length];
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i] = new Win32NetworkInterface2(adaptersAddresses[i]);
-			}
-			return array;
-		}
-
-		public static Win32_IP_ADAPTER_INFO GetAdapterInfoByIndex(int index)
-		{
-			foreach (Win32_IP_ADAPTER_INFO win32_IP_ADAPTER_INFO in Win32NetworkInterface2.GetAdaptersInfo())
-			{
-				if ((ulong)win32_IP_ADAPTER_INFO.Index == (ulong)((long)index))
-				{
-					return win32_IP_ADAPTER_INFO;
-				}
-			}
-			return null;
-		}
-
-		private unsafe static Win32_IP_ADAPTER_INFO[] GetAdaptersInfo()
-		{
-			byte[] array = null;
-			int num = 0;
-			Win32NetworkInterface2.GetAdaptersInfo(array, ref num);
-			array = new byte[num];
-			int adaptersInfo = Win32NetworkInterface2.GetAdaptersInfo(array, ref num);
-			if (adaptersInfo != 0)
-			{
-				throw new NetworkInformationException(adaptersInfo);
-			}
-			List<Win32_IP_ADAPTER_INFO> list = new List<Win32_IP_ADAPTER_INFO>();
-			fixed (byte* ptr = (ref array != null && array.Length != 0 ? ref array[0] : ref *null))
-			{
-				IntPtr intPtr = (IntPtr)((void*)ptr);
-				while (intPtr != IntPtr.Zero)
-				{
-					Win32_IP_ADAPTER_INFO win32_IP_ADAPTER_INFO = new Win32_IP_ADAPTER_INFO();
-					Marshal.PtrToStructure(intPtr, win32_IP_ADAPTER_INFO);
-					list.Add(win32_IP_ADAPTER_INFO);
-					intPtr = win32_IP_ADAPTER_INFO.Next;
-				}
-			}
-			return list.ToArray();
-		}
-
-		private unsafe static Win32_IP_ADAPTER_ADDRESSES[] GetAdaptersAddresses()
-		{
-			byte[] array = null;
-			int num = 0;
-			Win32NetworkInterface2.GetAdaptersAddresses(0U, 0U, IntPtr.Zero, array, ref num);
-			array = new byte[num];
-			int adaptersAddresses = Win32NetworkInterface2.GetAdaptersAddresses(0U, 0U, IntPtr.Zero, array, ref num);
-			if (adaptersAddresses != 0)
-			{
-				throw new NetworkInformationException(adaptersAddresses);
-			}
-			List<Win32_IP_ADAPTER_ADDRESSES> list = new List<Win32_IP_ADAPTER_ADDRESSES>();
-			fixed (byte* ptr = (ref array != null && array.Length != 0 ? ref array[0] : ref *null))
-			{
-				IntPtr intPtr = (IntPtr)((void*)ptr);
-				while (intPtr != IntPtr.Zero)
-				{
-					Win32_IP_ADAPTER_ADDRESSES win32_IP_ADAPTER_ADDRESSES = new Win32_IP_ADAPTER_ADDRESSES();
-					Marshal.PtrToStructure(intPtr, win32_IP_ADAPTER_ADDRESSES);
-					list.Add(win32_IP_ADAPTER_ADDRESSES);
-					intPtr = win32_IP_ADAPTER_ADDRESSES.Next;
-				}
-			}
-			return list.ToArray();
 		}
 
 		public override IPInterfaceProperties GetIPProperties()
@@ -187,7 +130,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return (long)((ulong)((this.mib6.Index < 0) ? this.mib4.Speed : this.mib6.Speed));
+				return (long)((ulong)((this.mib6.Index >= 0) ? this.mib6.Speed : this.mib4.Speed));
 			}
 		}
 

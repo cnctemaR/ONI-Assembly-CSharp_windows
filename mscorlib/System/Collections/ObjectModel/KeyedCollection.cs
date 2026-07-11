@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace System.Collections.ObjectModel
 {
+	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(false)]
+	[DebuggerTypeProxy(typeof(Mscorlib_KeyedCollectionDebugView<, >))]
 	[Serializable]
 	public abstract class KeyedCollection<TKey, TItem> : Collection<TItem>
 	{
@@ -20,57 +23,20 @@ namespace System.Collections.ObjectModel
 
 		protected KeyedCollection(IEqualityComparer<TKey> comparer, int dictionaryCreationThreshold)
 		{
-			if (comparer != null)
+			if (comparer == null)
 			{
-				this.comparer = comparer;
+				comparer = EqualityComparer<TKey>.Default;
 			}
-			else
+			if (dictionaryCreationThreshold == -1)
 			{
-				this.comparer = EqualityComparer<TKey>.Default;
+				dictionaryCreationThreshold = int.MaxValue;
 			}
-			this.dictionaryCreationThreshold = dictionaryCreationThreshold;
-			if (dictionaryCreationThreshold == 0)
+			if (dictionaryCreationThreshold < -1)
 			{
-				this.dictionary = new Dictionary<TKey, TItem>(this.comparer);
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.dictionaryCreationThreshold, ExceptionResource.ArgumentOutOfRange_InvalidThreshold);
 			}
-		}
-
-		public bool Contains(TKey key)
-		{
-			if (this.dictionary != null)
-			{
-				return this.dictionary.ContainsKey(key);
-			}
-			return this.IndexOfKey(key) >= 0;
-		}
-
-		private int IndexOfKey(TKey key)
-		{
-			for (int i = this.Count - 1; i >= 0; i--)
-			{
-				TKey keyForItem = this.GetKeyForItem(this[i]);
-				if (this.comparer.Equals(key, keyForItem))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		public bool Remove(TKey key)
-		{
-			if (this.dictionary != null)
-			{
-				TItem titem;
-				return this.dictionary.TryGetValue(key, out titem) && base.Remove(titem);
-			}
-			int num = this.IndexOfKey(key);
-			if (num == -1)
-			{
-				return false;
-			}
-			this.RemoveAt(num);
-			return true;
+			this.comparer = comparer;
+			this.threshold = dictionaryCreationThreshold;
 		}
 
 		public IEqualityComparer<TKey> Comparer
@@ -85,51 +51,121 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				if (this.dictionary != null)
+				if (key == null)
 				{
-					return this.dictionary[key];
+					ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
 				}
-				int num = this.IndexOfKey(key);
-				if (num >= 0)
+				if (this.dict != null)
 				{
-					return base[num];
+					return this.dict[key];
 				}
-				throw new KeyNotFoundException();
+				foreach (TItem titem in base.Items)
+				{
+					if (this.comparer.Equals(this.GetKeyForItem(titem), key))
+					{
+						return titem;
+					}
+				}
+				ThrowHelper.ThrowKeyNotFoundException();
+				return default(TItem);
+			}
+		}
+
+		public bool Contains(TKey key)
+		{
+			if (key == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
+			}
+			if (this.dict != null)
+			{
+				return this.dict.ContainsKey(key);
+			}
+			if (key != null)
+			{
+				foreach (TItem titem in base.Items)
+				{
+					if (this.comparer.Equals(this.GetKeyForItem(titem), key))
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			return false;
+		}
+
+		private bool ContainsItem(TItem item)
+		{
+			TKey keyForItem;
+			if (this.dict == null || (keyForItem = this.GetKeyForItem(item)) == null)
+			{
+				return base.Items.Contains(item);
+			}
+			TItem titem;
+			return this.dict.TryGetValue(keyForItem, out titem) && EqualityComparer<TItem>.Default.Equals(titem, item);
+		}
+
+		public bool Remove(TKey key)
+		{
+			if (key == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
+			}
+			if (this.dict != null)
+			{
+				return this.dict.ContainsKey(key) && base.Remove(this.dict[key]);
+			}
+			if (key != null)
+			{
+				for (int i = 0; i < base.Items.Count; i++)
+				{
+					if (this.comparer.Equals(this.GetKeyForItem(base.Items[i]), key))
+					{
+						this.RemoveItem(i);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		protected IDictionary<TKey, TItem> Dictionary
+		{
+			get
+			{
+				return this.dict;
 			}
 		}
 
 		protected void ChangeItemKey(TItem item, TKey newKey)
 		{
-			if (!this.Contains(item))
+			if (!this.ContainsItem(item))
 			{
-				throw new ArgumentException();
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_ItemNotExist);
 			}
 			TKey keyForItem = this.GetKeyForItem(item);
-			if (this.comparer.Equals(keyForItem, newKey))
+			if (!this.comparer.Equals(keyForItem, newKey))
 			{
-				return;
-			}
-			if (this.Contains(newKey))
-			{
-				throw new ArgumentException();
-			}
-			if (this.dictionary != null)
-			{
-				if (!this.dictionary.Remove(keyForItem))
+				if (newKey != null)
 				{
-					throw new ArgumentException();
+					this.AddKey(newKey, item);
 				}
-				this.dictionary.Add(newKey, item);
+				if (keyForItem != null)
+				{
+					this.RemoveKey(keyForItem);
+				}
 			}
 		}
 
 		protected override void ClearItems()
 		{
-			if (this.dictionary != null)
-			{
-				this.dictionary.Clear();
-			}
 			base.ClearItems();
+			if (this.dict != null)
+			{
+				this.dict.Clear();
+			}
+			this.keyCount = 0;
 		}
 
 		protected abstract TKey GetKeyForItem(TItem item);
@@ -137,72 +173,99 @@ namespace System.Collections.ObjectModel
 		protected override void InsertItem(int index, TItem item)
 		{
 			TKey keyForItem = this.GetKeyForItem(item);
-			if (keyForItem == null)
+			if (keyForItem != null)
 			{
-				throw new ArgumentNullException("GetKeyForItem(item)");
-			}
-			if (this.dictionary != null && this.dictionary.ContainsKey(keyForItem))
-			{
-				throw new ArgumentException("An element with the same key already exists in the dictionary.");
-			}
-			if (this.dictionary == null)
-			{
-				for (int i = 0; i < this.Count; i++)
-				{
-					if (this.comparer.Equals(keyForItem, this.GetKeyForItem(this[i])))
-					{
-						throw new ArgumentException("An element with the same key already exists in the dictionary.");
-					}
-				}
+				this.AddKey(keyForItem, item);
 			}
 			base.InsertItem(index, item);
-			if (this.dictionary != null)
-			{
-				this.dictionary.Add(keyForItem, item);
-			}
-			else if (this.dictionaryCreationThreshold != -1 && this.Count > this.dictionaryCreationThreshold)
-			{
-				this.dictionary = new Dictionary<TKey, TItem>(this.comparer);
-				for (int j = 0; j < this.Count; j++)
-				{
-					TItem titem = this[j];
-					this.dictionary.Add(this.GetKeyForItem(titem), titem);
-				}
-			}
 		}
 
 		protected override void RemoveItem(int index)
 		{
-			if (this.dictionary != null)
+			TKey keyForItem = this.GetKeyForItem(base.Items[index]);
+			if (keyForItem != null)
 			{
-				TKey keyForItem = this.GetKeyForItem(this[index]);
-				this.dictionary.Remove(keyForItem);
+				this.RemoveKey(keyForItem);
 			}
 			base.RemoveItem(index);
 		}
 
 		protected override void SetItem(int index, TItem item)
 		{
-			if (this.dictionary != null)
+			TKey keyForItem = this.GetKeyForItem(item);
+			TKey keyForItem2 = this.GetKeyForItem(base.Items[index]);
+			if (this.comparer.Equals(keyForItem2, keyForItem))
 			{
-				this.dictionary.Remove(this.GetKeyForItem(this[index]));
-				this.dictionary.Add(this.GetKeyForItem(item), item);
+				if (keyForItem != null && this.dict != null)
+				{
+					this.dict[keyForItem] = item;
+				}
+			}
+			else
+			{
+				if (keyForItem != null)
+				{
+					this.AddKey(keyForItem, item);
+				}
+				if (keyForItem2 != null)
+				{
+					this.RemoveKey(keyForItem2);
+				}
 			}
 			base.SetItem(index, item);
 		}
 
-		protected IDictionary<TKey, TItem> Dictionary
+		private void AddKey(TKey key, TItem item)
 		{
-			get
+			if (this.dict != null)
 			{
-				return this.dictionary;
+				this.dict.Add(key, item);
+				return;
+			}
+			if (this.keyCount == this.threshold)
+			{
+				this.CreateDictionary();
+				this.dict.Add(key, item);
+				return;
+			}
+			if (this.Contains(key))
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_AddingDuplicate);
+			}
+			this.keyCount++;
+		}
+
+		private void CreateDictionary()
+		{
+			this.dict = new Dictionary<TKey, TItem>(this.comparer);
+			foreach (TItem titem in base.Items)
+			{
+				TKey keyForItem = this.GetKeyForItem(titem);
+				if (keyForItem != null)
+				{
+					this.dict.Add(keyForItem, titem);
+				}
 			}
 		}
 
-		private Dictionary<TKey, TItem> dictionary;
+		private void RemoveKey(TKey key)
+		{
+			if (this.dict != null)
+			{
+				this.dict.Remove(key);
+				return;
+			}
+			this.keyCount--;
+		}
+
+		private const int defaultThreshold = 0;
 
 		private IEqualityComparer<TKey> comparer;
 
-		private int dictionaryCreationThreshold;
+		private Dictionary<TKey, TItem> dict;
+
+		private int keyCount;
+
+		private int threshold;
 	}
 }

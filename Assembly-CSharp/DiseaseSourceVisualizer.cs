@@ -63,8 +63,7 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 	{
 		Sprite overlaySprite = Assets.instance.DiseaseVisualization.overlaySprite;
 		Color32 overlayColour = disease.overlayColour;
-		Transform child = this.visualizer.transform.GetChild(0);
-		Image component = child.GetComponent<Image>();
+		Image component = this.visualizer.transform.GetChild(0).GetComponent<Image>();
 		component.sprite = overlaySprite;
 		component.color = overlayColour;
 		this.visible = true;

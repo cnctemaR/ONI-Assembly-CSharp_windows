@@ -93,8 +93,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Salsa", 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array, array2);
-		SalsaConfig.recipe = new ComplexRecipe(text, array, array2)
+		SalsaConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array, array2), array, array2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.SALSA.RECIPEDESC,
@@ -111,8 +110,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("MushroomWrap", 1f)
 		};
-		string text2 = ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array3, array4);
-		MushroomWrapConfig.recipe = new ComplexRecipe(text2, array3, array4)
+		MushroomWrapConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array3, array4), array3, array4)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.MUSHROOMWRAP.RECIPEDESC,
@@ -129,8 +127,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("SurfAndTurf", 1f)
 		};
-		string text3 = ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array5, array6);
-		SurfAndTurfConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		SurfAndTurfConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array5, array6), array5, array6)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.SURFANDTURF.RECIPEDESC,
@@ -147,8 +144,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("SpiceBread", 1f)
 		};
-		string text4 = ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array7, array8);
-		SpiceBreadConfig.recipe = new ComplexRecipe(text4, array7, array8)
+		SpiceBreadConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array7, array8), array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.SPICEBREAD.RECIPEDESC,
@@ -165,8 +161,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("SpicyTofu", 1f)
 		};
-		string text5 = ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array9, array10);
-		SpicyTofuConfig.recipe = new ComplexRecipe(text5, array9, array10)
+		SpicyTofuConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array9, array10), array9, array10)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.SPICYTOFU.RECIPEDESC,
@@ -184,8 +179,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Burger", 1f)
 		};
-		string text6 = ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array11, array12);
-		BurgerConfig.recipe = new ComplexRecipe(text6, array11, array12)
+		BurgerConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array11, array12), array11, array12)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.BURGER.RECIPEDESC,

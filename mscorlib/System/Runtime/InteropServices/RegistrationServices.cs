@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Security;
 
 namespace System.Runtime.InteropServices
 {
@@ -8,48 +9,53 @@ namespace System.Runtime.InteropServices
 	[Guid("475e398f-8afa-43a7-a3be-f4ef8d6787c9")]
 	public class RegistrationServices : IRegistrationServices
 	{
-		[MonoTODO("implement")]
 		public virtual Guid GetManagedCategoryGuid()
 		{
-			throw new NotImplementedException();
+			return RegistrationServices.guidManagedCategory;
 		}
 
-		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual string GetProgIdForType(Type type)
 		{
-			throw new NotImplementedException();
+			return Marshal.GenerateProgIdForType(type);
 		}
 
 		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual Type[] GetRegistrableTypesInAssembly(Assembly assembly)
 		{
 			throw new NotImplementedException();
 		}
 
 		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual bool RegisterAssembly(Assembly assembly, AssemblyRegistrationFlags flags)
 		{
 			throw new NotImplementedException();
 		}
 
 		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual void RegisterTypeForComClients(Type type, ref Guid g)
 		{
 			throw new NotImplementedException();
 		}
 
+		[SecuritySafeCritical]
 		[MonoTODO("implement")]
 		public virtual bool TypeRepresentsComType(Type type)
 		{
 			throw new NotImplementedException();
 		}
 
+		[SecurityCritical]
 		[MonoTODO("implement")]
 		public virtual bool TypeRequiresRegistration(Type type)
 		{
 			throw new NotImplementedException();
 		}
 
+		[SecurityCritical]
 		[MonoTODO("implement")]
 		public virtual bool UnregisterAssembly(Assembly assembly)
 		{
@@ -69,5 +75,7 @@ namespace System.Runtime.InteropServices
 		{
 			throw new NotImplementedException();
 		}
+
+		private static Guid guidManagedCategory = new Guid("{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}");
 	}
 }

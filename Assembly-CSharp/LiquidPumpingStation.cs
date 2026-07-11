@@ -30,12 +30,9 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		foreach (GameObject gameObject in base.GetComponent<Storage>().items)
 		{
-			if (!(gameObject == null))
+			if (!(gameObject == null) && gameObject != null)
 			{
-				if (gameObject != null)
-				{
-					gameObject.DeleteObject();
-				}
+				gameObject.DeleteObject();
 			}
 		}
 	}
@@ -146,24 +143,21 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		if (this.infoCount > 0)
 		{
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.PumpingStation, this);
+			return;
 		}
-		else
-		{
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmptyPumpingStation, this);
-		}
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmptyPumpingStation, this);
 	}
 
 	public string ResolveString(string base_string)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < this.infoCount; i++)
 		{
 			if (this.infos[i].source != null)
 			{
-				string text2 = text;
 				text = string.Concat(new string[]
 				{
-					text2,
+					text,
 					"\n",
 					this.infos[i].element.name,
 					": ",
@@ -207,8 +201,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			this.session.Cleanup();
 			this.session = null;
 		}
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play("on", KAnim.PlayMode.Once, 1f, 0f);
+		base.GetComponent<KAnimControllerBase>().Play("on", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	private void OnReservationsChanged()
@@ -245,7 +238,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			if (consumedAmount > 0f)
 			{
 				SubstanceChunk source = this.session.GetSource();
-				SimUtil.DiseaseInfo diseaseInfo = ((this.session == null) ? SimUtil.DiseaseInfo.Invalid : this.session.GetDiseaseInfo());
+				SimUtil.DiseaseInfo diseaseInfo = ((this.session != null) ? this.session.GetDiseaseInfo() : SimUtil.DiseaseInfo.Invalid);
 				PrimaryElement component2 = source.GetComponent<PrimaryElement>();
 				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.GetPosition()).GetComponent<Pickupable>();
 				component3.TotalAmount = consumedAmount;
@@ -379,8 +372,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				num = Mathf.Max(num, 1f);
 				HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(this.OnSimConsumeCallback), this, "LiquidPumpingStation");
 				int depthAvailable = PumpingStationGuide.GetDepthAvailable(this.cell, this.pump);
-				int num2 = Grid.OffsetCell(this.cell, new CellOffset(0, -depthAvailable));
-				SimMessages.ConsumeMass(num2, this.element, num, (byte)(depthAvailable + 1), handle.index);
+				SimMessages.ConsumeMass(Grid.OffsetCell(this.cell, new CellOffset(0, -depthAvailable)), this.element, num, (byte)(depthAvailable + 1), handle.index);
 			}
 		}
 

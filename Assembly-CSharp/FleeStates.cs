@@ -6,14 +6,10 @@ public class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.plan;
-		GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State state = this.root.Enter("SetFleeTarget", delegate(FleeStates.Instance smi)
+		this.root.Enter("SetFleeTarget", delegate(FleeStates.Instance smi)
 		{
 			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi.GetSMI<ThreatMonitor.Instance>().MainThreat), smi);
-		});
-		string text = CREATURES.STATUSITEMS.FLEEING.NAME;
-		string text2 = CREATURES.STATUSITEMS.FLEEING.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		}).ToggleStatusItem(CREATURES.STATUSITEMS.FLEEING.NAME, CREATURES.STATUSITEMS.FLEEING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.plan.Enter(delegate(FleeStates.Instance smi)
 		{
 			ThreatMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ThreatMonitor.Instance>();
@@ -21,11 +17,9 @@ public class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, ISta
 			if (this.fleeToTarget.Get(smi) != null)
 			{
 				smi.GoTo(this.approach);
+				return;
 			}
-			else
-			{
-				smi.GoTo(this.cower);
-			}
+			smi.GoTo(this.cower);
 		});
 		this.approach.InitializeStates(this.mover, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).Enter(delegate(FleeStates.Instance smi)
 		{
@@ -33,20 +27,20 @@ public class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, ISta
 		});
 		this.cower.Enter(delegate(FleeStates.Instance smi)
 		{
-			string text3 = "DEFAULT COWER ANIMATION";
+			string text = "DEFAULT COWER ANIMATION";
 			if (smi.Get<KBatchedAnimController>().HasAnimation("cower"))
 			{
-				text3 = "cower";
+				text = "cower";
 			}
 			else if (smi.Get<KBatchedAnimController>().HasAnimation("idle"))
 			{
-				text3 = "idle";
+				text = "idle";
 			}
 			else if (smi.Get<KBatchedAnimController>().HasAnimation("idle_loop"))
 			{
-				text3 = "idle_loop";
+				text = "idle_loop";
 			}
-			smi.Get<KBatchedAnimController>().Play(text3, KAnim.PlayMode.Loop, 1f, 0f);
+			smi.Get<KBatchedAnimController>().Play(text, KAnim.PlayMode.Loop, 1f, 0f);
 		}).ScheduleGoTo(2f, this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Flee, false);
 	}

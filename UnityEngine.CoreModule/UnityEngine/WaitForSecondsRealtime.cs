@@ -2,28 +2,32 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Suspends the coroutine execution for the given amount of seconds using unscaled time.</para>
-	/// </summary>
 	public class WaitForSecondsRealtime : CustomYieldInstruction
 	{
-		/// <summary>
-		///   <para>Creates a yield instruction to wait for a given number of seconds using unscaled time.</para>
-		/// </summary>
-		/// <param name="time"></param>
 		public WaitForSecondsRealtime(float time)
 		{
-			this.waitTime = Time.realtimeSinceStartup + time;
+			this.waitTime = time;
 		}
+
+		public float waitTime { get; set; }
 
 		public override bool keepWaiting
 		{
 			get
 			{
-				return Time.realtimeSinceStartup < this.waitTime;
+				if (this.m_WaitUntilTime < 0f)
+				{
+					this.m_WaitUntilTime = Time.realtimeSinceStartup + this.waitTime;
+				}
+				bool flag = Time.realtimeSinceStartup < this.m_WaitUntilTime;
+				if (!flag)
+				{
+					this.m_WaitUntilTime = -1f;
+				}
+				return flag;
 			}
 		}
 
-		private float waitTime;
+		private float m_WaitUntilTime = -1f;
 	}
 }

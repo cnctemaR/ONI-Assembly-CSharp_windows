@@ -1,5 +1,6 @@
 ﻿using System;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 
 public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
@@ -16,7 +17,7 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 			this.OnConditionButtonClicked(false);
 		};
 		LocText component = this.aboveToggle.transform.GetChild(0).GetComponent<LocText>();
-		LocText component2 = this.belowToggle.transform.GetChild(0).GetComponent<LocText>();
+		TMP_Text component2 = this.belowToggle.transform.GetChild(0).GetComponent<LocText>();
 		component.SetText(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.ABOVE_BUTTON);
 		component2.SetText(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.BELOW_BUTTON);
 		this.thresholdSlider.onDrag += delegate
@@ -164,12 +165,10 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 		{
 			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.thresholdSwitch.AboveToolTip, this.thresholdSwitch.Format(this.thresholdSwitch.Threshold, true)));
 			this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
+			return;
 		}
-		else
-		{
-			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.thresholdSwitch.BelowToolTip, this.thresholdSwitch.Format(this.thresholdSwitch.Threshold, true)));
-			this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
-		}
+		this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.thresholdSwitch.BelowToolTip, this.thresholdSwitch.Format(this.thresholdSwitch.Threshold, true)));
+		this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
 	}
 
 	private void ReceiveValueFromSlider(float newValue)

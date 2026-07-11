@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core.Events;
@@ -10,219 +9,89 @@ namespace YamlDotNet.Core
 	{
 		public MergingParser(IParser innerParser)
 		{
-			this._events = new MergingParser.ParsingEventCollection();
-			this._merged = false;
-			this._iterator = this._events.GetEnumerator();
 			this._innerParser = innerParser;
 		}
 
-		public ParsingEvent Current
-		{
-			get
-			{
-				if (this._iterator.Current != null)
-				{
-					return this._iterator.Current.Value;
-				}
-				return null;
-			}
-		}
+		public ParsingEvent Current { get; private set; }
 
 		public bool MoveNext()
 		{
-			if (!this._merged)
+			if (this._currentIndex < 0)
 			{
-				this.Merge();
-				this._events.CleanMarked();
-				this._iterator = this._events.GetEnumerator();
-				this._merged = true;
-			}
-			return this._iterator.MoveNext();
-		}
-
-		private void Merge()
-		{
-			while (this._innerParser.MoveNext())
-			{
-				this._events.Add(this._innerParser.Current);
-			}
-			foreach (LinkedListNode<ParsingEvent> linkedListNode in this._events)
-			{
-				if (this.IsMergeToken(linkedListNode))
+				while (this._innerParser.MoveNext())
 				{
-					this._events.MarkDeleted(linkedListNode);
-					if (!this.HandleMerge(linkedListNode.Next))
+					this._allEvents.Add(this._innerParser.Current);
+				}
+				for (int i = this._allEvents.Count - 2; i >= 0; i--)
+				{
+					Scalar scalar = this._allEvents[i] as Scalar;
+					if (scalar != null && scalar.Value == "<<")
 					{
-						throw new SemanticErrorException(linkedListNode.Value.Start, linkedListNode.Value.End, "Unrecognized merge key pattern");
+						AnchorAlias anchorAlias = this._allEvents[i + 1] as AnchorAlias;
+						if (anchorAlias == null)
+						{
+							if (this._allEvents[i + 1] is SequenceStart)
+							{
+								List<IEnumerable<ParsingEvent>> list = new List<IEnumerable<ParsingEvent>>();
+								bool flag = false;
+								for (int j = i + 2; j < this._allEvents.Count; j++)
+								{
+									anchorAlias = this._allEvents[j] as AnchorAlias;
+									if (anchorAlias != null)
+									{
+										list.Add(this.GetMappingEvents(anchorAlias.Value));
+									}
+									else if (this._allEvents[j] is SequenceEnd)
+									{
+										this._allEvents.RemoveRange(i, j - i + 1);
+										this._allEvents.InsertRange(i, list.SelectMany<IEnumerable<ParsingEvent>, ParsingEvent>((IEnumerable<ParsingEvent> e) => e));
+										flag = true;
+										break;
+									}
+								}
+								if (flag)
+								{
+									goto IL_019D;
+								}
+							}
+							throw new SemanticErrorException(scalar.Start, scalar.End, "Unrecognized merge key pattern");
+						}
+						IEnumerable<ParsingEvent> mappingEvents = this.GetMappingEvents(anchorAlias.Value);
+						this._allEvents.RemoveRange(i, 2);
+						this._allEvents.InsertRange(i, mappingEvents);
 					}
+					IL_019D:;
 				}
 			}
-		}
-
-		private bool HandleMerge(LinkedListNode<ParsingEvent> node)
-		{
-			if (node == null)
+			int num = this._currentIndex + 1;
+			if (num < this._allEvents.Count)
 			{
-				return false;
-			}
-			if (node.Value is AnchorAlias)
-			{
-				return this.HandleAnchorAlias(node);
-			}
-			return node.Value is SequenceStart && this.HandleSequence(node);
-		}
-
-		private bool IsMergeToken(LinkedListNode<ParsingEvent> node)
-		{
-			if (node.Value is Scalar)
-			{
-				Scalar scalar = node.Value as Scalar;
-				return scalar.Value == "<<";
+				this.Current = this._allEvents[num];
+				this._currentIndex = num;
+				return true;
 			}
 			return false;
 		}
 
-		private bool HandleAnchorAlias(LinkedListNode<ParsingEvent> node)
-		{
-			if (node == null || !(node.Value is AnchorAlias))
-			{
-				return false;
-			}
-			AnchorAlias anchorAlias = (AnchorAlias)node.Value;
-			IEnumerable<ParsingEvent> mappingEvents = this.GetMappingEvents(anchorAlias.Value);
-			this._events.AddAfter(node, mappingEvents);
-			this._events.MarkDeleted(node);
-			return true;
-		}
-
-		private bool HandleSequence(LinkedListNode<ParsingEvent> node)
-		{
-			if (node == null || !(node.Value is SequenceStart))
-			{
-				return false;
-			}
-			this._events.MarkDeleted(node);
-			while (node != null)
-			{
-				if (node.Value is SequenceEnd)
-				{
-					this._events.MarkDeleted(node);
-					return true;
-				}
-				LinkedListNode<ParsingEvent> next = node.Next;
-				this.HandleMerge(next);
-				node = next;
-			}
-			return true;
-		}
-
-		private IEnumerable<ParsingEvent> GetMappingEvents(string anchor)
+		private IEnumerable<ParsingEvent> GetMappingEvents(string mappingAlias)
 		{
 			MergingParser.ParsingEventCloner cloner = new MergingParser.ParsingEventCloner();
 			int nesting = 0;
-			return from e in (from e in this._events.FromAnchor(anchor)
-					select e.Value).TakeWhile<ParsingEvent>((ParsingEvent e) => (nesting += e.NestingIncrease) >= 0)
-				select cloner.Clone(e);
+			return (from e in this._allEvents.SkipWhile<ParsingEvent>(delegate(ParsingEvent e)
+				{
+					MappingStart mappingStart = e as MappingStart;
+					return mappingStart == null || mappingStart.Anchor != mappingAlias;
+				}).Skip<ParsingEvent>(1).TakeWhile<ParsingEvent>((ParsingEvent e) => (nesting += e.NestingIncrease) >= 0)
+				select cloner.Clone(e)).ToList<ParsingEvent>();
 		}
 
-		private readonly MergingParser.ParsingEventCollection _events;
+		private readonly List<ParsingEvent> _allEvents = new List<ParsingEvent>();
 
 		private readonly IParser _innerParser;
 
-		private IEnumerator<LinkedListNode<ParsingEvent>> _iterator;
+		private int _currentIndex = -1;
 
-		private bool _merged;
-
-		private sealed class ParsingEventCollection : IEnumerable<LinkedListNode<ParsingEvent>>, IEnumerable
-		{
-			public ParsingEventCollection()
-			{
-				this._events = new LinkedList<ParsingEvent>();
-				this._deleted = new HashSet<LinkedListNode<ParsingEvent>>();
-				this._references = new Dictionary<string, LinkedListNode<ParsingEvent>>();
-			}
-
-			public void AddAfter(LinkedListNode<ParsingEvent> node, IEnumerable<ParsingEvent> items)
-			{
-				foreach (ParsingEvent parsingEvent in items)
-				{
-					node = this._events.AddAfter(node, parsingEvent);
-				}
-			}
-
-			public void Add(ParsingEvent item)
-			{
-				LinkedListNode<ParsingEvent> linkedListNode = this._events.AddLast(item);
-				this.AddReference(item, linkedListNode);
-			}
-
-			public void MarkDeleted(LinkedListNode<ParsingEvent> node)
-			{
-				this._deleted.Add(node);
-			}
-
-			public void CleanMarked()
-			{
-				foreach (LinkedListNode<ParsingEvent> linkedListNode in this._deleted)
-				{
-					this._events.Remove(linkedListNode);
-				}
-			}
-
-			public IEnumerable<LinkedListNode<ParsingEvent>> FromAnchor(string anchor)
-			{
-				LinkedListNode<ParsingEvent> node = this._references[anchor].Next;
-				IEnumerator<LinkedListNode<ParsingEvent>> iterator = this.GetEnumerator(node);
-				while (iterator.MoveNext())
-				{
-					LinkedListNode<ParsingEvent> linkedListNode = iterator.Current;
-					yield return linkedListNode;
-				}
-				yield break;
-			}
-
-			public IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator()
-			{
-				return this.GetEnumerator(this._events.First);
-			}
-
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return this.GetEnumerator();
-			}
-
-			private IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator(LinkedListNode<ParsingEvent> node)
-			{
-				while (node != null)
-				{
-					yield return node;
-					node = node.Next;
-				}
-				yield break;
-			}
-
-			private void AddReference(ParsingEvent item, LinkedListNode<ParsingEvent> node)
-			{
-				if (!(item is MappingStart))
-				{
-					return;
-				}
-				MappingStart mappingStart = (MappingStart)item;
-				string anchor = mappingStart.Anchor;
-				if (!string.IsNullOrEmpty(anchor))
-				{
-					this._references[anchor] = node;
-				}
-			}
-
-			private readonly LinkedList<ParsingEvent> _events;
-
-			private readonly HashSet<LinkedListNode<ParsingEvent>> _deleted;
-
-			private readonly Dictionary<string, LinkedListNode<ParsingEvent>> _references;
-		}
-
-		private sealed class ParsingEventCloner : IParsingEventVisitor
+		private class ParsingEventCloner : IParsingEventVisitor
 		{
 			public ParsingEvent Clone(ParsingEvent e)
 			{

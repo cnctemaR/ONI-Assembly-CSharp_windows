@@ -8,10 +8,8 @@ public static class RenderTextureDestroyerExtensions
 		if (RenderTextureDestroyer.Instance != null)
 		{
 			RenderTextureDestroyer.Instance.Add(render_texture);
+			return;
 		}
-		else
-		{
-			global::UnityEngine.Object.Destroy(render_texture);
-		}
+		global::UnityEngine.Object.Destroy(render_texture);
 	}
 }

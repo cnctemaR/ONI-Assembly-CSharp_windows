@@ -3,9 +3,6 @@ using System.Collections;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML attribute representing an enum as a string.</para>
-	/// </summary>
 	public class UxmlEnumAttributeDescription<T> : UxmlAttributeDescription where T : struct, IConvertible
 	{
 		public UxmlEnumAttributeDescription()
@@ -50,9 +47,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
+		[Obsolete("Pass a creation context to the method.")]
 		public T GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyEnum<T>(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public T GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<T>(bag, cc, new Func<string, T, T>(UxmlEnumAttributeDescription<T>.ConvertValueToEnum<T>), this.defaultValue);
+		}
+
+		private static U ConvertValueToEnum<U>(string v, U defaultValue)
+		{
+			U u;
+			if (v == null || !Enum.IsDefined(typeof(U), v))
+			{
+				u = defaultValue;
+			}
+			else
+			{
+				U u2 = (U)((object)Enum.Parse(typeof(U), v));
+				u = u2;
+			}
+			return u;
 		}
 	}
 }

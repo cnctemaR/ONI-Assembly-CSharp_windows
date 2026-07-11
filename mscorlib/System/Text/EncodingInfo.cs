@@ -1,29 +1,23 @@
 ﻿using System;
+using Unity;
 
 namespace System.Text
 {
 	[Serializable]
 	public sealed class EncodingInfo
 	{
-		internal EncodingInfo(int cp)
+		internal EncodingInfo(int codePage, string name, string displayName)
 		{
-			this.codepage = cp;
+			this.iCodePage = codePage;
+			this.strEncodingName = name;
+			this.strDisplayName = displayName;
 		}
 
 		public int CodePage
 		{
 			get
 			{
-				return this.codepage;
-			}
-		}
-
-		[MonoTODO]
-		public string DisplayName
-		{
-			get
-			{
-				return this.Name;
+				return this.iCodePage;
 			}
 		}
 
@@ -31,32 +25,43 @@ namespace System.Text
 		{
 			get
 			{
-				if (this.encoding == null)
-				{
-					this.encoding = this.GetEncoding();
-				}
-				return this.encoding.WebName;
+				return this.strEncodingName;
 			}
+		}
+
+		public string DisplayName
+		{
+			get
+			{
+				return this.strDisplayName;
+			}
+		}
+
+		public Encoding GetEncoding()
+		{
+			return Encoding.GetEncoding(this.iCodePage);
 		}
 
 		public override bool Equals(object value)
 		{
 			EncodingInfo encodingInfo = value as EncodingInfo;
-			return encodingInfo != null && encodingInfo.codepage == this.codepage;
+			return encodingInfo != null && this.CodePage == encodingInfo.CodePage;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.codepage;
+			return this.CodePage;
 		}
 
-		public Encoding GetEncoding()
+		internal EncodingInfo()
 		{
-			return Encoding.GetEncoding(this.codepage);
+			ThrowStub.ThrowNotSupportedException();
 		}
 
-		private readonly int codepage;
+		private int iCodePage;
 
-		private Encoding encoding;
+		private string strEncodingName;
+
+		private string strDisplayName;
 	}
 }

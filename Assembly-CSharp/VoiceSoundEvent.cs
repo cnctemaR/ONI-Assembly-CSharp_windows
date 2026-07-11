@@ -26,10 +26,8 @@ public class VoiceSoundEvent : SoundEvent
 		}
 		if (name.Contains(":"))
 		{
-			string[] array = name.Split(new char[] { ':' });
-			float num = float.Parse(array[1]);
-			float num2 = (float)global::UnityEngine.Random.Range(0, 100);
-			if (num2 > num)
+			float num = float.Parse(name.Split(new char[] { ':' })[1]);
+			if ((float)global::UnityEngine.Random.Range(0, 100) > num)
 			{
 				return eventInstance;
 			}
@@ -43,8 +41,7 @@ public class VoiceSoundEvent : SoundEvent
 		}
 		Vector3 vector = component2.transform.GetPosition();
 		vector.z = 0f;
-		GameObject gameObject = controller.gameObject;
-		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		if (SoundEvent.ObjectIsSelectedAndVisible(controller.gameObject))
 		{
 			vector = SoundEvent.AudioHighlightListenerPosition(vector);
 		}
@@ -70,13 +67,9 @@ public class VoiceSoundEvent : SoundEvent
 			else
 			{
 				eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f, false);
-				if (sound.Contains("sleep_"))
+				if (sound.Contains("sleep_") && controller.GetComponent<Traits>().HasTrait("Snorer"))
 				{
-					Traits component4 = controller.GetComponent<Traits>();
-					if (component4.HasTrait("Snorer"))
-					{
-						eventInstance.setParameterValue("snoring", 1f);
-					}
+					eventInstance.setParameterValue("snoring", 1f);
 				}
 				SoundEvent.EndOneShot(eventInstance);
 				component.timeLastSpoke = Time.time;
@@ -103,8 +96,7 @@ public class VoiceSoundEvent : SoundEvent
 		string text2 = name;
 		if (name.Contains(":"))
 		{
-			string[] array = name.Split(new char[] { ':' });
-			text2 = array[0];
+			text2 = name.Split(new char[] { ':' })[0];
 		}
 		return StringFormatter.Combine("DupVoc_", text, "_", text2);
 	}
@@ -116,8 +108,7 @@ public class VoiceSoundEvent : SoundEvent
 			LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 			if (component != null)
 			{
-				string assetName = VoiceSoundEvent.GetAssetName(base.name, component);
-				string sound = GlobalAssets.GetSound(assetName, true);
+				string sound = GlobalAssets.GetSound(VoiceSoundEvent.GetAssetName(base.name, component), true);
 				component.StopSound(sound);
 			}
 		}

@@ -2,15 +2,10 @@
 
 namespace UnityEngine.Networking
 {
-	/// <summary>
-	///   <para>Defines global paramters for network library.</para>
-	/// </summary>
+	[Obsolete("The UNET transport will be removed in the future as soon a replacement is ready.")]
 	[Serializable]
 	public class GlobalConfig
 	{
-		/// <summary>
-		///   <para>Create new global config object.</para>
-		/// </summary>
 		public GlobalConfig()
 		{
 			this.m_ThreadAwakeTimeout = 1U;
@@ -28,9 +23,6 @@ namespace UnityEngine.Networking
 			this.m_NetworkEventAvailable = null;
 		}
 
-		/// <summary>
-		///   <para>Defines (1) for select reactor, minimum time period, when system will check if there are any messages for send (2) for fixrate reactor, minimum interval of time, when system will check for sending and receiving messages.</para>
-		/// </summary>
 		public uint ThreadAwakeTimeout
 		{
 			get
@@ -47,9 +39,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines reactor model for the network library.</para>
-		/// </summary>
 		public ReactorModel ReactorModel
 		{
 			get
@@ -62,9 +51,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>This property determines the initial size of the queue that holds messages received by Unity Multiplayer before they are processed.</para>
-		/// </summary>
 		public ushort ReactorMaximumReceivedMessages
 		{
 			get
@@ -77,9 +63,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines the initial size of the send queue. Messages are placed in this queue ready to be sent in packets to their destination.</para>
-		/// </summary>
 		public ushort ReactorMaximumSentMessages
 		{
 			get
@@ -92,9 +75,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines maximum possible packet size in bytes for all network connections.</para>
-		/// </summary>
 		public ushort MaxPacketSize
 		{
 			get
@@ -107,9 +87,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines how many hosts you can use. Default Value = 16. Max value = 128.</para>
-		/// </summary>
 		public ushort MaxHosts
 		{
 			get
@@ -130,9 +107,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines how many worker threads are available to handle incoming and outgoing messages.</para>
-		/// </summary>
 		public byte ThreadPoolSize
 		{
 			get
@@ -145,9 +119,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines the minimum timeout in milliseconds recognised by the system. The default value is 1 ms.</para>
-		/// </summary>
 		public uint MinTimerTimeout
 		{
 			get
@@ -168,9 +139,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines the maximum timeout in milliseconds for any configuration. The default value is 12 seconds (12000ms).</para>
-		/// </summary>
 		public uint MaxTimerTimeout
 		{
 			get
@@ -191,9 +159,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Deprecated. Defines the minimal timeout for network simulator. You cannot set up any delay less than this value. See Also: MinTimerTimeout.</para>
-		/// </summary>
 		public uint MinNetSimulatorTimeout
 		{
 			get
@@ -214,9 +179,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Deprecated. Defines maximum delay for network simulator. See Also: MaxTimerTimeout.</para>
-		/// </summary>
 		public uint MaxNetSimulatorTimeout
 		{
 			get
@@ -237,11 +199,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines the callback delegate which you can use to get a notification when the host (defined by hostID) has a network event. The callback is called for all event types except Networking.NetworkEventType.Nothing.
-		///
-		/// See Also: Networking.NetworkEventType</para>
-		/// </summary>
 		public Action<int> NetworkEventAvailable
 		{
 			get
@@ -254,9 +211,6 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		/// <summary>
-		///   <para>Defines the callback delegate which you can use to get a notification when a connection is ready to send data.</para>
-		/// </summary>
 		public Action<int, int> ConnectionReadyForSend
 		{
 			get

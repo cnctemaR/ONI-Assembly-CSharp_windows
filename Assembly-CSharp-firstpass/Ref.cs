@@ -19,15 +19,12 @@ public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehav
 
 	private void UpdateID()
 	{
-		ReferenceType referenceType = this.Get();
-		if (referenceType)
+		if (this.Get())
 		{
 			this.id = this.obj.GetComponent<KPrefabID>().InstanceID;
+			return;
 		}
-		else
-		{
-			this.id = -1;
-		}
+		this.id = -1;
 	}
 
 	[OnSerializing]
@@ -47,7 +44,7 @@ public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehav
 		ReferenceType referenceType = this.Get();
 		if (referenceType == null)
 		{
-			return (ComponentType)((object)null);
+			return default(ComponentType);
 		}
 		return referenceType.GetComponent<ComponentType>();
 	}

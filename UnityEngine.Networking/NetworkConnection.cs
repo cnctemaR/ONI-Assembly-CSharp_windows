@@ -4,6 +4,7 @@ using System.Text;
 
 namespace UnityEngine.Networking
 {
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkConnection : IDisposable
 	{
 		public NetworkConnection()
@@ -71,7 +72,7 @@ namespace UnityEngine.Networking
 			this.connectionId = networkConnectionId;
 			int channelCount = hostTopology.DefaultConfig.ChannelCount;
 			int packetSize = (int)hostTopology.DefaultConfig.PacketSize;
-			if (hostTopology.DefaultConfig.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4 && Application.platform != RuntimePlatform.PSP2)
+			if (hostTopology.DefaultConfig.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4)
 			{
 				throw new ArgumentOutOfRangeException("Platform specific protocols are not supported on this platform");
 			}
@@ -147,7 +148,7 @@ namespace UnityEngine.Networking
 			if (this.hostId != -1)
 			{
 				byte b;
-				NetworkTransport.Disconnect(this.hostId, this.connectionId, out b);
+				NetworkManager.activeTransport.Disconnect(this.hostId, this.connectionId, out b);
 				this.RemoveObservers();
 			}
 		}
@@ -525,7 +526,7 @@ namespace UnityEngine.Networking
 
 		public virtual bool TransportSend(byte[] bytes, int numBytes, int channelId, out byte error)
 		{
-			return NetworkTransport.Send(this.hostId, this.connectionId, channelId, bytes, numBytes, out error);
+			return NetworkManager.activeTransport.Send(this.hostId, this.connectionId, channelId, bytes, numBytes, out error);
 		}
 
 		internal void AddOwnedObject(NetworkIdentity obj)

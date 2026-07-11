@@ -35,12 +35,18 @@ namespace UnityEngineInternal.Input
 		}
 
 		[RequiredByNativeCode]
-		internal static void NotifyUpdate(NativeInputUpdateType updateType, int eventCount, IntPtr eventData)
+		internal unsafe static void NotifyUpdate(NativeInputUpdateType updateType, IntPtr eventBuffer)
 		{
-			Action<NativeInputUpdateType, int, IntPtr> action = NativeInputSystem.onUpdate;
-			if (action != null)
+			NativeUpdateCallback nativeUpdateCallback = NativeInputSystem.onUpdate;
+			NativeInputEventBuffer* ptr = (NativeInputEventBuffer*)eventBuffer.ToPointer();
+			if (nativeUpdateCallback == null)
 			{
-				action(updateType, eventCount, eventData);
+				ptr->eventCount = 0;
+				ptr->sizeInBytes = 0;
+			}
+			else
+			{
+				nativeUpdateCallback(updateType, ptr);
 			}
 		}
 
@@ -96,7 +102,7 @@ namespace UnityEngineInternal.Input
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetUpdateMask(NativeInputUpdateType mask);
 
-		public static Action<NativeInputUpdateType, int, IntPtr> onUpdate;
+		public static NativeUpdateCallback onUpdate;
 
 		public static Action<NativeInputUpdateType> onBeforeUpdate;
 

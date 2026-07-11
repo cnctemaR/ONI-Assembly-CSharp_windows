@@ -1,36 +1,38 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class SByteConverter : BaseNumberConverter
 	{
-		public SByteConverter()
-		{
-			this.InnerType = typeof(sbyte);
-		}
-
-		internal override bool SupportHex
+		internal override Type TargetType
 		{
 			get
 			{
-				return true;
+				return typeof(sbyte);
 			}
 		}
 
-		internal override string ConvertToString(object value, NumberFormatInfo format)
+		internal override object FromString(string value, int radix)
 		{
-			return ((sbyte)value).ToString("G", format);
+			return Convert.ToSByte(value, radix);
 		}
 
-		internal override object ConvertFromString(string value, NumberFormatInfo format)
+		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
-			return sbyte.Parse(value, NumberStyles.Integer, format);
+			return sbyte.Parse(value, NumberStyles.Integer, formatInfo);
 		}
 
-		internal override object ConvertFromString(string value, int fromBase)
+		internal override object FromString(string value, CultureInfo culture)
 		{
-			return Convert.ToSByte(value, fromBase);
+			return sbyte.Parse(value, culture);
+		}
+
+		internal override string ToString(object value, NumberFormatInfo formatInfo)
+		{
+			return ((sbyte)value).ToString("G", formatInfo);
 		}
 	}
 }

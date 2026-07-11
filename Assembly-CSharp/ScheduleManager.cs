@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using FMOD.Studio;
 using KSerialization;
@@ -10,7 +9,6 @@ using UnityEngine;
 
 public class ScheduleManager : KMonoBehaviour, ISim33ms
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<List<Schedule>> onSchedulesChanged;
 
 	public static void DestroyInstance()
@@ -23,7 +21,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	{
 		if (this.schedules.Count == 0)
 		{
-			this.SetupDefaultSchedule();
+			this.AddDefaultSchedule(true);
 		}
 	}
 
@@ -38,7 +36,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	{
 		if (this.schedules.Count == 0)
 		{
-			this.SetupDefaultSchedule();
+			this.AddDefaultSchedule(true);
 		}
 		foreach (Schedule schedule in this.schedules)
 		{
@@ -83,12 +81,22 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		}
 	}
 
-	private void SetupDefaultSchedule()
+	public void AddDefaultSchedule(bool alarmOn)
 	{
-		this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT, true);
+		Schedule schedule = this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT, alarmOn);
+		if (Game.Instance.FastWorkersModeActive)
+		{
+			for (int i = 0; i < 21; i++)
+			{
+				schedule.SetGroup(i, Db.Get().ScheduleGroups.Worktime);
+			}
+			schedule.SetGroup(21, Db.Get().ScheduleGroups.Recreation);
+			schedule.SetGroup(22, Db.Get().ScheduleGroups.Recreation);
+			schedule.SetGroup(23, Db.Get().ScheduleGroups.Sleep);
+		}
 	}
 
-	public void AddSchedule(List<ScheduleGroup> groups, string name = null, bool alarmOn = false)
+	public Schedule AddSchedule(List<ScheduleGroup> groups, string name = null, bool alarmOn = false)
 	{
 		this.scheduleNameIncrementor++;
 		if (name == null)
@@ -101,6 +109,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		{
 			this.onSchedulesChanged(this.schedules);
 		}
+		return schedule;
 	}
 
 	public void DeleteSchedule(Schedule schedule)
@@ -141,8 +150,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	public bool IsAllowed(Schedulable schedulable, ScheduleBlockType schedule_block_type)
 	{
 		int blockIdx = Schedule.GetBlockIdx();
-		ScheduleBlock block = this.GetSchedule(schedulable).GetBlock(blockIdx);
-		return block.IsAllowed(schedule_block_type);
+		return this.GetSchedule(schedulable).GetBlock(blockIdx).IsAllowed(schedule_block_type);
 	}
 
 	public void Sim33ms(float dt)
@@ -161,27 +169,29 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	public void PlayScheduleAlarm(Schedule schedule, ScheduleBlock block, bool forwards)
 	{
 		Notification notification = new Notification(string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.NAME, schedule.name, block.name), NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.TOOLTIP, schedule.name, block.name, Db.Get().ScheduleGroups.Get(block.GroupId).notificationTooltip), null, true, 0f, null, null, null);
-		base.GetComponent<Notifier>().Add(notification, string.Empty);
+		base.GetComponent<Notifier>().Add(notification, "");
 		base.StartCoroutine(this.PlayScheduleTone(schedule, forwards));
 	}
 
 	private IEnumerator PlayScheduleTone(Schedule schedule, bool forwards)
 	{
 		int[] tones = schedule.GetTones();
-		for (int i = 0; i < tones.Length; i++)
+		int num2;
+		for (int i = 0; i < tones.Length; i = num2 + 1)
 		{
-			int t = ((!forwards) ? (tones.Length - 1 - i) : i);
-			this.PlayTone(tones[t], forwards);
+			int num = (forwards ? i : (tones.Length - 1 - i));
+			this.PlayTone(tones[num], forwards);
 			yield return new WaitForSeconds(TuningData<ScheduleManager.Tuning>.Get().toneSpacingSeconds);
+			num2 = i;
 		}
 		yield break;
 	}
 
 	private void PlayTone(int pitch, bool forwards)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("WorkChime_tone", false), Vector3.zero, 1f);
+		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("WorkChime_tone", false), Vector3.zero, 1f);
 		eventInstance.setParameterValue("WorkChime_pitch", (float)pitch);
-		eventInstance.setParameterValue("WorkChime_start", (float)((!forwards) ? 0 : 1));
+		eventInstance.setParameterValue("WorkChime_start", (float)(forwards ? 1 : 0));
 		KFMOD.EndOneShot(eventInstance);
 	}
 

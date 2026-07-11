@@ -9,16 +9,16 @@ namespace YamlDotNet.Core
 	[Serializable]
 	public class Scanner : IScanner
 	{
+		public bool SkipComments { get; private set; }
+
+		public Token Current { get; private set; }
+
 		public Scanner(TextReader input, bool skipComments = true)
 		{
 			this.analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, 8));
 			this.cursor = new Cursor();
 			this.SkipComments = skipComments;
 		}
-
-		public bool SkipComments { get; private set; }
-
-		public Token Current { get; private set; }
 
 		public Mark CurrentPosition
 		{
@@ -152,14 +152,12 @@ namespace YamlDotNet.Core
 				this.FetchDirective();
 				return;
 			}
-			bool flag = this.cursor.LineOffset == 0 && this.analyzer.Check('-', 0) && this.analyzer.Check('-', 1) && this.analyzer.Check('-', 2) && this.analyzer.IsWhiteBreakOrZero(3);
-			if (flag)
+			if (this.cursor.LineOffset == 0 && this.analyzer.Check('-', 0) && this.analyzer.Check('-', 1) && this.analyzer.Check('-', 2) && this.analyzer.IsWhiteBreakOrZero(3))
 			{
 				this.FetchDocumentIndicator(true);
 				return;
 			}
-			bool flag2 = this.cursor.LineOffset == 0 && this.analyzer.Check('.', 0) && this.analyzer.Check('.', 1) && this.analyzer.Check('.', 2) && this.analyzer.IsWhiteBreakOrZero(3);
-			if (flag2)
+			if (this.cursor.LineOffset == 0 && this.analyzer.Check('.', 0) && this.analyzer.Check('.', 1) && this.analyzer.Check('.', 2) && this.analyzer.IsWhiteBreakOrZero(3))
 			{
 				this.FetchDocumentIndicator(false);
 				return;
@@ -239,9 +237,7 @@ namespace YamlDotNet.Core
 				this.FetchFlowScalar(false);
 				return;
 			}
-			bool flag3 = this.analyzer.IsWhiteBreakOrZero(0) || this.analyzer.Check("-?:,[]{}#&*!|>'\"%@`", 0);
-			bool flag4 = !flag3 || (this.analyzer.Check('-', 0) && !this.analyzer.IsWhite(1)) || (this.flowLevel == 0 && this.analyzer.Check("?:", 0) && !this.analyzer.IsWhiteBreakOrZero(1));
-			if (flag4)
+			if ((!this.analyzer.IsWhiteBreakOrZero(0) && !this.analyzer.Check("-?:,[]{}#&*!|>'\"%@`", 0)) || (this.analyzer.Check('-', 0) && !this.analyzer.IsWhite(1)) || (this.flowLevel == 0 && this.analyzer.Check("?:", 0) && !this.analyzer.IsWhiteBreakOrZero(1)))
 			{
 				this.FetchPlainScalar();
 				return;
@@ -280,13 +276,15 @@ namespace YamlDotNet.Core
 			{
 				this.cursor.SkipLineByOffset(2);
 				this.analyzer.Buffer.Skip(2);
+				return;
 			}
-			else if (this.analyzer.IsBreak(0))
+			if (this.analyzer.IsBreak(0))
 			{
 				this.cursor.SkipLineByOffset(1);
 				this.analyzer.Buffer.Skip(1);
+				return;
 			}
-			else if (!this.analyzer.IsZero(0))
+			if (!this.analyzer.IsZero(0))
 			{
 				throw new InvalidOperationException("Not at a break.");
 			}
@@ -296,19 +294,22 @@ namespace YamlDotNet.Core
 		{
 			for (;;)
 			{
-				while (this.CheckWhiteSpace())
+				if (!this.CheckWhiteSpace())
+				{
+					this.ProcessComment();
+					if (!this.analyzer.IsBreak(0))
+					{
+						break;
+					}
+					this.SkipLine();
+					if (this.flowLevel == 0)
+					{
+						this.simpleKeyAllowed = true;
+					}
+				}
+				else
 				{
 					this.Skip();
-				}
-				this.ProcessComment();
-				if (!this.analyzer.IsBreak(0))
-				{
-					break;
-				}
-				this.SkipLine();
-				if (this.flowLevel == 0)
-				{
-					this.simpleKeyAllowed = true;
 				}
 			}
 		}
@@ -330,7 +331,7 @@ namespace YamlDotNet.Core
 				}
 				if (!this.SkipComments)
 				{
-					bool flag = this.previous != null && this.previous.End.Line == mark.Line && this.previous.End.Column != 1 && !(this.previous is StreamStart);
+					bool flag = this.previous != null && this.previous.End.Line == mark.Line && !(this.previous is StreamStart);
 					this.tokens.Enqueue(new Comment(stringBuilder.ToString(), flag, mark, this.cursor.Mark()));
 				}
 			}
@@ -384,38 +385,33 @@ namespace YamlDotNet.Core
 			Mark mark = this.cursor.Mark();
 			this.Skip();
 			string text = this.ScanDirectiveName(mark);
-			if (text != null)
+			Token token;
+			if (!(text == "YAML"))
 			{
-				Token token;
-				if (!(text == "YAML"))
+				if (!(text == "TAG"))
 				{
-					if (!(text == "TAG"))
-					{
-						goto IL_005F;
-					}
-					token = this.ScanTagDirectiveValue(mark);
+					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, find uknown directive name.");
 				}
-				else
-				{
-					token = this.ScanVersionDirectiveValue(mark);
-				}
-				while (this.analyzer.IsWhite(0))
-				{
-					this.Skip();
-				}
-				this.ProcessComment();
-				if (!this.analyzer.IsBreakOrZero(0))
-				{
-					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
-				}
-				if (this.analyzer.IsBreak(0))
-				{
-					this.SkipLine();
-				}
-				return token;
+				token = this.ScanTagDirectiveValue(mark);
 			}
-			IL_005F:
-			throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, find uknown directive name.");
+			else
+			{
+				token = this.ScanVersionDirectiveValue(mark);
+			}
+			while (this.analyzer.IsWhite(0))
+			{
+				this.Skip();
+			}
+			this.ProcessComment();
+			if (!this.analyzer.IsBreakOrZero(0))
+			{
+				throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
+			}
+			if (this.analyzer.IsBreak(0))
+			{
+				this.SkipLine();
+			}
+			return token;
 		}
 
 		private void FetchDocumentIndicator(bool isStartToken)
@@ -427,7 +423,7 @@ namespace YamlDotNet.Core
 			this.Skip();
 			this.Skip();
 			this.Skip();
-			Token token = ((!isStartToken) ? new DocumentEnd(mark, mark) : new DocumentStart(mark, this.cursor.Mark()));
+			Token token = (isStartToken ? new DocumentStart(mark, this.cursor.Mark()) : new DocumentEnd(mark, mark));
 			this.tokens.Enqueue(token);
 		}
 
@@ -580,11 +576,9 @@ namespace YamlDotNet.Core
 				if (number == -1)
 				{
 					this.tokens.Enqueue(token);
+					return;
 				}
-				else
-				{
-					this.tokens.Insert(number - this.tokensParsed, token);
-				}
+				this.tokens.Insert(number - this.tokensParsed, token);
 			}
 		}
 
@@ -685,13 +679,13 @@ namespace YamlDotNet.Core
 			this.Skip();
 			if (this.analyzer.Check("+-", 0))
 			{
-				num = ((!this.analyzer.Check('+', 0)) ? (-1) : 1);
+				num = (this.analyzer.Check('+', 0) ? 1 : (-1));
 				this.Skip();
 				if (this.analyzer.IsDigit(0))
 				{
 					if (this.analyzer.Check('0', 0))
 					{
-						throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a block scalar, find an indentation indicator equal to 0.");
+						throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a block scalar, find an intendation indicator equal to 0.");
 					}
 					num2 = this.analyzer.AsDigit(0);
 					this.Skip();
@@ -701,13 +695,13 @@ namespace YamlDotNet.Core
 			{
 				if (this.analyzer.Check('0', 0))
 				{
-					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a block scalar, find an indentation indicator equal to 0.");
+					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a block scalar, find an intendation indicator equal to 0.");
 				}
 				num2 = this.analyzer.AsDigit(0);
 				this.Skip();
 				if (this.analyzer.Check("+-", 0))
 				{
-					num = ((!this.analyzer.Check('+', 0)) ? (-1) : 1);
+					num = (this.analyzer.Check('+', 0) ? 1 : (-1));
 					this.Skip();
 				}
 			}
@@ -727,7 +721,7 @@ namespace YamlDotNet.Core
 			Mark mark2 = this.cursor.Mark();
 			if (num2 != 0)
 			{
-				num3 = ((this.indent < 0) ? num2 : (this.indent + num2));
+				num3 = ((this.indent >= 0) ? (this.indent + num2) : num2);
 			}
 			num3 = this.ScanBlockScalarBreaks(num3, stringBuilder3, mark, ref mark2);
 			while (this.cursor.LineOffset == num3 && !this.analyzer.IsZero(0))
@@ -768,7 +762,7 @@ namespace YamlDotNet.Core
 			{
 				stringBuilder.Append(stringBuilder3);
 			}
-			ScalarStyle scalarStyle = ((!isLiteral) ? ScalarStyle.Folded : ScalarStyle.Literal);
+			ScalarStyle scalarStyle = (isLiteral ? ScalarStyle.Literal : ScalarStyle.Folded);
 			return new Scalar(stringBuilder.ToString(), scalarStyle, mark, mark2);
 		}
 
@@ -778,27 +772,30 @@ namespace YamlDotNet.Core
 			end = this.cursor.Mark();
 			for (;;)
 			{
-				while ((currentIndent == 0 || this.cursor.LineOffset < currentIndent) && this.analyzer.IsSpace(0))
+				if ((currentIndent != 0 && this.cursor.LineOffset >= currentIndent) || !this.analyzer.IsSpace(0))
+				{
+					if (this.cursor.LineOffset > num)
+					{
+						num = this.cursor.LineOffset;
+					}
+					if ((currentIndent == 0 || this.cursor.LineOffset < currentIndent) && this.analyzer.IsTab(0))
+					{
+						break;
+					}
+					if (!this.analyzer.IsBreak(0))
+					{
+						goto IL_00B5;
+					}
+					breaks.Append(this.ReadLine());
+					end = this.cursor.Mark();
+				}
+				else
 				{
 					this.Skip();
 				}
-				if (this.cursor.LineOffset > num)
-				{
-					num = this.cursor.LineOffset;
-				}
-				if ((currentIndent == 0 || this.cursor.LineOffset < currentIndent) && this.analyzer.IsTab(0))
-				{
-					break;
-				}
-				if (!this.analyzer.IsBreak(0))
-				{
-					goto Block_5;
-				}
-				breaks.Append(this.ReadLine());
-				end = this.cursor.Mark();
 			}
-			throw new SyntaxErrorException(start, this.cursor.Mark(), "While scanning a block scalar, find a tab character where an indentation space is expected.");
-			Block_5:
+			throw new SyntaxErrorException(start, this.cursor.Mark(), "While scanning a block scalar, find a tab character where an intendation space is expected.");
+			IL_00B5:
 			if (currentIndent == 0)
 			{
 				currentIndent = Math.Max(num, Math.Max(this.indent + 1, 1));
@@ -838,7 +835,7 @@ namespace YamlDotNet.Core
 					}
 					else
 					{
-						if (this.analyzer.Check((!isSingleQuoted) ? '"' : '\'', 0))
+						if (this.analyzer.Check(isSingleQuoted ? '\'' : '"', 0))
 						{
 							break;
 						}
@@ -853,29 +850,32 @@ namespace YamlDotNet.Core
 						{
 							int num = 0;
 							char c = this.analyzer.Peek(1);
-							switch (c)
+							if (c != 'U')
 							{
-							case 'u':
-								num = 4;
-								break;
-							default:
-								if (c != 'U')
+								if (c != 'u')
 								{
-									char c2;
-									if (!Scanner.simpleEscapeCodes.TryGetValue(c, out c2))
+									if (c == 'x')
 									{
-										throw new SyntaxErrorException(mark, this.cursor.Mark(), "While parsing a quoted scalar, find unknown escape character.");
+										num = 2;
 									}
-									stringBuilder.Append(c2);
+									else
+									{
+										char c2;
+										if (!Scanner.simpleEscapeCodes.TryGetValue(c, out c2))
+										{
+											throw new SyntaxErrorException(mark, this.cursor.Mark(), "While parsing a quoted scalar, find unknown escape character.");
+										}
+										stringBuilder.Append(c2);
+									}
 								}
 								else
 								{
-									num = 8;
+									num = 4;
 								}
-								break;
-							case 'x':
-								num = 2;
-								break;
+							}
+							else
+							{
+								num = 8;
 							}
 							this.Skip();
 							this.Skip();
@@ -907,10 +907,10 @@ namespace YamlDotNet.Core
 						}
 					}
 				}
-				if (this.analyzer.Check((!isSingleQuoted) ? '"' : '\'', 0))
+				if (this.analyzer.Check(isSingleQuoted ? '\'' : '"', 0))
 				{
 					this.Skip();
-					return new Scalar(stringBuilder.ToString(), (!isSingleQuoted) ? ScalarStyle.DoubleQuoted : ScalarStyle.SingleQuoted, mark, this.cursor.Mark());
+					return new Scalar(stringBuilder.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted, mark, this.cursor.Mark());
 				}
 				while (this.analyzer.IsWhite(0) || this.analyzer.IsBreak(0))
 				{
@@ -985,95 +985,95 @@ namespace YamlDotNet.Core
 			Mark mark2 = mark;
 			while (!this.IsDocumentIndicator())
 			{
-				if (!this.analyzer.Check('#', 0))
+				if (this.analyzer.Check('#', 0))
 				{
-					while (!this.analyzer.IsWhiteBreakOrZero(0))
+					break;
+				}
+				while (!this.analyzer.IsWhiteBreakOrZero(0))
+				{
+					if (this.flowLevel > 0 && this.analyzer.Check(':', 0) && !this.analyzer.IsWhiteBreakOrZero(1))
 					{
-						if (this.flowLevel > 0 && this.analyzer.Check(':', 0) && !this.analyzer.IsWhiteBreakOrZero(1))
+						throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a plain scalar, find unexpected ':'.");
+					}
+					if ((this.analyzer.Check(':', 0) && this.analyzer.IsWhiteBreakOrZero(1)) || (this.flowLevel > 0 && this.analyzer.Check(",:?[]{}", 0)))
+					{
+						break;
+					}
+					if (flag || stringBuilder2.Length > 0)
+					{
+						if (flag)
 						{
-							throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a plain scalar, find unexpected ':'.");
-						}
-						if ((this.analyzer.Check(':', 0) && this.analyzer.IsWhiteBreakOrZero(1)) || (this.flowLevel > 0 && this.analyzer.Check(",:?[]{}", 0)))
-						{
-							break;
-						}
-						if (flag || stringBuilder2.Length > 0)
-						{
-							if (flag)
+							if (Scanner.StartsWith(stringBuilder3, '\n'))
 							{
-								if (Scanner.StartsWith(stringBuilder3, '\n'))
+								if (stringBuilder4.Length == 0)
 								{
-									if (stringBuilder4.Length == 0)
-									{
-										stringBuilder.Append(' ');
-									}
-									else
-									{
-										stringBuilder.Append(stringBuilder4);
-									}
+									stringBuilder.Append(' ');
 								}
 								else
 								{
-									stringBuilder.Append(stringBuilder3);
 									stringBuilder.Append(stringBuilder4);
 								}
-								stringBuilder3.Length = 0;
-								stringBuilder4.Length = 0;
-								flag = false;
 							}
 							else
 							{
-								stringBuilder.Append(stringBuilder2);
-								stringBuilder2.Length = 0;
+								stringBuilder.Append(stringBuilder3);
+								stringBuilder.Append(stringBuilder4);
 							}
+							stringBuilder3.Length = 0;
+							stringBuilder4.Length = 0;
+							flag = false;
 						}
-						stringBuilder.Append(this.ReadCurrentCharacter());
-						mark2 = this.cursor.Mark();
-					}
-					if (this.analyzer.IsWhite(0) || this.analyzer.IsBreak(0))
-					{
-						while (this.analyzer.IsWhite(0) || this.analyzer.IsBreak(0))
+						else
 						{
-							if (this.analyzer.IsWhite(0))
-							{
-								if (flag && this.cursor.LineOffset < num && this.analyzer.IsTab(0))
-								{
-									throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a plain scalar, find a tab character that violate indentation.");
-								}
-								if (!flag)
-								{
-									stringBuilder2.Append(this.ReadCurrentCharacter());
-								}
-								else
-								{
-									this.Skip();
-								}
-							}
-							else if (!flag)
-							{
-								stringBuilder2.Length = 0;
-								stringBuilder3.Append(this.ReadLine());
-								flag = true;
-							}
-							else
-							{
-								stringBuilder4.Append(this.ReadLine());
-							}
-						}
-						if (this.flowLevel != 0 || this.cursor.LineOffset >= num)
-						{
-							continue;
+							stringBuilder.Append(stringBuilder2);
+							stringBuilder2.Length = 0;
 						}
 					}
+					stringBuilder.Append(this.ReadCurrentCharacter());
+					mark2 = this.cursor.Mark();
 				}
-				IL_02C4:
-				if (flag)
+				if (!this.analyzer.IsWhite(0) && !this.analyzer.IsBreak(0))
 				{
-					this.simpleKeyAllowed = true;
+					break;
 				}
-				return new Scalar(stringBuilder.ToString(), ScalarStyle.Plain, mark, mark2);
+				while (this.analyzer.IsWhite(0) || this.analyzer.IsBreak(0))
+				{
+					if (this.analyzer.IsWhite(0))
+					{
+						if (flag && this.cursor.LineOffset < num && this.analyzer.IsTab(0))
+						{
+							throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a plain scalar, find a tab character that violate intendation.");
+						}
+						if (!flag)
+						{
+							stringBuilder2.Append(this.ReadCurrentCharacter());
+						}
+						else
+						{
+							this.Skip();
+						}
+					}
+					else if (!flag)
+					{
+						stringBuilder2.Length = 0;
+						stringBuilder3.Append(this.ReadLine());
+						flag = true;
+					}
+					else
+					{
+						stringBuilder4.Append(this.ReadLine());
+					}
+				}
+				if (this.flowLevel == 0 && this.cursor.LineOffset < num)
+				{
+					break;
+				}
 			}
-			goto IL_02C4;
+			if (flag)
+			{
+				this.simpleKeyAllowed = true;
+			}
+			return new Scalar(stringBuilder.ToString(), ScalarStyle.Plain, mark, mark2);
 		}
 
 		private void RemoveSimpleKey()
@@ -1182,7 +1182,7 @@ namespace YamlDotNet.Core
 				int num3 = (this.analyzer.AsHex(1) << 4) + this.analyzer.AsHex(2);
 				if (num2 == 0)
 				{
-					num2 = (((num3 & 128) != 0) ? (((num3 & 224) != 192) ? (((num3 & 240) != 224) ? (((num3 & 248) != 240) ? 0 : 4) : 3) : 2) : 1);
+					num2 = (((num3 & 128) == 0) ? 1 : (((num3 & 224) == 192) ? 2 : (((num3 & 240) == 224) ? 3 : (((num3 & 248) == 240) ? 4 : 0))));
 					if (num2 == 0)
 					{
 						throw new SyntaxErrorException(start, this.cursor.Mark(), "While parsing a tag, find an incorrect leading UTF-8 octet.");

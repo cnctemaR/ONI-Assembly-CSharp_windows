@@ -150,8 +150,7 @@ namespace Mono.Security
 				ArrayList arrayList = new ArrayList();
 				foreach (object obj in this.elist)
 				{
-					ASN1 asn = (ASN1)obj;
-					byte[] bytes = asn.GetBytes();
+					byte[] bytes = ((ASN1)obj).GetBytes();
 					arrayList.Add(bytes);
 					num += bytes.Length;
 				}
@@ -253,15 +252,22 @@ namespace Mono.Security
 
 		protected void DecodeTLV(byte[] asn1, ref int pos, out byte tag, out int length, out byte[] content)
 		{
-			tag = asn1[pos++];
-			length = (int)asn1[pos++];
+			int num = pos;
+			pos = num + 1;
+			tag = asn1[num];
+			num = pos;
+			pos = num + 1;
+			length = (int)asn1[num];
 			if ((length & 128) == 128)
 			{
-				int num = length & 127;
+				int num2 = length & 127;
 				length = 0;
-				for (int i = 0; i < num; i++)
+				for (int i = 0; i < num2; i++)
 				{
-					length = length * 256 + (int)asn1[pos++];
+					int num3 = length * 256;
+					num = pos;
+					pos = num + 1;
+					length = num3 + (int)asn1[num];
 				}
 			}
 			content = new byte[length];
@@ -333,7 +339,7 @@ namespace Mono.Security
 				stringBuilder.AppendFormat("{0} ", this.Value[i].ToString("X2"));
 				if ((i + 1) % 16 == 0)
 				{
-					stringBuilder.AppendFormat(Environment.NewLine, new object[0]);
+					stringBuilder.AppendFormat(Environment.NewLine, Array.Empty<object>());
 				}
 			}
 			return stringBuilder.ToString();

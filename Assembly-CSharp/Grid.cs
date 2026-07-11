@@ -10,14 +10,10 @@ public class Grid
 	{
 		if (state)
 		{
-			Grid.BuildFlags[] array;
-			(array = Grid.BuildMasks)[i] = array[i] | flag;
+			Grid.BuildMasks[i] |= flag;
+			return;
 		}
-		else
-		{
-			Grid.BuildFlags[] array;
-			(array = Grid.BuildMasks)[i] = array[i] & ~flag;
-		}
+		Grid.BuildMasks[i] &= ~flag;
 	}
 
 	public static void SetSolid(int cell, bool solid, CellSolidEvent ev)
@@ -29,42 +25,30 @@ public class Grid
 	{
 		if (state)
 		{
-			Grid.VisFlags[] array;
-			(array = Grid.VisMasks)[i] = array[i] | flag;
+			Grid.VisMasks[i] |= flag;
+			return;
 		}
-		else
-		{
-			Grid.VisFlags[] array;
-			(array = Grid.VisMasks)[i] = array[i] & ~flag;
-		}
+		Grid.VisMasks[i] &= ~flag;
 	}
 
 	private static void UpdateNavValidatorMask(int i, Grid.NavValidatorFlags flag, bool state)
 	{
 		if (state)
 		{
-			Grid.NavValidatorFlags[] array;
-			(array = Grid.NavValidatorMasks)[i] = array[i] | flag;
+			Grid.NavValidatorMasks[i] |= flag;
+			return;
 		}
-		else
-		{
-			Grid.NavValidatorFlags[] array;
-			(array = Grid.NavValidatorMasks)[i] = array[i] & ~flag;
-		}
+		Grid.NavValidatorMasks[i] &= ~flag;
 	}
 
 	private static void UpdateNavMask(int i, Grid.NavFlags flag, bool state)
 	{
 		if (state)
 		{
-			Grid.NavFlags[] array;
-			(array = Grid.NavMasks)[i] = array[i] | flag;
+			Grid.NavMasks[i] |= flag;
+			return;
 		}
-		else
-		{
-			Grid.NavFlags[] array;
-			(array = Grid.NavMasks)[i] = array[i] & ~flag;
-		}
+		Grid.NavMasks[i] &= ~flag;
 	}
 
 	public static void ResetNavMasksAndDetails()
@@ -135,7 +119,7 @@ public class Grid
 			}
 		}
 		Grid.Restriction.Directions directions2 = (Grid.Restriction.Directions)0;
-		return (!restriction.directionMasks.TryGetValue(minion, out directions2) && !restriction.directionMasks.TryGetValue(-1, out directions2)) || (byte)(directions2 & directions) == 0;
+		return (!restriction.directionMasks.TryGetValue(minion, out directions2) && !restriction.directionMasks.TryGetValue(-1, out directions2)) || (directions2 & directions) == (Grid.Restriction.Directions)0;
 	}
 
 	public static void RegisterTubeEntrance(int cell, int reservationCapacity)
@@ -169,8 +153,7 @@ public class Grid
 		{
 			return false;
 		}
-		bool flag = reservations.Add(minion);
-		DebugUtil.Assert(flag);
+		DebugUtil.Assert(reservations.Add(minion));
 		return true;
 	}
 
@@ -245,8 +228,7 @@ public class Grid
 		{
 			return false;
 		}
-		bool flag = suitReservations.Add(minion);
-		DebugUtil.Assert(flag);
+		DebugUtil.Assert(suitReservations.Add(minion));
 		return true;
 	}
 
@@ -263,8 +245,7 @@ public class Grid
 		{
 			return false;
 		}
-		bool flag = emptyLockerReservations.Add(minion);
-		DebugUtil.Assert(flag);
+		DebugUtil.Assert(emptyLockerReservations.Add(minion));
 		return true;
 	}
 
@@ -323,15 +304,11 @@ public class Grid
 			Grid.Element[num] = element;
 			if (element.IsSolid)
 			{
-				Grid.BuildFlags[] array;
-				int num2;
-				(array = Grid.BuildMasks)[num2 = num] = array[num2] | Grid.BuildFlags.Solid;
+				Grid.BuildMasks[num] |= Grid.BuildFlags.Solid;
 			}
 			else
 			{
-				Grid.BuildFlags[] array;
-				int num3;
-				(array = Grid.BuildMasks)[num3 = num] = array[num3] & ~Grid.BuildFlags.Solid;
+				Grid.BuildMasks[num] &= ~Grid.BuildFlags.Solid;
 			}
 			Grid.RenderedByWorld[num] = element.substance != null && element.substance.renderedByWorld && Grid.Objects[num, 9] == null;
 		}
@@ -372,12 +349,20 @@ public class Grid
 
 	public static int CellLeft(int cell)
 	{
-		return (cell % Grid.WidthInCells <= 0) ? (-1) : (cell - 1);
+		if (cell % Grid.WidthInCells <= 0)
+		{
+			return -1;
+		}
+		return cell - 1;
 	}
 
 	public static int CellRight(int cell)
 	{
-		return (cell % Grid.WidthInCells >= Grid.WidthInCells - 1) ? (-1) : (cell + 1);
+		if (cell % Grid.WidthInCells >= Grid.WidthInCells - 1)
+		{
+			return -1;
+		}
+		return cell + 1;
 	}
 
 	public static CellOffset GetOffset(int cell)
@@ -525,54 +510,39 @@ public class Grid
 
 	public static bool IsCellOpenToSpace(int cell)
 	{
-		if (Grid.IsSolidCell(cell))
-		{
-			return false;
-		}
-		GameObject gameObject = Grid.Objects[cell, 2];
-		if (gameObject != null)
-		{
-			return false;
-		}
-		SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
-		return subWorldZoneType == SubWorld.ZoneType.Space;
+		return !Grid.IsSolidCell(cell) && !(Grid.Objects[cell, 2] != null) && global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell) == SubWorld.ZoneType.Space;
 	}
 
 	public static int PosToCell(Vector2 pos)
 	{
 		float x = pos.x;
-		float num = pos.y + 0.05f;
-		int num2 = (int)num;
-		int num3 = (int)x;
-		return num2 * Grid.WidthInCells + num3;
+		int num = (int)(pos.y + 0.05f);
+		int num2 = (int)x;
+		return num * Grid.WidthInCells + num2;
 	}
 
 	public static int PosToCell(Vector3 pos)
 	{
 		float x = pos.x;
-		float num = pos.y + 0.05f;
-		int num2 = (int)num;
-		int num3 = (int)x;
-		return num2 * Grid.WidthInCells + num3;
+		int num = (int)(pos.y + 0.05f);
+		int num2 = (int)x;
+		return num * Grid.WidthInCells + num2;
 	}
 
 	public static void PosToXY(Vector3 pos, out int x, out int y)
 	{
-		int num = Grid.PosToCell(pos);
-		Grid.CellToXY(num, out x, out y);
+		Grid.CellToXY(Grid.PosToCell(pos), out x, out y);
 	}
 
 	public static void PosToXY(Vector3 pos, out Vector2I xy)
 	{
-		int num = Grid.PosToCell(pos);
-		Grid.CellToXY(num, out xy.x, out xy.y);
+		Grid.CellToXY(Grid.PosToCell(pos), out xy.x, out xy.y);
 	}
 
 	public static Vector2I PosToXY(Vector3 pos)
 	{
-		int num = Grid.PosToCell(pos);
 		Vector2I vector2I;
-		Grid.CellToXY(num, out vector2I.x, out vector2I.y);
+		Grid.CellToXY(Grid.PosToCell(pos), out vector2I.x, out vector2I.y);
 		return vector2I;
 	}
 
@@ -772,14 +742,12 @@ public class Grid
 
 	public static bool IsLiquid(int cell)
 	{
-		Element element = ElementLoader.elements[(int)Grid.ElementIdx[cell]];
-		return element.IsLiquid;
+		return ElementLoader.elements[(int)Grid.ElementIdx[cell]].IsLiquid;
 	}
 
 	public static bool IsGas(int cell)
 	{
-		Element element = ElementLoader.elements[(int)Grid.ElementIdx[cell]];
-		return element.IsGas;
+		return ElementLoader.elements[(int)Grid.ElementIdx[cell]].IsGas;
 	}
 
 	public static void GetVisibleExtents(out int min_x, out int min_y, out int max_x, out int max_y)
@@ -915,11 +883,10 @@ public class Grid
 	[Conditional("UNITY_EDITOR")]
 	public static void DrawBoxOnCell(int cell, Color color, float offset = 0f)
 	{
-		Vector3 vector = Grid.CellToPos(cell) + new Vector3(0.5f, 0.5f, 0f);
-		float num = 0.5f + offset;
+		Grid.CellToPos(cell) + new Vector3(0.5f, 0.5f, 0f);
 	}
 
-	public static readonly CellOffset[] DefaultOffset = new CellOffset[] { default(CellOffset) };
+	public static readonly CellOffset[] DefaultOffset = new CellOffset[1];
 
 	public static float WidthInMeters;
 
@@ -1085,7 +1052,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Foundation) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.Foundation) > (Grid.BuildFlags)0;
 			}
 			set
 			{
@@ -1100,7 +1067,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Solid) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.Solid) > (Grid.BuildFlags)0;
 			}
 		}
 	}
@@ -1111,7 +1078,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.DupeImpassable) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.DupeImpassable) > (Grid.BuildFlags)0;
 			}
 			set
 			{
@@ -1126,7 +1093,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.FakeFloor) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.FakeFloor) > (Grid.BuildFlags)0;
 			}
 			set
 			{
@@ -1141,7 +1108,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.DupePassable) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.DupePassable) > (Grid.BuildFlags)0;
 			}
 			set
 			{
@@ -1156,7 +1123,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.CritterImpassable) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.CritterImpassable) > (Grid.BuildFlags)0;
 			}
 			set
 			{
@@ -1171,7 +1138,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Door) != 0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.Door) > (Grid.BuildFlags)0;
 			}
 			set
 			{
@@ -1195,7 +1162,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.Revealed) != 0;
+				return (Grid.VisMasks[i] & Grid.VisFlags.Revealed) > (Grid.VisFlags)0;
 			}
 			set
 			{
@@ -1210,7 +1177,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.PreventFogOfWarReveal) != 0;
+				return (Grid.VisMasks[i] & Grid.VisFlags.PreventFogOfWarReveal) > (Grid.VisFlags)0;
 			}
 			set
 			{
@@ -1225,7 +1192,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.RenderedByWorld) != 0;
+				return (Grid.VisMasks[i] & Grid.VisFlags.RenderedByWorld) > (Grid.VisFlags)0;
 			}
 			set
 			{
@@ -1240,7 +1207,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.AllowPathfinding) != 0;
+				return (Grid.VisMasks[i] & Grid.VisFlags.AllowPathfinding) > (Grid.VisFlags)0;
 			}
 			set
 			{
@@ -1264,7 +1231,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Ladder) != 0;
+				return (Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Ladder) > (Grid.NavValidatorFlags)0;
 			}
 			set
 			{
@@ -1279,7 +1246,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Pole) != 0;
+				return (Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Pole) > (Grid.NavValidatorFlags)0;
 			}
 			set
 			{
@@ -1294,7 +1261,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Tube) != 0;
+				return (Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Tube) > (Grid.NavValidatorFlags)0;
 			}
 			set
 			{
@@ -1309,7 +1276,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.UnderConstruction) != 0;
+				return (Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.UnderConstruction) > (Grid.NavValidatorFlags)0;
 			}
 			set
 			{
@@ -1334,7 +1301,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.AccessDoor) != 0;
+				return (Grid.NavMasks[i] & Grid.NavFlags.AccessDoor) > (Grid.NavFlags)0;
 			}
 			set
 			{
@@ -1349,7 +1316,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.TubeEntrance) != 0;
+				return (Grid.NavMasks[i] & Grid.NavFlags.TubeEntrance) > (Grid.NavFlags)0;
 			}
 			set
 			{
@@ -1364,7 +1331,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.PreventIdleTraversal) != 0;
+				return (Grid.NavMasks[i] & Grid.NavFlags.PreventIdleTraversal) > (Grid.NavFlags)0;
 			}
 			set
 			{
@@ -1379,7 +1346,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.Reserved) != 0;
+				return (Grid.NavMasks[i] & Grid.NavFlags.Reserved) > (Grid.NavFlags)0;
 			}
 			set
 			{
@@ -1394,7 +1361,7 @@ public class Grid
 		{
 			get
 			{
-				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.SuitMarker) != 0;
+				return (Grid.NavMasks[i] & Grid.NavFlags.SuitMarker) > (Grid.NavFlags)0;
 			}
 			set
 			{
@@ -1507,7 +1474,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.properties[i] & 16) != 0;
+				return (Grid.properties[i] & 16) > 0;
 			}
 		}
 	}

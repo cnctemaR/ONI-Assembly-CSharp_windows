@@ -4,62 +4,59 @@ using System.ComponentModel;
 
 namespace System.Data.Common
 {
-	public abstract class DbParameterCollection : MarshalByRefObject, ICollection, IEnumerable, IList, IDataParameterCollection
+	public abstract class DbParameterCollection : MarshalByRefObject, IDataParameterCollection, IList, ICollection, IEnumerable
 	{
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public abstract int Count { get; }
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public abstract bool IsFixedSize { get; }
-
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public abstract bool IsReadOnly { get; }
-
 		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public abstract bool IsSynchronized { get; }
-
-		public DbParameter this[int index]
+		public virtual bool IsFixedSize
 		{
 			get
 			{
-				throw null;
-			}
-			set
-			{
-			}
-		}
-
-		public DbParameter this[string parameterName]
-		{
-			get
-			{
-				throw null;
-			}
-			set
-			{
+				return false;
 			}
 		}
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		public virtual bool IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public virtual bool IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public abstract object SyncRoot { get; }
 
 		object IList.this[int index]
 		{
 			get
 			{
-				throw null;
+				return this.GetParameter(index);
 			}
 			set
 			{
+				this.SetParameter(index, (DbParameter)value);
 			}
 		}
 
@@ -67,10 +64,35 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return this.GetParameter(parameterName);
 			}
 			set
 			{
+				this.SetParameter(parameterName, (DbParameter)value);
+			}
+		}
+
+		public DbParameter this[int index]
+		{
+			get
+			{
+				return this.GetParameter(index);
+			}
+			set
+			{
+				this.SetParameter(index, value);
+			}
+		}
+
+		public DbParameter this[string parameterName]
+		{
+			get
+			{
+				return this.GetParameter(parameterName);
+			}
+			set
+			{
+				this.SetParameter(parameterName, value);
 			}
 		}
 
@@ -78,13 +100,13 @@ namespace System.Data.Common
 
 		public abstract void AddRange(Array values);
 
-		public abstract void Clear();
-
 		public abstract bool Contains(object value);
 
 		public abstract bool Contains(string value);
 
 		public abstract void CopyTo(Array array, int index);
+
+		public abstract void Clear();
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public abstract IEnumerator GetEnumerator();

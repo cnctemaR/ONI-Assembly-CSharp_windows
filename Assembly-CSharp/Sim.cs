@@ -37,8 +37,17 @@ public static class Sim
 	public unsafe static IntPtr HandleMessage(SimMessageHashes sim_msg_id, int msg_length, byte[] msg)
 	{
 		IntPtr intPtr;
-		fixed (byte* ptr = (ref msg != null && msg.Length != 0 ? ref msg[0] : ref *null))
+		fixed (byte[] array = msg)
 		{
+			byte* ptr;
+			if (msg == null || array.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array[0];
+			}
 			intPtr = Sim.SIM_HandleMessage((int)sim_msg_id, msg_length, ptr);
 		}
 		return intPtr;
@@ -47,9 +56,9 @@ public static class Sim
 	public unsafe static void Save(BinaryWriter writer)
 	{
 		int num;
-		byte* ptr = Sim.SIM_BeginSave(&num);
+		void* ptr = (void*)Sim.SIM_BeginSave(&num);
 		byte[] array = new byte[num];
-		Marshal.Copy((IntPtr)((void*)ptr), array, 0, num);
+		Marshal.Copy((IntPtr)ptr, array, 0, num);
 		Sim.SIM_EndSave();
 		writer.Write(num);
 		writer.Write(array);
@@ -58,12 +67,18 @@ public static class Sim
 	public unsafe static int Load(FastReader reader)
 	{
 		int num = reader.ReadInt32();
-		byte[] array = reader.ReadBytes(num);
-		IntPtr intPtr;
-		fixed (byte* ptr = (ref array != null && array.Length != 0 ? ref array[0] : ref *null))
+		byte[] array;
+		byte* ptr;
+		if ((array = reader.ReadBytes(num)) == null || array.Length == 0)
 		{
-			intPtr = Sim.SIM_HandleMessage(-672538170, num, ptr);
+			ptr = null;
 		}
+		else
+		{
+			ptr = &array[0];
+		}
+		IntPtr intPtr = Sim.SIM_HandleMessage(-672538170, num, ptr);
+		array = null;
 		if (intPtr == IntPtr.Zero)
 		{
 			return -1;
@@ -99,33 +114,33 @@ public static class Sim
 
 	public unsafe static int DLL_MessageHandler(int message_id, IntPtr data)
 	{
+		if (message_id == 0)
+		{
+			Sim.DLLExceptionHandlerMessage* ptr = (Sim.DLLExceptionHandlerMessage*)(void*)data;
+			string text = Marshal.PtrToStringAnsi(ptr->callstack);
+			string text2 = Marshal.PtrToStringAnsi(ptr->dmpFilename);
+			KCrashReporter.ReportSimDLLCrash("SimDLL Crash Dump", text, text2);
+			return 0;
+		}
 		if (message_id == 1)
 		{
-			Sim.DLLReportMessageMessage* ptr = (Sim.DLLReportMessageMessage*)(void*)data;
-			string text = "SimMessage: " + Marshal.PtrToStringAnsi(ptr->message);
-			string text2;
-			if (ptr->callstack != IntPtr.Zero)
+			Sim.DLLReportMessageMessage* ptr2 = (Sim.DLLReportMessageMessage*)(void*)data;
+			string text3 = "SimMessage: " + Marshal.PtrToStringAnsi(ptr2->message);
+			string text4;
+			if (ptr2->callstack != IntPtr.Zero)
 			{
-				text2 = Marshal.PtrToStringAnsi(ptr->callstack);
+				text4 = Marshal.PtrToStringAnsi(ptr2->callstack);
 			}
 			else
 			{
-				string text3 = Marshal.PtrToStringAnsi(ptr->file);
-				int line = ptr->line;
-				text2 = text3 + ":" + line;
+				object obj = Marshal.PtrToStringAnsi(ptr2->file);
+				int line = ptr2->line;
+				text4 = obj + ":" + line;
 			}
-			KCrashReporter.ReportSimDLLCrash(text, text2, null);
+			KCrashReporter.ReportSimDLLCrash(text3, text4, null);
 			return 0;
 		}
-		if (message_id != 0)
-		{
-			return -1;
-		}
-		Sim.DLLExceptionHandlerMessage* ptr2 = (Sim.DLLExceptionHandlerMessage*)(void*)data;
-		string text4 = Marshal.PtrToStringAnsi(ptr2->callstack);
-		string text5 = Marshal.PtrToStringAnsi(ptr2->dmpFilename);
-		KCrashReporter.ReportSimDLLCrash("SimDLL Crash Dump", text4, text5);
-		return 0;
+		return -1;
 	}
 
 	public const int InvalidHandle = -1;
@@ -289,8 +304,8 @@ public static class Sim
 			}
 			int num = elements.FindIndex((global::Element ele) => ele.id == e.lowTempTransitionTarget);
 			int num2 = elements.FindIndex((global::Element ele) => ele.id == e.highTempTransitionTarget);
-			this.lowTempTransitionIdx = (byte)((num < 0) ? 255 : num);
-			this.highTempTransitionIdx = (byte)((num2 < 0) ? 255 : num2);
+			this.lowTempTransitionIdx = (byte)((num >= 0) ? num : 255);
+			this.highTempTransitionIdx = (byte)((num2 >= 0) ? num2 : 255);
 			this.elementsTableIdx = (byte)elements.IndexOf(e);
 			this.specificHeatCapacity = e.specificHeatCapacity;
 			this.thermalConductivity = e.thermalConductivity;

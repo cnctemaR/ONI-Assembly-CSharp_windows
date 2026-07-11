@@ -32,8 +32,7 @@ public class ChoreProvider : KMonoBehaviour
 	{
 		for (int i = 0; i < this.chores.Count; i++)
 		{
-			Chore chore = this.chores[i];
-			chore.CollectChores(consumer_state, succeeded, failed_contexts, false);
+			this.chores[i].CollectChores(consumer_state, succeeded, failed_contexts, false);
 		}
 	}
 

@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromDocs]
-	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
 	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
+	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
+	[ExcludeFromDocs]
 	[StructLayout(LayoutKind.Sequential)]
 	public class RemoteConfigSettings : IDisposable
 	{
@@ -66,6 +66,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool QueueConfig(string name, object param, int ver = 1, string prefix = "");
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool SendDeviceInfoInConfigRequest();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ForceUpdate();
@@ -126,6 +129,30 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string[] GetKeys();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void UseSafeLock();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void ReleaseSafeLock();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern IntPtr GetSafeTopMap();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern IntPtr GetSafeMap(IntPtr m, string key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern long GetSafeNumber(IntPtr m, string key, long defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern float GetSafeFloat(IntPtr m, string key, float defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool GetSafeBool(IntPtr m, string key, bool defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern string GetSafeStringValue(IntPtr m, string key, string defaultValue);
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;

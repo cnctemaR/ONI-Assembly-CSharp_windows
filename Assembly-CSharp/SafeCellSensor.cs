@@ -25,11 +25,9 @@ public class SafeCellSensor : Sensor
 			if (flag2)
 			{
 				this.sensors.Trigger(982561777, null);
+				return;
 			}
-			else
-			{
-				this.sensors.Trigger(506919987, null);
-			}
+			this.sensors.Trigger(506919987, null);
 		}
 	}
 

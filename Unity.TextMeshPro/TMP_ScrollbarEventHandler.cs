@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace TMPro
 {
-	public class TMP_ScrollbarEventHandler : MonoBehaviour, IPointerClickHandler, ISelectHandler, IDeselectHandler, IEventSystemHandler
+	public class TMP_ScrollbarEventHandler : MonoBehaviour, IPointerClickHandler, IEventSystemHandler, ISelectHandler, IDeselectHandler
 	{
 		public void OnPointerClick(PointerEventData eventData)
 		{

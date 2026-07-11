@@ -6,6 +6,19 @@ namespace ProcGen.Noise
 {
 	public class Primitive : NoiseBase
 	{
+		public override Type GetObjectType()
+		{
+			return typeof(Primitive);
+		}
+
+		public NoisePrimitive primative { get; set; }
+
+		public NoiseQuality quality { get; set; }
+
+		public int seed { get; set; }
+
+		public float offset { get; set; }
+
 		public Primitive()
 		{
 			this.primative = NoisePrimitive.ImprovedPerlin;
@@ -21,19 +34,6 @@ namespace ProcGen.Noise
 			this.seed = src.seed;
 			this.offset = src.offset;
 		}
-
-		public override Type GetObjectType()
-		{
-			return typeof(Primitive);
-		}
-
-		public NoisePrimitive primative { get; set; }
-
-		public NoiseQuality quality { get; set; }
-
-		public int seed { get; set; }
-
-		public float offset { get; set; }
 
 		public IModule3D CreateModule(int globalSeed)
 		{

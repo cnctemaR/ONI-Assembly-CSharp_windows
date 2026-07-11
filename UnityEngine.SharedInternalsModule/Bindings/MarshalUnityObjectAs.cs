@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class)]
+	[VisibleToOtherModules]
 	internal class MarshalUnityObjectAs : Attribute, IBindingsAttribute
 	{
 		public MarshalUnityObjectAs(Type marshalAsType)

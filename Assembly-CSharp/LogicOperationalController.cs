@@ -9,7 +9,7 @@ public class LogicOperationalController : KMonoBehaviour
 		base.Subscribe<LogicOperationalController>(-801688580, LogicOperationalController.OnLogicValueChangedDelegate);
 		if (LogicOperationalController.infoStatusItem == null)
 		{
-			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			LogicOperationalController.infoStatusItem.resolveStringCallback = new Func<string, object, string>(LogicOperationalController.ResolveInfoStatusItemString);
 		}
 		this.CheckWireState();
@@ -17,25 +17,21 @@ public class LogicOperationalController : KMonoBehaviour
 
 	private LogicCircuitNetwork GetNetwork()
 	{
-		LogicPorts component = base.GetComponent<LogicPorts>();
-		int portCell = component.GetPortCell(LogicOperationalController.PORT_ID);
-		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-		return logicCircuitManager.GetNetworkForCell(portCell);
+		int portCell = base.GetComponent<LogicPorts>().GetPortCell(LogicOperationalController.PORT_ID);
+		return Game.Instance.logicCircuitManager.GetNetworkForCell(portCell);
 	}
 
 	private LogicCircuitNetwork CheckWireState()
 	{
 		LogicCircuitNetwork network = this.GetNetwork();
-		int num = ((network == null) ? this.unNetworkedValue : network.OutputValue);
+		int num = ((network != null) ? network.OutputValue : this.unNetworkedValue);
 		base.GetComponent<Operational>().SetFlag(LogicOperationalController.logicOperationalFlag, num > 0);
 		return network;
 	}
 
 	private static string ResolveInfoStatusItemString(string format_str, object data)
 	{
-		LogicOperationalController logicOperationalController = (LogicOperationalController)data;
-		Operational component = logicOperationalController.GetComponent<Operational>();
-		return (!component.GetFlag(LogicOperationalController.logicOperationalFlag)) ? BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_DISABLED : BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_ENABLED;
+		return ((LogicOperationalController)data).GetComponent<Operational>().GetFlag(LogicOperationalController.logicOperationalFlag) ? BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_ENABLED : BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_DISABLED;
 	}
 
 	private void OnLogicValueChanged(object data)

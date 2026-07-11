@@ -44,8 +44,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
-		logicUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}
@@ -53,16 +52,14 @@ public class LogicWireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
-		logicUtilityNetworkLink.visualizeOnly = true;
+		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
-		logicUtilityNetworkLink.visualizeOnly = false;
+		this.AddNetworkLink(go).visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
 		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}

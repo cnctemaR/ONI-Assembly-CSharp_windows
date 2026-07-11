@@ -6,14 +6,14 @@ namespace System.Security.Cryptography.Xml
 {
 	public class Signature
 	{
-		public Signature()
-		{
-			this.list = new ArrayList();
-		}
-
 		static Signature()
 		{
 			Signature.dsigNsmgr.AddNamespace("xd", "http://www.w3.org/2000/09/xmldsig#");
+		}
+
+		public Signature()
+		{
+			this.list = new ArrayList();
 		}
 
 		public string Id
@@ -132,8 +132,7 @@ namespace System.Security.Cryptography.Xml
 			{
 				foreach (object obj in this.list)
 				{
-					DataObject dataObject = (DataObject)obj;
-					xmlNode = dataObject.GetXml();
+					xmlNode = ((DataObject)obj).GetXml();
 					xmlNode2 = document.ImportNode(xmlNode, true);
 					xmlElement.AppendChild(xmlNode2);
 				}
@@ -144,7 +143,11 @@ namespace System.Security.Cryptography.Xml
 		private string GetAttribute(XmlElement xel, string attribute)
 		{
 			XmlAttribute xmlAttribute = xel.Attributes[attribute];
-			return (xmlAttribute == null) ? null : xmlAttribute.InnerText;
+			if (xmlAttribute == null)
+			{
+				return null;
+			}
+			return xmlAttribute.InnerText;
 		}
 
 		public void LoadXml(XmlElement value)
@@ -153,41 +156,49 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (!(value.LocalName == "Signature") || !(value.NamespaceURI == "http://www.w3.org/2000/09/xmldsig#"))
+			if (value.LocalName == "Signature" && value.NamespaceURI == "http://www.w3.org/2000/09/xmldsig#")
 			{
-				throw new CryptographicException("Malformed element: Signature.");
+				this.id = this.GetAttribute(value, "Id");
+				int num = this.NextElementPos(value.ChildNodes, 0, "SignedInfo", "http://www.w3.org/2000/09/xmldsig#", true);
+				XmlElement xmlElement = (XmlElement)value.ChildNodes[num];
+				this.info = new SignedInfo();
+				this.info.LoadXml(xmlElement);
+				num = this.NextElementPos(value.ChildNodes, num + 1, "SignatureValue", "http://www.w3.org/2000/09/xmldsig#", true);
+				XmlElement xmlElement2 = (XmlElement)value.ChildNodes[num];
+				this.signature = Convert.FromBase64String(xmlElement2.InnerText);
+				num = this.NextElementPos(value.ChildNodes, num + 1, "KeyInfo", "http://www.w3.org/2000/09/xmldsig#", false);
+				if (num > 0)
+				{
+					XmlElement xmlElement3 = (XmlElement)value.ChildNodes[num];
+					this.key = new KeyInfo();
+					this.key.LoadXml(xmlElement3);
+				}
+				using (IEnumerator enumerator = value.SelectNodes("xd:Object", Signature.dsigNsmgr).GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						XmlElement xmlElement4 = (XmlElement)obj;
+						DataObject dataObject = new DataObject();
+						dataObject.LoadXml(xmlElement4);
+						this.AddObject(dataObject);
+					}
+					goto IL_0180;
+				}
+				goto IL_0175;
+				IL_0180:
+				if (this.info == null)
+				{
+					throw new CryptographicException("SignedInfo");
+				}
+				if (this.signature == null)
+				{
+					throw new CryptographicException("SignatureValue");
+				}
+				return;
 			}
-			this.id = this.GetAttribute(value, "Id");
-			int num = this.NextElementPos(value.ChildNodes, 0, "SignedInfo", "http://www.w3.org/2000/09/xmldsig#", true);
-			XmlElement xmlElement = (XmlElement)value.ChildNodes[num];
-			this.info = new SignedInfo();
-			this.info.LoadXml(xmlElement);
-			num = this.NextElementPos(value.ChildNodes, num + 1, "SignatureValue", "http://www.w3.org/2000/09/xmldsig#", true);
-			XmlElement xmlElement2 = (XmlElement)value.ChildNodes[num];
-			this.signature = Convert.FromBase64String(xmlElement2.InnerText);
-			num = this.NextElementPos(value.ChildNodes, num + 1, "KeyInfo", "http://www.w3.org/2000/09/xmldsig#", false);
-			if (num > 0)
-			{
-				XmlElement xmlElement3 = (XmlElement)value.ChildNodes[num];
-				this.key = new KeyInfo();
-				this.key.LoadXml(xmlElement3);
-			}
-			XmlNodeList xmlNodeList = value.SelectNodes("xd:Object", Signature.dsigNsmgr);
-			foreach (object obj in xmlNodeList)
-			{
-				XmlElement xmlElement4 = (XmlElement)obj;
-				DataObject dataObject = new DataObject();
-				dataObject.LoadXml(xmlElement4);
-				this.AddObject(dataObject);
-			}
-			if (this.info == null)
-			{
-				throw new CryptographicException("SignedInfo");
-			}
-			if (this.signature == null)
-			{
-				throw new CryptographicException("SignatureValue");
-			}
+			IL_0175:
+			throw new CryptographicException("Malformed element: Signature.");
 		}
 
 		private int NextElementPos(XmlNodeList nl, int pos, string name, string ns, bool required)

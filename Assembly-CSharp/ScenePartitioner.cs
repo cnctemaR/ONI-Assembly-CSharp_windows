@@ -351,7 +351,9 @@ public class ScenePartitioner : ISim1000ms
 
 	public void GatherEntries(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data, List<ScenePartitionerEntry> gathered_entries)
 	{
-		this.GatherEntries(x, y, width, height, layer, event_data, gathered_entries, ++this.queryId);
+		int num = this.queryId + 1;
+		this.queryId = num;
+		this.GatherEntries(x, y, width, height, layer, event_data, gathered_entries, num);
 	}
 
 	public void GatherEntries(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data, List<ScenePartitionerEntry> gathered_entries, int query_id)
@@ -370,19 +372,16 @@ public class ScenePartitioner : ISim1000ms
 				for (int k = 0; k < count; k++)
 				{
 					ScenePartitionerEntry scenePartitionerEntry = this.nodes[layer2, i, j].entries[k];
-					if (scenePartitionerEntry != null)
+					if (scenePartitionerEntry != null && scenePartitionerEntry.queryId != this.queryId)
 					{
-						if (scenePartitionerEntry.queryId != this.queryId)
+						if (scenePartitionerEntry.obj == null)
 						{
-							if (scenePartitionerEntry.obj == null)
-							{
-								this.nodes[layer2, i, j].entries[k] = null;
-							}
-							else if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
-							{
-								scenePartitionerEntry.queryId = this.queryId;
-								gathered_entries.Add(scenePartitionerEntry);
-							}
+							this.nodes[layer2, i, j].entries[k] = null;
+						}
+						else if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
+						{
+							scenePartitionerEntry.queryId = this.queryId;
+							gathered_entries.Add(scenePartitionerEntry);
 						}
 					}
 				}

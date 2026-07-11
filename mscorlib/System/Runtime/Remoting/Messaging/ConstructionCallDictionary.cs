@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Remoting.Activation;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	internal class ConstructionCallDictionary : MethodDictionary
+	internal class ConstructionCallDictionary : MessageDictionary
 	{
 		public ConstructionCallDictionary(IConstructionCallMessage message)
 			: base(message)
@@ -14,52 +13,42 @@ namespace System.Runtime.Remoting.Messaging
 
 		protected override object GetMethodProperty(string key)
 		{
-			switch (key)
+			if (key == "__Activator")
 			{
-			case "__Activator":
 				return ((IConstructionCallMessage)this._message).Activator;
-			case "__CallSiteActivationAttributes":
-				return ((IConstructionCallMessage)this._message).CallSiteActivationAttributes;
-			case "__ActivationType":
-				return ((IConstructionCallMessage)this._message).ActivationType;
-			case "__ContextProperties":
-				return ((IConstructionCallMessage)this._message).ContextProperties;
-			case "__ActivationTypeName":
-				return ((IConstructionCallMessage)this._message).ActivationTypeName;
 			}
-			return base.GetMethodProperty(key);
+			if (key == "__CallSiteActivationAttributes")
+			{
+				return ((IConstructionCallMessage)this._message).CallSiteActivationAttributes;
+			}
+			if (key == "__ActivationType")
+			{
+				return ((IConstructionCallMessage)this._message).ActivationType;
+			}
+			if (key == "__ContextProperties")
+			{
+				return ((IConstructionCallMessage)this._message).ContextProperties;
+			}
+			if (!(key == "__ActivationTypeName"))
+			{
+				return base.GetMethodProperty(key);
+			}
+			return ((IConstructionCallMessage)this._message).ActivationTypeName;
 		}
 
 		protected override void SetMethodProperty(string key, object value)
 		{
-			if (key != null)
+			if (key == "__Activator")
 			{
-				if (ConstructionCallDictionary.<>f__switch$map29 == null)
-				{
-					ConstructionCallDictionary.<>f__switch$map29 = new Dictionary<string, int>(5)
-					{
-						{ "__Activator", 0 },
-						{ "__CallSiteActivationAttributes", 1 },
-						{ "__ActivationType", 1 },
-						{ "__ContextProperties", 1 },
-						{ "__ActivationTypeName", 1 }
-					};
-				}
-				int num;
-				if (ConstructionCallDictionary.<>f__switch$map29.TryGetValue(key, out num))
-				{
-					if (num == 0)
-					{
-						((IConstructionCallMessage)this._message).Activator = (IActivator)value;
-						return;
-					}
-					if (num == 1)
-					{
-						throw new ArgumentException("key was invalid");
-					}
-				}
+				((IConstructionCallMessage)this._message).Activator = (IActivator)value;
+				return;
 			}
-			base.SetMethodProperty(key, value);
+			if (!(key == "__CallSiteActivationAttributes") && !(key == "__ActivationType") && !(key == "__ContextProperties") && !(key == "__ActivationTypeName"))
+			{
+				base.SetMethodProperty(key, value);
+				return;
+			}
+			throw new ArgumentException("key was invalid");
 		}
 
 		public static string[] InternalKeys = new string[]

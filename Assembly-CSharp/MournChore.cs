@@ -1,11 +1,26 @@
 ﻿using System;
-using System.Collections;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
 public class MournChore : Chore<MournChore.StatesInstance>
 {
+	private static int GetStandableCell(int cell, Navigator navigator)
+	{
+		foreach (CellOffset cellOffset in MournChore.ValidStandingOffsets)
+		{
+			if (Grid.IsCellOffsetValid(cell, cellOffset))
+			{
+				int num = Grid.OffsetCell(cell, cellOffset);
+				if (!Grid.Reserved[num] && navigator.NavGrid.NavTable.IsValid(num, NavType.Floor) && navigator.GetNavigationCost(num) != -1)
+				{
+					return num;
+				}
+			}
+		}
+		return -1;
+	}
+
 	public MournChore(IStateMachineTarget master)
 		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
@@ -15,52 +30,17 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		base.AddPrecondition(MournChore.HasValidMournLocation, master);
 	}
 
-	private static int GetStandableCell(int cell, Navigator navigator)
-	{
-		foreach (CellOffset cellOffset in MournChore.ValidStandingOffsets)
-		{
-			if (Grid.IsCellOffsetValid(cell, cellOffset))
-			{
-				int num = Grid.OffsetCell(cell, cellOffset);
-				if (!Grid.Reserved[num])
-				{
-					if (navigator.NavGrid.NavTable.IsValid(num, NavType.Floor))
-					{
-						if (navigator.GetNavigationCost(num) != -1)
-						{
-							return num;
-						}
-					}
-				}
-			}
-		}
-		return -1;
-	}
-
 	public static Grave FindGraveToMournAt()
 	{
 		Grave grave = null;
 		float num = -1f;
-		IEnumerator enumerator = Components.Graves.GetEnumerator();
-		try
+		foreach (object obj in Components.Graves)
 		{
-			while (enumerator.MoveNext())
+			Grave grave2 = (Grave)obj;
+			if (grave2.burialTime > num)
 			{
-				object obj = enumerator.Current;
-				Grave grave2 = (Grave)obj;
-				if (grave2.burialTime > num)
-				{
-					num = grave2.burialTime;
-					grave = grave2;
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				num = grave2.burialTime;
+				grave = grave2;
 			}
 		}
 		return grave;
@@ -83,8 +63,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 			global::Debug.LogError("MournChore null smi.sm");
 			return;
 		}
-		Grave grave = MournChore.FindGraveToMournAt();
-		if (grave == null)
+		if (MournChore.FindGraveToMournAt() == null)
 		{
 			global::Debug.LogError("MournChore no grave");
 			return;
@@ -106,18 +85,12 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_PLACE_TO_STAND,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			IStateMachineTarget stateMachineTarget = (IStateMachineTarget)data;
-			Navigator component = stateMachineTarget.GetComponent<Navigator>();
+			Navigator component = ((IStateMachineTarget)data).GetComponent<Navigator>();
 			bool flag = false;
 			Grave grave = MournChore.FindGraveToMournAt();
-			if (grave != null)
+			if (grave != null && Grid.IsValidCell(MournChore.GetStandableCell(Grid.PosToCell(grave), component)))
 			{
-				int num = Grid.PosToCell(grave);
-				int standableCell = MournChore.GetStandableCell(num, component);
-				if (Grid.IsValidCell(standableCell))
-				{
-					flag = true;
-				}
+				flag = true;
 			}
 			return flag;
 		}
@@ -132,8 +105,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 
 		public void CreateLocator()
 		{
-			Grave grave = MournChore.FindGraveToMournAt();
-			int num = Grid.PosToCell(grave.transform.GetPosition());
+			int num = Grid.PosToCell(MournChore.FindGraveToMournAt().transform.GetPosition());
 			Navigator component = base.master.GetComponent<Navigator>();
 			int standableCell = MournChore.GetStandableCell(num, component);
 			if (standableCell < 0)

@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class Tuple<T, U, V> : IEquatable<Tuple<T, U, V>>
+public class Tuple<T, U, V> : IEquatable<global::Tuple<T, U, V>>
 {
 	public Tuple(T a, U b, V c)
 	{
@@ -9,7 +9,7 @@ public class Tuple<T, U, V> : IEquatable<Tuple<T, U, V>>
 		this.third = c;
 	}
 
-	public bool Equals(Tuple<T, U, V> other)
+	public bool Equals(global::Tuple<T, U, V> other)
 	{
 		return this.first.Equals(other.first) && this.second.Equals(other.second) && this.third.Equals(other.third);
 	}

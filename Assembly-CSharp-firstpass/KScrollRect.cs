@@ -45,8 +45,7 @@ public class KScrollRect : ScrollRect
 	{
 		if (base.vertical && base.verticalScrollbar != null)
 		{
-			RectTransform rectTransform = ((!(base.viewport == null)) ? base.viewport.rectTransform() : base.gameObject.GetComponent<RectTransform>());
-			float num = Mathf.Min(rectTransform.rect.size.y, base.content.sizeDelta.y) / base.content.sizeDelta.y;
+			float num = Mathf.Min(((base.viewport == null) ? base.gameObject.GetComponent<RectTransform>() : base.viewport.rectTransform()).rect.size.y, base.content.sizeDelta.y) / base.content.sizeDelta.y;
 			float num2 = Mathf.Abs(base.verticalScrollbar.size - num);
 			if (Mathf.Abs(num2) < 0.001f)
 			{
@@ -56,8 +55,7 @@ public class KScrollRect : ScrollRect
 		}
 		if (base.horizontal && base.horizontalScrollbar != null)
 		{
-			RectTransform rectTransform2 = ((!(base.viewport == null)) ? base.viewport.rectTransform() : base.gameObject.GetComponent<RectTransform>());
-			float num3 = Mathf.Min(rectTransform2.rect.size.x, base.content.sizeDelta.x) / base.content.sizeDelta.x;
+			float num3 = Mathf.Min(((base.viewport == null) ? base.gameObject.GetComponent<RectTransform>() : base.viewport.rectTransform()).rect.size.x, base.content.sizeDelta.x) / base.content.sizeDelta.x;
 			float num4 = Mathf.Abs(base.horizontalScrollbar.size - num3);
 			if (Mathf.Abs(num4) < 0.001f)
 			{
@@ -217,16 +215,19 @@ public class KScrollRect : ScrollRect
 		if (e.TryConsume(global::Action.PanLeft))
 		{
 			this.panLeft = true;
+			return;
 		}
-		else if (e.TryConsume(global::Action.PanRight))
+		if (e.TryConsume(global::Action.PanRight))
 		{
 			this.panRight = true;
+			return;
 		}
-		else if (e.TryConsume(global::Action.PanUp))
+		if (e.TryConsume(global::Action.PanUp))
 		{
 			this.panUp = true;
+			return;
 		}
-		else if (e.TryConsume(global::Action.PanDown))
+		if (e.TryConsume(global::Action.PanDown))
 		{
 			this.panDown = true;
 		}
@@ -242,18 +243,21 @@ public class KScrollRect : ScrollRect
 		{
 			this.panUp = false;
 			this.keyboardScrollDelta.y = 0f;
+			return;
 		}
-		else if (this.panDown && e.TryConsume(global::Action.PanDown))
+		if (this.panDown && e.TryConsume(global::Action.PanDown))
 		{
 			this.panDown = false;
 			this.keyboardScrollDelta.y = 0f;
+			return;
 		}
-		else if (this.panRight && e.TryConsume(global::Action.PanRight))
+		if (this.panRight && e.TryConsume(global::Action.PanRight))
 		{
 			this.panRight = false;
 			this.keyboardScrollDelta.x = 0f;
+			return;
 		}
-		else if (this.panLeft && e.TryConsume(global::Action.PanLeft))
+		if (this.panLeft && e.TryConsume(global::Action.PanLeft))
 		{
 			this.panLeft = false;
 			this.keyboardScrollDelta.x = 0f;
@@ -301,7 +305,7 @@ public class KScrollRect : ScrollRect
 
 	private bool panLeft;
 
-	private Vector3 keyboardScrollDelta = default(Vector3);
+	private Vector3 keyboardScrollDelta;
 
 	private float keyboardScrollSpeed = 1f;
 

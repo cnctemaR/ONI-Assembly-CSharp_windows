@@ -106,9 +106,8 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 			this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
 		}
 		string setting = this.newGameSettings.GetSetting(CustomGameSettingConfigs.World);
-		string setting2 = this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed);
 		int num;
-		int.TryParse(setting2, out num);
+		int.TryParse(this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed), out num);
 		ColonyDestinationAsteroidData colonyDestinationAsteroidData = this.destinationMapPanel.SelectAsteroid(setting, num);
 		this.destinationProperties.SetDescriptors(colonyDestinationAsteroidData.GetParamDescriptors());
 		this.startLocationProperties.SetDescriptors(colonyDestinationAsteroidData.GetTraitDescriptors());

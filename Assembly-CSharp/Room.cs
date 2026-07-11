@@ -50,7 +50,11 @@ public class Room : IAssignableIdentity
 	public Ownables GetSoleOwner()
 	{
 		List<Ownables> owners = this.GetOwners();
-		return (owners.Count <= 0) ? null : owners[0];
+		if (owners.Count <= 0)
+		{
+			return null;
+		}
+		return owners[0];
 	}
 
 	public List<KPrefabID> GetPrimaryEntities()

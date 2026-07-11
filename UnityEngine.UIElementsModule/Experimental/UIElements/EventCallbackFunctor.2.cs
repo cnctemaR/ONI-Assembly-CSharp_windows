@@ -7,10 +7,12 @@ namespace UnityEngine.Experimental.UIElements
 		public EventCallbackFunctor(EventCallback<TEventType, TCallbackArgs> callback, TCallbackArgs userArgs, CallbackPhase phase)
 			: base(phase)
 		{
+			this.userArgs = userArgs;
 			this.m_Callback = callback;
-			this.m_UserArgs = userArgs;
 			this.m_EventTypeId = EventBase<TEventType>.TypeId();
 		}
+
+		internal TCallbackArgs userArgs { get; set; }
 
 		public override void Invoke(EventBase evt)
 		{
@@ -22,7 +24,7 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				if (base.PhaseMatches(evt))
 				{
-					this.m_Callback(evt as TEventType, this.m_UserArgs);
+					this.m_Callback(evt as TEventType, this.userArgs);
 				}
 			}
 		}
@@ -33,8 +35,6 @@ namespace UnityEngine.Experimental.UIElements
 		}
 
 		private EventCallback<TEventType, TCallbackArgs> m_Callback;
-
-		private TCallbackArgs m_UserArgs;
 
 		private long m_EventTypeId;
 	}

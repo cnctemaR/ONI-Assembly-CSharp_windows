@@ -12,11 +12,6 @@ namespace System.Security.Permissions
 		{
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 3;
-		}
-
 		public override IPermission Copy()
 		{
 			return new IsolatedStorageFilePermission(PermissionState.None)
@@ -42,11 +37,11 @@ namespace System.Security.Permissions
 			}
 			return new IsolatedStorageFilePermission(PermissionState.None)
 			{
-				m_userQuota = ((this.m_userQuota >= isolatedStorageFilePermission.m_userQuota) ? isolatedStorageFilePermission.m_userQuota : this.m_userQuota),
-				m_machineQuota = ((this.m_machineQuota >= isolatedStorageFilePermission.m_machineQuota) ? isolatedStorageFilePermission.m_machineQuota : this.m_machineQuota),
-				m_expirationDays = ((this.m_expirationDays >= isolatedStorageFilePermission.m_expirationDays) ? isolatedStorageFilePermission.m_expirationDays : this.m_expirationDays),
+				m_userQuota = ((this.m_userQuota < isolatedStorageFilePermission.m_userQuota) ? this.m_userQuota : isolatedStorageFilePermission.m_userQuota),
+				m_machineQuota = ((this.m_machineQuota < isolatedStorageFilePermission.m_machineQuota) ? this.m_machineQuota : isolatedStorageFilePermission.m_machineQuota),
+				m_expirationDays = ((this.m_expirationDays < isolatedStorageFilePermission.m_expirationDays) ? this.m_expirationDays : isolatedStorageFilePermission.m_expirationDays),
 				m_permanentData = (this.m_permanentData && isolatedStorageFilePermission.m_permanentData),
-				UsageAllowed = ((this.m_allowed >= isolatedStorageFilePermission.m_allowed) ? isolatedStorageFilePermission.m_allowed : this.m_allowed)
+				UsageAllowed = ((this.m_allowed < isolatedStorageFilePermission.m_allowed) ? this.m_allowed : isolatedStorageFilePermission.m_allowed)
 			};
 		}
 
@@ -69,11 +64,11 @@ namespace System.Security.Permissions
 			}
 			return new IsolatedStorageFilePermission(PermissionState.None)
 			{
-				m_userQuota = ((this.m_userQuota <= isolatedStorageFilePermission.m_userQuota) ? isolatedStorageFilePermission.m_userQuota : this.m_userQuota),
-				m_machineQuota = ((this.m_machineQuota <= isolatedStorageFilePermission.m_machineQuota) ? isolatedStorageFilePermission.m_machineQuota : this.m_machineQuota),
-				m_expirationDays = ((this.m_expirationDays <= isolatedStorageFilePermission.m_expirationDays) ? isolatedStorageFilePermission.m_expirationDays : this.m_expirationDays),
+				m_userQuota = ((this.m_userQuota > isolatedStorageFilePermission.m_userQuota) ? this.m_userQuota : isolatedStorageFilePermission.m_userQuota),
+				m_machineQuota = ((this.m_machineQuota > isolatedStorageFilePermission.m_machineQuota) ? this.m_machineQuota : isolatedStorageFilePermission.m_machineQuota),
+				m_expirationDays = ((this.m_expirationDays > isolatedStorageFilePermission.m_expirationDays) ? this.m_expirationDays : isolatedStorageFilePermission.m_expirationDays),
 				m_permanentData = (this.m_permanentData || isolatedStorageFilePermission.m_permanentData),
-				UsageAllowed = ((this.m_allowed <= isolatedStorageFilePermission.m_allowed) ? isolatedStorageFilePermission.m_allowed : this.m_allowed)
+				UsageAllowed = ((this.m_allowed > isolatedStorageFilePermission.m_allowed) ? this.m_allowed : isolatedStorageFilePermission.m_allowed)
 			};
 		}
 
@@ -82,6 +77,11 @@ namespace System.Security.Permissions
 		public override SecurityElement ToXml()
 		{
 			return base.ToXml();
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 3;
 		}
 
 		private IsolatedStorageFilePermission Cast(IPermission target)
@@ -97,7 +97,5 @@ namespace System.Security.Permissions
 			}
 			return isolatedStorageFilePermission;
 		}
-
-		private const int version = 1;
 	}
 }

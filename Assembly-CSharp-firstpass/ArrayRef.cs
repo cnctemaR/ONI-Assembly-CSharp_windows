@@ -4,21 +4,6 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public struct ArrayRef<T>
 {
-	public ArrayRef(int initialCapacity)
-	{
-		this.capacityImpl = initialCapacity;
-		this.elements = new T[initialCapacity];
-		this.sizeImpl = 0;
-	}
-
-	public ArrayRef(T[] elements, int size)
-	{
-		Debug.Assert(size <= elements.Length);
-		this.elements = elements;
-		this.sizeImpl = size;
-		this.capacityImpl = elements.Length;
-	}
-
 	public T this[int i]
 	{
 		get
@@ -55,6 +40,21 @@ public struct ArrayRef<T>
 		{
 			return this.capacityImpl;
 		}
+	}
+
+	public ArrayRef(int initialCapacity)
+	{
+		this.capacityImpl = initialCapacity;
+		this.elements = new T[initialCapacity];
+		this.sizeImpl = 0;
+	}
+
+	public ArrayRef(T[] elements, int size)
+	{
+		Debug.Assert(size <= elements.Length);
+		this.elements = elements;
+		this.sizeImpl = size;
+		this.capacityImpl = elements.Length;
 	}
 
 	public int Add(T item)
@@ -175,7 +175,7 @@ public struct ArrayRef<T>
 		{
 			return;
 		}
-		this.Reallocate((this.capacity != 0) ? (this.capacity * 2) : 1);
+		this.Reallocate((this.capacity == 0) ? 1 : (this.capacity * 2));
 		DebugUtil.Assert(this.capacity == 0 || this.capacity == this.elements.Length);
 	}
 

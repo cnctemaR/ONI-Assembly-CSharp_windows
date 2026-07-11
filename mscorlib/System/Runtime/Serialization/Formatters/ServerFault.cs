@@ -4,11 +4,16 @@ using System.Runtime.Remoting.Metadata;
 
 namespace System.Runtime.Serialization.Formatters
 {
-	[SoapType]
+	[SoapType(Embedded = true)]
 	[ComVisible(true)]
 	[Serializable]
 	public sealed class ServerFault
 	{
+		internal ServerFault(Exception exception)
+		{
+			this.exception = exception;
+		}
+
 		public ServerFault(string exceptionType, string message, string stackTrace)
 		{
 			this.exceptionType = exceptionType;
@@ -49,6 +54,14 @@ namespace System.Runtime.Serialization.Formatters
 			set
 			{
 				this.stackTrace = value;
+			}
+		}
+
+		internal Exception Exception
+		{
+			get
+			{
+				return this.exception;
 			}
 		}
 

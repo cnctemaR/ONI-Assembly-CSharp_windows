@@ -24,8 +24,7 @@ public class LightBugBlackConfig : IEntityConfig
 			SimHashes.Katairite.CreateTag(),
 			SimHashes.Phosphorus.CreateTag()
 		}, Tag.Invalid, LightBugBlackConfig.CALORIES_PER_KG_OF_ORE);
-		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
-		def.lures = new Tag[] { SimHashes.Phosphorus.CreateTag() };
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { SimHashes.Phosphorus.CreateTag() };
 		return gameObject;
 	}
 

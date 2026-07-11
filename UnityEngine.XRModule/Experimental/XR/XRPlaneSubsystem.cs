@@ -7,14 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.XR
 {
-	/// <summary>
-	///   <para>Provides methods, events, and properties that provides information about planes detected in the environment. </para>
-	/// </summary>
-	[NativeConditional("ENABLE_XR")]
+	[NativeHeader("Modules/XR/XRPrefix.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Modules/XR/Subsystems/Planes/XRPlaneSubsystem.h")]
-	[NativeHeader("Modules/XR/XRPrefix.h")]
-	public class XRPlaneSubsystem : Subsystem<XRPlaneSubsystemDescriptor>
+	[NativeConditional("ENABLE_XR")]
+	public class XRPlaneSubsystem : IntegratedSubsystem<XRPlaneSubsystemDescriptor>
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<PlaneAddedEventArgs> PlaneAdded;
@@ -25,9 +22,6 @@ namespace UnityEngine.Experimental.XR
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<PlaneRemovedEventArgs> PlaneRemoved;
 
-		/// <summary>
-		///   <para>The frame during which the planes were last updated.</para>
-		/// </summary>
 		public extern int LastUpdatedFrame
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

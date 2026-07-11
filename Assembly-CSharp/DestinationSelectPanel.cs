@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Klei.CustomSettings;
 using ProcGen;
 using ProcGenGame;
@@ -8,7 +7,6 @@ using UnityEngine;
 
 public class DestinationSelectPanel : KMonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<ColonyDestinationAsteroidData> OnAsteroidClicked;
 
 	private float min
@@ -142,8 +140,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 				float num = this.offset + (float)i * this.asteroidXSeparation;
 				if (num + this.offset + this.asteroidXSeparation >= this.min && num + this.offset - this.asteroidXSeparation <= this.max)
 				{
-					DestinationAsteroid2 asteroid = this.GetAsteroid(this.worldNames[i], 1f);
-					asteroid.transform.SetLocalPosition(new Vector3(num, 0f, 0f));
+					this.GetAsteroid(this.worldNames[i], 1f).transform.SetLocalPosition(new Vector3(num, 0f, 0f));
 					if (this.numAsteroids > 100)
 					{
 						break;
@@ -152,8 +149,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 			}
 		}
 		float num2 = this.offset + (float)this.selectedIndex * this.asteroidXSeparation;
-		DestinationAsteroid2 asteroid2 = this.GetAsteroid(this.worldNames[this.selectedIndex], this.asteroidFocusScale);
-		asteroid2.transform.SetLocalPosition(new Vector3(num2, 0f, 0f));
+		this.GetAsteroid(this.worldNames[this.selectedIndex], this.asteroidFocusScale).transform.SetLocalPosition(new Vector3(num2, 0f, 0f));
 		this.EndAsteroidDrawing();
 	}
 

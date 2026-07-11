@@ -14,8 +14,7 @@ public class Prioritizable : KMonoBehaviour
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		Prioritizable component = gameObject.GetComponent<Prioritizable>();
+		Prioritizable component = ((GameObject)data).GetComponent<Prioritizable>();
 		if (component != null)
 		{
 			this.SetMasterPriority(component.GetMasterPriority());
@@ -121,8 +120,9 @@ public class Prioritizable : KMonoBehaviour
 		if (flag && this.highPriorityStatusItem == Guid.Empty)
 		{
 			this.highPriorityStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.EmergencyPriority, null);
+			return;
 		}
-		else if (!flag && this.highPriorityStatusItem != Guid.Empty)
+		if (!flag && this.highPriorityStatusItem != Guid.Empty)
 		{
 			this.highPriorityStatusItem = base.GetComponent<KSelectable>().RemoveStatusItem(this.highPriorityStatusItem, false);
 		}

@@ -15,22 +15,20 @@ public class InitializeCheck : MonoBehaviour
 		{
 			AudioMixer.Create();
 			App.LoadScene("frontend");
+			return;
 		}
-		else
-		{
-			Canvas canvas = base.gameObject.AddComponent<Canvas>();
-			canvas.rectTransform().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 500f);
-			canvas.rectTransform().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 500f);
-			Camera camera = base.gameObject.AddComponent<Camera>();
-			camera.orthographic = true;
-			camera.orthographicSize = 200f;
-			camera.backgroundColor = Color.black;
-			camera.clearFlags = CameraClearFlags.Color;
-			camera.nearClipPlane = 0f;
-			global::Debug.Log("Cannot initialize filesystem. [" + InitializeCheck.savePathState.ToString() + "]");
-			Localization.Initialize(true);
-			this.ShowFileErrorDialogs();
-		}
+		Canvas canvas = base.gameObject.AddComponent<Canvas>();
+		canvas.rectTransform().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 500f);
+		canvas.rectTransform().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 500f);
+		Camera camera = base.gameObject.AddComponent<Camera>();
+		camera.orthographic = true;
+		camera.orthographicSize = 200f;
+		camera.backgroundColor = Color.black;
+		camera.clearFlags = CameraClearFlags.Color;
+		camera.nearClipPlane = 0f;
+		global::Debug.Log("Cannot initialize filesystem. [" + InitializeCheck.savePathState.ToString() + "]");
+		Localization.Initialize(true);
+		this.ShowFileErrorDialogs();
 	}
 
 	private GameObject CreateUIRoot()
@@ -41,35 +39,23 @@ public class InitializeCheck : MonoBehaviour
 	private void ShowErrorDialog(string msg)
 	{
 		GameObject gameObject = this.CreateUIRoot();
-		ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(this.confirmDialogScreen.gameObject, gameObject, true);
-		ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
-		global::System.Action action = new global::System.Action(this.Quit);
-		global::System.Action action2 = null;
-		Sprite sprite = this.sadDupe;
-		confirmDialogScreen2.PopupConfirmDialog(msg, action, action2, null, null, null, null, null, sprite, true);
+		Util.KInstantiateUI<ConfirmDialogScreen>(this.confirmDialogScreen.gameObject, gameObject, true).PopupConfirmDialog(msg, new global::System.Action(this.Quit), null, null, null, null, null, null, this.sadDupe, true);
 	}
 
 	private void ShowFileErrorDialogs()
 	{
 		string text = null;
-		InitializeCheck.SavePathIssue savePathState = InitializeCheck.savePathState;
-		if (savePathState != InitializeCheck.SavePathIssue.WriteTestFail)
+		switch (InitializeCheck.savePathState)
 		{
-			if (savePathState != InitializeCheck.SavePathIssue.SpaceTestFail)
-			{
-				if (savePathState == InitializeCheck.SavePathIssue.WorldGenFilesFail)
-				{
-					text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FILES, WorldGen.WORLDGEN_SAVE_FILENAME + "\n" + WorldGen.SIM_SAVE_FILENAME);
-				}
-			}
-			else
-			{
-				text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, SaveLoader.GetSavePrefix());
-			}
-		}
-		else
-		{
+		case InitializeCheck.SavePathIssue.WriteTestFail:
 			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, SaveLoader.GetSavePrefix());
+			break;
+		case InitializeCheck.SavePathIssue.SpaceTestFail:
+			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, SaveLoader.GetSavePrefix());
+			break;
+		case InitializeCheck.SavePathIssue.WorldGenFilesFail:
+			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FILES, WorldGen.WORLDGEN_SAVE_FILENAME + "\n" + WorldGen.SIM_SAVE_FILENAME);
+			break;
 		}
 		if (text != null)
 		{
@@ -98,7 +84,7 @@ public class InitializeCheck : MonoBehaviour
 		catch
 		{
 			InitializeCheck.savePathState = InitializeCheck.SavePathIssue.WriteTestFail;
-			goto IL_0111;
+			goto IL_00E6;
 		}
 		using (FileStream fileStream2 = File.Open(savePrefix + InitializeCheck.testSave, FileMode.Create, FileAccess.Write))
 		{
@@ -112,7 +98,7 @@ public class InitializeCheck : MonoBehaviour
 			{
 				fileStream2.Close();
 				InitializeCheck.savePathState = InitializeCheck.SavePathIssue.SpaceTestFail;
-				goto IL_0111;
+				goto IL_00E6;
 			}
 		}
 		try
@@ -128,9 +114,9 @@ public class InitializeCheck : MonoBehaviour
 		{
 			InitializeCheck.savePathState = InitializeCheck.SavePathIssue.WorldGenFilesFail;
 		}
+		IL_00E6:
 		try
 		{
-			IL_0111:
 			if (File.Exists(savePrefix + InitializeCheck.testFile))
 			{
 				File.Delete(savePrefix + InitializeCheck.testFile);

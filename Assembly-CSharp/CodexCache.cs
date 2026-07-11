@@ -10,7 +10,7 @@ public static class CodexCache
 	public static string FormatLinkID(string linkID)
 	{
 		linkID = linkID.ToUpper();
-		linkID = linkID.Replace("_", string.Empty);
+		linkID = linkID.Replace("_", "");
 		return linkID;
 	}
 
@@ -22,17 +22,17 @@ public static class CodexCache
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		if (CodexCache.widgetTagMappings == null)
 		{
-			CodexCache.widgetTagMappings = new List<Tuple<string, Type>>
+			CodexCache.widgetTagMappings = new List<global::Tuple<string, Type>>
 			{
-				new Tuple<string, Type>("!CodexText", typeof(CodexText)),
-				new Tuple<string, Type>("!CodexImage", typeof(CodexImage)),
-				new Tuple<string, Type>("!CodexDividerLine", typeof(CodexDividerLine)),
-				new Tuple<string, Type>("!CodexSpacer", typeof(CodexSpacer)),
-				new Tuple<string, Type>("!CodexLabelWithIcon", typeof(CodexLabelWithIcon)),
-				new Tuple<string, Type>("!CodexLabelWithLargeIcon", typeof(CodexLabelWithLargeIcon)),
-				new Tuple<string, Type>("!CodexContentLockedIndicator", typeof(CodexContentLockedIndicator)),
-				new Tuple<string, Type>("!CodexLargeSpacer", typeof(CodexLargeSpacer)),
-				new Tuple<string, Type>("!CodexVideo", typeof(CodexVideo))
+				new global::Tuple<string, Type>("!CodexText", typeof(CodexText)),
+				new global::Tuple<string, Type>("!CodexImage", typeof(CodexImage)),
+				new global::Tuple<string, Type>("!CodexDividerLine", typeof(CodexDividerLine)),
+				new global::Tuple<string, Type>("!CodexSpacer", typeof(CodexSpacer)),
+				new global::Tuple<string, Type>("!CodexLabelWithIcon", typeof(CodexLabelWithIcon)),
+				new global::Tuple<string, Type>("!CodexLabelWithLargeIcon", typeof(CodexLabelWithLargeIcon)),
+				new global::Tuple<string, Type>("!CodexContentLockedIndicator", typeof(CodexContentLockedIndicator)),
+				new global::Tuple<string, Type>("!CodexLargeSpacer", typeof(CodexLargeSpacer)),
+				new global::Tuple<string, Type>("!CodexVideo", typeof(CodexVideo))
 			};
 		}
 		string text = CodexCache.FormatLinkID("LESSONS");
@@ -175,8 +175,7 @@ public static class CodexCache
 	private static void CollectYAMLEntries(List<CategoryEntry> categories)
 	{
 		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
-		List<CodexEntry> list = CodexCache.CollectEntries(string.Empty);
-		foreach (CodexEntry codexEntry in list)
+		foreach (CodexEntry codexEntry in CodexCache.CollectEntries(""))
 		{
 			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null)
 			{
@@ -190,10 +189,10 @@ public static class CodexCache
 				}
 			}
 		}
-		foreach (string text in Directory.GetDirectories(CodexCache.baseEntryPath))
+		string[] directories = Directory.GetDirectories(CodexCache.baseEntryPath);
+		for (int i = 0; i < directories.Length; i++)
 		{
-			List<CodexEntry> list2 = CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(text));
-			foreach (CodexEntry codexEntry2 in list2)
+			foreach (CodexEntry codexEntry2 in CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(directories[i])))
 			{
 				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null)
 				{
@@ -213,8 +212,7 @@ public static class CodexCache
 	private static void CollectYAMLSubEntries(List<CategoryEntry> categories)
 	{
 		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
-		List<SubEntry> list = CodexCache.CollectSubEntries(string.Empty);
-		using (List<SubEntry>.Enumerator enumerator = list.GetEnumerator())
+		using (List<SubEntry>.Enumerator enumerator = CodexCache.CollectSubEntries("").GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
@@ -321,7 +319,7 @@ public static class CodexCache
 		{
 			try
 			{
-				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty);
+				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, "");
 			}
 			catch
 			{
@@ -412,14 +410,13 @@ public static class CodexCache
 
 	private static void YamlParseErrorCB(YamlIO.Error error, bool force_log_as_warning)
 	{
-		string text = string.Format("{0} parse error in {1}\n{2}", error.severity, error.file.full_path, error.message);
-		throw new Exception(text, error.inner_exception);
+		throw new Exception(string.Format("{0} parse error in {1}\n{2}", error.severity, error.file.full_path, error.message), error.inner_exception);
 	}
 
 	public static List<CodexEntry> CollectEntries(string folder)
 	{
 		List<CodexEntry> list = new List<CodexEntry>();
-		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
+		string text = ((folder == "") ? CodexCache.baseEntryPath : Path.Combine(CodexCache.baseEntryPath, folder));
 		string[] array = new string[0];
 		try
 		{
@@ -464,7 +461,7 @@ public static class CodexCache
 	public static List<SubEntry> CollectSubEntries(string folder)
 	{
 		List<SubEntry> list = new List<SubEntry>();
-		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
+		string text = ((folder == "") ? CodexCache.baseEntryPath : Path.Combine(CodexCache.baseEntryPath, folder));
 		string[] array = new string[0];
 		try
 		{
@@ -505,5 +502,5 @@ public static class CodexCache
 
 	private static Dictionary<string, List<string>> unlockedEntryLookup;
 
-	private static List<Tuple<string, Type>> widgetTagMappings;
+	private static List<global::Tuple<string, Type>> widgetTagMappings;
 }

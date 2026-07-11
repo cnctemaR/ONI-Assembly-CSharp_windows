@@ -10,8 +10,7 @@ public class LogicGateBase : KMonoBehaviour
 		{
 			offset = component.GetRotatedCellOffset(offset);
 		}
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		return Grid.OffsetCell(num, offset);
+		return Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), offset);
 	}
 
 	public int InputCellOne

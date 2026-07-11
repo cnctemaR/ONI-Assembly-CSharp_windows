@@ -5,9 +5,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Represents an axis aligned bounding box with all values as integers.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct BoundsInt : IEquatable<BoundsInt>
 	{
@@ -23,9 +20,6 @@ namespace UnityEngine
 			this.m_Size = size;
 		}
 
-		/// <summary>
-		///   <para>X value of the minimal point of the box.</para>
-		/// </summary>
 		public int x
 		{
 			get
@@ -38,9 +32,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Y value of the minimal point of the box.</para>
-		/// </summary>
 		public int y
 		{
 			get
@@ -53,9 +44,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Z value of the minimal point of the box.</para>
-		/// </summary>
 		public int z
 		{
 			get
@@ -68,9 +56,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The center of the bounding box.</para>
-		/// </summary>
 		public Vector3 center
 		{
 			get
@@ -79,9 +64,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimal point of the box.</para>
-		/// </summary>
 		public Vector3Int min
 		{
 			get
@@ -96,9 +78,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximal point of the box.</para>
-		/// </summary>
 		public Vector3Int max
 		{
 			get
@@ -113,9 +92,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimal x point of the box.</para>
-		/// </summary>
 		public int xMin
 		{
 			get
@@ -130,9 +106,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimal y point of the box.</para>
-		/// </summary>
 		public int yMin
 		{
 			get
@@ -147,9 +120,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimal z point of the box.</para>
-		/// </summary>
 		public int zMin
 		{
 			get
@@ -164,9 +134,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximal x point of the box.</para>
-		/// </summary>
 		public int xMax
 		{
 			get
@@ -179,9 +146,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximal y point of the box.</para>
-		/// </summary>
 		public int yMax
 		{
 			get
@@ -194,9 +158,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximal z point of the box.</para>
-		/// </summary>
 		public int zMax
 		{
 			get
@@ -209,9 +170,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The position of the bounding box.</para>
-		/// </summary>
 		public Vector3Int position
 		{
 			get
@@ -224,9 +182,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The total size of the box.</para>
-		/// </summary>
 		public Vector3Int size
 		{
 			get
@@ -239,43 +194,23 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the bounds to the min and max value of the box.</para>
-		/// </summary>
-		/// <param name="minPosition"></param>
-		/// <param name="maxPosition"></param>
 		public void SetMinMax(Vector3Int minPosition, Vector3Int maxPosition)
 		{
 			this.min = minPosition;
 			this.max = maxPosition;
 		}
 
-		/// <summary>
-		///   <para>Clamps the position and size of this bounding box to the given bounds.</para>
-		/// </summary>
-		/// <param name="bounds">Bounds to clamp to.</param>
 		public void ClampToBounds(BoundsInt bounds)
 		{
 			this.position = new Vector3Int(Math.Max(Math.Min(bounds.xMax, this.position.x), bounds.xMin), Math.Max(Math.Min(bounds.yMax, this.position.y), bounds.yMin), Math.Max(Math.Min(bounds.zMax, this.position.z), bounds.zMin));
 			this.size = new Vector3Int(Math.Min(bounds.xMax - this.position.x, this.size.x), Math.Min(bounds.yMax - this.position.y, this.size.y), Math.Min(bounds.zMax - this.position.z, this.size.z));
 		}
 
-		/// <summary>
-		///   <para>Is point contained in the bounding box?</para>
-		/// </summary>
-		/// <param name="position">Point to check.</param>
-		/// <param name="inclusive">Whether the max limits are included in the check.</param>
-		/// <returns>
-		///   <para>Is point contained in the bounding box?</para>
-		/// </returns>
 		public bool Contains(Vector3Int position)
 		{
-			return position.x >= this.m_Position.x && position.y >= this.m_Position.y && position.z >= this.m_Position.z && position.x < this.m_Position.x + this.m_Size.x && position.y < this.m_Position.y + this.m_Size.y && position.z < this.m_Position.z + this.m_Size.z;
+			return position.x >= this.xMin && position.y >= this.yMin && position.z >= this.zMin && position.x < this.xMax && position.y < this.yMax && position.z < this.zMax;
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for the bounds.</para>
-		/// </summary>
 		public override string ToString()
 		{
 			return UnityString.Format("Position: {0}, Size: {1}", new object[] { this.m_Position, this.m_Size });
@@ -306,9 +241,6 @@ namespace UnityEngine
 			return this.m_Position.GetHashCode() ^ (this.m_Size.GetHashCode() << 2);
 		}
 
-		/// <summary>
-		///   <para>A BoundsInt.PositionCollection that contains all positions within the BoundsInt.</para>
-		/// </summary>
 		public BoundsInt.PositionEnumerator allPositionsWithin
 		{
 			get
@@ -321,9 +253,6 @@ namespace UnityEngine
 
 		private Vector3Int m_Size;
 
-		/// <summary>
-		///   <para>An iterator that allows you to iterate over all positions within the BoundsInt.</para>
-		/// </summary>
 		public struct PositionEnumerator : IEnumerator<Vector3Int>, IEnumerator, IDisposable
 		{
 			public PositionEnumerator(Vector3Int min, Vector3Int max)
@@ -334,23 +263,11 @@ namespace UnityEngine
 				this.Reset();
 			}
 
-			/// <summary>
-			///   <para>Returns this as an iterator that allows you to iterate over all positions within the BoundsInt.</para>
-			/// </summary>
-			/// <returns>
-			///   <para>This BoundsInt.PositionEnumerator.</para>
-			/// </returns>
 			public BoundsInt.PositionEnumerator GetEnumerator()
 			{
 				return this;
 			}
 
-			/// <summary>
-			///   <para>Moves the enumerator to the next position.</para>
-			/// </summary>
-			/// <returns>
-			///   <para>Whether the enumerator has successfully moved to the next position.</para>
-			/// </returns>
 			public bool MoveNext()
 			{
 				bool flag;
@@ -380,18 +297,12 @@ namespace UnityEngine
 				return flag;
 			}
 
-			/// <summary>
-			///   <para>Resets this enumerator to its starting state.</para>
-			/// </summary>
 			public void Reset()
 			{
 				this._current = this._min;
 				this._current.x = this._current.x - 1;
 			}
 
-			/// <summary>
-			///   <para>Current position of the enumerator.</para>
-			/// </summary>
 			public Vector3Int Current
 			{
 				get

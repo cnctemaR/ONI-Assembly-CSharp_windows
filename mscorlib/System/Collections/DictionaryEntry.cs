@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
-	[DebuggerDisplay("{_value}", Name = "[{_key}]")]
 	[Serializable]
 	public struct DictionaryEntry
 	{
@@ -37,6 +33,12 @@ namespace System.Collections
 			{
 				this._value = value;
 			}
+		}
+
+		public void Deconstruct(out object key, out object value)
+		{
+			key = this.Key;
+			value = this.Value;
 		}
 
 		private object _key;

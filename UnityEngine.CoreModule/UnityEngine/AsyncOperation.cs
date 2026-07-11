@@ -6,9 +6,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Asynchronous operation coroutine.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	[ThreadAndSerializationSafe]
 	[NativeHeader("Runtime/Export/AsyncOperation.bindings.h")]
@@ -16,14 +13,11 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncOperation : YieldInstruction
 	{
-		[NativeMethod(IsThreadSafe = true)]
 		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
+		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroy(IntPtr ptr);
 
-		/// <summary>
-		///   <para>Has the operation finished? (Read Only)</para>
-		/// </summary>
 		public extern bool isDone
 		{
 			[NativeMethod("IsDone")]
@@ -31,9 +25,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>What's the operation's progress. (Read Only)</para>
-		/// </summary>
 		public extern float progress
 		{
 			[NativeMethod("GetProgress")]
@@ -41,9 +32,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Priority lets you tweak in which order async operation calls will be performed.</para>
-		/// </summary>
 		public extern int priority
 		{
 			[NativeMethod("GetPriority")]
@@ -54,9 +42,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Allow scenes to be activated as soon as it is ready.</para>
-		/// </summary>
 		public extern bool allowSceneActivation
 		{
 			[NativeMethod("GetAllowSceneActivation")]

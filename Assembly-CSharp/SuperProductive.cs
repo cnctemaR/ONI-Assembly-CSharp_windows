@@ -32,8 +32,7 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 			if (component.state == Worker.State.Working)
 			{
 				float num = component.workable.WorkTimeRemaining;
-				Diggable component2 = component.workable.GetComponent<Diggable>();
-				if (component2 != null)
+				if (component.workable.GetComponent<Diggable>() != null)
 				{
 					num = Diggable.GetApproximateDigTime(Grid.PosToCell(component.workable));
 				}
@@ -69,8 +68,7 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 
 		public bool ShouldSkipWork()
 		{
-			float num = global::UnityEngine.Random.Range(0f, 100f);
-			return num <= TRAITS.JOY_REACTIONS.SUPER_PRODUCTIVE.INSTANT_SUCCESS_CHANCE;
+			return global::UnityEngine.Random.Range(0f, 100f) <= TRAITS.JOY_REACTIONS.SUPER_PRODUCTIVE.INSTANT_SUCCESS_CHANCE;
 		}
 
 		public void ReactSuperProductive()

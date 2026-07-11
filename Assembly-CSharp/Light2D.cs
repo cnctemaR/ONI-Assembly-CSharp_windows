@@ -5,13 +5,6 @@ using UnityEngine;
 
 public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescriptor
 {
-	public Light2D()
-	{
-		this.emitter = new LightGridManager.LightGridEmitter();
-		this.Range = 5f;
-		this.Lux = 1000;
-	}
-
 	private T MaybeDirty<T>(T old_value, T new_value, ref bool dirty)
 	{
 		if (!EqualityComparer<T>.Default.Equals(old_value, new_value))
@@ -110,6 +103,13 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescr
 		}
 	}
 
+	public Light2D()
+	{
+		this.emitter = new LightGridManager.LightGridEmitter();
+		this.Range = 5f;
+		this.Lux = 1000;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.Subscribe<Light2D>(-592767678, Light2D.OnOperationalChangedDelegate);
@@ -172,7 +172,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescr
 		int num = (int)this.Range;
 		Vector2I vector2I2 = new Vector2I(vector2I.x - num, vector2I.y - num);
 		int num2 = 2 * num;
-		int num3 = ((this.shape != LightShape.Circle) ? num : (2 * num));
+		int num3 = ((this.shape == LightShape.Circle) ? (2 * num) : num);
 		this.solidPartitionerEntry = this.AddToLayer(vector2I2, num2, num3, GameScenePartitioner.Instance.solidChangedLayer);
 		this.liquidPartitionerEntry = this.AddToLayer(vector2I2, num2, num3, GameScenePartitioner.Instance.liquidChangedLayer);
 	}

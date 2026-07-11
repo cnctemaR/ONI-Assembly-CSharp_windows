@@ -3,16 +3,11 @@ using System.Collections;
 
 namespace System.Security.Cryptography.Pkcs
 {
-	public sealed class RecipientInfoCollection : IEnumerable, ICollection
+	public sealed class RecipientInfoCollection : ICollection, IEnumerable
 	{
 		internal RecipientInfoCollection()
 		{
 			this._list = new ArrayList();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new RecipientInfoEnumerator(this._list);
 		}
 
 		public int Count
@@ -63,6 +58,11 @@ namespace System.Security.Cryptography.Pkcs
 		}
 
 		public RecipientInfoEnumerator GetEnumerator()
+		{
+			return new RecipientInfoEnumerator(this._list);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new RecipientInfoEnumerator(this._list);
 		}

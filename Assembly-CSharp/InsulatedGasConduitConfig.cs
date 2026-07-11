@@ -45,8 +45,7 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		Conduit conduit = go.AddOrGet<Conduit>();
-		conduit.type = ConduitType.Gas;
+		go.AddOrGet<Conduit>().type = ConduitType.Gas;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

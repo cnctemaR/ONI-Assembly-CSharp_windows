@@ -41,7 +41,7 @@ public class BatteryUI : KMonoBehaviour
 				break;
 			}
 		}
-		this.batteryBG.sprite = ((bat.Capacity < 40000f) ? this.regularBatteryBG : this.bigBatteryBG);
+		this.batteryBG.sprite = ((bat.Capacity >= 40000f) ? this.bigBatteryBG : this.regularBatteryBG);
 		float num2 = 25f;
 		component.sizeDelta = new Vector2(num, num2);
 		BuildingEnabledButton component2 = bat.GetComponent<BuildingEnabledButton>();
@@ -52,7 +52,7 @@ public class BatteryUI : KMonoBehaviour
 		}
 		else
 		{
-			color = ((bat.PercentFull < bat.PreviousPercentFull) ? this.energyDecreaseColor : this.energyIncreaseColor);
+			color = ((bat.PercentFull >= bat.PreviousPercentFull) ? this.energyIncreaseColor : this.energyDecreaseColor);
 		}
 		this.batteryMeter.color = color;
 		this.batteryBG.color = color;

@@ -1,23 +1,27 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[ComVisible(false)]
+	[DebuggerTypeProxy(typeof(StackDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class Stack<T> : ICollection, IEnumerable<T>, IEnumerable
+	public class Stack<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{
 		public Stack()
 		{
+			this._array = Array.Empty<T>();
 		}
 
-		public Stack(int count)
+		public Stack(int capacity)
 		{
-			if (count < 0)
+			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("count");
+				throw new ArgumentOutOfRangeException("capacity", capacity, "Non-negative number required.");
 			}
-			this._array = new T[count];
+			this._array = new T[capacity];
 		}
 
 		public Stack(IEnumerable<T> collection)
@@ -26,19 +30,14 @@ namespace System.Collections.Generic
 			{
 				throw new ArgumentNullException("collection");
 			}
-			ICollection<T> collection2 = collection as ICollection<T>;
-			if (collection2 != null)
+			this._array = EnumerableHelpers.ToArray<T>(collection, out this._size);
+		}
+
+		public int Count
+		{
+			get
 			{
-				this._size = collection2.Count;
-				this._array = new T[this._size];
-				collection2.CopyTo(this._array, 0);
-			}
-			else
-			{
-				foreach (T t in collection)
-				{
-					this.Push(t);
-				}
+				return this._size;
 			}
 		}
 
@@ -54,120 +53,81 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				return this;
-			}
-		}
-
-		void ICollection.CopyTo(Array dest, int idx)
-		{
-			try
-			{
-				if (this._array != null)
+				if (this._syncRoot == null)
 				{
-					this._array.CopyTo(dest, idx);
-					Array.Reverse(dest, idx, this._size);
+					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
 				}
+				return this._syncRoot;
 			}
-			catch (ArrayTypeMismatchException)
-			{
-				throw new ArgumentException();
-			}
-		}
-
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
 		}
 
 		public void Clear()
 		{
-			if (this._array != null)
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
 			{
-				Array.Clear(this._array, 0, this._array.Length);
+				Array.Clear(this._array, 0, this._size);
 			}
 			this._size = 0;
 			this._version++;
 		}
 
-		public bool Contains(T t)
+		public bool Contains(T item)
 		{
-			return this._array != null && Array.IndexOf<T>(this._array, t, 0, this._size) != -1;
+			return this._size != 0 && Array.LastIndexOf<T>(this._array, item, this._size - 1) != -1;
 		}
 
-		public void CopyTo(T[] dest, int idx)
+		public void CopyTo(T[] array, int arrayIndex)
 		{
-			if (dest == null)
+			if (array == null)
 			{
-				throw new ArgumentNullException("dest");
+				throw new ArgumentNullException("array");
 			}
-			if (idx < 0)
+			if (arrayIndex < 0 || arrayIndex > array.Length)
 			{
-				throw new ArgumentOutOfRangeException("idx");
+				throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (this._array != null)
+			if (array.Length - arrayIndex < this._size)
 			{
-				Array.Copy(this._array, 0, dest, idx, this._size);
-				Array.Reverse(dest, idx, this._size);
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			int i = 0;
+			int num = arrayIndex + this._size;
+			while (i < this._size)
+			{
+				array[--num] = this._array[i++];
 			}
 		}
 
-		public T Peek()
+		void ICollection.CopyTo(Array array, int arrayIndex)
 		{
-			if (this._size == 0)
+			if (array == null)
 			{
-				throw new InvalidOperationException();
+				throw new ArgumentNullException("array");
 			}
-			return this._array[this._size - 1];
-		}
-
-		public T Pop()
-		{
-			if (this._size == 0)
+			if (array.Rank != 1)
 			{
-				throw new InvalidOperationException();
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
-			this._version++;
-			T t = this._array[--this._size];
-			this._array[this._size] = default(T);
-			return t;
-		}
-
-		public void Push(T t)
-		{
-			if (this._array == null || this._size == this._array.Length)
+			if (array.GetLowerBound(0) != 0)
 			{
-				Array.Resize<T>(ref this._array, (this._size != 0) ? (2 * this._size) : 16);
+				throw new ArgumentException("The lower bound of target array must be zero.", "array");
 			}
-			this._version++;
-			this._array[this._size++] = t;
-		}
-
-		public T[] ToArray()
-		{
-			T[] array = new T[this._size];
-			this.CopyTo(array, 0);
-			return array;
-		}
-
-		public void TrimExcess()
-		{
-			if (this._array != null && (double)this._size < (double)this._array.Length * 0.9)
+			if (arrayIndex < 0 || arrayIndex > array.Length)
 			{
-				Array.Resize<T>(ref this._array, this._size);
+				throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			this._version++;
-		}
-
-		public int Count
-		{
-			get
+			if (array.Length - arrayIndex < this._size)
 			{
-				return this._size;
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			try
+			{
+				Array.Copy(this._array, 0, array, arrayIndex, this._size);
+				Array.Reverse(array, arrayIndex, this._size);
+			}
+			catch (ArrayTypeMismatchException)
+			{
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
 			}
 		}
 
@@ -176,7 +136,114 @@ namespace System.Collections.Generic
 			return new Stack<T>.Enumerator(this);
 		}
 
-		private const int INITIAL_SIZE = 16;
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			return new Stack<T>.Enumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new Stack<T>.Enumerator(this);
+		}
+
+		public void TrimExcess()
+		{
+			int num = (int)((double)this._array.Length * 0.9);
+			if (this._size < num)
+			{
+				Array.Resize<T>(ref this._array, this._size);
+				this._version++;
+			}
+		}
+
+		public T Peek()
+		{
+			if (this._size == 0)
+			{
+				this.ThrowForEmptyStack();
+			}
+			return this._array[this._size - 1];
+		}
+
+		public bool TryPeek(out T result)
+		{
+			if (this._size == 0)
+			{
+				result = default(T);
+				return false;
+			}
+			result = this._array[this._size - 1];
+			return true;
+		}
+
+		public T Pop()
+		{
+			if (this._size == 0)
+			{
+				this.ThrowForEmptyStack();
+			}
+			this._version++;
+			T[] array = this._array;
+			int num = this._size - 1;
+			this._size = num;
+			T t = array[num];
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+			{
+				this._array[this._size] = default(T);
+			}
+			return t;
+		}
+
+		public bool TryPop(out T result)
+		{
+			if (this._size == 0)
+			{
+				result = default(T);
+				return false;
+			}
+			this._version++;
+			T[] array = this._array;
+			int num = this._size - 1;
+			this._size = num;
+			result = array[num];
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+			{
+				this._array[this._size] = default(T);
+			}
+			return true;
+		}
+
+		public void Push(T item)
+		{
+			if (this._size == this._array.Length)
+			{
+				Array.Resize<T>(ref this._array, (this._array.Length == 0) ? 4 : (2 * this._array.Length));
+			}
+			T[] array = this._array;
+			int size = this._size;
+			this._size = size + 1;
+			array[size] = item;
+			this._version++;
+		}
+
+		public T[] ToArray()
+		{
+			if (this._size == 0)
+			{
+				return Array.Empty<T>();
+			}
+			T[] array = new T[this._size];
+			for (int i = 0; i < this._size; i++)
+			{
+				array[i] = this._array[this._size - i - 1];
+			}
+			return array;
+		}
+
+		private void ThrowForEmptyStack()
+		{
+			throw new InvalidOperationException("Stack empty.");
+		}
 
 		private T[] _array;
 
@@ -184,23 +251,74 @@ namespace System.Collections.Generic
 
 		private int _version;
 
+		[NonSerialized]
+		private object _syncRoot;
+
+		private const int DefaultCapacity = 4;
+
 		[Serializable]
-		public struct Enumerator : IEnumerator, IDisposable, IEnumerator<T>
+		public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator
 		{
-			internal Enumerator(Stack<T> t)
+			internal Enumerator(Stack<T> stack)
 			{
-				this.parent = t;
-				this.idx = -2;
-				this._version = t._version;
+				this._stack = stack;
+				this._version = stack._version;
+				this._index = -2;
+				this._currentElement = default(T);
 			}
 
-			void IEnumerator.Reset()
+			public void Dispose()
 			{
-				if (this._version != this.parent._version)
+				this._index = -1;
+			}
+
+			public bool MoveNext()
+			{
+				if (this._version != this._stack._version)
 				{
-					throw new InvalidOperationException();
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				this.idx = -2;
+				if (this._index == -2)
+				{
+					this._index = this._stack._size - 1;
+					bool flag = this._index >= 0;
+					if (flag)
+					{
+						this._currentElement = this._stack._array[this._index];
+					}
+					return flag;
+				}
+				if (this._index == -1)
+				{
+					return false;
+				}
+				int num = this._index - 1;
+				this._index = num;
+				bool flag2 = num >= 0;
+				if (flag2)
+				{
+					this._currentElement = this._stack._array[this._index];
+					return flag2;
+				}
+				this._currentElement = default(T);
+				return flag2;
+			}
+
+			public T Current
+			{
+				get
+				{
+					if (this._index < 0)
+					{
+						this.ThrowEnumerationNotStartedOrEnded();
+					}
+					return this._currentElement;
+				}
+			}
+
+			private void ThrowEnumerationNotStartedOrEnded()
+			{
+				throw new InvalidOperationException((this._index == -2) ? "Enumeration has not started. Call MoveNext." : "Enumeration already finished.");
 			}
 
 			object IEnumerator.Current
@@ -211,45 +329,23 @@ namespace System.Collections.Generic
 				}
 			}
 
-			public void Dispose()
+			void IEnumerator.Reset()
 			{
-				this.idx = -2;
+				if (this._version != this._stack._version)
+				{
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+				}
+				this._index = -2;
+				this._currentElement = default(T);
 			}
 
-			public bool MoveNext()
-			{
-				if (this._version != this.parent._version)
-				{
-					throw new InvalidOperationException();
-				}
-				if (this.idx == -2)
-				{
-					this.idx = this.parent._size;
-				}
-				return this.idx != -1 && --this.idx != -1;
-			}
+			private readonly Stack<T> _stack;
 
-			public T Current
-			{
-				get
-				{
-					if (this.idx < 0)
-					{
-						throw new InvalidOperationException();
-					}
-					return this.parent._array[this.idx];
-				}
-			}
+			private readonly int _version;
 
-			private const int NOT_STARTED = -2;
+			private int _index;
 
-			private const int FINISHED = -1;
-
-			private Stack<T> parent;
-
-			private int idx;
-
-			private int _version;
+			private T _currentElement;
 		}
 	}
 }

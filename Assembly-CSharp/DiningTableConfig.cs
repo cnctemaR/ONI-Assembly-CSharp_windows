@@ -35,8 +35,7 @@ public class DiningTableConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
-		Ownable ownable = go.AddOrGet<Ownable>();
-		ownable.slotID = Db.Get().AssignableSlots.MessStation.Id;
+		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.MessStation.Id;
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.capacityKg = TableSaltTuning.SALTSHAKERSTORAGEMASS;

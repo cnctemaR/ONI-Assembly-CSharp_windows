@@ -39,11 +39,10 @@ public class DoorToggleSideScreen : SideScreenContent
 			while (enumerator.MoveNext())
 			{
 				DoorToggleSideScreen.DoorButtonInfo info = enumerator.Current;
-				DoorToggleSideScreen $this = this;
 				info.button.onClick += delegate
 				{
-					$this.target.QueueStateChange(info.state);
-					$this.Refresh();
+					this.target.QueueStateChange(info.state);
+					this.Refresh();
 				};
 			}
 		}
@@ -97,9 +96,10 @@ public class DoorToggleSideScreen : SideScreenContent
 			{
 				doorButtonInfo.button.GetComponent<ImageToggleStateThrobber>().enabled = false;
 				doorButtonInfo.button.isOn = true;
-				foreach (KImage kimage in doorButtonInfo.button.GetComponentsInChildren<KImage>())
+				KImage[] array = doorButtonInfo.button.GetComponentsInChildren<KImage>();
+				for (int i = 0; i < array.Length; i++)
 				{
-					kimage.ColorState = KImage.ColorSelector.Active;
+					array[i].ColorState = KImage.ColorSelector.Active;
 				}
 				foreach (ImageToggleState imageToggleState in doorButtonInfo.button.GetComponentsInChildren<ImageToggleState>())
 				{
@@ -113,17 +113,19 @@ public class DoorToggleSideScreen : SideScreenContent
 				doorButtonInfo.button.GetComponent<ImageToggleStateThrobber>().enabled = true;
 				doorButtonInfo.button.isOn = true;
 				text2 = doorButtonInfo.pendingString;
-				foreach (KImage kimage2 in doorButtonInfo.button.GetComponentsInChildren<KImage>())
+				KImage[] array = doorButtonInfo.button.GetComponentsInChildren<KImage>();
+				for (int i = 0; i < array.Length; i++)
 				{
-					kimage2.ColorState = KImage.ColorSelector.Active;
+					array[i].ColorState = KImage.ColorSelector.Active;
 				}
 			}
 			else
 			{
 				doorButtonInfo.button.GetComponent<ImageToggleStateThrobber>().enabled = false;
-				foreach (KImage kimage3 in doorButtonInfo.button.GetComponentsInChildren<KImage>())
+				KImage[] array = doorButtonInfo.button.GetComponentsInChildren<KImage>();
+				for (int i = 0; i < array.Length; i++)
 				{
-					kimage3.ColorState = KImage.ColorSelector.Inactive;
+					array[i].ColorState = KImage.ColorSelector.Inactive;
 				}
 				doorButtonInfo.button.isOn = false;
 				foreach (ImageToggleState imageToggleState2 in doorButtonInfo.button.GetComponentsInChildren<ImageToggleState>())
@@ -145,19 +147,22 @@ public class DoorToggleSideScreen : SideScreenContent
 		if (this.target.building.Def.PrefabID == POIDoorInternalConfig.ID)
 		{
 			text3 = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.POI_INTERNAL;
-			foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo2 in this.buttonList)
+			using (List<DoorToggleSideScreen.DoorButtonInfo>.Enumerator enumerator = this.buttonList.GetEnumerator())
 			{
-				doorButtonInfo2.button.gameObject.SetActive(false);
+				while (enumerator.MoveNext())
+				{
+					DoorToggleSideScreen.DoorButtonInfo doorButtonInfo2 = enumerator.Current;
+					doorButtonInfo2.button.gameObject.SetActive(false);
+				}
+				goto IL_02FA;
 			}
 		}
-		else
+		foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo3 in this.buttonList)
 		{
-			foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo3 in this.buttonList)
-			{
-				bool flag = doorButtonInfo3.state != Door.ControlState.Auto || this.target.allowAutoControl;
-				doorButtonInfo3.button.gameObject.SetActive(flag);
-			}
+			bool flag = doorButtonInfo3.state != Door.ControlState.Auto || this.target.allowAutoControl;
+			doorButtonInfo3.button.gameObject.SetActive(flag);
 		}
+		IL_02FA:
 		this.description.text = text3;
 		this.description.gameObject.SetActive(!string.IsNullOrEmpty(text3));
 		this.ContentContainer.SetActive(!this.target.isSealed);

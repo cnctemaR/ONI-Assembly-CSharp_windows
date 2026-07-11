@@ -6,14 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.XR
 {
-	/// <summary>
-	///   <para>Provides methods and properties that allow for querying portions of the physical environment that are near a provided specified ray. These trackables include planes and depth data.</para>
-	/// </summary>
+	[NativeHeader("Modules/XR/XRPrefix.h")]
+	[NativeHeader("Modules/XR/Subsystems/Raycast/XRRaycastSubsystem.h")]
 	[UsedByNativeCode]
 	[NativeConditional("ENABLE_XR")]
-	[NativeHeader("Modules/XR/Subsystems/Raycast/XRRaycastSubsystem.h")]
-	[NativeHeader("Modules/XR/XRPrefix.h")]
-	public class XRRaycastSubsystem : Subsystem<XRRaycastSubsystemDescriptor>
+	public class XRRaycastSubsystem : IntegratedSubsystem<XRRaycastSubsystemDescriptor>
 	{
 		public bool Raycast(Vector3 screenPoint, List<XRRaycastHit> hitResults, TrackableType trackableTypeMask = TrackableType.All)
 		{

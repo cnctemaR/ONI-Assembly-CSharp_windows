@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -72,8 +73,7 @@ public class MaterialSelector : KScreen
 				KToggle component2 = gameObject2.GetComponent<KToggle>();
 				this.ElementToggles.Add(tag2, component2);
 				component2.group = this.toggleGroup;
-				ToolTip component3 = gameObject2.gameObject.GetComponent<ToolTip>();
-				component3.toolTip = tag2.ProperName();
+				gameObject2.gameObject.GetComponent<ToolTip>().toolTip = tag2.ProperName();
 			}
 		}
 		this.RefreshToggleContents();
@@ -85,21 +85,20 @@ public class MaterialSelector : KScreen
 		{
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimUIMaterial;
 			toggle.GetComponent<ImageToggleState>().SetActive();
+			return;
 		}
-		else if (WorldInventory.Instance.GetAmount(elem) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
+		if (WorldInventory.Instance.GetAmount(elem) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
 		{
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimUIMaterial;
 			toggle.GetComponentsInChildren<Image>()[1].color = Color.white;
 			toggle.GetComponent<ImageToggleState>().SetInactive();
+			return;
 		}
-		else
+		toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimMaterialUIDesaturated;
+		toggle.GetComponentsInChildren<Image>()[1].color = new Color(1f, 1f, 1f, 0.6f);
+		if (!MaterialSelector.AllowInsufficientMaterialBuild())
 		{
-			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimMaterialUIDesaturated;
-			toggle.GetComponentsInChildren<Image>()[1].color = new Color(1f, 1f, 1f, 0.6f);
-			if (!MaterialSelector.AllowInsufficientMaterialBuild())
-			{
-				toggle.GetComponent<ImageToggleState>().SetDisabled();
-			}
+			toggle.GetComponent<ImageToggleState>().SetDisabled();
 		}
 	}
 
@@ -138,9 +137,8 @@ public class MaterialSelector : KScreen
 				list.Add(keyValuePair.Key);
 			}
 			list.Sort(new Comparison<Tag>(this.ElementSorter));
-			int num = list.IndexOf(elem);
-			float num2 = (float)num / (float)(list.Count - 1);
-			this.ScrollRect.normalizedPosition = new Vector2(num2, 0f);
+			float num = (float)list.IndexOf(elem) / (float)(list.Count - 1);
+			this.ScrollRect.normalizedPosition = new Vector2(num, 0f);
 		}
 		this.RefreshToggleContents();
 	}
@@ -154,15 +152,15 @@ public class MaterialSelector : KScreen
 			GameObject gameObject = value.gameObject;
 			LocText[] componentsInChildren = gameObject.GetComponentsInChildren<LocText>();
 			LocText locText = componentsInChildren[0];
-			LocText locText2 = componentsInChildren[1];
+			TMP_Text tmp_Text = componentsInChildren[1];
 			Image image = gameObject.GetComponentsInChildren<Image>()[1];
-			locText2.text = Util.FormatWholeNumber(WorldInventory.Instance.GetAmount(elem));
+			tmp_Text.text = Util.FormatWholeNumber(WorldInventory.Instance.GetAmount(elem));
 			locText.text = Util.FormatWholeNumber(this.activeMass);
 			GameObject gameObject2 = Assets.TryGetPrefab(keyValuePair.Key);
 			if (gameObject2 != null)
 			{
 				KBatchedAnimController component = gameObject2.GetComponent<KBatchedAnimController>();
-				image.sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, string.Empty);
+				image.sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, "");
 			}
 			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(elem) || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive);
 			this.SetToggleBGImage(keyValuePair.Value, keyValuePair.Key);
@@ -282,8 +280,7 @@ public class MaterialSelector : KScreen
 		int num = 0;
 		foreach (KeyValuePair<Tag, KToggle> keyValuePair in this.ElementToggles)
 		{
-			KToggle value = keyValuePair.Value;
-			if (value.gameObject.activeSelf)
+			if (keyValuePair.Value.gameObject.activeSelf)
 			{
 				num++;
 			}
@@ -299,15 +296,13 @@ public class MaterialSelector : KScreen
 			this.BadBG.SetActive(true);
 			this.Scrollbar.SetActive(false);
 			this.LayoutContainer.SetActive(false);
+			return;
 		}
-		else
-		{
-			componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
-			this.NoMaterialDiscovered.gameObject.SetActive(false);
-			this.BadBG.SetActive(false);
-			this.LayoutContainer.SetActive(true);
-			this.UpdateScrollBar();
-		}
+		componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
+		this.NoMaterialDiscovered.gameObject.SetActive(false);
+		this.BadBG.SetActive(false);
+		this.LayoutContainer.SetActive(true);
+		this.UpdateScrollBar();
 	}
 
 	public void ToggleShowDescriptorsPanel(bool show)
@@ -322,11 +317,9 @@ public class MaterialSelector : KScreen
 		{
 			this.MaterialDescriptionText.text = stringEntry.ToString();
 			this.MaterialDescriptionPane.SetActive(true);
+			return;
 		}
-		else
-		{
-			this.MaterialDescriptionPane.SetActive(false);
-		}
+		this.MaterialDescriptionPane.SetActive(false);
 	}
 
 	private void SetEffects(Tag element)
@@ -339,11 +332,9 @@ public class MaterialSelector : KScreen
 			materialDescriptors.Insert(0, descriptor);
 			this.MaterialEffectsPane.gameObject.SetActive(true);
 			this.MaterialEffectsPane.SetDescriptors(materialDescriptors);
+			return;
 		}
-		else
-		{
-			this.MaterialEffectsPane.gameObject.SetActive(false);
-		}
+		this.MaterialEffectsPane.gameObject.SetActive(false);
 	}
 
 	public static bool AllowInsufficientMaterialBuild()
@@ -354,9 +345,9 @@ public class MaterialSelector : KScreen
 	private int ElementSorter(Tag at, Tag bt)
 	{
 		GameObject gameObject = Assets.TryGetPrefab(at);
-		IHasSortOrder hasSortOrder = ((!(gameObject != null)) ? null : gameObject.GetComponent<IHasSortOrder>());
+		IHasSortOrder hasSortOrder = ((gameObject != null) ? gameObject.GetComponent<IHasSortOrder>() : null);
 		GameObject gameObject2 = Assets.TryGetPrefab(bt);
-		IHasSortOrder hasSortOrder2 = ((!(gameObject2 != null)) ? null : gameObject2.GetComponent<IHasSortOrder>());
+		IHasSortOrder hasSortOrder2 = ((gameObject2 != null) ? gameObject2.GetComponent<IHasSortOrder>() : null);
 		if (hasSortOrder == null || hasSortOrder2 == null)
 		{
 			return 0;

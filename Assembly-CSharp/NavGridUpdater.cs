@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class NavGridUpdater
 {
@@ -20,9 +19,9 @@ public class NavGridUpdater
 	{
 		foreach (int num in dirty_solid_cells)
 		{
-			foreach (NavTableValidator navTableValidator in validators)
+			for (int i = 0; i < validators.Length; i++)
 			{
-				navTableValidator.UpdateCell(num, nav_table, bounding_offsets);
+				validators[i].UpdateCell(num, nav_table, bounding_offsets);
 			}
 		}
 	}
@@ -59,26 +58,23 @@ public class NavGridUpdater
 		{
 			NavType navType = (NavType)i;
 			NavGrid.Transition[] array = transitions_by_nav_type[i];
-			if (array != null)
+			if (array != null && nav_table.IsValid(cell, navType))
 			{
-				if (nav_table.IsValid(cell, navType))
+				foreach (NavGrid.Transition transition in array)
 				{
-					foreach (NavGrid.Transition transition in array)
+					int num3 = transition.IsValid(cell, nav_table);
+					if (num3 != Grid.InvalidCell)
 					{
-						int num3 = transition.IsValid(cell, nav_table);
-						if (num3 != Grid.InvalidCell)
-						{
-							links[num] = new NavGrid.Link(num3, transition.start, transition.end, transition.id, transition.cost);
-							num++;
-							num2++;
-						}
+						links[num] = new NavGrid.Link(num3, transition.start, transition.end, transition.id, transition.cost);
+						num++;
+						num2++;
 					}
 				}
 			}
 		}
 		if (num2 >= max_links_per_cell)
 		{
-			global::Debug.LogError("Out of nav links. Need to increase maxLinksPerCell:" + max_links_per_cell);
+			Debug.LogError("Out of nav links. Need to increase maxLinksPerCell:" + max_links_per_cell);
 		}
 		links[num].link = Grid.InvalidCell;
 	}
@@ -96,8 +92,8 @@ public class NavGridUpdater
 
 	public static void DebugDrawPath(int start_cell, int end_cell)
 	{
-		Vector3 vector = Grid.CellToPosCCF(start_cell, Grid.SceneLayer.Move);
-		Vector3 vector2 = Grid.CellToPosCCF(end_cell, Grid.SceneLayer.Move);
+		Grid.CellToPosCCF(start_cell, Grid.SceneLayer.Move);
+		Grid.CellToPosCCF(end_cell, Grid.SceneLayer.Move);
 	}
 
 	public static void DebugDrawPath(PathFinder.Path path)
@@ -132,8 +128,7 @@ public class NavGridUpdater
 		{
 			for (int i = 0; i < Grid.WidthInCells; i++)
 			{
-				int num = this.startCell + i;
-				NavGridUpdater.CreateLinksForCell(num, this.navTable, this.maxLinksPerCell, this.links, this.transitionsByNavType);
+				NavGridUpdater.CreateLinksForCell(this.startCell + i, this.navTable, this.maxLinksPerCell, this.links, this.transitionsByNavType);
 			}
 		}
 
@@ -163,9 +158,10 @@ public class NavGridUpdater
 			for (int i = 0; i < Grid.WidthInCells; i++)
 			{
 				int num = this.startCell + i;
-				foreach (NavTableValidator navTableValidator in this.validators)
+				NavTableValidator[] array = this.validators;
+				for (int j = 0; j < array.Length; j++)
 				{
-					navTableValidator.UpdateCell(num, this.navTable, this.boundingOffsets);
+					array[j].UpdateCell(num, this.navTable, this.boundingOffsets);
 				}
 			}
 		}

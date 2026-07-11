@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Emit;
+using Unity;
 
 namespace System.Linq.Expressions
 {
@@ -9,47 +9,35 @@ namespace System.Linq.Expressions
 		internal MemberAssignment(MemberInfo member, Expression expression)
 			: base(MemberBindingType.Assignment, member)
 		{
-			this.expression = expression;
+			this._expression = expression;
 		}
 
 		public Expression Expression
 		{
 			get
 			{
-				return this.expression;
+				return this._expression;
 			}
 		}
 
-		internal override void Emit(EmitContext ec, LocalBuilder local)
+		public MemberAssignment Update(Expression expression)
 		{
-			base.Member.OnFieldOrProperty(delegate(FieldInfo field)
+			if (expression == this.Expression)
 			{
-				this.EmitFieldAssignment(ec, field, local);
-			}, delegate(PropertyInfo prop)
-			{
-				this.EmitPropertyAssignment(ec, prop, local);
-			});
-		}
-
-		private void EmitFieldAssignment(EmitContext ec, FieldInfo field, LocalBuilder local)
-		{
-			ec.EmitLoadSubject(local);
-			this.expression.Emit(ec);
-			ec.ig.Emit(OpCodes.Stfld, field);
-		}
-
-		private void EmitPropertyAssignment(EmitContext ec, PropertyInfo property, LocalBuilder local)
-		{
-			MethodInfo setMethod = property.GetSetMethod(true);
-			if (setMethod == null)
-			{
-				throw new InvalidOperationException();
+				return this;
 			}
-			ec.EmitLoadSubject(local);
-			this.expression.Emit(ec);
-			ec.EmitCall(setMethod);
+			return Expression.Bind(base.Member, expression);
 		}
 
-		private Expression expression;
+		internal override void ValidateAsDefinedHere(int index)
+		{
+		}
+
+		internal MemberAssignment()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		private readonly Expression _expression;
 	}
 }

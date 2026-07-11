@@ -49,7 +49,11 @@ public class Accumulators
 
 	public float GetAverageRate(HandleVector<int>.Handle handle)
 	{
-		return (!handle.IsValid()) ? 0f : this.average.GetData(handle);
+		if (!handle.IsValid())
+		{
+			return 0f;
+		}
+		return this.average.GetData(handle);
 	}
 
 	public void Accumulate(HandleVector<int>.Handle handle, float amount)

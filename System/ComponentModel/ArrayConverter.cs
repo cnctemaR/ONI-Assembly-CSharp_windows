@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ArrayConverter : CollectionConverter
 	{
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -13,27 +15,26 @@ namespace System.ComponentModel
 			}
 			if (destinationType == typeof(string) && value is Array)
 			{
-				return value.GetType().Name + " Array";
+				return global::SR.GetString("{0} Array", new object[] { value.GetType().Name });
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
 		public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
 		{
-			if (value == null)
+			PropertyDescriptor[] array = null;
+			if (value.GetType().IsArray)
 			{
-				throw new NullReferenceException();
-			}
-			PropertyDescriptorCollection propertyDescriptorCollection = new PropertyDescriptorCollection(null);
-			if (value is Array)
-			{
-				Array array = (Array)value;
-				for (int i = 0; i < array.Length; i++)
+				int length = ((Array)value).GetLength(0);
+				array = new PropertyDescriptor[length];
+				Type type = value.GetType();
+				Type elementType = type.GetElementType();
+				for (int i = 0; i < length; i++)
 				{
-					propertyDescriptorCollection.Add(new ArrayConverter.ArrayPropertyDescriptor(i, array.GetType()));
+					array[i] = new ArrayConverter.ArrayPropertyDescriptor(type, elementType, i);
 				}
 			}
-			return propertyDescriptorCollection;
+			return new PropertyDescriptorCollection(array);
 		}
 
 		public override bool GetPropertiesSupported(ITypeDescriptorContext context)
@@ -41,74 +42,41 @@ namespace System.ComponentModel
 			return true;
 		}
 
-		internal class ArrayPropertyDescriptor : PropertyDescriptor
+		private class ArrayPropertyDescriptor : TypeConverter.SimplePropertyDescriptor
 		{
-			public ArrayPropertyDescriptor(int index, Type array_type)
-				: base(string.Format("[{0}]", index), null)
+			public ArrayPropertyDescriptor(Type arrayType, Type elementType, int index)
+				: base(arrayType, "[" + index + "]", elementType, null)
 			{
 				this.index = index;
-				this.array_type = array_type;
 			}
 
-			public override Type ComponentType
+			public override object GetValue(object instance)
 			{
-				get
+				if (instance is Array)
 				{
-					return this.array_type;
+					Array array = (Array)instance;
+					if (array.GetLength(0) > this.index)
+					{
+						return array.GetValue(this.index);
+					}
 				}
+				return null;
 			}
 
-			public override Type PropertyType
+			public override void SetValue(object instance, object value)
 			{
-				get
+				if (instance is Array)
 				{
-					return this.array_type.GetElementType();
+					Array array = (Array)instance;
+					if (array.GetLength(0) > this.index)
+					{
+						array.SetValue(value, this.index);
+					}
+					this.OnValueChanged(instance, EventArgs.Empty);
 				}
-			}
-
-			public override bool IsReadOnly
-			{
-				get
-				{
-					return false;
-				}
-			}
-
-			public override object GetValue(object component)
-			{
-				if (component == null)
-				{
-					return null;
-				}
-				return ((Array)component).GetValue(this.index);
-			}
-
-			public override void SetValue(object component, object value)
-			{
-				if (component == null)
-				{
-					return;
-				}
-				((Array)component).SetValue(value, this.index);
-			}
-
-			public override void ResetValue(object component)
-			{
-			}
-
-			public override bool CanResetValue(object component)
-			{
-				return false;
-			}
-
-			public override bool ShouldSerializeValue(object component)
-			{
-				return false;
 			}
 
 			private int index;
-
-			private Type array_type;
 		}
 	}
 }

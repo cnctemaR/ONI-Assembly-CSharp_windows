@@ -36,25 +36,22 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 		Navigator component = path_prober.GetComponent<Navigator>();
 		foreach (FetchChore fetchChore in this.fetchChores)
 		{
-			if (!(fetchChore.driver != null))
+			if (!(fetchChore.driver != null) && (!(fetchChore.automatable != null) || !fetchChore.automatable.GetAutomationOnly()))
 			{
-				if (!(fetchChore.automatable != null) || !fetchChore.automatable.GetAutomationOnly())
+				Storage destination = fetchChore.destination;
+				if (!(destination == null))
 				{
-					Storage destination = fetchChore.destination;
-					if (!(destination == null))
+					int navigationCost = component.GetNavigationCost(destination);
+					if (navigationCost != -1)
 					{
-						int navigationCost = component.GetNavigationCost(destination);
-						if (navigationCost != -1)
+						this.fetches.Add(new GlobalChoreProvider.Fetch
 						{
-							this.fetches.Add(new GlobalChoreProvider.Fetch
-							{
-								chore = fetchChore,
-								tagBitsHash = fetchChore.tagBitsHash,
-								cost = navigationCost,
-								priority = fetchChore.masterPriority,
-								category = destination.fetchCategory
-							});
-						}
+							chore = fetchChore,
+							tagBitsHash = fetchChore.tagBitsHash,
+							cost = navigationCost,
+							priority = fetchChore.masterPriority,
+							category = destination.fetchCategory
+						});
 					}
 				}
 			}
@@ -142,15 +139,12 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 		this.storageFetchableBits.ClearAll();
 		foreach (FetchChore fetchChore in this.fetchChores)
 		{
-			if (fetchChore.choreType == storageFetch || fetchChore.choreType == foodFetch)
+			if ((fetchChore.choreType == storageFetch || fetchChore.choreType == foodFetch) && fetchChore.destination)
 			{
-				if (fetchChore.destination)
+				int num = Grid.PosToCell(fetchChore.destination);
+				if (MinionGroupProber.Get().IsReachable(num, fetchChore.destination.GetOffsets(num)))
 				{
-					int num = Grid.PosToCell(fetchChore.destination);
-					if (MinionGroupProber.Get().IsReachable(num, fetchChore.destination.GetOffsets(num)))
-					{
-						this.storageFetchableBits.Or(ref fetchChore.tagBits);
-					}
+					this.storageFetchableBits.Or(ref fetchChore.tagBits);
 				}
 			}
 		}
@@ -173,7 +167,7 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 
 	private ClearableManager clearableManager;
 
-	private TagBits storageFetchableBits = default(TagBits);
+	private TagBits storageFetchableBits;
 
 	private static WorkItemCollection<GlobalChoreProvider.FindTopPriorityTask, object> find_top_priority_job = new WorkItemCollection<GlobalChoreProvider.FindTopPriorityTask, object>();
 

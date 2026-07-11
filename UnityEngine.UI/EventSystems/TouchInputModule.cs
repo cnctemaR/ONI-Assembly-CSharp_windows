@@ -209,11 +209,6 @@ namespace UnityEngine.EventSystems
 				}
 				pointerEvent.dragging = false;
 				pointerEvent.pointerDrag = null;
-				if (pointerEvent.pointerDrag != null)
-				{
-					ExecuteEvents.Execute<IEndDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
-				}
-				pointerEvent.pointerDrag = null;
 				ExecuteEvents.ExecuteHierarchy<IPointerExitHandler>(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
 				pointerEvent.pointerEnter = null;
 				this.m_InputPointerEvent = pointerEvent;

@@ -1,38 +1,30 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeNamespaceImportCollection : IList, ICollection, IEnumerable
 	{
-		public CodeNamespaceImportCollection()
-		{
-			this.data = new ArrayList();
-			this.keys = new Hashtable(CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
-		}
-
-		int ICollection.Count
+		public CodeNamespaceImport this[int index]
 		{
 			get
 			{
-				return this.data.Count;
+				return (CodeNamespaceImport)this._data[index];
+			}
+			set
+			{
+				this._data[index] = value;
+				this.SyncKeys();
 			}
 		}
 
-		void IList.Clear()
-		{
-			this.Clear();
-		}
-
-		bool IList.IsFixedSize
+		public int Count
 		{
 			get
 			{
-				return false;
+				return this._data.Count;
 			}
 		}
 
@@ -44,132 +36,20 @@ namespace System.CodeDom
 			}
 		}
 
-		object IList.this[int index]
+		bool IList.IsFixedSize
 		{
 			get
 			{
-				return this.data[index];
-			}
-			set
-			{
-				this[index] = (CodeNamespaceImport)value;
-			}
-		}
-
-		int IList.Add(object value)
-		{
-			this.Add((CodeNamespaceImport)value);
-			return this.data.Count - 1;
-		}
-
-		bool IList.Contains(object value)
-		{
-			return this.data.Contains(value);
-		}
-
-		int IList.IndexOf(object value)
-		{
-			return this.data.IndexOf(value);
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			this.data.Insert(index, value);
-			CodeNamespaceImport codeNamespaceImport = (CodeNamespaceImport)value;
-			this.keys[codeNamespaceImport.Namespace] = codeNamespaceImport;
-		}
-
-		void IList.Remove(object value)
-		{
-			string @namespace = ((CodeNamespaceImport)value).Namespace;
-			this.data.Remove(value);
-			foreach (object obj in this.data)
-			{
-				CodeNamespaceImport codeNamespaceImport = (CodeNamespaceImport)obj;
-				if (codeNamespaceImport.Namespace == @namespace)
-				{
-					this.keys[@namespace] = codeNamespaceImport;
-					return;
-				}
-			}
-			this.keys.Remove(@namespace);
-		}
-
-		void IList.RemoveAt(int index)
-		{
-			string @namespace = this[index].Namespace;
-			this.data.RemoveAt(index);
-			foreach (object obj in this.data)
-			{
-				CodeNamespaceImport codeNamespaceImport = (CodeNamespaceImport)obj;
-				if (codeNamespaceImport.Namespace == @namespace)
-				{
-					this.keys[@namespace] = codeNamespaceImport;
-					return;
-				}
-			}
-			this.keys.Remove(@namespace);
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.data.IsSynchronized;
-			}
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.data.CopyTo(array, index);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.data.GetEnumerator();
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.data.Count;
-			}
-		}
-
-		public CodeNamespaceImport this[int index]
-		{
-			get
-			{
-				return (CodeNamespaceImport)this.data[index];
-			}
-			set
-			{
-				CodeNamespaceImport codeNamespaceImport = (CodeNamespaceImport)this.data[index];
-				this.keys.Remove(codeNamespaceImport.Namespace);
-				this.data[index] = value;
-				this.keys[value.Namespace] = value;
+				return false;
 			}
 		}
 
 		public void Add(CodeNamespaceImport value)
 		{
-			if (value == null)
+			if (!this._keys.ContainsKey(value.Namespace))
 			{
-				throw new NullReferenceException();
-			}
-			if (!this.keys.ContainsKey(value.Namespace))
-			{
-				this.keys[value.Namespace] = value;
-				this.data.Add(value);
+				this._keys[value.Namespace] = value;
+				this._data.Add(value);
 			}
 		}
 
@@ -187,17 +67,112 @@ namespace System.CodeDom
 
 		public void Clear()
 		{
-			this.data.Clear();
-			this.keys.Clear();
+			this._data.Clear();
+			this._keys.Clear();
+		}
+
+		private void SyncKeys()
+		{
+			this._keys.Clear();
+			foreach (object obj in this._data)
+			{
+				CodeNamespaceImport codeNamespaceImport = (CodeNamespaceImport)obj;
+				this._keys[codeNamespaceImport.Namespace] = codeNamespaceImport;
+			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return this.data.GetEnumerator();
+			return this._data.GetEnumerator();
 		}
 
-		private Hashtable keys;
+		object IList.this[int index]
+		{
+			get
+			{
+				return this[index];
+			}
+			set
+			{
+				this[index] = (CodeNamespaceImport)value;
+				this.SyncKeys();
+			}
+		}
 
-		private ArrayList data;
+		int ICollection.Count
+		{
+			get
+			{
+				return this.Count;
+			}
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return null;
+			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this._data.CopyTo(array, index);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
+		int IList.Add(object value)
+		{
+			return this._data.Add((CodeNamespaceImport)value);
+		}
+
+		void IList.Clear()
+		{
+			this.Clear();
+		}
+
+		bool IList.Contains(object value)
+		{
+			return this._data.Contains(value);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			return this._data.IndexOf((CodeNamespaceImport)value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			this._data.Insert(index, (CodeNamespaceImport)value);
+			this.SyncKeys();
+		}
+
+		void IList.Remove(object value)
+		{
+			this._data.Remove((CodeNamespaceImport)value);
+			this.SyncKeys();
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			this._data.RemoveAt(index);
+			this.SyncKeys();
+		}
+
+		private readonly ArrayList _data = new ArrayList();
+
+		private readonly Dictionary<string, CodeNamespaceImport> _keys = new Dictionary<string, CodeNamespaceImport>(StringComparer.OrdinalIgnoreCase);
 	}
 }

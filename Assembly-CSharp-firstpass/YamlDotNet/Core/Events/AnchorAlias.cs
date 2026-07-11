@@ -5,6 +5,22 @@ namespace YamlDotNet.Core.Events
 {
 	public class AnchorAlias : ParsingEvent
 	{
+		internal override EventType Type
+		{
+			get
+			{
+				return EventType.Alias;
+			}
+		}
+
+		public string Value
+		{
+			get
+			{
+				return this.value;
+			}
+		}
+
 		public AnchorAlias(string value, Mark start, Mark end)
 			: base(start, end)
 		{
@@ -24,25 +40,9 @@ namespace YamlDotNet.Core.Events
 		{
 		}
 
-		internal override EventType Type
-		{
-			get
-			{
-				return EventType.Alias;
-			}
-		}
-
-		public string Value
-		{
-			get
-			{
-				return this.value;
-			}
-		}
-
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", new object[] { this.value });
+			return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", this.value);
 		}
 
 		public override void Accept(IParsingEventVisitor visitor)

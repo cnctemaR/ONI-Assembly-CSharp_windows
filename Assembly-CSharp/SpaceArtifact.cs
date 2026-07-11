@@ -28,7 +28,7 @@ public class SpaceArtifact : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 	public List<Descriptor> GetEffectDescriptions()
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = new Descriptor(string.Format("This is an artifact from space", new object[0]), string.Format("This is the tooltip string", new object[0]), Descriptor.DescriptorType.Information, false);
+		Descriptor descriptor = new Descriptor(string.Format("This is an artifact from space", Array.Empty<object>()), string.Format("This is the tooltip string", Array.Empty<object>()), Descriptor.DescriptorType.Information, false);
 		list.Add(descriptor);
 		return list;
 	}

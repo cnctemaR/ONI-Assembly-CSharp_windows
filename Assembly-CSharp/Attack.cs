@@ -13,16 +13,14 @@ public class Attack
 
 	private void RollHits()
 	{
-		for (int i = 0; i < this.targets.Length; i++)
+		int num = 0;
+		while (num < this.targets.Length && num <= this.properties.maxHits - 1)
 		{
-			if (i > this.properties.maxHits - 1)
+			if (this.targets[num] != null)
 			{
-				break;
+				new Hit(this.properties, this.targets[num]);
 			}
-			if (this.targets[i] != null)
-			{
-				new Hit(this.properties, this.targets[i]);
-			}
+			num++;
 		}
 	}
 

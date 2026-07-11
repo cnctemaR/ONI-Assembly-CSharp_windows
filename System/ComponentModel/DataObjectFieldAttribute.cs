@@ -6,36 +6,33 @@ namespace System.ComponentModel
 	public sealed class DataObjectFieldAttribute : Attribute
 	{
 		public DataObjectFieldAttribute(bool primaryKey)
+			: this(primaryKey, false, false, -1)
 		{
-			this.primary_key = primaryKey;
 		}
 
 		public DataObjectFieldAttribute(bool primaryKey, bool isIdentity)
+			: this(primaryKey, isIdentity, false, -1)
 		{
-			this.primary_key = primaryKey;
-			this.is_identity = isIdentity;
 		}
 
 		public DataObjectFieldAttribute(bool primaryKey, bool isIdentity, bool isNullable)
+			: this(primaryKey, isIdentity, isNullable, -1)
 		{
-			this.primary_key = primaryKey;
-			this.is_identity = isIdentity;
-			this.is_nullable = isNullable;
 		}
 
 		public DataObjectFieldAttribute(bool primaryKey, bool isIdentity, bool isNullable, int length)
 		{
-			this.primary_key = primaryKey;
-			this.is_identity = isIdentity;
-			this.is_nullable = isNullable;
-			this.length = length;
+			this._primaryKey = primaryKey;
+			this._isIdentity = isIdentity;
+			this._isNullable = isNullable;
+			this._length = length;
 		}
 
 		public bool IsIdentity
 		{
 			get
 			{
-				return this.is_identity;
+				return this._isIdentity;
 			}
 		}
 
@@ -43,7 +40,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.is_nullable;
+				return this._isNullable;
 			}
 		}
 
@@ -51,7 +48,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.length;
+				return this._length;
 			}
 		}
 
@@ -59,27 +56,31 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.primary_key;
+				return this._primaryKey;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
+			if (obj == this)
+			{
+				return true;
+			}
 			DataObjectFieldAttribute dataObjectFieldAttribute = obj as DataObjectFieldAttribute;
-			return dataObjectFieldAttribute != null && (dataObjectFieldAttribute.primary_key == this.primary_key && dataObjectFieldAttribute.is_identity == this.is_identity && dataObjectFieldAttribute.is_nullable == this.is_nullable) && dataObjectFieldAttribute.length == this.length;
+			return dataObjectFieldAttribute != null && dataObjectFieldAttribute.IsIdentity == this.IsIdentity && dataObjectFieldAttribute.IsNullable == this.IsNullable && dataObjectFieldAttribute.Length == this.Length && dataObjectFieldAttribute.PrimaryKey == this.PrimaryKey;
 		}
 
 		public override int GetHashCode()
 		{
-			return (((!this.primary_key) ? 0 : 1) | ((!this.is_identity) ? 0 : 2) | ((!this.is_nullable) ? 0 : 4)) ^ this.length;
+			return base.GetHashCode();
 		}
 
-		private bool primary_key;
+		private bool _primaryKey;
 
-		private bool is_identity;
+		private bool _isIdentity;
 
-		private bool is_nullable;
+		private bool _isNullable;
 
-		private int length = -1;
+		private int _length;
 	}
 }

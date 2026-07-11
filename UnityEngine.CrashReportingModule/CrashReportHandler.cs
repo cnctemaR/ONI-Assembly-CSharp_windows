@@ -4,19 +4,15 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.CrashReportHandler
 {
-	/// <summary>
-	///   <para>Engine API for CrashReporting Service.</para>
-	/// </summary>
-	[NativeHeader("Modules/CrashReporting/CrashReportHandler.h")]
+	[StaticAccessor("CrashReporting::CrashReporter::Get()", StaticAccessorType.Dot)]
+	[NativeHeader("Modules/CrashReporting/Public/CrashReporter.h")]
 	public class CrashReportHandler
 	{
 		private CrashReportHandler()
 		{
 		}
 
-		/// <summary>
-		///   <para>This Boolean field will cause CrashReportHandler to capture exceptions when set to true. By default enable capture exceptions is true.</para>
-		/// </summary>
+		[NativeProperty("Enabled")]
 		public static extern bool enableCaptureExceptions
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -24,5 +20,22 @@ namespace UnityEngine.CrashReportHandler
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[NativeThrows]
+		public static extern uint logBufferSize
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern string GetUserMetadata(string key);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetUserMetadata(string key, string value);
 	}
 }

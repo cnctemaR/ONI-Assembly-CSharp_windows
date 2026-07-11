@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Xml.XPath;
 
 namespace System.Xml
@@ -8,25 +9,18 @@ namespace System.Xml
 		protected internal XmlCharacterData(string data, XmlDocument doc)
 			: base(doc)
 		{
-			if (data == null)
-			{
-				data = string.Empty;
-			}
 			this.data = data;
 		}
 
-		public virtual string Data
+		public override string Value
 		{
 			get
 			{
-				return this.data;
+				return this.Data;
 			}
 			set
 			{
-				string text = this.data;
-				this.OwnerDocument.onNodeChanging(this, this.ParentNode, text, value);
-				this.data = value;
-				this.OwnerDocument.onNodeChanged(this, this.ParentNode, text, value);
+				this.Data = value;
 			}
 		}
 
@@ -34,11 +28,37 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.data;
+				return this.Value;
 			}
 			set
 			{
-				this.Data = value;
+				this.Value = value;
+			}
+		}
+
+		public virtual string Data
+		{
+			get
+			{
+				if (this.data != null)
+				{
+					return this.data;
+				}
+				return string.Empty;
+			}
+			set
+			{
+				XmlNode parentNode = this.ParentNode;
+				XmlNodeChangedEventArgs eventArgs = this.GetEventArgs(this, parentNode, parentNode, this.data, value, XmlNodeChangedAction.Change);
+				if (eventArgs != null)
+				{
+					this.BeforeEvent(eventArgs);
+				}
+				this.data = value;
+				if (eventArgs != null)
+				{
+					this.AfterEvent(eventArgs);
+				}
 			}
 		}
 
@@ -46,102 +66,149 @@ namespace System.Xml
 		{
 			get
 			{
-				return (this.data == null) ? 0 : this.data.Length;
+				if (this.data != null)
+				{
+					return this.data.Length;
+				}
+				return 0;
 			}
-		}
-
-		public override string Value
-		{
-			get
-			{
-				return this.data;
-			}
-			set
-			{
-				this.Data = value;
-			}
-		}
-
-		internal override XPathNodeType XPathNodeType
-		{
-			get
-			{
-				return XPathNodeType.Text;
-			}
-		}
-
-		public virtual void AppendData(string strData)
-		{
-			string text = this.data;
-			string text2 = (this.data += strData);
-			this.OwnerDocument.onNodeChanging(this, this.ParentNode, text, text2);
-			this.data = text2;
-			this.OwnerDocument.onNodeChanged(this, this.ParentNode, text, text2);
-		}
-
-		public virtual void DeleteData(int offset, int count)
-		{
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", "Must be non-negative and must not be greater than the length of this instance.");
-			}
-			int num = this.data.Length - offset;
-			if (offset + count < this.data.Length)
-			{
-				num = count;
-			}
-			string text = this.data;
-			string text2 = this.data.Remove(offset, num);
-			this.OwnerDocument.onNodeChanging(this, this.ParentNode, text, text2);
-			this.data = text2;
-			this.OwnerDocument.onNodeChanged(this, this.ParentNode, text, text2);
-		}
-
-		public virtual void InsertData(int offset, string strData)
-		{
-			if (offset < 0 || offset > this.data.Length)
-			{
-				throw new ArgumentOutOfRangeException("offset", "Must be non-negative and must not be greater than the length of this instance.");
-			}
-			string text = this.data;
-			string text2 = this.data.Insert(offset, strData);
-			this.OwnerDocument.onNodeChanging(this, this.ParentNode, text, text2);
-			this.data = text2;
-			this.OwnerDocument.onNodeChanged(this, this.ParentNode, text, text2);
-		}
-
-		public virtual void ReplaceData(int offset, int count, string strData)
-		{
-			if (offset < 0 || offset > this.data.Length)
-			{
-				throw new ArgumentOutOfRangeException("offset", "Must be non-negative and must not be greater than the length of this instance.");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", "Must be non-negative.");
-			}
-			if (strData == null)
-			{
-				throw new ArgumentNullException("strData", "Must be non-null.");
-			}
-			string text = this.data;
-			string text2 = this.data.Substring(0, offset) + strData;
-			if (offset + count < this.data.Length)
-			{
-				text2 += this.data.Substring(offset + count);
-			}
-			this.OwnerDocument.onNodeChanging(this, this.ParentNode, text, text2);
-			this.data = text2;
-			this.OwnerDocument.onNodeChanged(this, this.ParentNode, text, text2);
 		}
 
 		public virtual string Substring(int offset, int count)
 		{
-			if (this.data.Length < offset + count)
+			int num = ((this.data != null) ? this.data.Length : 0);
+			if (num > 0)
 			{
-				return this.data.Substring(offset);
+				if (num < offset + count)
+				{
+					count = num - offset;
+				}
+				return this.data.Substring(offset, count);
 			}
-			return this.data.Substring(offset, count);
+			return string.Empty;
+		}
+
+		public virtual void AppendData(string strData)
+		{
+			XmlNode parentNode = this.ParentNode;
+			int num = ((this.data != null) ? this.data.Length : 0);
+			if (strData != null)
+			{
+				num += strData.Length;
+			}
+			string text = new StringBuilder(num).Append(this.data).Append(strData).ToString();
+			XmlNodeChangedEventArgs eventArgs = this.GetEventArgs(this, parentNode, parentNode, this.data, text, XmlNodeChangedAction.Change);
+			if (eventArgs != null)
+			{
+				this.BeforeEvent(eventArgs);
+			}
+			this.data = text;
+			if (eventArgs != null)
+			{
+				this.AfterEvent(eventArgs);
+			}
+		}
+
+		public virtual void InsertData(int offset, string strData)
+		{
+			XmlNode parentNode = this.ParentNode;
+			int num = ((this.data != null) ? this.data.Length : 0);
+			if (strData != null)
+			{
+				num += strData.Length;
+			}
+			string text = new StringBuilder(num).Append(this.data).Insert(offset, strData).ToString();
+			XmlNodeChangedEventArgs eventArgs = this.GetEventArgs(this, parentNode, parentNode, this.data, text, XmlNodeChangedAction.Change);
+			if (eventArgs != null)
+			{
+				this.BeforeEvent(eventArgs);
+			}
+			this.data = text;
+			if (eventArgs != null)
+			{
+				this.AfterEvent(eventArgs);
+			}
+		}
+
+		public virtual void DeleteData(int offset, int count)
+		{
+			int num = ((this.data != null) ? this.data.Length : 0);
+			if (num > 0 && num < offset + count)
+			{
+				count = Math.Max(num - offset, 0);
+			}
+			string text = new StringBuilder(this.data).Remove(offset, count).ToString();
+			XmlNode parentNode = this.ParentNode;
+			XmlNodeChangedEventArgs eventArgs = this.GetEventArgs(this, parentNode, parentNode, this.data, text, XmlNodeChangedAction.Change);
+			if (eventArgs != null)
+			{
+				this.BeforeEvent(eventArgs);
+			}
+			this.data = text;
+			if (eventArgs != null)
+			{
+				this.AfterEvent(eventArgs);
+			}
+		}
+
+		public virtual void ReplaceData(int offset, int count, string strData)
+		{
+			int num = ((this.data != null) ? this.data.Length : 0);
+			if (num > 0 && num < offset + count)
+			{
+				count = Math.Max(num - offset, 0);
+			}
+			string text = new StringBuilder(this.data).Remove(offset, count).Insert(offset, strData).ToString();
+			XmlNode parentNode = this.ParentNode;
+			XmlNodeChangedEventArgs eventArgs = this.GetEventArgs(this, parentNode, parentNode, this.data, text, XmlNodeChangedAction.Change);
+			if (eventArgs != null)
+			{
+				this.BeforeEvent(eventArgs);
+			}
+			this.data = text;
+			if (eventArgs != null)
+			{
+				this.AfterEvent(eventArgs);
+			}
+		}
+
+		internal bool CheckOnData(string data)
+		{
+			return XmlCharType.Instance.IsOnlyWhitespace(data);
+		}
+
+		internal bool DecideXPNodeTypeForTextNodes(XmlNode node, ref XPathNodeType xnt)
+		{
+			while (node != null)
+			{
+				XmlNodeType nodeType = node.NodeType;
+				if (nodeType <= XmlNodeType.EntityReference)
+				{
+					if (nodeType - XmlNodeType.Text <= 1)
+					{
+						xnt = XPathNodeType.Text;
+						return false;
+					}
+					if (nodeType != XmlNodeType.EntityReference)
+					{
+						return false;
+					}
+					if (!this.DecideXPNodeTypeForTextNodes(node.FirstChild, ref xnt))
+					{
+						return false;
+					}
+				}
+				else if (nodeType != XmlNodeType.Whitespace)
+				{
+					if (nodeType != XmlNodeType.SignificantWhitespace)
+					{
+						return false;
+					}
+					xnt = XPathNodeType.SignificantWhitespace;
+				}
+				node = node.NextSibling;
+			}
+			return true;
 		}
 
 		private string data;

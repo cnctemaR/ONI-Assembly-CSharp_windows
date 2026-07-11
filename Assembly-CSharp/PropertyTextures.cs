@@ -98,8 +98,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			{
 				TextureBuffer[] array = this.textureBuffers;
 				int num = i;
-				PropertyTextures.Property property2 = (PropertyTextures.Property)i;
-				array[num] = new TextureBuffer(property2.ToString(), Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, textureProperties.filterMode, this.texturePagePool);
+				property = (PropertyTextures.Property)i;
+				array[num] = new TextureBuffer(property.ToString(), Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, textureProperties.filterMode, this.texturePagePool);
 				texture = this.textureBuffers[i].texture;
 			}
 			if (textureProperties.blend)
@@ -107,8 +107,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				TextureLerper[] array2 = this.lerpers;
 				int num2 = i;
 				Texture texture2 = texture;
-				PropertyTextures.Property property3 = (PropertyTextures.Property)i;
-				array2[num2] = new TextureLerper(texture2, property3.ToString(), texture.filterMode, textureProperties.textureFormat);
+				property = (PropertyTextures.Property)i;
+				array2[num2] = new TextureLerper(texture2, property.ToString(), texture.filterMode, textureProperties.textureFormat);
 				this.lerpers[i].Speed = textureProperties.blendSpeed;
 			}
 			string shaderPropertyName = this.GetShaderPropertyName((PropertyTextures.Property)i);
@@ -200,30 +200,28 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				break;
 			}
 			textureRegion.Unlock();
+			return;
 		}
-		else
+		PropertyTextures.Property simProperty2 = p.simProperty;
+		if (simProperty2 != PropertyTextures.Property.Flow)
 		{
-			PropertyTextures.Property simProperty2 = p.simProperty;
-			if (simProperty2 != PropertyTextures.Property.Flow)
+			if (simProperty2 != PropertyTextures.Property.Liquid)
 			{
-				if (simProperty2 != PropertyTextures.Property.Liquid)
+				if (simProperty2 == PropertyTextures.Property.ExposedToSunlight)
 				{
-					if (simProperty2 == PropertyTextures.Property.ExposedToSunlight)
-					{
-						this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalExposedToSunlight, Grid.WidthInCells * Grid.HeightInCells);
-					}
-				}
-				else
-				{
-					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
+					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalExposedToSunlight, Grid.WidthInCells * Grid.HeightInCells);
 				}
 			}
 			else
 			{
-				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
+				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
 			}
-			this.externallyUpdatedTextures[simProperty].Apply();
 		}
+		else
+		{
+			this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
+		}
+		this.externallyUpdatedTextures[simProperty].Apply();
 	}
 
 	private void LateUpdate()
@@ -242,17 +240,21 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		int num4;
 		this.GetVisibleCellRange(out num, out num2, out num3, out num4);
 		Shader.SetGlobalFloat(this.FogOfWarScaleID, PropertyTextures.FogOfWarScale);
-		int num5 = this.NextPropertyIdx++ % this.allTextureProperties.Count;
-		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num5];
+		int num5 = this.NextPropertyIdx;
+		this.NextPropertyIdx = num5 + 1;
+		int num6 = num5 % this.allTextureProperties.Count;
+		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num6];
 		while (textureProperties.updateEveryFrame)
 		{
-			num5 = this.NextPropertyIdx++ % this.allTextureProperties.Count;
-			textureProperties = this.allTextureProperties[num5];
+			num5 = this.NextPropertyIdx;
+			this.NextPropertyIdx = num5 + 1;
+			num6 = num5 % this.allTextureProperties.Count;
+			textureProperties = this.allTextureProperties[num6];
 		}
 		for (int i = 0; i < this.allTextureProperties.Count; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
-			if (num5 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
+			if (num6 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
 			{
 				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}
@@ -315,7 +317,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				if (element.IsGas)
 				{
 					float num4 = Grid.Pressure[num2];
-					float num5 = ((num4 <= 0f) ? 0f : minPressureVisibility);
+					float num5 = ((num4 > 0f) ? minPressureVisibility : 0f);
 					num3 = Mathf.Max(Mathf.Clamp01((num4 - pressureRange.x) / num), num5);
 				}
 				else if (element.IsLiquid)
@@ -324,7 +326,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 					if (Grid.IsValidCell(num6) && Grid.Element[num6].IsGas)
 					{
 						float num7 = Grid.Pressure[num6];
-						float num8 = ((num7 <= 0f) ? 0f : minPressureVisibility);
+						float num8 = ((num7 > 0f) ? minPressureVisibility : 0f);
 						num3 = Mathf.Max(Mathf.Clamp01((num7 - pressureRange.x) / num), num8);
 					}
 				}
@@ -340,8 +342,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			for (int j = x0; j <= x1; j++)
 			{
 				int num = Grid.XYToCell(j, i);
-				Element element = Grid.Element[num];
-				byte b = ((element.id != SimHashes.Oxygen) ? byte.MaxValue : 0);
+				byte b = ((Grid.Element[num].id == SimHashes.Oxygen) ? 0 : byte.MaxValue);
 				region.SetBytes(j, i, b);
 			}
 		}
@@ -361,12 +362,10 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				{
 					float num3 = Grid.Temperature[num];
 					float num4 = element.lowTemp * temperatureStateChangeRange;
-					float num5 = Mathf.Abs(num3 - element.lowTemp);
-					float num6 = num5 / num4;
-					float num7 = element.highTemp * temperatureStateChangeRange;
-					float num8 = Mathf.Abs(num3 - element.highTemp);
-					float num9 = num8 / num7;
-					num2 = Mathf.Max(num2, 1f - Mathf.Min(num6, num9));
+					float num5 = Mathf.Abs(num3 - element.lowTemp) / num4;
+					float num6 = element.highTemp * temperatureStateChangeRange;
+					float num7 = Mathf.Abs(num3 - element.highTemp) / num6;
+					num2 = Mathf.Max(num2, 1f - Mathf.Min(num5, num7));
 				}
 				region.SetBytes(j, i, (byte)(num2 * 255f));
 			}
@@ -387,8 +386,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				}
 				else if (element.IsLiquid)
 				{
-					int num2 = Grid.CellAbove(num);
-					if (Grid.IsValidCell(num2))
+					if (Grid.IsValidCell(Grid.CellAbove(num)))
 					{
 						region.SetBytes(j, i, element.substance.colour.r, element.substance.colour.g, element.substance.colour.b, byte.MaxValue);
 					}
@@ -513,8 +511,9 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		{
 			float num = Mathf.Clamp01((cold_range.y - t) / (cold_range.y - cold_range.x));
 			cold_alpha = (byte)(num * 255f);
+			return;
 		}
-		else if (t >= hot_range.x)
+		if (t >= hot_range.x)
 		{
 			float num2 = Mathf.Clamp01((t - hot_range.x) / (hot_range.y - hot_range.x));
 			hot_alpha = (byte)(num2 * 255f);
@@ -552,21 +551,19 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				int num3 = x0;
 				while (j <= num2)
 				{
-					Color32 color = ((Grid.LightCount[j] <= 0) ? new Color32(0, 0, 0, byte.MaxValue) : Lighting.Instance.Settings.LightColour);
-					region.SetBytes(num3, i, color.r, color.g, color.b, (color.r + color.g + color.b <= 0) ? 0 : byte.MaxValue);
+					Color32 color = ((Grid.LightCount[j] > 0) ? Lighting.Instance.Settings.LightColour : new Color32(0, 0, 0, byte.MaxValue));
+					region.SetBytes(num3, i, color.r, color.g, color.b, (color.r + color.g + color.b > 0) ? byte.MaxValue : 0);
 					j++;
 					num3++;
 				}
 			}
+			return;
 		}
-		else
+		for (int k = y0; k <= y1; k++)
 		{
-			for (int k = y0; k <= y1; k++)
+			for (int l = x0; l <= x1; l++)
 			{
-				for (int l = x0; l <= x1; l++)
-				{
-					region.SetBytes(l, k, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-				}
+				region.SetBytes(l, k, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 			}
 		}
 	}

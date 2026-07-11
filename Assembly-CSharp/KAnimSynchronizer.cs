@@ -61,14 +61,12 @@ public class KAnimSynchronizer
 		if (component != null)
 		{
 			float num = component.transform.GetPosition().x;
-			num += ((!this.masterController.FlipX) ? 0.5f : (-0.5f));
+			num += (this.masterController.FlipX ? (-0.5f) : 0.5f);
 			component.Face(num);
+			return;
 		}
-		else
-		{
-			controller.FlipX = this.masterController.FlipX;
-			controller.FlipY = this.masterController.FlipY;
-		}
+		controller.FlipX = this.masterController.FlipX;
+		controller.FlipY = this.masterController.FlipY;
 	}
 
 	public void Sync()
@@ -85,8 +83,7 @@ public class KAnimSynchronizer
 		float elapsedTime = this.masterController.GetElapsedTime();
 		for (int i = 0; i < this.Targets.Count; i++)
 		{
-			KAnimControllerBase kanimControllerBase = this.Targets[i];
-			kanimControllerBase.SetElapsedTime(elapsedTime);
+			this.Targets[i].SetElapsedTime(elapsedTime);
 		}
 	}
 

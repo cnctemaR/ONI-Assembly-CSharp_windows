@@ -24,13 +24,12 @@ public class SocialChoreTracker
 		{
 			CellOffset cellOffset = this.choreOffsets[i];
 			Chore chore = this.chores[i];
-			bool flag = update && num < this.choreCount && this.IsOffsetValid(cellOffset);
-			if (flag)
+			if (update && num < this.choreCount && this.IsOffsetValid(cellOffset))
 			{
 				num++;
 				if (chore == null || chore.isComplete)
 				{
-					this.chores[i] = ((this.CreateChoreCB == null) ? null : this.CreateChoreCB(i));
+					this.chores[i] = ((this.CreateChoreCB != null) ? this.CreateChoreCB(i) : null);
 				}
 			}
 			else if (chore != null)
@@ -58,10 +57,9 @@ public class SocialChoreTracker
 
 	private bool IsOffsetValid(CellOffset offset)
 	{
-		int num = Grid.PosToCell(this.owner);
-		int num2 = Grid.OffsetCell(num, offset);
-		int num3 = Grid.CellBelow(num2);
-		return GameNavGrids.FloorValidator.IsWalkableCell(num2, num3, true);
+		int num = Grid.OffsetCell(Grid.PosToCell(this.owner), offset);
+		int num2 = Grid.CellBelow(num);
+		return GameNavGrids.FloorValidator.IsWalkableCell(num, num2, true);
 	}
 
 	public Func<int, Chore> CreateChoreCB;

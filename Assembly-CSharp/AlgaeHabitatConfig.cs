@@ -74,10 +74,9 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		{
 			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0)
 		};
-		ElementConverter elementConverter2 = go.AddComponent<ElementConverter>();
-		elementConverter2.outputElements = new ElementConverter.OutputElement[]
+		go.AddComponent<ElementConverter>().outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.29033336f, SimHashes.DirtyWater, 303.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0)
 		};
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;

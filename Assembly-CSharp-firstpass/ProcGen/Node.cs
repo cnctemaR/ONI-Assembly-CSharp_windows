@@ -8,6 +8,24 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Node
 	{
+		public Node node { get; private set; }
+
+		[Serialize]
+		public string type { get; private set; }
+
+		public void SetType(string newtype)
+		{
+			this.type = newtype;
+		}
+
+		[Serialize]
+		public Vector2 position { get; private set; }
+
+		public void SetPosition(Vector2 newPos)
+		{
+			this.position = newPos;
+		}
+
 		public Node()
 		{
 		}
@@ -31,24 +49,6 @@ namespace ProcGen
 		{
 			this.node = node;
 			this.type = type;
-		}
-
-		public Node node { get; private set; }
-
-		[Serialize]
-		public string type { get; private set; }
-
-		public void SetType(string newtype)
-		{
-			this.type = newtype;
-		}
-
-		[Serialize]
-		public Vector2 position { get; private set; }
-
-		public void SetPosition(Vector2 newPos)
-		{
-			this.position = newPos;
 		}
 
 		[Serialize]

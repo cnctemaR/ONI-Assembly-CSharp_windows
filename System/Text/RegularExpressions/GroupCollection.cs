@@ -1,30 +1,23 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class GroupCollection : ICollection, IEnumerable
 	{
-		internal GroupCollection(int n, int gap)
+		internal GroupCollection(Match match, Hashtable caps)
 		{
-			this.list = new Group[n];
-			this.gap = gap;
+			this._match = match;
+			this._captureMap = caps;
 		}
 
-		public int Count
+		public object SyncRoot
 		{
 			get
 			{
-				return this.list.Length;
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				return true;
+				return this._match;
 			}
 		}
 
@@ -36,61 +29,109 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		public Group this[int i]
+		public bool IsReadOnly
 		{
 			get
 			{
-				if (i >= this.gap)
+				return true;
+			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this._match._matchcount.Length;
+			}
+		}
+
+		public Group this[int groupnum]
+		{
+			get
+			{
+				return this.GetGroup(groupnum);
+			}
+		}
+
+		public Group this[string groupname]
+		{
+			get
+			{
+				if (this._match._regex == null)
 				{
-					Match match = (Match)this.list[0];
-					i = ((match != Match.Empty) ? match.Regex.GetGroupIndex(i) : (-1));
+					return Group._emptygroup;
 				}
-				return (i >= 0) ? this.list[i] : Group.Fail;
+				return this.GetGroup(this._match._regex.GroupNumberFromName(groupname));
 			}
 		}
 
-		internal void SetValue(Group g, int i)
+		internal Group GetGroup(int groupnum)
 		{
-			this.list[i] = g;
-		}
-
-		public Group this[string groupName]
-		{
-			get
+			if (this._captureMap != null)
 			{
-				Match match = (Match)this.list[0];
-				if (match != Match.Empty)
+				object obj = this._captureMap[groupnum];
+				if (obj == null)
 				{
-					int num = match.Regex.GroupNumberFromName(groupName);
-					if (num != -1)
-					{
-						return this[num];
-					}
+					return Group._emptygroup;
 				}
-				return Group.Fail;
+				return this.GetGroupImpl((int)obj);
 			}
-		}
-
-		public object SyncRoot
-		{
-			get
+			else
 			{
-				return this.list;
+				if (groupnum >= this._match._matchcount.Length || groupnum < 0)
+				{
+					return Group._emptygroup;
+				}
+				return this.GetGroupImpl(groupnum);
 			}
 		}
 
-		public void CopyTo(Array array, int index)
+		internal Group GetGroupImpl(int groupnum)
 		{
-			this.list.CopyTo(array, index);
+			if (groupnum == 0)
+			{
+				return this._match;
+			}
+			if (this._groups == null)
+			{
+				this._groups = new Group[this._match._matchcount.Length - 1];
+				for (int i = 0; i < this._groups.Length; i++)
+				{
+					string text = this._match._regex.GroupNameFromNumber(i + 1);
+					this._groups[i] = new Group(this._match._text, this._match._matches[i + 1], this._match._matchcount[i + 1], text);
+				}
+			}
+			return this._groups[groupnum - 1];
+		}
+
+		public void CopyTo(Array array, int arrayIndex)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			int num = arrayIndex;
+			for (int i = 0; i < this.Count; i++)
+			{
+				array.SetValue(this[i], num);
+				num++;
+			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return this.list.GetEnumerator();
+			return new GroupEnumerator(this);
 		}
 
-		private Group[] list;
+		internal GroupCollection()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
 
-		private int gap;
+		internal Match _match;
+
+		internal Hashtable _captureMap;
+
+		internal Group[] _groups;
 	}
 }

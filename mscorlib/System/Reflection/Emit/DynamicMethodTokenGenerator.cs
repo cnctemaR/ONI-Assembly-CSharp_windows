@@ -14,12 +14,12 @@ namespace System.Reflection.Emit
 			return this.m.AddRef(str);
 		}
 
-		public int GetToken(MethodInfo method, Type[] opt_param_types)
+		public int GetToken(MethodBase method, Type[] opt_param_types)
 		{
 			throw new InvalidOperationException();
 		}
 
-		public int GetToken(MemberInfo member)
+		public int GetToken(MemberInfo member, bool create_open_instance)
 		{
 			return this.m.AddRef(member);
 		}

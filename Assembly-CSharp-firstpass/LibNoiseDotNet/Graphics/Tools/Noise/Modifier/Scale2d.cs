@@ -5,6 +5,18 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
 	public class Scale2d : ModifierModule, IModule3D, IModule
 	{
+		public Vector2 Scale
+		{
+			get
+			{
+				return this._scale;
+			}
+			set
+			{
+				this._scale = value;
+			}
+		}
+
 		public Scale2d()
 		{
 		}
@@ -18,18 +30,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 			: base(source)
 		{
 			this._scale = scale;
-		}
-
-		public Vector2 Scale
-		{
-			get
-			{
-				return this._scale;
-			}
-			set
-			{
-				this._scale = value;
-			}
 		}
 
 		public float GetValue(float x, float y, float z)

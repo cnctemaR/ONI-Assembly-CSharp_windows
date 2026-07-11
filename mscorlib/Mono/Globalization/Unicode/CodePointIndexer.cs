@@ -4,21 +4,6 @@ namespace Mono.Globalization.Unicode
 {
 	internal class CodePointIndexer
 	{
-		public CodePointIndexer(int[] starts, int[] ends, int defaultIndex, int defaultCP)
-		{
-			this.defaultIndex = defaultIndex;
-			this.defaultCP = defaultCP;
-			this.ranges = new CodePointIndexer.TableRange[starts.Length];
-			for (int i = 0; i < this.ranges.Length; i++)
-			{
-				this.ranges[i] = new CodePointIndexer.TableRange(starts[i], ends[i], (i != 0) ? (this.ranges[i - 1].IndexStart + this.ranges[i - 1].Count) : 0);
-			}
-			for (int j = 0; j < this.ranges.Length; j++)
-			{
-				this.TotalCount += this.ranges[j].Count;
-			}
-		}
-
 		public static Array CompressArray(Array source, Type type, CodePointIndexer indexer)
 		{
 			int num = 0;
@@ -32,6 +17,21 @@ namespace Mono.Globalization.Unicode
 				Array.Copy(source, indexer.ranges[j].Start, array, indexer.ranges[j].IndexStart, indexer.ranges[j].Count);
 			}
 			return array;
+		}
+
+		public CodePointIndexer(int[] starts, int[] ends, int defaultIndex, int defaultCP)
+		{
+			this.defaultIndex = defaultIndex;
+			this.defaultCP = defaultCP;
+			this.ranges = new CodePointIndexer.TableRange[starts.Length];
+			for (int i = 0; i < this.ranges.Length; i++)
+			{
+				this.ranges[i] = new CodePointIndexer.TableRange(starts[i], ends[i], (i == 0) ? 0 : (this.ranges[i - 1].IndexStart + this.ranges[i - 1].Count));
+			}
+			for (int j = 0; j < this.ranges.Length; j++)
+			{
+				this.TotalCount += this.ranges[j].Count;
+			}
 		}
 
 		public int ToIndex(int cp)

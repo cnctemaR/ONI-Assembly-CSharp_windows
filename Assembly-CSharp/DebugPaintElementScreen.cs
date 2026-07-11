@@ -130,9 +130,9 @@ public class DebugPaintElementScreen : KScreen
 				SimHashes.Water,
 				SimHashes.Oxygen
 			};
-			foreach (SimHashes simHashes in array)
+			for (int i = 0; i < array.Length; i++)
 			{
-				Element element2 = ElementLoader.FindElementByHash(simHashes);
+				Element element2 = ElementLoader.FindElementByHash(array[i]);
 				list.Insert(0, new DebugPaintElementScreen.ElemDisplayInfo
 				{
 					id = element2.id,
@@ -229,12 +229,10 @@ public class DebugPaintElementScreen : KScreen
 		if (diseaseIdx == 255)
 		{
 			this.diseaseButton.GetComponentInChildren<LocText>().text = "None";
+			return;
 		}
-		else
-		{
-			string name = Db.Get().Diseases[diseaseIdx].Name;
-			this.diseaseButton.GetComponentInChildren<LocText>().text = name;
-		}
+		string name = Db.Get().Diseases[diseaseIdx].Name;
+		this.diseaseButton.GetComponentInChildren<LocText>().text = name;
 	}
 
 	private void OnChangeFOWReveal()
@@ -295,7 +293,7 @@ public class DebugPaintElementScreen : KScreen
 
 	public void OnElementsFilterEdited(string new_filter)
 	{
-		this.filter = ((!string.IsNullOrEmpty(this.filterInput.text)) ? this.filterInput.text : null);
+		this.filter = (string.IsNullOrEmpty(this.filterInput.text) ? null : this.filterInput.text);
 		this.FilterElements(this.filter);
 	}
 
@@ -306,6 +304,7 @@ public class DebugPaintElementScreen : KScreen
 			if (!e.Consumed)
 			{
 				e.Consumed = true;
+				return;
 			}
 		}
 		else
@@ -321,6 +320,7 @@ public class DebugPaintElementScreen : KScreen
 			if (!e.Consumed)
 			{
 				e.Consumed = true;
+				return;
 			}
 		}
 		else

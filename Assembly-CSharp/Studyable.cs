@@ -99,24 +99,22 @@ public class Studyable : Workable, ISidescreenButtonControl
 			this.studiedIndicator.meterController.Play(this.meterAnim, KAnim.PlayMode.Loop, 1f, 0f);
 			this.requiredSkillPerk = null;
 			this.UpdateStatusItem(null);
+			return;
+		}
+		if (this.markedForStudy)
+		{
+			if (this.chore == null)
+			{
+				this.chore = new WorkChore<Studyable>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			}
+			this.statusItemGuid = component.ReplaceStatusItem(this.statusItemGuid, Db.Get().MiscStatusItems.AwaitingStudy, null);
 		}
 		else
 		{
-			if (this.markedForStudy)
-			{
-				if (this.chore == null)
-				{
-					this.chore = new WorkChore<Studyable>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-				}
-				this.statusItemGuid = component.ReplaceStatusItem(this.statusItemGuid, Db.Get().MiscStatusItems.AwaitingStudy, null);
-			}
-			else
-			{
-				this.CancelChore();
-				this.statusItemGuid = component.RemoveStatusItem(this.statusItemGuid, false);
-			}
-			this.studiedIndicator.gameObject.SetActive(false);
+			this.CancelChore();
+			this.statusItemGuid = component.RemoveStatusItem(this.statusItemGuid, false);
 		}
+		this.studiedIndicator.gameObject.SetActive(false);
 	}
 
 	private void ToggleStudyChore()

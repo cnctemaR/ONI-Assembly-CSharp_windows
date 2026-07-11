@@ -6,23 +6,33 @@ namespace System.ComponentModel
 	public class DisplayNameAttribute : Attribute
 	{
 		public DisplayNameAttribute()
+			: this(string.Empty)
 		{
-			this.attributeDisplayName = string.Empty;
 		}
 
 		public DisplayNameAttribute(string displayName)
 		{
-			this.attributeDisplayName = displayName;
+			this._displayName = displayName;
 		}
 
-		public override bool IsDefaultAttribute()
+		public virtual string DisplayName
 		{
-			return this.attributeDisplayName != null && this.attributeDisplayName.Length == 0;
+			get
+			{
+				return this.DisplayNameValue;
+			}
 		}
 
-		public override int GetHashCode()
+		protected string DisplayNameValue
 		{
-			return this.attributeDisplayName.GetHashCode();
+			get
+			{
+				return this._displayName;
+			}
+			set
+			{
+				this._displayName = value;
+			}
 		}
 
 		public override bool Equals(object obj)
@@ -32,31 +42,21 @@ namespace System.ComponentModel
 				return true;
 			}
 			DisplayNameAttribute displayNameAttribute = obj as DisplayNameAttribute;
-			return displayNameAttribute != null && displayNameAttribute.DisplayName == this.attributeDisplayName;
+			return displayNameAttribute != null && displayNameAttribute.DisplayName == this.DisplayName;
 		}
 
-		public virtual string DisplayName
+		public override int GetHashCode()
 		{
-			get
-			{
-				return this.attributeDisplayName;
-			}
+			return this.DisplayName.GetHashCode();
 		}
 
-		protected string DisplayNameValue
+		public override bool IsDefaultAttribute()
 		{
-			get
-			{
-				return this.attributeDisplayName;
-			}
-			set
-			{
-				this.attributeDisplayName = value;
-			}
+			return this.Equals(DisplayNameAttribute.Default);
 		}
 
 		public static readonly DisplayNameAttribute Default = new DisplayNameAttribute();
 
-		private string attributeDisplayName;
+		private string _displayName;
 	}
 }

@@ -28,8 +28,7 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMg
 		int num;
 		int num2;
 		base.GetCells(out num, out num2);
-		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
-		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
 		if (networkForCell != null)
 		{
 			networks.Add(networkForCell);
@@ -41,8 +40,7 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMg
 		int num;
 		int num2;
 		base.GetCells(out num, out num2);
-		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
-		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
 		return networks.Contains(networkForCell);
 	}
 }

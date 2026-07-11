@@ -47,17 +47,11 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 				if (smi.master.rm.Replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
 				{
 					smi.GoTo(this.blocked_from_growing);
+					return;
 				}
-				else
-				{
-					smi.GoTo(this.alive.seed_grow);
-				}
+				smi.GoTo(this.alive.seed_grow);
 			});
-			GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State state = this.dead;
-			string text = CREATURES.STATUSITEMS.DEAD.NAME;
-			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
-			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main).Enter(delegate(JungleGasPlant.StatesInstance smi)
+			this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(JungleGasPlant.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				smi.master.Trigger(1623392196, null);

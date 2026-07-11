@@ -29,12 +29,10 @@ public class LogicGateFilterConfig : LogicGateBaseConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		LogicGateFilter logicGateFilter = go.AddComponent<LogicGateFilter>();
-		logicGateFilter.op = this.GetLogicOp();
+		go.AddComponent<LogicGateFilter>().op = this.GetLogicOp();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
-			LogicGateFilter component = game_object.GetComponent<LogicGateFilter>();
-			component.SetPortDescriptions(this.GetDescriptions());
+			game_object.GetComponent<LogicGateFilter>().SetPortDescriptions(this.GetDescriptions());
 		};
 	}
 

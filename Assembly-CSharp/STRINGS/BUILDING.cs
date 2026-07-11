@@ -1313,7 +1313,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Waiting For Materials";
 
-				public static LocString TOOLTIP = "Fabrication will begin once materials have been deliverd";
+				public static LocString TOOLTIP = "Fabrication will begin once materials have been delivered";
 			}
 
 			public class TOILET
@@ -1581,9 +1581,9 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "A spacecraft is ready to land";
 
-				public static LocString NOTIFICATION = "Ready to land";
+				public static LocString NOTIFICATION = "Space mission complete";
 
-				public static LocString NOTIFICATION_TOOLTIP = "A spacecraft is ready to land";
+				public static LocString NOTIFICATION_TOOLTIP = "Spacecrafts have completed their missions";
 			}
 
 			public class CONSUMINGFROMSTORAGE

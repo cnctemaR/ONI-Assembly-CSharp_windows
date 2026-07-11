@@ -18,11 +18,10 @@ namespace MIConvexHull
 
 		public static VoronoiMesh<DefaultVertex, DefaultTriangulationCell<DefaultVertex>, VoronoiEdge<DefaultVertex, DefaultTriangulationCell<DefaultVertex>>> Create(IList<double[]> data)
 		{
-			List<DefaultVertex> list = data.Select<double[], DefaultVertex>((double[] p) => new DefaultVertex
+			return VoronoiMesh<DefaultVertex, DefaultTriangulationCell<DefaultVertex>, VoronoiEdge<DefaultVertex, DefaultTriangulationCell<DefaultVertex>>>.Create(data.Select<double[], DefaultVertex>((double[] p) => new DefaultVertex
 			{
 				Position = p.ToArray<double>()
-			}).ToList<DefaultVertex>();
-			return VoronoiMesh<DefaultVertex, DefaultTriangulationCell<DefaultVertex>, VoronoiEdge<DefaultVertex, DefaultTriangulationCell<DefaultVertex>>>.Create(list);
+			}).ToList<DefaultVertex>());
 		}
 
 		public static VoronoiMesh<TVertex, TCell, VoronoiEdge<TVertex, TCell>> Create<TVertex, TCell>(IList<TVertex> data) where TVertex : IVertex where TCell : TriangulationCell<TVertex, TCell>, new()

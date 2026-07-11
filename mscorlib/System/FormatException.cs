@@ -9,28 +9,26 @@ namespace System
 	public class FormatException : SystemException
 	{
 		public FormatException()
-			: base(Locale.GetText("Invalid format."))
+			: base(Environment.GetResourceString("One of the identified items was in an invalid format."))
 		{
-			base.HResult = -2146233033;
+			base.SetErrorCode(-2146233033);
 		}
 
 		public FormatException(string message)
 			: base(message)
 		{
-			base.HResult = -2146233033;
+			base.SetErrorCode(-2146233033);
 		}
 
 		public FormatException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.HResult = -2146233033;
+			base.SetErrorCode(-2146233033);
 		}
 
 		protected FormatException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		private const int Result = -2146233033;
 	}
 }

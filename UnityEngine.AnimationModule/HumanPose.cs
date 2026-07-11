@@ -2,9 +2,6 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Retargetable humanoid pose.</para>
-	/// </summary>
 	public struct HumanPose
 	{
 		internal void Init()
@@ -26,19 +23,10 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The human body position for that pose.</para>
-		/// </summary>
 		public Vector3 bodyPosition;
 
-		/// <summary>
-		///   <para>The human body orientation for that pose.</para>
-		/// </summary>
 		public Quaternion bodyRotation;
 
-		/// <summary>
-		///   <para>The array of muscle values for that pose.</para>
-		/// </summary>
 		public float[] muscles;
 	}
 }

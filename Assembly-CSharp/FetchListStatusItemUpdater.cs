@@ -58,8 +58,7 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender200ms
 			foreach (FetchList2 fetchList2 in keyValuePair.Value)
 			{
 				fetchList2.UpdateRemaining();
-				Dictionary<Tag, float> remaining = fetchList2.GetRemaining();
-				foreach (KeyValuePair<Tag, float> keyValuePair2 in remaining)
+				foreach (KeyValuePair<Tag, float> keyValuePair2 in fetchList2.GetRemaining())
 				{
 					if (!pooledList2.Contains(keyValuePair2.Key))
 					{
@@ -108,8 +107,7 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender200ms
 				bool flag = false;
 				bool flag2 = true;
 				bool flag3 = false;
-				Dictionary<Tag, float> remaining2 = fetchList3.GetRemaining();
-				foreach (KeyValuePair<Tag, float> keyValuePair3 in remaining2)
+				foreach (KeyValuePair<Tag, float> keyValuePair3 in fetchList3.GetRemaining())
 				{
 					Tag key = keyValuePair3.Key;
 					float value = keyValuePair3.Value;

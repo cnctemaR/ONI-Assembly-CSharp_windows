@@ -10,14 +10,6 @@ namespace ProcGen.Map
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class MapGraph : Graph
 	{
-		public MapGraph(int seed)
-			: base(seed)
-		{
-			this.cellList = new List<Cell>();
-			this.cornerList = new List<Corner>();
-			this.edgeList = new List<Edge>();
-		}
-
 		public List<Cell> cells
 		{
 			get
@@ -42,6 +34,14 @@ namespace ProcGen.Map
 			}
 		}
 
+		public MapGraph(int seed)
+			: base(seed)
+		{
+			this.cellList = new List<Cell>();
+			this.cornerList = new List<Corner>();
+			this.edgeList = new List<Edge>();
+		}
+
 		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK = true)
 		{
 			bool flag;
@@ -61,8 +61,7 @@ namespace ProcGen.Map
 				global::Debug.LogWarning("Cant create Edge but no edge found");
 				return null;
 			}
-			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
-			edge = new Edge(arc, corner0, corner1);
+			edge = new Edge(base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected), corner0, corner1);
 			this.arcList.Add(edge);
 			this.edgeList.Add(edge);
 			didCreate = true;
@@ -88,8 +87,7 @@ namespace ProcGen.Map
 				global::Debug.LogWarning("Cant create Edge but no edge found");
 				return null;
 			}
-			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
-			edge = new Edge(arc, corner0, corner1, site0, site1);
+			edge = new Edge(base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected), corner0, corner1, site0, site1);
 			this.arcList.Add(edge);
 			this.edgeList.Add(edge);
 			didCreate = true;
@@ -278,86 +276,83 @@ namespace ProcGen.Map
 							global::Debug.LogError("Duplicate edge (corner different order)");
 							return;
 						}
-						if (edge.site0 != edge.site1)
+						if (edge.site0 != edge.site1 && edge2.site0 != edge2.site1)
 						{
-							if (edge2.site0 != edge2.site1)
+							if (edge.site0 == edge2.site0 && edge.site1 == edge2.site1)
 							{
-								if (edge.site0 == edge2.site0 && edge.site1 == edge2.site1)
+								global::Debug.LogError("Duplicate edge (site same order)");
+								return;
+							}
+							if (edge.site0 == edge2.site1 && edge.site1 == edge2.site0)
+							{
+								global::Debug.LogError(string.Concat(new object[]
 								{
-									global::Debug.LogError("Duplicate edge (site same order)");
+									"Duplicate Edge [",
+									edge.arc.Id,
+									"] -> [",
+									edge.corner0.node.Id,
+									"<-->",
+									edge.corner1.node.Id,
+									"] sites: [",
+									edge.site0.node.Id,
+									" -- ",
+									edge.site1.node.Id,
+									"] and [",
+									edge2.arc.Id,
+									"] -> [",
+									edge2.corner0.node.Id,
+									"<-->",
+									edge2.corner1.node.Id,
+									"] sites: [",
+									edge2.site0.node.Id,
+									" -- ",
+									edge2.site1.node.Id,
+									"] - (site differnt order)"
+								}));
+								global::Debug.Log(string.Concat(new object[]
+								{
+									"CE 0: ",
+									edge.corner0.position,
+									" 1: ",
+									edge.corner1.position
+								}));
+								global::Debug.Log(string.Concat(new object[]
+								{
+									"OE 0: ",
+									edge2.corner0.position,
+									" 1: ",
+									edge2.corner1.position
+								}));
+								global::Debug.Log(string.Concat(new object[]
+								{
+									"Sites C 0: ",
+									edge.site0.position,
+									" 1: ",
+									edge.site1.position
+								}));
+								DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true, 4f);
+								DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true, 4f);
+								global::Debug.Log(string.Concat(new object[]
+								{
+									"Sites O 0: ",
+									edge2.site0.position,
+									" 1: ",
+									edge2.site1.position
+								}));
+								DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true, 4f);
+								DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true, 4f);
+							}
+							else
+							{
+								if (edge.site0.node == edge2.site0.node && edge.site1.node == edge2.site1.node)
+								{
+									global::Debug.LogError("Duplicate edge (site node same order)");
 									return;
 								}
-								if (edge.site0 == edge2.site1 && edge.site1 == edge2.site0)
+								if (edge.site1.node == edge2.site0.node && edge.site0.node == edge2.site1.node)
 								{
-									global::Debug.LogError(string.Concat(new object[]
-									{
-										"Duplicate Edge [",
-										edge.arc.Id,
-										"] -> [",
-										edge.corner0.node.Id,
-										"<-->",
-										edge.corner1.node.Id,
-										"] sites: [",
-										edge.site0.node.Id,
-										" -- ",
-										edge.site1.node.Id,
-										"] and [",
-										edge2.arc.Id,
-										"] -> [",
-										edge2.corner0.node.Id,
-										"<-->",
-										edge2.corner1.node.Id,
-										"] sites: [",
-										edge2.site0.node.Id,
-										" -- ",
-										edge2.site1.node.Id,
-										"] - (site differnt order)"
-									}));
-									global::Debug.Log(string.Concat(new object[]
-									{
-										"CE 0: ",
-										edge.corner0.position,
-										" 1: ",
-										edge.corner1.position
-									}));
-									global::Debug.Log(string.Concat(new object[]
-									{
-										"OE 0: ",
-										edge2.corner0.position,
-										" 1: ",
-										edge2.corner1.position
-									}));
-									global::Debug.Log(string.Concat(new object[]
-									{
-										"Sites C 0: ",
-										edge.site0.position,
-										" 1: ",
-										edge.site1.position
-									}));
-									DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true, 4f);
-									DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true, 4f);
-									global::Debug.Log(string.Concat(new object[]
-									{
-										"Sites O 0: ",
-										edge2.site0.position,
-										" 1: ",
-										edge2.site1.position
-									}));
-									DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true, 4f);
-									DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true, 4f);
-								}
-								else
-								{
-									if (edge.site0.node == edge2.site0.node && edge.site1.node == edge2.site1.node)
-									{
-										global::Debug.LogError("Duplicate edge (site node same order)");
-										return;
-									}
-									if (edge.site1.node == edge2.site0.node && edge.site0.node == edge2.site1.node)
-									{
-										global::Debug.LogError("Duplicate edge (site node differnt order)");
-										return;
-									}
+									global::Debug.LogError("Duplicate edge (site node differnt order)");
+									return;
 								}
 							}
 						}

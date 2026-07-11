@@ -12,14 +12,6 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Graph
 	{
-		public Graph(int seed)
-		{
-			this.SetSeed(seed);
-			this.nodeList = new List<Node>();
-			this.arcList = new List<Arc>();
-			this.baseGraph = new CustomGraph();
-		}
-
 		public List<Node> nodes
 		{
 			get
@@ -43,6 +35,14 @@ namespace ProcGen
 			this.myRandom = new SeededRandom(seed);
 		}
 
+		public Graph(int seed)
+		{
+			this.SetSeed(seed);
+			this.nodeList = new List<Node>();
+			this.arcList = new List<Arc>();
+			this.baseGraph = new CustomGraph();
+		}
+
 		public Node AddNode(string type)
 		{
 			Node node = new Node(this.baseGraph.AddNode(), type);
@@ -58,10 +58,9 @@ namespace ProcGen
 
 		public Arc AddArc(Node nodeA, Node nodeB, string type)
 		{
-			Arc arc = this.baseGraph.AddArc(nodeA.node, nodeB.node, Directedness.Undirected);
-			Arc arc2 = new Arc(arc, type);
-			this.arcList.Add(arc2);
-			return arc2;
+			Arc arc = new Arc(this.baseGraph.AddArc(nodeA.node, nodeB.node, Directedness.Undirected), type);
+			this.arcList.Add(arc);
+			return arc;
 		}
 
 		public Node FindNodeByID(uint id)
@@ -223,14 +222,27 @@ namespace ProcGen
 			bool flag = false;
 			int num = 0;
 			Vector2 vector = default(Vector2);
+			Func<Node, PointD> <>9__0;
+			Func<PointD, PointD> <>9__1;
 			while (!flag && num < 100)
 			{
 				flag = true;
-				Func<Node, PointD> func = (Node n) => this.GetPositionForNode(n);
-				CustomGraph baseGraph = this.baseGraph;
+				Func<Node, PointD> func;
+				if ((func = <>9__0) == null)
+				{
+					func = (<>9__0 = (Node n) => this.GetPositionForNode(n));
+				}
+				Func<Node, PointD> func2 = func;
+				IGraph baseGraph = this.baseGraph;
 				int num2 = num;
-				ForceDirectedLayout forceDirectedLayout = new ForceDirectedLayout(baseGraph, func, num2);
-				forceDirectedLayout.ExternalForce = (PointD point) => Graph.GetForceForBoundry(point, bounds);
+				ForceDirectedLayout forceDirectedLayout = new ForceDirectedLayout(baseGraph, func2, num2);
+				ForceDirectedLayout forceDirectedLayout2 = forceDirectedLayout;
+				Func<PointD, PointD> func3;
+				if ((func3 = <>9__1) == null)
+				{
+					func3 = (<>9__1 = (PointD point) => Graph.GetForceForBoundry(point, bounds));
+				}
+				forceDirectedLayout2.ExternalForce = func3;
 				forceDirectedLayout.Run(0.01);
 				IEnumerator<Node> enumerator = this.baseGraph.Nodes().GetEnumerator();
 				int num3 = 0;

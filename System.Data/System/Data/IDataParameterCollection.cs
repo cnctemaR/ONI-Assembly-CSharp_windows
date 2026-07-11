@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.Data
 {
-	public interface IDataParameterCollection : ICollection, IEnumerable, IList
+	public interface IDataParameterCollection : IList, ICollection, IEnumerable
 	{
 		object this[string parameterName] { get; set; }
 

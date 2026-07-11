@@ -30,8 +30,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		get
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
-			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
-			return electricalUtilityNetwork != null;
+			return Game.Instance.electricalConduitSystem.GetNetworkForCell(num) is ElectricalUtilityNetwork;
 		}
 	}
 
@@ -41,7 +40,11 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
-			return (electricalUtilityNetwork == null) ? ushort.MaxValue : ((ushort)electricalUtilityNetwork.id);
+			if (electricalUtilityNetwork == null)
+			{
+				return ushort.MaxValue;
+			}
+			return (ushort)electricalUtilityNetwork.id;
 		}
 	}
 
@@ -54,8 +57,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		base.Subscribe<Wire>(-1735440190, Wire.OnBuildingFullyRepairedDelegate);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireCircuitStatus, this);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireMaxWattageStatus, this);
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.SetSymbolVisiblity(Wire.OutlineSymbol, false);
+		base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity(Wire.OutlineSymbol, false);
 	}
 
 	protected override void OnCleanUp()
@@ -119,7 +121,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Wires, false);
 		if (Wire.WireCircuitStatus == null)
 		{
-			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022).SetResolveStringCallback(delegate(string str, object data)
+			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022).SetResolveStringCallback(delegate(string str, object data)
 			{
 				Wire wire = (Wire)data;
 				int num = Grid.PosToCell(wire.transform.GetPosition());
@@ -133,14 +135,14 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				}
 				float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wire.MaxWattageRating);
 				string wireLoadColor = GameUtil.GetWireLoadColor(wattsUsedByCircuit, maxWattageAsFloat);
-				str = str.Replace("{CurrentLoadAndColor}", (!(wireLoadColor == Color.white.ToHexString())) ? string.Concat(new string[]
+				str = str.Replace("{CurrentLoadAndColor}", (wireLoadColor == Color.white.ToHexString()) ? GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit) : string.Concat(new string[]
 				{
 					"<color=#",
 					wireLoadColor,
 					">",
 					GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit),
 					"</color>"
-				}) : GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit));
+				}));
 				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat, wattageFormatterUnit));
 				str = str.Replace("{WireType}", this.GetProperName());
 				return str;
@@ -148,7 +150,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		}
 		if (Wire.WireMaxWattageStatus == null)
 		{
-			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022).SetResolveStringCallback(delegate(string str, object data)
+			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022).SetResolveStringCallback(delegate(string str, object data)
 			{
 				Wire wire2 = (Wire)data;
 				GameUtil.WattageFormatterUnit wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Watts;
@@ -161,14 +163,14 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				ushort circuitID2 = circuitManager2.GetCircuitID(num2);
 				float wattsNeededWhenActive = circuitManager2.GetWattsNeededWhenActive(circuitID2);
 				float maxWattageAsFloat2 = Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating);
-				str = str.Replace("{TotalPotentialLoadAndColor}", (wattsNeededWhenActive <= maxWattageAsFloat2) ? GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2) : string.Concat(new string[]
+				str = str.Replace("{TotalPotentialLoadAndColor}", (wattsNeededWhenActive > maxWattageAsFloat2) ? string.Concat(new string[]
 				{
 					"<color=#",
 					new Color(0.9843137f, 0.6901961f, 0.23137255f).ToHexString(),
 					">",
 					GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2),
 					"</color>"
-				}));
+				}) : GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2));
 				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat2, wattageFormatterUnit2));
 				return str;
 			});

@@ -3,8 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace System.IO.Ports
 {
-	internal class SerialPortStream : Stream, IDisposable, ISerialStream
+	internal class SerialPortStream : Stream, ISerialStream, IDisposable
 	{
+		[DllImport("MonoPosixHelper", SetLastError = true)]
+		private static extern int open_serial(string portName);
+
 		public SerialPortStream(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, bool dtrEnable, bool rtsEnable, Handshake handshake, int readTimeout, int writeTimeout, int readBufferSize, int writeBufferSize)
 		{
 			this.fd = SerialPortStream.open_serial(portName);
@@ -12,6 +15,7 @@ namespace System.IO.Ports
 			{
 				SerialPortStream.ThrowIOException();
 			}
+			this.TryBaudRate(baudRate);
 			if (!SerialPortStream.set_attributes(this.fd, baudRate, parity, dataBits, stopBits, handshake))
 			{
 				SerialPortStream.ThrowIOException();
@@ -24,15 +28,6 @@ namespace System.IO.Ports
 				this.SetSignal(SerialSignal.Rts, rtsEnable);
 			}
 		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		[DllImport("MonoPosixHelper", SetLastError = true)]
-		private static extern int open_serial(string portName);
 
 		public override bool CanRead
 		{
@@ -153,7 +148,12 @@ namespace System.IO.Ports
 			{
 				throw new TimeoutException();
 			}
-			return SerialPortStream.read_serial(this.fd, buffer, offset, count);
+			int num2 = SerialPortStream.read_serial(this.fd, buffer, offset, count);
+			if (num2 == -1)
+			{
+				SerialPortStream.ThrowIOException();
+			}
+			return num2;
 		}
 
 		public override long Seek(long offset, SeekOrigin origin)
@@ -211,9 +211,21 @@ namespace System.IO.Ports
 			((IDisposable)this).Dispose();
 		}
 
+		void IDisposable.Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
 		~SerialPortStream()
 		{
-			this.Dispose(false);
+			try
+			{
+				this.Dispose(false);
+			}
+			catch (IOException)
+			{
+			}
 		}
 
 		private void CheckDisposed()
@@ -242,7 +254,12 @@ namespace System.IO.Ports
 		{
 			get
 			{
-				return SerialPortStream.get_bytes_in_buffer(this.fd, 1);
+				int num = SerialPortStream.get_bytes_in_buffer(this.fd, 1);
+				if (num == -1)
+				{
+					SerialPortStream.ThrowIOException();
+				}
+				return num;
 			}
 		}
 
@@ -250,21 +267,32 @@ namespace System.IO.Ports
 		{
 			get
 			{
-				return SerialPortStream.get_bytes_in_buffer(this.fd, 0);
+				int num = SerialPortStream.get_bytes_in_buffer(this.fd, 0);
+				if (num == -1)
+				{
+					SerialPortStream.ThrowIOException();
+				}
+				return num;
 			}
 		}
 
 		[DllImport("MonoPosixHelper", SetLastError = true)]
-		private static extern void discard_buffer(int fd, bool inputBuffer);
+		private static extern int discard_buffer(int fd, bool inputBuffer);
 
 		public void DiscardInBuffer()
 		{
-			SerialPortStream.discard_buffer(this.fd, true);
+			if (SerialPortStream.discard_buffer(this.fd, true) != 0)
+			{
+				SerialPortStream.ThrowIOException();
+			}
 		}
 
 		public void DiscardOutBuffer()
 		{
-			SerialPortStream.discard_buffer(this.fd, false);
+			if (SerialPortStream.discard_buffer(this.fd, false) != 0)
+			{
+				SerialPortStream.ThrowIOException();
+			}
 		}
 
 		[DllImport("MonoPosixHelper", SetLastError = true)]
@@ -301,9 +329,9 @@ namespace System.IO.Ports
 
 		public void SetBreakState(bool value)
 		{
-			if (value)
+			if (value && SerialPortStream.breakprop(this.fd) == -1)
 			{
-				SerialPortStream.breakprop(this.fd);
+				SerialPortStream.ThrowIOException();
 			}
 		}
 
@@ -312,9 +340,18 @@ namespace System.IO.Ports
 
 		private static void ThrowIOException()
 		{
-			int lastWin32Error = Marshal.GetLastWin32Error();
-			string text = Marshal.PtrToStringAnsi(SerialPortStream.strerror(lastWin32Error));
-			throw new IOException(text);
+			throw new IOException(Marshal.PtrToStringAnsi(SerialPortStream.strerror(Marshal.GetLastWin32Error())));
+		}
+
+		[DllImport("MonoPosixHelper")]
+		private static extern bool is_baud_rate_legal(int baud_rate);
+
+		private void TryBaudRate(int baudRate)
+		{
+			if (!SerialPortStream.is_baud_rate_legal(baudRate))
+			{
+				throw new ArgumentOutOfRangeException("baudRate", "Given baud rate is not supported on this platform.");
+			}
 		}
 
 		private int fd;

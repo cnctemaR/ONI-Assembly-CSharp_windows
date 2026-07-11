@@ -10,14 +10,17 @@ public static class CPUBudget
 		get
 		{
 			int overrideCoreCount = TuningData<CPUBudget.Tuning>.Get().overrideCoreCount;
-			return (0 >= overrideCoreCount || overrideCoreCount >= SystemInfo.processorCount) ? SystemInfo.processorCount : overrideCoreCount;
+			if (0 >= overrideCoreCount || overrideCoreCount >= SystemInfo.processorCount)
+			{
+				return SystemInfo.processorCount;
+			}
+			return overrideCoreCount;
 		}
 	}
 
 	public static float ComputeDuration(long start)
 	{
-		long num = (CPUBudget.stopwatch.ElapsedTicks - start) * 1000000L / Stopwatch.Frequency;
-		return (float)num / 1000f;
+		return (float)((CPUBudget.stopwatch.ElapsedTicks - start) * 1000000L / Stopwatch.Frequency) / 1000f;
 	}
 
 	public static void AddRoot(ICPULoad root)
@@ -93,6 +96,7 @@ public static class CPUBudget
 			if (node.load.AdjustLoad(node.frameTime, frameTimeDelta))
 			{
 				node.frameTime += frameTimeDelta;
+				return;
 			}
 		}
 		else

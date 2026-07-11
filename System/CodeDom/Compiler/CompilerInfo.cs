@@ -1,49 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.CodeDom.Compiler
 {
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public sealed class CompilerInfo
 	{
-		internal CompilerInfo()
+		private CompilerInfo()
 		{
 		}
 
-		internal void Init()
+		public string[] GetLanguages()
 		{
-			if (this.inited)
-			{
-				return;
-			}
-			this.inited = true;
-			this.type = Type.GetType(this.TypeName);
-			if (this.type == null)
-			{
-				return;
-			}
-			if (!typeof(CodeDomProvider).IsAssignableFrom(this.type))
-			{
-				this.type = null;
-			}
+			return this.CloneCompilerLanguages();
+		}
+
+		public string[] GetExtensions()
+		{
+			return this.CloneCompilerExtensions();
 		}
 
 		public Type CodeDomProviderType
 		{
 			get
 			{
-				if (this.type == null)
+				if (this._type == null)
 				{
-					this.type = Type.GetType(this.TypeName, false);
-					if (this.type == null)
+					lock (this)
 					{
-						throw new ConfigurationErrorsException("Unable to locate compiler type '" + this.TypeName + "'");
+						if (this._type == null)
+						{
+							this._type = Type.GetType(this._codeDomProviderTypeName);
+						}
 					}
 				}
-				return this.type;
+				return this._type;
 			}
 		}
 
@@ -51,78 +42,114 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				return this.type != null;
+				return Type.GetType(this._codeDomProviderTypeName) != null;
 			}
-		}
-
-		public CompilerParameters CreateDefaultCompilerParameters()
-		{
-			CompilerParameters compilerParameters = new CompilerParameters();
-			if (this.CompilerOptions == null)
-			{
-				compilerParameters.CompilerOptions = string.Empty;
-			}
-			else
-			{
-				compilerParameters.CompilerOptions = this.CompilerOptions;
-			}
-			compilerParameters.WarningLevel = this.WarningLevel;
-			return compilerParameters;
 		}
 
 		public CodeDomProvider CreateProvider()
 		{
-			Type codeDomProviderType = this.CodeDomProviderType;
-			if (this.ProviderOptions != null && this.ProviderOptions.Count > 0)
+			if (this._providerOptions.Count > 0)
 			{
-				ConstructorInfo constructor = codeDomProviderType.GetConstructor(new Type[] { typeof(Dictionary<string, string>) });
+				ConstructorInfo constructor = this.CodeDomProviderType.GetConstructor(new Type[] { typeof(IDictionary<string, string>) });
 				if (constructor != null)
 				{
-					return (CodeDomProvider)constructor.Invoke(new object[] { this.ProviderOptions });
+					return (CodeDomProvider)constructor.Invoke(new object[] { this._providerOptions });
 				}
 			}
-			return (CodeDomProvider)Activator.CreateInstance(codeDomProviderType);
+			return (CodeDomProvider)Activator.CreateInstance(this.CodeDomProviderType);
 		}
 
-		public override bool Equals(object o)
+		public CodeDomProvider CreateProvider(IDictionary<string, string> providerOptions)
 		{
-			if (!(o is CompilerInfo))
+			if (providerOptions == null)
 			{
-				return false;
+				throw new ArgumentNullException("providerOptions");
 			}
-			CompilerInfo compilerInfo = (CompilerInfo)o;
-			return compilerInfo.TypeName == this.TypeName;
+			ConstructorInfo constructor = this.CodeDomProviderType.GetConstructor(new Type[] { typeof(IDictionary<string, string>) });
+			if (constructor != null)
+			{
+				return (CodeDomProvider)constructor.Invoke(new object[] { providerOptions });
+			}
+			throw new InvalidOperationException(global::SR.Format("This CodeDomProvider type does not have a constructor that takes providerOptions - \"{0}\"", this.CodeDomProviderType.ToString()));
+		}
+
+		public CompilerParameters CreateDefaultCompilerParameters()
+		{
+			return this.CloneCompilerParameters();
+		}
+
+		internal CompilerInfo(CompilerParameters compilerParams, string codeDomProviderTypeName, string[] compilerLanguages, string[] compilerExtensions)
+		{
+			this._compilerLanguages = compilerLanguages;
+			this._compilerExtensions = compilerExtensions;
+			this._codeDomProviderTypeName = codeDomProviderTypeName;
+			this._compilerParams = compilerParams ?? new CompilerParameters();
+		}
+
+		internal CompilerInfo(CompilerParameters compilerParams, string codeDomProviderTypeName)
+		{
+			this._codeDomProviderTypeName = codeDomProviderTypeName;
+			this._compilerParams = compilerParams ?? new CompilerParameters();
 		}
 
 		public override int GetHashCode()
 		{
-			return this.TypeName.GetHashCode();
+			return this._codeDomProviderTypeName.GetHashCode();
 		}
 
-		public string[] GetExtensions()
+		public override bool Equals(object o)
 		{
-			return this.Extensions.Split(new char[] { ';' });
+			CompilerInfo compilerInfo = o as CompilerInfo;
+			return compilerInfo != null && (this.CodeDomProviderType == compilerInfo.CodeDomProviderType && this.CompilerParams.WarningLevel == compilerInfo.CompilerParams.WarningLevel && this.CompilerParams.IncludeDebugInformation == compilerInfo.CompilerParams.IncludeDebugInformation) && this.CompilerParams.CompilerOptions == compilerInfo.CompilerParams.CompilerOptions;
 		}
 
-		public string[] GetLanguages()
+		private CompilerParameters CloneCompilerParameters()
 		{
-			return this.Languages.Split(new char[] { ';' });
+			return new CompilerParameters
+			{
+				IncludeDebugInformation = this._compilerParams.IncludeDebugInformation,
+				TreatWarningsAsErrors = this._compilerParams.TreatWarningsAsErrors,
+				WarningLevel = this._compilerParams.WarningLevel,
+				CompilerOptions = this._compilerParams.CompilerOptions
+			};
 		}
 
-		internal string Languages;
+		private string[] CloneCompilerLanguages()
+		{
+			return (string[])this._compilerLanguages.Clone();
+		}
 
-		internal string Extensions;
+		private string[] CloneCompilerExtensions()
+		{
+			return (string[])this._compilerExtensions.Clone();
+		}
 
-		internal string TypeName;
+		internal CompilerParameters CompilerParams
+		{
+			get
+			{
+				return this._compilerParams;
+			}
+		}
 
-		internal int WarningLevel;
+		internal IDictionary<string, string> ProviderOptions
+		{
+			get
+			{
+				return this._providerOptions;
+			}
+		}
 
-		internal string CompilerOptions;
+		internal readonly IDictionary<string, string> _providerOptions = new Dictionary<string, string>();
 
-		internal Dictionary<string, string> ProviderOptions;
+		internal string _codeDomProviderTypeName;
 
-		private bool inited;
+		internal CompilerParameters _compilerParams;
 
-		private Type type;
+		internal string[] _compilerLanguages;
+
+		internal string[] _compilerExtensions;
+
+		private Type _type;
 	}
 }

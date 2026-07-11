@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[CLSCompliant(false)]
+	[Guid("6240837A-707F-3181-8E98-A36AE086766B")]
 	[ComVisible(true)]
 	[TypeLibImportClass(typeof(MethodBase))]
-	[Guid("6240837A-707F-3181-8E98-A36AE086766B")]
+	[CLSCompliant(false)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface _MethodBase
 	{
 		bool Equals(object other);

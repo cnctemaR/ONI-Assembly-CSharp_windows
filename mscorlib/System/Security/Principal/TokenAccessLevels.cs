@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Principal
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum TokenAccessLevels
 	{

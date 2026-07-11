@@ -18,7 +18,7 @@ namespace UnityEngine.Experimental.UIElements
 		protected bool PhaseMatches(EventBase evt)
 		{
 			CallbackPhase phase = this.phase;
-			if (phase != CallbackPhase.CaptureAndTarget)
+			if (phase != CallbackPhase.TrickleDownAndTarget)
 			{
 				if (phase == CallbackPhase.TargetAndBubbleUp)
 				{
@@ -28,7 +28,7 @@ namespace UnityEngine.Experimental.UIElements
 					}
 				}
 			}
-			else if (evt.propagationPhase != PropagationPhase.Capture && evt.propagationPhase != PropagationPhase.AtTarget)
+			else if (evt.propagationPhase != PropagationPhase.TrickleDown && evt.propagationPhase != PropagationPhase.AtTarget)
 			{
 				return false;
 			}

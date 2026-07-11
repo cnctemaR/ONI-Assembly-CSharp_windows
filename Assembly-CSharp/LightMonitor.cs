@@ -15,8 +15,8 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		}, UpdateRate.SIM_200ms, false);
 		this.unburnt.safe.unlit.ParamTransition<float>(this.lightLevel, this.unburnt.safe.normal_light, GameStateMachine<LightMonitor, LightMonitor.Instance, IStateMachineTarget, object>.IsGTZero);
 		this.unburnt.safe.normal_light.ParamTransition<float>(this.lightLevel, this.unburnt.safe.unlit, GameStateMachine<LightMonitor, LightMonitor.Instance, IStateMachineTarget, object>.IsLTEZero).ParamTransition<float>(this.lightLevel, this.unburnt.safe.sunlight, (LightMonitor.Instance smi, float p) => p >= 40000f);
-		this.unburnt.safe.sunlight.ParamTransition<float>(this.lightLevel, this.unburnt.safe.normal_light, (LightMonitor.Instance smi, float p) => p < 40000f).ParamTransition<float>(this.lightLevel, this.unburnt.burning, (LightMonitor.Instance smi, float p) => p >= 71999f).ToggleEffect("Sunlight_Pleasant");
-		this.unburnt.burning.ParamTransition<float>(this.lightLevel, this.unburnt.safe.sunlight, (LightMonitor.Instance smi, float p) => p < 71999f).Update(delegate(LightMonitor.Instance smi, float dt)
+		this.unburnt.safe.sunlight.ParamTransition<float>(this.lightLevel, this.unburnt.safe.normal_light, (LightMonitor.Instance smi, float p) => p < 40000f).ParamTransition<float>(this.lightLevel, this.unburnt.burning, (LightMonitor.Instance smi, float p) => p >= 72000f).ToggleEffect("Sunlight_Pleasant");
+		this.unburnt.burning.ParamTransition<float>(this.lightLevel, this.unburnt.safe.sunlight, (LightMonitor.Instance smi, float p) => p < 72000f).Update(delegate(LightMonitor.Instance smi, float dt)
 		{
 			smi.sm.burnResistance.DeltaClamp(-dt, 0f, 120f, smi);
 		}, UpdateRate.SIM_200ms, false).ToggleEffect("Sunlight_Burning");
@@ -36,14 +36,12 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		if (component != null && component.HasTag(GameTags.Shaded))
 		{
 			smi.sm.lightLevel.Set(0f, smi);
+			return;
 		}
-		else
+		int num = Grid.PosToCell(smi.gameObject);
+		if (Grid.IsValidCell(num))
 		{
-			int num = Grid.PosToCell(smi.gameObject);
-			if (Grid.IsValidCell(num))
-			{
-				smi.sm.lightLevel.Set((float)Grid.LightIntensity[num], smi);
-			}
+			smi.sm.lightLevel.Set((float)Grid.LightIntensity[num], smi);
 		}
 	}
 

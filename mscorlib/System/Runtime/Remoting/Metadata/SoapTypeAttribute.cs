@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Remoting.Metadata
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface)]
+	[ComVisible(true)]
 	public sealed class SoapTypeAttribute : SoapAttribute
 	{
 		public SoapOption SoapOptions

@@ -30,8 +30,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		bool flag = (transition.start == NavType.Pole || transition.end == NavType.Pole) && transition.y < 0 && transition.x == 0;
 		bool flag2 = transition.start == NavType.Tube || transition.end == NavType.Tube;
 		bool flag3 = transition.start == NavType.Hover || transition.end == NavType.Hover;
-		bool flag4 = !flag && !flag2 && !flag3;
-		if (flag4)
+		if (!flag && !flag2 && !flag3)
 		{
 			if (this.isWalking)
 			{
@@ -41,8 +40,8 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		}
 		int num2 = Grid.PosToCell(navigator);
 		float num3 = 1f;
-		bool flag5 = (byte)(navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
-		if ((byte)(navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) == 0 && !flag5 && Grid.IsSubstantialLiquid(num2, 0.35f))
+		bool flag4 = (navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
+		if ((navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) <= PathFinder.PotentialPath.Flags.None && !flag4 && Grid.IsSubstantialLiquid(num2, 0.35f))
 		{
 			num3 = 0.5f;
 		}

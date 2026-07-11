@@ -11,13 +11,15 @@ public class LogicCircuitNetwork : UtilityNetwork
 		if (item is LogicWire)
 		{
 			this.wires.Add((LogicWire)item);
+			return;
 		}
-		else if (item is ILogicEventReceiver)
+		if (item is ILogicEventReceiver)
 		{
 			ILogicEventReceiver logicEventReceiver = (ILogicEventReceiver)item;
 			this.receivers.Add(logicEventReceiver);
+			return;
 		}
-		else if (item is ILogicEventSender)
+		if (item is ILogicEventSender)
 		{
 			ILogicEventSender logicEventSender = (ILogicEventSender)item;
 			this.senders.Add(logicEventSender);
@@ -29,13 +31,15 @@ public class LogicCircuitNetwork : UtilityNetwork
 		if (item is LogicWire)
 		{
 			this.wires.Remove((LogicWire)item);
+			return;
 		}
-		else if (item is ILogicEventReceiver)
+		if (item is ILogicEventReceiver)
 		{
 			ILogicEventReceiver logicEventReceiver = item as ILogicEventReceiver;
 			this.receivers.Remove(logicEventReceiver);
+			return;
 		}
-		else if (item is ILogicEventSender)
+		if (item is ILogicEventSender)
 		{
 			ILogicEventSender logicEventSender = (ILogicEventSender)item;
 			this.senders.Remove(logicEventSender);
@@ -46,13 +50,12 @@ public class LogicCircuitNetwork : UtilityNetwork
 	{
 		if (item is ILogicEventReceiver)
 		{
-			ILogicEventReceiver logicEventReceiver = (ILogicEventReceiver)item;
-			logicEventReceiver.OnLogicNetworkConnectionChanged(true);
+			((ILogicEventReceiver)item).OnLogicNetworkConnectionChanged(true);
+			return;
 		}
-		else if (item is ILogicEventSender)
+		if (item is ILogicEventSender)
 		{
-			ILogicEventSender logicEventSender = (ILogicEventSender)item;
-			logicEventSender.OnLogicNetworkConnectionChanged(true);
+			((ILogicEventSender)item).OnLogicNetworkConnectionChanged(true);
 		}
 	}
 
@@ -63,11 +66,11 @@ public class LogicCircuitNetwork : UtilityNetwork
 			ILogicEventReceiver logicEventReceiver = item as ILogicEventReceiver;
 			logicEventReceiver.ReceiveLogicEvent(0);
 			logicEventReceiver.OnLogicNetworkConnectionChanged(false);
+			return;
 		}
-		else if (item is ILogicEventSender)
+		if (item is ILogicEventSender)
 		{
-			ILogicEventSender logicEventSender = item as ILogicEventSender;
-			logicEventSender.OnLogicNetworkConnectionChanged(false);
+			(item as ILogicEventSender).OnLogicNetworkConnectionChanged(false);
 		}
 	}
 
@@ -126,7 +129,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 			}
 			if (!force_send)
 			{
-				this.TriggerAudio((this.previousValue < 0) ? 0 : this.previousValue, id);
+				this.TriggerAudio((this.previousValue >= 0) ? this.previousValue : 0, id);
 			}
 		}
 	}
@@ -151,6 +154,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 				if (list[num] != null)
 				{
 					Vector3 position = list[num].transform.GetPosition();
+					position.z = 0f;
 					string text = "Logic_Circuit_Toggle";
 					LogicCircuitNetwork.LogicSoundPair logicSoundPair = new LogicCircuitNetwork.LogicSoundPair();
 					if (!LogicCircuitNetwork.logicSoundRegister.ContainsKey(id))
@@ -171,7 +175,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 						LogicCircuitNetwork.logicSoundRegister[id].playedIndex = 0;
 						LogicCircuitNetwork.logicSoundRegister[id].lastPlayed = Time.time;
 					}
-					float num2 = (Time.time - logicSoundPair.lastPlayed) / 5f;
+					float num2 = (Time.time - logicSoundPair.lastPlayed) / 3f;
 					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), position, 1f);
 					eventInstance.setParameterValue("logic_volumeModifer", num2);
 					eventInstance.setParameterValue("wireCount", (float)(this.wires.Count % 24));

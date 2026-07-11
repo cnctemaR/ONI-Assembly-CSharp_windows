@@ -41,10 +41,10 @@ public class IceSculptureConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Artable artable = go.AddComponent<Sculpture>();
-		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.NAME, "slab", 0, false, Artable.Status.Ready));
-		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.POORQUALITYNAME, "crap", 5, false, Artable.Status.Ugly));
-		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.AVERAGEQUALITYNAME, "idle", 10, true, Artable.Status.Okay));
+		Sculpture sculpture = go.AddComponent<Sculpture>();
+		sculpture.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.NAME, "slab", 0, false, Artable.Status.Ready));
+		sculpture.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.POORQUALITYNAME, "crap", 5, false, Artable.Status.Ugly));
+		sculpture.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.AVERAGEQUALITYNAME, "idle", 10, true, Artable.Status.Okay));
 	}
 
 	public const string ID = "IceSculpture";

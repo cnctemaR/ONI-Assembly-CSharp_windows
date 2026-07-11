@@ -5,8 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Export/Director/PlayableHandle.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	public struct PlayableHandle : IEquatable<PlayableHandle>
 	{
 		internal T GetObject<T>() where T : class, IPlayableBehaviour
@@ -41,10 +43,7 @@ namespace UnityEngine.Playables
 		{
 			get
 			{
-				return new PlayableHandle
-				{
-					m_Version = uint.MaxValue
-				};
+				return PlayableHandle.m_Null;
 			}
 		}
 
@@ -168,30 +167,35 @@ namespace UnityEngine.Playables
 			return PlayableHandle.IsValid_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetPlayableType", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal Type GetPlayableType()
 		{
 			return PlayableHandle.GetPlayableType_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetJobType", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal Type GetJobType()
 		{
 			return PlayableHandle.GetJobType_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetScriptInstance", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void SetScriptInstance(object scriptInstance)
 		{
 			PlayableHandle.SetScriptInstance_Injected(ref this, scriptInstance);
 		}
 
+		[FreeFunction("PlayableHandleBindings::CanChangeInputs", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal bool CanChangeInputs()
 		{
 			return PlayableHandle.CanChangeInputs_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::CanSetWeights", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal bool CanSetWeights()
 		{
@@ -199,29 +203,34 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::CanDestroy", HasExplicitThis = true, ThrowsException = true)]
 		internal bool CanDestroy()
 		{
 			return PlayableHandle.CanDestroy_Injected(ref this);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetPlayState", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayState GetPlayState()
 		{
 			return PlayableHandle.GetPlayState_Injected(ref this);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::Play", HasExplicitThis = true, ThrowsException = true)]
 		internal void Play()
 		{
 			PlayableHandle.Play_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::Pause", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void Pause()
 		{
 			PlayableHandle.Pause_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetSpeed", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal double GetSpeed()
 		{
@@ -229,17 +238,20 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetSpeed", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetSpeed(double value)
 		{
 			PlayableHandle.SetSpeed_Injected(ref this, value);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal double GetTime()
 		{
 			return PlayableHandle.GetTime_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void SetTime(double value)
 		{
@@ -247,29 +259,34 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::IsDone", HasExplicitThis = true, ThrowsException = true)]
 		internal bool IsDone()
 		{
 			return PlayableHandle.IsDone_Injected(ref this);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetDone", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetDone(bool value)
 		{
 			PlayableHandle.SetDone_Injected(ref this, value);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetDuration", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal double GetDuration()
 		{
 			return PlayableHandle.GetDuration_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetDuration", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void SetDuration(double value)
 		{
 			PlayableHandle.SetDuration_Injected(ref this, value);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetPropagateSetTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal bool GetPropagateSetTime()
 		{
@@ -277,12 +294,14 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetPropagateSetTime", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetPropagateSetTime(bool value)
 		{
 			PlayableHandle.SetPropagateSetTime_Injected(ref this, value);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetGraph", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableGraph GetGraph()
 		{
 			PlayableGraph playableGraph;
@@ -291,23 +310,27 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetInputCount", HasExplicitThis = true, ThrowsException = true)]
 		internal int GetInputCount()
 		{
 			return PlayableHandle.GetInputCount_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetInputCount", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void SetInputCount(int value)
 		{
 			PlayableHandle.SetInputCount_Injected(ref this, value);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetOutputCount", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal int GetOutputCount()
 		{
 			return PlayableHandle.GetOutputCount_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetOutputCount", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void SetOutputCount(int value)
 		{
@@ -315,35 +338,41 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetInputWeight", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetInputWeight(PlayableHandle input, float weight)
 		{
 			PlayableHandle.SetInputWeight_Injected(ref this, ref input, weight);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetDelay", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetDelay(double delay)
 		{
 			PlayableHandle.SetDelay_Injected(ref this, delay);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetDelay", HasExplicitThis = true, ThrowsException = true)]
 		internal double GetDelay()
 		{
 			return PlayableHandle.GetDelay_Injected(ref this);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::IsDelayed", HasExplicitThis = true, ThrowsException = true)]
 		internal bool IsDelayed()
 		{
 			return PlayableHandle.IsDelayed_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetPreviousTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal double GetPreviousTime()
 		{
 			return PlayableHandle.GetPreviousTime_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetLeadTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal void SetLeadTime(float value)
 		{
@@ -351,34 +380,54 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetLeadTime", HasExplicitThis = true, ThrowsException = true)]
 		internal float GetLeadTime()
 		{
 			return PlayableHandle.GetLeadTime_Injected(ref this);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetTraversalMode", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableTraversalMode GetTraversalMode()
 		{
 			return PlayableHandle.GetTraversalMode_Injected(ref this);
 		}
 
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetTraversalMode", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetTraversalMode(PlayableTraversalMode mode)
 		{
 			PlayableHandle.SetTraversalMode_Injected(ref this, mode);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetAdditionalPayload", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
 		internal IntPtr GetAdditionalPayload()
 		{
 			return PlayableHandle.GetAdditionalPayload_Injected(ref this);
 		}
 
+		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetTimeWrapMode", HasExplicitThis = true, ThrowsException = true)]
+		internal DirectorWrapMode GetTimeWrapMode()
+		{
+			return PlayableHandle.GetTimeWrapMode_Injected(ref this);
+		}
+
+		[FreeFunction("PlayableHandleBindings::SetTimeWrapMode", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
+		internal void SetTimeWrapMode(DirectorWrapMode mode)
+		{
+			PlayableHandle.SetTimeWrapMode_Injected(ref this, mode);
+		}
+
+		[FreeFunction("PlayableHandleBindings::GetScriptInstance", HasExplicitThis = true, ThrowsException = true)]
 		private object GetScriptInstance()
 		{
 			return PlayableHandle.GetScriptInstance_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetInputHandle", HasExplicitThis = true, ThrowsException = true)]
 		private PlayableHandle GetInputHandle(int index)
 		{
 			PlayableHandle playableHandle;
@@ -386,6 +435,7 @@ namespace UnityEngine.Playables
 			return playableHandle;
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetOutputHandle", HasExplicitThis = true, ThrowsException = true)]
 		private PlayableHandle GetOutputHandle(int index)
 		{
 			PlayableHandle playableHandle;
@@ -393,11 +443,13 @@ namespace UnityEngine.Playables
 			return playableHandle;
 		}
 
+		[FreeFunction("PlayableHandleBindings::SetInputWeightFromIndex", HasExplicitThis = true, ThrowsException = true)]
 		private void SetInputWeightFromIndex(int index, float weight)
 		{
 			PlayableHandle.SetInputWeightFromIndex_Injected(ref this, index, weight);
 		}
 
+		[FreeFunction("PlayableHandleBindings::GetInputWeightFromIndex", HasExplicitThis = true, ThrowsException = true)]
 		private float GetInputWeightFromIndex(int index)
 		{
 			return PlayableHandle.GetInputWeightFromIndex_Injected(ref this, index);
@@ -512,6 +564,12 @@ namespace UnityEngine.Playables
 		private static extern IntPtr GetAdditionalPayload_Injected(ref PlayableHandle _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern DirectorWrapMode GetTimeWrapMode_Injected(ref PlayableHandle _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTimeWrapMode_Injected(ref PlayableHandle _unity_self, DirectorWrapMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern object GetScriptInstance_Injected(ref PlayableHandle _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -529,5 +587,7 @@ namespace UnityEngine.Playables
 		internal IntPtr m_Handle;
 
 		internal uint m_Version;
+
+		private static readonly PlayableHandle m_Null = default(PlayableHandle);
 	}
 }

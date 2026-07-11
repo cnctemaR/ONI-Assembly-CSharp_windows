@@ -4,9 +4,10 @@ using System.Runtime.InteropServices;
 namespace System.Reflection
 {
 	[ComVisible(true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public class LocalVariableInfo
 	{
-		internal LocalVariableInfo()
+		protected LocalVariableInfo()
 		{
 		}
 

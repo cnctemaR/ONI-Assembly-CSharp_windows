@@ -388,7 +388,7 @@ namespace TMPro
 			string text = string.Empty;
 			for (int i = 0; i < fontAsset.m_glyphInfoList.Count; i++)
 			{
-				text += (char)fontAsset.m_glyphInfoList[i].id;
+				text += ((char)fontAsset.m_glyphInfoList[i].id).ToString();
 			}
 			return text;
 		}

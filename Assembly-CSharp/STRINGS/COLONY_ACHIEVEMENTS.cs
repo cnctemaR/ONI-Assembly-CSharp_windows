@@ -262,7 +262,7 @@ namespace STRINGS
 
 			public static LocString MYLOGNAME = "This Is Our Home";
 
-			public static LocString DESCRIPTION = string.Empty;
+			public static LocString DESCRIPTION = "";
 
 			public static LocString MESSAGE_TITLE = "THIS IS OUR HOME";
 
@@ -317,7 +317,7 @@ namespace STRINGS
 
 			public static LocString MYLOGNAME = "A Colony's Hope";
 
-			public static LocString DESCRIPTION = string.Empty;
+			public static LocString DESCRIPTION = "";
 
 			public static LocString MESSAGE_TITLE = "A COLONY'S HOPE";
 

@@ -6,16 +6,23 @@ namespace System.Data
 	{
 		public FillErrorEventArgs(DataTable dataTable, object[] values)
 		{
+			this._dataTable = dataTable;
+			this._values = values;
+			if (this._values == null)
+			{
+				this._values = Array.Empty<object>();
+			}
 		}
 
 		public bool Continue
 		{
 			get
 			{
-				throw null;
+				return this._continueFlag;
 			}
 			set
 			{
+				this._continueFlag = value;
 			}
 		}
 
@@ -23,7 +30,7 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this._dataTable;
 			}
 		}
 
@@ -31,10 +38,11 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this._errors;
 			}
 			set
 			{
+				this._errors = value;
 			}
 		}
 
@@ -42,8 +50,21 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				object[] array = new object[this._values.Length];
+				for (int i = 0; i < this._values.Length; i++)
+				{
+					array[i] = this._values[i];
+				}
+				return array;
 			}
 		}
+
+		private bool _continueFlag;
+
+		private DataTable _dataTable;
+
+		private Exception _errors;
+
+		private object[] _values;
 	}
 }

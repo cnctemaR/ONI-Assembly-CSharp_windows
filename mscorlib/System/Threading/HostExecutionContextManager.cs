@@ -20,7 +20,7 @@ namespace System.Threading
 		}
 
 		[MonoTODO]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"Infrastructure\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 		public virtual object SetHostExecutionContext(HostExecutionContext hostExecutionContext)
 		{
 			throw new NotImplementedException();

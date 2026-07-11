@@ -29,22 +29,19 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 				context.chore.PrepareChore(ref context);
 				this.context = context;
 				base.smi.sm.nextChore.Set(context.chore, base.smi);
+				return;
 			}
-			else
+			string text = "Null";
+			string text2 = "Null";
+			if (currentChore != null)
 			{
-				string text = "Null";
-				string text2 = "Null";
-				if (currentChore != null)
-				{
-					text = currentChore.GetType().Name;
-				}
-				if (context.chore != null)
-				{
-					text2 = context.chore.GetType().Name;
-				}
-				string text3 = string.Concat(new string[] { "Stopping chore ", text, " to start ", text2, " but stopping the first chore cancelled the second one." });
-				Debug.LogWarning(text3);
+				text = currentChore.GetType().Name;
 			}
+			if (context.chore != null)
+			{
+				text2 = context.chore.GetType().Name;
+			}
+			Debug.LogWarning(string.Concat(new string[] { "Stopping chore ", text, " to start ", text2, " but stopping the first chore cancelled the second one." }));
 		}
 	}
 
@@ -114,13 +111,9 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 		private void OnChoreRulesChanged()
 		{
 			Chore currentChore = this.GetCurrentChore();
-			if (currentChore != null)
+			if (currentChore != null && !base.GetComponent<ChoreConsumer>().IsPermittedOrEnabled(currentChore.choreType, currentChore))
 			{
-				ChoreConsumer component = base.GetComponent<ChoreConsumer>();
-				if (!component.IsPermittedOrEnabled(currentChore.choreType, currentChore))
-				{
-					this.EndChore("Permissions changed");
-				}
+				this.EndChore("Permissions changed");
 			}
 		}
 	}
@@ -153,21 +146,19 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 					if (smi.master.GetComponent<Navigator>().IsMoving())
 					{
 						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, GameUtil.GetChoreName(chore, null), smi.master.GetProperName());
+						return;
 					}
-					else
+					ReportManager.ReportType reportType = chore.GetReportType();
+					Workable workable = smi.master.GetComponent<Worker>().workable;
+					if (workable != null)
 					{
-						ReportManager.ReportType reportType = chore.GetReportType();
-						Workable workable = smi.master.GetComponent<Worker>().workable;
-						if (workable != null)
+						ReportManager.ReportType reportType2 = workable.GetReportType();
+						if (reportType != reportType2)
 						{
-							ReportManager.ReportType reportType2 = workable.GetReportType();
-							if (reportType != reportType2)
-							{
-								reportType = reportType2;
-							}
+							reportType = reportType2;
 						}
-						ReportManager.Instance.ReportValue(reportType, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.WORK_TIME, GameUtil.GetChoreName(chore, null)), smi.master.GetProperName());
 					}
+					ReportManager.Instance.ReportValue(reportType, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.WORK_TIME, GameUtil.GetChoreName(chore, null)), smi.master.GetProperName());
 				}
 			}, UpdateRate.SIM_200ms, false).Exit("EndChore", delegate(ChoreDriver.StatesInstance smi)
 			{

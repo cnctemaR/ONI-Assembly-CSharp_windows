@@ -8,6 +8,24 @@ using UnityEngine;
 [DebuggerDisplay("{Name}")]
 public class Recipe : IHasSortOrder
 {
+	public int sortOrder { get; set; }
+
+	public string Name
+	{
+		get
+		{
+			if (this.nameOverride != null)
+			{
+				return this.nameOverride;
+			}
+			return this.Result.ProperName();
+		}
+		set
+		{
+			this.nameOverride = value;
+		}
+	}
+
 	public Recipe()
 	{
 	}
@@ -23,20 +41,6 @@ public class Recipe : IHasSortOrder
 		this.recipeDescription = recipeDescription;
 		this.sortOrder = sortOrder;
 		this.FabricationVisualizer = null;
-	}
-
-	public int sortOrder { get; set; }
-
-	public string Name
-	{
-		get
-		{
-			return (this.nameOverride != null) ? this.nameOverride : this.Result.ProperName();
-		}
-		set
-		{
-			this.nameOverride = value;
-		}
 	}
 
 	public Recipe SetFabricator(string fabricator, float fabricationTime)
@@ -216,8 +220,7 @@ public class Recipe : IHasSortOrder
 
 	public BuildingDef GetBuildingDef()
 	{
-		GameObject prefab = Assets.GetPrefab(this.Result);
-		BuildingComplete component = prefab.GetComponent<BuildingComplete>();
+		BuildingComplete component = Assets.GetPrefab(this.Result).GetComponent<BuildingComplete>();
 		if (component != null)
 		{
 			return component.Def;
@@ -234,11 +237,10 @@ public class Recipe : IHasSortOrder
 		}
 		else
 		{
-			GameObject prefab = Assets.GetPrefab(this.Result);
-			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+			KBatchedAnimController component = Assets.GetPrefab(this.Result).GetComponent<KBatchedAnimController>();
 			if (component != null)
 			{
-				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, string.Empty);
+				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, "");
 			}
 		}
 		return sprite;
@@ -246,7 +248,11 @@ public class Recipe : IHasSortOrder
 
 	public Color GetUIColor()
 	{
-		return (!(this.Icon != null)) ? Color.white : this.IconColor;
+		if (!(this.Icon != null))
+		{
+			return Color.white;
+		}
+		return this.IconColor;
 	}
 
 	private string nameOverride;

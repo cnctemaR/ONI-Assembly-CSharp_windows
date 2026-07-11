@@ -4,22 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 {
 	public abstract class PrimitiveModule : IModule
 	{
-		public PrimitiveModule()
-			: this(0, NoiseQuality.Standard)
-		{
-		}
-
-		public PrimitiveModule(int seed)
-			: this(seed, NoiseQuality.Standard)
-		{
-		}
-
-		public PrimitiveModule(int seed, NoiseQuality quality)
-		{
-			this._seed = seed;
-			this._quality = quality;
-		}
-
 		public virtual int Seed
 		{
 			get
@@ -42,6 +26,22 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 			{
 				this._quality = value;
 			}
+		}
+
+		public PrimitiveModule()
+			: this(0, NoiseQuality.Standard)
+		{
+		}
+
+		public PrimitiveModule(int seed)
+			: this(seed, NoiseQuality.Standard)
+		{
+		}
+
+		public PrimitiveModule(int seed, NoiseQuality quality)
+		{
+			this._seed = seed;
+			this._quality = quality;
 		}
 
 		public const int DEFAULT_SEED = 0;

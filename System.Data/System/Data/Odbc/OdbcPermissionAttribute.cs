@@ -10,13 +10,13 @@ namespace System.Data.Odbc
 	public sealed class OdbcPermissionAttribute : DBDataPermissionAttribute
 	{
 		public OdbcPermissionAttribute(SecurityAction action)
-			: base((SecurityAction)0)
+			: base(action)
 		{
 		}
 
 		public override IPermission CreatePermission()
 		{
-			throw null;
+			return new OdbcPermission(this);
 		}
 	}
 }

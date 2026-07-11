@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Unity;
 
 namespace System.Media
 {
@@ -12,8 +13,12 @@ namespace System.Media
 
 		public void Play()
 		{
-			SoundPlayer soundPlayer = new SoundPlayer(this.resource);
-			soundPlayer.Play();
+			new SoundPlayer(this.resource).Play();
+		}
+
+		internal SystemSound()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private Stream resource;

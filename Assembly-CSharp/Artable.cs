@@ -7,12 +7,6 @@ using UnityEngine;
 
 public class Artable : Workable
 {
-	protected Artable()
-	{
-		this.faceTargetWhenWorking = true;
-		this.statuses = new Dictionary<Artable.Status, StatusItem>();
-	}
-
 	public Artable.Status CurrentStatus
 	{
 		get
@@ -36,13 +30,19 @@ public class Artable : Workable
 		}
 	}
 
+	protected Artable()
+	{
+		this.faceTargetWhenWorking = true;
+		this.statuses = new Dictionary<Artable.Status, StatusItem>();
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Arting;
 		this.attributeConverter = Db.Get().AttributeConverters.ArtSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
@@ -123,22 +123,20 @@ public class Artable : Workable
 		if (stage == null)
 		{
 			global::Debug.LogError("Missing stage: " + stage_id);
+			return;
 		}
-		else
+		this.currentStage = stage.id;
+		base.GetComponent<KAnimControllerBase>().Play(stage.anim, KAnim.PlayMode.Once, 1f, 0f);
+		if (stage.decor != 0)
 		{
-			this.currentStage = stage.id;
-			base.GetComponent<KAnimControllerBase>().Play(stage.anim, KAnim.PlayMode.Once, 1f, 0f);
-			if (stage.decor != 0)
-			{
-				AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, (float)stage.decor, "Art Quality", false, false, true);
-				this.GetAttributes().Add(attributeModifier);
-			}
-			KSelectable component = base.GetComponent<KSelectable>();
-			component.SetName(stage.name);
-			component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.statuses[stage.statusItem], this);
-			this.shouldShowSkillPerkStatusItem = false;
-			this.UpdateStatusItem(null);
+			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, (float)stage.decor, "Art Quality", false, false, true);
+			this.GetAttributes().Add(attributeModifier);
 		}
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.SetName(stage.name);
+		component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.statuses[stage.statusItem], this);
+		this.shouldShowSkillPerkStatusItem = false;
+		this.UpdateStatusItem(null);
 	}
 
 	private Dictionary<Artable.Status, StatusItem> statuses;

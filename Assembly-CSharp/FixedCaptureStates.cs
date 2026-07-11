@@ -11,22 +11,14 @@ public class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCapt
 			smi.AbandonedCapturePoint();
 		});
 		this.capture.EventTransition(GameHashes.CapturePointNoLongerAvailable, null, null).DefaultState(this.capture.cheer);
-		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State state = this.capture.cheer.DefaultState(this.capture.cheer.pre);
-		string text = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME;
-		string text2 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP;
-		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
+		this.capture.cheer.DefaultState(this.capture.cheer.pre).ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.capture.cheer.pre.ScheduleGoTo(0.9f, this.capture.cheer.cheer);
 		this.capture.cheer.cheer.Enter("FaceRancher", delegate(FixedCaptureStates.Instance smi)
 		{
 			smi.GetComponent<Facing>().Face(smi.GetCapturePoint().transform.GetPosition());
 		}).PlayAnim("excited_loop").OnAnimQueueComplete(this.capture.cheer.pst);
 		this.capture.cheer.pst.ScheduleGoTo(0.2f, this.capture.move);
-		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State state2 = this.capture.move.DefaultState(this.capture.move.movetoranch);
-		text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME;
-		text = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
-		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
+		this.capture.move.DefaultState(this.capture.move.movetoranch).ToggleStatusItem(CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME, CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.capture.move.movetoranch.Enter("Speedup", delegate(FixedCaptureStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed * 1.25f;
@@ -38,11 +30,7 @@ public class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCapt
 		{
 			smi.GetCapturePoint().Trigger(-1992722293, null);
 		}).EventTransition(GameHashes.RancherReadyAtCapturePoint, this.capture.ranching, null);
-		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State ranching = this.capture.ranching;
-		text = CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME;
-		text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
-		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		ranching.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
+		this.capture.ranching.ToggleStatusItem(CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME, CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToGetCaptured, false);
 	}
 
@@ -77,7 +65,11 @@ public class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCapt
 		public FixedCapturePoint.Instance GetCapturePoint()
 		{
 			FixedCapturableMonitor.Instance smi = this.GetSMI<FixedCapturableMonitor.Instance>();
-			return (smi == null) ? null : smi.targetCapturePoint;
+			if (smi == null)
+			{
+				return null;
+			}
+			return smi.targetCapturePoint;
 		}
 
 		public void AbandonedCapturePoint()

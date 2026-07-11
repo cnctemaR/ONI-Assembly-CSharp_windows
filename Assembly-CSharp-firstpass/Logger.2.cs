@@ -4,12 +4,6 @@ using System.Diagnostics;
 
 public class Logger<EntryType> : Logger
 {
-	public Logger(string name, int new_max = 35)
-		: base(name)
-	{
-		this.SetMaxEntries(new_max);
-	}
-
 	public IEnumerator<EntryType> GetEnumerator()
 	{
 		if (this.entries == null)
@@ -33,6 +27,12 @@ public class Logger<EntryType> : Logger
 
 	public void SetMaxEntries(int new_max)
 	{
+	}
+
+	public Logger(string name, int new_max = 35)
+		: base(name)
+	{
+		this.SetMaxEntries(new_max);
 	}
 
 	[Conditional("UNITY_EDITOR")]

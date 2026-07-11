@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
 public class ToolParameterMenu : KMonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onParametersChanged;
 
 	protected override void OnPrefabInit()
@@ -85,25 +83,18 @@ public class ToolParameterMenu : KMonoBehaviour
 	{
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgets)
 		{
-			ToolParameterMenu.ToggleState toggleState = this.currentParameters[keyValuePair.Key];
-			if (toggleState != ToolParameterMenu.ToggleState.Disabled)
+			switch (this.currentParameters[keyValuePair.Key])
 			{
-				if (toggleState != ToolParameterMenu.ToggleState.Off)
-				{
-					if (toggleState == ToolParameterMenu.ToggleState.On)
-					{
-						keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(1);
-						this.lastEnabledFilter = keyValuePair.Key;
-					}
-				}
-				else
-				{
-					keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(0);
-				}
-			}
-			else
-			{
+			case ToolParameterMenu.ToggleState.On:
+				keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(1);
+				this.lastEnabledFilter = keyValuePair.Key;
+				break;
+			case ToolParameterMenu.ToggleState.Off:
+				keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(0);
+				break;
+			case ToolParameterMenu.ToggleState.Disabled:
 				keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(2);
+				break;
 			}
 		}
 		if (this.onParametersChanged != null)

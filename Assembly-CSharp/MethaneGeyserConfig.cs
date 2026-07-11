@@ -7,13 +7,18 @@ public class MethaneGeyserConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("MethaneGeyser", global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.NAME, global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.DESC, 2000f, Assets.GetAnim("geyser_side_methane_kanim"), "inactive", Grid.SceneLayer.BuildingBack, 4, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, NOISE_POLLUTION.NOISY.TIER5, SimHashes.Creature, null, 293f);
+		string text = "MethaneGeyser";
+		string text2 = global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.DESC;
+		float num = 2000f;
+		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER1;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("geyser_side_methane_kanim"), "inactive", Grid.SceneLayer.BuildingBack, 4, 2, tier, tier2, SimHashes.Creature, null, 293f);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.DeprecatedContent, false);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.IgneousRock);
 		component.Temperature = 372.15f;
-		Geyser geyser = gameObject.AddOrGet<Geyser>();
-		geyser.outputOffset = new Vector2I(0, 1);
+		gameObject.AddOrGet<Geyser>().outputOffset = new Vector2I(0, 1);
 		GeyserConfigurator geyserConfigurator = gameObject.AddOrGet<GeyserConfigurator>();
 		geyserConfigurator.presetType = "methane";
 		geyserConfigurator.presetMin = 0.35f;

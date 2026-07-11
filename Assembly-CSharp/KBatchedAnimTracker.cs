@@ -75,8 +75,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 	{
 		this.forceUpdate = false;
 		bool flag = false;
-		KAnim.Anim currentAnim = this.controller.CurrentAnim;
-		if (currentAnim != null)
+		if (this.controller.CurrentAnim != null)
 		{
 			Matrix2x3 symbolLocalTransform = this.controller.GetSymbolLocalTransform(this.symbol, out flag);
 			Vector3 position = this.controller.transform.GetPosition();
@@ -104,8 +103,8 @@ public class KBatchedAnimTracker : MonoBehaviour
 				}
 				else
 				{
-					Vector3 vector2 = ((!this.controller.FlipX) ? Vector3.right : Vector3.left);
-					Vector3 vector3 = ((!this.controller.FlipY) ? Vector3.up : Vector3.down);
+					Vector3 vector2 = (this.controller.FlipX ? Vector3.left : Vector3.right);
+					Vector3 vector3 = (this.controller.FlipY ? Vector3.down : Vector3.up);
 					base.transform.up = matrix2x.MultiplyVector(vector3);
 					base.transform.right = matrix2x.MultiplyVector(vector2);
 					if (this.myAnim != null)

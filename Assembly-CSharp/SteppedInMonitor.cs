@@ -84,9 +84,8 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 
 	private static bool IsSubmerged(SteppedInMonitor.Instance smi)
 	{
-		int num = Grid.PosToCell(smi);
-		int num2 = Grid.CellAbove(num);
-		return Grid.IsValidCell(num2) && Grid.Element[num2].IsLiquid;
+		int num = Grid.CellAbove(Grid.PosToCell(smi));
+		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid;
 	}
 
 	public GameStateMachine<SteppedInMonitor, SteppedInMonitor.Instance, IStateMachineTarget, object>.State satisfied;

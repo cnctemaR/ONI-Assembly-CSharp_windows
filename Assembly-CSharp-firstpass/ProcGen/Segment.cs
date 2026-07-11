@@ -20,10 +20,8 @@ namespace ProcGen
 			Vector2 vector = this.e1 - this.e0;
 			Vector2 vector2 = this.e0;
 			Vector2 vector3 = this.e1;
-			float magnitude = vector.magnitude;
-			float num = magnitude / maxDistance;
-			Vector2 vector4 = new Vector2(-vector.y, vector.x);
-			Vector2 normalized = vector4.normalized;
+			float num = vector.magnitude / maxDistance;
+			Vector2 normalized = new Vector2(-vector.y, vector.x).normalized;
 			int num2 = 0;
 			while ((float)num2 < num)
 			{

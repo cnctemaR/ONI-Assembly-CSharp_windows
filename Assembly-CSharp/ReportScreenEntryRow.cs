@@ -43,7 +43,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 				ReportScreenEntryRow.notes.Add(note);
 			}
 		});
-		string text = string.Empty;
+		string text = "";
 		float num = 0f;
 		if (this.entry.contextEntries.Count > 0)
 		{
@@ -123,10 +123,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 		LayoutElement component = this.name.GetComponent<LayoutElement>();
 		if (entry.context == null)
 		{
-			LayoutElement layoutElement = component;
-			float num = this.nameWidth;
-			component.preferredWidth = num;
-			layoutElement.minWidth = num;
+			component.minWidth = (component.preferredWidth = this.nameWidth);
 			if (entry.HasContextEntries())
 			{
 				this.toggle.gameObject.SetActive(true);
@@ -144,10 +141,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			this.toggle.gameObject.SetActive(false);
 			this.spacer.minWidth = this.contextSpacerWidth;
 			this.name.text = entry.context;
-			LayoutElement layoutElement2 = component;
-			float num = this.nameWidth - this.indentWidth;
-			component.preferredWidth = num;
-			layoutElement2.minWidth = num;
+			component.minWidth = (component.preferredWidth = this.nameWidth - this.indentWidth);
 			if (base.transform.GetSiblingIndex() % 2 != 0)
 			{
 				this.bgImage.color = this.oddRowColor;
@@ -158,17 +152,17 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			string text = reportGroup.formatfn(entry.Positive);
 			if (reportGroup.groupFormatfn != null && entry.context == null)
 			{
-				float num2;
+				float num;
 				if (entry.contextEntries.Count > 0)
 				{
-					num2 = (float)entry.contextEntries.Count;
+					num = (float)entry.contextEntries.Count;
 				}
 				else
 				{
-					num2 = (float)pos_notes.Count;
+					num = (float)pos_notes.Count;
 				}
-				num2 = Mathf.Max(num2, 1f);
-				text = reportGroup.groupFormatfn(entry.Positive, num2);
+				num = Mathf.Max(num, 1f);
+				text = reportGroup.groupFormatfn(entry.Positive, num);
 			}
 			this.added.text = text;
 			this.addedValue = entry.Positive;
@@ -178,6 +172,26 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			string text2 = reportGroup.formatfn(entry.Negative);
 			if (reportGroup.groupFormatfn != null && entry.context == null)
 			{
+				float num2;
+				if (entry.contextEntries.Count > 0)
+				{
+					num2 = (float)entry.contextEntries.Count;
+				}
+				else
+				{
+					num2 = (float)neg_notes.Count;
+				}
+				num2 = Mathf.Max(num2, 1f);
+				text2 = reportGroup.groupFormatfn(entry.Negative, num2);
+			}
+			this.removed.text = text2;
+			this.removedValue = entry.Negative;
+		}
+		if (this.netValue != entry.Net)
+		{
+			string text3 = ((reportGroup.formatfn == null) ? entry.Net.ToString() : reportGroup.formatfn(entry.Net));
+			if (reportGroup.groupFormatfn != null && entry.context == null)
+			{
 				float num3;
 				if (entry.contextEntries.Count > 0)
 				{
@@ -185,30 +199,10 @@ public class ReportScreenEntryRow : KMonoBehaviour
 				}
 				else
 				{
-					num3 = (float)neg_notes.Count;
+					num3 = (float)(pos_notes.Count + neg_notes.Count);
 				}
 				num3 = Mathf.Max(num3, 1f);
-				text2 = reportGroup.groupFormatfn(entry.Negative, num3);
-			}
-			this.removed.text = text2;
-			this.removedValue = entry.Negative;
-		}
-		if (this.netValue != entry.Net)
-		{
-			string text3 = ((reportGroup.formatfn != null) ? reportGroup.formatfn(entry.Net) : entry.Net.ToString());
-			if (reportGroup.groupFormatfn != null && entry.context == null)
-			{
-				float num4;
-				if (entry.contextEntries.Count > 0)
-				{
-					num4 = (float)entry.contextEntries.Count;
-				}
-				else
-				{
-					num4 = (float)(pos_notes.Count + neg_notes.Count);
-				}
-				num4 = Mathf.Max(num4, 1f);
-				text3 = reportGroup.groupFormatfn(entry.Net, num4);
+				text3 = reportGroup.groupFormatfn(entry.Net, num3);
 			}
 			this.net.text = text3;
 			this.netValue = entry.Net;

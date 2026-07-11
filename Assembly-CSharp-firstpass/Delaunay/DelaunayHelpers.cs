@@ -66,13 +66,13 @@ namespace Delaunay
 			Dictionary<Vector2?, Node> dictionary = new Dictionary<Vector2?, Node>();
 			List<LineSegment> list = new List<LineSegment>();
 			Stack<Node> pool = Node.pool;
-			if (type != KruskalType.MAXIMUM)
+			if (type == KruskalType.MAXIMUM)
 			{
-				lineSegments.Sort((LineSegment l1, LineSegment l2) => LineSegment.CompareLengths_MAX(l1, l2));
+				lineSegments.Sort((LineSegment l1, LineSegment l2) => LineSegment.CompareLengths(l1, l2));
 			}
 			else
 			{
-				lineSegments.Sort((LineSegment l1, LineSegment l2) => LineSegment.CompareLengths(l1, l2));
+				lineSegments.Sort((LineSegment l1, LineSegment l2) => LineSegment.CompareLengths_MAX(l1, l2));
 			}
 			int num = lineSegments.Count;
 			while (--num > -1)
@@ -81,7 +81,7 @@ namespace Delaunay
 				Node node2;
 				if (!dictionary.ContainsKey(lineSegment.p0))
 				{
-					Node node = ((pool.Count <= 0) ? new Node() : pool.Pop());
+					Node node = ((pool.Count > 0) ? pool.Pop() : new Node());
 					node2 = (node.parent = node);
 					node.treeSize = 1;
 					dictionary[lineSegment.p0] = node;
@@ -94,7 +94,7 @@ namespace Delaunay
 				Node node4;
 				if (!dictionary.ContainsKey(lineSegment.p1))
 				{
-					Node node3 = ((pool.Count <= 0) ? new Node() : pool.Pop());
+					Node node3 = ((pool.Count > 0) ? pool.Pop() : new Node());
 					node4 = (node3.parent = node3);
 					node3.treeSize = 1;
 					dictionary[lineSegment.p1] = node3;
@@ -141,16 +141,16 @@ namespace Delaunay
 
 		public class LineSegmentWithSites : LineSegment
 		{
+			public uint id0 { get; private set; }
+
+			public uint id1 { get; private set; }
+
 			public LineSegmentWithSites(Vector2? p0, Vector2? p1, uint id0, uint id1)
 				: base(p0, p1)
 			{
 				this.id0 = id0;
 				this.id1 = id1;
 			}
-
-			public uint id0 { get; private set; }
-
-			public uint id1 { get; private set; }
 		}
 	}
 }

@@ -4,30 +4,15 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Jobs
 {
-	/// <summary>
-	///   <para>TransformAccessArray.</para>
-	/// </summary>
 	[NativeType(Header = "Runtime/Transform/ScriptBindings/TransformAccess.bindings.h", CodegenOptions = CodegenOptions.Custom)]
 	public struct TransformAccessArray : IDisposable
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
-		/// <param name="transforms">Transforms.</param>
-		/// <param name="desiredJobCount">Desired job count.</param>
-		/// <param name="capacity">Capacity.</param>
 		public TransformAccessArray(Transform[] transforms, int desiredJobCount = -1)
 		{
 			TransformAccessArray.Allocate(transforms.Length, desiredJobCount, out this);
 			TransformAccessArray.SetTransforms(this.m_TransformArray, transforms);
 		}
 
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
-		/// <param name="transforms">Transforms.</param>
-		/// <param name="desiredJobCount">Desired job count.</param>
-		/// <param name="capacity">Capacity.</param>
 		public TransformAccessArray(int capacity, int desiredJobCount = -1)
 		{
 			TransformAccessArray.Allocate(capacity, desiredJobCount, out this);
@@ -38,9 +23,6 @@ namespace UnityEngine.Jobs
 			array.m_TransformArray = TransformAccessArray.Create(capacity, desiredJobCount);
 		}
 
-		/// <summary>
-		///   <para>isCreated.</para>
-		/// </summary>
 		public bool isCreated
 		{
 			get
@@ -49,9 +31,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>Dispose.</para>
-		/// </summary>
 		public void Dispose()
 		{
 			TransformAccessArray.DestroyTransformAccessArray(this.m_TransformArray);
@@ -75,9 +54,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns array capacity.</para>
-		/// </summary>
 		public int capacity
 		{
 			get
@@ -90,9 +66,6 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>Length.</para>
-		/// </summary>
 		public int length
 		{
 			get
@@ -101,28 +74,16 @@ namespace UnityEngine.Jobs
 			}
 		}
 
-		/// <summary>
-		///   <para>Add.</para>
-		/// </summary>
-		/// <param name="transform">Transform.</param>
 		public void Add(Transform transform)
 		{
 			TransformAccessArray.Add(this.m_TransformArray, transform);
 		}
 
-		/// <summary>
-		///   <para>Remove item at index.</para>
-		/// </summary>
-		/// <param name="index">Index.</param>
 		public void RemoveAtSwapBack(int index)
 		{
 			TransformAccessArray.RemoveAtSwapBack(this.m_TransformArray, index);
 		}
 
-		/// <summary>
-		///   <para>Set transforms.</para>
-		/// </summary>
-		/// <param name="transforms">Transforms.</param>
 		public void SetTransforms(Transform[] transforms)
 		{
 			TransformAccessArray.SetTransforms(this.m_TransformArray, transforms);

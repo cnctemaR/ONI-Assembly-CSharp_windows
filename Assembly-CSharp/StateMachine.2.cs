@@ -52,9 +52,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 	public void BindStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State parent_state, object state_machine)
 	{
-		Type type = state_machine.GetType();
-		FieldInfo[] fields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-		foreach (FieldInfo fieldInfo in fields)
+		foreach (FieldInfo fieldInfo in state_machine.GetType().GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 		{
 			if (fieldInfo.FieldType.IsSubclassOf(typeof(StateMachine.BaseState)))
 			{
@@ -112,27 +110,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 	public class GenericInstance : StateMachine.Instance
 	{
-		public GenericInstance(MasterType master)
-			: base((StateMachine)((object)Singleton<StateMachineManager>.Instance.CreateStateMachine<StateMachineType>()), master)
-		{
-			this.master = master;
-			this.stateStack = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry[this.stateMachine.GetMaxDepth()];
-			for (int i = 0; i < this.stateStack.Length; i++)
-			{
-				this.stateStack[i].schedulerGroup = Singleton<StateMachineManager>.Instance.CreateSchedulerGroup();
-			}
-			this.sm = (StateMachineType)((object)this.stateMachine);
-			this.dataTable = new object[base.GetStateMachine().dataTableSize];
-			this.updateTable = new StateMachine.Instance.UpdateTableEntry[base.GetStateMachine().updateTableSize];
-			this.controller = master.GetComponent<StateMachineController>();
-			if (this.controller == null)
-			{
-				this.controller = master.gameObject.AddComponent<StateMachineController>();
-			}
-			this.internalSm.masterTarget.Set(master.gameObject, this.smi);
-			this.controller.AddStateMachineInstance(this);
-		}
-
 		public StateMachineType sm { get; private set; }
 
 		protected StateMachineInstanceType smi
@@ -209,6 +186,27 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			base.FreeResources();
 		}
 
+		public GenericInstance(MasterType master)
+			: base((StateMachine)((object)Singleton<StateMachineManager>.Instance.CreateStateMachine<StateMachineType>()), master)
+		{
+			this.master = master;
+			this.stateStack = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry[this.stateMachine.GetMaxDepth()];
+			for (int i = 0; i < this.stateStack.Length; i++)
+			{
+				this.stateStack[i].schedulerGroup = Singleton<StateMachineManager>.Instance.CreateSchedulerGroup();
+			}
+			this.sm = (StateMachineType)((object)this.stateMachine);
+			this.dataTable = new object[base.GetStateMachine().dataTableSize];
+			this.updateTable = new StateMachine.Instance.UpdateTableEntry[base.GetStateMachine().updateTableSize];
+			this.controller = master.GetComponent<StateMachineController>();
+			if (this.controller == null)
+			{
+				this.controller = master.gameObject.AddComponent<StateMachineController>();
+			}
+			this.internalSm.masterTarget.Set(master.gameObject, this.smi);
+			this.controller.AddStateMachineInstance(this);
+		}
+
 		public override IStateMachineTarget GetMaster()
 		{
 			return this.master;
@@ -261,8 +259,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				foreach (StateMachine.ParameterTransition parameterTransition in state.parameterTransitions)
 				{
-					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition;
-					parameterTransition2.Register(this.smi);
+					((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition).Register(this.smi);
 				}
 			}
 			if (state.updateActions != null)
@@ -280,7 +277,10 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				}
 			}
 			this.stateEnterTime = Time.time;
-			this.stateStack[this.stackSize++].state = state;
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry[] array = this.stateStack;
+			int stackSize = this.stackSize;
+			this.stackSize = stackSize + 1;
+			array[stackSize].state = state;
 			this.currentSchedulerGroup = this.stateStack[this.stackSize - 1].schedulerGroup;
 			if (state.transitions != null)
 			{
@@ -296,14 +296,14 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 			if (state.parameterTransitions != null)
 			{
-				foreach (StateMachine.ParameterTransition parameterTransition3 in state.parameterTransitions)
+				foreach (StateMachine.ParameterTransition parameterTransition2 in state.parameterTransitions)
 				{
-					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition4 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition3;
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition3 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition2;
 					if (num != this.gotoId)
 					{
 						return;
 					}
-					parameterTransition4.Evaluate(this.smi);
+					parameterTransition3.Evaluate(this.smi);
 				}
 			}
 			if (num != this.gotoId)
@@ -311,10 +311,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				return;
 			}
 			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.enterActions);
-			if (num != this.gotoId)
-			{
-				return;
-			}
+			int num2 = this.gotoId;
 		}
 
 		private void ExecuteActions(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, List<StateMachine.Action> actions)
@@ -325,12 +322,8 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 			int num = this.gotoId;
 			this.currentActionIdx++;
-			while (this.currentActionIdx < actions.Count)
+			while (this.currentActionIdx < actions.Count && num == this.gotoId)
 			{
-				if (num != this.gotoId)
-				{
-					break;
-				}
 				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback)actions[this.currentActionIdx].callback;
 				try
 				{
@@ -376,14 +369,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		private void PopState()
 		{
 			this.currentActionIdx = -1;
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry stackEntry = this.stateStack[--this.stackSize];
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry[] array = this.stateStack;
+			int num = this.stackSize - 1;
+			this.stackSize = num;
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry stackEntry = array[num];
 			StateMachine.BaseState state = stackEntry.state;
 			if (state.parameterTransitions != null)
 			{
 				foreach (StateMachine.ParameterTransition parameterTransition in state.parameterTransitions)
 				{
-					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition;
-					parameterTransition2.Unregister(this.smi);
+					((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition).Unregister(this.smi);
 				}
 			}
 			if (state.transitions != null)
@@ -405,9 +400,9 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				foreach (StateMachine.UpdateAction updateAction in state.updateActions)
 				{
 					int updateTableIdx = updateAction.updateTableIdx;
-					UpdateBucketWithUpdater<StateMachineInstanceType> updateBucketWithUpdater = (UpdateBucketWithUpdater<StateMachineInstanceType>)this.smi.updateTable[updateTableIdx].bucket;
+					StateMachineUpdater.BaseUpdateBucket baseUpdateBucket = (UpdateBucketWithUpdater<StateMachineInstanceType>)this.smi.updateTable[updateTableIdx].bucket;
 					this.smi.updateTable[updateTableIdx].bucket = null;
-					updateBucketWithUpdater.Remove(this.smi.updateTable[updateTableIdx].handle);
+					baseUpdateBucket.Remove(this.smi.updateTable[updateTableIdx].handle);
 				}
 			}
 			stackEntry.schedulerGroup.Reset();
@@ -527,31 +522,29 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					}
 					else
 					{
-						int num = ++this.gotoId;
-						StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state = base_state as StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State;
-						StateMachine.BaseState[] branch = state.branch;
-						int i;
-						for (i = 0; i < this.stackSize; i++)
+						int num = this.gotoId + 1;
+						this.gotoId = num;
+						int num2 = num;
+						StateMachine.BaseState[] branch = (base_state as StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State).branch;
+						int num3 = 0;
+						while (num3 < this.stackSize && num3 < branch.Length && this.stateStack[num3].state == branch[num3])
 						{
-							if (i >= branch.Length || this.stateStack[i].state != branch[i])
-							{
-								break;
-							}
+							num3++;
 						}
-						int num2 = this.stackSize - 1;
-						if (num2 >= 0 && num2 == i - 1)
+						int num4 = this.stackSize - 1;
+						if (num4 >= 0 && num4 == num3 - 1)
 						{
-							this.FinishStateInProgress(this.stateStack[num2].state);
+							this.FinishStateInProgress(this.stateStack[num4].state);
 						}
-						while (this.stackSize > i && num == this.gotoId)
+						while (this.stackSize > num3 && num2 == this.gotoId)
 						{
 							this.PopState();
 						}
-						int num3 = i;
-						while (num3 < branch.Length && num == this.gotoId)
+						int num5 = num3;
+						while (num5 < branch.Length && num2 == this.gotoId)
 						{
-							this.PushState(branch[num3]);
-							num3++;
+							this.PushState(branch[num5]);
+							num5++;
 						}
 						this.gotoStack.Pop();
 					}
@@ -568,8 +561,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 						text2 = base_state.name;
 					}
 					string text3 = "(NULL).";
-					IStateMachineTarget master = this.GetMaster();
-					if (!master.isNull)
+					if (!this.GetMaster().isNull)
 					{
 						text3 = "(" + base.gameObject.name + ").";
 					}
@@ -653,8 +645,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public virtual StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context Register(StateMachineInstanceType smi)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context context = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context(this);
-			return context;
+			return new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context(this);
 		}
 
 		public virtual void Unregister(StateMachineInstanceType smi, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context context)
@@ -694,15 +685,13 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public ParameterType Set(ParameterType value, StateMachineInstanceType smi)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this);
-			context.Set(value, smi);
+			((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this)).Set(value, smi);
 			return value;
 		}
 
 		public ParameterType Get(StateMachineInstanceType smi)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this);
-			return context.value;
+			return ((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this)).value;
 		}
 
 		public ParameterType defaultValue;
@@ -727,8 +716,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					return;
 				}
 				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this.parameter);
-				bool flag = this.callback(smi, context.value);
-				if (flag)
+				if (this.callback(smi, context.value))
 				{
 					smi.GoTo(this.state);
 				}
@@ -746,12 +734,10 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context2 = context;
 					context2.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context2.onDirty, new Action<StateMachineInstanceType>(this.Trigger));
+					return;
 				}
-				else
-				{
-					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context3 = context;
-					context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context3.onDirty, new Action<StateMachineInstanceType>(this.Evaluate));
-				}
+				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context3 = context;
+				context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Combine(context3.onDirty, new Action<StateMachineInstanceType>(this.Evaluate));
 			}
 
 			public override void Unregister(StateMachineInstanceType smi)
@@ -761,12 +747,10 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context2 = context;
 					context2.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context2.onDirty, new Action<StateMachineInstanceType>(this.Trigger));
+					return;
 				}
-				else
-				{
-					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context3 = context;
-					context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context3.onDirty, new Action<StateMachineInstanceType>(this.Evaluate));
-				}
+				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context3 = context;
+				context3.onDirty = (Action<StateMachineInstanceType>)Delegate.Remove(context3.onDirty, new Action<StateMachineInstanceType>(this.Evaluate));
 			}
 
 			public override string ToString()
@@ -836,12 +820,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Serialize(BinaryWriter writer)
 			{
-				writer.Write((!this.value) ? 0 : 1);
+				writer.Write(this.value ? 1 : 0);
 			}
 
 			public override void Deserialize(IReader reader)
 			{
-				this.value = reader.ReadByte() != 0;
+				this.value = reader.ReadByte() > 0;
 			}
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
@@ -1034,7 +1018,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 	public class ResourceParameter<ResourceType> : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ResourceType> where ResourceType : Resource
 	{
 		public ResourceParameter()
-			: base((ResourceType)((object)null))
+			: base(default(ResourceType))
 		{
 		}
 
@@ -1052,7 +1036,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Serialize(BinaryWriter writer)
 			{
-				string text = string.Empty;
+				string text = "";
 				if (this.value != null)
 				{
 					if (this.value.Guid == null)
@@ -1070,7 +1054,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void Deserialize(IReader reader)
 			{
 				string text = reader.ReadKleiString();
-				if (text != string.Empty)
+				if (text != "")
 				{
 					ResourceGuid resourceGuid = new ResourceGuid(text, null);
 					this.value = Db.Get().GetResource<ResourceType>(resourceGuid);
@@ -1086,7 +1070,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 	public class ObjectParameter<ObjectType> : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ObjectType> where ObjectType : class
 	{
 		public ObjectParameter()
-			: base((ObjectType)((object)null))
+			: base(default(ObjectType))
 		{
 		}
 
@@ -1135,13 +1119,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				}
 				global::Debug.LogError(gameObject.name + " does not have state machine " + typeof(StateMachineType).Name);
 			}
-			return (SMT)((object)null);
+			return default(SMT);
 		}
 
 		public bool IsNull(StateMachineInstanceType smi)
 		{
-			GameObject gameObject = base.Get(smi);
-			return gameObject == null;
+			return base.Get(smi) == null;
 		}
 
 		public ComponentType Get<ComponentType>(StateMachineInstanceType smi)
@@ -1243,8 +1226,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public void Trigger(StateMachineInstanceType smi)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Signal.Context context = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Signal.Context)smi.GetParameterContext(this);
-			context.Set(null, smi);
+			((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Signal.Context)smi.GetParameterContext(this)).Set(null, smi);
 		}
 
 		public override StateMachine.Parameter.Context CreateContext()

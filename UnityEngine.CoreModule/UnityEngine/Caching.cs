@@ -6,16 +6,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The Caching class lets you manage cached AssetBundles, downloaded using UnityWebRequestAssetBundle.GetAssetBundle().</para>
-	/// </summary>
-	[NativeHeader("Runtime/Misc/CachingManager.h")]
 	[StaticAccessor("GetCachingManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Misc/CachingManager.h")]
 	public sealed class Caching
 	{
-		/// <summary>
-		///   <para>Controls compression of cache data. Enabled by default.</para>
-		/// </summary>
 		public static extern bool compressionEnabled
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -24,9 +18,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Returns true if Caching system is ready for use.</para>
-		/// </summary>
 		public static extern bool ready
 		{
 			[NativeName("GetIsReady")]
@@ -34,23 +25,9 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Removes all AssetBundle content that has been cached by the current application.</para>
-		/// </summary>
-		/// <param name="expiration">The number of seconds that AssetBundles may remain unused in the cache.</param>
-		/// <returns>
-		///   <para>True when cache clearing succeeded, false if cache was in use.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool ClearCache();
 
-		/// <summary>
-		///   <para>Removes all AssetBundle content that has been cached by the current application.</para>
-		/// </summary>
-		/// <param name="expiration">The number of seconds that AssetBundles may remain unused in the cache.</param>
-		/// <returns>
-		///   <para>True when cache clearing succeeded, false if cache was in use.</para>
-		/// </returns>
 		public static bool ClearCache(int expiration)
 		{
 			return Caching.ClearCache_Int(expiration);
@@ -60,14 +37,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool ClearCache_Int(int expiration);
 
-		/// <summary>
-		///   <para>Removes the given version of the AssetBundle.</para>
-		/// </summary>
-		/// <param name="assetBundleName">The AssetBundle name.</param>
-		/// <param name="hash">Version needs to be cleaned.</param>
-		/// <returns>
-		///   <para>Returns true when cache clearing succeeded.  Can return false if any cached bundle is in use.</para>
-		/// </returns>
 		public static bool ClearCachedVersion(string assetBundleName, Hash128 hash)
 		{
 			if (string.IsNullOrEmpty(assetBundleName))
@@ -83,14 +52,6 @@ namespace UnityEngine
 			return Caching.ClearCachedVersionInternal_Injected(assetBundleName, ref hash);
 		}
 
-		/// <summary>
-		///   <para>Removes all the cached versions of the AssetBundle from the cache, except for the specified version.</para>
-		/// </summary>
-		/// <param name="assetBundleName">The AssetBundle name.</param>
-		/// <param name="hash">Version needs to be kept.</param>
-		/// <returns>
-		///   <para>Returns true when cache clearing succeeded.</para>
-		/// </returns>
 		public static bool ClearOtherCachedVersions(string assetBundleName, Hash128 hash)
 		{
 			if (string.IsNullOrEmpty(assetBundleName))
@@ -100,13 +61,6 @@ namespace UnityEngine
 			return Caching.ClearCachedVersions(assetBundleName, hash, true);
 		}
 
-		/// <summary>
-		///   <para>Removes all the cached versions of the given AssetBundle from the cache.</para>
-		/// </summary>
-		/// <param name="assetBundleName">The AssetBundle name.</param>
-		/// <returns>
-		///   <para>Returns true when cache clearing succeeded.</para>
-		/// </returns>
 		public static bool ClearAllCachedVersions(string assetBundleName)
 		{
 			if (string.IsNullOrEmpty(assetBundleName))
@@ -137,16 +91,6 @@ namespace UnityEngine
 			outCachedVersions.AddRange(Caching.GetCachedVersions(assetBundleName));
 		}
 
-		/// <summary>
-		///   <para>Checks if an AssetBundle is cached.</para>
-		/// </summary>
-		/// <param name="string">Url The filename of the AssetBundle. Domain and path information are stripped from this string automatically.</param>
-		/// <param name="int">Version The version number of the AssetBundle to check for. Negative values are not allowed.</param>
-		/// <param name="url"></param>
-		/// <param name="version"></param>
-		/// <returns>
-		///   <para>True if an AssetBundle matching the url and version parameters has previously been loaded using UnityWebRequestAssetBundle.GetAssetBundle() and is currently stored in the cache. Returns false if the AssetBundle is not in cache, either because it has been flushed from the cache or was never loaded using the Caching API.</para>
-		/// </returns>
 		[Obsolete("Please use IsVersionCached with Hash128 instead.")]
 		public static bool IsVersionCached(string url, int version)
 		{
@@ -177,11 +121,6 @@ namespace UnityEngine
 			return Caching.IsVersionCached_Injected(url, assetBundleName, ref hash);
 		}
 
-		/// <summary>
-		///   <para>Bumps the timestamp of a cached file to be the current time.</para>
-		/// </summary>
-		/// <param name="url"></param>
-		/// <param name="version"></param>
 		[Obsolete("Please use MarkAsUsed with Hash128 instead.")]
 		public static bool MarkAsUsed(string url, int version)
 		{
@@ -275,10 +214,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Add a cache with the given path.</para>
-		/// </summary>
-		/// <param name="cachePath">Path to the cache folder.</param>
 		public static Cache AddCache(string cachePath)
 		{
 			if (string.IsNullOrEmpty(cachePath))
@@ -316,16 +251,9 @@ namespace UnityEngine
 			return cache;
 		}
 
-		/// <summary>
-		///   <para>Returns the Cache at the given position in the cache list.</para>
-		/// </summary>
-		/// <param name="cacheIndex">Index of the cache to get.</param>
-		/// <returns>
-		///   <para>A reference to the Cache at the index specified.</para>
-		/// </returns>
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
-		[NativeName("Caching_GetCacheHandleAt")]
 		[NativeThrows]
+		[NativeName("Caching_GetCacheHandleAt")]
 		public static Cache GetCacheAt(int cacheIndex)
 		{
 			Cache cache;
@@ -333,16 +261,9 @@ namespace UnityEngine
 			return cache;
 		}
 
-		/// <summary>
-		///   <para>Returns the Cache that has the given cache path.</para>
-		/// </summary>
-		/// <param name="cachePath">The cache path.</param>
-		/// <returns>
-		///   <para>A reference to the Cache with the given path.</para>
-		/// </returns>
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
-		[NativeName("Caching_GetCacheHandleByPath")]
 		[NativeThrows]
+		[NativeName("Caching_GetCacheHandleByPath")]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static Cache GetCacheByPath(string cachePath)
 		{
 			Cache cache;
@@ -359,26 +280,14 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Removes the Cache from cache list.</para>
-		/// </summary>
-		/// <param name="cache">The Cache to be removed.</param>
-		/// <returns>
-		///   <para>Returns true if the Cache is removed.</para>
-		/// </returns>
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_RemoveCacheByHandle")]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		public static bool RemoveCache(Cache cache)
 		{
 			return Caching.RemoveCache_Injected(ref cache);
 		}
 
-		/// <summary>
-		///   <para>Moves the source Cache before the destination Cache in the cache list.</para>
-		/// </summary>
-		/// <param name="src">The Cache to move.</param>
-		/// <param name="dst">The Cache which should come after the source Cache in the cache list.</param>
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_MoveCacheBeforeByHandle")]
 		[NativeThrows]
@@ -387,31 +296,20 @@ namespace UnityEngine
 			Caching.MoveCacheBefore_Injected(ref src, ref dst);
 		}
 
-		/// <summary>
-		///   <para>Moves the source Cache after the destination Cache in the cache list.</para>
-		/// </summary>
-		/// <param name="src">The Cache to move.</param>
-		/// <param name="dst">The Cache which should come before the source Cache in the cache list.</param>
-		[NativeName("Caching_MoveCacheAfterByHandle")]
 		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
+		[NativeName("Caching_MoveCacheAfterByHandle")]
 		public static void MoveCacheAfter(Cache src, Cache dst)
 		{
 			Caching.MoveCacheAfter_Injected(ref src, ref dst);
 		}
 
-		/// <summary>
-		///   <para>Returns the cache count in the cache list.</para>
-		/// </summary>
 		public static extern int cacheCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Returns the default cache which is added by Unity internally.</para>
-		/// </summary>
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static Cache defaultCache
 		{
@@ -424,9 +322,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets or sets the current cache in which AssetBundles should be cached.</para>
-		/// </summary>
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static Cache currentCacheForWriting
 		{

@@ -5,7 +5,8 @@ using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	public sealed class OleDbDataReader : DbDataReader, IDisposable
+	[MonoTODO("OleDb is not implemented.")]
+	public sealed class OleDbDataReader : DbDataReader
 	{
 		internal OleDbDataReader()
 		{
@@ -15,7 +16,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -23,16 +24,15 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
-		[MonoTODO]
 		public override bool HasRows
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -40,23 +40,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
-			}
-		}
-
-		public override object this[int index]
-		{
-			get
-			{
-				throw null;
-			}
-		}
-
-		public override object this[string name]
-		{
-			get
-			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -64,174 +48,178 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
-		[MonoTODO]
 		public override int VisibleFieldCount
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
 		public override void Close()
 		{
+			throw ADP.OleDb();
 		}
 
 		public override bool GetBoolean(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override byte GetByte(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public override long GetBytes(int ordinal, long dataIndex, byte[] buffer, int bufferIndex, int length)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public override char GetChar(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public override long GetChars(int ordinal, long dataIndex, char[] buffer, int bufferIndex, int length)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		[MonoTODO]
 		public new OleDbDataReader GetData(int ordinal)
 		{
-			throw null;
-		}
-
-		public override string GetDataTypeName(int index)
-		{
-			throw null;
-		}
-
-		public override DateTime GetDateTime(int ordinal)
-		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		protected override DbDataReader GetDbDataReader(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
+		public override string GetDataTypeName(int index)
+		{
+			throw ADP.OleDb();
+		}
+
+		public override DateTime GetDateTime(int ordinal)
+		{
+			throw ADP.OleDb();
+		}
+
 		public override decimal GetDecimal(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override double GetDouble(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override IEnumerator GetEnumerator()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override Type GetFieldType(int index)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override float GetFloat(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public override Guid GetGuid(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override short GetInt16(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override int GetInt32(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override long GetInt64(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override string GetName(int index)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override int GetOrdinal(string name)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override DataTable GetSchemaTable()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override string GetString(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public TimeSpan GetTimeSpan(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override object GetValue(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public override int GetValues(object[] values)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override bool IsDBNull(int ordinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override bool NextResult()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override bool Read()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		void IDisposable.Dispose()
+		public override object this[int index]
 		{
+			get
+			{
+				throw ADP.OleDb();
+			}
+		}
+
+		public override object this[string name]
+		{
+			get
+			{
+				throw ADP.OleDb();
+			}
 		}
 	}
 }

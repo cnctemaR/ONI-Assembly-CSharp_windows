@@ -22,7 +22,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameMax);
 			int num = NativeMethods.ISteamAppList_GetAppName(CSteamAPIContext.GetSteamAppList(), nAppID, intPtr, cchNameMax);
-			pchName = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchName = ((num != -1) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return num;
 		}
@@ -32,7 +32,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameMax);
 			int num = NativeMethods.ISteamAppList_GetAppInstallDir(CSteamAPIContext.GetSteamAppList(), nAppID, intPtr, cchNameMax);
-			pchDirectory = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchDirectory = ((num != -1) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return num;
 		}

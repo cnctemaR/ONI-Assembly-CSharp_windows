@@ -11,11 +11,14 @@ namespace System.Diagnostics
 		{
 			if (value == null)
 			{
-				value = string.Empty;
+				this.value = "";
 			}
-			this.value = value;
-			this.type = string.Empty;
-			this.name = string.Empty;
+			else
+			{
+				this.value = value;
+			}
+			this.name = "";
+			this.type = "";
 		}
 
 		public string Value
@@ -23,47 +26,6 @@ namespace System.Diagnostics
 			get
 			{
 				return this.value;
-			}
-		}
-
-		public Type Target
-		{
-			get
-			{
-				return this.target_type;
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				this.target_type = value;
-				this.target_type_name = this.target_type.AssemblyQualifiedName;
-			}
-		}
-
-		public string TargetTypeName
-		{
-			get
-			{
-				return this.target_type_name;
-			}
-			set
-			{
-				this.target_type_name = value;
-			}
-		}
-
-		public string Type
-		{
-			get
-			{
-				return this.type;
-			}
-			set
-			{
-				this.type = value;
 			}
 		}
 
@@ -79,14 +41,55 @@ namespace System.Diagnostics
 			}
 		}
 
+		public string Type
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
+			}
+		}
+
+		public Type Target
+		{
+			get
+			{
+				return this.target;
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				this.targetName = value.AssemblyQualifiedName;
+				this.target = value;
+			}
+		}
+
+		public string TargetTypeName
+		{
+			get
+			{
+				return this.targetName;
+			}
+			set
+			{
+				this.targetName = value;
+			}
+		}
+
+		private string name;
+
 		private string value;
 
 		private string type;
 
-		private string name;
+		private string targetName;
 
-		private string target_type_name;
-
-		private Type target_type;
+		private Type target;
 	}
 }

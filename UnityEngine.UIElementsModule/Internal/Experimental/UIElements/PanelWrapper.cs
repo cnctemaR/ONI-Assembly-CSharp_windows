@@ -12,7 +12,31 @@ namespace UnityEngine.Internal.Experimental.UIElements
 
 		private void OnDisable()
 		{
+			if (this.m_Updater != null)
+			{
+				this.m_Updater.Dispose();
+			}
 			this.m_Panel = null;
+		}
+
+		public bool UIREnabled
+		{
+			set
+			{
+				if (this.m_Updater != null)
+				{
+					this.m_Updater.Dispose();
+				}
+				if (value)
+				{
+					this.m_Updater = new UIRRepaintUpdater();
+				}
+				else
+				{
+					this.m_Updater = new VisualTreeRepaintUpdater();
+				}
+				this.m_Panel.SetUpdater(this.m_Updater, VisualTreeUpdatePhase.Repaint);
+			}
 		}
 
 		public VisualElement visualTree
@@ -29,5 +53,7 @@ namespace UnityEngine.Internal.Experimental.UIElements
 		}
 
 		private Panel m_Panel;
+
+		private BaseVisualTreeUpdater m_Updater;
 	}
 }

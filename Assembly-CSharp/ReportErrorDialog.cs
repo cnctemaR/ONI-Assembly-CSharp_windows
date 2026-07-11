@@ -76,16 +76,15 @@ public class ReportErrorDialog : MonoBehaviour
 	{
 		yield return new WaitForEndOfFrame();
 		yield return new WaitForEndOfFrame();
-		bool delay = false;
+		bool flag = false;
 		if (ReportErrorDialog.MOST_RECENT_SAVEFILE != null && File.Exists(ReportErrorDialog.MOST_RECENT_SAVEFILE))
 		{
-			delay = true;
-			FileInfo fileInfo = new FileInfo(ReportErrorDialog.MOST_RECENT_SAVEFILE);
-			long length = fileInfo.Length;
+			flag = true;
+			long length = new FileInfo(ReportErrorDialog.MOST_RECENT_SAVEFILE).Length;
 			this.saveFileInfoLabel.text = Path.GetFileName(ReportErrorDialog.MOST_RECENT_SAVEFILE) + " " + length.ToString() + " bytes";
 			this.uploadSaveDialog.SetActive(true);
 		}
-		if (!delay)
+		if (!flag)
 		{
 			this.Submit();
 		}

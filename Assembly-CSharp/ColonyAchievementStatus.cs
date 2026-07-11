@@ -32,13 +32,12 @@ public class ColonyAchievementStatus
 
 	public void Deserialize(IReader reader)
 	{
-		this.success = reader.ReadByte() != 0;
-		this.failed = reader.ReadByte() != 0;
+		this.success = reader.ReadByte() > 0;
+		this.failed = reader.ReadByte() > 0;
 		int num = reader.ReadInt32();
 		for (int i = 0; i < num; i++)
 		{
-			string text = reader.ReadKleiString();
-			Type type = Type.GetType(text);
+			Type type = Type.GetType(reader.ReadKleiString());
 			if (type != null)
 			{
 				ColonyAchievementRequirement colonyAchievementRequirement = (ColonyAchievementRequirement)FormatterServices.GetUninitializedObject(type);
@@ -55,9 +54,9 @@ public class ColonyAchievementStatus
 
 	public void Serialize(BinaryWriter writer)
 	{
-		writer.Write((!this.success) ? 0 : 1);
-		writer.Write((!this.failed) ? 0 : 1);
-		writer.Write((this.requirements == null) ? 0 : this.requirements.Count);
+		writer.Write(this.success ? 1 : 0);
+		writer.Write(this.failed ? 1 : 0);
+		writer.Write((this.requirements != null) ? this.requirements.Count : 0);
 		if (this.requirements != null)
 		{
 			foreach (ColonyAchievementRequirement colonyAchievementRequirement in this.requirements)

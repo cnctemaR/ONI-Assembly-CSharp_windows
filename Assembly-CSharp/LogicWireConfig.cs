@@ -47,8 +47,7 @@ public class LogicWireConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		Constructable component = go.GetComponent<Constructable>();
-		component.isDiggingRequired = false;
+		go.GetComponent<Constructable>().isDiggingRequired = false;
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddOrGet<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Logic;
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;

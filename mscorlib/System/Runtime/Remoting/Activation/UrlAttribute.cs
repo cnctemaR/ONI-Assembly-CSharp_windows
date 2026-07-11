@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Contexts;
+using System.Security;
 
 namespace System.Runtime.Remoting.Activation
 {
@@ -32,12 +33,14 @@ namespace System.Runtime.Remoting.Activation
 			return this.url.GetHashCode();
 		}
 
+		[SecurityCritical]
 		[ComVisible(true)]
 		public override void GetPropertiesForNewContext(IConstructionCallMessage ctorMsg)
 		{
 		}
 
 		[ComVisible(true)]
+		[SecurityCritical]
 		public override bool IsContextOK(Context ctx, IConstructionCallMessage msg)
 		{
 			return true;

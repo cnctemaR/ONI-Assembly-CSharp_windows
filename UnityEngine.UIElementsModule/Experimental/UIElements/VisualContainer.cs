@@ -40,14 +40,8 @@ namespace UnityEngine.Experimental.UIElements
 			return base.shadow[index];
 		}
 
-		/// <summary>
-		///   <para>Instantiates a VisualElement using the data read from a UXML file.</para>
-		/// </summary>
-		public class VisualContainerFactory : VisualElement.VisualElementFactory
+		public new class UxmlFactory : VisualElement.UxmlFactory
 		{
-			/// <summary>
-			///   <para>Returns VisualContainer type name.</para>
-			/// </summary>
 			public override string uxmlName
 			{
 				get
@@ -56,9 +50,6 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Returns VisualContainer namespace name.</para>
-			/// </summary>
 			public override string uxmlNamespace
 			{
 				get
@@ -67,9 +58,6 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Returns VisualContainer full name.</para>
-			/// </summary>
 			public override string uxmlQualifiedName
 			{
 				get
@@ -78,9 +66,6 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Returns the VisualElement type name.</para>
-			/// </summary>
 			public override string substituteForTypeName
 			{
 				get
@@ -89,9 +74,6 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Returns the VisualElement type namespace.</para>
-			/// </summary>
 			public override string substituteForTypeNamespace
 			{
 				get
@@ -100,9 +82,6 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Returns the VisualElement qualified name.</para>
-			/// </summary>
 			public override string substituteForTypeQualifiedName
 			{
 				get

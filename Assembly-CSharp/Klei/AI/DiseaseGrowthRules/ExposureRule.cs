@@ -13,11 +13,9 @@ namespace Klei.AI.DiseaseGrowthRules
 				if (this.Test(elements[i]))
 				{
 					ElemExposureInfo elemExposureInfo = infoList[i];
-					float? num = this.populationHalfLife;
-					if (num != null)
+					if (this.populationHalfLife != null)
 					{
-						float? num2 = this.populationHalfLife;
-						elemExposureInfo.populationHalfLife = num2.Value;
+						elemExposureInfo.populationHalfLife = this.populationHalfLife.Value;
 					}
 					infoList[i] = elemExposureInfo;
 				}

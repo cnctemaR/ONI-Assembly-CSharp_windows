@@ -14,8 +14,7 @@ namespace Database
 		public override bool Success()
 		{
 			float num = 0f;
-			ReportManager.DailyReport todaysReport = ReportManager.Instance.TodaysReport;
-			ReportManager.ReportEntry entry = todaysReport.GetEntry(ReportManager.ReportType.ChoreStatus);
+			ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.ChoreStatus);
 			for (int i = 0; i < entry.contextEntries.Count; i++)
 			{
 				ReportManager.ReportEntry reportEntry = entry.contextEntries[i];
@@ -28,8 +27,7 @@ namespace Database
 			int count = ReportManager.Instance.reports.Count;
 			for (int j = 0; j < count; j++)
 			{
-				ReportManager.DailyReport dailyReport = ReportManager.Instance.reports[j];
-				ReportManager.ReportEntry entry2 = dailyReport.GetEntry(ReportManager.ReportType.ChoreStatus);
+				ReportManager.ReportEntry entry2 = ReportManager.Instance.reports[j].GetEntry(ReportManager.ReportType.ChoreStatus);
 				int count2 = entry2.contextEntries.Count;
 				for (int k = 0; k < count2; k++)
 				{
@@ -56,7 +54,7 @@ namespace Database
 
 		public override string GetProgress(bool complete)
 		{
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CHORES_OF_TYPE, (!complete) ? this.choresCompleted : this.numChoreseToComplete, this.numChoreseToComplete, Db.Get().ChoreTypes.PowerTinker.Name);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CHORES_OF_TYPE, complete ? this.numChoreseToComplete : this.choresCompleted, this.numChoreseToComplete, Db.Get().ChoreTypes.PowerTinker.Name);
 		}
 
 		private float numChoreseToComplete;

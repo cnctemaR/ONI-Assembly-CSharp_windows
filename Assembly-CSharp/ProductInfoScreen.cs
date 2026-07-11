@@ -12,11 +12,9 @@ public class ProductInfoScreen : KScreen
 		if (this.currentDef != null)
 		{
 			this.SetTitle(this.currentDef);
+			return;
 		}
-		else
-		{
-			this.ClearProduct(true);
-		}
+		this.ClearProduct(true);
 	}
 
 	public void ClearProduct(bool deactivateTool = true)
@@ -68,12 +66,12 @@ public class ProductInfoScreen : KScreen
 		this.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(this.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
 		this.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(this.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
 		this.ConsumeMouseScroll = true;
-		this.sandboxInstantBuildToggle.ChangeState((!SandboxToolParameterMenu.instance.settings.InstantBuild) ? 0 : 1);
+		this.sandboxInstantBuildToggle.ChangeState(SandboxToolParameterMenu.instance.settings.InstantBuild ? 1 : 0);
 		MultiToggle multiToggle = this.sandboxInstantBuildToggle;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
 			SandboxToolParameterMenu.instance.settings.InstantBuild = !SandboxToolParameterMenu.instance.settings.InstantBuild;
-			this.sandboxInstantBuildToggle.ChangeState((!SandboxToolParameterMenu.instance.settings.InstantBuild) ? 0 : 1);
+			this.sandboxInstantBuildToggle.ChangeState(SandboxToolParameterMenu.instance.settings.InstantBuild ? 1 : 0);
 		}));
 		this.sandboxInstantBuildToggle.gameObject.SetActive(Game.Instance.SandboxModeActive);
 		Game.Instance.Subscribe(-1948169901, delegate(object data)
@@ -146,7 +144,7 @@ public class ProductInfoScreen : KScreen
 	{
 		this.titleBar.SetTitle(def.Name);
 		bool flag = (PlanScreen.Instance != null && PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete);
-		this.titleBar.GetComponentInChildren<KImage>().ColorState = ((!flag) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Active);
+		this.titleBar.GetComponentInChildren<KImage>().ColorState = (flag ? KImage.ColorSelector.Active : KImage.ColorSelector.Disabled);
 	}
 
 	private void SetDescription(BuildingDef def)
@@ -182,32 +180,34 @@ public class ProductInfoScreen : KScreen
 			Element element = ElementLoader.GetElement(this.materialSelectionPanel.CurrentSelectedElement);
 			if (element != null)
 			{
-				foreach (AttributeModifier attributeModifier2 in element.attributeModifiers)
+				using (List<AttributeModifier>.Enumerator enumerator2 = element.attributeModifiers.GetEnumerator())
 				{
-					float num2 = 0f;
-					Klei.AI.Attribute attribute3 = Db.Get().BuildingAttributes.Get(attributeModifier2.AttributeId);
-					dictionary2.TryGetValue(attribute3, out num2);
-					num2 += attributeModifier2.Value;
-					dictionary2[attribute3] = num2;
+					while (enumerator2.MoveNext())
+					{
+						AttributeModifier attributeModifier2 = enumerator2.Current;
+						float num2 = 0f;
+						Klei.AI.Attribute attribute3 = Db.Get().BuildingAttributes.Get(attributeModifier2.AttributeId);
+						dictionary2.TryGetValue(attribute3, out num2);
+						num2 += attributeModifier2.Value;
+						dictionary2[attribute3] = num2;
+					}
+					goto IL_021D;
 				}
 			}
-			else
+			PrefabAttributeModifiers component = Assets.TryGetPrefab(this.materialSelectionPanel.CurrentSelectedElement).GetComponent<PrefabAttributeModifiers>();
+			if (component != null)
 			{
-				GameObject gameObject = Assets.TryGetPrefab(this.materialSelectionPanel.CurrentSelectedElement);
-				PrefabAttributeModifiers component = gameObject.GetComponent<PrefabAttributeModifiers>();
-				if (component != null)
+				foreach (AttributeModifier attributeModifier3 in component.descriptors)
 				{
-					foreach (AttributeModifier attributeModifier3 in component.descriptors)
-					{
-						float num3 = 0f;
-						Klei.AI.Attribute attribute4 = Db.Get().BuildingAttributes.Get(attributeModifier3.AttributeId);
-						dictionary2.TryGetValue(attribute4, out num3);
-						num3 += attributeModifier3.Value;
-						dictionary2[attribute4] = num3;
-					}
+					float num3 = 0f;
+					Klei.AI.Attribute attribute4 = Db.Get().BuildingAttributes.Get(attributeModifier3.AttributeId);
+					dictionary2.TryGetValue(attribute4, out num3);
+					num3 += attributeModifier3.Value;
+					dictionary2[attribute4] = num3;
 				}
 			}
 		}
+		IL_021D:
 		if (dictionary.Count > 0)
 		{
 			text += "\n\n";
@@ -216,16 +216,15 @@ public class ProductInfoScreen : KScreen
 				float num4 = 0f;
 				dictionary.TryGetValue(keyValuePair.Key, out num4);
 				float num5 = 0f;
-				string text2 = string.Empty;
+				string text2 = "";
 				if (dictionary2.TryGetValue(keyValuePair.Key, out num5))
 				{
 					num5 = Mathf.Abs(num4 * num5);
 					text2 = "(+" + num5 + ")";
 				}
-				string text3 = text;
 				text = string.Concat(new object[]
 				{
-					text3,
+					text,
 					"\n",
 					keyValuePair.Key.Name,
 					": ",
@@ -328,8 +327,9 @@ public class ProductInfoScreen : KScreen
 		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(def))
 		{
 			this.onElementsFullySelected.Signal();
+			return;
 		}
-		else if (!MaterialSelector.AllowInsufficientMaterialBuild() && !DebugHandler.InstantBuildMode)
+		if (!MaterialSelector.AllowInsufficientMaterialBuild() && !DebugHandler.InstantBuildMode)
 		{
 			if (PlayerController.Instance.ActiveTool == BuildTool.Instance)
 			{

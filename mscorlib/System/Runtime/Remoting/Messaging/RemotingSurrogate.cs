@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Remoting.Proxies;
 using System.Runtime.Serialization;
 
 namespace System.Runtime.Remoting.Messaging
@@ -14,13 +13,10 @@ namespace System.Runtime.Remoting.Messaging
 			}
 			if (RemotingServices.IsTransparentProxy(obj))
 			{
-				RealProxy realProxy = RemotingServices.GetRealProxy(obj);
-				realProxy.GetObjectData(si, sc);
+				RemotingServices.GetRealProxy(obj).GetObjectData(si, sc);
+				return;
 			}
-			else
-			{
-				RemotingServices.GetObjectData(obj, si, sc);
-			}
+			RemotingServices.GetObjectData(obj, si, sc);
 		}
 
 		public virtual object SetObjectData(object obj, SerializationInfo si, StreamingContext sc, ISurrogateSelector selector)

@@ -26,26 +26,28 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
-		int num = this.versionCounter++;
-		int num2 = 1;
+		int num = this.versionCounter;
+		this.versionCounter = num + 1;
+		int num2 = num;
+		int num3 = 1;
 		this.cavityIdToCavityInfo.Clear();
 		this.cellToFishCount.Clear();
 		ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.PooledList pooledList = ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.Allocate();
 		foreach (FishOvercrowdingMonitor.Instance instance in this.fishes)
 		{
-			int num3 = Grid.PosToCell(instance);
-			if (Grid.IsValidCell(num3))
+			int num4 = Grid.PosToCell(instance);
+			if (Grid.IsValidCell(num4))
 			{
 				FishOvercrowingManager.FishInfo fishInfo = new FishOvercrowingManager.FishInfo
 				{
-					cell = num3,
+					cell = num4,
 					fish = instance
 				};
 				pooledList.Add(fishInfo);
-				int num4 = 0;
-				this.cellToFishCount.TryGetValue(num3, out num4);
-				num4++;
-				this.cellToFishCount[num3] = num4;
+				int num5 = 0;
+				this.cellToFishCount.TryGetValue(num4, out num5);
+				num5++;
+				this.cellToFishCount[num4] = num5;
 			}
 		}
 		foreach (FishOvercrowingManager.FishInfo fishInfo2 in pooledList)
@@ -53,35 +55,32 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 			ListPool<int, FishOvercrowingManager>.PooledList pooledList2 = ListPool<int, FishOvercrowingManager>.Allocate();
 			pooledList2.Add(fishInfo2.cell);
 			int i = 0;
-			int num5 = num2++;
+			int num6 = num3++;
 			while (i < pooledList2.Count)
 			{
-				int num6 = pooledList2[i++];
-				if (Grid.IsValidCell(num6))
+				int num7 = pooledList2[i++];
+				if (Grid.IsValidCell(num7))
 				{
-					FishOvercrowingManager.Cell cell = this.cells[num6];
-					if (cell.version != num)
+					FishOvercrowingManager.Cell cell = this.cells[num7];
+					if (cell.version != num2 && Grid.IsLiquid(num7))
 					{
-						if (Grid.IsLiquid(num6))
+						cell.cavityId = num6;
+						cell.version = num2;
+						int num8 = 0;
+						this.cellToFishCount.TryGetValue(num7, out num8);
+						FishOvercrowingManager.CavityInfo cavityInfo = default(FishOvercrowingManager.CavityInfo);
+						if (!this.cavityIdToCavityInfo.TryGetValue(num6, out cavityInfo))
 						{
-							cell.cavityId = num5;
-							cell.version = num;
-							int num7 = 0;
-							this.cellToFishCount.TryGetValue(num6, out num7);
-							FishOvercrowingManager.CavityInfo cavityInfo = default(FishOvercrowingManager.CavityInfo);
-							if (!this.cavityIdToCavityInfo.TryGetValue(num5, out cavityInfo))
-							{
-								cavityInfo = default(FishOvercrowingManager.CavityInfo);
-							}
-							cavityInfo.fishCount += num7;
-							cavityInfo.cellCount++;
-							this.cavityIdToCavityInfo[num5] = cavityInfo;
-							pooledList2.Add(Grid.CellLeft(num6));
-							pooledList2.Add(Grid.CellRight(num6));
-							pooledList2.Add(Grid.CellAbove(num6));
-							pooledList2.Add(Grid.CellBelow(num6));
-							this.cells[num6] = cell;
+							cavityInfo = default(FishOvercrowingManager.CavityInfo);
 						}
+						cavityInfo.fishCount += num8;
+						cavityInfo.cellCount++;
+						this.cavityIdToCavityInfo[num6] = cavityInfo;
+						pooledList2.Add(Grid.CellLeft(num7));
+						pooledList2.Add(Grid.CellRight(num7));
+						pooledList2.Add(Grid.CellAbove(num7));
+						pooledList2.Add(Grid.CellBelow(num7));
+						this.cells[num7] = cell;
 					}
 				}
 			}

@@ -9,7 +9,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class HashMembershipCondition : ISerializable, IDeserializationCallback, ISecurityEncodable, ISecurityPolicyEncodable, IMembershipCondition
+	public sealed class HashMembershipCondition : IMembershipCondition, ISecurityEncodable, ISecurityPolicyEncodable, IDeserializationCallback, ISerializable
 	{
 		internal HashMembershipCondition()
 		{
@@ -27,16 +27,6 @@ namespace System.Security.Policy
 			}
 			this.hash_algorithm = hashAlg;
 			this.hash_value = (byte[])value.Clone();
-		}
-
-		[MonoTODO("fx 2.0")]
-		void IDeserializationCallback.OnDeserialization(object sender)
-		{
-		}
-
-		[MonoTODO("fx 2.0")]
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
 		}
 
 		public HashAlgorithm HashAlgorithm
@@ -136,7 +126,7 @@ namespace System.Security.Policy
 			MembershipConditionHelper.CheckSecurityElement(e, "e", this.version, this.version);
 			this.hash_value = CryptoConvert.FromHex(e.Attribute("HashValue"));
 			string text = e.Attribute("HashAlgorithm");
-			this.hash_algorithm = ((text != null) ? HashAlgorithm.Create(text) : null);
+			this.hash_algorithm = ((text == null) ? null : HashAlgorithm.Create(text));
 		}
 
 		public override int GetHashCode()
@@ -173,6 +163,16 @@ namespace System.Security.Policy
 				}
 			}
 			return true;
+		}
+
+		[MonoTODO("fx 2.0")]
+		void IDeserializationCallback.OnDeserialization(object sender)
+		{
+		}
+
+		[MonoTODO("fx 2.0")]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
 		}
 
 		private readonly int version = 1;

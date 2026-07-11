@@ -75,6 +75,7 @@ public class WiltCondition : KMonoBehaviour
 			{
 				this.goingToWilt = true;
 				this.Recover();
+				return;
 			}
 		}
 		else
@@ -121,6 +122,7 @@ public class WiltCondition : KMonoBehaviour
 			if (!this.goingToWilt)
 			{
 				this.Wilt();
+				return;
 			}
 		}
 		else if (this.goingToWilt)
@@ -175,11 +177,10 @@ public class WiltCondition : KMonoBehaviour
 			if (this.rm.Replanted)
 			{
 				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, base.GetComponent<ReceptacleMonitor>());
+				return;
 			}
-			else
-			{
-				component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<ReceptacleMonitor>());
-			}
+			component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<ReceptacleMonitor>());
+			return;
 		}
 		else
 		{
@@ -187,31 +188,27 @@ public class WiltCondition : KMonoBehaviour
 			if (smi != null && !smi.IsInsideState(smi.sm.wild))
 			{
 				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowingDomestic, this);
+				return;
 			}
-			else
-			{
-				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, this);
-			}
+			component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, this);
+			return;
 		}
 	}
 
 	public string WiltCausesString()
 	{
-		string text = string.Empty;
+		string text = "";
 		List<IWiltCause> allSMI = this.GetAllSMI<IWiltCause>();
 		allSMI.AddRange(base.GetComponents<IWiltCause>());
 		foreach (IWiltCause wiltCause in allSMI)
 		{
 			foreach (WiltCondition.Condition condition in wiltCause.Conditions)
 			{
-				if (this.WiltConditions.ContainsKey((int)condition))
+				if (this.WiltConditions.ContainsKey((int)condition) && !this.WiltConditions[(int)condition])
 				{
-					if (!this.WiltConditions[(int)condition])
-					{
-						text += "\n";
-						text += wiltCause.WiltStateString;
-						break;
-					}
+					text += "\n";
+					text += wiltCause.WiltStateString;
+					break;
 				}
 			}
 		}

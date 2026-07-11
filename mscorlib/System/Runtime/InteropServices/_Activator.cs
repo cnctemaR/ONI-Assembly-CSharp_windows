@@ -2,11 +2,11 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("03973551-57A1-3900-A2B5-9083E3FF2943")]
 	[TypeLibImportClass(typeof(Activator))]
+	[Guid("03973551-57A1-3900-A2B5-9083E3FF2943")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	public interface _Activator
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

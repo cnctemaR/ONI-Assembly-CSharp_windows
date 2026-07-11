@@ -81,24 +81,26 @@ public class SimulatedTemperatureAdjuster
 		this.operational = (bool)data;
 		if (this.operational)
 		{
-			foreach (GameObject gameObject in this.storage.items)
+			using (List<GameObject>.Enumerator enumerator = this.storage.items.GetEnumerator())
 			{
-				if (gameObject != null)
+				while (enumerator.MoveNext())
 				{
-					SimTemperatureTransfer component = gameObject.GetComponent<SimTemperatureTransfer>();
-					this.OnItemSimRegistered(component);
+					GameObject gameObject = enumerator.Current;
+					if (gameObject != null)
+					{
+						SimTemperatureTransfer component = gameObject.GetComponent<SimTemperatureTransfer>();
+						this.OnItemSimRegistered(component);
+					}
 				}
+				return;
 			}
 		}
-		else
+		foreach (GameObject gameObject2 in this.storage.items)
 		{
-			foreach (GameObject gameObject2 in this.storage.items)
+			if (gameObject2 != null)
 			{
-				if (gameObject2 != null)
-				{
-					SimTemperatureTransfer component2 = gameObject2.GetComponent<SimTemperatureTransfer>();
-					this.Unregister(component2);
-				}
+				SimTemperatureTransfer component2 = gameObject2.GetComponent<SimTemperatureTransfer>();
+				this.Unregister(component2);
 			}
 		}
 	}
@@ -129,15 +131,12 @@ public class SimulatedTemperatureAdjuster
 		{
 			return;
 		}
-		bool flag = this.operational && component2.storage == this.storage;
-		if (flag)
+		if (this.operational && component2.storage == this.storage)
 		{
 			this.Register(component);
+			return;
 		}
-		else
-		{
-			this.Unregister(component);
-		}
+		this.Unregister(component);
 	}
 
 	private float temperature;

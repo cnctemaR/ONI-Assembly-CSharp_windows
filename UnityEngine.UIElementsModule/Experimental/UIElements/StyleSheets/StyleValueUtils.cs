@@ -28,13 +28,13 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			return current.Apply(other, StylePropertyApplyMode.CopyIfEqualOrGreaterSpecificity) && value != other.value;
 		}
 
-		public static bool ApplyAndCompare(ref StyleValue<CursorStyle> current, StyleValue<CursorStyle> other)
+		public static bool ApplyAndCompare<T>(ref StyleValue<T> current, StyleValue<T> other) where T : struct, IEquatable<T>
 		{
-			CursorStyle value = current.value;
-			return current.Apply(other, StylePropertyApplyMode.CopyIfEqualOrGreaterSpecificity) && value != other.value;
+			T value = current.value;
+			return current.Apply(other, StylePropertyApplyMode.CopyIfEqualOrGreaterSpecificity) && !value.Equals(other.value);
 		}
 
-		public static bool ApplyAndCompare<T>(ref StyleValue<T> current, StyleValue<T> other) where T : Object
+		public static bool ApplyAndCompareObject<T>(ref StyleValue<T> current, StyleValue<T> other) where T : class
 		{
 			T value = current.value;
 			return current.Apply(other, StylePropertyApplyMode.CopyIfEqualOrGreaterSpecificity) && value != other.value;

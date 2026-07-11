@@ -45,28 +45,15 @@ public static class ReachedDistantPlanetSequence
 		AudioMixer.instance.Start(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot);
 		CameraController.Instance.FadeIn(0f, 1f);
 		MusicManager.instance.PlaySong("Music_Victory_02_NIS", false);
-		IEnumerator enumerator3 = Components.LiveMinionIdentities.GetEnumerator();
-		try
+		foreach (object obj in Components.LiveMinionIdentities)
 		{
-			while (enumerator3.MoveNext())
+			MinionIdentity minionIdentity = (MinionIdentity)obj;
+			if (minionIdentity != null)
 			{
-				object obj = enumerator3.Current;
-				MinionIdentity minionIdentity = (MinionIdentity)obj;
-				if (minionIdentity != null)
-				{
-					minionIdentity.GetComponent<Facing>().Face(cameraTagetMid.x);
-					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator3 as IDisposable) != null)
-			{
-				disposable.Dispose();
+				minionIdentity.GetComponent<Facing>().Face(cameraTagetMid.x);
+				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
 			}
 		}
 		yield return new WaitForSecondsRealtime(0.5f);
@@ -78,10 +65,12 @@ public static class ReachedDistantPlanetSequence
 		CameraController.Instance.SetOverrideZoomSpeed(0.01f);
 		CameraController.Instance.SetTargetPos(cameraTargetTop, 35f, false);
 		float baseZoomSpeed = 0.03f;
-		for (int i = 0; i < 10; i++)
+		int num;
+		for (int i = 0; i < 10; i = num + 1)
 		{
 			yield return new WaitForSecondsRealtime(0.5f);
 			CameraController.Instance.SetOverrideZoomSpeed(baseZoomSpeed + (float)i * 0.006f);
+			num = i;
 		}
 		yield return new WaitForSecondsRealtime(6f);
 		CameraController.Instance.FadeOut(1f, 1f);
@@ -97,8 +86,7 @@ public static class ReachedDistantPlanetSequence
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
 		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.ReachedDistantPlanet.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);
 		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.ReachedDistantPlanet.messageBody, Db.Get().ColonyAchievements.ReachedDistantPlanet.Id, Db.Get().ColonyAchievements.ReachedDistantPlanet.loopVideoName);
-		VideoScreen videoScreen = component;
-		videoScreen.OnStop = (global::System.Action)Delegate.Combine(videoScreen.OnStop, new global::System.Action(delegate
+		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);
 			CameraController.Instance.FadeIn(0f, 1f);

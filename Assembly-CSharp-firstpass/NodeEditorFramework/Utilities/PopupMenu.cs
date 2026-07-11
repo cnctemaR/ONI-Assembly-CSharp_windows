@@ -25,7 +25,7 @@ namespace NodeEditorFramework.Utilities
 		{
 			this.minWidth = MinWidth;
 			this.position = PopupMenu.calculateRect(pos, this.menuItems, this.minWidth);
-			this.selectedPath = string.Empty;
+			this.selectedPath = "";
 			OverlayGUI.currentPopup = this;
 		}
 
@@ -44,11 +44,9 @@ namespace NodeEditorFramework.Utilities
 			if (menuItem != null)
 			{
 				menuItem.subItems.Add(new PopupMenu.MenuItem(text, content, func, userData));
+				return;
 			}
-			else
-			{
-				this.menuItems.Add(new PopupMenu.MenuItem(text, content, func, userData));
-			}
+			this.menuItems.Add(new PopupMenu.MenuItem(text, content, func, userData));
 		}
 
 		public void AddItem(GUIContent content, bool on, PopupMenu.MenuFunction func)
@@ -58,11 +56,9 @@ namespace NodeEditorFramework.Utilities
 			if (menuItem != null)
 			{
 				menuItem.subItems.Add(new PopupMenu.MenuItem(text, content, func));
+				return;
 			}
-			else
-			{
-				this.menuItems.Add(new PopupMenu.MenuItem(text, content, func));
-			}
+			this.menuItems.Add(new PopupMenu.MenuItem(text, content, func));
 		}
 
 		public void AddSeparator(string path)
@@ -72,11 +68,9 @@ namespace NodeEditorFramework.Utilities
 			if (menuItem != null)
 			{
 				menuItem.subItems.Add(new PopupMenu.MenuItem());
+				return;
 			}
-			else
-			{
-				this.menuItems.Add(new PopupMenu.MenuItem());
-			}
+			this.menuItems.Add(new PopupMenu.MenuItem());
 		}
 
 		private PopupMenu.MenuItem AddHierarchy(ref GUIContent content, out string path)
@@ -168,33 +162,31 @@ namespace NodeEditorFramework.Utilities
 					RTEditorGUI.Seperator(new Rect(PopupMenu.backgroundStyle.contentOffset.x + 1f, this.currentItemHeight + 1f, groupRect.width - 2f, 1f));
 				}
 				this.currentItemHeight += 3f;
+				return;
 			}
-			else
+			Rect rect = new Rect(PopupMenu.backgroundStyle.contentOffset.x, this.currentItemHeight, groupRect.width, PopupMenu.itemHeight);
+			if (rect.Contains(Event.current.mousePosition))
 			{
-				Rect rect = new Rect(PopupMenu.backgroundStyle.contentOffset.x, this.currentItemHeight, groupRect.width, PopupMenu.itemHeight);
-				if (rect.Contains(Event.current.mousePosition))
-				{
-					this.selectedPath = item.path;
-				}
-				bool flag = this.selectedPath == item.path || this.selectedPath.Contains(item.path + "/");
-				GUI.Label(rect, item.content, (!flag) ? GUI.skin.label : PopupMenu.selectedLabel);
-				if (item.group)
-				{
-					GUI.DrawTexture(new Rect(rect.x + rect.width - 12f, rect.y + (rect.height - 12f) / 2f, 12f, 12f), PopupMenu.expandRight);
-					if (flag)
-					{
-						item.groupPos = new Rect(groupRect.x + groupRect.width + 4f, groupRect.y + this.currentItemHeight - 2f, 0f, 0f);
-						this.groupToDraw = item;
-					}
-				}
-				else if (flag && (Event.current.type == EventType.MouseDown || (Event.current.button != 1 && Event.current.type == EventType.MouseUp)))
-				{
-					item.Execute();
-					this.close = true;
-					Event.current.Use();
-				}
-				this.currentItemHeight += PopupMenu.itemHeight;
+				this.selectedPath = item.path;
 			}
+			bool flag = this.selectedPath == item.path || this.selectedPath.Contains(item.path + "/");
+			GUI.Label(rect, item.content, flag ? PopupMenu.selectedLabel : GUI.skin.label);
+			if (item.group)
+			{
+				GUI.DrawTexture(new Rect(rect.x + rect.width - 12f, rect.y + (rect.height - 12f) / 2f, 12f, 12f), PopupMenu.expandRight);
+				if (flag)
+				{
+					item.groupPos = new Rect(groupRect.x + groupRect.width + 4f, groupRect.y + this.currentItemHeight - 2f, 0f, 0f);
+					this.groupToDraw = item;
+				}
+			}
+			else if (flag && (Event.current.type == EventType.MouseDown || (Event.current.button != 1 && Event.current.type == EventType.MouseUp)))
+			{
+				item.Execute();
+				this.close = true;
+				Event.current.Use();
+			}
+			this.currentItemHeight += PopupMenu.itemHeight;
 		}
 
 		private static Rect extendRect(Rect rect, Vector2 extendValue)
@@ -219,13 +211,13 @@ namespace NodeEditorFramework.Utilities
 				}
 				else
 				{
-					num = Mathf.Max(num, GUI.skin.label.CalcSize(menuItem.content).x + (float)((!menuItem.group) ? 10 : 22));
+					num = Mathf.Max(num, GUI.skin.label.CalcSize(menuItem.content).x + (float)(menuItem.group ? 22 : 10));
 					num2 += PopupMenu.itemHeight;
 				}
 			}
 			Vector2 vector = new Vector2(num, num2);
 			bool flag = position.y + vector.y <= (float)Screen.height;
-			return new Rect(position.x, position.y - ((!flag) ? vector.y : 0f), vector.x, vector.y);
+			return new Rect(position.x, position.y - (flag ? 0f : vector.y), vector.x, vector.y);
 		}
 
 		public List<PopupMenu.MenuItem> menuItems = new List<PopupMenu.MenuItem>();
@@ -292,8 +284,9 @@ namespace NodeEditorFramework.Utilities
 				if (this.funcData != null)
 				{
 					this.funcData(this.userData);
+					return;
 				}
-				else if (this.func != null)
+				if (this.func != null)
 				{
 					this.func();
 				}

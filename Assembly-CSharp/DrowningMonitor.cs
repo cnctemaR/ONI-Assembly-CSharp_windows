@@ -120,18 +120,18 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 				if (this.livesUnderWater)
 				{
 					this.effects.Add(DrowningMonitor.saturatedEffect, false);
+					return;
 				}
-				else
-				{
-					this.effects.Add(DrowningMonitor.drowningEffect, false);
-				}
-			}
-			else if (this.livesUnderWater)
-			{
-				this.effects.Remove(DrowningMonitor.saturatedEffect);
+				this.effects.Add(DrowningMonitor.drowningEffect, false);
+				return;
 			}
 			else
 			{
+				if (this.livesUnderWater)
+				{
+					this.effects.Remove(DrowningMonitor.saturatedEffect);
+					return;
+				}
 				this.effects.Remove(DrowningMonitor.drowningEffect);
 			}
 		}
@@ -203,6 +203,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 				if (this.timeToDrown <= 0f)
 				{
 					this.CheckDrowning(null);
+					return;
 				}
 			}
 		}

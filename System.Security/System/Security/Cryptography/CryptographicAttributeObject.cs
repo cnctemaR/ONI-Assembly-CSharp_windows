@@ -24,11 +24,9 @@ namespace System.Security.Cryptography
 			if (values == null)
 			{
 				this._list = new AsnEncodedDataCollection();
+				return;
 			}
-			else
-			{
-				this._list = values;
-			}
+			this._list = values;
 		}
 
 		public Oid Oid

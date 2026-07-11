@@ -4,17 +4,19 @@ namespace System.Data
 {
 	public interface IDbCommand : IDisposable
 	{
+		IDbConnection Connection { get; set; }
+
+		IDbTransaction Transaction { get; set; }
+
 		string CommandText { get; set; }
 
 		int CommandTimeout { get; set; }
 
 		CommandType CommandType { get; set; }
 
-		IDbConnection Connection { get; set; }
-
 		IDataParameterCollection Parameters { get; }
 
-		IDbTransaction Transaction { get; set; }
+		void Prepare();
 
 		UpdateRowSource UpdatedRowSource { get; set; }
 
@@ -29,7 +31,5 @@ namespace System.Data
 		IDataReader ExecuteReader(CommandBehavior behavior);
 
 		object ExecuteScalar();
-
-		void Prepare();
 	}
 }

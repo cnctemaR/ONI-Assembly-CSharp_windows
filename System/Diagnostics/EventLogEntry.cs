@@ -3,14 +3,15 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using Unity;
 
 namespace System.Diagnostics
 {
-	[global::System.ComponentModel.DesignTimeVisible(false)]
-	[global::System.ComponentModel.ToolboxItem(false)]
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[DesignTimeVisible(false)]
+	[ToolboxItem(false)]
+	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
 	[Serializable]
-	public sealed class EventLogEntry : global::System.ComponentModel.Component, ISerializable
+	public sealed class EventLogEntry : Component, ISerializable
 	{
 		internal EventLogEntry(string category, short categoryNumber, int index, int eventID, string source, string message, string userName, string machineName, EventLogEntryType entryType, DateTime timeGenerated, DateTime timeWritten, byte[] data, string[] replacementStrings, long instanceId)
 		{
@@ -30,15 +31,9 @@ namespace System.Diagnostics
 			this.instanceId = instanceId;
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		private EventLogEntry(SerializationInfo info, StreamingContext context)
 		{
-		}
-
-		[global::System.MonoTODO("Needs serialization support")]
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			throw new NotImplementedException();
 		}
 
 		[MonitoringDescription("The category of this event entry.")]
@@ -77,8 +72,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("An ID number for this event entry.")]
 		[Obsolete("Use InstanceId")]
+		[MonitoringDescription("An ID number for this event entry.")]
 		public int EventID
 		{
 			get
@@ -96,8 +91,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ComVisible(false)]
 		[MonitoringDescription("The instance ID for this event entry.")]
+		[ComVisible(false)]
 		public long InstanceId
 		{
 			get
@@ -115,7 +110,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.ComponentModel.Editor("System.ComponentModel.Design.BinaryEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[Editor("System.ComponentModel.Design.BinaryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[MonitoringDescription("The message of this event entry.")]
 		public string Message
 		{
@@ -172,7 +167,18 @@ namespace System.Diagnostics
 
 		public bool Equals(EventLogEntry otherEntry)
 		{
-			return otherEntry == this || (otherEntry.Category == this.category && otherEntry.CategoryNumber == this.categoryNumber && otherEntry.Data.Equals(this.data) && otherEntry.EntryType == this.entryType && otherEntry.EventID == this.eventID && otherEntry.Index == this.index && otherEntry.MachineName == this.machineName && otherEntry.Message == this.message && otherEntry.ReplacementStrings.Equals(this.replacementStrings) && otherEntry.Source == this.source && otherEntry.TimeGenerated.Equals(this.timeGenerated) && otherEntry.TimeWritten.Equals(this.timeWritten) && otherEntry.UserName == this.userName);
+			return otherEntry == this || (otherEntry.Category == this.category && otherEntry.CategoryNumber == this.categoryNumber && otherEntry.Data.Equals(this.data) && otherEntry.EntryType == this.entryType && otherEntry.InstanceId == this.instanceId && otherEntry.Index == this.index && otherEntry.MachineName == this.machineName && otherEntry.Message == this.message && otherEntry.ReplacementStrings.Equals(this.replacementStrings) && otherEntry.Source == this.source && otherEntry.TimeGenerated.Equals(this.timeGenerated) && otherEntry.TimeWritten.Equals(this.timeWritten) && otherEntry.UserName == this.userName);
+		}
+
+		[MonoTODO("Needs serialization support")]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal EventLogEntry()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private string category;

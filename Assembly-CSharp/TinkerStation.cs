@@ -132,6 +132,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 				this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 				base.SetWorkTime(this.workTime);
+				return;
 			}
 		}
 		else if (this.chore != null)
@@ -184,8 +185,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 	public static TinkerStation AddTinkerStation(GameObject go, string required_room_type)
 	{
 		TinkerStation tinkerStation = go.AddOrGet<TinkerStation>();
-		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
-		roomTracker.requiredRoomType = required_room_type;
+		go.AddOrGet<RoomTracker>().requiredRoomType = required_room_type;
 		return tinkerStation;
 	}
 

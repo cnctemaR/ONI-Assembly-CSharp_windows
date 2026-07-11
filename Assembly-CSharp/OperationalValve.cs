@@ -24,15 +24,12 @@ public class OperationalValve : ValveBase
 
 	private void OnOperationalChanged(object data)
 	{
-		bool flag = (bool)data;
-		if (flag)
+		if ((bool)data)
 		{
 			base.CurrentFlow = base.MaxFlow;
+			return;
 		}
-		else
-		{
-			base.CurrentFlow = 0f;
-		}
+		base.CurrentFlow = 0f;
 	}
 
 	public override void UpdateAnim()
@@ -43,19 +40,20 @@ public class OperationalValve : ValveBase
 			if (averageRate > 0f)
 			{
 				this.controller.Queue("on_flow", KAnim.PlayMode.Loop, 1f, 0f);
+				return;
 			}
-			else
-			{
-				this.controller.Queue("on", KAnim.PlayMode.Once, 1f, 0f);
-			}
-		}
-		else if (averageRate > 0f)
-		{
-			this.controller.Queue("off_flow", KAnim.PlayMode.Loop, 1f, 0f);
+			this.controller.Queue("on", KAnim.PlayMode.Once, 1f, 0f);
+			return;
 		}
 		else
 		{
+			if (averageRate > 0f)
+			{
+				this.controller.Queue("off_flow", KAnim.PlayMode.Loop, 1f, 0f);
+				return;
+			}
 			this.controller.Queue("off", KAnim.PlayMode.Once, 1f, 0f);
+			return;
 		}
 	}
 

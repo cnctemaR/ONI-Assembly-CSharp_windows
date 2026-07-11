@@ -17,9 +17,10 @@ namespace KSerialization
 			Type type = Type.GetType(type_name);
 			if (type == null)
 			{
-				foreach (Assembly assembly in Manager.assemblies)
+				Assembly[] array = Manager.assemblies;
+				for (int i = 0; i < array.Length; i++)
 				{
-					type = assembly.GetType(type_name);
+					type = array[i].GetType(type_name);
 					if (type != null)
 					{
 						break;
@@ -61,7 +62,7 @@ namespace KSerialization
 
 		public static SerializationTemplate GetSerializationTemplate(string type_name)
 		{
-			if (type_name == null || type_name == string.Empty)
+			if (type_name == null || type_name == "")
 			{
 				throw new InvalidOperationException("Invalid type name encountered when serializing");
 			}

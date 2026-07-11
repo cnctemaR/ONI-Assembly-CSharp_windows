@@ -28,8 +28,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 			if (minionIdentity.gameObject != gameObject.gameObject)
 			{
 				Vector2 vector2 = minionIdentity.transform.GetPosition();
-				float num = Vector2.SqrMagnitude(vector - vector2);
-				if (num <= 2.25f)
+				if (Vector2.SqrMagnitude(vector - vector2) <= 2.25f)
 				{
 					minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
 					minionIdentity.GetComponent<Effects>().Add("SmelledStinky", true);
@@ -37,23 +36,23 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 				}
 			}
 		}
-		int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
+		int num = Grid.PosToCell(gameObject.transform.GetPosition());
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
-		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, true, -1);
+		SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, true, -1);
 		GameObject gameObject2 = gameObject;
 		bool flag = SoundEvent.ObjectIsSelectedAndVisible(gameObject2);
 		Vector3 vector3 = gameObject2.GetComponent<Transform>().GetPosition();
-		float num3 = 1f;
+		float num2 = 1f;
 		if (flag)
 		{
 			vector3 = SoundEvent.AudioHighlightListenerPosition(vector3);
-			num3 = SoundEvent.GetVolume(flag);
+			num2 = SoundEvent.GetVolume(flag);
 		}
 		else
 		{
 			vector3.z = 0f;
 		}
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num3);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num2);
 	}
 
 	private void OnDeath(object data)
@@ -129,10 +128,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 
 		private float GetNewInterval()
 		{
-			float num = TRAITS.STINKY_EMIT_INTERVAL_MAX - TRAITS.STINKY_EMIT_INTERVAL_MIN;
-			float num2 = Util.GaussianRandom(num, 1f);
-			num2 = Mathf.Max(num2, TRAITS.STINKY_EMIT_INTERVAL_MIN);
-			return Mathf.Min(num2, TRAITS.STINKY_EMIT_INTERVAL_MAX);
+			return Mathf.Min(Mathf.Max(Util.GaussianRandom(TRAITS.STINKY_EMIT_INTERVAL_MAX - TRAITS.STINKY_EMIT_INTERVAL_MIN, 1f), TRAITS.STINKY_EMIT_INTERVAL_MIN), TRAITS.STINKY_EMIT_INTERVAL_MAX);
 		}
 
 		public GameStateMachine<Stinky.States, Stinky.StatesInstance, Stinky, object>.State idle;

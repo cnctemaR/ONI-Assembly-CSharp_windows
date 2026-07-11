@@ -39,8 +39,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		this.arm_go.transform.parent = component.transform;
 		this.looping_sounds = this.arm_go.AddComponent<LoopingSounds>();
 		this.rotateSound = GlobalAssets.GetSound(this.rotateSound, false);
-		KPrefabID kprefabID = this.arm_go.AddComponent<KPrefabID>();
-		kprefabID.PrefabTag = new Tag(text);
+		this.arm_go.AddComponent<KPrefabID>().PrefabTag = new Tag(text);
 		this.arm_anim_ctrl = this.arm_go.AddComponent<KBatchedAnimController>();
 		this.arm_anim_ctrl.AnimFiles = new KAnimFile[] { component.AnimFiles[0] };
 		this.arm_anim_ctrl.initialAnim = "gun";
@@ -48,8 +47,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		this.arm_anim_ctrl.sceneLayer = Grid.SceneLayer.TransferArm;
 		component.SetSymbolVisiblity("gun_target", false);
 		bool flag;
-		Vector4 column = component.GetSymbolTransform(new HashedString("gun_target"), out flag).GetColumn(3);
-		Vector3 vector = column;
+		Vector3 vector = component.GetSymbolTransform(new HashedString("gun_target"), out flag).GetColumn(3);
 		vector.z = Grid.GetLayerZ(Grid.SceneLayer.TransferArm);
 		this.arm_go.transform.SetPosition(vector);
 		this.arm_go.SetActive(true);
@@ -211,21 +209,18 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 					int num8;
 					int num9;
 					Grid.CellToXY(num7, out num8, out num9);
-					if (Grid.IsValidCell(num7) && AutoMiner.ValidDigCell(num7))
+					if (Grid.IsValidCell(num7) && AutoMiner.ValidDigCell(num7) && Grid.TestLineOfSight(num3, num4, num8, num9, new Func<int, bool>(AutoMiner.DigBlockingCB), false))
 					{
-						if (Grid.TestLineOfSight(num3, num4, num8, num9, new Func<int, bool>(AutoMiner.DigBlockingCB), false))
+						if (num7 == this.dig_cell)
 						{
-							if (num7 == this.dig_cell)
-							{
-								flag = true;
-							}
-							Vector3 vector2 = Grid.CellToPos(num7);
-							float num10 = Vector3.Distance(vector, vector2);
-							if (num10 < num5)
-							{
-								num5 = num10;
-								num6 = num7;
-							}
+							flag = true;
+						}
+						Vector3 vector2 = Grid.CellToPos(num7);
+						float num10 = Vector3.Distance(vector, vector2);
+						if (num10 < num5)
+						{
+							num5 = num10;
+							num6 = num7;
 						}
 					}
 				}
@@ -254,31 +249,28 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		{
 			return;
 		}
-		float num = MathUtil.AngleSigned(Vector3.up, target_dir, Vector3.forward);
-		float num2 = num - this.arm_rot;
-		num2 = MathUtil.Wrap(-180f, 180f, num2);
-		this.rotation_complete = Mathf.Approximately(num2, 0f);
-		float num3 = num2;
+		float num = MathUtil.AngleSigned(Vector3.up, target_dir, Vector3.forward) - this.arm_rot;
+		num = MathUtil.Wrap(-180f, 180f, num);
+		this.rotation_complete = Mathf.Approximately(num, 0f);
+		float num2 = num;
 		if (warp)
 		{
 			this.rotation_complete = true;
 		}
 		else
 		{
-			num3 = Mathf.Clamp(num3, -this.turn_rate * dt, this.turn_rate * dt);
+			num2 = Mathf.Clamp(num2, -this.turn_rate * dt, this.turn_rate * dt);
 		}
-		this.arm_rot += num3;
+		this.arm_rot += num2;
 		this.arm_rot = MathUtil.Wrap(-180f, 180f, this.arm_rot);
 		this.arm_go.transform.rotation = Quaternion.Euler(0f, 0f, this.arm_rot);
 		if (!this.rotation_complete)
 		{
 			this.StartRotateSound();
 			this.looping_sounds.SetParameter(this.rotateSound, AutoMiner.HASH_ROTATION, this.arm_rot);
+			return;
 		}
-		else
-		{
-			this.StopRotateSound();
-		}
+		this.StopRotateSound();
 	}
 
 	private void StartRotateSound()

@@ -41,8 +41,7 @@ namespace ProcGenGame
 				}
 				array2 = memoryStream.ToArray();
 			}
-			FastReader fastReader = new FastReader(array2);
-			if (Sim.Load(fastReader) != 0)
+			if (Sim.Load(new FastReader(array2)) != 0)
 			{
 				updateProgressFn(UI.WORLDGEN.FAILED.key, -1f, WorldGenProgressStages.Stages.Failure);
 				return true;
@@ -62,8 +61,7 @@ namespace ProcGenGame
 					Sim.GameDataUpdate* ptr = (Sim.GameDataUpdate*)(void*)intPtr;
 					for (int k = 0; k < ptr->numSubstanceChangeInfo; k++)
 					{
-						Sim.SubstanceChangeInfo substanceChangeInfo = ptr->substanceChangeInfo[k];
-						int cellIdx = substanceChangeInfo.cellIdx;
+						int cellIdx = ptr->substanceChangeInfo[k].cellIdx;
 						cells[cellIdx].elementIdx = ptr->elementIdx[cellIdx];
 						cells[cellIdx].insulation = ptr->insulation[cellIdx];
 						cells[cellIdx].properties = ptr->properties[cellIdx];
@@ -72,6 +70,7 @@ namespace ProcGenGame
 						cells[cellIdx].strengthInfo = ptr->strengthInfo[cellIdx];
 					}
 					Cell templateCellData;
+					Predicate<string> <>9__0;
 					foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair in templateSpawnTargets)
 					{
 						for (int l = 0; l < keyValuePair.Value.cells.Count; l++)
@@ -83,7 +82,14 @@ namespace ProcGenGame
 								cells[num2].elementIdx = (byte)ElementLoader.GetElementIndex(templateCellData.element);
 								cells[num2].temperature = templateCellData.temperature;
 								cells[num2].mass = templateCellData.mass;
-								dcs[num2].diseaseIdx = (byte)WorldGen.diseaseIds.FindIndex((string name) => name == templateCellData.diseaseName);
+								int num3 = num2;
+								List<string> diseaseIds = WorldGen.diseaseIds;
+								Predicate<string> predicate;
+								if ((predicate = <>9__0) == null)
+								{
+									predicate = (<>9__0 = (string name) => name == templateCellData.diseaseName);
+								}
+								dcs[num3].diseaseIdx = (byte)diseaseIds.FindIndex(predicate);
 								dcs[num2].elementCount = templateCellData.diseaseCount;
 							}
 						}
@@ -92,8 +98,8 @@ namespace ProcGenGame
 			}
 			for (int m = 0; m < Grid.CellCount; m++)
 			{
-				int num3 = ((m != Grid.CellCount - 1) ? (-1) : 2147481337);
-				SimMessages.ModifyCell(m, (int)cells[m].elementIdx, cells[m].temperature, cells[m].mass, dcs[m].diseaseIdx, dcs[m].elementCount, SimMessages.ReplaceType.Replace, false, num3);
+				int num4 = ((m == Grid.CellCount - 1) ? 2147481337 : (-1));
+				SimMessages.ModifyCell(m, (int)cells[m].elementIdx, cells[m].temperature, cells[m].mass, dcs[m].diseaseIdx, dcs[m].elementCount, SimMessages.ReplaceType.Replace, false, num4);
 			}
 			bool flag = false;
 			while (!flag)
@@ -105,8 +111,7 @@ namespace ProcGenGame
 					Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr2;
 					for (int n = 0; n < ptr2->numCallbackInfo; n++)
 					{
-						Sim.CallbackInfo callbackInfo = ptr2->callbackInfo[n];
-						if (callbackInfo.callbackIdx == 2147481337)
+						if (ptr2->callbackInfo[n].callbackIdx == 2147481337)
 						{
 							flag = true;
 							break;

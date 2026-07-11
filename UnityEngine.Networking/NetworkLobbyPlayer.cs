@@ -6,6 +6,7 @@ namespace UnityEngine.Networking
 {
 	[DisallowMultipleComponent]
 	[AddComponentMenu("Network/NetworkLobbyPlayer")]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkLobbyPlayer : NetworkBehaviour
 	{
 		public byte slot
@@ -49,10 +50,10 @@ namespace UnityEngine.Networking
 
 		public override void OnStartClient()
 		{
-			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-			if (networkLobbyManager)
+			NetworkLobbyManager lobbyManager = this.GetLobbyManager();
+			if (lobbyManager)
 			{
-				networkLobbyManager.lobbySlots[(int)this.m_Slot] = this;
+				lobbyManager.lobbySlots[(int)this.m_Slot] = this;
 				this.m_ReadyToBegin = false;
 				this.OnClientEnterLobby();
 			}
@@ -68,13 +69,13 @@ namespace UnityEngine.Networking
 			{
 				Debug.Log("NetworkLobbyPlayer SendReadyToBeginMessage");
 			}
-			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-			if (networkLobbyManager)
+			NetworkLobbyManager lobbyManager = this.GetLobbyManager();
+			if (lobbyManager)
 			{
 				LobbyReadyToBeginMessage lobbyReadyToBeginMessage = new LobbyReadyToBeginMessage();
 				lobbyReadyToBeginMessage.slotId = (byte)base.playerControllerId;
 				lobbyReadyToBeginMessage.readyState = true;
-				networkLobbyManager.client.Send(43, lobbyReadyToBeginMessage);
+				lobbyManager.client.Send(43, lobbyReadyToBeginMessage);
 			}
 		}
 
@@ -84,13 +85,13 @@ namespace UnityEngine.Networking
 			{
 				Debug.Log("NetworkLobbyPlayer SendReadyToBeginMessage");
 			}
-			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-			if (networkLobbyManager)
+			NetworkLobbyManager lobbyManager = this.GetLobbyManager();
+			if (lobbyManager)
 			{
 				LobbyReadyToBeginMessage lobbyReadyToBeginMessage = new LobbyReadyToBeginMessage();
 				lobbyReadyToBeginMessage.slotId = (byte)base.playerControllerId;
 				lobbyReadyToBeginMessage.readyState = false;
-				networkLobbyManager.client.Send(43, lobbyReadyToBeginMessage);
+				lobbyManager.client.Send(43, lobbyReadyToBeginMessage);
 			}
 		}
 
@@ -100,21 +101,21 @@ namespace UnityEngine.Networking
 			{
 				Debug.Log("NetworkLobbyPlayer SendSceneLoadedMessage");
 			}
-			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-			if (networkLobbyManager)
+			NetworkLobbyManager lobbyManager = this.GetLobbyManager();
+			if (lobbyManager)
 			{
 				IntegerMessage integerMessage = new IntegerMessage((int)base.playerControllerId);
-				networkLobbyManager.client.Send(44, integerMessage);
+				lobbyManager.client.Send(44, integerMessage);
 			}
 		}
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-			if (networkLobbyManager)
+			NetworkLobbyManager lobbyManager = this.GetLobbyManager();
+			if (lobbyManager)
 			{
 				string name = scene.name;
-				if (name == networkLobbyManager.lobbyScene)
+				if (name == lobbyManager.lobbyScene)
 				{
 					return;
 				}
@@ -123,6 +124,11 @@ namespace UnityEngine.Networking
 			{
 				this.SendSceneLoadedMessage();
 			}
+		}
+
+		private NetworkLobbyManager GetLobbyManager()
+		{
+			return NetworkManager.singleton as NetworkLobbyManager;
 		}
 
 		public void RemovePlayer()
@@ -170,15 +176,15 @@ namespace UnityEngine.Networking
 		{
 			if (this.ShowLobbyGUI)
 			{
-				NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-				if (networkLobbyManager)
+				NetworkLobbyManager lobbyManager = this.GetLobbyManager();
+				if (lobbyManager)
 				{
-					if (!networkLobbyManager.showLobbyGUI)
+					if (!lobbyManager.showLobbyGUI)
 					{
 						return;
 					}
 					string name = SceneManager.GetSceneAt(0).name;
-					if (name != networkLobbyManager.lobbyScene)
+					if (name != lobbyManager.lobbyScene)
 					{
 						return;
 					}

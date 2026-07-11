@@ -108,10 +108,6 @@ namespace UnityEngineInternal
 					text = "file://" + text2;
 				}
 			}
-			else if (targetUrl.Contains("%"))
-			{
-				text = targetUri.OriginalString;
-			}
 			else
 			{
 				string scheme = targetUri.Scheme;
@@ -126,7 +122,15 @@ namespace UnityEngineInternal
 						{
 							text3 = WebRequestUtils.URLDecode(text3);
 						}
-						stringBuilder.Append(text3);
+						if (text3.StartsWith("file:/") && text3.Length > 6 && text3[6] != '/')
+						{
+							stringBuilder.Append("file://");
+							stringBuilder.Append(text3.Substring(5));
+						}
+						else
+						{
+							stringBuilder.Append(text3);
+						}
 						text = stringBuilder.ToString();
 					}
 					else
@@ -135,6 +139,10 @@ namespace UnityEngineInternal
 						stringBuilder.Append(targetUri.Fragment);
 						text = stringBuilder.ToString();
 					}
+				}
+				else if (targetUrl.Contains("%"))
+				{
+					text = targetUri.OriginalString;
 				}
 				else
 				{

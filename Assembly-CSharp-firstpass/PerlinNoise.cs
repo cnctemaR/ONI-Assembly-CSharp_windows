@@ -64,9 +64,8 @@ public class PerlinNoise
 
 	private double Lattice(int ix, int iy, int iz, double fx, double fy, double fz)
 	{
-		int num = this.Index(ix, iy, iz);
-		int num2 = num * 3;
-		return this._gradients[num2] * fx + this._gradients[num2 + 1] * fy + this._gradients[num2 + 2] * fz;
+		int num = this.Index(ix, iy, iz) * 3;
+		return this._gradients[num] * fx + this._gradients[num + 1] * fy + this._gradients[num + 2] * fz;
 	}
 
 	private double Lerp(double t, double value0, double value1)

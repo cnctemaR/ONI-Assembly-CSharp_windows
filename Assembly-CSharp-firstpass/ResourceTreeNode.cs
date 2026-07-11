@@ -35,14 +35,6 @@ public class ResourceTreeNode : Resource
 
 	public class Edge
 	{
-		public Edge(ResourceTreeNode source, ResourceTreeNode target, ResourceTreeNode.Edge.EdgeType edgeType)
-		{
-			this.edgeType = edgeType;
-			this.source = source;
-			this.target = target;
-			this.path = null;
-		}
-
 		public ResourceTreeNode.Edge.EdgeType edgeType { get; private set; }
 
 		public ResourceTreeNode source { get; private set; }
@@ -73,6 +65,14 @@ public class ResourceTreeNode : Resource
 
 		public List<Vector2> path { get; private set; }
 
+		public Edge(ResourceTreeNode source, ResourceTreeNode target, ResourceTreeNode.Edge.EdgeType edgeType)
+		{
+			this.edgeType = edgeType;
+			this.source = source;
+			this.target = target;
+			this.path = null;
+		}
+
 		public void AddToPath(Vector2f point)
 		{
 			if (this.path == null)
@@ -85,9 +85,6 @@ public class ResourceTreeNode : Resource
 		public void Render(Rect rect, float width, Color colour)
 		{
 			ResourceTreeNode.Edge.EdgeType edgeType = this.edgeType;
-			if (edgeType != ResourceTreeNode.Edge.EdgeType.GenericEdge)
-			{
-			}
 			RTEditorGUI.DrawLine(rect, this.SourcePos(), this.TargetPos(), colour, null, width);
 		}
 

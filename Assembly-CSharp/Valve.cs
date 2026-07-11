@@ -9,7 +9,11 @@ public class Valve : Workable, ISaveLoadable
 	{
 		get
 		{
-			return (this.chore == null) ? (-1f) : this.desiredFlow;
+			if (this.chore == null)
+			{
+				return -1f;
+			}
+			return this.desiredFlow;
 		}
 	}
 
@@ -31,8 +35,7 @@ public class Valve : Workable, ISaveLoadable
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		Valve component = gameObject.GetComponent<Valve>();
+		Valve component = ((GameObject)data).GetComponent<Valve>();
 		if (component != null)
 		{
 			this.desiredFlow = component.desiredFlow;
@@ -70,26 +73,25 @@ public class Valve : Workable, ISaveLoadable
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.UpdateFlow();
+			return;
 		}
-		else
+		if (this.desiredFlow == this.valveBase.CurrentFlow)
 		{
-			if (this.desiredFlow == this.valveBase.CurrentFlow)
+			if (this.chore != null)
 			{
-				if (this.chore != null)
-				{
-					this.chore.Cancel("desiredFlow == currentFlow");
-					this.chore = null;
-				}
-				component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
-				component.RemoveStatusItem(Db.Get().BuildingStatusItems.PendingWork, false);
-				return;
+				this.chore.Cancel("desiredFlow == currentFlow");
+				this.chore = null;
 			}
-			if (this.chore == null)
-			{
-				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
-				component.AddStatusItem(Db.Get().BuildingStatusItems.PendingWork, this);
-				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-			}
+			component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
+			component.RemoveStatusItem(Db.Get().BuildingStatusItems.PendingWork, false);
+			return;
+		}
+		if (this.chore == null)
+		{
+			component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
+			component.AddStatusItem(Db.Get().BuildingStatusItems.PendingWork, this);
+			this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			return;
 		}
 	}
 

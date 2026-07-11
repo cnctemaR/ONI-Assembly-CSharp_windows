@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using Mono.Security.Cryptography;
 using Mono.Security.X509.Extensions;
 
 namespace Mono.Security.X509
@@ -127,10 +127,11 @@ namespace Mono.Security.X509
 			{
 				if (this.hash_value == null)
 				{
-					ASN1 asn = new ASN1(this.encoded);
-					byte[] bytes = asn[0].GetBytes();
-					HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.GetHashName());
-					this.hash_value = hashAlgorithm.ComputeHash(bytes);
+					byte[] bytes = new ASN1(this.encoded)[0].GetBytes();
+					using (HashAlgorithm hashAlgorithm = PKCS1.CreateFromOid(this.signatureOID))
+					{
+						this.hash_value = hashAlgorithm.ComputeHash(bytes);
+					}
 				}
 				return this.hash_value;
 			}
@@ -276,20 +277,21 @@ namespace Mono.Security.X509
 			}
 			if (x509.Version >= 3)
 			{
-				X509Extension x509Extension = x509.Extensions["2.5.29.15"];
+				BasicConstraintsExtension basicConstraintsExtension = null;
+				X509Extension x509Extension = x509.Extensions["2.5.29.19"];
 				if (x509Extension != null)
 				{
-					KeyUsageExtension keyUsageExtension = new KeyUsageExtension(x509Extension);
-					if (!keyUsageExtension.Support(KeyUsages.cRLSign))
+					basicConstraintsExtension = new BasicConstraintsExtension(x509Extension);
+					if (!basicConstraintsExtension.CertificateAuthority)
 					{
 						return false;
 					}
 				}
-				x509Extension = x509.Extensions["2.5.29.19"];
+				x509Extension = x509.Extensions["2.5.29.15"];
 				if (x509Extension != null)
 				{
-					BasicConstraintsExtension basicConstraintsExtension = new BasicConstraintsExtension(x509Extension);
-					if (!basicConstraintsExtension.CertificateAuthority)
+					KeyUsageExtension keyUsageExtension = new KeyUsageExtension(x509Extension);
+					if (!keyUsageExtension.Support(KeyUsages.cRLSign) && (basicConstraintsExtension == null || !keyUsageExtension.Support(KeyUsages.digitalSignature)))
 					{
 						return false;
 					}
@@ -300,38 +302,11 @@ namespace Mono.Security.X509
 				return false;
 			}
 			string text = this.signatureOID;
-			if (text != null)
+			if (text == "1.2.840.10040.4.3")
 			{
-				if (X509Crl.<>f__switch$map12 == null)
-				{
-					X509Crl.<>f__switch$map12 = new Dictionary<string, int>(1) { { "1.2.840.10040.4.3", 0 } };
-				}
-				int num;
-				if (X509Crl.<>f__switch$map12.TryGetValue(text, out num))
-				{
-					if (num == 0)
-					{
-						return this.VerifySignature(x509.DSA);
-					}
-				}
+				return this.VerifySignature(x509.DSA);
 			}
 			return this.VerifySignature(x509.RSA);
-		}
-
-		private string GetHashName()
-		{
-			string text = this.signatureOID;
-			switch (text)
-			{
-			case "1.2.840.113549.1.1.2":
-				return "MD2";
-			case "1.2.840.113549.1.1.4":
-				return "MD5";
-			case "1.2.840.10040.4.3":
-			case "1.2.840.113549.1.1.5":
-				return "SHA1";
-			}
-			throw new CryptographicException("Unsupported hash algorithm: " + this.signatureOID);
 		}
 
 		internal bool VerifySignature(DSA dsa)
@@ -362,7 +337,7 @@ namespace Mono.Security.X509
 		internal bool VerifySignature(RSA rsa)
 		{
 			RSAPKCS1SignatureDeformatter rsapkcs1SignatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-			rsapkcs1SignatureDeformatter.SetHashAlgorithm(this.GetHashName());
+			rsapkcs1SignatureDeformatter.SetHashAlgorithm(PKCS1.HashNameFromOid(this.signatureOID, true));
 			return rsapkcs1SignatureDeformatter.VerifySignature(this.Hash, this.signature);
 		}
 
@@ -424,17 +399,15 @@ namespace Mono.Security.X509
 				if (extensions == null)
 				{
 					this.extensions = new X509ExtensionCollection();
+					return;
 				}
-				else
-				{
-					this.extensions = extensions;
-				}
+				this.extensions = extensions;
 			}
 
 			internal X509CrlEntry(ASN1 entry)
 			{
 				this.sn = entry[0].Value;
-				Array.Reverse(this.sn);
+				Array.Reverse<byte>(this.sn);
 				this.revocationDate = ASN1Convert.ToDateTime(entry[1]);
 				this.extensions = new X509ExtensionCollection(entry[2]);
 			}

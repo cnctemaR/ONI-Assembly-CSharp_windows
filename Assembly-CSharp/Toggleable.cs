@@ -65,12 +65,10 @@ public class Toggleable : Workable
 			if (DebugHandler.InstantBuildMode)
 			{
 				this.targets[targetIdx].Key.HandleToggle();
+				return;
 			}
-			else
-			{
-				this.targets[targetIdx] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetIdx].Key, new WorkChore<Toggleable>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true));
-				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle, null);
-			}
+			this.targets[targetIdx] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetIdx].Key, new WorkChore<Toggleable>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true));
+			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle, null);
 		}
 	}
 
@@ -83,11 +81,9 @@ public class Toggleable : Workable
 		if (this.targets[targetIdx].Value == null)
 		{
 			this.QueueToggle(targetIdx);
+			return;
 		}
-		else
-		{
-			this.CancelToggle(targetIdx);
-		}
+		this.CancelToggle(targetIdx);
 	}
 
 	private void CancelToggle(int targetIdx)

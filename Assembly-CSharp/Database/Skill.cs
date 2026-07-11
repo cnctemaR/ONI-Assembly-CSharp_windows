@@ -30,11 +30,14 @@ namespace Database
 
 		public bool GivesPerk(HashedString perkId)
 		{
-			foreach (SkillPerk skillPerk in this.perks)
+			using (List<SkillPerk>.Enumerator enumerator = this.perks.GetEnumerator())
 			{
-				if (skillPerk.IdHash == perkId)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current.IdHash == perkId)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

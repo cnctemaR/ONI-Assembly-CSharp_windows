@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Sends an event when a value from a field changes.</para>
-	/// </summary>
 	public class ChangeEvent<T> : EventBase<ChangeEvent<T>>, IChangeEvent
 	{
 		public ChangeEvent()
@@ -19,7 +16,7 @@ namespace UnityEngine.Experimental.UIElements
 		protected override void Init()
 		{
 			base.Init();
-			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.Capturable;
+			base.flags = EventBase.EventFlags.Bubbles | EventBase.EventFlags.TricklesDown;
 			this.previousValue = default(T);
 			this.newValue = default(T);
 		}

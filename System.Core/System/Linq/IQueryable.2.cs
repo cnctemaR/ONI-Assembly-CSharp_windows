@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace System.Linq
 {
-	public interface IQueryable<T> : IEnumerable, IQueryable, IEnumerable<T>
+	public interface IQueryable<out T> : IEnumerable<T>, IEnumerable, IQueryable
 	{
 	}
 }

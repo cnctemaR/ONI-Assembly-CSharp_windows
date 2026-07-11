@@ -10,11 +10,46 @@ namespace System.Security.Cryptography
 		{
 			this.KeySizeValue = 64;
 			this.BlockSizeValue = 64;
-			this.FeedbackSizeValue = 8;
-			this.LegalKeySizesValue = new KeySizes[1];
-			this.LegalKeySizesValue[0] = new KeySizes(64, 64, 0);
-			this.LegalBlockSizesValue = new KeySizes[1];
-			this.LegalBlockSizesValue[0] = new KeySizes(64, 64, 0);
+			this.FeedbackSizeValue = this.BlockSizeValue;
+			this.LegalBlockSizesValue = DES.s_legalBlockSizes;
+			this.LegalKeySizesValue = DES.s_legalKeySizes;
+		}
+
+		public override byte[] Key
+		{
+			get
+			{
+				if (this.KeyValue == null)
+				{
+					do
+					{
+						this.GenerateKey();
+					}
+					while (DES.IsWeakKey(this.KeyValue) || DES.IsSemiWeakKey(this.KeyValue));
+				}
+				return (byte[])this.KeyValue.Clone();
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				if (!base.ValidKeySize(value.Length * 8))
+				{
+					throw new ArgumentException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+				}
+				if (DES.IsWeakKey(value))
+				{
+					throw new CryptographicException(Environment.GetResourceString("Specified key is a known weak key for '{0}' and cannot be used."), "DES");
+				}
+				if (DES.IsSemiWeakKey(value))
+				{
+					throw new CryptographicException(Environment.GetResourceString("Specified key is a known semi-weak key for '{0}' and cannot be used."), "DES");
+				}
+				this.KeyValue = (byte[])value.Clone();
+				this.KeySizeValue = value.Length * 8;
+			}
 		}
 
 		public new static DES Create()
@@ -29,132 +64,42 @@ namespace System.Security.Cryptography
 
 		public static bool IsWeakKey(byte[] rgbKey)
 		{
-			if (rgbKey == null)
+			if (!DES.IsLegalKeySize(rgbKey))
 			{
-				throw new CryptographicException(Locale.GetText("Null Key"));
+				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
 			}
-			if (rgbKey.Length != 8)
-			{
-				throw new CryptographicException(Locale.GetText("Wrong Key Length"));
-			}
-			for (int i = 0; i < rgbKey.Length; i++)
-			{
-				int num = (int)(rgbKey[i] | 17);
-				if (num != 17 && num != 31 && num != 241 && num != 255)
-				{
-					return false;
-				}
-			}
-			for (int j = 0; j < DES.weakKeys.Length >> 3; j++)
-			{
-				int k;
-				for (k = 0; k < rgbKey.Length; k++)
-				{
-					if ((rgbKey[k] ^ DES.weakKeys[j, k]) > 1)
-					{
-						break;
-					}
-				}
-				if (k == 8)
-				{
-					return true;
-				}
-			}
-			return false;
+			ulong num = DES.QuadWordFromBigEndian(Utils.FixupKeyParity(rgbKey));
+			return num == 72340172838076673UL || num == 18374403900871474942UL || num == 2242545357694045710UL || num == 16204198716015505905UL;
 		}
 
 		public static bool IsSemiWeakKey(byte[] rgbKey)
 		{
-			if (rgbKey == null)
+			if (!DES.IsLegalKeySize(rgbKey))
 			{
-				throw new CryptographicException(Locale.GetText("Null Key"));
+				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
 			}
-			if (rgbKey.Length != 8)
-			{
-				throw new CryptographicException(Locale.GetText("Wrong Key Length"));
-			}
-			for (int i = 0; i < rgbKey.Length; i++)
-			{
-				int num = (int)(rgbKey[i] | 17);
-				if (num != 17 && num != 31 && num != 241 && num != 255)
-				{
-					return false;
-				}
-			}
-			for (int j = 0; j < DES.semiWeakKeys.Length >> 3; j++)
-			{
-				int k;
-				for (k = 0; k < rgbKey.Length; k++)
-				{
-					if ((rgbKey[k] ^ DES.semiWeakKeys[j, k]) > 1)
-					{
-						break;
-					}
-				}
-				if (k == 8)
-				{
-					return true;
-				}
-			}
-			return false;
+			ulong num = DES.QuadWordFromBigEndian(Utils.FixupKeyParity(rgbKey));
+			return num == 143554428589179390UL || num == 18303189645120372225UL || num == 2296870857142767345UL || num == 16149873216566784270UL || num == 135110050437988849UL || num == 16141428838415593729UL || num == 2305315235293957886UL || num == 18311634023271562766UL || num == 80784550989267214UL || num == 2234100979542855169UL || num == 16212643094166696446UL || num == 18365959522720284401UL;
 		}
 
-		public override byte[] Key
+		private static bool IsLegalKeySize(byte[] rgbKey)
 		{
-			get
-			{
-				if (this.KeyValue == null)
-				{
-					this.GenerateKey();
-				}
-				return (byte[])this.KeyValue.Clone();
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("Key");
-				}
-				if (value.Length != 8)
-				{
-					throw new ArgumentException(Locale.GetText("Wrong Key Length"));
-				}
-				if (DES.IsWeakKey(value))
-				{
-					throw new CryptographicException(Locale.GetText("Weak Key"));
-				}
-				if (DES.IsSemiWeakKey(value))
-				{
-					throw new CryptographicException(Locale.GetText("Semi Weak Key"));
-				}
-				this.KeyValue = (byte[])value.Clone();
-			}
+			return rgbKey != null && rgbKey.Length == 8;
 		}
 
-		private const int keySizeByte = 8;
-
-		internal static readonly byte[,] weakKeys = new byte[,]
+		private static ulong QuadWordFromBigEndian(byte[] block)
 		{
-			{ 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 31, 31, 31, 31, 15, 15, 15, 15 },
-			{ 225, 225, 225, 225, 241, 241, 241, 241 },
-			{ byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue }
+			return ((ulong)block[0] << 56) | ((ulong)block[1] << 48) | ((ulong)block[2] << 40) | ((ulong)block[3] << 32) | ((ulong)block[4] << 24) | ((ulong)block[5] << 16) | ((ulong)block[6] << 8) | (ulong)block[7];
+		}
+
+		private static KeySizes[] s_legalBlockSizes = new KeySizes[]
+		{
+			new KeySizes(64, 64, 0)
 		};
 
-		internal static readonly byte[,] semiWeakKeys = new byte[,]
+		private static KeySizes[] s_legalKeySizes = new KeySizes[]
 		{
-			{ 0, 30, 0, 30, 0, 14, 0, 14 },
-			{ 0, 224, 0, 224, 0, 240, 0, 240 },
-			{ 0, 254, 0, 254, 0, 254, 0, 254 },
-			{ 30, 0, 30, 0, 14, 0, 14, 0 },
-			{ 30, 224, 30, 224, 14, 240, 14, 240 },
-			{ 30, 254, 30, 254, 14, 254, 14, 254 },
-			{ 224, 0, 224, 0, 240, 0, 240, 0 },
-			{ 224, 30, 224, 30, 240, 14, 240, 14 },
-			{ 224, 254, 224, 254, 240, 254, 240, 254 },
-			{ 254, 0, 254, 0, 254, 0, 254, 0 },
-			{ 254, 30, 254, 30, 254, 14, 254, 14 },
-			{ 254, 224, 254, 224, 254, 240, 254, 240 }
+			new KeySizes(64, 64, 0)
 		};
 	}
 }

@@ -4,21 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Utils
 {
 	public abstract class DataMap<T>
 	{
-		public DataMap()
-		{
-			this.AllocateBuffer();
-		}
-
-		public DataMap(int width, int height)
-		{
-			this.AllocateBuffer(width, height);
-		}
-
-		public DataMap(DataMap<T> copy)
-		{
-			this.CopyFrom(copy);
-		}
-
 		public int Width
 		{
 			get
@@ -81,6 +66,21 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Utils
 			{
 				return (float)this.MemoryUsage / 8388608f;
 			}
+		}
+
+		public DataMap()
+		{
+			this.AllocateBuffer();
+		}
+
+		public DataMap(int width, int height)
+		{
+			this.AllocateBuffer(width, height);
+		}
+
+		public DataMap(DataMap<T> copy)
+		{
+			this.CopyFrom(copy);
 		}
 
 		public T[] GetSlab(int y)
@@ -159,7 +159,7 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Utils
 			{
 				buffer = new T[this._cellsCount];
 			}
-			int num = ((this._data.Length <= buffer.Length) ? this._data.Length : buffer.Length);
+			int num = ((this._data.Length > buffer.Length) ? buffer.Length : this._data.Length);
 			Array.Copy(this._data, 0, buffer, 0, num);
 		}
 
@@ -228,8 +228,9 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Utils
 			if (this._data == null)
 			{
 				this._data = new T[this._cellsCount];
+				return;
 			}
-			else if (this._data.Length < this._cellsCount)
+			if (this._data.Length < this._cellsCount)
 			{
 				Array.Resize<T>(ref this._data, this._cellsCount);
 			}

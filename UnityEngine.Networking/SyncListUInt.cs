@@ -2,6 +2,7 @@
 
 namespace UnityEngine.Networking
 {
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class SyncListUInt : SyncList<uint>
 	{
 		protected override void SerializeItem(NetworkWriter writer, uint item)

@@ -8,11 +8,6 @@ namespace ProcGen.Noise
 	[Serializable]
 	public class ControlPointList : NoiseBase
 	{
-		public ControlPointList()
-		{
-			this.points = new List<ControlPointList.Control>();
-		}
-
 		public override Type GetObjectType()
 		{
 			return typeof(ControlPointList);
@@ -20,6 +15,11 @@ namespace ProcGen.Noise
 
 		[SerializeField]
 		public List<ControlPointList.Control> points { get; set; }
+
+		public ControlPointList()
+		{
+			this.points = new List<ControlPointList.Control>();
+		}
 
 		public List<ControlPoint> GetControls()
 		{
@@ -33,6 +33,10 @@ namespace ProcGen.Noise
 
 		public class Control
 		{
+			public float input { get; set; }
+
+			public float output { get; set; }
+
 			public Control()
 			{
 				this.input = 0f;
@@ -44,10 +48,6 @@ namespace ProcGen.Noise
 				this.input = i;
 				this.output = o;
 			}
-
-			public float input { get; set; }
-
-			public float output { get; set; }
 		}
 	}
 }

@@ -2,11 +2,9 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	internal interface ITextInputField : IEventHandler
+	internal interface ITextInputField : IEventHandler, ITextElement
 	{
 		bool hasFocus { get; }
-
-		string text { get; }
 
 		bool doubleClickSelectsWord { get; }
 

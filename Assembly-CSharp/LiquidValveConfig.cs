@@ -43,8 +43,7 @@ public class LiquidValveConfig : IBuildingConfig
 			new ValveBase.AnimRangeInfo(10f, "hi")
 		};
 		go.AddOrGet<Valve>();
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 5f;
+		go.AddOrGet<Workable>().workTime = 5f;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

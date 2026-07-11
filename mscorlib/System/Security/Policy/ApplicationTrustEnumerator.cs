@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Security.Policy
 {
@@ -12,14 +13,6 @@ namespace System.Security.Policy
 			this.e = collection.GetEnumerator();
 		}
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.e.Current;
-			}
-		}
-
 		public ApplicationTrust Current
 		{
 			get
@@ -28,6 +21,15 @@ namespace System.Security.Policy
 			}
 		}
 
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.e.Current;
+			}
+		}
+
+		[SecuritySafeCritical]
 		public bool MoveNext()
 		{
 			return this.e.MoveNext();
@@ -36,6 +38,11 @@ namespace System.Security.Policy
 		public void Reset()
 		{
 			this.e.Reset();
+		}
+
+		internal ApplicationTrustEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private IEnumerator e;

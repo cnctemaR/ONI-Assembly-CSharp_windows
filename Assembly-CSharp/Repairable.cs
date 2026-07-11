@@ -61,27 +61,12 @@ public class Repairable : Workable
 	{
 		if (base.gameObject != null && this.smi != null)
 		{
-			StateMachine.BaseState currentState = this.smi.GetCurrentState();
-			if (currentState == this.smi.sm.forbidden)
+			if (this.smi.GetCurrentState() == this.smi.sm.forbidden)
 			{
-				UserMenu userMenu = Game.Instance.userMenu;
-				GameObject gameObject = base.gameObject;
-				string text = "action_repair";
-				string text2 = global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME;
-				global::System.Action action = new global::System.Action(this.AllowRepair);
-				string text3 = global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
-				userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+				Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_repair", global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME, new global::System.Action(this.AllowRepair), global::Action.NumActions, null, null, null, global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP, true), 0.5f);
+				return;
 			}
-			else
-			{
-				UserMenu userMenu2 = Game.Instance.userMenu;
-				GameObject gameObject2 = base.gameObject;
-				string text3 = "action_repair";
-				string text2 = global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME;
-				global::System.Action action = new global::System.Action(this.CancelRepair);
-				string text = global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP;
-				userMenu2.AddButton(gameObject2, new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
-			}
+			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_repair", global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME, new global::System.Action(this.CancelRepair), global::Action.NumActions, null, null, null, global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP, true), 0.5f);
 		}
 	}
 
@@ -118,22 +103,18 @@ public class Repairable : Workable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		float num = Mathf.Sqrt(component.Mass);
-		float num2 = ((this.expectedRepairTime >= 0f) ? this.expectedRepairTime : num);
-		float num3 = num2 * 0.1f;
-		if (this.timeSpentRepairing >= num3)
+		float num = Mathf.Sqrt(base.GetComponent<PrimaryElement>().Mass);
+		float num2 = ((this.expectedRepairTime < 0f) ? num : this.expectedRepairTime) * 0.1f;
+		if (this.timeSpentRepairing >= num2)
 		{
-			this.timeSpentRepairing -= num3;
-			int num4 = 0;
+			this.timeSpentRepairing -= num2;
+			int num3 = 0;
 			if (worker != null)
 			{
-				AttributeInstance attributeInstance = Db.Get().Attributes.Machinery.Lookup(worker);
-				num4 = (int)attributeInstance.GetTotalValue();
+				num3 = (int)Db.Get().Attributes.Machinery.Lookup(worker).GetTotalValue();
 			}
-			int num5 = 10 + Math.Max(0, num4 * 10);
-			int num6 = Mathf.CeilToInt((float)num5 * 0.1f);
-			this.hp.Repair(num6);
+			int num4 = Mathf.CeilToInt((float)(10 + Math.Max(0, num3 * 10)) * 0.1f);
+			this.hp.Repair(num4);
 			if (this.hp.HitPoints >= this.hp.MaxHitPoints)
 			{
 				return true;
@@ -242,8 +223,7 @@ public class Repairable : Workable
 		{
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			float num = component.Mass * 0.1f;
-			Storage storageProxy = base.smi.master.storageProxy;
-			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
+			PrimaryElement primaryElement = base.smi.master.storageProxy.FindPrimaryElement(component.ElementID);
 			return primaryElement != null && primaryElement.Mass >= num;
 		}
 
@@ -251,11 +231,9 @@ public class Repairable : Workable
 		{
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			float num = component.Mass * 0.1f;
-			Storage storageProxy = base.smi.master.storageProxy;
-			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
-			float num2 = ((!(primaryElement != null)) ? num : Math.Max(0f, num - primaryElement.Mass));
-			KeyValuePair<Tag, float> keyValuePair = new KeyValuePair<Tag, float>(component.Element.tag, num2);
-			return keyValuePair;
+			PrimaryElement primaryElement = base.smi.master.storageProxy.FindPrimaryElement(component.ElementID);
+			float num2 = ((primaryElement != null) ? Math.Max(0f, num - primaryElement.Mass) : num);
+			return new KeyValuePair<Tag, float>(component.Element.tag, num2);
 		}
 
 		public void ConsumeRepairMaterials()
@@ -320,9 +298,8 @@ public class Repairable : Workable
 		private Chore CreateFetchChore(Repairable.SMInstance smi)
 		{
 			PrimaryElement component = smi.master.GetComponent<PrimaryElement>();
-			Storage storageProxy = smi.master.storageProxy;
-			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
-			float num = component.Mass * 0.1f - ((!(primaryElement != null)) ? 0f : primaryElement.Mass);
+			PrimaryElement primaryElement = smi.master.storageProxy.FindPrimaryElement(component.ElementID);
+			float num = component.Mass * 0.1f - ((primaryElement != null) ? primaryElement.Mass : 0f);
 			Tag[] array = new Tag[] { GameTagExtensions.Create(component.ElementID) };
 			return new FetchChore(Db.Get().ChoreTypes.RepairFetch, smi.master.storageProxy, num, array, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
 		}
@@ -363,8 +340,7 @@ public class Repairable : Workable
 				bool flag = true;
 				if (data != null)
 				{
-					Breakable breakable = (Breakable)data;
-					flag = breakable.worker == null;
+					flag = ((Breakable)data).worker == null;
 				}
 				return flag;
 			}

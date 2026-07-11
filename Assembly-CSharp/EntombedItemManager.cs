@@ -24,28 +24,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			return false;
 		}
 		int num = Grid.PosToCell(pickupable);
-		if (!Grid.IsValidCell(num))
-		{
-			return false;
-		}
-		if (!Grid.Solid[num])
-		{
-			return false;
-		}
-		if (Grid.Objects[num, 9] != null)
-		{
-			return false;
-		}
-		PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
-		if (component.Element.IsSolid)
-		{
-			ElementChunk component2 = pickupable.GetComponent<ElementChunk>();
-			if (component2 != null)
-			{
-				return true;
-			}
-		}
-		return false;
+		return Grid.IsValidCell(num) && Grid.Solid[num] && !(Grid.Objects[num, 9] != null) && (pickupable.GetComponent<PrimaryElement>().Element.IsSolid && pickupable.GetComponent<ElementChunk>() != null);
 	}
 
 	public void Add(Pickupable pickupable)
@@ -143,12 +122,9 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 		for (int i = 0; i < this.cells.Count; i++)
 		{
 			int num = this.cells[i];
-			if (Grid.Solid[num])
+			if (Grid.Solid[num] && Grid.Element[num].id == (SimHashes)this.elementIds[i])
 			{
-				if (Grid.Element[num].id == (SimHashes)this.elementIds[i])
-				{
-					pooledList.Add(i);
-				}
+				pooledList.Add(i);
 			}
 		}
 		pooledList.Sort();
@@ -198,8 +174,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			EntombedItemManager.Item item = this.GetItem(num);
 			component.RemoveItem(item.cell);
 			this.RemoveItem(num);
-			SimHashes elementId = (SimHashes)item.elementId;
-			Element element = ElementLoader.FindElementByHash(elementId);
+			Element element = ElementLoader.FindElementByHash((SimHashes)item.elementId);
 			if (element != null)
 			{
 				element.substance.SpawnResource(Grid.CellToPosCCC(item.cell, Grid.SceneLayer.Ore), item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, false, false, false);

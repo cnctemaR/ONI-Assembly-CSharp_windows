@@ -9,11 +9,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Diggable : Workable
 {
-	private Diggable()
-	{
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
-	}
-
 	public bool Reachable
 	{
 		get
@@ -40,13 +35,17 @@ public class Diggable : Workable
 		Prioritizable.AddRef(base.gameObject);
 	}
 
+	private Diggable()
+	{
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		int num = Grid.PosToCell(this);
 		this.originalDigElement = Grid.Element[num];
-		KSelectable component = base.GetComponent<KSelectable>();
-		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForDig, null);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForDig, null);
 		this.UpdateColor(this.isReachable);
 		Grid.Objects[num, 7] = base.gameObject;
 		ChoreType choreType = Db.Get().ChoreTypes.Dig;
@@ -58,8 +57,7 @@ public class Diggable : Workable
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
-		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
-		instance.StartSM();
+		new ReachabilityMonitor.Instance(this).StartSM();
 		base.Subscribe<Diggable>(493375141, Diggable.OnRefreshUserMenuDelegate);
 		this.handle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		Components.Diggables.Add(this);
@@ -68,7 +66,7 @@ public class Diggable : Workable
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
 		Workable.AnimInfo animInfo = default(Workable.AnimInfo);
-		if (this.overrideAnims != null && this.overrideAnims.Length > 0)
+		if (this.overrideAnims != null && this.overrideAnims.Length != 0)
 		{
 			animInfo.overrideAnims = this.overrideAnims;
 		}
@@ -83,13 +81,9 @@ public class Diggable : Workable
 	{
 		bool flag = false;
 		GameObject gameObject = Grid.Objects[cell, 1];
-		if (gameObject != null)
+		if (gameObject != null && gameObject.GetComponent<Constructable>() != null)
 		{
-			Constructable component = gameObject.GetComponent<Constructable>();
-			if (component != null)
-			{
-				flag = true;
-			}
+			flag = true;
 		}
 		return flag;
 	}
@@ -114,12 +108,15 @@ public class Diggable : Workable
 		if (Grid.Element[num].hardness >= 200)
 		{
 			bool flag = false;
-			foreach (Chore.PreconditionInstance preconditionInstance in this.chore.GetPreconditions())
+			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
 			{
-				if (preconditionInstance.id == ChorePreconditions.instance.HasSkillPerk.id)
+				while (enumerator.MoveNext())
 				{
-					flag = true;
-					break;
+					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
 			if (!flag)
@@ -132,12 +129,15 @@ public class Diggable : Workable
 		else if (Grid.Element[num].hardness >= 150)
 		{
 			bool flag2 = false;
-			foreach (Chore.PreconditionInstance preconditionInstance2 in this.chore.GetPreconditions())
+			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
 			{
-				if (preconditionInstance2.id == ChorePreconditions.instance.HasSkillPerk.id)
+				while (enumerator.MoveNext())
 				{
-					flag2 = true;
-					break;
+					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					{
+						flag2 = true;
+						break;
+					}
 				}
 			}
 			if (!flag2)
@@ -150,12 +150,15 @@ public class Diggable : Workable
 		else if (Grid.Element[num].hardness >= 50)
 		{
 			bool flag3 = false;
-			foreach (Chore.PreconditionInstance preconditionInstance3 in this.chore.GetPreconditions())
+			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
 			{
-				if (preconditionInstance3.id == ChorePreconditions.instance.HasSkillPerk.id)
+				while (enumerator.MoveNext())
 				{
-					flag3 = true;
-					break;
+					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					{
+						flag3 = true;
+						break;
+					}
 				}
 			}
 			if (!flag3)
@@ -188,26 +191,25 @@ public class Diggable : Workable
 		{
 			flag4 = true;
 		}
-		if (flag4)
+		if (!flag4)
 		{
-			this.isDigComplete = true;
-			if (this.chore == null || !this.chore.InProgress())
+			if (num2 != -1)
 			{
-				Util.KDestroyGameObject(base.gameObject);
+				Extents extents = default(Extents);
+				Grid.CellToXY(num, out extents.x, out extents.y);
+				extents.width = 1;
+				extents.height = (num2 - num + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
+				this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 			}
-			else
-			{
-				base.GetComponentInChildren<MeshRenderer>().enabled = false;
-			}
+			return;
 		}
-		else if (num2 != -1)
+		this.isDigComplete = true;
+		if (this.chore == null || !this.chore.InProgress())
 		{
-			Extents extents = default(Extents);
-			Grid.CellToXY(num, out extents.x, out extents.y);
-			extents.width = 1;
-			extents.height = (num2 - num + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
-			this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+			Util.KDestroyGameObject(base.gameObject);
+			return;
 		}
+		base.GetComponentInChildren<MeshRenderer>().enabled = false;
 	}
 
 	public Element GetTargetElement()
@@ -223,8 +225,7 @@ public class Diggable : Workable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		int num = Grid.PosToCell(this);
-		Diggable.DoDigTick(num, dt);
+		Diggable.DoDigTick(Grid.PosToCell(this), dt);
 		return this.isDigComplete;
 	}
 
@@ -286,8 +287,7 @@ public class Diggable : Workable
 	private static int GetUnstableCellAbove(int cell)
 	{
 		Vector2I vector2I = Grid.CellToXY(cell);
-		UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
-		List<int> cellsContainingFallingAbove = component.GetCellsContainingFallingAbove(vector2I);
+		List<int> cellsContainingFallingAbove = World.Instance.GetComponent<UnstableGroundManager>().GetCellsContainingFallingAbove(vector2I);
 		if (cellsContainingFallingAbove.Contains(cell))
 		{
 			return cell;
@@ -346,15 +346,13 @@ public class Diggable : Workable
 		if (this.isReachable)
 		{
 			component.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, false);
+			return;
 		}
-		else
+		component.AddStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, this);
+		GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
 		{
-			component.AddStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, this);
-			GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
-			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion, true);
-			}, null, null);
-		}
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion, true);
+		}, null, null);
 	}
 
 	private void UpdateColor(bool reachable)
@@ -379,20 +377,18 @@ public class Diggable : Workable
 				}
 				this.multitoolContext = Diggable.lasersForHardness[1].first;
 				this.multitoolHitEffectTag = Diggable.lasersForHardness[1].second;
+				return;
+			}
+			if (reachable)
+			{
+				material.color = Game.Instance.uiColours.Dig.validLocation;
 			}
 			else
 			{
-				if (reachable)
-				{
-					material.color = Game.Instance.uiColours.Dig.validLocation;
-				}
-				else
-				{
-					material.color = Game.Instance.uiColours.Dig.unreachable;
-				}
-				this.multitoolContext = Diggable.lasersForHardness[0].first;
-				this.multitoolHitEffectTag = Diggable.lasersForHardness[0].second;
+				material.color = Game.Instance.uiColours.Dig.unreachable;
 			}
+			this.multitoolContext = Diggable.lasersForHardness[0].first;
+			this.multitoolHitEffectTag = Diggable.lasersForHardness[0].second;
 		}
 	}
 
@@ -420,13 +416,7 @@ public class Diggable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "icon_cancel";
-		string text2 = UI.USERMENUACTIONS.CANCELDIG.NAME;
-		global::System.Action action = new global::System.Action(this.OnCancel);
-		string text3 = UI.USERMENUACTIONS.CANCELDIG.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELDIG.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELDIG.TOOLTIP, true), 1f);
 	}
 
 	private HandleVector<int>.Handle partitionerEntry;
@@ -453,10 +443,10 @@ public class Diggable : Workable
 
 	private bool isDigComplete;
 
-	private static List<Tuple<string, Tag>> lasersForHardness = new List<Tuple<string, Tag>>
+	private static List<global::Tuple<string, Tag>> lasersForHardness = new List<global::Tuple<string, Tag>>
 	{
-		new Tuple<string, Tag>("dig", "fx_dig_splash"),
-		new Tuple<string, Tag>("specialistdig", "fx_dig_splash")
+		new global::Tuple<string, Tag>("dig", "fx_dig_splash"),
+		new global::Tuple<string, Tag>("specialistdig", "fx_dig_splash")
 	};
 
 	private int handle;

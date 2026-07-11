@@ -1,58 +1,23 @@
 ﻿using System;
+using Unity;
 
 namespace System.Xml.Serialization
 {
 	public class XmlNodeEventArgs : EventArgs
 	{
-		internal XmlNodeEventArgs(int linenumber, int lineposition, string localname, string name, string nsuri, XmlNodeType nodetype, object source, string text)
+		internal XmlNodeEventArgs(XmlNode xmlNode, int lineNumber, int linePosition, object o)
 		{
-			this.linenumber = linenumber;
-			this.lineposition = lineposition;
-			this.localname = localname;
-			this.name = name;
-			this.nsuri = nsuri;
-			this.nodetype = nodetype;
-			this.source = source;
-			this.text = text;
+			this.o = o;
+			this.xmlNode = xmlNode;
+			this.lineNumber = lineNumber;
+			this.linePosition = linePosition;
 		}
 
-		public int LineNumber
+		public object ObjectBeingDeserialized
 		{
 			get
 			{
-				return this.linenumber;
-			}
-		}
-
-		public int LinePosition
-		{
-			get
-			{
-				return this.lineposition;
-			}
-		}
-
-		public string LocalName
-		{
-			get
-			{
-				return this.localname;
-			}
-		}
-
-		public string Name
-		{
-			get
-			{
-				return this.name;
-			}
-		}
-
-		public string NamespaceURI
-		{
-			get
-			{
-				return this.nsuri;
+				return this.o;
 			}
 		}
 
@@ -60,15 +25,31 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this.nodetype;
+				return this.xmlNode.NodeType;
 			}
 		}
 
-		public object ObjectBeingDeserialized
+		public string Name
 		{
 			get
 			{
-				return this.source;
+				return this.xmlNode.Name;
+			}
+		}
+
+		public string LocalName
+		{
+			get
+			{
+				return this.xmlNode.LocalName;
+			}
+		}
+
+		public string NamespaceURI
+		{
+			get
+			{
+				return this.xmlNode.NamespaceURI;
 			}
 		}
 
@@ -76,24 +57,37 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this.text;
+				return this.xmlNode.Value;
 			}
 		}
 
-		private int linenumber;
+		public int LineNumber
+		{
+			get
+			{
+				return this.lineNumber;
+			}
+		}
 
-		private int lineposition;
+		public int LinePosition
+		{
+			get
+			{
+				return this.linePosition;
+			}
+		}
 
-		private string localname;
+		internal XmlNodeEventArgs()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
 
-		private string name;
+		private object o;
 
-		private string nsuri;
+		private XmlNode xmlNode;
 
-		private XmlNodeType nodetype;
+		private int lineNumber;
 
-		private object source;
-
-		private string text;
+		private int linePosition;
 	}
 }

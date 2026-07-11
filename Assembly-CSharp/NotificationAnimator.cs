@@ -21,12 +21,10 @@ public class NotificationAnimator : MonoBehaviour
 				this.bounceCount--;
 				this.speed = -this.speed / Mathf.Pow(2f, (float)(2 - this.bounceCount));
 				this.layoutElement.minWidth = -this.speed;
+				return;
 			}
-			else
-			{
-				this.layoutElement.minWidth = 0f;
-				base.enabled = false;
-			}
+			this.layoutElement.minWidth = 0f;
+			base.enabled = false;
 		}
 	}
 

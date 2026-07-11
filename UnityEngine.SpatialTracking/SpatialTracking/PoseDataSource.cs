@@ -7,8 +7,9 @@ namespace UnityEngine.SpatialTracking
 {
 	public static class PoseDataSource
 	{
-		internal static bool TryGetNodePoseData(XRNode node, out Pose resultPose)
+		internal static PoseDataFlags GetNodePoseData(XRNode node, out Pose resultPose)
 		{
+			PoseDataFlags poseDataFlags = PoseDataFlags.NoData;
 			InputTracking.GetNodeStates(PoseDataSource.nodeStates);
 			foreach (XRNodeState xrnodeState in PoseDataSource.nodeStates)
 			{
@@ -16,83 +17,82 @@ namespace UnityEngine.SpatialTracking
 				{
 					if (xrnodeState.TryGetPosition(out resultPose.position))
 					{
-						if (xrnodeState.TryGetRotation(out resultPose.rotation))
-						{
-							return true;
-						}
+						poseDataFlags |= PoseDataFlags.Position;
 					}
-					resultPose = Pose.identity;
-					return false;
+					if (xrnodeState.TryGetRotation(out resultPose.rotation))
+					{
+						poseDataFlags |= PoseDataFlags.Rotation;
+					}
+					return poseDataFlags;
 				}
 			}
 			resultPose = Pose.identity;
-			return false;
+			return poseDataFlags;
 		}
 
 		public static bool TryGetDataFromSource(TrackedPoseDriver.TrackedPose poseSource, out Pose resultPose)
 		{
-			bool flag;
+			return PoseDataSource.GetDataFromSource(poseSource, out resultPose) == (PoseDataFlags.Position | PoseDataFlags.Rotation);
+		}
+
+		internal static PoseDataFlags GetDataFromSource(TrackedPoseDriver.TrackedPose poseSource, out Pose resultPose)
+		{
 			switch (poseSource)
 			{
 			case TrackedPoseDriver.TrackedPose.LeftEye:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.LeftEye, out resultPose);
-				break;
+				return PoseDataSource.GetNodePoseData(XRNode.LeftEye, out resultPose);
 			case TrackedPoseDriver.TrackedPose.RightEye:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.RightEye, out resultPose);
-				break;
+				return PoseDataSource.GetNodePoseData(XRNode.RightEye, out resultPose);
 			case TrackedPoseDriver.TrackedPose.Center:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.CenterEye, out resultPose);
-				break;
+				return PoseDataSource.GetNodePoseData(XRNode.CenterEye, out resultPose);
 			case TrackedPoseDriver.TrackedPose.Head:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.Head, out resultPose);
-				break;
+				return PoseDataSource.GetNodePoseData(XRNode.Head, out resultPose);
 			case TrackedPoseDriver.TrackedPose.LeftPose:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.LeftHand, out resultPose);
-				break;
+				return PoseDataSource.GetNodePoseData(XRNode.LeftHand, out resultPose);
 			case TrackedPoseDriver.TrackedPose.RightPose:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.RightHand, out resultPose);
-				break;
+				return PoseDataSource.GetNodePoseData(XRNode.RightHand, out resultPose);
 			case TrackedPoseDriver.TrackedPose.ColorCamera:
-				flag = PoseDataSource.TryGetTangoPose(CoordinateFrame.CameraColor, out resultPose) || PoseDataSource.TryGetNodePoseData(XRNode.CenterEye, out resultPose);
-				break;
-			case TrackedPoseDriver.TrackedPose.DepthCamera:
-				flag = PoseDataSource.TryGetTangoPose(CoordinateFrame.CameraDepth, out resultPose);
-				break;
-			case TrackedPoseDriver.TrackedPose.FisheyeCamera:
-				flag = PoseDataSource.TryGetTangoPose(CoordinateFrame.CameraFisheye, out resultPose);
-				break;
-			case TrackedPoseDriver.TrackedPose.Device:
-				flag = PoseDataSource.TryGetTangoPose(CoordinateFrame.Device, out resultPose);
-				break;
-			case TrackedPoseDriver.TrackedPose.RemotePose:
-				flag = PoseDataSource.TryGetNodePoseData(XRNode.RightHand, out resultPose);
-				break;
-			default:
-				resultPose = Pose.identity;
-				flag = false;
-				break;
+			{
+				PoseDataFlags poseDataFlags = PoseDataSource.TryGetTangoPose(out resultPose);
+				if (poseDataFlags == PoseDataFlags.NoData)
+				{
+					return PoseDataSource.GetNodePoseData(XRNode.CenterEye, out resultPose);
+				}
+				return poseDataFlags;
 			}
-			return flag;
+			case TrackedPoseDriver.TrackedPose.RemotePose:
+			{
+				PoseDataFlags nodePoseData = PoseDataSource.GetNodePoseData(XRNode.RightHand, out resultPose);
+				if (nodePoseData == PoseDataFlags.NoData)
+				{
+					return PoseDataSource.GetNodePoseData(XRNode.LeftHand, out resultPose);
+				}
+				return nodePoseData;
+			}
+			}
+			Debug.LogWarningFormat("Unable to retrieve pose data for poseSource: {0}", new object[] { poseSource.ToString() });
+			resultPose = Pose.identity;
+			return PoseDataFlags.NoData;
 		}
 
-		private static bool TryGetTangoPose(CoordinateFrame frame, out Pose pose)
+		private static PoseDataFlags TryGetTangoPose(out Pose pose)
 		{
 			PoseData poseData;
-			bool flag;
-			if (TangoInputTracking.TryGetPoseAtTime(out poseData, TangoDevice.baseCoordinateFrame, frame, 0.0) && poseData.statusCode == PoseStatus.Valid)
+			PoseDataFlags poseDataFlags;
+			if (TangoInputTracking.TryGetPoseAtTime(out poseData) && poseData.statusCode == PoseStatus.Valid)
 			{
 				pose.position = poseData.position;
 				pose.rotation = poseData.rotation;
-				flag = true;
+				poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
 			}
 			else
 			{
 				pose = Pose.identity;
-				flag = false;
+				poseDataFlags = PoseDataFlags.NoData;
 			}
-			return flag;
+			return poseDataFlags;
 		}
 
-		private static List<XRNodeState> nodeStates = new List<XRNodeState>();
+		internal static List<XRNodeState> nodeStates = new List<XRNodeState>();
 	}
 }

@@ -78,8 +78,7 @@ public class AnimTileable : KMonoBehaviour
 		{
 			flag4 = !this.HasTileableNeighbour(num7);
 		}
-		KBatchedAnimController[] componentsInChildren = base.GetComponentsInChildren<KBatchedAnimController>();
-		foreach (KBatchedAnimController kbatchedAnimController in componentsInChildren)
+		foreach (KBatchedAnimController kbatchedAnimController in base.GetComponentsInChildren<KBatchedAnimController>())
 		{
 			foreach (KAnimHashedString kanimHashedString in AnimTileable.leftSymbols)
 			{

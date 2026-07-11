@@ -4,16 +4,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
-	/// <summary>
-	///   <para>A Struct for the required data for animating a Tile.</para>
-	/// </summary>
 	[NativeType(Header = "Modules/Tilemap/TilemapScripting.h")]
 	[RequiredByNativeCode]
 	public struct TileAnimationData
 	{
-		/// <summary>
-		///   <para>The array of that are ordered by appearance in the animation.</para>
-		/// </summary>
 		public Sprite[] animatedSprites
 		{
 			get
@@ -26,9 +20,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>The animation speed.</para>
-		/// </summary>
 		public float animationSpeed
 		{
 			get
@@ -41,9 +32,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>The start time of the animation. The animation will begin at this time offset.</para>
-		/// </summary>
 		public float animationStartTime
 		{
 			get

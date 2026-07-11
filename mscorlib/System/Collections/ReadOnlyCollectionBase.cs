@@ -5,40 +5,17 @@ namespace System.Collections
 {
 	[ComVisible(true)]
 	[Serializable]
-	public abstract class ReadOnlyCollectionBase : IEnumerable, ICollection
+	public abstract class ReadOnlyCollectionBase : ICollection, IEnumerable
 	{
-		protected ReadOnlyCollectionBase()
-		{
-			this.list = new ArrayList();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			ArrayList innerList = this.InnerList;
-			lock (innerList)
-			{
-				this.InnerList.CopyTo(array, index);
-			}
-		}
-
-		object ICollection.SyncRoot
+		protected ArrayList InnerList
 		{
 			get
 			{
-				return this.InnerList.SyncRoot;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.InnerList.IsSynchronized;
+				if (this.list == null)
+				{
+					this.list = new ArrayList();
+				}
+				return this.list;
 			}
 		}
 
@@ -50,17 +27,30 @@ namespace System.Collections
 			}
 		}
 
-		public virtual IEnumerator GetEnumerator()
-		{
-			return this.InnerList.GetEnumerator();
-		}
-
-		protected ArrayList InnerList
+		bool ICollection.IsSynchronized
 		{
 			get
 			{
-				return this.list;
+				return this.InnerList.IsSynchronized;
 			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return this.InnerList.SyncRoot;
+			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this.InnerList.CopyTo(array, index);
+		}
+
+		public virtual IEnumerator GetEnumerator()
+		{
+			return this.InnerList.GetEnumerator();
 		}
 
 		private ArrayList list;

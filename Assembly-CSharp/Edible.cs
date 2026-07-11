@@ -7,14 +7,6 @@ using UnityEngine;
 
 public class Edible : Workable, IGameObjectEffectDescriptor
 {
-	private Edible()
-	{
-		base.SetReportType(ReportManager.ReportType.PersonalTime);
-		this.showProgressBar = false;
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-		this.shouldTransferDiseaseWithWorker = false;
-	}
-
 	public float Units
 	{
 		get
@@ -54,6 +46,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	public bool isBeingConsumed { get; private set; }
 
+	private Edible()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+		this.showProgressBar = false;
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.shouldTransferDiseaseWithWorker = false;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -86,9 +86,20 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (component != null && component.CurrentHat != null)
 		{
-			return (!flag) ? Edible.hatWorkAnims : Edible.saltHatWorkAnims;
+			if (!flag)
+			{
+				return Edible.hatWorkAnims;
+			}
+			return Edible.saltHatWorkAnims;
 		}
-		return (!flag) ? Edible.normalWorkAnims : Edible.saltWorkAnims;
+		else
+		{
+			if (!flag)
+			{
+				return Edible.normalWorkAnims;
+			}
+			return Edible.saltWorkAnims;
+		}
 	}
 
 	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
@@ -98,9 +109,20 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (component != null && component.CurrentHat != null)
 		{
-			return (!flag) ? Edible.hatWorkPstAnim : Edible.saltHatWorkPstAnim;
+			if (!flag)
+			{
+				return Edible.hatWorkPstAnim;
+			}
+			return Edible.saltHatWorkPstAnim;
 		}
-		return (!flag) ? Edible.normalWorkPstAnim : Edible.saltWorkPstAnim;
+		else
+		{
+			if (!flag)
+			{
+				return Edible.normalWorkPstAnim;
+			}
+			return Edible.saltWorkPstAnim;
+		}
 	}
 
 	private void OnCraft(object data)
@@ -129,8 +151,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		this.caloriesConsumed = 0f;
 		this.unitsConsumed = 0f;
 		this.totalUnits = this.Units;
-		KPrefabID component = worker.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.AlwaysConverse, false);
+		worker.GetComponent<KPrefabID>().AddTag(GameTags.AlwaysConverse, false);
 		this.totalConsumableCalories = this.Units * this.foodInfo.CaloriesPerUnit;
 		this.StartConsuming();
 	}
@@ -162,13 +183,17 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			worker.GetAttributes().Remove(this.currentModifier);
 			this.currentModifier = null;
 		}
-		KPrefabID component = worker.GetComponent<KPrefabID>();
-		component.RemoveTag(GameTags.AlwaysConverse);
+		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AlwaysConverse);
 		this.StopConsuming(worker);
 	}
 
 	private bool OnTickConsume(Worker worker, float dt)
 	{
+		if (!this.isBeingConsumed)
+		{
+			DebugUtil.DevLogError("OnTickConsume while we're not eating, this would set a NaN mass on this Edible");
+			return true;
+		}
 		bool flag = false;
 		float num = dt / this.totalFeedingTime;
 		float num2 = num * this.totalConsumableCalories;
@@ -185,11 +210,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		}
 		this.Units -= num3;
 		this.unitsConsumed += num3;
-		if (float.IsNaN(this.unitsConsumed))
-		{
-			KCrashReporter.Assert(false, "Why is unitsConsumed NaN?");
-			this.unitsConsumed = this.Units;
-		}
 		if (this.Units <= 0f)
 		{
 			flag = true;
@@ -238,13 +258,9 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private void AddQualityEffects(Worker worker)
 	{
-		Attributes attributes = worker.GetAttributes();
-		AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.FoodExpectation);
-		float totalValue = attributeInstance.GetTotalValue();
-		int num = Mathf.RoundToInt(totalValue);
+		int num = Mathf.RoundToInt(worker.GetAttributes().Add(Db.Get().Attributes.FoodExpectation).GetTotalValue());
 		int num2 = this.FoodInfo.Quality + num;
-		Effects component = worker.GetComponent<Effects>();
-		component.Add(Edible.GetEffectForFoodQuality(num2), true);
+		worker.GetComponent<Effects>().Add(Edible.GetEffectForFoodQuality(num2), true);
 	}
 
 	protected override void OnCleanUp()
@@ -324,12 +340,12 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	public class EdibleStartWorkInfo : Worker.StartWorkInfo
 	{
+		public float amount { get; private set; }
+
 		public EdibleStartWorkInfo(Workable workable, float amount)
 			: base(workable)
 		{
 			this.amount = amount;
 		}
-
-		public float amount { get; private set; }
 	}
 }

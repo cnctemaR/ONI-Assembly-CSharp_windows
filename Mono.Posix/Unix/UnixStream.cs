@@ -14,37 +14,24 @@ namespace Mono.Unix
 
 		public UnixStream(int fileDescriptor, bool ownsHandle)
 		{
-			if (fileDescriptor == -1)
+			if (-1 == fileDescriptor)
 			{
 				throw new ArgumentException(Locale.GetText("Invalid file descriptor"), "fileDescriptor");
 			}
 			this.fileDescriptor = fileDescriptor;
 			this.owner = ownsHandle;
-			long num = Syscall.lseek(fileDescriptor, 0L, SeekFlags.SEEK_CUR);
-			if (num != -1L)
+			if (Syscall.lseek(fileDescriptor, 0L, SeekFlags.SEEK_CUR) != -1L)
 			{
 				this.canSeek = true;
 			}
-			long num2 = Syscall.read(fileDescriptor, IntPtr.Zero, 0UL);
-			if (num2 != -1L)
+			if (Syscall.read(fileDescriptor, IntPtr.Zero, 0UL) != -1L)
 			{
 				this.canRead = true;
 			}
-			long num3 = Syscall.write(fileDescriptor, IntPtr.Zero, 0UL);
-			if (num3 != -1L)
+			if (Syscall.write(fileDescriptor, IntPtr.Zero, 0UL) != -1L)
 			{
 				this.canWrite = true;
 			}
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.AssertNotDisposed();
-			if (this.owner)
-			{
-				this.Close();
-			}
-			GC.SuppressFinalize(this);
 		}
 
 		private void AssertNotDisposed()
@@ -134,8 +121,7 @@ namespace Mono.Unix
 			set
 			{
 				value &= ~FilePermissions.S_IFMT;
-				int num = Syscall.fchmod(this.fileDescriptor, value);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num);
+				UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.fchmod(this.fileDescriptor, value));
 			}
 		}
 
@@ -143,8 +129,7 @@ namespace Mono.Unix
 		{
 			get
 			{
-				int protection = (int)this.Protection;
-				return (FileTypes)(protection & 61440);
+				return (FileTypes)(this.Protection & FilePermissions.S_IFMT);
 			}
 		}
 
@@ -152,8 +137,7 @@ namespace Mono.Unix
 		{
 			get
 			{
-				int protection = (int)this.Protection;
-				return (FileAccessPermissions)(protection & 511);
+				return (FileAccessPermissions)(this.Protection & FilePermissions.ACCESSPERMS);
 			}
 			set
 			{
@@ -168,8 +152,7 @@ namespace Mono.Unix
 		{
 			get
 			{
-				int protection = (int)this.Protection;
-				return (FileSpecialAttributes)(protection & 3584);
+				return (FileSpecialAttributes)(this.Protection & (FilePermissions.S_ISUID | FilePermissions.S_ISGID | FilePermissions.S_ISVTX));
 			}
 			set
 			{
@@ -219,8 +202,7 @@ namespace Mono.Unix
 		private void RefreshStat()
 		{
 			this.AssertNotDisposed();
-			int num = Syscall.fstat(this.fileDescriptor, out this.stat);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.fstat(this.fileDescriptor, out this.stat));
 		}
 
 		public void AdviseFileAccessPattern(FileAccessPattern pattern, long offset, long len)
@@ -252,9 +234,10 @@ namespace Mono.Unix
 			long num;
 			fixed (byte* ptr = &buffer[offset])
 			{
+				byte* ptr2 = ptr;
 				do
 				{
-					num = Syscall.read(this.fileDescriptor, (void*)ptr, (ulong)((long)count));
+					num = Syscall.read(this.fileDescriptor, (void*)ptr2, (ulong)((long)count));
 				}
 				while (UnixMarshal.ShouldRetrySyscall((int)num));
 			}
@@ -304,9 +287,10 @@ namespace Mono.Unix
 			long num;
 			fixed (byte* ptr = &buffer[offset])
 			{
+				byte* ptr2 = ptr;
 				do
 				{
-					num = Syscall.pread(this.fileDescriptor, (void*)ptr, (ulong)((long)count), fileOffset);
+					num = Syscall.pread(this.fileDescriptor, (void*)ptr2, (ulong)((long)count), fileOffset);
 				}
 				while (UnixMarshal.ShouldRetrySyscall((int)num));
 			}
@@ -380,9 +364,10 @@ namespace Mono.Unix
 			long num;
 			fixed (byte* ptr = &buffer[offset])
 			{
+				byte* ptr2 = ptr;
 				do
 				{
-					num = Syscall.write(this.fileDescriptor, (void*)ptr, (ulong)((long)count));
+					num = Syscall.write(this.fileDescriptor, (void*)ptr2, (ulong)((long)count));
 				}
 				while (UnixMarshal.ShouldRetrySyscall((int)num));
 			}
@@ -407,9 +392,10 @@ namespace Mono.Unix
 			long num;
 			fixed (byte* ptr = &buffer[offset])
 			{
+				byte* ptr2 = ptr;
 				do
 				{
-					num = Syscall.pwrite(this.fileDescriptor, (void*)ptr, (ulong)((long)count), fileOffset);
+					num = Syscall.pwrite(this.fileDescriptor, (void*)ptr2, (ulong)((long)count), fileOffset);
 				}
 				while (UnixMarshal.ShouldRetrySyscall((int)num));
 			}
@@ -438,8 +424,7 @@ namespace Mono.Unix
 				throw new NotSupportedException("Unable to write to the current file descriptor");
 			}
 			long position = this.Position;
-			long num = Syscall.sendfile(out_fd, this.fileDescriptor, ref position, count);
-			if (num == -1L)
+			if (Syscall.sendfile(out_fd, this.fileDescriptor, ref position, count) == -1L)
 			{
 				UnixMarshal.ThrowExceptionForLastError();
 			}
@@ -448,8 +433,7 @@ namespace Mono.Unix
 		public void SetOwner(long user, long group)
 		{
 			this.AssertNotDisposed();
-			int num = Syscall.fchown(this.fileDescriptor, Convert.ToUInt32(user), Convert.ToUInt32(group));
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.fchown(this.fileDescriptor, Convert.ToUInt32(user), Convert.ToUInt32(group)));
 		}
 
 		public void SetOwner(string user, string group)
@@ -509,6 +493,15 @@ namespace Mono.Unix
 			while (UnixMarshal.ShouldRetrySyscall(num));
 			UnixMarshal.ThrowExceptionForLastErrorIf(num);
 			this.fileDescriptor = -1;
+			GC.SuppressFinalize(this);
+		}
+
+		void IDisposable.Dispose()
+		{
+			if (this.fileDescriptor != -1 && this.owner)
+			{
+				this.Close();
+			}
 			GC.SuppressFinalize(this);
 		}
 

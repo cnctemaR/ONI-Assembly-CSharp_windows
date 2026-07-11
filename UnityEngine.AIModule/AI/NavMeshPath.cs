@@ -6,16 +6,10 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>A path as calculated by the navigation system.</para>
-	/// </summary>
 	[MovedFrom("UnityEngine")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class NavMeshPath
 	{
-		/// <summary>
-		///   <para>NavMeshPath constructor.</para>
-		/// </summary>
 		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern NavMeshPath();
@@ -31,13 +25,6 @@ namespace UnityEngine.AI
 			this.m_Ptr = IntPtr.Zero;
 		}
 
-		/// <summary>
-		///   <para>Calculate the corners for the path.</para>
-		/// </summary>
-		/// <param name="results">Array to store path corners.</param>
-		/// <returns>
-		///   <para>The number of corners along the path - including start and end points.</para>
-		/// </returns>
 		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetCornersNonAlloc(Vector3[] results);
@@ -50,9 +37,6 @@ namespace UnityEngine.AI
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ClearCornersInternal();
 
-		/// <summary>
-		///   <para>Erase all corner points from path.</para>
-		/// </summary>
 		public void ClearCorners()
 		{
 			this.ClearCornersInternal();
@@ -67,9 +51,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Corner points of the path. (Read Only)</para>
-		/// </summary>
 		public Vector3[] corners
 		{
 			get
@@ -79,9 +60,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Status of the path. (Read Only)</para>
-		/// </summary>
 		public extern NavMeshPathStatus status
 		{
 			[GeneratedByOldBindingsGenerator]

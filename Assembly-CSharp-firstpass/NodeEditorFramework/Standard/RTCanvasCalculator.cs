@@ -33,11 +33,9 @@ namespace NodeEditorFramework.Standard
 			{
 				this.canvas = NodeEditorSaveManager.LoadNodeCanvas(this.canvasPath, true);
 				this.CalculateCanvas();
+				return;
 			}
-			else
-			{
-				this.canvas = null;
-			}
+			this.canvas = null;
 		}
 
 		public void CalculateCanvas()
@@ -50,41 +48,46 @@ namespace NodeEditorFramework.Standard
 		private void DebugOutputResults()
 		{
 			this.AssureCanvas();
-			List<Node> outputNodes = this.getOutputNodes();
-			foreach (Node node in outputNodes)
+			foreach (Node node in this.getOutputNodes())
 			{
 				string text = "(OUT) " + node.name + ": ";
 				if (node.Outputs.Count == 0)
 				{
-					foreach (NodeInput nodeInput in node.Inputs)
+					using (List<NodeInput>.Enumerator enumerator2 = node.Inputs.GetEnumerator())
 					{
-						string text2 = text;
-						text = string.Concat(new string[]
+						while (enumerator2.MoveNext())
 						{
-							text2,
-							nodeInput.typeID,
-							" ",
-							(!nodeInput.IsValueNull) ? nodeInput.GetValue().ToString() : "NULL",
-							"; "
-						});
+							NodeInput nodeInput = enumerator2.Current;
+							text = string.Concat(new string[]
+							{
+								text,
+								nodeInput.typeID,
+								" ",
+								nodeInput.IsValueNull ? "NULL" : nodeInput.GetValue().ToString(),
+								"; "
+							});
+						}
+						goto IL_0138;
 					}
+					goto IL_00BE;
 				}
-				else
-				{
-					foreach (NodeOutput nodeOutput in node.Outputs)
-					{
-						string text2 = text;
-						text = string.Concat(new string[]
-						{
-							text2,
-							nodeOutput.typeID,
-							" ",
-							(!nodeOutput.IsValueNull) ? nodeOutput.GetValue().ToString() : "NULL",
-							"; "
-						});
-					}
-				}
+				goto IL_00BE;
+				IL_0138:
 				global::Debug.Log(text);
+				continue;
+				IL_00BE:
+				foreach (NodeOutput nodeOutput in node.Outputs)
+				{
+					text = string.Concat(new string[]
+					{
+						text,
+						nodeOutput.typeID,
+						" ",
+						nodeOutput.IsValueNull ? "NULL" : nodeOutput.GetValue().ToString(),
+						"; "
+					});
+				}
+				goto IL_0138;
 			}
 		}
 
@@ -93,16 +96,11 @@ namespace NodeEditorFramework.Standard
 			this.AssureCanvas();
 			return this.canvas.nodes.Where<Node>(delegate(Node node)
 			{
-				bool flag;
 				if (node.Inputs.Count != 0 || node.Outputs.Count == 0)
 				{
-					flag = node.Inputs.TrueForAll((NodeInput input) => input.connection == null);
+					return node.Inputs.TrueForAll((NodeInput input) => input.connection == null);
 				}
-				else
-				{
-					flag = true;
-				}
-				return flag;
+				return true;
 			}).ToList<Node>();
 		}
 
@@ -111,16 +109,11 @@ namespace NodeEditorFramework.Standard
 			this.AssureCanvas();
 			return this.canvas.nodes.Where<Node>(delegate(Node node)
 			{
-				bool flag;
 				if (node.Outputs.Count != 0 || node.Inputs.Count == 0)
 				{
-					flag = node.Outputs.TrueForAll((NodeOutput output) => output.connections.Count == 0);
+					return node.Outputs.TrueForAll((NodeOutput output) => output.connections.Count == 0);
 				}
-				else
-				{
-					flag = true;
-				}
-				return flag;
+				return true;
 			}).ToList<Node>();
 		}
 

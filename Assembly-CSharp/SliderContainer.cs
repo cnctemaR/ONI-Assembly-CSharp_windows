@@ -14,11 +14,9 @@ public class SliderContainer : KMonoBehaviour
 		if (this.isPercentValue)
 		{
 			this.valueLabel.text = (newValue * 100f).ToString("F0") + "%";
+			return;
 		}
-		else
-		{
-			this.valueLabel.text = newValue.ToString();
-		}
+		this.valueLabel.text = newValue.ToString();
 	}
 
 	public bool isPercentValue = true;

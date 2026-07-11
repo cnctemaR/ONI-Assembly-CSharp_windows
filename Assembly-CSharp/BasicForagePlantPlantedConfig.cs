@@ -11,13 +11,10 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 		string text2 = global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.NAME;
 		string text3 = global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.DESC;
 		float num = 100f;
-		KAnimFile anim = Assets.GetAnim("muckroot_kanim");
-		string text4 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("muckroot_kanim"), "idle", Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.AddOrGet<SimTemperatureTransfer>();
-		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
-		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<EntombVulnerable>();
 		gameObject.AddOrGet<DrowningMonitor>();
 		gameObject.AddOrGet<Prioritizable>();
@@ -25,8 +22,7 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 		gameObject.AddOrGet<UprootedMonitor>();
 		gameObject.AddOrGet<Harvestable>();
 		gameObject.AddOrGet<HarvestDesignatable>();
-		SeedProducer seedProducer = gameObject.AddOrGet<SeedProducer>();
-		seedProducer.Configure("BasicForagePlant", SeedProducer.ProductionType.DigOnly, 1);
+		gameObject.AddOrGet<SeedProducer>().Configure("BasicForagePlant", SeedProducer.ProductionType.DigOnly, 1);
 		gameObject.AddOrGet<BasicForagePlantPlanted>();
 		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 		return gameObject;

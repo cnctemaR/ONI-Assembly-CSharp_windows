@@ -1,54 +1,53 @@
 ﻿using System;
 using System.Runtime.ConstrainedExecution;
+using System.Security;
+using System.Security.Permissions;
 
 namespace System.Runtime.InteropServices
 {
+	[SecurityCritical]
+	[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
 	public abstract class CriticalHandle : CriticalFinalizerObject, IDisposable
 	{
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		protected CriticalHandle(IntPtr invalidHandleValue)
 		{
 			this.handle = invalidHandleValue;
+			this._isClosed = false;
 		}
 
+		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		~CriticalHandle()
 		{
 			this.Dispose(false);
 		}
 
+		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public void Close()
+		private void Cleanup()
 		{
-			this.Dispose(true);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public void Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		protected virtual void Dispose(bool disposing)
-		{
-			if (this._disposed)
+			if (this.IsClosed)
 			{
 				return;
 			}
-			this._disposed = true;
+			this._isClosed = true;
 			if (this.IsInvalid)
 			{
 				return;
 			}
-			if (disposing && !this.IsInvalid && !this.ReleaseHandle())
+			int lastWin32Error = Marshal.GetLastWin32Error();
+			if (!this.ReleaseHandle())
 			{
-				GC.SuppressFinalize(this);
+				CriticalHandle.FireCustomerDebugProbe();
 			}
+			Marshal.SetLastWin32Error(lastWin32Error);
+			GC.SuppressFinalize(this);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		protected abstract bool ReleaseHandle();
+		private static void FireCustomerDebugProbe()
+		{
+		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		protected void SetHandle(IntPtr handle)
@@ -56,18 +55,12 @@ namespace System.Runtime.InteropServices
 			this.handle = handle;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public void SetHandleAsInvalid()
-		{
-			this._disposed = true;
-		}
-
 		public bool IsClosed
 		{
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				return this._disposed;
+				return this._isClosed;
 			}
 		}
 
@@ -77,8 +70,39 @@ namespace System.Runtime.InteropServices
 			get;
 		}
 
+		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public void Close()
+		{
+			this.Dispose(true);
+		}
+
+		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public void Dispose()
+		{
+			this.Dispose(true);
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecurityCritical]
+		protected virtual void Dispose(bool disposing)
+		{
+			this.Cleanup();
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public void SetHandleAsInvalid()
+		{
+			this._isClosed = true;
+			GC.SuppressFinalize(this);
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		protected abstract bool ReleaseHandle();
+
 		protected IntPtr handle;
 
-		private bool _disposed;
+		private bool _isClosed;
 	}
 }

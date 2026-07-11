@@ -8,7 +8,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class Site : IBuiltInEvidence, IIdentityPermissionFactory
+	public sealed class Site : EvidenceBase, IIdentityPermissionFactory, IBuiltInEvidence
 	{
 		public Site(string name)
 		{
@@ -21,23 +21,6 @@ namespace System.Security.Policy
 				throw new ArgumentException(Locale.GetText("name is not valid"));
 			}
 			this.origin_site = name;
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return ((!verbose) ? 1 : 3) + this.origin_site.Length;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
 		}
 
 		public static Site CreateFromUrl(string url)
@@ -53,8 +36,7 @@ namespace System.Security.Policy
 			string text = Site.UrlToSite(url);
 			if (text == null)
 			{
-				string text2 = string.Format(Locale.GetText("Invalid URL '{0}'."), url);
-				throw new ArgumentException(text2, "url");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid URL '{0}'."), url), "url");
 			}
 			return new Site(text);
 		}
@@ -96,6 +78,23 @@ namespace System.Security.Policy
 			}
 		}
 
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return (verbose ? 3 : 1) + this.origin_site.Length;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
+		}
+
 		internal static bool IsValid(string name)
 		{
 			if (name == string.Empty)
@@ -112,9 +111,10 @@ namespace System.Security.Policy
 				string text = array[i];
 				if (i != 0 || !(text == "*"))
 				{
-					foreach (char c in text)
+					string text2 = text;
+					for (int j = 0; j < text2.Length; j++)
 					{
-						int num = Convert.ToInt32(c);
+						int num = Convert.ToInt32(text2[j]);
 						if (num != 33 && num != 45 && (num < 35 || num > 41) && (num < 48 || num > 57) && (num < 64 || num > 90) && (num < 94 || num > 95) && (num < 97 || num > 123) && (num < 125 || num > 126))
 						{
 							return false;
@@ -137,7 +137,11 @@ namespace System.Security.Policy
 				return null;
 			}
 			string host = uri.Host;
-			return (!Site.IsValid(host)) ? null : host;
+			if (!Site.IsValid(host))
+			{
+				return null;
+			}
+			return host;
 		}
 
 		internal string origin_site;

@@ -5,10 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.SceneManagement
 {
-	/// <summary>
-	///   <para>Run-time data structure for *.unity file.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Export/SceneManager/Scene.bindings.h")]
+	[Serializable]
 	public struct Scene
 	{
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
@@ -46,6 +44,10 @@ namespace UnityEngine.SceneManagement
 
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetDirtyID(int sceneHandle);
+
+		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetBuildIndexInternal(int sceneHandle);
 
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
@@ -56,7 +58,7 @@ namespace UnityEngine.SceneManagement
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetRootGameObjectsInternal(int sceneHandle, object resultRootList);
 
-		internal int handle
+		public int handle
 		{
 			get
 			{
@@ -80,21 +82,11 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
-		/// <summary>
-		///   <para>Whether this is a valid Scene.
-		/// A Scene may be invalid if, for example, you tried to open a Scene that does not exist. In this case, the Scene returned from EditorSceneManager.OpenScene would return False for IsValid.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Whether this is a valid Scene.</para>
-		/// </returns>
 		public bool IsValid()
 		{
 			return Scene.IsValidInternal(this.handle);
 		}
 
-		/// <summary>
-		///   <para>Returns the relative path of the Scene. Like: "AssetsMyScenesMyScene.unity".</para>
-		/// </summary>
 		public string path
 		{
 			get
@@ -103,24 +95,18 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the name of the Scene.</para>
-		/// </summary>
 		public string name
 		{
 			get
 			{
 				return Scene.GetNameInternal(this.handle);
 			}
-			internal set
+			set
 			{
 				Scene.SetNameInternal(this.handle, value);
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the Scene is loaded.</para>
-		/// </summary>
 		public bool isLoaded
 		{
 			get
@@ -129,9 +115,6 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
-		/// <summary>
-		///   <para>Return the index of the Scene in the Build Settings.</para>
-		/// </summary>
 		public int buildIndex
 		{
 			get
@@ -140,9 +123,6 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the Scene is modifed.</para>
-		/// </summary>
 		public bool isDirty
 		{
 			get
@@ -151,9 +131,14 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
-		/// <summary>
-		///   <para>The number of root transforms of this Scene.</para>
-		/// </summary>
+		internal int dirtyID
+		{
+			get
+			{
+				return Scene.GetDirtyID(this.handle);
+			}
+		}
+
 		public int rootCount
 		{
 			get
@@ -162,12 +147,6 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns all the root game objects in the Scene.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>An array of game objects.</para>
-		/// </returns>
 		public GameObject[] GetRootGameObjects()
 		{
 			List<GameObject> list = new List<GameObject>(this.rootCount);
@@ -226,13 +205,15 @@ namespace UnityEngine.SceneManagement
 			return flag;
 		}
 
+		[SerializeField]
 		private int m_Handle;
 
 		internal enum LoadingState
 		{
 			NotLoaded,
 			Loading,
-			Loaded
+			Loaded,
+			Unloading
 		}
 	}
 }

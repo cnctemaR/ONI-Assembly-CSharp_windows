@@ -5,35 +5,6 @@ namespace YamlDotNet.Core.Events
 {
 	public class Scalar : NodeEvent
 	{
-		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
-			: base(anchor, tag, start, end)
-		{
-			this.value = value;
-			this.style = style;
-			this.isPlainImplicit = isPlainImplicit;
-			this.isQuotedImplicit = isQuotedImplicit;
-		}
-
-		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit)
-			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit, Mark.Empty, Mark.Empty)
-		{
-		}
-
-		public Scalar(string value)
-			: this(null, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
-		{
-		}
-
-		public Scalar(string tag, string value)
-			: this(null, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
-		{
-		}
-
-		public Scalar(string anchor, string tag, string value)
-			: this(anchor, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
-		{
-		}
-
 		internal override EventType Type
 		{
 			get
@@ -80,6 +51,35 @@ namespace YamlDotNet.Core.Events
 			{
 				return !this.isPlainImplicit && !this.isQuotedImplicit;
 			}
+		}
+
+		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
+			: base(anchor, tag, start, end)
+		{
+			this.value = value;
+			this.style = style;
+			this.isPlainImplicit = isPlainImplicit;
+			this.isQuotedImplicit = isQuotedImplicit;
+		}
+
+		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit)
+			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		public Scalar(string value)
+			: this(null, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		public Scalar(string tag, string value)
+			: this(null, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		public Scalar(string anchor, string tag, string value)
+			: this(anchor, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+		{
 		}
 
 		public override string ToString()

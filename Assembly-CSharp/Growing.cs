@@ -82,8 +82,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 
 	public float TimeUntilNextHarvest()
 	{
-		float num = this.maturity.GetMax() - this.maturity.value;
-		return num / this.maturity.GetDelta();
+		return (this.maturity.GetMax() - this.maturity.value) / this.maturity.GetDelta();
 	}
 
 	public float DomesticGrowthTime()
@@ -108,14 +107,18 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 
 	public float PercentOldAge()
 	{
-		return (!this.shouldGrowOld) ? 0f : (this.oldAge.value / this.oldAge.GetMax());
+		if (!this.shouldGrowOld)
+		{
+			return 0f;
+		}
+		return this.oldAge.value / this.oldAge.GetMax();
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 
@@ -170,7 +173,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			this.baseGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, 0.0016666667f, CREATURES.STATS.MATURITY.GROWING, false, false, true);
 			this.wildGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, 0.00041666668f, CREATURES.STATS.MATURITY.GROWINGWILD, false, false, true);
-			this.getOldRate = new AttributeModifier(master.oldAge.deltaAttribute.Id, (!master.shouldGrowOld) ? 0f : 1f, null, false, false, true);
+			this.getOldRate = new AttributeModifier(master.oldAge.deltaAttribute.Id, master.shouldGrowOld ? 1f : 0f, null, false, false, true);
 		}
 
 		public bool IsGrown()
@@ -230,7 +233,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				.ToggleStatusItem(Db.Get().CreatureStatusItems.Growing, (Growing.StatesInstance smi) => smi.master.GetComponent<Growing>())
 				.Enter(delegate(Growing.StatesInstance smi)
 				{
-					GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State state = ((!smi.master.rm.Replanted) ? this.growing.wild : this.growing.planted);
+					GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State state = (smi.master.rm.Replanted ? this.growing.planted : this.growing.wild);
 					smi.GoTo(state);
 				});
 			this.growing.wild.ToggleAttributeModifier("GrowingWild", (Growing.StatesInstance smi) => smi.wildGrowingRate, null);

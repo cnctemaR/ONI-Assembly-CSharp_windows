@@ -5,10 +5,10 @@ namespace System.Data.Common
 	[Flags]
 	public enum SupportedJoinOperators
 	{
-		FullOuter = 8,
+		None = 0,
 		Inner = 1,
 		LeftOuter = 2,
-		None = 0,
-		RightOuter = 4
+		RightOuter = 4,
+		FullOuter = 8
 	}
 }

@@ -5,14 +5,6 @@ namespace ClipperLib
 {
 	public class ClipperBase
 	{
-		internal ClipperBase()
-		{
-			this.m_MinimaList = null;
-			this.m_CurrentLM = null;
-			this.m_UseFullRange = false;
-			this.m_HasOpenPaths = false;
-		}
-
 		internal static bool near_zero(double val)
 		{
 			return val > -1E-20 && val < 1E-20;
@@ -96,6 +88,14 @@ namespace ClipperLib
 			return (pt1.Y - pt2.Y) * (pt3.X - pt4.X) - (pt1.X - pt2.X) * (pt3.Y - pt4.Y) == 0L;
 		}
 
+		internal ClipperBase()
+		{
+			this.m_MinimaList = null;
+			this.m_CurrentLM = null;
+			this.m_UseFullRange = false;
+			this.m_HasOpenPaths = false;
+		}
+
 		public virtual void Clear()
 		{
 			this.DisposeLocalMinimaList();
@@ -168,30 +168,33 @@ namespace ClipperLib
 			TEdge tedge;
 			for (;;)
 			{
-				while (E.Bot != E.Prev.Bot || E.Curr == E.Top)
+				if (!(E.Bot != E.Prev.Bot) && !(E.Curr == E.Top))
+				{
+					if (E.Dx != -3.4E+38 && E.Prev.Dx != -3.4E+38)
+					{
+						break;
+					}
+					while (E.Prev.Dx == -3.4E+38)
+					{
+						E = E.Prev;
+					}
+					tedge = E;
+					while (E.Dx == -3.4E+38)
+					{
+						E = E.Next;
+					}
+					if (E.Top.Y != E.Prev.Bot.Y)
+					{
+						goto Block_7;
+					}
+				}
+				else
 				{
 					E = E.Next;
-				}
-				if (E.Dx != -3.4E+38 && E.Prev.Dx != -3.4E+38)
-				{
-					break;
-				}
-				while (E.Prev.Dx == -3.4E+38)
-				{
-					E = E.Prev;
-				}
-				tedge = E;
-				while (E.Dx == -3.4E+38)
-				{
-					E = E.Next;
-				}
-				if (E.Top.Y != E.Prev.Bot.Y)
-				{
-					goto IL_00E3;
 				}
 			}
 			return E;
-			IL_00E3:
+			Block_7:
 			if (tedge.Prev.Bot.X < E.Bot.X)
 			{
 				E = tedge;
@@ -211,8 +214,12 @@ namespace ClipperLib
 					{
 						E = E.Next;
 					}
-					while (E != tedge && E.Dx == -3.4E+38)
+					while (E != tedge)
 					{
+						if (E.Dx != -3.4E+38)
+						{
+							break;
+						}
 						E = E.Prev;
 					}
 				}
@@ -375,37 +382,41 @@ namespace ClipperLib
 			{
 				throw new ClipperException("AddPath: Open paths have been disabled.");
 			}
-			int num = pg.Count - 1;
+			int i = pg.Count - 1;
 			if (Closed)
 			{
-				while (num > 0 && pg[num] == pg[0])
+				while (i > 0)
 				{
-					num--;
+					if (!(pg[i] == pg[0]))
+					{
+						break;
+					}
+					i--;
 				}
 			}
-			while (num > 0 && pg[num] == pg[num - 1])
+			while (i > 0 && pg[i] == pg[i - 1])
 			{
-				num--;
+				i--;
 			}
-			if ((Closed && num < 2) || (!Closed && num < 1))
+			if ((Closed && i < 2) || (!Closed && i < 1))
 			{
 				return false;
 			}
-			List<TEdge> list = new List<TEdge>(num + 1);
-			for (int i = 0; i <= num; i++)
+			List<TEdge> list = new List<TEdge>(i + 1);
+			for (int j = 0; j <= i; j++)
 			{
 				list.Add(new TEdge());
 			}
 			bool flag = true;
 			list[1].Curr = pg[1];
 			this.RangeTest(pg[0], ref this.m_UseFullRange);
-			this.RangeTest(pg[num], ref this.m_UseFullRange);
-			this.InitEdge(list[0], list[1], list[num], pg[0]);
-			this.InitEdge(list[num], list[0], list[num - 1], pg[num]);
-			for (int j = num - 1; j >= 1; j--)
+			this.RangeTest(pg[i], ref this.m_UseFullRange);
+			this.InitEdge(list[0], list[1], list[i], pg[0]);
+			this.InitEdge(list[i], list[0], list[i - 1], pg[i]);
+			for (int k = i - 1; k >= 1; k--)
 			{
-				this.RangeTest(pg[j], ref this.m_UseFullRange);
-				this.InitEdge(list[j], list[j + 1], list[j - 1], pg[j]);
+				this.RangeTest(pg[k], ref this.m_UseFullRange);
+				this.InitEdge(list[k], list[k + 1], list[k - 1], pg[k]);
 			}
 			TEdge tedge = list[0];
 			TEdge tedge2 = tedge;
@@ -619,11 +630,9 @@ namespace ClipperLib
 			if (e.Delta.Y == 0L)
 			{
 				e.Dx = -3.4E+38;
+				return;
 			}
-			else
-			{
-				e.Dx = (double)e.Delta.X / (double)e.Delta.Y;
-			}
+			e.Dx = (double)e.Delta.X / (double)e.Delta.Y;
 		}
 
 		private void InsertLocalMinima(LocalMinima newLm)
@@ -631,22 +640,21 @@ namespace ClipperLib
 			if (this.m_MinimaList == null)
 			{
 				this.m_MinimaList = newLm;
+				return;
 			}
-			else if (newLm.Y >= this.m_MinimaList.Y)
+			if (newLm.Y >= this.m_MinimaList.Y)
 			{
 				newLm.Next = this.m_MinimaList;
 				this.m_MinimaList = newLm;
+				return;
 			}
-			else
+			LocalMinima localMinima = this.m_MinimaList;
+			while (localMinima.Next != null && newLm.Y < localMinima.Next.Y)
 			{
-				LocalMinima localMinima = this.m_MinimaList;
-				while (localMinima.Next != null && newLm.Y < localMinima.Next.Y)
-				{
-					localMinima = localMinima.Next;
-				}
-				newLm.Next = localMinima.Next;
-				localMinima.Next = newLm;
+				localMinima = localMinima.Next;
 			}
+			newLm.Next = localMinima.Next;
+			localMinima.Next = newLm;
 		}
 
 		protected void PopLocalMinima()

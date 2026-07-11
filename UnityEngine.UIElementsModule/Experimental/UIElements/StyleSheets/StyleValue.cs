@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Experimental.UIElements.StyleSheets
 {
-	/// <summary>
-	///   <para>This generic structure encodes a value type that can come from USS or be specified programmatically.</para>
-	/// </summary>
 	public struct StyleValue<T>
 	{
 		public StyleValue(T value)

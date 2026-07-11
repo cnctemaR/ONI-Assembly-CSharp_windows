@@ -47,54 +47,56 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 			co.transform.SetPosition(co.transform.GetPosition() + co.velocity * dt);
 			Grid.PosToXY(co.transform.GetPosition(), out vector2I2);
 			int num2 = Grid.XYToCell(vector2I.x, vector2I.y);
-			int num3 = num2;
-			for (int j = vector2I.y; j >= vector2I2.y; j--)
+			int j = vector2I.y;
+			while (j >= vector2I2.y)
 			{
-				int num4 = Grid.XYToCell(vector2I.x, j);
-				bool flag = !Grid.IsValidCell(num4) || co.lifetimeRemaining <= 0f;
+				int num3 = Grid.XYToCell(vector2I.x, j);
+				bool flag = !Grid.IsValidCell(num3) || co.lifetimeRemaining <= 0f;
 				if (!flag)
 				{
-					Element element = Grid.Element[num4];
+					Element element = Grid.Element[num3];
 					flag = element.IsLiquid || element.IsSolid;
 				}
 				if (flag)
 				{
 					bool flag2 = false;
-					int num5;
-					if (num3 != num4)
+					int num4;
+					if (num2 != num3)
 					{
-						num5 = num3;
+						num4 = num2;
 						flag2 = true;
 					}
 					else
 					{
-						num5 = num4;
-						while (Grid.IsValidCell(num5))
+						num4 = num3;
+						while (Grid.IsValidCell(num4))
 						{
-							Element element2 = Grid.Element[num5];
+							Element element2 = Grid.Element[num4];
 							if (!element2.IsLiquid && !element2.IsSolid)
 							{
 								flag2 = true;
 								break;
 							}
-							num5 = Grid.CellAbove(num5);
+							num4 = Grid.CellAbove(num4);
 						}
 					}
 					co.TriggerDestroy();
 					if (flag2)
 					{
-						SimMessages.ModifyMass(num5, co.mass, byte.MaxValue, 0, CellEventLogger.Instance.CO2ManagerFixedUpdate, co.temperature, SimHashes.CarbonDioxide);
+						SimMessages.ModifyMass(num4, co.mass, byte.MaxValue, 0, CellEventLogger.Instance.CO2ManagerFixedUpdate, co.temperature, SimHashes.CarbonDioxide);
 						num--;
 						this.co2Items[i] = this.co2Items[num];
 						this.co2Items.RemoveAt(num);
+						break;
 					}
-					else
-					{
-						DebugUtil.LogWarningArgs(new object[] { "Couldn't emit CO2" });
-					}
+					DebugUtil.LogWarningArgs(new object[] { "Couldn't emit CO2" });
 					break;
 				}
-				num3 = num4;
+				else
+				{
+					num2 = num3;
+					j--;
+				}
 			}
 		}
 	}

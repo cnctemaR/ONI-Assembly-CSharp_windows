@@ -4,16 +4,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Asynchronous load request from the Resources bundle.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ResourceRequest : AsyncOperation
 	{
-		/// <summary>
-		///   <para>Asset object being loaded (Read Only).</para>
-		/// </summary>
 		public Object asset
 		{
 			get

@@ -8,14 +8,9 @@ namespace System.Data.Common
 	{
 		public DbProviderSpecificTypePropertyAttribute(bool isProviderSpecificTypeProperty)
 		{
+			this.IsProviderSpecificTypeProperty = isProviderSpecificTypeProperty;
 		}
 
-		public bool IsProviderSpecificTypeProperty
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public bool IsProviderSpecificTypeProperty { get; }
 	}
 }

@@ -16,8 +16,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		BatterySmart component = gameObject.GetComponent<BatterySmart>();
+		BatterySmart component = ((GameObject)data).GetComponent<BatterySmart>();
 		if (component != null)
 		{
 			this.ActivateValue = component.ActivateValue;
@@ -35,7 +34,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 
 	private void CreateLogicMeter()
 	{
-		this.logicMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
+		this.logicMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 	}
 
 	public override void EnergySim200ms(float dt)
@@ -60,7 +59,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 		}
 		bool isOperational = this.operational.IsOperational;
 		bool flag = this.activated && isOperational;
-		this.logicPorts.SendSignal(BatterySmart.PORT_ID, (!flag) ? 0 : 1);
+		this.logicPorts.SendSignal(BatterySmart.PORT_ID, flag ? 1 : 0);
 	}
 
 	private void OnLogicValueChanged(object data)
@@ -76,7 +75,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 	{
 		if (this.logicMeter != null)
 		{
-			this.logicMeter.SetPositionPercent((!on) ? 0f : 1f);
+			this.logicMeter.SetPositionPercent(on ? 1f : 0f);
 		}
 	}
 

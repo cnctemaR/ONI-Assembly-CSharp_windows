@@ -37,8 +37,7 @@ public class SpriteSheetAnimManager : KMonoBehaviour, IRenderEveryTick
 
 	public void Play(int name_hash, Vector3 pos, Quaternion rotation, Vector2 size, Color32 colour)
 	{
-		SpriteSheetAnimator spriteSheetAnimator = this.nameIndexMap[name_hash];
-		spriteSheetAnimator.Play(pos, rotation, size, colour);
+		this.nameIndexMap[name_hash].Play(pos, rotation, size, colour);
 	}
 
 	public void RenderEveryTick(float dt)

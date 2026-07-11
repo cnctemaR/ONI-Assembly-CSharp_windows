@@ -21,7 +21,11 @@ public class PeeChoreMonitor : GameStateMachine<PeeChoreMonitor, PeeChoreMonitor
 	private bool IsSleeping(PeeChoreMonitor.Instance smi)
 	{
 		StaminaMonitor.Instance smi2 = smi.master.gameObject.GetSMI<StaminaMonitor.Instance>();
-		return (smi2 == null || !smi2.IsSleeping()) && false;
+		if (smi2 != null)
+		{
+			smi2.IsSleeping();
+		}
+		return false;
 	}
 
 	private Chore CreatePeeChore(PeeChoreMonitor.Instance smi)

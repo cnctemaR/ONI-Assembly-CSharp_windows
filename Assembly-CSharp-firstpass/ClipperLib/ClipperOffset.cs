@@ -5,16 +5,16 @@ namespace ClipperLib
 {
 	public class ClipperOffset
 	{
+		public double ArcTolerance { get; set; }
+
+		public double MiterLimit { get; set; }
+
 		public ClipperOffset(double miterLimit = 2.0, double arcTolerance = 0.25)
 		{
 			this.MiterLimit = miterLimit;
 			this.ArcTolerance = arcTolerance;
 			this.m_lowest.X = -1L;
 		}
-
-		public double ArcTolerance { get; set; }
-
-		public double MiterLimit { get; set; }
 
 		public void Clear()
 		{
@@ -24,7 +24,11 @@ namespace ClipperLib
 
 		internal static long Round(double value)
 		{
-			return (value >= 0.0) ? ((long)(value + 0.5)) : ((long)(value - 0.5));
+			if (value >= 0.0)
+			{
+				return (long)(value + 0.5);
+			}
+			return (long)(value - 0.5);
 		}
 
 		public void AddPath(List<IntPoint> path, JoinType joinType, EndType endType)
@@ -37,13 +41,18 @@ namespace ClipperLib
 			PolyNode polyNode = new PolyNode();
 			polyNode.m_jointype = joinType;
 			polyNode.m_endtype = endType;
-			if (endType == EndType.etClosedLine || endType == EndType.etClosedPolygon)
+			if (endType != EndType.etClosedLine)
 			{
-				while (num > 0 && path[0] == path[num])
+				if (endType != EndType.etClosedPolygon)
 				{
-					num--;
+					goto IL_0048;
 				}
 			}
+			while (num > 0 && path[0] == path[num])
+			{
+				num--;
+			}
+			IL_0048:
 			polyNode.m_polygon.Capacity = num + 1;
 			polyNode.m_polygon.Add(path[0]);
 			int num2 = 0;
@@ -72,14 +81,12 @@ namespace ClipperLib
 			if (this.m_lowest.X < 0L)
 			{
 				this.m_lowest = new IntPoint((long)(this.m_polyNodes.ChildCount - 1), (long)num3);
+				return;
 			}
-			else
+			IntPoint intPoint = this.m_polyNodes.Childs[(int)this.m_lowest.X].m_polygon[(int)this.m_lowest.Y];
+			if (polyNode.m_polygon[num3].Y > intPoint.Y || (polyNode.m_polygon[num3].Y == intPoint.Y && polyNode.m_polygon[num3].X < intPoint.X))
 			{
-				IntPoint intPoint = this.m_polyNodes.Childs[(int)this.m_lowest.X].m_polygon[(int)this.m_lowest.Y];
-				if (polyNode.m_polygon[num3].Y > intPoint.Y || (polyNode.m_polygon[num3].Y == intPoint.Y && polyNode.m_polygon[num3].X < intPoint.X))
-				{
-					this.m_lowest = new IntPoint((long)(this.m_polyNodes.ChildCount - 1), (long)num3);
-				}
+				this.m_lowest = new IntPoint((long)(this.m_polyNodes.ChildCount - 1), (long)num3);
 			}
 		}
 
@@ -103,16 +110,14 @@ namespace ClipperLib
 						polyNode.m_polygon.Reverse();
 					}
 				}
+				return;
 			}
-			else
+			for (int j = 0; j < this.m_polyNodes.ChildCount; j++)
 			{
-				for (int j = 0; j < this.m_polyNodes.ChildCount; j++)
+				PolyNode polyNode2 = this.m_polyNodes.Childs[j];
+				if (polyNode2.m_endtype == EndType.etClosedLine && !Clipper.Orientation(polyNode2.m_polygon))
 				{
-					PolyNode polyNode2 = this.m_polyNodes.Childs[j];
-					if (polyNode2.m_endtype == EndType.etClosedLine && !Clipper.Orientation(polyNode2.m_polygon))
-					{
-						polyNode2.m_polygon.Reverse();
-					}
+					polyNode2.m_polygon.Reverse();
 				}
 			}
 		}
@@ -349,23 +354,21 @@ namespace ClipperLib
 			if (delta > 0.0)
 			{
 				clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftPositive, PolyFillType.pftPositive);
+				return;
 			}
-			else
+			IntRect bounds = ClipperBase.GetBounds(this.m_destPolys);
+			clipper.AddPath(new List<IntPoint>(4)
 			{
-				IntRect bounds = ClipperBase.GetBounds(this.m_destPolys);
-				clipper.AddPath(new List<IntPoint>(4)
-				{
-					new IntPoint(bounds.left - 10L, bounds.bottom + 10L),
-					new IntPoint(bounds.right + 10L, bounds.bottom + 10L),
-					new IntPoint(bounds.right + 10L, bounds.top - 10L),
-					new IntPoint(bounds.left - 10L, bounds.top - 10L)
-				}, PolyType.ptSubject, true);
-				clipper.ReverseSolution = true;
-				clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftNegative, PolyFillType.pftNegative);
-				if (solution.Count > 0)
-				{
-					solution.RemoveAt(0);
-				}
+				new IntPoint(bounds.left - 10L, bounds.bottom + 10L),
+				new IntPoint(bounds.right + 10L, bounds.bottom + 10L),
+				new IntPoint(bounds.right + 10L, bounds.top - 10L),
+				new IntPoint(bounds.left - 10L, bounds.top - 10L)
+			}, PolyType.ptSubject, true);
+			clipper.ReverseSolution = true;
+			clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftNegative, PolyFillType.pftNegative);
+			if (solution.Count > 0)
+			{
+				solution.RemoveAt(0);
 			}
 		}
 
@@ -379,35 +382,31 @@ namespace ClipperLib
 			if (delta > 0.0)
 			{
 				clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftPositive, PolyFillType.pftPositive);
+				return;
 			}
-			else
+			IntRect bounds = ClipperBase.GetBounds(this.m_destPolys);
+			clipper.AddPath(new List<IntPoint>(4)
 			{
-				IntRect bounds = ClipperBase.GetBounds(this.m_destPolys);
-				clipper.AddPath(new List<IntPoint>(4)
+				new IntPoint(bounds.left - 10L, bounds.bottom + 10L),
+				new IntPoint(bounds.right + 10L, bounds.bottom + 10L),
+				new IntPoint(bounds.right + 10L, bounds.top - 10L),
+				new IntPoint(bounds.left - 10L, bounds.top - 10L)
+			}, PolyType.ptSubject, true);
+			clipper.ReverseSolution = true;
+			clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftNegative, PolyFillType.pftNegative);
+			if (solution.ChildCount == 1 && solution.Childs[0].ChildCount > 0)
+			{
+				PolyNode polyNode = solution.Childs[0];
+				solution.Childs.Capacity = polyNode.ChildCount;
+				solution.Childs[0] = polyNode.Childs[0];
+				solution.Childs[0].m_Parent = solution;
+				for (int i = 1; i < polyNode.ChildCount; i++)
 				{
-					new IntPoint(bounds.left - 10L, bounds.bottom + 10L),
-					new IntPoint(bounds.right + 10L, bounds.bottom + 10L),
-					new IntPoint(bounds.right + 10L, bounds.top - 10L),
-					new IntPoint(bounds.left - 10L, bounds.top - 10L)
-				}, PolyType.ptSubject, true);
-				clipper.ReverseSolution = true;
-				clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftNegative, PolyFillType.pftNegative);
-				if (solution.ChildCount == 1 && solution.Childs[0].ChildCount > 0)
-				{
-					PolyNode polyNode = solution.Childs[0];
-					solution.Childs.Capacity = polyNode.ChildCount;
-					solution.Childs[0] = polyNode.Childs[0];
-					solution.Childs[0].m_Parent = solution;
-					for (int i = 1; i < polyNode.ChildCount; i++)
-					{
-						solution.AddChild(polyNode.Childs[i]);
-					}
+					solution.AddChild(polyNode.Childs[i]);
 				}
-				else
-				{
-					solution.Clear();
-				}
+				return;
 			}
+			solution.Clear();
 		}
 
 		private void OffsetPoint(int j, ref int k, JoinType jointype)
@@ -415,8 +414,7 @@ namespace ClipperLib
 			this.m_sinA = this.m_normals[k].X * this.m_normals[j].Y - this.m_normals[j].X * this.m_normals[k].Y;
 			if (Math.Abs(this.m_sinA * this.m_delta) < 1.0)
 			{
-				double num = this.m_normals[k].X * this.m_normals[j].X + this.m_normals[j].Y * this.m_normals[k].Y;
-				if (num > 0.0)
+				if (this.m_normals[k].X * this.m_normals[j].X + this.m_normals[j].Y * this.m_normals[k].Y > 0.0)
 				{
 					this.m_destPoly.Add(new IntPoint(ClipperOffset.Round((double)this.m_srcPoly[j].X + this.m_normals[k].X * this.m_delta), ClipperOffset.Round((double)this.m_srcPoly[j].Y + this.m_normals[k].Y * this.m_delta)));
 					return;
@@ -436,30 +434,29 @@ namespace ClipperLib
 				this.m_destPoly.Add(this.m_srcPoly[j]);
 				this.m_destPoly.Add(new IntPoint(ClipperOffset.Round((double)this.m_srcPoly[j].X + this.m_normals[j].X * this.m_delta), ClipperOffset.Round((double)this.m_srcPoly[j].Y + this.m_normals[j].Y * this.m_delta)));
 			}
-			else if (jointype != JoinType.jtMiter)
-			{
-				if (jointype != JoinType.jtSquare)
-				{
-					if (jointype == JoinType.jtRound)
-					{
-						this.DoRound(j, k);
-					}
-				}
-				else
-				{
-					this.DoSquare(j, k);
-				}
-			}
 			else
 			{
-				double num2 = 1.0 + (this.m_normals[j].X * this.m_normals[k].X + this.m_normals[j].Y * this.m_normals[k].Y);
-				if (num2 >= this.m_miterLim)
+				switch (jointype)
 				{
-					this.DoMiter(j, k, num2);
-				}
-				else
-				{
+				case JoinType.jtSquare:
 					this.DoSquare(j, k);
+					break;
+				case JoinType.jtRound:
+					this.DoRound(j, k);
+					break;
+				case JoinType.jtMiter:
+				{
+					double num = 1.0 + (this.m_normals[j].X * this.m_normals[k].X + this.m_normals[j].Y * this.m_normals[k].Y);
+					if (num >= this.m_miterLim)
+					{
+						this.DoMiter(j, k, num);
+					}
+					else
+					{
+						this.DoSquare(j, k);
+					}
+					break;
+				}
 				}
 			}
 			k = j;

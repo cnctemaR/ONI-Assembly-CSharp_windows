@@ -99,9 +99,13 @@ public class Worker : KMonoBehaviour
 							Rotatable component2 = this.workable.GetComponent<Rotatable>();
 							bool flag2 = component2 != null && component2.GetOrientation() == Orientation.FlipH;
 							Vector3 vector = this.facing.transform.GetPosition();
-							vector += ((!flag2) ? Vector3.right : Vector3.left);
+							vector += (flag2 ? Vector3.left : Vector3.right);
 							this.facing.Face(vector);
 						}
+					}
+					if (dt > 0f && Game.Instance.FastWorkersModeActive)
+					{
+						dt = Mathf.Min(this.workable.WorkTimeRemaining + 0.01f, 5f);
 					}
 					Klei.AI.Attribute workAttribute = this.workable.GetWorkAttribute();
 					if (workAttribute != null && workAttribute.IsTrainable)
@@ -148,7 +152,7 @@ public class Worker : KMonoBehaviour
 		HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, this.successFullyCompleted);
 		if (this.smi == null)
 		{
-			if (workPstAnims != null && workPstAnims.Length > 0)
+			if (workPstAnims != null && workPstAnims.Length != 0)
 			{
 				if (this.workable != null && this.workable.synchronizeAnims)
 				{
@@ -175,16 +179,15 @@ public class Worker : KMonoBehaviour
 	{
 		this.state = Worker.State.Idle;
 		base.gameObject.RemoveTag(GameTags.PerformingWorkRequest);
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Offset -= this.workAnimOffset;
+		base.GetComponent<KAnimControllerBase>().Offset -= this.workAnimOffset;
 		this.workAnimOffset = Vector3.zero;
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.PreventChoreInterruption);
 		this.DetachAnimOverrides();
 		this.ClearPasserbyReactable();
-		AnimEventHandler component2 = base.GetComponent<AnimEventHandler>();
-		if (component2)
+		AnimEventHandler component = base.GetComponent<AnimEventHandler>();
+		if (component)
 		{
-			component2.ClearContext();
+			component.ClearContext();
 		}
 		if (this.previousStatusItem.item != null)
 		{
@@ -221,42 +224,40 @@ public class Worker : KMonoBehaviour
 		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 		if (component != null && component.choreDriver != null)
 		{
-			Chore currentChore = component.choreDriver.GetCurrentChore();
-			currentChore.Fail((text == null) ? "WorkChoreDisabled" : text);
+			component.choreDriver.GetCurrentChore().Fail((text != null) ? text : "WorkChoreDisabled");
 		}
 	}
 
 	public void StopWork()
 	{
-		if (this.state == Worker.State.PendingCompletion || this.state == Worker.State.Completing)
+		if (this.state != Worker.State.PendingCompletion && this.state != Worker.State.Completing)
 		{
-			this.state = Worker.State.Idle;
-			if (this.successFullyCompleted)
+			if (this.state == Worker.State.Working)
 			{
-				this.CompleteWork();
-			}
-			else
-			{
-				this.InternalStopWork(this.workable, true);
-			}
-		}
-		else if (this.state == Worker.State.Working)
-		{
-			if (this.workable != null && this.workable.synchronizeAnims)
-			{
-				KBatchedAnimController component = this.workable.GetComponent<KBatchedAnimController>();
-				if (component != null)
+				if (this.workable != null && this.workable.synchronizeAnims)
 				{
-					HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, false);
-					if (workPstAnims != null)
+					KBatchedAnimController component = this.workable.GetComponent<KBatchedAnimController>();
+					if (component != null)
 					{
-						component.Play(workPstAnims, KAnim.PlayMode.Once);
-						component.SetPositionPercent(1f);
+						HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, false);
+						if (workPstAnims != null)
+						{
+							component.Play(workPstAnims, KAnim.PlayMode.Once);
+							component.SetPositionPercent(1f);
+						}
 					}
 				}
+				this.InternalStopWork(this.workable, true);
 			}
-			this.InternalStopWork(this.workable, true);
+			return;
 		}
+		this.state = Worker.State.Idle;
+		if (this.successFullyCompleted)
+		{
+			this.CompleteWork();
+			return;
+		}
+		this.InternalStopWork(this.workable, true);
 	}
 
 	public void StartWork(Worker.StartWorkInfo start_work_info)
@@ -265,7 +266,7 @@ public class Worker : KMonoBehaviour
 		Game.Instance.StartedWork();
 		if (this.state != Worker.State.Idle)
 		{
-			string text = string.Empty;
+			string text = "";
 			if (this.workable != null)
 			{
 				text = this.workable.name;
@@ -359,7 +360,7 @@ public class Worker : KMonoBehaviour
 
 	private void AttachOverrideAnims(KAnimControllerBase worker_controller)
 	{
-		if (this.animInfo.overrideAnims != null && this.animInfo.overrideAnims.Length > 0)
+		if (this.animInfo.overrideAnims != null && this.animInfo.overrideAnims.Length != 0)
 		{
 			for (int i = 0; i < this.animInfo.overrideAnims.Length; i++)
 			{
@@ -409,10 +410,10 @@ public class Worker : KMonoBehaviour
 			}
 		})
 			.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
-		Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
+		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
 		if (uisprite != null)
 		{
-			Thought thought = new Thought("Completion_" + topic, null, uisprite.first, "mode_satisfaction", "conversation_short", "bubble_conversation", SpeechMonitor.PREFIX_HAPPY, string.Empty, true, 4f);
+			Thought thought = new Thought("Completion_" + topic, null, uisprite.first, "mode_satisfaction", "conversation_short", "bubble_conversation", SpeechMonitor.PREFIX_HAPPY, "", true, 4f);
 			emoteReactable.AddThought(thought);
 		}
 	}
@@ -436,8 +437,7 @@ public class Worker : KMonoBehaviour
 
 	private void GetReactionEffect(GameObject reactor)
 	{
-		Effects component = base.GetComponent<Effects>();
-		component.Add("WorkEncouraged", true);
+		base.GetComponent<Effects>().Add("WorkEncouraged", true);
 	}
 
 	private bool ReactorIsOnFloor(GameObject reactor, Navigator.ActiveTransition transition)
@@ -505,12 +505,12 @@ public class Worker : KMonoBehaviour
 
 	public class StartWorkInfo
 	{
+		public Workable workable { get; set; }
+
 		public StartWorkInfo(Workable workable)
 		{
 			this.workable = workable;
 		}
-
-		public Workable workable { get; set; }
 	}
 
 	public enum WorkResult

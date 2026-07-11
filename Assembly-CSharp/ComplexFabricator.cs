@@ -29,7 +29,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	{
 		get
 		{
-			return (!this.HasWorkingOrder) ? null : this.recipe_list[this.workingOrderIdx];
+			if (!this.HasWorkingOrder)
+			{
+				return null;
+			}
+			return this.recipe_list[this.workingOrderIdx];
 		}
 	}
 
@@ -37,7 +41,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	{
 		get
 		{
-			return (!this.nextOrderIsWorkable) ? null : this.recipe_list[this.nextOrderIdx];
+			if (!this.nextOrderIsWorkable)
+			{
+				return null;
+			}
+			return this.recipe_list[this.nextOrderIdx];
 		}
 	}
 
@@ -155,8 +163,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	private void OnOperationalChanged(object data)
 	{
-		bool flag = (bool)data;
-		if (flag)
+		if ((bool)data)
 		{
 			this.queueDirty = true;
 		}
@@ -242,9 +249,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 		this.TransferCurrentRecipeIngredientsForBuild();
 		global::Debug.Assert(this.openOrderCounts[this.workingOrderIdx] > 0, "openOrderCount invalid");
-		List<int> list;
-		int num;
-		(list = this.openOrderCounts)[num = this.workingOrderIdx] = list[num] - 1;
+		List<int> list = this.openOrderCounts;
+		int num = this.workingOrderIdx;
+		int num2 = list[num];
+		list[num] = num2 - 1;
 		this.UpdateChore();
 		this.AdvanceNextOrder();
 	}
@@ -306,8 +314,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		if (flag && this.chore == null)
 		{
 			this.CreateChore();
+			return;
 		}
-		else if (!flag && this.chore != null)
+		if (!flag && this.chore != null)
 		{
 			this.CancelChore();
 		}
@@ -382,12 +391,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary2 = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
 		for (int j = 0; j < this.openOrderCounts.Count; j++)
 		{
-			int num2 = this.openOrderCounts[j];
-			if (num2 > 0)
+			if (this.openOrderCounts[j] > 0)
 			{
-				ComplexRecipe complexRecipe2 = this.recipe_list[j];
-				ComplexRecipe.RecipeElement[] ingredients = complexRecipe2.ingredients;
-				foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
+				foreach (ComplexRecipe.RecipeElement recipeElement in this.recipe_list[j].ingredients)
 				{
 					pooledDictionary[recipeElement.material] = this.inStorage.GetAmountAvailable(recipeElement.material);
 				}
@@ -395,27 +401,25 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 		for (int l = 0; l < this.recipe_list.Length; l++)
 		{
-			int num3 = this.openOrderCounts[l];
-			if (num3 > 0)
+			int num2 = this.openOrderCounts[l];
+			if (num2 > 0)
 			{
-				ComplexRecipe complexRecipe3 = this.recipe_list[l];
-				ComplexRecipe.RecipeElement[] ingredients2 = complexRecipe3.ingredients;
-				foreach (ComplexRecipe.RecipeElement recipeElement2 in ingredients2)
+				foreach (ComplexRecipe.RecipeElement recipeElement2 in this.recipe_list[l].ingredients)
 				{
-					float num4 = recipeElement2.amount * (float)num3;
-					float num5 = num4 - pooledDictionary[recipeElement2.material];
-					if (num5 > 0f)
+					float num3 = recipeElement2.amount * (float)num2;
+					float num4 = num3 - pooledDictionary[recipeElement2.material];
+					if (num4 > 0f)
 					{
-						float num6;
-						pooledDictionary2.TryGetValue(recipeElement2.material, out num6);
-						pooledDictionary2[recipeElement2.material] = num6 + num5;
+						float num5;
+						pooledDictionary2.TryGetValue(recipeElement2.material, out num5);
+						pooledDictionary2[recipeElement2.material] = num5 + num4;
 						pooledDictionary[recipeElement2.material] = 0f;
 					}
 					else
 					{
-						DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary3;
-						Tag material;
-						(pooledDictionary3 = pooledDictionary)[material = recipeElement2.material] = pooledDictionary3[material] - num4;
+						DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary3 = pooledDictionary;
+						Tag material = recipeElement2.material;
+						pooledDictionary3[material] -= num3;
 					}
 				}
 			}
@@ -456,8 +460,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	{
 		for (int i = this.fetchListList.Count - 1; i >= 0; i--)
 		{
-			FetchList2 fetchList = this.fetchListList[i];
-			if (fetchList.IsComplete)
+			if (this.fetchListList[i].IsComplete)
 			{
 				this.fetchListList.RemoveAt(i);
 				this.queueDirty = true;
@@ -501,18 +504,12 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			if (!(gameObject == null))
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (!(component == null))
+				if (!(component == null) && (!this.keepExcessLiquids || !component.Element.IsLiquid))
 				{
-					if (!this.keepExcessLiquids || !component.Element.IsLiquid)
+					KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+					if (component2 && !component2.HasAnyTags(ref tagBits))
 					{
-						KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
-						if (component2)
-						{
-							if (!component2.HasAnyTags(ref tagBits))
-							{
-								storage.Drop(gameObject, true);
-							}
-						}
+						storage.Drop(gameObject, true);
 					}
 				}
 			}
@@ -556,17 +553,19 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	{
 		if (this.recipe_list == null)
 		{
-			KPrefabID component = base.GetComponent<KPrefabID>();
-			Tag prefabTag = component.PrefabTag;
+			Tag prefabTag = base.GetComponent<KPrefabID>().PrefabTag;
 			List<ComplexRecipe> recipes = ComplexRecipeManager.Get().recipes;
 			List<ComplexRecipe> list = new List<ComplexRecipe>();
 			foreach (ComplexRecipe complexRecipe in recipes)
 			{
-				foreach (Tag tag in complexRecipe.fabricators)
+				using (List<Tag>.Enumerator enumerator2 = complexRecipe.fabricators.GetEnumerator())
 				{
-					if (tag == prefabTag)
+					while (enumerator2.MoveNext())
 					{
-						list.Add(complexRecipe);
+						if (enumerator2.Current == prefabTag)
+						{
+							list.Add(complexRecipe);
+						}
 					}
 				}
 			}
@@ -581,12 +580,15 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		foreach (ComplexRecipe complexRecipe in this.GetRecipes())
 		{
 			bool flag = false;
-			foreach (string text in this.recipeQueueCounts.Keys)
+			using (Dictionary<string, int>.KeyCollection.Enumerator enumerator = this.recipeQueueCounts.Keys.GetEnumerator())
 			{
-				if (text == complexRecipe.id)
+				while (enumerator.MoveNext())
 				{
-					flag = true;
-					break;
+					if (enumerator.Current == complexRecipe.id)
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
 			if (!flag)
@@ -675,9 +677,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 		else
 		{
-			Dictionary<string, int> dictionary;
-			string id;
-			(dictionary = this.recipeQueueCounts)[id = recipe.id] = dictionary[id] + 1;
+			Dictionary<string, int> dictionary = this.recipeQueueCounts;
+			string id = recipe.id;
+			int num = dictionary[id];
+			dictionary[id] = num + 1;
 		}
 		this.RefreshQueue();
 	}
@@ -695,17 +698,17 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			if (this.recipeQueueCounts[recipe.id] == ComplexFabricator.QUEUE_INFINITE)
 			{
 				this.recipeQueueCounts[recipe.id] = ComplexFabricator.MAX_QUEUE_SIZE;
+				return;
 			}
-			else if (this.recipeQueueCounts[recipe.id] == 0)
+			if (this.recipeQueueCounts[recipe.id] == 0)
 			{
 				this.recipeQueueCounts[recipe.id] = ComplexFabricator.QUEUE_INFINITE;
+				return;
 			}
-			else
-			{
-				Dictionary<string, int> dictionary;
-				string id;
-				(dictionary = this.recipeQueueCounts)[id = recipe.id] = dictionary[id] - 1;
-			}
+			Dictionary<string, int> dictionary = this.recipeQueueCounts;
+			string id = recipe.id;
+			int num = dictionary[id];
+			dictionary[id] = num - 1;
 		}
 	}
 
@@ -735,20 +738,13 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreTypeIdHash);
 		foreach (KeyValuePair<Tag, float> keyValuePair in missingAmounts)
 		{
-			if (keyValuePair.Value >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+			if (keyValuePair.Value >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && !this.HasPendingFetch(keyValuePair.Key))
 			{
-				bool flag = this.HasPendingFetch(keyValuePair.Key);
-				if (!flag)
-				{
-					FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
-					FetchList2 fetchList2 = fetchList;
-					Tag key = keyValuePair.Key;
-					float value = keyValuePair.Value;
-					fetchList2.Add(key, null, null, value, FetchOrder2.OperationalRequirement.None);
-					fetchList.ShowStatusItem = false;
-					fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-					this.fetchListList.Add(fetchList);
-				}
+				FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
+				fetchList.Add(keyValuePair.Key, null, null, keyValuePair.Value, FetchOrder2.OperationalRequirement.None);
+				fetchList.ShowStatusItem = false;
+				fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+				this.fetchListList.Add(fetchList);
 			}
 		}
 	}
@@ -779,11 +775,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	protected virtual void TransferCurrentRecipeIngredientsForBuild()
 	{
 		ComplexRecipe.RecipeElement[] ingredients = this.recipe_list[this.workingOrderIdx].ingredients;
-		ComplexRecipe.RecipeElement[] array = ingredients;
 		int i = 0;
-		while (i < array.Length)
+		while (i < ingredients.Length)
 		{
-			ComplexRecipe.RecipeElement recipeElement = array[i];
+			ComplexRecipe.RecipeElement recipeElement = ingredients[i];
 			float num;
 			for (;;)
 			{
@@ -798,24 +793,21 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				}
 				this.inStorage.Transfer(this.buildStorage, recipeElement.material, num, false, true);
 			}
-			IL_00B4:
+			IL_009D:
 			i++;
 			continue;
-			goto IL_00B4;
 			Block_2:
 			global::Debug.LogWarningFormat("TransferCurrentRecipeIngredientsForBuild ran out of {0} but still needed {1} more.", new object[] { recipeElement.material, num });
-			goto IL_00B4;
+			goto IL_009D;
 		}
 	}
 
 	protected virtual bool HasIngredients(ComplexRecipe recipe, Storage storage)
 	{
-		ComplexRecipe.RecipeElement[] ingredients = recipe.ingredients;
-		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
+		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
 			float amountAvailable = storage.GetAmountAvailable(recipeElement.material);
-			float num = recipeElement.amount - amountAvailable;
-			if (num >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+			if (recipeElement.amount - amountAvailable >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 			{
 				return false;
 			}
@@ -859,7 +851,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				}
 			}
 			ComplexFabricator.ResultState resultState = this.resultState;
-			if (resultState != ComplexFabricator.ResultState.PassTemperature && resultState != ComplexFabricator.ResultState.Heated)
+			if (resultState > ComplexFabricator.ResultState.Heated)
 			{
 				if (resultState == ComplexFabricator.ResultState.Melted)
 				{
@@ -872,13 +864,12 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			}
 			else
 			{
-				GameObject prefab = Assets.GetPrefab(recipeElement3.material);
-				GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0);
+				GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(recipeElement3.material), Grid.SceneLayer.Ore, null, 0);
 				int num6 = Grid.PosToCell(this);
 				gameObject2.transform.SetPosition(Grid.CellToPosCCC(num6, Grid.SceneLayer.Ore) + this.outputOffset);
 				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 				component2.Units = recipeElement3.amount;
-				component2.Temperature = ((this.resultState != ComplexFabricator.ResultState.PassTemperature) ? this.heatedTemperature : num);
+				component2.Temperature = ((this.resultState == ComplexFabricator.ResultState.PassTemperature) ? num : this.heatedTemperature);
 				gameObject2.SetActive(true);
 				float num7 = recipeElement3.amount / recipe.TotalResultUnits();
 				component2.AddDisease(diseaseInfo.idx, Mathf.RoundToInt((float)diseaseInfo.count * num7), "ComplexFabricator.CompleteOrder");
@@ -894,8 +885,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				SymbolOverrideController component3 = base.GetComponent<SymbolOverrideController>();
 				if (component3 != null)
 				{
-					KBatchedAnimController component4 = list[0].GetComponent<KBatchedAnimController>();
-					KAnim.Build build = component4.AnimFiles[0].GetData().build;
+					KAnim.Build build = list[0].GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build;
 					KAnim.Build.Symbol symbol = build.GetSymbol(build.name);
 					if (symbol != null)
 					{
@@ -916,7 +906,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		ComplexRecipe[] recipes = this.GetRecipes();
-		if (recipes.Length > 0)
+		if (recipes.Length != 0)
 		{
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.PROCESSES, UI.BUILDINGEFFECTS.TOOLTIPS.PROCESSES, Descriptor.DescriptorType.Effect);
@@ -924,7 +914,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 		foreach (ComplexRecipe complexRecipe in recipes)
 		{
-			string text = string.Empty;
+			string text = "";
 			string uiname = complexRecipe.GetUIName(false);
 			foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
 			{
@@ -983,7 +973,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	public bool keepExcessLiquids;
 
-	public TagBits keepAdditionalTags = default(TagBits);
+	public TagBits keepAdditionalTags;
 
 	public static int MAX_QUEUE_SIZE = 99;
 

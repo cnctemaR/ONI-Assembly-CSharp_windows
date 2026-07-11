@@ -10,10 +10,16 @@ public static class UtilityConnectionsExtensions
 			return UtilityConnections.Right;
 		case UtilityConnections.Right:
 			return UtilityConnections.Left;
+		case UtilityConnections.Left | UtilityConnections.Right:
+			break;
 		case UtilityConnections.Up:
 			return UtilityConnections.Down;
-		case UtilityConnections.Down:
-			return UtilityConnections.Up;
+		default:
+			if (direction == UtilityConnections.Down)
+			{
+				return UtilityConnections.Up;
+			}
+			break;
 		}
 		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
@@ -26,10 +32,16 @@ public static class UtilityConnectionsExtensions
 			return UtilityConnections.Down;
 		case UtilityConnections.Right:
 			return UtilityConnections.Up;
+		case UtilityConnections.Left | UtilityConnections.Right:
+			break;
 		case UtilityConnections.Up:
 			return UtilityConnections.Left;
-		case UtilityConnections.Down:
-			return UtilityConnections.Right;
+		default:
+			if (direction == UtilityConnections.Down)
+			{
+				return UtilityConnections.Right;
+			}
+			break;
 		}
 		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
@@ -42,10 +54,16 @@ public static class UtilityConnectionsExtensions
 			return UtilityConnections.Up;
 		case UtilityConnections.Right:
 			return UtilityConnections.Down;
+		case UtilityConnections.Left | UtilityConnections.Right:
+			break;
 		case UtilityConnections.Up:
 			return UtilityConnections.Right;
-		case UtilityConnections.Down:
-			return UtilityConnections.Left;
+		default:
+			if (direction == UtilityConnections.Down)
+			{
+				return UtilityConnections.Left;
+			}
+			break;
 		}
 		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
@@ -58,10 +76,16 @@ public static class UtilityConnectionsExtensions
 			return from_cell - 1;
 		case UtilityConnections.Right:
 			return from_cell + 1;
+		case UtilityConnections.Left | UtilityConnections.Right:
+			break;
 		case UtilityConnections.Up:
 			return from_cell + Grid.WidthInCells;
-		case UtilityConnections.Down:
-			return from_cell - Grid.WidthInCells;
+		default:
+			if (direction == UtilityConnections.Down)
+			{
+				return from_cell - Grid.WidthInCells;
+			}
+			break;
 		}
 		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}

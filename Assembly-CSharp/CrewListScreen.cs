@@ -87,11 +87,9 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 			{
 				this.PanelScrollbar.value = Mathf.Lerp(this.PanelScrollbar.value, 1f, 10f);
 				this.PanelScrollbar.gameObject.SetActive(false);
+				return;
 			}
-			else
-			{
-				this.PanelScrollbar.gameObject.SetActive(true);
-			}
+			this.PanelScrollbar.gameObject.SetActive(true);
 		}
 	}
 
@@ -115,19 +113,17 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 			return;
 		}
 		this.SetHeadersActive(true);
-		EntryType entryType = this.EntryObjects[0];
-		int childCount = entryType.transform.childCount;
+		int childCount = this.EntryObjects[0].transform.childCount;
 		for (int i = 0; i < childCount; i++)
 		{
-			EntryType entryType2 = this.EntryObjects[0];
-			OverviewColumnIdentity component = entryType2.transform.GetChild(i).GetComponent<OverviewColumnIdentity>();
+			OverviewColumnIdentity component = this.EntryObjects[0].transform.GetChild(i).GetComponent<OverviewColumnIdentity>();
 			if (component != null)
 			{
 				GameObject gameObject = Util.KInstantiate(this.Prefab_ColumnTitle, null, null);
 				gameObject.name = component.Column_DisplayName;
 				LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
 				gameObject.transform.SetParent(this.ColumnTitlesContainer);
-				componentInChildren.text = ((!component.StringLookup) ? component.Column_DisplayName : Strings.Get(component.Column_DisplayName));
+				componentInChildren.text = (component.StringLookup ? Strings.Get(component.Column_DisplayName) : component.Column_DisplayName);
 				gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.SORTCOLUMN, componentInChildren.text);
 				gameObject.rectTransform().anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x, 0f);
 				OverviewColumnIdentity overviewColumnIdentity = gameObject.GetComponent<OverviewColumnIdentity>();
@@ -164,47 +160,34 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 
 	protected void UpdateColumnTitles()
 	{
-		if (this.EntryObjects.Count > 0)
+		if (this.EntryObjects.Count <= 0 || !this.EntryObjects[0].gameObject.activeSelf)
 		{
-			EntryType entryType = this.EntryObjects[0];
-			if (entryType.gameObject.activeSelf)
+			this.SetHeadersActive(false);
+			return;
+		}
+		this.SetHeadersActive(true);
+		for (int i = 0; i < this.ColumnTitlesContainer.childCount; i++)
+		{
+			RectTransform rectTransform = this.ColumnTitlesContainer.GetChild(i).rectTransform();
+			for (int j = 0; j < this.EntryObjects[0].transform.childCount; j++)
 			{
-				this.SetHeadersActive(true);
-				for (int i = 0; i < this.ColumnTitlesContainer.childCount; i++)
+				OverviewColumnIdentity component = this.EntryObjects[0].transform.GetChild(j).GetComponent<OverviewColumnIdentity>();
+				if (component != null && component.Column_DisplayName == rectTransform.name)
 				{
-					RectTransform rectTransform = this.ColumnTitlesContainer.GetChild(i).rectTransform();
-					int num = 0;
-					for (;;)
+					rectTransform.pivot = new Vector2(component.xPivot, rectTransform.pivot.y);
+					rectTransform.anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x + this.columnTitleHorizontalOffset, 0f);
+					rectTransform.sizeDelta = new Vector2(component.rectTransform().sizeDelta.x, rectTransform.sizeDelta.y);
+					if (rectTransform.anchoredPosition.x == 0f)
 					{
-						int num2 = num;
-						EntryType entryType2 = this.EntryObjects[0];
-						if (num2 >= entryType2.transform.childCount)
-						{
-							break;
-						}
-						EntryType entryType3 = this.EntryObjects[0];
-						OverviewColumnIdentity component = entryType3.transform.GetChild(num).GetComponent<OverviewColumnIdentity>();
-						if (component != null && component.Column_DisplayName == rectTransform.name)
-						{
-							rectTransform.pivot = new Vector2(component.xPivot, rectTransform.pivot.y);
-							rectTransform.anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x + this.columnTitleHorizontalOffset, 0f);
-							rectTransform.sizeDelta = new Vector2(component.rectTransform().sizeDelta.x, rectTransform.sizeDelta.y);
-							if (rectTransform.anchoredPosition.x == 0f)
-							{
-								rectTransform.gameObject.SetActive(false);
-							}
-							else
-							{
-								rectTransform.gameObject.SetActive(true);
-							}
-						}
-						num++;
+						rectTransform.gameObject.SetActive(false);
+					}
+					else
+					{
+						rectTransform.gameObject.SetActive(true);
 					}
 				}
-				return;
 			}
 		}
-		this.SetHeadersActive(false);
 	}
 
 	protected void ReorderEntries(List<EntryType> sortedEntries, bool reverse)
@@ -213,13 +196,11 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 		{
 			if (reverse)
 			{
-				EntryType entryType = sortedEntries[i];
-				entryType.transform.SetSiblingIndex(sortedEntries.Count - 1 - i);
+				sortedEntries[i].transform.SetSiblingIndex(sortedEntries.Count - 1 - i);
 			}
 			else
 			{
-				EntryType entryType2 = sortedEntries[i];
-				entryType2.transform.SetSiblingIndex(i);
+				sortedEntries[i].transform.SetSiblingIndex(i);
 			}
 		}
 	}

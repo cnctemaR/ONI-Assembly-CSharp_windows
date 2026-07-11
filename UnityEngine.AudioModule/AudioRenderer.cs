@@ -7,40 +7,19 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Allow recording the main output of the game or specific groups in the AudioMixer.</para>
-	/// </summary>
 	[NativeType(Header = "Modules/Audio/Public/ScriptBindings/AudioRenderer.bindings.h")]
 	public class AudioRenderer
 	{
-		/// <summary>
-		///   <para>Enters audio recording mode. After this Unity will output silence until AudioRenderer.Stop is called.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>True if the engine was switched into output recording mode. False if it is already recording.</para>
-		/// </returns>
 		public static bool Start()
 		{
 			return AudioRenderer.Internal_AudioRenderer_Start();
 		}
 
-		/// <summary>
-		///   <para>Exits audio recording mode. After this audio output will be audible again.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>True if the engine was recording when this function was called.</para>
-		/// </returns>
 		public static bool Stop()
 		{
 			return AudioRenderer.Internal_AudioRenderer_Stop();
 		}
 
-		/// <summary>
-		///   <para>Returns the number of samples available since the last time AudioRenderer.Render was called. This is dependent on the frame capture rate.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Number of samples available since last recorded frame.</para>
-		/// </returns>
 		public static int GetSampleCountForCaptureFrame()
 		{
 			return AudioRenderer.Internal_AudioRenderer_GetSampleCountForCaptureFrame();

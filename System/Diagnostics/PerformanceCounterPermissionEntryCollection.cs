@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Security.Permissions;
+using Unity;
 
 namespace System.Diagnostics
 {
@@ -10,10 +11,10 @@ namespace System.Diagnostics
 		internal PerformanceCounterPermissionEntryCollection(PerformanceCounterPermission owner)
 		{
 			this.owner = owner;
-			global::System.Security.Permissions.ResourcePermissionBaseEntry[] entries = owner.GetEntries();
-			if (entries.Length > 0)
+			ResourcePermissionBaseEntry[] entries = owner.GetEntries();
+			if (entries.Length != 0)
 			{
-				foreach (global::System.Security.Permissions.ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
+				foreach (ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
 				{
 					PerformanceCounterPermissionAccess permissionAccess = (PerformanceCounterPermissionAccess)resourcePermissionBaseEntry.PermissionAccess;
 					string text = resourcePermissionBaseEntry.PermissionAccessPath[0];
@@ -24,9 +25,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		internal PerformanceCounterPermissionEntryCollection(global::System.Security.Permissions.ResourcePermissionBaseEntry[] entries)
+		internal PerformanceCounterPermissionEntryCollection(ResourcePermissionBaseEntry[] entries)
 		{
-			foreach (global::System.Security.Permissions.ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
+			foreach (ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
 			{
 				base.List.Add(new PerformanceCounterPermissionEntry((PerformanceCounterPermissionAccess)resourcePermissionBaseEntry.PermissionAccess, resourcePermissionBaseEntry.PermissionAccessPath[0], resourcePermissionBaseEntry.PermissionAccessPath[1]));
 			}
@@ -110,6 +111,11 @@ namespace System.Diagnostics
 		public void Remove(PerformanceCounterPermissionEntry value)
 		{
 			base.List.Remove(value);
+		}
+
+		internal PerformanceCounterPermissionEntryCollection()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private PerformanceCounterPermission owner;

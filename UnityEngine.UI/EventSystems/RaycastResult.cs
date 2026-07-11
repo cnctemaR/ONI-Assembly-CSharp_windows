@@ -35,7 +35,7 @@ namespace UnityEngine.EventSystems
 			this.sortingOrder = 0;
 			this.worldNormal = Vector3.up;
 			this.worldPosition = Vector3.zero;
-			this.screenPosition = Vector2.zero;
+			this.screenPosition = Vector3.zero;
 		}
 
 		public override string ToString()
@@ -97,5 +97,7 @@ namespace UnityEngine.EventSystems
 		public Vector3 worldNormal;
 
 		public Vector2 screenPosition;
+
+		internal int displayIndex;
 	}
 }

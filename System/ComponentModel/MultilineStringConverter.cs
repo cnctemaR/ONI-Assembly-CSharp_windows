@@ -1,26 +1,33 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class MultilineStringConverter : TypeConverter
 	{
-		[global::System.MonoTODO]
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			throw new NotImplementedException();
+			if (destinationType == null)
+			{
+				throw new ArgumentNullException("destinationType");
+			}
+			if (destinationType == typeof(string) && value is string)
+			{
+				return global::SR.GetString("(Text)");
+			}
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		[global::System.MonoTODO]
 		public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
 		{
-			throw new NotImplementedException();
+			return null;
 		}
 
-		[global::System.MonoTODO]
 		public override bool GetPropertiesSupported(ITypeDescriptorContext context)
 		{
-			throw new NotImplementedException();
+			return false;
 		}
 	}
 }

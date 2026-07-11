@@ -31,9 +31,8 @@ public class FallWhenDeadMonitor : GameStateMachine<FallWhenDeadMonitor, FallWhe
 
 		public bool IsFalling()
 		{
-			int num = Grid.PosToCell(base.master.transform.GetPosition());
-			int num2 = Grid.CellBelow(num);
-			return Grid.IsValidCell(num2) && !Grid.Solid[num2];
+			int num = Grid.CellBelow(Grid.PosToCell(base.master.transform.GetPosition()));
+			return Grid.IsValidCell(num) && !Grid.Solid[num];
 		}
 	}
 }

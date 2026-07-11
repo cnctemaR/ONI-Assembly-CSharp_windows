@@ -31,20 +31,17 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 		this.candidateCells.Clear();
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
-			if (!this.cooldowns.ContainsKey(minionIdentity) || GameClock.Instance.GetTime() - this.cooldowns[minionIdentity] >= 720f * TuningData<DupeGreetingManager.Tuning>.Get().greetingDelayMultiplier)
+			if ((!this.cooldowns.ContainsKey(minionIdentity) || GameClock.Instance.GetTime() - this.cooldowns[minionIdentity] >= 720f * TuningData<DupeGreetingManager.Tuning>.Get().greetingDelayMultiplier) && this.ValidNavigatingMinion(minionIdentity))
 			{
-				if (this.ValidNavigatingMinion(minionIdentity))
+				for (int j = 0; j <= 2; j++)
 				{
-					for (int j = 0; j <= 2; j++)
+					int offsetCell = this.GetOffsetCell(minionIdentity, j);
+					if (this.candidateCells.ContainsKey(offsetCell) && this.ValidOppositionalMinion(minionIdentity, this.candidateCells[offsetCell]))
 					{
-						int offsetCell = this.GetOffsetCell(minionIdentity, j);
-						if (this.candidateCells.ContainsKey(offsetCell) && this.ValidOppositionalMinion(minionIdentity, this.candidateCells[offsetCell]))
-						{
-							this.BeginNewGreeting(minionIdentity, this.candidateCells[offsetCell], offsetCell);
-							break;
-						}
-						this.candidateCells[offsetCell] = minionIdentity;
+						this.BeginNewGreeting(minionIdentity, this.candidateCells[offsetCell], offsetCell);
+						break;
 					}
+					this.candidateCells[offsetCell] = minionIdentity;
 				}
 			}
 		}
@@ -52,8 +49,11 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 
 	private int GetOffsetCell(MinionIdentity minion, int offset)
 	{
-		Facing component = minion.GetComponent<Facing>();
-		return (!component.GetFacing()) ? Grid.OffsetCell(Grid.PosToCell(minion), offset, 0) : Grid.OffsetCell(Grid.PosToCell(minion), -offset, 0);
+		if (!minion.GetComponent<Facing>().GetFacing())
+		{
+			return Grid.OffsetCell(Grid.PosToCell(minion), offset, 0);
+		}
+		return Grid.OffsetCell(Grid.PosToCell(minion), -offset, 0);
 	}
 
 	private bool ValidNavigatingMinion(MinionIdentity minion)
@@ -116,10 +116,8 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 				break;
 			}
 		}
-		Facing component2 = minionGO.GetComponent<Facing>();
-		component2.SetFacing(vector.x < minionGO.transform.GetPosition().x);
-		Effects component3 = minionGO.GetComponent<Effects>();
-		component3.Add("Greeting", true);
+		minionGO.GetComponent<Facing>().SetFacing(vector.x < minionGO.transform.GetPosition().x);
+		minionGO.GetComponent<Effects>().Add("Greeting", true);
 		this.cooldowns[component] = GameClock.Instance.GetTime();
 	}
 

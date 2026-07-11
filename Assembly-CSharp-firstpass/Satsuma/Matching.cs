@@ -4,8 +4,10 @@ using System.Linq;
 
 namespace Satsuma
 {
-	public sealed class Matching : IMatching, IClearable, IGraph, IArcLookup
+	public sealed class Matching : IMatching, IGraph, IArcLookup, IClearable
 	{
+		public IGraph Graph { get; private set; }
+
 		public Matching(IGraph graph)
 		{
 			this.Graph = graph;
@@ -13,8 +15,6 @@ namespace Satsuma
 			this.arcs = new HashSet<Arc>();
 			this.Clear();
 		}
-
-		public IGraph Graph { get; private set; }
 
 		public void Clear()
 		{
@@ -51,6 +51,7 @@ namespace Satsuma
 				if (this.Graph.IsEdge(arc))
 				{
 					this.edgeCount++;
+					return;
 				}
 			}
 			else
@@ -68,7 +69,11 @@ namespace Satsuma
 		public Arc MatchedArc(Node node)
 		{
 			Arc arc;
-			return (!this.matchedArc.TryGetValue(node, out arc)) ? Arc.Invalid : arc;
+			if (!this.matchedArc.TryGetValue(node, out arc))
+			{
+				return Arc.Invalid;
+			}
+			return arc;
 		}
 
 		public Node U(Arc arc)
@@ -139,23 +144,35 @@ namespace Satsuma
 
 		public int ArcCount(ArcFilter filter = ArcFilter.All)
 		{
-			return (filter != ArcFilter.All) ? this.edgeCount : this.arcs.Count;
+			if (filter != ArcFilter.All)
+			{
+				return this.edgeCount;
+			}
+			return this.arcs.Count;
 		}
 
 		public int ArcCount(Node u, ArcFilter filter = ArcFilter.All)
 		{
 			Arc arc = this.MatchedArc(u);
-			return (!(arc != Arc.Invalid) || !this.YieldArc(u, filter, arc)) ? 0 : 1;
+			if (!(arc != Arc.Invalid) || !this.YieldArc(u, filter, arc))
+			{
+				return 0;
+			}
+			return 1;
 		}
 
 		public int ArcCount(Node u, Node v, ArcFilter filter = ArcFilter.All)
 		{
-			if (u != v)
+			if (!(u != v))
 			{
-				Arc arc = this.MatchedArc(u);
-				return (!(arc != Arc.Invalid) || !(arc == this.MatchedArc(v)) || !this.YieldArc(u, filter, arc)) ? 0 : 1;
+				return 0;
 			}
-			return 0;
+			Arc arc = this.MatchedArc(u);
+			if (!(arc != Arc.Invalid) || !(arc == this.MatchedArc(v)) || !this.YieldArc(u, filter, arc))
+			{
+				return 0;
+			}
+			return 1;
 		}
 
 		public bool HasNode(Node node)

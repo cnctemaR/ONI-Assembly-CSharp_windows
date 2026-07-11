@@ -74,6 +74,6 @@ public class UtilityNetworkTubesManager : UtilityNetworkManager<TravelTubeNetwor
 
 	private bool HasConnection(int cell, UtilityConnections connection, bool is_physical_building)
 	{
-		return (base.GetConnections(cell, is_physical_building) & connection) != (UtilityConnections)0;
+		return (base.GetConnections(cell, is_physical_building) & connection) > (UtilityConnections)0;
 	}
 }

@@ -4,15 +4,6 @@ namespace Mono.Security.Cryptography
 {
 	public class MD2Managed : MD2
 	{
-		public MD2Managed()
-		{
-			this.state = new byte[16];
-			this.checksum = new byte[16];
-			this.buffer = new byte[16];
-			this.x = new byte[48];
-			this.Initialize();
-		}
-
 		private byte[] Padding(int nLength)
 		{
 			if (nLength > 0)
@@ -25,6 +16,15 @@ namespace Mono.Security.Cryptography
 				return array;
 			}
 			return null;
+		}
+
+		public MD2Managed()
+		{
+			this.state = new byte[16];
+			this.checksum = new byte[16];
+			this.buffer = new byte[16];
+			this.x = new byte[48];
+			this.Initialize();
 		}
 
 		public override void Initialize()
@@ -49,7 +49,7 @@ namespace Mono.Security.Cryptography
 				num3 = num2;
 				while (num3 + 15 < cbSize)
 				{
-					this.MD2Transform(this.state, this.checksum, array, num3);
+					this.MD2Transform(this.state, this.checksum, array, ibStart + num3);
 					num3 += 16;
 				}
 				num = 0;

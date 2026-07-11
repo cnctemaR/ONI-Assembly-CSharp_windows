@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace System.Configuration
 {
-	public class SettingChangingEventArgs : global::System.ComponentModel.CancelEventArgs
+	public class SettingChangingEventArgs : CancelEventArgs
 	{
 		public SettingChangingEventArgs(string settingName, string settingClass, string settingKey, object newValue, bool cancel)
 			: base(cancel)

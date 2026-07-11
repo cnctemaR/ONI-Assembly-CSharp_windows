@@ -12,8 +12,7 @@ public class CreditsScreen : KModalScreen
 		this.AddCredits(this.TeamCreditsFile);
 		foreach (string text in LocString.GetStrings(typeof(UI.CREDITSSCREEN.THIRD_PARTY)))
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.entryPrefab, this.entryContainer.gameObject, true);
-			gameObject.GetComponent<LocText>().text = text;
+			Util.KInstantiateUI(this.entryPrefab, this.entryContainer.gameObject, true).GetComponent<LocText>().text = text;
 		}
 		this.CloseButton.onClick += this.Close;
 	}
@@ -38,8 +37,7 @@ public class CreditsScreen : KModalScreen
 		list.Shuffle<string>();
 		foreach (string text2 in list)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.entryPrefab, this.entryContainer.gameObject, true);
-			gameObject.GetComponent<LocText>().text = text2;
+			Util.KInstantiateUI(this.entryPrefab, this.entryContainer.gameObject, true).GetComponent<LocText>().text = text2;
 		}
 	}
 

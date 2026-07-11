@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using Unity;
 
 namespace System.Net.Configuration
 {
@@ -74,6 +75,24 @@ namespace System.Net.Configuration
 			get
 			{
 				return SettingsSection.properties;
+			}
+		}
+
+		public HttpListenerElement HttpListener
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+		}
+
+		public WebUtilityElement WebUtility
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return null;
 			}
 		}
 

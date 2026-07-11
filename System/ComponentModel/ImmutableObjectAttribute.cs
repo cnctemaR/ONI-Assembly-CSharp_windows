@@ -20,25 +20,30 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			return obj is ImmutableObjectAttribute && (obj == this || ((ImmutableObjectAttribute)obj).Immutable == this.immutable);
+			if (obj == this)
+			{
+				return true;
+			}
+			ImmutableObjectAttribute immutableObjectAttribute = obj as ImmutableObjectAttribute;
+			return immutableObjectAttribute != null && immutableObjectAttribute.Immutable == this.immutable;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.immutable.GetHashCode();
+			return base.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.immutable == ImmutableObjectAttribute.Default.Immutable;
+			return this.Equals(ImmutableObjectAttribute.Default);
 		}
 
-		private bool immutable;
-
-		public static readonly ImmutableObjectAttribute Default = new ImmutableObjectAttribute(false);
+		public static readonly ImmutableObjectAttribute Yes = new ImmutableObjectAttribute(true);
 
 		public static readonly ImmutableObjectAttribute No = new ImmutableObjectAttribute(false);
 
-		public static readonly ImmutableObjectAttribute Yes = new ImmutableObjectAttribute(true);
+		public static readonly ImmutableObjectAttribute Default = ImmutableObjectAttribute.No;
+
+		private bool immutable = true;
 	}
 }

@@ -62,8 +62,7 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		public static SoapYearMonth Parse(string value)
 		{
-			DateTime dateTime = DateTime.ParseExact(value, SoapYearMonth._datetimeFormats, null, DateTimeStyles.None);
-			SoapYearMonth soapYearMonth = new SoapYearMonth(dateTime);
+			SoapYearMonth soapYearMonth = new SoapYearMonth(DateTime.ParseExact(value, SoapYearMonth._datetimeFormats, null, DateTimeStyles.None));
 			if (value.StartsWith("-"))
 			{
 				soapYearMonth.Sign = -1;

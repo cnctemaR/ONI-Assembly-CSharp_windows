@@ -36,7 +36,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					Array.Resize<object>(ref this.data, this.data.Length * 2);
 				}
 				this.data[this.count] = value;
-				return this.count++;
+				int num = this.count;
+				this.count = num + 1;
+				return num;
 			}
 
 			public void Clear()
@@ -129,9 +131,11 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
 			public IEnumerator GetEnumerator()
 			{
-				for (int i = 0; i < this.count; i++)
+				int num;
+				for (int i = 0; i < this.count; i = num)
 				{
 					yield return this.data[i];
+					num = i + 1;
 				}
 				yield break;
 			}

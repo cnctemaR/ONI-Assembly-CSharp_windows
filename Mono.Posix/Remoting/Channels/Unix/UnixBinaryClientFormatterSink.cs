@@ -6,7 +6,7 @@ using System.Runtime.Remoting.Messaging;
 
 namespace Mono.Remoting.Channels.Unix
 {
-	internal class UnixBinaryClientFormatterSink : IClientChannelSink, IMessageSink, IChannelSinkBase, IClientFormatterSink
+	internal class UnixBinaryClientFormatterSink : IClientFormatterSink, IMessageSink, IClientChannelSink, IChannelSinkBase
 	{
 		public UnixBinaryClientFormatterSink(IClientChannelSink nextSink)
 		{

@@ -5,6 +5,7 @@ namespace UnityEngine.Networking
 {
 	[DisallowMultipleComponent]
 	[AddComponentMenu("Network/NetworkDiscovery")]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkDiscovery : MonoBehaviour
 	{
 		public int broadcastPort
@@ -218,9 +219,9 @@ namespace UnityEngine.Networking
 			}
 			else
 			{
-				if (!NetworkTransport.IsStarted)
+				if (!NetworkManager.activeTransport.IsStarted)
 				{
-					NetworkTransport.Init();
+					NetworkManager.activeTransport.Init();
 				}
 				if (this.m_UseNetworkManager && NetworkManager.singleton != null)
 				{
@@ -276,7 +277,7 @@ namespace UnityEngine.Networking
 			}
 			else
 			{
-				this.m_HostId = NetworkTransport.AddHost(this.m_DefaultTopology, this.m_BroadcastPort);
+				this.m_HostId = NetworkManager.activeTransport.AddHost(this.m_DefaultTopology, this.m_BroadcastPort, null);
 				if (this.m_HostId == -1)
 				{
 					if (LogFilter.logError)
@@ -288,7 +289,7 @@ namespace UnityEngine.Networking
 				else
 				{
 					byte b;
-					NetworkTransport.SetBroadcastCredentials(this.m_HostId, this.m_BroadcastKey, this.m_BroadcastVersion, this.m_BroadcastSubVersion, out b);
+					NetworkManager.activeTransport.SetBroadcastCredentials(this.m_HostId, this.m_BroadcastKey, this.m_BroadcastVersion, this.m_BroadcastSubVersion, out b);
 					this.m_Running = true;
 					this.m_IsClient = true;
 					if (LogFilter.logDebug)
@@ -314,7 +315,7 @@ namespace UnityEngine.Networking
 			}
 			else
 			{
-				this.m_HostId = NetworkTransport.AddHost(this.m_DefaultTopology, 0);
+				this.m_HostId = NetworkManager.activeTransport.AddHost(this.m_DefaultTopology, 0, null);
 				byte b;
 				if (this.m_HostId == -1)
 				{
@@ -324,8 +325,10 @@ namespace UnityEngine.Networking
 					}
 					flag = false;
 				}
-				else if (!NetworkTransport.StartBroadcastDiscovery(this.m_HostId, this.m_BroadcastPort, this.m_BroadcastKey, this.m_BroadcastVersion, this.m_BroadcastSubVersion, this.m_MsgOutBuffer, this.m_MsgOutBuffer.Length, this.m_BroadcastInterval, out b))
+				else if (!NetworkManager.activeTransport.StartBroadcastDiscovery(this.m_HostId, this.m_BroadcastPort, this.m_BroadcastKey, this.m_BroadcastVersion, this.m_BroadcastSubVersion, this.m_MsgOutBuffer, this.m_MsgOutBuffer.Length, this.m_BroadcastInterval, out b))
 				{
+					NetworkTransport.RemoveHost(this.m_HostId);
+					this.m_HostId = -1;
 					if (LogFilter.logError)
 					{
 						Debug.LogError("NetworkDiscovery StartBroadcast failed err: " + b);
@@ -364,9 +367,9 @@ namespace UnityEngine.Networking
 			{
 				if (this.m_IsServer)
 				{
-					NetworkTransport.StopBroadcastDiscovery();
+					NetworkManager.activeTransport.StopBroadcastDiscovery();
 				}
-				NetworkTransport.RemoveHost(this.m_HostId);
+				NetworkManager.activeTransport.RemoveHost(this.m_HostId);
 				this.m_HostId = -1;
 				this.m_Running = false;
 				this.m_IsServer = false;
@@ -393,13 +396,13 @@ namespace UnityEngine.Networking
 						int num2;
 						int num3;
 						byte b;
-						networkEventType = NetworkTransport.ReceiveFromHost(this.m_HostId, out num, out num2, this.m_MsgInBuffer, 1024, out num3, out b);
+						networkEventType = NetworkManager.activeTransport.ReceiveFromHost(this.m_HostId, out num, out num2, this.m_MsgInBuffer, 1024, out num3, out b);
 						if (networkEventType == NetworkEventType.BroadcastEvent)
 						{
-							NetworkTransport.GetBroadcastConnectionMessage(this.m_HostId, this.m_MsgInBuffer, 1024, out num3, out b);
+							NetworkManager.activeTransport.GetBroadcastConnectionMessage(this.m_HostId, this.m_MsgInBuffer, 1024, out num3, out b);
 							string text;
 							int num4;
-							NetworkTransport.GetBroadcastConnectionInfo(this.m_HostId, out text, out num4, out b);
+							NetworkManager.activeTransport.GetBroadcastConnectionInfo(this.m_HostId, out text, out num4, out b);
 							NetworkBroadcastResult networkBroadcastResult = default(NetworkBroadcastResult);
 							networkBroadcastResult.serverAddress = text;
 							networkBroadcastResult.broadcastData = new byte[num3];
@@ -417,12 +420,12 @@ namespace UnityEngine.Networking
 		{
 			if (this.m_IsServer && this.m_Running && this.m_HostId != -1)
 			{
-				NetworkTransport.StopBroadcastDiscovery();
-				NetworkTransport.RemoveHost(this.m_HostId);
+				NetworkManager.activeTransport.StopBroadcastDiscovery();
+				NetworkManager.activeTransport.RemoveHost(this.m_HostId);
 			}
 			if (this.m_IsClient && this.m_Running && this.m_HostId != -1)
 			{
-				NetworkTransport.RemoveHost(this.m_HostId);
+				NetworkManager.activeTransport.RemoveHost(this.m_HostId);
 			}
 		}
 

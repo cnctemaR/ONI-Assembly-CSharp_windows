@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity;
 
 namespace System.Timers
 {
@@ -15,6 +16,11 @@ namespace System.Timers
 			{
 				return this.time;
 			}
+		}
+
+		internal ElapsedEventArgs()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private DateTime time;

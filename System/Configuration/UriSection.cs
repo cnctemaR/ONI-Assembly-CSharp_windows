@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity;
 
 namespace System.Configuration
 {
@@ -33,6 +34,15 @@ namespace System.Configuration
 			get
 			{
 				return UriSection.properties;
+			}
+		}
+
+		public SchemeSettingElementCollection SchemeSettings
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return null;
 			}
 		}
 

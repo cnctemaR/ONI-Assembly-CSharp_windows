@@ -65,7 +65,11 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddCheckboxLine(Db.Get().Amounts.Irrigation, this.conditionsContainerAdditional, (GameObject go) => this.GetIrrigationLabel(go), delegate(GameObject go)
 		{
 			ReceptacleMonitor component = go.GetComponent<ReceptacleMonitor>();
-			return (!(component != null) || !component.Replanted) ? MinionVitalsPanel.CheckboxLineDisplayType.Diminished : MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+			if (!(component != null) || !component.Replanted)
+			{
+				return MinionVitalsPanel.CheckboxLineDisplayType.Diminished;
+			}
+			return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 		}, (GameObject go) => this.check_irrigation(go), (GameObject go) => this.GetIrrigationTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Illumination, this.conditionsContainerNormal, (GameObject go) => this.GetIlluminationLabel(go), (GameObject go) => MinionVitalsPanel.CheckboxLineDisplayType.Normal, (GameObject go) => this.check_illumination(go), (GameObject go) => this.GetIlluminationTooltip(go));
 	}
@@ -94,7 +98,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		amountLine.locText = gameObject.GetComponentInChildren<LocText>();
 		amountLine.toolTip = gameObject.GetComponentInChildren<ToolTip>();
 		amountLine.imageToggle = gameObject.GetComponentInChildren<ValueTrendImageToggle>();
-		amountLine.toolTipFunc = ((tooltip_func == null) ? new Func<AmountInstance, string>(amount.GetTooltip) : tooltip_func);
+		amountLine.toolTipFunc = ((tooltip_func != null) ? tooltip_func : new Func<AmountInstance, string>(amount.GetTooltip));
 		this.amountsLines.Add(amountLine);
 	}
 
@@ -110,7 +114,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		attributeLine.locText = gameObject.GetComponentInChildren<LocText>();
 		attributeLine.toolTip = gameObject.GetComponentInChildren<ToolTip>();
 		gameObject.GetComponentInChildren<ValueTrendImageToggle>().gameObject.SetActive(false);
-		attributeLine.toolTipFunc = ((tooltip_func == null) ? new Func<AttributeInstance, string>(attribute.GetTooltip) : tooltip_func);
+		attributeLine.toolTipFunc = ((tooltip_func != null) ? tooltip_func : new Func<AttributeInstance, string>(attribute.GetTooltip));
 		this.attributesLines.Add(attributeLine);
 	}
 
@@ -148,7 +152,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 			{
 				tt.ClearMultiStringTooltip();
 				tt.AddMultiStringTooltip(tooltip_func(this.selectedEntity), null);
-				return string.Empty;
+				return "";
 			};
 		}
 		this.checkboxLines.Add(checkboxLine);
@@ -258,34 +262,34 @@ public class MinionVitalsPanel : KMonoBehaviour
 		}
 		if (component != null)
 		{
-			Growing component2 = component.GetComponent<Growing>();
+			global::UnityEngine.Object component2 = component.GetComponent<Growing>();
 			bool flag4 = component.HasTag(GameTags.Decoration);
 			this.conditionsContainerNormal.gameObject.SetActive(true);
 			this.conditionsContainerAdditional.gameObject.SetActive(!flag4);
 			if (component2 == null)
 			{
 				float num = 1f;
-				LocText locText = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				locText.text = string.Empty;
-				locText.text = ((!flag4) ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 0.25f * 100f)) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_DECOR.BASE, new object[0]));
-				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.TOOLTIP, new object[0]));
-				locText = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				locText.color = ((!this.selectedEntity.GetComponent<ReceptacleMonitor>().Replanted) ? Color.grey : Color.black);
-				locText.text = string.Empty;
-				locText.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 100f));
-				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.TOOLTIP, new object[0]));
+				LocText reference = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				reference.text = "";
+				reference.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_DECOR.BASE, Array.Empty<object>()) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 0.25f * 100f)));
+				reference.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.TOOLTIP, Array.Empty<object>()));
+				LocText reference2 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				reference2.color = (this.selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
+				reference2.text = "";
+				reference2.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 100f));
+				reference2.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.TOOLTIP, Array.Empty<object>()));
 			}
 			else
 			{
-				LocText locText = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				locText.text = string.Empty;
-				locText.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1"));
-				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1")));
-				locText = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				locText.color = ((!this.selectedEntity.GetComponent<ReceptacleMonitor>().Replanted) ? Color.grey : Color.black);
-				locText.text = string.Empty;
-				locText.text = ((!flag3) ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
-				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
+				LocText reference3 = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				reference3.text = "";
+				reference3.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1"));
+				reference3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1")));
+				LocText reference4 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				reference4.color = (this.selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
+				reference4.text = "";
+				reference4.text = (flag3 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
+				reference4.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
 			}
 			foreach (MinionVitalsPanel.AmountLine amountLine2 in this.amountsLines)
 			{
@@ -303,7 +307,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
 		if (component == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		return UI.TOOLTIPS.VITALS_CHECKBOX_PRESSURE.text.Replace("{pressure}", GameUtil.GetFormattedMass(component.GetExternalPressure(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
@@ -313,7 +317,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		TemperatureVulnerable component = go.GetComponent<TemperatureVulnerable>();
 		if (component == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		return UI.TOOLTIPS.VITALS_CHECKBOX_TEMPERATURE.text.Replace("{temperature}", GameUtil.GetFormattedTemperature(component.InternalTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 	}
@@ -323,7 +327,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		FertilizationMonitor.Instance smi = go.GetSMI<FertilizationMonitor.Instance>();
 		if (smi == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		return UI.TOOLTIPS.VITALS_CHECKBOX_FERTILIZER.text.Replace("{mass}", GameUtil.GetFormattedMass(smi.total_fertilizer_available, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
@@ -333,7 +337,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		IrrigationMonitor.Instance smi = go.GetSMI<IrrigationMonitor.Instance>();
 		if (smi == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		return UI.TOOLTIPS.VITALS_CHECKBOX_IRRIGATION.text.Replace("{mass}", GameUtil.GetFormattedMass(smi.total_fertilizer_available, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
@@ -343,7 +347,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
 		if (component == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		if ((component.prefersDarkness && component.IsComfortable()) || (!component.prefersDarkness && !component.IsComfortable()))
 		{
@@ -357,7 +361,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		ReceptacleMonitor component = go.GetComponent<ReceptacleMonitor>();
 		if (component == null)
 		{
-			return string.Empty;
+			return "";
 		}
 		if (component.HasOperationalReceptacle())
 		{
@@ -404,14 +408,13 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	private string GetFertilizationLabel(GameObject go)
 	{
-		FertilizationMonitor.Instance smi = go.GetSMI<FertilizationMonitor.Instance>();
+		StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.GenericInstance smi = go.GetSMI<FertilizationMonitor.Instance>();
 		string text = Db.Get().Amounts.Fertilization.Name;
 		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in smi.def.consumedElements)
 		{
-			string text2 = text;
 			text = string.Concat(new string[]
 			{
-				text2,
+				text,
 				"\n    • ",
 				ElementLoader.GetElement(consumeInfo.tag).name,
 				" ",
@@ -437,7 +440,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 	private string GetIlluminationLabel(GameObject go)
 	{
 		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
-		return Db.Get().Amounts.Illumination.Name + "\n    • " + ((!component.prefersDarkness) ? UI.GAMEOBJECTEFFECTS.LIGHT : UI.GAMEOBJECTEFFECTS.DARKNESS);
+		return Db.Get().Amounts.Illumination.Name + "\n    • " + (component.prefersDarkness ? UI.GAMEOBJECTEFFECTS.DARKNESS : UI.GAMEOBJECTEFFECTS.LIGHT);
 	}
 
 	private string GetAtmosphereLabel(GameObject go)

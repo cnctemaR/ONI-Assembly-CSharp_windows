@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 public class SchedulerGroup
 {
+	public Scheduler scheduler { get; private set; }
+
 	public SchedulerGroup(Scheduler scheduler)
 	{
 		this.scheduler = scheduler;
 		this.Reset();
 	}
-
-	public Scheduler scheduler { get; private set; }
 
 	public void FreeResources()
 	{

@@ -5,13 +5,13 @@ namespace Klei.AI
 {
 	public class ModifierInstance<ModifierType> : IStateMachineTarget
 	{
+		public GameObject gameObject { get; private set; }
+
 		public ModifierInstance(GameObject game_object, ModifierType modifier)
 		{
 			this.gameObject = game_object;
 			this.modifier = modifier;
 		}
-
-		public GameObject gameObject { get; private set; }
 
 		public ComponentType GetComponent<ComponentType>()
 		{

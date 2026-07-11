@@ -30,11 +30,9 @@ namespace Rendering.World
 			{
 				this.Triangles = new int[triangle_count];
 				this.SetTriangles = true;
+				return;
 			}
-			else
-			{
-				this.SetTriangles = false;
-			}
+			this.SetTriangles = false;
 		}
 
 		public bool AreTrianglesFull()
@@ -74,17 +72,26 @@ namespace Rendering.World
 
 		public void AddTriangle(int triangle)
 		{
-			this.Triangles[this.TriangleIdx++] = triangle + this.IdxOffset;
+			int[] triangles = this.Triangles;
+			int triangleIdx = this.TriangleIdx;
+			this.TriangleIdx = triangleIdx + 1;
+			triangles[triangleIdx] = triangle + this.IdxOffset;
 		}
 
 		public void AddUV(Vector2 uv)
 		{
-			this.UVs[this.UVIdx++] = uv;
+			Vector2[] uvs = this.UVs;
+			int uvidx = this.UVIdx;
+			this.UVIdx = uvidx + 1;
+			uvs[uvidx] = uv;
 		}
 
 		public void AddVertex(Vector3 vertex)
 		{
-			this.Vertices[this.VertexIdx++] = vertex;
+			Vector3[] vertices = this.Vertices;
+			int vertexIdx = this.VertexIdx;
+			this.VertexIdx = vertexIdx + 1;
+			vertices[vertexIdx] = vertex;
 		}
 
 		public void Render(Vector3 position, Quaternion rotation, Material material, int layer, MaterialPropertyBlock property_block)

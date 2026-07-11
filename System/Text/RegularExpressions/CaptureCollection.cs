@@ -1,29 +1,23 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class CaptureCollection : ICollection, IEnumerable
 	{
-		internal CaptureCollection(int n)
+		internal CaptureCollection(Group group)
 		{
-			this.list = new Capture[n];
+			this._group = group;
+			this._capcount = this._group._capcount;
 		}
 
-		public int Count
+		public object SyncRoot
 		{
 			get
 			{
-				return this.list.Length;
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				return true;
+				return this._group;
 			}
 		}
 
@@ -35,41 +29,79 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
+		public bool IsReadOnly
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this._capcount;
+			}
+		}
+
 		public Capture this[int i]
 		{
 			get
 			{
-				if (i < 0 || i >= this.Count)
-				{
-					throw new ArgumentOutOfRangeException("Index is out of range");
-				}
-				return this.list[i];
+				return this.GetCapture(i);
 			}
 		}
 
-		internal void SetValue(Capture cap, int i)
+		public void CopyTo(Array array, int arrayIndex)
 		{
-			this.list[i] = cap;
-		}
-
-		public object SyncRoot
-		{
-			get
+			if (array == null)
 			{
-				return this.list;
+				throw new ArgumentNullException("array");
 			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.list.CopyTo(array, index);
+			int num = arrayIndex;
+			for (int i = 0; i < this.Count; i++)
+			{
+				array.SetValue(this[i], num);
+				num++;
+			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return this.list.GetEnumerator();
+			return new CaptureEnumerator(this);
 		}
 
-		private Capture[] list;
+		internal Capture GetCapture(int i)
+		{
+			if (i == this._capcount - 1 && i >= 0)
+			{
+				return this._group;
+			}
+			if (i >= this._capcount || i < 0)
+			{
+				throw new ArgumentOutOfRangeException("i");
+			}
+			if (this._captures == null)
+			{
+				this._captures = new Capture[this._capcount];
+				for (int j = 0; j < this._capcount - 1; j++)
+				{
+					this._captures[j] = new Capture(this._group._text, this._group._caps[j * 2], this._group._caps[j * 2 + 1]);
+				}
+			}
+			return this._captures[i];
+		}
+
+		internal CaptureCollection()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		internal Group _group;
+
+		internal int _capcount;
+
+		internal Capture[] _captures;
 	}
 }

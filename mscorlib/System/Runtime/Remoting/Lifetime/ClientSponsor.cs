@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace System.Runtime.Remoting.Lifetime
 {
@@ -33,9 +34,7 @@ namespace System.Runtime.Remoting.Lifetime
 		{
 			foreach (object obj in this.registered_objects.Values)
 			{
-				MarshalByRefObject marshalByRefObject = (MarshalByRefObject)obj;
-				ILease lease = marshalByRefObject.GetLifetimeService() as ILease;
-				lease.Unregister(this);
+				(((MarshalByRefObject)obj).GetLifetimeService() as ILease).Unregister(this);
 			}
 			this.registered_objects.Clear();
 		}
@@ -66,6 +65,7 @@ namespace System.Runtime.Remoting.Lifetime
 			return true;
 		}
 
+		[SecurityCritical]
 		public TimeSpan Renewal(ILease lease)
 		{
 			return this.renewal_time;
@@ -77,8 +77,7 @@ namespace System.Runtime.Remoting.Lifetime
 			{
 				return;
 			}
-			ILease lease = obj.GetLifetimeService() as ILease;
-			lease.Unregister(this);
+			(obj.GetLifetimeService() as ILease).Unregister(this);
 			this.registered_objects.Remove(obj);
 		}
 

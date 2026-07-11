@@ -5,6 +5,14 @@ namespace Satsuma
 {
 	public class BiNodeConnectedComponents
 	{
+		public IGraph Graph { get; private set; }
+
+		public int Count { get; private set; }
+
+		public List<HashSet<Node>> Components { get; private set; }
+
+		public Dictionary<Node, int> Cutvertices { get; private set; }
+
 		public BiNodeConnectedComponents(IGraph graph, BiNodeConnectedComponents.Flags flags = BiNodeConnectedComponents.Flags.None)
 		{
 			this.Graph = graph;
@@ -21,14 +29,6 @@ namespace Satsuma
 				Parent = this
 			}.Run(graph, null);
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public int Count { get; private set; }
-
-		public List<HashSet<Node>> Components { get; private set; }
-
-		public Dictionary<Node, int> Cutvertices { get; private set; }
 
 		[Flags]
 		public enum Flags
@@ -73,7 +73,9 @@ namespace Satsuma
 				{
 					if (this.oneNodeComponent)
 					{
-						this.Parent.Count++;
+						BiNodeConnectedComponents parent = this.Parent;
+						int num = parent.Count;
+						parent.Count = num + 1;
 						if (this.Parent.Components != null)
 						{
 							this.Parent.Components.Add(new HashSet<Node> { node });
@@ -95,10 +97,12 @@ namespace Satsuma
 					{
 						if (this.Parent.Cutvertices != null)
 						{
-							int num;
-							this.Parent.Cutvertices[node2] = ((!this.Parent.Cutvertices.TryGetValue(node2, out num)) ? 0 : num) + 1;
+							int num2;
+							this.Parent.Cutvertices[node2] = (this.Parent.Cutvertices.TryGetValue(node2, out num2) ? num2 : 0) + 1;
 						}
-						this.Parent.Count++;
+						BiNodeConnectedComponents parent2 = this.Parent;
+						int num = parent2.Count;
+						parent2.Count = num + 1;
 						if (this.Parent.Components != null)
 						{
 							HashSet<Node> hashSet = new HashSet<Node>();

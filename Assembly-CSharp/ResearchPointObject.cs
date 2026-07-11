@@ -22,5 +22,5 @@ public class ResearchPointObject : KMonoBehaviour, IGameObjectEffectDescriptor
 		return list;
 	}
 
-	public string TypeID = string.Empty;
+	public string TypeID = "";
 }

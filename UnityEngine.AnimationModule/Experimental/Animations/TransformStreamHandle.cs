@@ -4,20 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Animations
 {
-	/// <summary>
-	///   <para>Position, rotation and scale of an object in the AnimationStream.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/Director/AnimationStreamHandles.h")]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationStreamHandles.bindings.h")]
 	public struct TransformStreamHandle
 	{
-		/// <summary>
-		///   <para>Returns whether this is a valid handle.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>Whether this is a valid handle.</para>
-		/// </returns>
 		public bool IsValid(AnimationStream stream)
 		{
 			return this.IsValidInternal(ref stream);
@@ -69,22 +59,11 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Bind this handle with an animated values from the AnimationStream.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
 		public void Resolve(AnimationStream stream)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Returns whether this handle is resolved.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>Returns true if the handle is resolved, false otherwise.</para>
-		/// </returns>
 		public bool IsResolved(AnimationStream stream)
 		{
 			return this.IsResolvedInternal(ref stream);
@@ -115,120 +94,60 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the position of the transform in world space.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>The position of the transform in world space.</para>
-		/// </returns>
 		public Vector3 GetPosition(AnimationStream stream)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			return this.GetPositionInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the position of the transform in world space.</para>
-		/// </summary>
-		/// <param name="position">The position of the transform in world space.</param>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
 		public void SetPosition(AnimationStream stream, Vector3 position)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			this.SetPositionInternal(ref stream, position);
 		}
 
-		/// <summary>
-		///   <para>Gets the rotation of the transform in world space.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>The rotation of the transform in world space.</para>
-		/// </returns>
 		public Quaternion GetRotation(AnimationStream stream)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			return this.GetRotationInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the rotation of the transform in world space.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <param name="rotation">The rotation of the transform in world space.</param>
 		public void SetRotation(AnimationStream stream, Quaternion rotation)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			this.SetRotationInternal(ref stream, rotation);
 		}
 
-		/// <summary>
-		///   <para>Gets the position of the transform relative to the parent.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>The position of the transform relative to the parent.</para>
-		/// </returns>
 		public Vector3 GetLocalPosition(AnimationStream stream)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			return this.GetLocalPositionInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the position of the transform relative to the parent.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <param name="position">The position of the transform relative to the parent.</param>
 		public void SetLocalPosition(AnimationStream stream, Vector3 position)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			this.SetLocalPositionInternal(ref stream, position);
 		}
 
-		/// <summary>
-		///   <para>Gets the rotation of the transform relative to the parent.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>The rotation of the transform relative to the parent.</para>
-		/// </returns>
 		public Quaternion GetLocalRotation(AnimationStream stream)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			return this.GetLocalRotationInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the rotation of the transform relative to the parent.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <param name="rotation">The rotation of the transform relative to the parent.</param>
 		public void SetLocalRotation(AnimationStream stream, Quaternion rotation)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			this.SetLocalRotationInternal(ref stream, rotation);
 		}
 
-		/// <summary>
-		///   <para>Gets the scale of the transform relative to the parent.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
-		/// <returns>
-		///   <para>The scale of the transform relative to the parent.</para>
-		/// </returns>
 		public Vector3 GetLocalScale(AnimationStream stream)
 		{
 			this.CheckIsValidAndResolve(ref stream);
 			return this.GetLocalScaleInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the scale of the transform relative to the parent.</para>
-		/// </summary>
-		/// <param name="scale">The scale of the transform relative to the parent.</param>
-		/// <param name="stream">The AnimationStream that hold the animated values.</param>
 		public void SetLocalScale(AnimationStream stream, Vector3 scale)
 		{
 			this.CheckIsValidAndResolve(ref stream);

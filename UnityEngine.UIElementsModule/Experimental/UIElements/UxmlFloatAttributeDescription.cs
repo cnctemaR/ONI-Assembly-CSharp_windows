@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML float attribute.</para>
-	/// </summary>
 	public class UxmlFloatAttributeDescription : UxmlAttributeDescription
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public UxmlFloatAttributeDescription()
 		{
 			base.type = "float";
@@ -17,14 +11,8 @@ namespace UnityEngine.Experimental.UIElements
 			this.defaultValue = 0f;
 		}
 
-		/// <summary>
-		///   <para>The default value for the attribute.</para>
-		/// </summary>
 		public float defaultValue { get; set; }
 
-		/// <summary>
-		///   <para>The default value for the attribute, as a string.</para>
-		/// </summary>
 		public override string defaultValueAsString
 		{
 			get
@@ -33,16 +21,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieves the value of this attribute from the attribute bag. Returns it if it is found, otherwise return defaultValue.</para>
-		/// </summary>
-		/// <param name="bag">The bag of attributes.</param>
-		/// <returns>
-		///   <para>The value of the attribute.</para>
-		/// </returns>
+		[Obsolete("Pass a creation context to the method.")]
 		public float GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyFloat(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public float GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<float>(bag, cc, new Func<string, float, float>(UxmlFloatAttributeDescription.ConvertValueToFloat), this.defaultValue);
+		}
+
+		private static float ConvertValueToFloat(string v, float defaultValue)
+		{
+			float num;
+			float num2;
+			if (v == null || !float.TryParse(v, out num))
+			{
+				num2 = defaultValue;
+			}
+			else
+			{
+				num2 = num;
+			}
+			return num2;
 		}
 	}
 }

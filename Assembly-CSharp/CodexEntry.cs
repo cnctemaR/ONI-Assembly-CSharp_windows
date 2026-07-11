@@ -55,7 +55,7 @@ public class CodexEntry
 					"<b>",
 					contentContainer.contentLayout.ToString(),
 					" container: ",
-					(contentContainer.content != null) ? contentContainer.content.Count : 0,
+					(contentContainer.content == null) ? 0 : contentContainer.content.Count,
 					" items</b>"
 				});
 				if (contentContainer.content != null)
@@ -63,10 +63,9 @@ public class CodexEntry
 					text += "\n";
 					for (int i = 0; i < contentContainer.content.Count; i++)
 					{
-						string text2 = text;
 						text = string.Concat(new string[]
 						{
-							text2,
+							text,
 							"    • ",
 							contentContainer.content[i].ToString(),
 							": ",
@@ -112,7 +111,7 @@ public class CodexEntry
 		{
 			return codexIndentedLabelWithIcon.label.text + " / " + codexIndentedLabelWithIcon.icon.spriteName;
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public void CreateContentContainerCollection()

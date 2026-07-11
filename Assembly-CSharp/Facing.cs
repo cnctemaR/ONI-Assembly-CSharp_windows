@@ -17,8 +17,9 @@ public class Facing : KMonoBehaviour
 		{
 			this.facingLeft = true;
 			this.UpdateMirror();
+			return;
 		}
-		else if (target_x > x)
+		if (target_x > x)
 		{
 			this.facingLeft = false;
 			this.UpdateMirror();
@@ -33,8 +34,9 @@ public class Facing : KMonoBehaviour
 		{
 			this.facingLeft = true;
 			this.UpdateMirror();
+			return;
 		}
-		else if (num2 > num)
+		if (num2 > num)
 		{
 			this.facingLeft = false;
 			this.UpdateMirror();
@@ -53,9 +55,7 @@ public class Facing : KMonoBehaviour
 		if (this.kanimController != null && this.kanimController.FlipX != this.facingLeft)
 		{
 			this.kanimController.FlipX = this.facingLeft;
-			if (this.facingLeft)
-			{
-			}
+			bool flag = this.facingLeft;
 		}
 	}
 

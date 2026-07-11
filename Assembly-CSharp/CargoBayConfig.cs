@@ -17,12 +17,16 @@ public class CargoBayConfig : IBuildingConfig
 			"BuildableRaw",
 			SimHashes.Steel.ToString()
 		};
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
+		float[] array2 = new float[]
 		{
 			ROCKETRY.CARGO_CONTAINER_MASS.STATIC_MASS,
 			ROCKETRY.CARGO_CONTAINER_MASS.STATIC_MASS
-		}, array, 9999f, BuildLocationRule.BuildingAttachPoint, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		};
+		string[] array3 = array;
+		float num5 = 9999f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.Invincible = true;
@@ -43,8 +47,7 @@ public class CargoBayConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		BuildingAttachPoint buildingAttachPoint = go.AddOrGet<BuildingAttachPoint>();
-		buildingAttachPoint.points = new BuildingAttachPoint.HardPoint[]
+		go.AddOrGet<BuildingAttachPoint>().points = new BuildingAttachPoint.HardPoint[]
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 5), GameTags.Rocket, null)
 		};
@@ -65,8 +68,7 @@ public class CargoBayConfig : IBuildingConfig
 		cargoBay.storageType = CargoBay.CargoType.solids;
 		cargoBay.storage.capacityKg = 1000f;
 		cargoBay.storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		RocketModule rocketModule = go.AddOrGet<RocketModule>();
-		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_storage_solid_bg_kanim"));
+		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_storage_solid_bg_kanim"));
 		EntityTemplates.ExtendBuildingToRocketModule(go);
 		go.AddOrGet<SolidConduitDispenser>();
 	}

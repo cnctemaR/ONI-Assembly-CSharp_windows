@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using FMOD.Studio;
 using Klei.AI;
 using STRINGS;
@@ -12,11 +10,6 @@ public abstract class OverlayModes
 {
 	public class GasConduits : OverlayModes.ConduitMode
 	{
-		public GasConduits()
-			: base(OverlayScreen.GasVentIDs)
-		{
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.GasConduits.ID;
@@ -27,16 +20,16 @@ public abstract class OverlayModes
 			return "GasVent";
 		}
 
+		public GasConduits()
+			: base(OverlayScreen.GasVentIDs)
+		{
+		}
+
 		public static readonly HashedString ID = "GasConduit";
 	}
 
 	public class LiquidConduits : OverlayModes.ConduitMode
 	{
-		public LiquidConduits()
-			: base(OverlayScreen.LiquidVentIDs)
-		{
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.LiquidConduits.ID;
@@ -45,6 +38,11 @@ public abstract class OverlayModes
 		public override string GetSoundName()
 		{
 			return "LiquidVent";
+		}
+
+		public LiquidConduits()
+			: base(OverlayScreen.LiquidVentIDs)
+		{
 		}
 
 		public static readonly HashedString ID = "LiquidConduit";
@@ -72,8 +70,7 @@ public abstract class OverlayModes
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
 		{
-			KPrefabID component = item.GetComponent<KPrefabID>();
-			Tag saveLoadTag = component.GetSaveLoadTag();
+			Tag saveLoadTag = item.GetComponent<KPrefabID>().GetSaveLoadTag();
 			if (this.targetIDs.Contains(saveLoadTag))
 			{
 				this.partition.Add(item);
@@ -111,24 +108,10 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
-			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			IEnumerator enumerator = allIntersecting.GetEnumerator();
-			try
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			GameObject gameObject = null;
 			if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
@@ -143,14 +126,14 @@ public abstract class OverlayModes
 				if (component != null)
 				{
 					int networkCell = component.GetNetworkCell();
-					UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((!(this.ViewMode() == OverlayModes.LiquidConduits.ID)) ? Game.Instance.gasConduitSystem : Game.Instance.liquidConduitSystem);
+					UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((this.ViewMode() == OverlayModes.LiquidConduits.ID) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
 					this.visited.Clear();
 					this.FindConnectedNetworks(networkCell, utilityNetworkManager, this.connectedNetworks, this.visited);
 					this.visited.Clear();
 					num = OverlayModes.ModeUtil.GetHighlightScale();
 				}
 			}
-			Game.ConduitVisInfo conduitVisInfo = ((!(this.ViewMode() == OverlayModes.LiquidConduits.ID)) ? Game.Instance.gasConduitVisInfo : Game.Instance.liquidConduitVisInfo);
+			Game.ConduitVisInfo conduitVisInfo = ((this.ViewMode() == OverlayModes.LiquidConduits.ID) ? Game.Instance.liquidConduitVisInfo : Game.Instance.gasConduitVisInfo);
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{
 				if (!(saveLoadRoot2 == null))
@@ -179,8 +162,7 @@ public abstract class OverlayModes
 							color.b = (byte)((float)color.b * num);
 						}
 					}
-					KBatchedAnimController component3 = saveLoadRoot2.GetComponent<KBatchedAnimController>();
-					component3.TintColour = color;
+					saveLoadRoot2.GetComponent<KBatchedAnimController>().TintColour = color;
 				}
 			}
 		}
@@ -248,6 +230,16 @@ public abstract class OverlayModes
 
 	public class Crop : OverlayModes.BasePlantMode
 	{
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.Crop.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return "Harvest";
+		}
+
 		public Crop(Canvas ui_root, GameObject harvestable_notification_prefab)
 		{
 			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[3];
@@ -264,16 +256,6 @@ public abstract class OverlayModes
 			this.harvestableNotificationPrefab = harvestable_notification_prefab;
 		}
 
-		public override HashedString ViewMode()
-		{
-			return OverlayModes.Crop.ID;
-		}
-
-		public override string GetSoundName()
-		{
-			return "Harvest";
-		}
-
 		public override void Update()
 		{
 			this.updateCropInfo.Clear();
@@ -282,24 +264,10 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<HarvestDesignatable>(this.layerTargets, vector2I, vector2I2, null);
-			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			IEnumerator enumerator = allIntersecting.GetEnumerator();
-			try
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					HarvestDesignatable harvestDesignatable = (HarvestDesignatable)obj;
-					base.AddTargetIfVisible<HarvestDesignatable>(harvestDesignatable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				HarvestDesignatable harvestDesignatable = (HarvestDesignatable)obj;
+				base.AddTargetIfVisible<HarvestDesignatable>(harvestDesignatable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			foreach (HarvestDesignatable harvestDesignatable2 in this.layerTargets)
 			{
@@ -400,14 +368,6 @@ public abstract class OverlayModes
 
 	public class Harvest : OverlayModes.BasePlantMode
 	{
-		public Harvest()
-		{
-			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
-			array[0] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour harvestable) => new Color(0.65f, 0.65f, 0.65f, 0.65f), (KMonoBehaviour harvestable) => true);
-			this.highlightConditions = array;
-			base..ctor(OverlayScreen.HarvestableIDs);
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.Harvest.ID;
@@ -418,30 +378,24 @@ public abstract class OverlayModes
 			return "Harvest";
 		}
 
+		public Harvest()
+		{
+			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
+			array[0] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour harvestable) => new Color(0.65f, 0.65f, 0.65f, 0.65f), (KMonoBehaviour harvestable) => true);
+			this.highlightConditions = array;
+			base..ctor(OverlayScreen.HarvestableIDs);
+		}
+
 		public override void Update()
 		{
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<HarvestDesignatable>(this.layerTargets, vector2I, vector2I2, null);
-			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			IEnumerator enumerator = allIntersecting.GetEnumerator();
-			try
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					HarvestDesignatable harvestDesignatable = (HarvestDesignatable)obj;
-					base.AddTargetIfVisible<HarvestDesignatable>(harvestDesignatable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				HarvestDesignatable harvestDesignatable = (HarvestDesignatable)obj;
+				base.AddTargetIfVisible<HarvestDesignatable>(harvestDesignatable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			base.UpdateHighlightTypeOverlay<HarvestDesignatable>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Constant, this.targetLayer);
 			base.Update();
@@ -528,52 +482,6 @@ public abstract class OverlayModes
 
 	public class Decor : OverlayModes.Mode
 	{
-		public Decor()
-		{
-			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
-			array[0] = new OverlayModes.ColorHighlightCondition(delegate(KMonoBehaviour dp)
-			{
-				Color black = Color.black;
-				Color black2 = Color.black;
-				if (dp != null)
-				{
-					int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
-					float num2 = (dp as DecorProvider).GetDecorForCell(num);
-					if (num2 > 0f)
-					{
-						black2 = new Color(0f, 0.8f, 0f, 0.8f);
-					}
-					else if (num2 < 0f)
-					{
-						black2 = new Color(1f, 0f, 0f, 0.4f);
-					}
-					else if (dp.GetComponent<MonumentPart>() != null && dp.GetComponent<MonumentPart>().IsMonumentCompleted())
-					{
-						List<GameObject> attachedNetwork = AttachableBuilding.GetAttachedNetwork(dp.GetComponent<AttachableBuilding>());
-						foreach (GameObject gameObject in attachedNetwork)
-						{
-							num2 = gameObject.GetComponent<DecorProvider>().GetDecorForCell(num);
-							if (num2 > 0f)
-							{
-								black2 = new Color(0f, 0.8f, 0f, 0.8f);
-								break;
-							}
-							if (num2 < 0f)
-							{
-								black2 = new Color(1f, 0f, 0f, 0.4f);
-								break;
-							}
-						}
-					}
-				}
-				return Color.Lerp(black, black2, 0.85f);
-			}, (KMonoBehaviour dp) => SelectToolHoverTextCard.highlightedObjects.Contains(dp.gameObject));
-			this.highlightConditions = array;
-			base..ctor();
-			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
-			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.Decor.ID;
@@ -584,20 +492,64 @@ public abstract class OverlayModes
 			return "Decor";
 		}
 
+		public Decor()
+		{
+			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
+			array[0] = new OverlayModes.ColorHighlightCondition(delegate(KMonoBehaviour dp)
+			{
+				Color black = Color.black;
+				Color color = Color.black;
+				if (dp != null)
+				{
+					int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
+					float num2 = (dp as DecorProvider).GetDecorForCell(num);
+					if (num2 > 0f)
+					{
+						color = new Color(0f, 0.8f, 0f, 0.8f);
+					}
+					else if (num2 < 0f)
+					{
+						color = new Color(1f, 0f, 0f, 0.4f);
+					}
+					else if (dp.GetComponent<MonumentPart>() != null && dp.GetComponent<MonumentPart>().IsMonumentCompleted())
+					{
+						foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(dp.GetComponent<AttachableBuilding>()))
+						{
+							num2 = gameObject.GetComponent<DecorProvider>().GetDecorForCell(num);
+							if (num2 > 0f)
+							{
+								color = new Color(0f, 0.8f, 0f, 0.8f);
+								break;
+							}
+							if (num2 < 0f)
+							{
+								color = new Color(1f, 0f, 0f, 0.4f);
+								break;
+							}
+						}
+					}
+				}
+				return Color.Lerp(black, color, 0.85f);
+			}, (KMonoBehaviour dp) => SelectToolHoverTextCard.highlightedObjects.Contains(dp.gameObject));
+			this.highlightConditions = array;
+			base..ctor();
+			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+		}
+
 		public override void Enable()
 		{
 			base.RegisterSaveLoadListeners();
 			List<Tag> prefabTagsWithComponent = Assets.GetPrefabTagsWithComponent<DecorProvider>();
 			this.targetIDs.UnionWith(prefabTagsWithComponent);
-			Tag[] array = new Tag[]
+			foreach (Tag tag in new Tag[]
 			{
 				new Tag("Tile"),
 				new Tag("MeshTile"),
 				new Tag("InsulationTile"),
 				new Tag("GasPermeableMembrane"),
 				new Tag("CarpetTile")
-			};
-			foreach (Tag tag in array)
+			})
 			{
 				this.targetIDs.Remove(tag);
 			}
@@ -687,14 +639,6 @@ public abstract class OverlayModes
 
 	public class Disease : OverlayModes.Mode
 	{
-		public Disease(Canvas diseaseUIParent, GameObject diseaseOverlayPrefab)
-		{
-			this.diseaseUIParent = diseaseUIParent;
-			this.diseaseOverlayPrefab = diseaseOverlayPrefab;
-			this.legendFilters = this.CreateDefaultFilters();
-			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
-		}
-
 		private static float CalculateHUE(Color32 colour)
 		{
 			byte b = Math.Max(colour.r, Math.Max(colour.g, colour.b));
@@ -728,6 +672,14 @@ public abstract class OverlayModes
 		public override string GetSoundName()
 		{
 			return "Disease";
+		}
+
+		public Disease(Canvas diseaseUIParent, GameObject diseaseOverlayPrefab)
+		{
+			this.diseaseUIParent = diseaseUIParent;
+			this.diseaseOverlayPrefab = diseaseOverlayPrefab;
+			this.legendFilters = this.CreateDefaultFilters();
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 		}
 
 		public override void Enable()
@@ -867,7 +819,7 @@ public abstract class OverlayModes
 			AmountInstance amountInstance = target.GetComponent<Modifiers>().amounts.Get(Db.Get().Amounts.ImmuneLevel);
 			OverlayModes.Disease.UpdateDiseaseInfo updateDiseaseInfo = new OverlayModes.Disease.UpdateDiseaseInfo(amountInstance, component);
 			KAnimControllerBase component2 = target.GetComponent<KAnimControllerBase>();
-			Vector3 vector = ((!(component2 != null)) ? (target.transform.GetPosition() + Vector3.down) : component2.GetWorldPivot());
+			Vector3 vector = ((component2 != null) ? component2.GetWorldPivot() : (target.transform.GetPosition() + Vector3.down));
 			gameObject.GetComponent<RectTransform>().SetPosition(vector);
 			this.updateDiseaseInfo.Add(updateDiseaseInfo);
 		}
@@ -905,48 +857,54 @@ public abstract class OverlayModes
 			bool flag = false;
 			if (Game.Instance.showLiquidConduitDisease)
 			{
-				foreach (Tag tag in OverlayScreen.LiquidVentIDs)
+				using (HashSet<Tag>.Enumerator enumerator4 = OverlayScreen.LiquidVentIDs.GetEnumerator())
 				{
-					if (!OverlayScreen.DiseaseIDs.Contains(tag))
+					while (enumerator4.MoveNext())
 					{
-						OverlayScreen.DiseaseIDs.Add(tag);
-						flag = true;
+						Tag tag = enumerator4.Current;
+						if (!OverlayScreen.DiseaseIDs.Contains(tag))
+						{
+							OverlayScreen.DiseaseIDs.Add(tag);
+							flag = true;
+						}
 					}
+					goto IL_01F1;
 				}
 			}
-			else
+			foreach (Tag tag2 in OverlayScreen.LiquidVentIDs)
 			{
-				foreach (Tag tag2 in OverlayScreen.LiquidVentIDs)
+				if (OverlayScreen.DiseaseIDs.Contains(tag2))
 				{
-					if (OverlayScreen.DiseaseIDs.Contains(tag2))
-					{
-						OverlayScreen.DiseaseIDs.Remove(tag2);
-						flag = true;
-					}
+					OverlayScreen.DiseaseIDs.Remove(tag2);
+					flag = true;
 				}
 			}
+			IL_01F1:
 			if (Game.Instance.showGasConduitDisease)
 			{
-				foreach (Tag tag3 in OverlayScreen.GasVentIDs)
+				using (HashSet<Tag>.Enumerator enumerator4 = OverlayScreen.GasVentIDs.GetEnumerator())
 				{
-					if (!OverlayScreen.DiseaseIDs.Contains(tag3))
+					while (enumerator4.MoveNext())
 					{
-						OverlayScreen.DiseaseIDs.Add(tag3);
-						flag = true;
+						Tag tag3 = enumerator4.Current;
+						if (!OverlayScreen.DiseaseIDs.Contains(tag3))
+						{
+							OverlayScreen.DiseaseIDs.Add(tag3);
+							flag = true;
+						}
 					}
+					goto IL_0297;
 				}
 			}
-			else
+			foreach (Tag tag4 in OverlayScreen.GasVentIDs)
 			{
-				foreach (Tag tag4 in OverlayScreen.GasVentIDs)
+				if (OverlayScreen.DiseaseIDs.Contains(tag4))
 				{
-					if (OverlayScreen.DiseaseIDs.Contains(tag4))
-					{
-						OverlayScreen.DiseaseIDs.Remove(tag4);
-						flag = true;
-					}
+					OverlayScreen.DiseaseIDs.Remove(tag4);
+					flag = true;
 				}
 			}
+			IL_0297:
 			if (flag)
 			{
 				this.SetLayerZ(-50f);
@@ -979,24 +937,18 @@ public abstract class OverlayModes
 				{
 					foreach (KMonoBehaviour kmonoBehaviour in list)
 					{
-						if (!(kmonoBehaviour == null))
+						if (!(kmonoBehaviour == null) && !this.layerTargets.Contains(kmonoBehaviour))
 						{
-							if (!this.layerTargets.Contains(kmonoBehaviour))
+							Vector3 position = kmonoBehaviour.transform.GetPosition();
+							if (Grid.IsVisible(Grid.PosToCell(position)) && vector2I <= position && position <= vector2I2)
 							{
-								Vector3 position = kmonoBehaviour.transform.GetPosition();
-								if (Grid.IsVisible(Grid.PosToCell(position)))
-								{
-									if (vector2I <= position && position <= vector2I2)
-									{
-										float defaultDepth = OverlayModes.Mode.GetDefaultDepth(kmonoBehaviour);
-										position.z = defaultDepth + offset_z;
-										kmonoBehaviour.transform.SetPosition(position);
-										KBatchedAnimController component = kmonoBehaviour.GetComponent<KBatchedAnimController>();
-										component.enabled = false;
-										component.enabled = true;
-										this.layerTargets.Add(kmonoBehaviour);
-									}
-								}
+								float defaultDepth = OverlayModes.Mode.GetDefaultDepth(kmonoBehaviour);
+								position.z = defaultDepth + offset_z;
+								kmonoBehaviour.transform.SetPosition(position);
+								KBatchedAnimController component = kmonoBehaviour.GetComponent<KBatchedAnimController>();
+								component.enabled = false;
+								component.enabled = true;
+								this.layerTargets.Add(kmonoBehaviour);
 							}
 						}
 					}
@@ -1053,15 +1005,6 @@ public abstract class OverlayModes
 
 	public class Logic : OverlayModes.Mode
 	{
-		public Logic(LogicModeUI ui_asset)
-		{
-			this.conduitTargetLayer = LayerMask.NameToLayer("MaskedOverlay");
-			this.objectTargetLayer = LayerMask.NameToLayer("MaskedOverlayBG");
-			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
-			this.selectionMask = this.cameraLayerMask;
-			this.uiAsset = ui_asset;
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.Logic.ID;
@@ -1070,6 +1013,15 @@ public abstract class OverlayModes
 		public override string GetSoundName()
 		{
 			return "Logic";
+		}
+
+		public Logic(LogicModeUI ui_asset)
+		{
+			this.conduitTargetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.objectTargetLayer = LayerMask.NameToLayer("MaskedOverlayBG");
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+			this.selectionMask = this.cameraLayerMask;
+			this.uiAsset = ui_asset;
 		}
 
 		public override void Enable()
@@ -1185,8 +1137,9 @@ public abstract class OverlayModes
 					if (prefabTag == wire_id)
 					{
 						this.wireControllers.Remove(root.GetComponent<KBatchedAnimController>());
+						return;
 					}
-					else if (prefabTag == bridge_id)
+					if (prefabTag == bridge_id)
 					{
 						KBatchedAnimController controller = root.GetComponent<KBatchedAnimController>();
 						this.bridgeControllers.RemoveWhere((OverlayModes.Logic.BridgeInfo x) => x.controller == controller);
@@ -1196,20 +1149,24 @@ public abstract class OverlayModes
 			OverlayModes.Mode.RemoveOffscreenTargets<ILogicUIElement>(this.ioTargets, this.workingIOTargets, vector2I, vector2I2, new Action<ILogicUIElement>(this.FreeUI), null);
 			using (new KProfiler.Region("UpdateLogicOverlay", null))
 			{
-				IEnumerable allIntersecting = this.gameObjPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-				IEnumerator enumerator = allIntersecting.GetEnumerator();
-				try
+				Action<SaveLoadRoot> <>9__2;
+				foreach (object obj in this.gameObjPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 				{
-					while (enumerator.MoveNext())
+					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+					if (saveLoadRoot != null)
 					{
-						object obj = enumerator.Current;
-						SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-						if (saveLoadRoot != null)
+						KPrefabID component = saveLoadRoot.GetComponent<KPrefabID>();
+						if (component.PrefabTag == wire_id || component.PrefabTag == bridge_id)
 						{
-							KPrefabID component = saveLoadRoot.GetComponent<KPrefabID>();
-							if (component.PrefabTag == wire_id || component.PrefabTag == bridge_id)
+							SaveLoadRoot saveLoadRoot2 = saveLoadRoot;
+							Vector2I vector2I3 = vector2I;
+							Vector2I vector2I4 = vector2I2;
+							ICollection<SaveLoadRoot> collection = this.gameObjTargets;
+							int num = this.conduitTargetLayer;
+							Action<SaveLoadRoot> action;
+							if ((action = <>9__2) == null)
 							{
-								base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.conduitTargetLayer, delegate(SaveLoadRoot root)
+								action = (<>9__2 = delegate(SaveLoadRoot root)
 								{
 									if (root == null)
 									{
@@ -1221,70 +1178,49 @@ public abstract class OverlayModes
 										if (component6.PrefabTag == wire_id)
 										{
 											this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
+											return;
 										}
-										else if (component6.PrefabTag == bridge_id)
+										if (component6.PrefabTag == bridge_id)
 										{
 											KBatchedAnimController component7 = root.GetComponent<KBatchedAnimController>();
-											LogicUtilityNetworkLink component8 = root.GetComponent<LogicUtilityNetworkLink>();
-											int num2;
 											int num3;
-											component8.GetCells(out num2, out num3);
+											int num4;
+											root.GetComponent<LogicUtilityNetworkLink>().GetCells(out num3, out num4);
 											this.bridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
 											{
-												cell = num2,
+												cell = num3,
 												controller = component7
 											});
 										}
 									}
-								}, null);
+								});
 							}
-							else
-							{
-								base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
-								{
-									Vector3 position = root.transform.GetPosition();
-									position.z += 2f;
-									root.transform.SetPosition(position);
-									KBatchedAnimController component9 = root.GetComponent<KBatchedAnimController>();
-									component9.enabled = false;
-									component9.enabled = true;
-								}, null);
-							}
+							base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot2, vector2I3, vector2I4, collection, num, action, null);
 						}
-					}
-				}
-				finally
-				{
-					IDisposable disposable;
-					if ((disposable = enumerator as IDisposable) != null)
-					{
-						disposable.Dispose();
-					}
-				}
-				IEnumerable allIntersecting2 = this.ioPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-				IEnumerator enumerator2 = allIntersecting2.GetEnumerator();
-				try
-				{
-					while (enumerator2.MoveNext())
-					{
-						object obj2 = enumerator2.Current;
-						ILogicUIElement logicUIElement = (ILogicUIElement)obj2;
-						if (logicUIElement != null)
+						else
 						{
-							base.AddTargetIfVisible<ILogicUIElement>(logicUIElement, vector2I, vector2I2, this.ioTargets, this.objectTargetLayer, new Action<ILogicUIElement>(this.AddUI), (KMonoBehaviour kcmp) => kcmp != null && OverlayModes.Logic.HighlightItemIDs.Contains(kcmp.GetComponent<KPrefabID>().PrefabTag));
+							base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
+							{
+								Vector3 position = root.transform.GetPosition();
+								position.z += 2f;
+								root.transform.SetPosition(position);
+								KBatchedAnimController component8 = root.GetComponent<KBatchedAnimController>();
+								component8.enabled = false;
+								component8.enabled = true;
+							}, null);
 						}
 					}
 				}
-				finally
+				foreach (object obj2 in this.ioPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 				{
-					IDisposable disposable2;
-					if ((disposable2 = enumerator2 as IDisposable) != null)
+					ILogicUIElement logicUIElement = (ILogicUIElement)obj2;
+					if (logicUIElement != null)
 					{
-						disposable2.Dispose();
+						base.AddTargetIfVisible<ILogicUIElement>(logicUIElement, vector2I, vector2I2, this.ioTargets, this.objectTargetLayer, new Action<ILogicUIElement>(this.AddUI), (KMonoBehaviour kcmp) => kcmp != null && OverlayModes.Logic.HighlightItemIDs.Contains(kcmp.GetComponent<KPrefabID>().PrefabTag));
 					}
 				}
 				this.connectedNetworks.Clear();
-				float num = 1f;
+				float num2 = 1f;
 				GameObject gameObject = null;
 				if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
 				{
@@ -1299,7 +1235,7 @@ public abstract class OverlayModes
 						this.visited.Clear();
 						this.FindConnectedNetworks(networkCell, Game.Instance.logicCircuitSystem, this.connectedNetworks, this.visited);
 						this.visited.Clear();
-						num = OverlayModes.ModeUtil.GetHighlightScale();
+						num2 = OverlayModes.ModeUtil.GetHighlightScale();
 					}
 				}
 				LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
@@ -1314,16 +1250,16 @@ public abstract class OverlayModes
 						LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.GetPosition()));
 						if (networkForCell != null)
 						{
-							color = ((networkForCell.OutputValue <= 0) ? colourOff : colourOn);
+							color = ((networkForCell.OutputValue > 0) ? colourOn : colourOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
 							IBridgedNetworkItem component3 = kbatchedAnimController.GetComponent<IBridgedNetworkItem>();
 							if (component3 != null && component3.IsConnectedToNetworks(this.connectedNetworks))
 							{
-								color.r = (byte)((float)color.r * num);
-								color.g = (byte)((float)color.g * num);
-								color.b = (byte)((float)color.b * num);
+								color.r = (byte)((float)color.r * num2);
+								color.g = (byte)((float)color.g * num2);
+								color.b = (byte)((float)color.b * num2);
 							}
 						}
 						kbatchedAnimController.TintColour = color;
@@ -1337,16 +1273,16 @@ public abstract class OverlayModes
 						LogicCircuitNetwork networkForCell2 = logicCircuitManager.GetNetworkForCell(bridgeInfo.cell);
 						if (networkForCell2 != null)
 						{
-							color2 = ((networkForCell2.OutputValue <= 0) ? colourOff : colourOn);
+							color2 = ((networkForCell2.OutputValue > 0) ? colourOn : colourOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
 							IBridgedNetworkItem component4 = bridgeInfo.controller.GetComponent<IBridgedNetworkItem>();
 							if (component4 != null && component4.IsConnectedToNetworks(this.connectedNetworks))
 							{
-								color2.r = (byte)((float)color2.r * num);
-								color2.g = (byte)((float)color2.g * num);
-								color2.b = (byte)((float)color2.b * num);
+								color2.r = (byte)((float)color2.r * num2);
+								color2.g = (byte)((float)color2.g * num2);
+								color2.b = (byte)((float)color2.b * num2);
 							}
 						}
 						bridgeInfo.controller.TintColour = color2;
@@ -1368,8 +1304,7 @@ public abstract class OverlayModes
 				Color32 color = colourDisconnected;
 				if (networkForCell != null)
 				{
-					bool flag = networkForCell.OutputValue > 0;
-					color = ((!flag) ? colourOff : colourOn);
+					color = ((networkForCell.OutputValue > 0) ? colourOn : colourOff);
 				}
 				if (uiinfo.image.color != color)
 				{
@@ -1409,9 +1344,7 @@ public abstract class OverlayModes
 		protected UniformGrid<ILogicUIElement> CreateLogicUIPartition()
 		{
 			UniformGrid<ILogicUIElement> uniformGrid = new UniformGrid<ILogicUIElement>(Grid.WidthInCells, Grid.HeightInCells, 8, 8);
-			LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-			ReadOnlyCollection<ILogicUIElement> visElements = logicCircuitManager.GetVisElements();
-			foreach (ILogicUIElement logicUIElement in visElements)
+			foreach (ILogicUIElement logicUIElement in Game.Instance.logicCircuitManager.GetVisElements())
 			{
 				if (logicUIElement != null)
 				{
@@ -1509,24 +1442,19 @@ public abstract class OverlayModes
 				this.instance.SetActive(true);
 				this.image = this.instance.GetComponent<Image>();
 				this.image.raycastTarget = false;
-				LogicPortSpriteType logicPortSpriteType = ui_elem.GetLogicPortSpriteType();
-				if (logicPortSpriteType != LogicPortSpriteType.Input)
+				switch (ui_elem.GetLogicPortSpriteType())
 				{
-					if (logicPortSpriteType != LogicPortSpriteType.Output)
-					{
-						if (logicPortSpriteType == LogicPortSpriteType.ResetUpdate)
-						{
-							this.image.sprite = ui_data.resetSprite;
-						}
-					}
-					else
-					{
-						this.image.sprite = ui_data.outputSprite;
-					}
-				}
-				else
-				{
+				case LogicPortSpriteType.Input:
 					this.image.sprite = ui_data.inputSprite;
+					return;
+				case LogicPortSpriteType.Output:
+					this.image.sprite = ui_data.outputSprite;
+					return;
+				case LogicPortSpriteType.ResetUpdate:
+					this.image.sprite = ui_data.resetSprite;
+					return;
+				default:
+					return;
 				}
 			}
 
@@ -1717,7 +1645,7 @@ public abstract class OverlayModes
 			foreach (RoomType roomType in list2)
 			{
 				string text = roomType.GetCriteriaString();
-				if (roomType.effects != null && roomType.effects.Length > 0)
+				if (roomType.effects != null && roomType.effects.Length != 0)
 				{
 					text = text + "\n\n" + roomType.GetRoomEffectsString();
 				}
@@ -1810,8 +1738,7 @@ public abstract class OverlayModes
 
 		protected static UniformGrid<T> PopulatePartition<T>(ICollection<Tag> tags) where T : IUniformGridObject
 		{
-			SaveManager saveManager = SaveLoader.Instance.saveManager;
-			Dictionary<Tag, List<SaveLoadRoot>> lists = saveManager.GetLists();
+			Dictionary<Tag, List<SaveLoadRoot>> lists = SaveLoader.Instance.saveManager.GetLists();
 			UniformGrid<T> uniformGrid = new UniformGrid<T>(Grid.WidthInCells, Grid.HeightInCells, 8, 8);
 			foreach (Tag tag in tags)
 			{
@@ -1997,43 +1924,37 @@ public abstract class OverlayModes
 				{
 					Vector3 position = t.transform.GetPosition();
 					int num = Grid.PosToCell(position);
-					if (Grid.IsValidCell(num))
+					if (Grid.IsValidCell(num) && Grid.IsVisible(num) && min <= position && position <= max)
 					{
-						if (Grid.IsVisible(num))
+						KBatchedAnimController component = t.GetComponent<KBatchedAnimController>();
+						if (!(component == null))
 						{
-							if (min <= position && position <= max)
+							int num2 = 0;
+							Color32 color = Color.clear;
+							if (highlights != null)
 							{
-								KBatchedAnimController component = t.GetComponent<KBatchedAnimController>();
-								if (!(component == null))
+								foreach (OverlayModes.ColorHighlightCondition colorHighlightCondition in highlights)
 								{
-									int num2 = 0;
-									Color32 color = Color.clear;
-									if (highlights != null)
+									if (colorHighlightCondition.highlight_condition(t))
 									{
-										foreach (OverlayModes.ColorHighlightCondition colorHighlightCondition in highlights)
-										{
-											if (colorHighlightCondition.highlight_condition(t))
-											{
-												color = colorHighlightCondition.highlight_color(t);
-												num2 = layer;
-												break;
-											}
-										}
+										color = colorHighlightCondition.highlight_color(t);
+										num2 = layer;
+										break;
 									}
-									if (bringToFrontSetting != OverlayModes.BringToFrontLayerSetting.Constant)
-									{
-										if (bringToFrontSetting == OverlayModes.BringToFrontLayerSetting.Conditional)
-										{
-											component.SetLayer(num2);
-										}
-									}
-									else
-									{
-										component.SetLayer(layer);
-									}
-									component.HighlightColour = color;
 								}
 							}
+							if (bringToFrontSetting != OverlayModes.BringToFrontLayerSetting.Constant)
+							{
+								if (bringToFrontSetting == OverlayModes.BringToFrontLayerSetting.Conditional)
+								{
+									component.SetLayer(num2);
+								}
+							}
+							else
+							{
+								component.SetLayer(layer);
+							}
+							component.HighlightColour = color;
 						}
 					}
 				}
@@ -2133,6 +2054,16 @@ public abstract class OverlayModes
 
 	public class Power : OverlayModes.Mode
 	{
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.Power.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return "Power";
+		}
+
 		public Power(Canvas powerLabelParent, LocText powerLabelPrefab, BatteryUI batteryUIPrefab, Vector3 powerLabelOffset, Vector3 batteryUIOffset, Vector3 batteryUITransformerOffset, Vector3 batteryUISmallTransformerOffset, Color consumerColour, Color generatorColour, Color buildingDisabledColour, Color32 circuitUnpoweredColour, Color32 circuitSafeColour, Color32 circuitStrainingColour, Color32 circuitOverloadingColour)
 		{
 			this.powerLabelParent = powerLabelParent;
@@ -2152,16 +2083,6 @@ public abstract class OverlayModes
 			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
 			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 			this.selectionMask = this.cameraLayerMask;
-		}
-
-		public override HashedString ViewMode()
-		{
-			return OverlayModes.Power.ID;
-		}
-
-		public override string GetSoundName()
-		{
-			return "Power";
 		}
 
 		public override void Enable()
@@ -2218,24 +2139,10 @@ public abstract class OverlayModes
 			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
 			using (new KProfiler.Region("UpdatePowerOverlay", null))
 			{
-				IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-				IEnumerator enumerator = allIntersecting.GetEnumerator();
-				try
+				foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 				{
-					while (enumerator.MoveNext())
-					{
-						object obj = enumerator.Current;
-						SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-						base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-					}
-				}
-				finally
-				{
-					IDisposable disposable;
-					if ((disposable = enumerator as IDisposable) != null)
-					{
-						disposable.Dispose();
-					}
+					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 				}
 				this.connectedNetworks.Clear();
 				float num = 1f;
@@ -2264,11 +2171,10 @@ public abstract class OverlayModes
 						IBridgedNetworkItem component2 = saveLoadRoot2.GetComponent<IBridgedNetworkItem>();
 						if (component2 != null)
 						{
-							KMonoBehaviour kmonoBehaviour = component2 as KMonoBehaviour;
-							KBatchedAnimController component3 = kmonoBehaviour.GetComponent<KBatchedAnimController>();
+							KAnimControllerBase component3 = (component2 as KMonoBehaviour).GetComponent<KBatchedAnimController>();
 							int networkCell2 = component2.GetNetworkCell();
 							UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(networkCell2);
-							ushort num2 = ((networkForCell == null) ? ushort.MaxValue : ((ushort)networkForCell.id));
+							ushort num2 = ((networkForCell != null) ? ((ushort)networkForCell.id) : ushort.MaxValue);
 							float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(num2);
 							float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(num2);
 							float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(num2);
@@ -2388,9 +2294,8 @@ public abstract class OverlayModes
 				{
 					if (generator != null && consumer == null)
 					{
-						ManualGenerator component = generator.GetComponent<ManualGenerator>();
 						int num;
-						if (component == null)
+						if (generator.GetComponent<ManualGenerator>() == null)
 						{
 							generator.GetComponent<Operational>();
 							num = Mathf.Max(0, Mathf.RoundToInt(generator.WattageRating));
@@ -2399,9 +2304,9 @@ public abstract class OverlayModes
 						{
 							num = Mathf.Max(0, Mathf.RoundToInt(generator.WattageRating));
 						}
-						powerLabel.text = ((num == 0) ? num.ToString() : ("+" + num.ToString()));
-						BuildingEnabledButton component2 = item.GetComponent<BuildingEnabledButton>();
-						Color color = ((!(component2 != null) || component2.IsEnabled) ? this.generatorColour : this.buildingDisabledColour);
+						powerLabel.text = ((num != 0) ? ("+" + num.ToString()) : num.ToString());
+						BuildingEnabledButton component = item.GetComponent<BuildingEnabledButton>();
+						Color color = ((component != null && !component.IsEnabled) ? this.buildingDisabledColour : this.generatorColour);
 						powerLabel.color = color;
 						unitLabel.color = color;
 						Image outputIcon = generator.GetComponent<BuildingCellVisualizer>().GetOutputIcon();
@@ -2412,11 +2317,11 @@ public abstract class OverlayModes
 					}
 					if (consumer != null)
 					{
-						BuildingEnabledButton component3 = item.GetComponent<BuildingEnabledButton>();
-						Color color2 = ((!(component3 != null) || component3.IsEnabled) ? this.consumerColour : this.buildingDisabledColour);
+						BuildingEnabledButton component2 = item.GetComponent<BuildingEnabledButton>();
+						Color color2 = ((component2 != null && !component2.IsEnabled) ? this.buildingDisabledColour : this.consumerColour);
 						int num2 = Mathf.Max(0, Mathf.RoundToInt(consumer.WattsNeededWhenActive));
 						string text = num2.ToString();
-						powerLabel.text = ((num2 == 0) ? text : ("-" + text));
+						powerLabel.text = ((num2 != 0) ? ("-" + text) : text);
 						powerLabel.color = color2;
 						unitLabel.color = color2;
 						Image inputIcon = item.GetComponentInChildren<BuildingCellVisualizer>().GetInputIcon();
@@ -2500,8 +2405,7 @@ public abstract class OverlayModes
 			Vector3 vector2 = this.batteryUIOffset;
 			if (flag)
 			{
-				int widthInCells = bat.GetComponent<Building>().Def.WidthInCells;
-				vector2 = ((widthInCells != 2) ? this.batteryUITransformerOffset : this.batteryUISmallTransformerOffset);
+				vector2 = ((bat.GetComponent<Building>().Def.WidthInCells == 2) ? this.batteryUISmallTransformerOffset : this.batteryUITransformerOffset);
 			}
 			vector2.x *= num;
 			freeBatteryUI.GetComponent<RectTransform>().SetPosition(Vector3.up + vector + vector2);
@@ -2674,13 +2578,6 @@ public abstract class OverlayModes
 
 	public class SolidConveyor : OverlayModes.Mode
 	{
-		public SolidConveyor()
-		{
-			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
-			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
-			this.selectionMask = this.cameraLayerMask;
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.SolidConveyor.ID;
@@ -2689,6 +2586,13 @@ public abstract class OverlayModes
 		public override string GetSoundName()
 		{
 			return "LiquidVent";
+		}
+
+		public SolidConveyor()
+		{
+			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+			this.selectionMask = this.cameraLayerMask;
 		}
 
 		public override void Enable()
@@ -2703,8 +2607,7 @@ public abstract class OverlayModes
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
 		{
-			KPrefabID component = item.GetComponent<KPrefabID>();
-			Tag saveLoadTag = component.GetSaveLoadTag();
+			Tag saveLoadTag = item.GetComponent<KPrefabID>().GetSaveLoadTag();
 			if (this.targetIDs.Contains(saveLoadTag))
 			{
 				this.partition.Add(item);
@@ -2742,32 +2645,17 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
-			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			IEnumerator enumerator = allIntersecting.GetEnumerator();
-			try
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			Color32 color = Color.white;
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{
 				if (!(saveLoadRoot2 == null))
 				{
-					KBatchedAnimController component = saveLoadRoot2.GetComponent<KBatchedAnimController>();
-					component.TintColour = color;
+					saveLoadRoot2.GetComponent<KBatchedAnimController>().TintColour = color;
 				}
 			}
 		}
@@ -2789,6 +2677,16 @@ public abstract class OverlayModes
 
 	public class Sound : OverlayModes.Mode
 	{
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.Sound.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return "Sound";
+		}
+
 		public Sound()
 		{
 			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
@@ -2800,8 +2698,7 @@ public abstract class OverlayModes
 				if (np != null)
 				{
 					int num2 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
-					float noiseForCell = (np as NoisePolluter).GetNoiseForCell(num2);
-					if (noiseForCell < 36f)
+					if ((np as NoisePolluter).GetNoiseForCell(num2) < 36f)
 					{
 						num = 1f;
 						black2 = new Color(0.4f, 0.4f, 0.4f);
@@ -2830,16 +2727,6 @@ public abstract class OverlayModes
 			this.targetIDs.UnionWith(prefabTagsWithComponent);
 		}
 
-		public override HashedString ViewMode()
-		{
-			return OverlayModes.Sound.ID;
-		}
-
-		public override string GetSoundName()
-		{
-			return "Sound";
-		}
-
 		public override void Enable()
 		{
 			base.RegisterSaveLoadListeners();
@@ -2855,24 +2742,10 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<NoisePolluter>(this.layerTargets, vector2I, vector2I2, null);
-			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			IEnumerator enumerator = allIntersecting.GetEnumerator();
-			try
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					NoisePolluter noisePolluter = (NoisePolluter)obj;
-					base.AddTargetIfVisible<NoisePolluter>(noisePolluter, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				NoisePolluter noisePolluter = (NoisePolluter)obj;
+				base.AddTargetIfVisible<NoisePolluter>(noisePolluter, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			base.UpdateHighlightTypeOverlay<NoisePolluter>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Conditional, this.targetLayer);
 		}
@@ -2927,16 +2800,6 @@ public abstract class OverlayModes
 
 	public class Suit : OverlayModes.Mode
 	{
-		public Suit(Canvas ui_parent, GameObject overlay_prefab)
-		{
-			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
-			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
-			this.selectionMask = this.cameraLayerMask;
-			this.targetIDs = OverlayScreen.SuitIDs;
-			this.uiParent = ui_parent;
-			this.overlayPrefab = overlay_prefab;
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.Suit.ID;
@@ -2945,6 +2808,16 @@ public abstract class OverlayModes
 		public override string GetSoundName()
 		{
 			return "SuitRequired";
+		}
+
+		public Suit(Canvas ui_parent, GameObject overlay_prefab)
+		{
+			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+			this.selectionMask = this.cameraLayerMask;
+			this.targetIDs = OverlayScreen.SuitIDs;
+			this.uiParent = ui_parent;
+			this.overlayPrefab = overlay_prefab;
 		}
 
 		public override void Enable()
@@ -2977,8 +2850,7 @@ public abstract class OverlayModes
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
 		{
-			KPrefabID component = item.GetComponent<KPrefabID>();
-			Tag saveLoadTag = component.GetSaveLoadTag();
+			Tag saveLoadTag = item.GetComponent<KPrefabID>().GetSaveLoadTag();
 			if (this.targetIDs.Contains(saveLoadTag))
 			{
 				this.partition.Add(item);
@@ -3008,7 +2880,10 @@ public abstract class OverlayModes
 			}
 			else
 			{
-				gameObject = this.uiList[this.freeUiIdx++];
+				List<GameObject> list = this.uiList;
+				int num = this.freeUiIdx;
+				this.freeUiIdx = num + 1;
+				gameObject = list[num];
 			}
 			if (!gameObject.activeSelf)
 			{
@@ -3024,31 +2899,16 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
-			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			IEnumerator enumerator = allIntersecting.GetEnumerator();
-			try
+			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{
 				if (!(saveLoadRoot2 == null))
 				{
-					KBatchedAnimController component = saveLoadRoot2.GetComponent<KBatchedAnimController>();
-					component.TintColour = Color.white;
+					saveLoadRoot2.GetComponent<KBatchedAnimController>().TintColour = Color.white;
 					bool flag = false;
 					if (saveLoadRoot2.GetComponent<KPrefabID>().HasTag(GameTags.Suit))
 					{
@@ -3056,16 +2916,15 @@ public abstract class OverlayModes
 					}
 					else
 					{
-						SuitLocker component2 = saveLoadRoot2.GetComponent<SuitLocker>();
-						if (component2 != null)
+						SuitLocker component = saveLoadRoot2.GetComponent<SuitLocker>();
+						if (component != null)
 						{
-							flag = component2.GetStoredOutfit() != null;
+							flag = component.GetStoredOutfit() != null;
 						}
 					}
 					if (flag)
 					{
-						GameObject freeUI = this.GetFreeUI();
-						freeUI.GetComponent<RectTransform>().SetPosition(saveLoadRoot2.transform.GetPosition());
+						this.GetFreeUI().GetComponent<RectTransform>().SetPosition(saveLoadRoot2.transform.GetPosition());
 					}
 				}
 			}
@@ -3103,6 +2962,16 @@ public abstract class OverlayModes
 
 	public class Temperature : OverlayModes.Mode
 	{
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.Temperature.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return "Temperature";
+		}
+
 		public Temperature()
 		{
 			this.legendFilters = this.CreateDefaultFilters();
@@ -3112,16 +2981,6 @@ public abstract class OverlayModes
 				this.temperatureLegend[i].colour = SimDebugView.Instance.temperatureThresholds[num - i].color;
 				this.temperatureLegend[i].desc = string.Format(this.temperatureLegend[i].desc, GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 			}
-		}
-
-		public override HashedString ViewMode()
-		{
-			return OverlayModes.Temperature.ID;
-		}
-
-		public override string GetSoundName()
-		{
-			return "Temperature";
 		}
 
 		public override void Enable()
@@ -3188,19 +3047,21 @@ public abstract class OverlayModes
 			case Game.TemperatureOverlayModes.AbsoluteTemperature:
 				Infrared.Instance.SetMode(Infrared.Mode.Infrared);
 				CameraController.Instance.ToggleColouredOverlayView(true);
-				break;
+				return;
 			case Game.TemperatureOverlayModes.AdaptiveTemperature:
 				Infrared.Instance.SetMode(Infrared.Mode.Infrared);
 				CameraController.Instance.ToggleColouredOverlayView(true);
-				break;
+				return;
 			case Game.TemperatureOverlayModes.HeatFlow:
 				Infrared.Instance.SetMode(Infrared.Mode.Disabled);
 				CameraController.Instance.ToggleColouredOverlayView(false);
-				break;
+				return;
 			case Game.TemperatureOverlayModes.StateChange:
 				Infrared.Instance.SetMode(Infrared.Mode.Disabled);
 				CameraController.Instance.ToggleColouredOverlayView(false);
-				break;
+				return;
+			default:
+				return;
 			}
 		}
 
@@ -3254,26 +3115,6 @@ public abstract class OverlayModes
 
 	public class TileMode : OverlayModes.Mode
 	{
-		public TileMode()
-		{
-			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
-			array[0] = new OverlayModes.ColorHighlightCondition(delegate(KMonoBehaviour primary_element)
-			{
-				Color color = Color.black;
-				if (primary_element != null)
-				{
-					Element element = (primary_element as PrimaryElement).Element;
-					color = element.substance.uiColour;
-				}
-				return color;
-			}, (KMonoBehaviour primary_element) => primary_element.gameObject.GetComponent<KBatchedAnimController>().IsVisible());
-			this.highlightConditions = array;
-			base..ctor();
-			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
-			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
-			this.legendFilters = this.CreateDefaultFilters();
-		}
-
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.TileMode.ID;
@@ -3282,6 +3123,25 @@ public abstract class OverlayModes
 		public override string GetSoundName()
 		{
 			return "SuitRequired";
+		}
+
+		public TileMode()
+		{
+			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
+			array[0] = new OverlayModes.ColorHighlightCondition(delegate(KMonoBehaviour primary_element)
+			{
+				Color color = Color.black;
+				if (primary_element != null)
+				{
+					color = (primary_element as PrimaryElement).Element.substance.uiColour;
+				}
+				return color;
+			}, (KMonoBehaviour primary_element) => primary_element.gameObject.GetComponent<KBatchedAnimController>().IsVisible());
+			this.highlightConditions = array;
+			base..ctor();
+			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+			this.legendFilters = this.CreateDefaultFilters();
 		}
 
 		public override void Enable()
@@ -3308,8 +3168,7 @@ public abstract class OverlayModes
 			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.pickupablesLayer, list);
 			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
 			{
-				Pickupable pickupable = (Pickupable)scenePartitionerEntry.obj;
-				PrimaryElement component = pickupable.gameObject.GetComponent<PrimaryElement>();
+				PrimaryElement component = ((Pickupable)scenePartitionerEntry.obj).gameObject.GetComponent<PrimaryElement>();
 				if (component != null)
 				{
 					this.TryAddObject(component, vector2I, vector2I2);

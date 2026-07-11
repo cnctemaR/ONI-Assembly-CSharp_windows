@@ -6,27 +6,17 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Interface to control Animator Override Controller.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/AnimatorOverrideController.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	public class AnimatorOverrideController : RuntimeAnimatorController
 	{
-		/// <summary>
-		///   <para>Creates an empty Animator Override Controller.</para>
-		/// </summary>
 		public AnimatorOverrideController()
 		{
 			AnimatorOverrideController.Internal_Create(this, null);
 			this.OnOverrideControllerDirty = null;
 		}
 
-		/// <summary>
-		///   <para>Creates an Animator Override Controller that overrides controller.</para>
-		/// </summary>
-		/// <param name="controller">Runtime Animator Controller to override.</param>
 		public AnimatorOverrideController(RuntimeAnimatorController controller)
 		{
 			AnimatorOverrideController.Internal_Create(this, controller);
@@ -37,9 +27,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] AnimatorOverrideController self, RuntimeAnimatorController controller);
 
-		/// <summary>
-		///   <para>The Runtime Animator Controller that the Animator Override Controller overrides.</para>
-		/// </summary>
 		public extern RuntimeAnimatorController runtimeAnimatorController
 		{
 			[NativeMethod("GetAnimatorController")]
@@ -97,9 +84,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern AnimationClip GetOverrideClip(AnimationClip originalClip);
 
-		/// <summary>
-		///   <para>Returns the count of overrides.</para>
-		/// </summary>
 		public extern int overridesCount
 		{
 			[NativeMethod("GetOriginalClipsCount")]
@@ -139,9 +123,6 @@ namespace UnityEngine
 			this.SendNotification();
 		}
 
-		/// <summary>
-		///   <para>Returns the list of orignal Animation Clip from the controller and their override Animation Clip.</para>
-		/// </summary>
 		[Obsolete("AnimatorOverrideController.clips property is deprecated. Use AnimatorOverrideController.GetOverrides and AnimatorOverrideController.ApplyOverrides instead.")]
 		public AnimationClipPair[] clips
 		{

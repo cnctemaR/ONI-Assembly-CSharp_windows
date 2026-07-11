@@ -8,35 +8,6 @@ namespace KSerialization
 {
 	public class SerializationTemplate
 	{
-		public SerializationTemplate(Type type)
-		{
-			this.serializableType = type;
-			this.typeInfo = Manager.GetTypeInfo(type);
-			type.GetSerializationMethods(typeof(OnSerializingAttribute), typeof(OnSerializedAttribute), out this.onSerializing, out this.onSerialized);
-			MemberSerialization serializationConfig = this.GetSerializationConfig(type);
-			if (serializationConfig != MemberSerialization.OptOut)
-			{
-				if (serializationConfig == MemberSerialization.OptIn)
-				{
-					while (type != typeof(object))
-					{
-						this.AddOptInFields(type);
-						this.AddOptInProperties(type);
-						type = type.BaseType;
-					}
-				}
-			}
-			else
-			{
-				while (type != typeof(object))
-				{
-					this.AddPublicFields(type);
-					this.AddPublicProperties(type);
-					type = type.BaseType;
-				}
-			}
-		}
-
 		private MemberSerialization GetSerializationConfig(Type type)
 		{
 			MemberSerialization memberSerialization = MemberSerialization.Invalid;
@@ -44,11 +15,10 @@ namespace KSerialization
 			while (type != typeof(object))
 			{
 				object[] customAttributes = type.GetCustomAttributes(typeof(SerializationConfig), false);
-				object[] array = customAttributes;
 				int i = 0;
-				while (i < array.Length)
+				while (i < customAttributes.Length)
 				{
-					Attribute attribute = (Attribute)array[i];
+					Attribute attribute = (Attribute)customAttributes[i];
 					if (attribute is SerializationConfig)
 					{
 						SerializationConfig serializationConfig = attribute as SerializationConfig;
@@ -76,6 +46,34 @@ namespace KSerialization
 			return memberSerialization;
 		}
 
+		public SerializationTemplate(Type type)
+		{
+			this.serializableType = type;
+			this.typeInfo = Manager.GetTypeInfo(type);
+			type.GetSerializationMethods(typeof(OnSerializingAttribute), typeof(OnSerializedAttribute), out this.onSerializing, out this.onSerialized);
+			MemberSerialization serializationConfig = this.GetSerializationConfig(type);
+			if (serializationConfig == MemberSerialization.OptOut)
+			{
+				while (type != typeof(object))
+				{
+					this.AddPublicFields(type);
+					this.AddPublicProperties(type);
+					type = type.BaseType;
+				}
+				return;
+			}
+			if (serializationConfig != MemberSerialization.OptIn)
+			{
+				return;
+			}
+			while (type != typeof(object))
+			{
+				this.AddOptInFields(type);
+				this.AddOptInProperties(type);
+				type = type.BaseType;
+			}
+		}
+
 		public override string ToString()
 		{
 			string text = "Template: " + this.serializableType.ToString() + "\n";
@@ -88,8 +86,7 @@ namespace KSerialization
 
 		private void AddPublicFields(Type type)
 		{
-			FieldInfo[] fields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-			foreach (FieldInfo fieldInfo in fields)
+			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public))
 			{
 				this.AddValidField(fieldInfo);
 			}
@@ -97,11 +94,9 @@ namespace KSerialization
 
 		private void AddOptInFields(Type type)
 		{
-			FieldInfo[] fields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			foreach (FieldInfo fieldInfo in fields)
+			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 			{
-				object[] customAttributes = fieldInfo.GetCustomAttributes(false);
-				foreach (object obj in customAttributes)
+				foreach (object obj in fieldInfo.GetCustomAttributes(false))
 				{
 					if (obj != null && obj is Serialize)
 					{
@@ -114,7 +109,7 @@ namespace KSerialization
 		private void AddValidField(FieldInfo field)
 		{
 			object[] customAttributes = field.GetCustomAttributes(typeof(NonSerializedAttribute), false);
-			if (customAttributes == null || customAttributes.Length <= 0)
+			if (customAttributes == null || customAttributes.Length == 0)
 			{
 				this.serializableFields.Add(new SerializationTemplate.SerializationField
 				{
@@ -126,8 +121,7 @@ namespace KSerialization
 
 		private void AddPublicProperties(Type type)
 		{
-			PropertyInfo[] properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-			foreach (PropertyInfo propertyInfo in properties)
+			foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public))
 			{
 				this.AddValidProperty(propertyInfo);
 			}
@@ -135,11 +129,9 @@ namespace KSerialization
 
 		private void AddOptInProperties(Type type)
 		{
-			PropertyInfo[] properties = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			foreach (PropertyInfo propertyInfo in properties)
+			foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 			{
-				object[] customAttributes = propertyInfo.GetCustomAttributes(false);
-				foreach (object obj in customAttributes)
+				foreach (object obj in propertyInfo.GetCustomAttributes(false))
 				{
 					if (obj != null && obj is Serialize)
 					{
@@ -152,17 +144,13 @@ namespace KSerialization
 		private void AddValidProperty(PropertyInfo property)
 		{
 			object[] customAttributes = property.GetCustomAttributes(typeof(NonSerializedAttribute), false);
-			if (customAttributes == null || customAttributes.Length <= 0)
+			if ((customAttributes == null || customAttributes.Length == 0) && property.GetSetMethod() != null)
 			{
-				MethodInfo setMethod = property.GetSetMethod();
-				if (setMethod != null)
+				this.serializableProperties.Add(new SerializationTemplate.SerializationProperty
 				{
-					this.serializableProperties.Add(new SerializationTemplate.SerializationProperty
-					{
-						property = property,
-						typeInfo = Manager.GetTypeInfo(property.PropertyType)
-					});
-				}
+					property = property,
+					typeInfo = Manager.GetTypeInfo(property.PropertyType)
+				});
 			}
 		}
 
@@ -200,13 +188,15 @@ namespace KSerialization
 				{
 					this.WriteType(writer, genericArguments[i]);
 				}
+				return;
 			}
-			else if (Helper.IsArray(serializationTypeInfo))
+			if (Helper.IsArray(serializationTypeInfo))
 			{
 				Type elementType = type.GetElementType();
 				this.WriteType(writer, elementType);
+				return;
 			}
-			else if (type.IsEnum || Helper.IsUserDefinedType(serializationTypeInfo))
+			if (type.IsEnum || Helper.IsUserDefinedType(serializationTypeInfo))
 			{
 				writer.WriteKleiString(type.GetKTypeString());
 			}

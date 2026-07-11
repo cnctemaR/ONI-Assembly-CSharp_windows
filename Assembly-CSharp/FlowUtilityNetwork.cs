@@ -31,7 +31,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 				}
 				this.sources.Add(item);
 				item.Network = this;
-				break;
+				return;
 			case Endpoint.Sink:
 				if (this.sinks.Contains(item))
 				{
@@ -39,7 +39,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 				}
 				this.sinks.Add(item);
 				item.Network = this;
-				break;
+				return;
 			case Endpoint.Conduit:
 				break;
 			default:

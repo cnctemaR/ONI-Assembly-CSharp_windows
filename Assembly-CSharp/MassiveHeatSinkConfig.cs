@@ -32,14 +32,12 @@ public class MassiveHeatSinkConfig : IBuildingConfig
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<MassiveHeatSink>();
-		MinimumOperatingTemperature minimumOperatingTemperature = go.AddOrGet<MinimumOperatingTemperature>();
-		minimumOperatingTemperature.minimumTemperature = 100f;
+		go.AddOrGet<MinimumOperatingTemperature>().minimumTemperature = 100f;
 		PrimaryElement component = go.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Iron);
 		component.Temperature = 294.15f;
 		go.AddOrGet<LoopingSounds>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 0.099999994f;
+		go.AddOrGet<Storage>().capacityKg = 0.099999994f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 1f;
@@ -47,8 +45,7 @@ public class MassiveHeatSinkConfig : IBuildingConfig
 		conduitConsumer.capacityKG = 0.099999994f;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
-		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
-		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
+		go.AddOrGet<ElementConverter>().consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(ElementLoader.FindElementByHash(SimHashes.Hydrogen).tag, 0.01f)
 		};

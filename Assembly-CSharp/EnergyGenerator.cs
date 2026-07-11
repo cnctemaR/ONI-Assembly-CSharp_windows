@@ -74,8 +74,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		EnergyGenerator component = gameObject.GetComponent<EnergyGenerator>();
+		EnergyGenerator component = ((GameObject)data).GetComponent<EnergyGenerator>();
 		if (component != null)
 		{
 			this.batteryRefillPercent = component.batteryRefillPercent;
@@ -84,8 +83,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 
 	protected void OnActiveChanged(object data)
 	{
-		bool isActive = ((Operational)data).IsActive;
-		StatusItem statusItem = ((!isActive) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
+		StatusItem statusItem = (((Operational)data).IsActive ? Db.Get().BuildingStatusItems.Wattage : Db.Get().BuildingStatusItems.GeneratorOffline);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
 	}
 
@@ -132,8 +130,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			GameObject gameObject = this.storage.FindFirst(inputItem.tag);
 			if (gameObject != null)
 			{
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				num = component.Mass / inputItem.maxStoredMass;
+				num = gameObject.GetComponent<PrimaryElement>().Mass / inputItem.maxStoredMass;
 			}
 			this.meter.SetPositionPercent(num);
 		}
@@ -146,24 +143,27 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			List<Battery> batteriesOnCircuit = Game.Instance.circuitManager.GetBatteriesOnCircuit(circuitID);
 			if (!this.ignoreBatteryRefillPercent && batteriesOnCircuit.Count > 0)
 			{
-				foreach (Battery battery in batteriesOnCircuit)
+				using (List<Battery>.Enumerator enumerator = batteriesOnCircuit.GetEnumerator())
 				{
-					if (this.batteryRefillPercent <= 0f && battery.PercentFull <= 0f)
+					while (enumerator.MoveNext())
 					{
-						flag2 = true;
-						break;
+						Battery battery = enumerator.Current;
+						if (this.batteryRefillPercent <= 0f && battery.PercentFull <= 0f)
+						{
+							flag2 = true;
+							break;
+						}
+						if (battery.PercentFull < this.batteryRefillPercent)
+						{
+							flag2 = true;
+							break;
+						}
 					}
-					if (battery.PercentFull < this.batteryRefillPercent)
-					{
-						flag2 = true;
-						break;
-					}
+					goto IL_0123;
 				}
 			}
-			else
-			{
-				flag2 = true;
-			}
+			flag2 = true;
+			IL_0123:
 			if (!this.ignoreBatteryRefillPercent)
 			{
 				this.selectable.ToggleStatusItem(EnergyGenerator.batteriesSufficientlyFull, !flag2, null);
@@ -183,10 +183,10 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 						float num2 = inputItem2.consumptionRate * dt;
 						this.storage.ConsumeIgnoringDisease(inputItem2.tag, num2);
 					}
-					PrimaryElement component2 = base.GetComponent<PrimaryElement>();
+					PrimaryElement component = base.GetComponent<PrimaryElement>();
 					foreach (EnergyGenerator.OutputItem outputItem in this.formula.outputs)
 					{
-						this.Emit(outputItem, dt, component2);
+						this.Emit(outputItem, dt, component);
 					}
 					base.GenerateJoules(base.WattageRating * dt, false);
 					this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this);
@@ -225,8 +225,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		for (int i = 0; i < this.formula.outputs.Length; i++)
 		{
 			EnergyGenerator.OutputItem outputItem = this.formula.outputs[i];
-			Element element = ElementLoader.FindElementByHash(outputItem.element);
-			string text = element.tag.ProperName();
+			string text = ElementLoader.FindElementByHash(outputItem.element).tag.ProperName();
 			Descriptor descriptor = default(Descriptor);
 			if (outputItem.minTemperature > 0f)
 			{
@@ -267,7 +266,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		}
 	}
 
@@ -301,35 +300,34 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			if (element.IsGas)
 			{
 				this.storage.AddGasChunk(output.element, num, root_pe.Temperature, byte.MaxValue, 0, true, true);
+				return;
 			}
-			else if (element.IsLiquid)
+			if (element.IsLiquid)
 			{
 				this.storage.AddLiquid(output.element, num, root_pe.Temperature, byte.MaxValue, 0, true, true);
+				return;
 			}
-			else
-			{
-				GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), num, root_pe.Temperature, byte.MaxValue, 0, false, false, false);
-				this.storage.Store(gameObject, true, false, true, false);
-			}
+			GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), num, root_pe.Temperature, byte.MaxValue, 0, false, false, false);
+			this.storage.Store(gameObject, true, false, true, false);
+			return;
 		}
 		else
 		{
-			int num2 = Grid.PosToCell(base.transform.GetPosition());
-			int num3 = Grid.OffsetCell(num2, output.emitOffset);
-			float num4 = Mathf.Max(root_pe.Temperature, output.minTemperature);
+			int num2 = Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), output.emitOffset);
+			float num3 = Mathf.Max(root_pe.Temperature, output.minTemperature);
 			if (element.IsGas)
 			{
-				SimMessages.ModifyMass(num3, num, byte.MaxValue, 0, CellEventLogger.Instance.EnergyGeneratorModifyMass, num4, output.element);
+				SimMessages.ModifyMass(num2, num, byte.MaxValue, 0, CellEventLogger.Instance.EnergyGeneratorModifyMass, num3, output.element);
+				return;
 			}
-			else if (element.IsLiquid)
+			if (element.IsLiquid)
 			{
 				int elementIndex = ElementLoader.GetElementIndex(output.element);
-				FallingWater.instance.AddParticle(num3, (byte)elementIndex, num, num4, byte.MaxValue, 0, true, false, false, false);
+				FallingWater.instance.AddParticle(num2, (byte)elementIndex, num, num3, byte.MaxValue, 0, true, false, false, false);
+				return;
 			}
-			else
-			{
-				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Front), num, num4, byte.MaxValue, 0, true, false, false);
-			}
+			element.substance.SpawnResource(Grid.CellToPosCCC(num2, Grid.SceneLayer.Front), num, num3, byte.MaxValue, 0, true, false, false);
+			return;
 		}
 	}
 

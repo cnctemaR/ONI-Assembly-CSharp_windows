@@ -96,7 +96,7 @@ namespace KMod
 							{
 								foreach (Type type in assembly2.GetTypes())
 								{
-									if (type != null)
+									if (!(type == null))
 									{
 										MethodInfo methodInfo = type.GetMethod("OnLoad", array);
 										if (methodInfo != null)

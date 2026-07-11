@@ -5,6 +5,7 @@ using UnityEngine.Networking.NetworkSystem;
 
 namespace UnityEngine.Networking
 {
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkCRC
 	{
 		internal static NetworkCRC singleton

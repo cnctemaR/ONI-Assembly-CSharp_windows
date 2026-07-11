@@ -83,8 +83,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			{
 				Guid guid;
 				this.statusItemHandles.TryGetValue(exposureType.germ_id, out guid);
-				KSelectable component = base.GetComponent<KSelectable>();
-				guid = component.RemoveStatusItem(guid, false);
+				guid = base.GetComponent<KSelectable>().RemoveStatusItem(guid, false);
 			}
 			base.StopSM(reason);
 		}
@@ -156,8 +155,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			}
 			num = Mathf.Clamp(num, 1f, 3f);
 			float num2 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)num - 1];
-			AttributeInstance attributeInstance = Db.Get().Attributes.GermResistance.Lookup(base.gameObject);
-			float totalValue = attributeInstance.GetTotalValue();
+			float totalValue = Db.Get().Attributes.GermResistance.Lookup(base.gameObject).GetTotalValue();
 			return (float)exposureType.base_resistance + totalValue + num2;
 		}
 
@@ -190,92 +188,81 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		{
 			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
-				if (disease.id == exposureType.germ_id && count > exposureType.exposure_threshold)
+				if (disease.id == exposureType.germ_id && count > exposureType.exposure_threshold && this.HasMinExposurePeriodElapsed(exposureType.germ_id) && this.IsExposureValidForTraits(exposureType))
 				{
-					if (this.HasMinExposurePeriodElapsed(exposureType.germ_id))
+					Sickness sickness = ((exposureType.sickness_id != null) ? Db.Get().Sicknesses.Get(exposureType.sickness_id) : null);
+					if (sickness == null || sickness.infectionVectors.Contains(vector))
 					{
-						if (this.IsExposureValidForTraits(exposureType))
+						GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
+						float exposureTier = this.GetExposureTier(exposureType.germ_id);
+						if (exposureState == GermExposureMonitor.ExposureState.None || exposureState == GermExposureMonitor.ExposureState.Contact)
 						{
-							Sickness sickness = ((exposureType.sickness_id == null) ? null : Db.Get().Sicknesses.Get(exposureType.sickness_id));
-							if (sickness == null || sickness.infectionVectors.Contains(vector))
+							float contractionChance = GermExposureMonitor.GetContractionChance(this.GetResistanceToExposureType(exposureType, -1f));
+							this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Contact);
+							if (contractionChance > 0f)
 							{
-								GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
-								float exposureTier = this.GetExposureTier(exposureType.germ_id);
-								if (exposureState == GermExposureMonitor.ExposureState.None || exposureState == GermExposureMonitor.ExposureState.Contact)
+								this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance, base.transform.GetPosition());
+								if (exposureType.infect_immediately)
 								{
-									float resistanceToExposureType = this.GetResistanceToExposureType(exposureType, -1f);
-									float contractionChance = GermExposureMonitor.GetContractionChance(resistanceToExposureType);
-									this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Contact);
-									if (contractionChance > 0f)
+									this.InfectImmediately(exposureType);
+								}
+								else
+								{
+									bool flag = true;
+									bool flag2 = vector == Sickness.InfectionVector.Inhalation;
+									bool flag3 = vector == Sickness.InfectionVector.Digestion;
+									int num = 1;
+									if (flag2)
 									{
-										this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance, base.transform.GetPosition());
-										if (exposureType.infect_immediately)
+										flag = this.AssessInhaledGerms(exposureType);
+									}
+									if (flag3)
+									{
+										num = this.AssessDigestedGerms(exposureType, count);
+									}
+									if (flag)
+									{
+										if (flag2)
 										{
-											this.InfectImmediately(exposureType);
+											this.inhaleExposureTick[exposureType.germ_id].ticks = 0;
 										}
-										else
-										{
-											bool flag = true;
-											bool flag2 = vector == Sickness.InfectionVector.Inhalation;
-											bool flag3 = vector == Sickness.InfectionVector.Digestion;
-											int num = 1;
-											if (flag2)
-											{
-												flag = this.AssessInhaledGerms(exposureType);
-											}
-											if (flag3)
-											{
-												num = this.AssessDigestedGerms(exposureType, count);
-											}
-											if (flag)
-											{
-												if (flag2)
-												{
-													this.inhaleExposureTick[exposureType.germ_id].ticks = 0;
-												}
-												this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Exposed);
-												this.SetExposureTier(exposureType.germ_id, (float)num);
-												float num2 = Mathf.Clamp01(contractionChance);
-												GermExposureTracker.Instance.AddExposure(exposureType, num2);
-											}
-										}
+										this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Exposed);
+										this.SetExposureTier(exposureType.germ_id, (float)num);
+										float num2 = Mathf.Clamp01(contractionChance);
+										GermExposureTracker.Instance.AddExposure(exposureType, num2);
 									}
 								}
-								else if (exposureState == GermExposureMonitor.ExposureState.Exposed && exposureTier < 3f)
+							}
+						}
+						else if (exposureState == GermExposureMonitor.ExposureState.Exposed && exposureTier < 3f)
+						{
+							float contractionChance2 = GermExposureMonitor.GetContractionChance(this.GetResistanceToExposureType(exposureType, -1f));
+							if (contractionChance2 > 0f)
+							{
+								this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance2, base.transform.GetPosition());
+								if (!exposureType.infect_immediately)
 								{
-									float resistanceToExposureType2 = this.GetResistanceToExposureType(exposureType, -1f);
-									float contractionChance2 = GermExposureMonitor.GetContractionChance(resistanceToExposureType2);
-									if (contractionChance2 > 0f)
+									bool flag4 = true;
+									bool flag5 = vector == Sickness.InfectionVector.Inhalation;
+									bool flag6 = vector == Sickness.InfectionVector.Digestion;
+									int num3 = 1;
+									if (flag5)
 									{
-										this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance2, base.transform.GetPosition());
-										if (!exposureType.infect_immediately)
+										flag4 = this.AssessInhaledGerms(exposureType);
+									}
+									if (flag6)
+									{
+										num3 = this.AssessDigestedGerms(exposureType, count);
+									}
+									if (flag4)
+									{
+										if (flag5)
 										{
-											bool flag4 = true;
-											bool flag5 = vector == Sickness.InfectionVector.Inhalation;
-											bool flag6 = vector == Sickness.InfectionVector.Digestion;
-											int num3 = 1;
-											if (flag5)
-											{
-												flag4 = this.AssessInhaledGerms(exposureType);
-											}
-											if (flag6)
-											{
-												num3 = this.AssessDigestedGerms(exposureType, count);
-											}
-											if (flag4)
-											{
-												if (flag5)
-												{
-													this.inhaleExposureTick[exposureType.germ_id].ticks = 0;
-												}
-												this.SetExposureTier(exposureType.germ_id, this.GetExposureTier(exposureType.germ_id) + (float)num3);
-												float resistanceToExposureType3 = this.GetResistanceToExposureType(exposureType, -1f);
-												float contractionChance3 = GermExposureMonitor.GetContractionChance(resistanceToExposureType3);
-												float num4 = contractionChance3 - contractionChance2;
-												float num5 = Mathf.Clamp01(num4);
-												GermExposureTracker.Instance.AddExposure(exposureType, num5);
-											}
+											this.inhaleExposureTick[exposureType.germ_id].ticks = 0;
 										}
+										this.SetExposureTier(exposureType.germ_id, this.GetExposureTier(exposureType.germ_id) + (float)num3);
+										float num4 = Mathf.Clamp01(GermExposureMonitor.GetContractionChance(this.GetResistanceToExposureType(exposureType, -1f)) - contractionChance2);
+										GermExposureTracker.Instance.AddExposure(exposureType, num4);
 									}
 								}
 							}
@@ -315,8 +302,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 		public void ContractGerms(string germ_id)
 		{
-			GermExposureMonitor.ExposureState exposureState = this.GetExposureState(germ_id);
-			DebugUtil.DevAssert(exposureState == GermExposureMonitor.ExposureState.Exposed, "Duplicant is contracting a sickness but was never exposed to it!");
+			DebugUtil.DevAssert(this.GetExposureState(germ_id) == GermExposureMonitor.ExposureState.Exposed, "Duplicant is contracting a sickness but was never exposed to it!");
 			this.SetExposureState(germ_id, GermExposureMonitor.ExposureState.Contracted);
 		}
 
@@ -384,12 +370,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		{
 			float num;
 			this.lastExposureTime.TryGetValue(germ_id, out num);
-			if (num == 0f)
-			{
-				return true;
-			}
-			float num2 = GameClock.Instance.GetTime() - num;
-			return num2 > 540f;
+			return num == 0f || GameClock.Instance.GetTime() - num > 540f;
 		}
 
 		private void RefreshStatusItems()
@@ -403,8 +384,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
 				if (guid2 == Guid.Empty && (exposureState == GermExposureMonitor.ExposureState.Exposed || exposureState == GermExposureMonitor.ExposureState.Contracted))
 				{
-					KSelectable component = base.GetComponent<KSelectable>();
-					guid2 = component.AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, new GermExposureMonitor.ExposureStatusData
+					guid2 = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, new GermExposureMonitor.ExposureStatusData
 					{
 						exposure_type = exposureType,
 						owner = this
@@ -412,14 +392,12 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				}
 				else if (guid2 != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Exposed && exposureState != GermExposureMonitor.ExposureState.Contracted)
 				{
-					KSelectable component2 = base.GetComponent<KSelectable>();
-					guid2 = component2.RemoveStatusItem(guid2, false);
+					guid2 = base.GetComponent<KSelectable>().RemoveStatusItem(guid2, false);
 				}
 				this.statusItemHandles[exposureType.germ_id] = guid2;
 				if (guid == Guid.Empty && exposureState == GermExposureMonitor.ExposureState.Contact)
 				{
-					KSelectable component3 = base.GetComponent<KSelectable>();
-					guid = component3.AddStatusItem(Db.Get().DuplicantStatusItems.ContactWithGerms, new GermExposureMonitor.ExposureStatusData
+					guid = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ContactWithGerms, new GermExposureMonitor.ExposureStatusData
 					{
 						exposure_type = exposureType,
 						owner = this
@@ -427,8 +405,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				}
 				else if (guid != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Contact)
 				{
-					KSelectable component4 = base.GetComponent<KSelectable>();
-					guid = component4.RemoveStatusItem(guid, false);
+					guid = base.GetComponent<KSelectable>().RemoveStatusItem(guid, false);
 				}
 				this.contactStatusItemHandles[exposureType.germ_id] = guid;
 			}
@@ -448,8 +425,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		{
 			if (exposure_type.infection_effect != null)
 			{
-				Effects component = base.master.GetComponent<Effects>();
-				component.Add(exposure_type.infection_effect, true);
+				base.master.GetComponent<Effects>().Add(exposure_type.infection_effect, true);
 			}
 			if (exposure_type.sickness_id != null)
 			{

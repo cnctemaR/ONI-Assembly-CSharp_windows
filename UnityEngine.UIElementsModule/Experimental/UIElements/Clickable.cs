@@ -63,16 +63,16 @@ namespace UnityEngine.Experimental.UIElements
 
 		protected override void RegisterCallbacksOnTarget()
 		{
-			base.target.RegisterCallback<MouseDownEvent>(new EventCallback<MouseDownEvent>(this.OnMouseDown), Capture.NoCapture);
-			base.target.RegisterCallback<MouseMoveEvent>(new EventCallback<MouseMoveEvent>(this.OnMouseMove), Capture.NoCapture);
-			base.target.RegisterCallback<MouseUpEvent>(new EventCallback<MouseUpEvent>(this.OnMouseUp), Capture.NoCapture);
+			base.target.RegisterCallback<MouseDownEvent>(new EventCallback<MouseDownEvent>(this.OnMouseDown), TrickleDown.NoTrickleDown);
+			base.target.RegisterCallback<MouseMoveEvent>(new EventCallback<MouseMoveEvent>(this.OnMouseMove), TrickleDown.NoTrickleDown);
+			base.target.RegisterCallback<MouseUpEvent>(new EventCallback<MouseUpEvent>(this.OnMouseUp), TrickleDown.NoTrickleDown);
 		}
 
 		protected override void UnregisterCallbacksFromTarget()
 		{
-			base.target.UnregisterCallback<MouseDownEvent>(new EventCallback<MouseDownEvent>(this.OnMouseDown), Capture.NoCapture);
-			base.target.UnregisterCallback<MouseMoveEvent>(new EventCallback<MouseMoveEvent>(this.OnMouseMove), Capture.NoCapture);
-			base.target.UnregisterCallback<MouseUpEvent>(new EventCallback<MouseUpEvent>(this.OnMouseUp), Capture.NoCapture);
+			base.target.UnregisterCallback<MouseDownEvent>(new EventCallback<MouseDownEvent>(this.OnMouseDown), TrickleDown.NoTrickleDown);
+			base.target.UnregisterCallback<MouseMoveEvent>(new EventCallback<MouseMoveEvent>(this.OnMouseMove), TrickleDown.NoTrickleDown);
+			base.target.UnregisterCallback<MouseUpEvent>(new EventCallback<MouseUpEvent>(this.OnMouseUp), TrickleDown.NoTrickleDown);
 		}
 
 		protected void OnMouseDown(MouseDownEvent evt)
@@ -80,7 +80,7 @@ namespace UnityEngine.Experimental.UIElements
 			if (base.CanStartManipulation(evt))
 			{
 				this.m_Active = true;
-				base.target.TakeMouseCapture();
+				base.target.CaptureMouse();
 				this.lastMousePosition = evt.localMousePosition;
 				if (this.IsRepeatable())
 				{
@@ -114,6 +114,14 @@ namespace UnityEngine.Experimental.UIElements
 			if (this.m_Active)
 			{
 				this.lastMousePosition = evt.localMousePosition;
+				if (base.target.ContainsPoint(evt.localMousePosition))
+				{
+					base.target.pseudoStates |= PseudoStates.Active;
+				}
+				else
+				{
+					base.target.pseudoStates &= ~PseudoStates.Active;
+				}
 				evt.StopPropagation();
 			}
 		}
@@ -123,7 +131,7 @@ namespace UnityEngine.Experimental.UIElements
 			if (this.m_Active && base.CanStopManipulation(evt))
 			{
 				this.m_Active = false;
-				base.target.ReleaseMouseCapture();
+				base.target.ReleaseMouse();
 				if (this.IsRepeatable())
 				{
 					if (this.m_Repeater != null)

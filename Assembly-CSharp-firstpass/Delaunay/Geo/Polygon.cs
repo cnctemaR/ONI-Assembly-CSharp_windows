@@ -11,8 +11,30 @@ namespace Delaunay.Geo
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public sealed class Polygon
 	{
+		public Rect bounds { get; private set; }
+
+		public List<Vector2> Vertices
+		{
+			get
+			{
+				return this.vertices;
+			}
+		}
+
 		public Polygon()
 		{
+		}
+
+		[OnDeserializing]
+		internal void OnDeserializingMethod()
+		{
+			this.vertices = new List<Vector2>();
+		}
+
+		[OnDeserialized]
+		internal void OnDeserializedMethod()
+		{
+			this.Initialize();
 		}
 
 		public Polygon(List<Vector2> verts)
@@ -28,28 +50,6 @@ namespace Delaunay.Geo
 			this.vertices.Add(new Vector2(bounds.x + bounds.width, bounds.y));
 			this.vertices.Add(new Vector2(bounds.x + bounds.width, bounds.y + bounds.height));
 			this.vertices.Add(new Vector2(bounds.x, bounds.y + bounds.height));
-			this.Initialize();
-		}
-
-		public Rect bounds { get; private set; }
-
-		public List<Vector2> Vertices
-		{
-			get
-			{
-				return this.vertices;
-			}
-		}
-
-		[OnDeserializing]
-		internal void OnDeserializingMethod()
-		{
-			this.vertices = new List<Vector2>();
-		}
-
-		[OnDeserialized]
-		internal void OnDeserializedMethod()
-		{
 			this.Initialize();
 		}
 
@@ -164,8 +164,7 @@ namespace Delaunay.Geo
 
 		public Vector2 Centroid()
 		{
-			Vector2? vector = this.centroid;
-			if (vector == null)
+			if (this.centroid == null)
 			{
 				this.centroid = new Vector2?(Vector2.zero);
 				if (this.vertices.Count > 1)
@@ -175,16 +174,15 @@ namespace Delaunay.Geo
 					for (int i = 0; i < this.vertices.Count; i++)
 					{
 						float num3 = this.vertices[i].x * this.vertices[num2].y - this.vertices[num2].x * this.vertices[i].y;
-						Vector2? vector2 = this.centroid;
-						this.centroid = ((vector2 == null) ? null : new Vector2?(vector2.GetValueOrDefault() + new Vector2((this.vertices[i].x + this.vertices[num2].x) * num3, (this.vertices[i].y + this.vertices[num2].y) * num3)));
+						Vector2? vector = this.centroid;
+						Vector2 vector2 = new Vector2((this.vertices[i].x + this.vertices[num2].x) * num3, (this.vertices[i].y + this.vertices[num2].y) * num3);
+						this.centroid = vector + vector2;
 						num2 = (num2 + 1) % this.vertices.Count;
 					}
-					Vector2? vector3 = this.centroid;
-					this.centroid = ((vector3 == null) ? null : new Vector2?(vector3.GetValueOrDefault() / (6f * num)));
+					this.centroid /= 6f * num;
 				}
 			}
-			Vector2? vector4 = this.centroid;
-			return vector4.Value;
+			return this.centroid.Value;
 		}
 
 		public bool PointInPolygon(Vector2I point)
@@ -254,11 +252,7 @@ namespace Delaunay.Geo
 				{
 					Vector2 vector3 = other.vertices[num2];
 					Vector2 vector4 = other.vertices[j];
-					int num3 = 0;
-					num3 += ((Vector2.Distance(vector4, vector2) >= 0.001f) ? 0 : 1);
-					num3 += ((Vector2.Distance(vector4, vector) >= 0.001f) ? 0 : 1);
-					num3 += ((Vector2.Distance(vector3, vector2) >= 0.001f) ? 0 : 1);
-					num3 += ((Vector2.Distance(vector3, vector) >= 0.001f) ? 0 : 1);
+					int num3 = 0 + ((Vector2.Distance(vector4, vector2) < 0.001f) ? 1 : 0) + ((Vector2.Distance(vector4, vector) < 0.001f) ? 1 : 0) + ((Vector2.Distance(vector3, vector2) < 0.001f) ? 1 : 0) + ((Vector2.Distance(vector3, vector) < 0.001f) ? 1 : 0);
 					if (num3 == 1)
 					{
 						commonality = Polygon.Commonality.Point;
@@ -284,8 +278,7 @@ namespace Delaunay.Geo
 			float num = 0f;
 			MathUtil.Pair<Vector2, Vector2> closestEdge = this.GetClosestEdge(point.Value, ref num);
 			Vector2 vector = closestEdge.Second - closestEdge.First;
-			Vector2 vector2 = closestEdge.First + vector * num;
-			return Vector2.Distance(vector2, point.Value);
+			return Vector2.Distance(closestEdge.First + vector * num, point.Value);
 		}
 
 		public MathUtil.Pair<Vector2, Vector2> GetClosestEdge(Vector2 point, ref float timeOnEdge)
@@ -401,7 +394,7 @@ namespace Delaunay.Geo
 			for (int i = 0; i < this.vertices.Count; i++)
 			{
 				int num2 = i;
-				int num3 = ((i >= this.vertices.Count - 1) ? 0 : (i + 1));
+				int num3 = ((i < this.vertices.Count - 1) ? (i + 1) : 0);
 				if ((this.vertices[num2].y <= point.y && this.vertices[num3].y > point.y) || (this.vertices[num2].y > point.y && this.vertices[num3].y <= point.y))
 				{
 					float num4 = (point.y - this.vertices[num2].y) / (this.vertices[num3].y - this.vertices[num2].y);
@@ -430,10 +423,7 @@ namespace Delaunay.Geo
 		{
 			normNear = Vector2.zero;
 			normFar = Vector2.zero;
-			Vector2? p = segment.p0;
-			bool flag = p != null;
-			Vector2? p2 = segment.p1;
-			if (flag == (p2 != null) && (p == null || p.GetValueOrDefault() == p2.GetValueOrDefault()))
+			if (segment.p0 == segment.p1)
 			{
 				intersectingSegment = segment;
 				return this.CrossingNumber(segment.p0.Value) == 1;
@@ -444,7 +434,7 @@ namespace Delaunay.Geo
 			for (int i = 0; i < this.vertices.Count; i++)
 			{
 				int num3 = i;
-				int num4 = ((i >= this.vertices.Count - 1) ? 0 : (i + 1));
+				int num4 = ((i < this.vertices.Count - 1) ? (i + 1) : 0);
 				Vector2 vector2 = this.vertices[num4] - this.vertices[num3];
 				Vector2 vector3 = new Vector2(vector2.y, -vector2.x);
 				float num5 = this.perp(vector2, segment.p0.Value - this.vertices[num3]);
@@ -482,12 +472,8 @@ namespace Delaunay.Geo
 					}
 				}
 			}
-			LineSegment lineSegment = intersectingSegment;
-			Vector2? p3 = segment.p0;
-			lineSegment.p0 = ((p3 == null) ? null : new Vector2?(p3.GetValueOrDefault() + num * vector));
-			LineSegment lineSegment2 = intersectingSegment;
-			Vector2? p4 = segment.p0;
-			lineSegment2.p1 = ((p4 == null) ? null : new Vector2?(p4.GetValueOrDefault() + num2 * vector));
+			intersectingSegment.p0 = segment.p0 + num * vector;
+			intersectingSegment.p1 = segment.p0 + num2 * vector;
 			normFar.Normalize();
 			normNear.Normalize();
 			return true;
@@ -503,12 +489,11 @@ namespace Delaunay.Geo
 			for (int i = 0; i < this.vertices.Count; i++)
 			{
 				Vector2 vector2 = this.vertices[i];
-				Vector2 vector3 = this.vertices[(i >= this.vertices.Count - 1) ? 0 : (i + 1)];
-				Vector2 vector4 = vector3 - vector2;
-				Vector2 vector5 = new Vector2(vector4.y, -vector4.x);
-				Vector2 vector6 = vector2 - segment.p0.Value;
-				float num3 = this.perp(vector6, vector5);
-				float num4 = this.perp(vector, vector5);
+				Vector2 vector3 = this.vertices[(i < this.vertices.Count - 1) ? (i + 1) : 0] - vector2;
+				Vector2 vector4 = new Vector2(vector3.y, -vector3.x);
+				Vector2 vector5 = vector2 - segment.p0.Value;
+				float num3 = this.perp(vector5, vector4);
+				float num4 = this.perp(vector, vector4);
 				if (Mathf.Abs(num4) < Mathf.Epsilon)
 				{
 					if (num3 < 0f)
@@ -528,7 +513,7 @@ namespace Delaunay.Geo
 						if (num5 > num)
 						{
 							num = num5;
-							normNear = vector5;
+							normNear = vector4;
 						}
 					}
 					else
@@ -540,17 +525,13 @@ namespace Delaunay.Geo
 						if (num5 < num2)
 						{
 							num2 = num5;
-							normFar = vector5;
+							normFar = vector4;
 						}
 					}
 				}
 			}
-			LineSegment lineSegment = intersectingSegment;
-			Vector2? p = segment.p0;
-			lineSegment.p0 = ((p == null) ? null : new Vector2?(p.GetValueOrDefault() + num * vector));
-			LineSegment lineSegment2 = intersectingSegment;
-			Vector2? p2 = segment.p0;
-			lineSegment2.p1 = ((p2 == null) ? null : new Vector2?(p2.GetValueOrDefault() + num2 * vector));
+			intersectingSegment.p0 = segment.p0 + num * vector;
+			intersectingSegment.p1 = segment.p0 + num2 * vector;
 			normFar.Normalize();
 			normNear.Normalize();
 			return true;
@@ -562,15 +543,12 @@ namespace Delaunay.Geo
 			for (int i = 0; i < this.vertices.Count; i++)
 			{
 				Vector2 vector2 = this.vertices[i];
-				Vector2 vector3 = this.vertices[(i >= this.vertices.Count - 1) ? 0 : (i + 1)];
+				Vector2 vector3 = this.vertices[(i < this.vertices.Count - 1) ? (i + 1) : 0];
 				if (inset != 0f)
 				{
-					Vector2 vector4 = (vector2 - vector).normalized * -inset;
-					Vector2 vector5 = (vector3 - vector).normalized * -inset;
+					(vector2 - vector).normalized * -inset;
+					(vector3 - vector).normalized * -inset;
 				}
-			}
-			if (drawCentroid)
-			{
 			}
 		}
 

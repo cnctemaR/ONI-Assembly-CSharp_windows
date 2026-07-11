@@ -3,15 +3,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Represents a display resolution.</para>
-	/// </summary>
-	[UsedByNativeCode]
+	[RequiredByNativeCode]
 	public struct Resolution
 	{
-		/// <summary>
-		///   <para>Resolution width in pixels.</para>
-		/// </summary>
 		public int width
 		{
 			get
@@ -24,9 +18,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Resolution height in pixels.</para>
-		/// </summary>
 		public int height
 		{
 			get
@@ -39,9 +30,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Resolution's vertical refresh rate in Hz.</para>
-		/// </summary>
 		public int refreshRate
 		{
 			get
@@ -54,12 +42,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string of the resolution.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>A string with the format "width x height @ refreshRateHz".</para>
-		/// </returns>
 		public override string ToString()
 		{
 			return UnityString.Format("{0} x {1} @ {2}Hz", new object[] { this.m_Width, this.m_Height, this.m_RefreshRate });

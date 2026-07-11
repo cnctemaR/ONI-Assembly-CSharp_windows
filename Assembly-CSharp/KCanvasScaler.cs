@@ -48,9 +48,7 @@ public class KCanvasScaler : KMonoBehaviour
 		{
 			camera = global::UnityEngine.Object.FindObjectOfType<Camera>();
 		}
-		if (camera != null)
-		{
-		}
+		camera != null;
 		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y || (float)Screen.width / (float)Screen.height < 1.6777778f)
 		{
 			return this.scaleSteps[0].scale;

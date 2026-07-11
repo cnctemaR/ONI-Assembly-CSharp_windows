@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class UIGameObjectPool
 {
-	public UIGameObjectPool(GameObject prefab)
-	{
-		this.prefab = prefab;
-		this.freeElements = new List<GameObject>();
-		this.activeElements = new List<GameObject>();
-	}
-
 	public int ActiveElementsCount
 	{
 		get
@@ -33,6 +26,13 @@ public class UIGameObjectPool
 		{
 			return this.ActiveElementsCount + this.FreeElementsCount;
 		}
+	}
+
+	public UIGameObjectPool(GameObject prefab)
+	{
+		this.prefab = prefab;
+		this.freeElements = new List<GameObject>();
+		this.activeElements = new List<GameObject>();
 	}
 
 	public GameObject GetFreeElement(GameObject instantiateParent = null, bool forceActive = false)
@@ -63,13 +63,13 @@ public class UIGameObjectPool
 	{
 		if (!this.activeElements.Contains(element))
 		{
-			string text = ((!this.freeElements.Contains(element)) ? (element.name + ": The element provided does not belong to this pool") : (element.name + ": The element provided is already inactive"));
+			object obj = (this.freeElements.Contains(element) ? (element.name + ": The element provided is already inactive") : (element.name + ": The element provided does not belong to this pool"));
 			element.SetActive(false);
 			if (this.disabledElementParent != null)
 			{
 				element.transform.SetParent(this.disabledElementParent);
 			}
-			global::Debug.LogError(text);
+			global::Debug.LogError(obj);
 			return;
 		}
 		if (this.disabledElementParent != null)

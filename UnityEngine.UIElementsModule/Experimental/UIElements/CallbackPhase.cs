@@ -5,6 +5,8 @@ namespace UnityEngine.Experimental.UIElements
 	internal enum CallbackPhase
 	{
 		TargetAndBubbleUp = 1,
-		CaptureAndTarget
+		TrickleDownAndTarget,
+		[Obsolete("Use TrickleDownAndTarget instead of CaptureAndTarget.")]
+		CaptureAndTarget = 2
 	}
 }

@@ -2,12 +2,6 @@
 
 public class OffsetTableTracker : OffsetTracker
 {
-	public OffsetTableTracker(CellOffset[][] table, KMonoBehaviour cmp)
-	{
-		this.table = table;
-		this.cmp = cmp;
-	}
-
 	private static NavGrid navGrid
 	{
 		get
@@ -19,6 +13,12 @@ public class OffsetTableTracker : OffsetTracker
 			Debug.Assert(OffsetTableTracker.navGridImpl == Pathfinding.Instance.GetNavGrid("MinionNavGrid"), "Cached NavGrid reference is invalid");
 			return OffsetTableTracker.navGridImpl;
 		}
+	}
+
+	public OffsetTableTracker(CellOffset[][] table, KMonoBehaviour cmp)
+	{
+		this.table = table;
+		this.cmp = cmp;
 	}
 
 	protected override void UpdateCell(int previous_cell, int current_cell)
@@ -64,7 +64,7 @@ public class OffsetTableTracker : OffsetTracker
 	private unsafe void UpdateOffsets(int cell, CellOffset[][] table)
 	{
 		Debug.Assert(table.Length <= 192, string.Format("validRowIndices[{0}] isn't big enough < {1}", 192, table.Length));
-		int* ptr = stackalloc int[checked(192 * 4)];
+		int* ptr = stackalloc int[(UIntPtr)768];
 		int num = 0;
 		if (Grid.IsValidCell(cell))
 		{

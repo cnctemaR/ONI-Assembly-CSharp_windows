@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
@@ -20,13 +19,10 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KPrefabID.PrefabFn instantiateFn;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KPrefabID.PrefabFn prefabInitFn;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KPrefabID.PrefabFn prefabSpawnFn;
 
 	public bool pendingDestruction { get; private set; }
@@ -178,11 +174,9 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (set)
 		{
 			this.AddTag(tag, false);
+			return;
 		}
-		else
-		{
-			this.RemoveTag(tag);
-		}
+		this.RemoveTag(tag);
 	}
 
 	public bool HasTag(Tag tag)
@@ -273,8 +267,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	internal void OnDeserializedMethod()
 	{
 		KPrefabIDTracker kprefabIDTracker = KPrefabIDTracker.Get();
-		KPrefabID instance = kprefabIDTracker.GetInstance(this.InstanceID);
-		if (instance)
+		if (kprefabIDTracker.GetInstance(this.InstanceID))
 		{
 			this.conflicted = true;
 		}

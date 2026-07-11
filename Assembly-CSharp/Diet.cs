@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class Diet
 {
+	public Diet.Info[] infos { get; private set; }
+
 	public Diet(params Diet.Info[] infos)
 	{
 		this.infos = infos;
@@ -20,7 +22,7 @@ public class Diet
 				while (enumerator.MoveNext())
 				{
 					Tag tag = enumerator.Current;
-					if (this.consumedTags.FindIndex((KeyValuePair<Tag, float> e) => e.Key == tag) == -1)
+					if (-1 == this.consumedTags.FindIndex((KeyValuePair<Tag, float> e) => e.Key == tag))
 					{
 						this.consumedTags.Add(new KeyValuePair<Tag, float>(tag, info.caloriesPerKg));
 					}
@@ -31,14 +33,12 @@ public class Diet
 					this.consumedTagToInfo[tag] = info;
 				}
 			}
-			if (info.producedElement != Tag.Invalid && this.producedTags.FindIndex((KeyValuePair<Tag, float> e) => e.Key == info.producedElement) == -1)
+			if (info.producedElement != Tag.Invalid && -1 == this.producedTags.FindIndex((KeyValuePair<Tag, float> e) => e.Key == info.producedElement))
 			{
 				this.producedTags.Add(new KeyValuePair<Tag, float>(info.producedElement, info.producedConversionRate));
 			}
 		}
 	}
-
-	public Diet.Info[] infos { get; private set; }
 
 	public Diet.Info GetDietInfo(Tag tag)
 	{
@@ -57,6 +57,22 @@ public class Diet
 
 	public class Info
 	{
+		public HashSet<Tag> consumedTags { get; private set; }
+
+		public Tag producedElement { get; private set; }
+
+		public float caloriesPerKg { get; private set; }
+
+		public float producedConversionRate { get; private set; }
+
+		public byte diseaseIdx { get; private set; }
+
+		public float diseasePerKgProduced { get; private set; }
+
+		public bool produceSolidTile { get; private set; }
+
+		public bool eatsPlantsDirectly { get; private set; }
+
 		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f, bool produce_solid_tile = false, bool eats_plants_directly = false)
 		{
 			this.consumedTags = consumed_tags;
@@ -74,22 +90,6 @@ public class Diet
 			this.produceSolidTile = produce_solid_tile;
 			this.eatsPlantsDirectly = eats_plants_directly;
 		}
-
-		public HashSet<Tag> consumedTags { get; private set; }
-
-		public Tag producedElement { get; private set; }
-
-		public float caloriesPerKg { get; private set; }
-
-		public float producedConversionRate { get; private set; }
-
-		public byte diseaseIdx { get; private set; }
-
-		public float diseasePerKgProduced { get; private set; }
-
-		public bool produceSolidTile { get; private set; }
-
-		public bool eatsPlantsDirectly { get; private set; }
 
 		public bool IsMatch(Tag tag)
 		{

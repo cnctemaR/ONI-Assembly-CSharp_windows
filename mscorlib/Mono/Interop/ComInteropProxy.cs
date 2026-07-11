@@ -9,12 +9,29 @@ using System.Threading;
 
 namespace Mono.Interop
 {
+	[StructLayout(LayoutKind.Sequential)]
 	internal class ComInteropProxy : RealProxy, IRemotingTypeInfo
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddProxy(IntPtr pItf, ComInteropProxy proxy);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern ComInteropProxy FindProxy(IntPtr pItf);
+
 		private ComInteropProxy(Type t)
 			: base(t)
 		{
 			this.com_object = __ComObject.CreateRCW(t);
+		}
+
+		private void CacheProxy()
+		{
+			if (ComInteropProxy.FindProxy(this.com_object.IUnknown) == null)
+			{
+				ComInteropProxy.AddProxy(this.com_object.IUnknown, this);
+				return;
+			}
+			Interlocked.Increment(ref this.ref_count);
 		}
 
 		private ComInteropProxy(IntPtr pUnk)
@@ -25,51 +42,45 @@ namespace Mono.Interop
 		internal ComInteropProxy(IntPtr pUnk, Type t)
 			: base(t)
 		{
-			this.com_object = new __ComObject(pUnk);
+			this.com_object = new __ComObject(pUnk, this);
 			this.CacheProxy();
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddProxy(IntPtr pItf, ComInteropProxy proxy);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern ComInteropProxy FindProxy(IntPtr pItf);
-
-		private void CacheProxy()
-		{
-			ComInteropProxy.AddProxy(this.com_object.IUnknown, this);
 		}
 
 		internal static ComInteropProxy GetProxy(IntPtr pItf, Type t)
 		{
 			Guid iid_IUnknown = __ComObject.IID_IUnknown;
 			IntPtr intPtr;
-			int num = Marshal.QueryInterface(pItf, ref iid_IUnknown, out intPtr);
-			Marshal.ThrowExceptionForHR(num);
+			Marshal.ThrowExceptionForHR(Marshal.QueryInterface(pItf, ref iid_IUnknown, out intPtr));
 			ComInteropProxy comInteropProxy = ComInteropProxy.FindProxy(intPtr);
 			if (comInteropProxy == null)
 			{
-				Marshal.Release(pItf);
+				Marshal.Release(intPtr);
 				return new ComInteropProxy(intPtr);
 			}
-			Marshal.Release(pItf);
+			Marshal.Release(intPtr);
 			Interlocked.Increment(ref comInteropProxy.ref_count);
 			return comInteropProxy;
 		}
 
 		internal static ComInteropProxy CreateProxy(Type t)
 		{
-			ComInteropProxy comInteropProxy = new ComInteropProxy(t);
-			comInteropProxy.com_object.Initialize(t);
-			ComInteropProxy comInteropProxy2 = ComInteropProxy.FindProxy(comInteropProxy.com_object.IUnknown);
-			if (comInteropProxy2 == null)
+			IntPtr intPtr = __ComObject.CreateIUnknown(t);
+			ComInteropProxy comInteropProxy = ComInteropProxy.FindProxy(intPtr);
+			ComInteropProxy comInteropProxy2;
+			if (comInteropProxy != null)
 			{
-				return comInteropProxy;
+				Type type = comInteropProxy.com_object.GetType();
+				if (type != t)
+				{
+					throw new InvalidCastException(string.Format("Unable to cast object of type '{0}' to type '{1}'.", type, t));
+				}
+				comInteropProxy2 = comInteropProxy;
+				Marshal.Release(intPtr);
 			}
-			Type type = comInteropProxy2.com_object.GetType();
-			if (type != t)
+			else
 			{
-				throw new InvalidCastException(string.Format("Unable to cast object of type '{0}' to type '{1}'.", type, t));
+				comInteropProxy2 = new ComInteropProxy(t);
+				comInteropProxy2.com_object.Initialize(intPtr, comInteropProxy2);
 			}
 			return comInteropProxy2;
 		}

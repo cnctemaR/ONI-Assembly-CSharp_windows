@@ -22,9 +22,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 	public void LogCallbackReceive(int callback_id)
 	{
 		int invalidCell = Grid.InvalidCell;
-		if (this.CallbackToCellMap.TryGetValue(callback_id, out invalidCell))
-		{
-		}
+		this.CallbackToCellMap.TryGetValue(callback_id, out invalidCell);
 	}
 
 	protected override void OnPrefabInit()

@@ -2,12 +2,14 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security;
 
 namespace System.Runtime.Remoting.Channels
 {
 	[ComVisible(true)]
-	public class ServerChannelSinkStack : IServerResponseChannelSinkStack, IServerChannelSinkStack
+	public class ServerChannelSinkStack : IServerChannelSinkStack, IServerResponseChannelSinkStack
 	{
+		[SecurityCritical]
 		public Stream GetResponseStream(IMessage msg, ITransportHeaders headers)
 		{
 			if (this._sinkStack == null)
@@ -17,6 +19,7 @@ namespace System.Runtime.Remoting.Channels
 			return ((IServerChannelSink)this._sinkStack.Sink).GetResponseStream(this, this._sinkStack.State, msg, headers);
 		}
 
+		[SecurityCritical]
 		public object Pop(IServerChannelSink sink)
 		{
 			while (this._sinkStack != null)
@@ -31,29 +34,34 @@ namespace System.Runtime.Remoting.Channels
 			throw new RemotingException("The current sink stack is empty, or the specified sink was never pushed onto the current stack");
 		}
 
+		[SecurityCritical]
 		public void Push(IServerChannelSink sink, object state)
 		{
 			this._sinkStack = new ChanelSinkStackEntry(sink, state, this._sinkStack);
 		}
 
 		[MonoTODO]
+		[SecurityCritical]
 		public void ServerCallback(IAsyncResult ar)
 		{
 			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
+		[SecurityCritical]
 		public void Store(IServerChannelSink sink, object state)
 		{
 			throw new NotImplementedException();
 		}
 
+		[SecurityCritical]
 		[MonoTODO]
 		public void StoreAndDispatch(IServerChannelSink sink, object state)
 		{
 			throw new NotImplementedException();
 		}
 
+		[SecurityCritical]
 		public void AsyncProcessResponse(IMessage msg, ITransportHeaders headers, Stream stream)
 		{
 			if (this._sinkStack == null)

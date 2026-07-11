@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -9,7 +8,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Sim.ConsumedMassInfo> OnElementConsumed;
 
 	public float AverageConsumeRate
@@ -85,7 +83,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	{
 		global::Debug.Assert(Sim.IsValidHandle(this.simHandle));
 		int sampleCell = this.GetSampleCell();
-		float num = ((!this.consumptionEnabled || !this.hasAvailableCapacity) ? 0f : this.consumptionRate);
+		float num = ((this.consumptionEnabled && this.hasAvailableCapacity) ? this.consumptionRate : 0f);
 		SimMessages.SetElementConsumerData(this.simHandle, sampleCell, num);
 		this.UpdateStatusItem();
 	}
@@ -157,8 +155,9 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 			if (this.statusHandle == Guid.Empty && this.IsActive() && this.consumptionEnabled)
 			{
 				this.statusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.ElementConsumer, this);
+				return;
 			}
-			else if (this.statusHandle != Guid.Empty)
+			if (this.statusHandle != Guid.Empty)
 			{
 				base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
 			}
@@ -280,8 +279,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo<int>>.Handle cb_handle)
 	{
-		int sampleCell = this.GetSampleCell();
-		SimMessages.AddElementConsumer(sampleCell, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
+		SimMessages.AddElementConsumer(this.GetSampleCell(), this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
 	}
 
 	protected override Action<int> GetStaticUnregister()

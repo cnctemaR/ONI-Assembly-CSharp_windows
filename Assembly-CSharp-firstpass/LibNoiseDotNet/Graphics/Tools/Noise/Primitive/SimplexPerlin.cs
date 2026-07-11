@@ -2,7 +2,7 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 {
-	public class SimplexPerlin : ImprovedPerlin, IModule4D, IModule3D, IModule2D, IModule
+	public class SimplexPerlin : ImprovedPerlin, IModule4D, IModule, IModule3D, IModule2D
 	{
 		public SimplexPerlin()
 			: base(0, NoiseQuality.Standard)
@@ -57,18 +57,18 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 				num16 |= 1;
 			}
 			int[] array = SimplexPerlin._simplex[num16];
-			int num17 = ((array[0] < 3) ? 0 : 1);
-			int num18 = ((array[1] < 3) ? 0 : 1);
-			int num19 = ((array[2] < 3) ? 0 : 1);
-			int num20 = ((array[3] < 3) ? 0 : 1);
-			int num21 = ((array[0] < 2) ? 0 : 1);
-			int num22 = ((array[1] < 2) ? 0 : 1);
-			int num23 = ((array[2] < 2) ? 0 : 1);
-			int num24 = ((array[3] < 2) ? 0 : 1);
-			int num25 = ((array[0] < 1) ? 0 : 1);
-			int num26 = ((array[1] < 1) ? 0 : 1);
-			int num27 = ((array[2] < 1) ? 0 : 1);
-			int num28 = ((array[3] < 1) ? 0 : 1);
+			int num17 = ((array[0] >= 3) ? 1 : 0);
+			int num18 = ((array[1] >= 3) ? 1 : 0);
+			int num19 = ((array[2] >= 3) ? 1 : 0);
+			int num20 = ((array[3] >= 3) ? 1 : 0);
+			int num21 = ((array[0] >= 2) ? 1 : 0);
+			int num22 = ((array[1] >= 2) ? 1 : 0);
+			int num23 = ((array[2] >= 2) ? 1 : 0);
+			int num24 = ((array[3] >= 2) ? 1 : 0);
+			int num25 = ((array[0] >= 1) ? 1 : 0);
+			int num26 = ((array[1] >= 1) ? 1 : 0);
+			int num27 = ((array[2] >= 1) ? 1 : 0);
+			int num28 = ((array[3] >= 1) ? 1 : 0);
 			float num29 = num12 - (float)num17 + SimplexPerlin.G4;
 			float num30 = num13 - (float)num18 + SimplexPerlin.G4;
 			float num31 = num14 - (float)num19 + SimplexPerlin.G4;

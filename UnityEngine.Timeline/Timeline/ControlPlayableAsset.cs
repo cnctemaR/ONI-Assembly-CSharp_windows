@@ -340,7 +340,7 @@ namespace UnityEngine.Timeline
 		IList<PlayableDirector> IDirectorDriver.GetDrivenDirectors(IExposedPropertyTable resolver)
 		{
 			IList<PlayableDirector> list;
-			if (!this.updateDirector || this.prefabGameObject != null)
+			if (!this.updateDirector || this.prefabGameObject != null || resolver == null)
 			{
 				list = new List<PlayableDirector>(0);
 			}

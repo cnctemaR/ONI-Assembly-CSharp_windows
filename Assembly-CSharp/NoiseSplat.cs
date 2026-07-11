@@ -4,6 +4,30 @@ using UnityEngine;
 
 public class NoiseSplat : IUniformGridObject
 {
+	public int dB { get; private set; }
+
+	public float deathTime { get; private set; }
+
+	public string GetName()
+	{
+		return this.provider.GetName();
+	}
+
+	public IPolluter GetProvider()
+	{
+		return this.provider;
+	}
+
+	public Vector2 PosMin()
+	{
+		return new Vector2(this.position.x - (float)this.radius, this.position.y - (float)this.radius);
+	}
+
+	public Vector2 PosMax()
+	{
+		return new Vector2(this.position.x + (float)this.radius, this.position.y + (float)this.radius);
+	}
+
 	public NoiseSplat(NoisePolluter setProvider, float death_time = 0f)
 	{
 		this.deathTime = death_time;
@@ -82,30 +106,6 @@ public class NoiseSplat : IUniformGridObject
 		this.AddNoise();
 	}
 
-	public int dB { get; private set; }
-
-	public float deathTime { get; private set; }
-
-	public string GetName()
-	{
-		return this.provider.GetName();
-	}
-
-	public IPolluter GetProvider()
-	{
-		return this.provider;
-	}
-
-	public Vector2 PosMin()
-	{
-		return new Vector2(this.position.x - (float)this.radius, this.position.y - (float)this.radius);
-	}
-
-	public Vector2 PosMax()
-	{
-		return new Vector2(this.position.x + (float)this.radius, this.position.y + (float)this.radius);
-	}
-
 	public void Clear()
 	{
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
@@ -155,8 +155,7 @@ public class NoiseSplat : IUniformGridObject
 		{
 			num = 0f;
 		}
-		float num2 = (float)this.dB - (float)this.dB * num * 0.05f;
-		return Mathf.Round(num2);
+		return Mathf.Round((float)this.dB - (float)this.dB * num * 0.05f);
 	}
 
 	private void RemoveNoise()
@@ -165,7 +164,7 @@ public class NoiseSplat : IUniformGridObject
 		{
 			Pair<int, float> pair = this.decibels[i];
 			float num = Math.Max(0f, Grid.Loudness[pair.first] - pair.second);
-			Grid.Loudness[pair.first] = ((num >= 1f) ? num : 0f);
+			Grid.Loudness[pair.first] = ((num < 1f) ? 0f : num);
 		}
 		this.decibels.Clear();
 	}

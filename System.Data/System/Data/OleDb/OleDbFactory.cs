@@ -5,6 +5,7 @@ using System.Security.Permissions;
 
 namespace System.Data.OleDb
 {
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbFactory : DbProviderFactory
 	{
 		internal OleDbFactory()
@@ -13,37 +14,37 @@ namespace System.Data.OleDb
 
 		public override DbCommand CreateCommand()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override DbCommandBuilder CreateCommandBuilder()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override DbConnection CreateConnection()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override DbDataAdapter CreateDataAdapter()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override DbParameter CreateParameter()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public override CodeAccessPermission CreatePermission(PermissionState state)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		public static readonly OleDbFactory Instance;

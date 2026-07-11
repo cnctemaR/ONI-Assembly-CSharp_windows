@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -15,8 +14,7 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicDiseaseSensor component = gameObject.GetComponent<LogicDiseaseSensor>();
+		LogicDiseaseSensor component = ((GameObject)data).GetComponent<LogicDiseaseSensor>();
 		if (component != null)
 		{
 			this.Threshold = component.Threshold;
@@ -201,7 +199,7 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 
 	private void UpdateLogicCircuit()
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -217,21 +215,18 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 				Color32 color = Color.white;
 				if (b != 255)
 				{
-					Disease disease = Db.Get().Diseases[(int)b];
-					color = disease.overlayColour;
+					color = Db.Get().Diseases[(int)b].overlayColour;
 				}
 				this.animController.SetSymbolTint(LogicDiseaseSensor.TINT_SYMBOL, color);
+				return;
 			}
-			else
-			{
-				this.animController.Play(LogicDiseaseSensor.OFF_ANIMS, KAnim.PlayMode.Once);
-			}
+			this.animController.Play(LogicDiseaseSensor.OFF_ANIMS, KAnim.PlayMode.Once);
 		}
 	}
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 

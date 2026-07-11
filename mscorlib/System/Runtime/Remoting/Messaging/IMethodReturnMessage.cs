@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public interface IMethodReturnMessage : IMessage, IMethodMessage
+	public interface IMethodReturnMessage : IMethodMessage, IMessage
 	{
 		Exception Exception { get; }
 

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeNamespaceImport : CodeObject
 	{
@@ -14,39 +11,23 @@ namespace System.CodeDom
 
 		public CodeNamespaceImport(string nameSpace)
 		{
-			this.nameSpace = nameSpace;
+			this.Namespace = nameSpace;
 		}
 
-		public CodeLinePragma LinePragma
-		{
-			get
-			{
-				return this.linePragma;
-			}
-			set
-			{
-				this.linePragma = value;
-			}
-		}
+		public CodeLinePragma LinePragma { get; set; }
 
 		public string Namespace
 		{
 			get
 			{
-				if (this.nameSpace == null)
-				{
-					return string.Empty;
-				}
-				return this.nameSpace;
+				return this._nameSpace ?? string.Empty;
 			}
 			set
 			{
-				this.nameSpace = value;
+				this._nameSpace = value;
 			}
 		}
 
-		private CodeLinePragma linePragma;
-
-		private string nameSpace;
+		private string _nameSpace;
 	}
 }

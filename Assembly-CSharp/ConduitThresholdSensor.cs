@@ -15,8 +15,7 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		ConduitThresholdSensor component = gameObject.GetComponent<ConduitThresholdSensor>();
+		ConduitThresholdSensor component = ((GameObject)data).GetComponent<ConduitThresholdSensor>();
 		if (component != null)
 		{
 			this.Threshold = component.Threshold;
@@ -26,8 +25,7 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 
 	protected override void ConduitUpdate(float dt)
 	{
-		float containedMass = this.GetContainedMass();
-		if (containedMass <= 0f && !this.dirty)
+		if (this.GetContainedMass() <= 0f && !this.dirty)
 		{
 			return;
 		}
@@ -38,6 +36,7 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 			if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
 			{
 				this.Toggle();
+				return;
 			}
 		}
 		else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue <= this.threshold && !base.IsSwitchedOn))
@@ -49,8 +48,7 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 	private float GetContainedMass()
 	{
 		int num = Grid.PosToCell(this);
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-		return flowManager.GetContents(num).mass;
+		return Conduit.GetFlowManager(this.conduitType).GetContents(num).mass;
 	}
 
 	public float Threshold

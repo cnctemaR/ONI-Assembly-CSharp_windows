@@ -20,25 +20,25 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			return obj is NotifyParentPropertyAttribute && (obj == this || ((NotifyParentPropertyAttribute)obj).NotifyParent == this.notifyParent);
+			return obj == this || (obj != null && obj is NotifyParentPropertyAttribute && ((NotifyParentPropertyAttribute)obj).NotifyParent == this.notifyParent);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.notifyParent.GetHashCode();
+			return base.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.notifyParent == NotifyParentPropertyAttribute.Default.NotifyParent;
+			return this.Equals(NotifyParentPropertyAttribute.Default);
 		}
 
-		private bool notifyParent;
-
-		public static readonly NotifyParentPropertyAttribute Default = new NotifyParentPropertyAttribute(false);
+		public static readonly NotifyParentPropertyAttribute Yes = new NotifyParentPropertyAttribute(true);
 
 		public static readonly NotifyParentPropertyAttribute No = new NotifyParentPropertyAttribute(false);
 
-		public static readonly NotifyParentPropertyAttribute Yes = new NotifyParentPropertyAttribute(true);
+		public static readonly NotifyParentPropertyAttribute Default = NotifyParentPropertyAttribute.No;
+
+		private bool notifyParent;
 	}
 }

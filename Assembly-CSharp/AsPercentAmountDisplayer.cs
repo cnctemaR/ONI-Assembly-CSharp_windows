@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class AsPercentAmountDisplayer : IAmountDisplayer
 {
-	public AsPercentAmountDisplayer(GameUtil.TimeSlice deltaTimeSlice)
-	{
-		this.formatter = new StandardAttributeFormatter(GameUtil.UnitClass.Percent, deltaTimeSlice);
-	}
-
 	public IAttributeFormatter Formatter
 	{
 		get
@@ -28,6 +23,11 @@ public class AsPercentAmountDisplayer : IAmountDisplayer
 		{
 			this.formatter.DeltaTimeSlice = value;
 		}
+	}
+
+	public AsPercentAmountDisplayer(GameUtil.TimeSlice deltaTimeSlice)
+	{
+		this.formatter = new StandardAttributeFormatter(GameUtil.UnitClass.Percent, deltaTimeSlice);
 	}
 
 	public string GetValueString(Amount master, AmountInstance instance)

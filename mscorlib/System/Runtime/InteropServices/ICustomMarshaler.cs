@@ -5,14 +5,14 @@ namespace System.Runtime.InteropServices
 	[ComVisible(true)]
 	public interface ICustomMarshaler
 	{
-		void CleanUpManagedData(object ManagedObj);
-
-		void CleanUpNativeData(IntPtr pNativeData);
-
-		int GetNativeDataSize();
+		object MarshalNativeToManaged(IntPtr pNativeData);
 
 		IntPtr MarshalManagedToNative(object ManagedObj);
 
-		object MarshalNativeToManaged(IntPtr pNativeData);
+		void CleanUpNativeData(IntPtr pNativeData);
+
+		void CleanUpManagedData(object ManagedObj);
+
+		int GetNativeDataSize();
 	}
 }

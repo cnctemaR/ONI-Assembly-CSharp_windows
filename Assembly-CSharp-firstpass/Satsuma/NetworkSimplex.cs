@@ -6,31 +6,43 @@ namespace Satsuma
 {
 	public sealed class NetworkSimplex : IClearable
 	{
+		public IGraph Graph { get; private set; }
+
+		public Func<Arc, long> LowerBound { get; private set; }
+
+		public Func<Arc, long> UpperBound { get; private set; }
+
+		public Func<Node, long> Supply { get; private set; }
+
+		public Func<Arc, double> Cost { get; private set; }
+
+		public SimplexState State { get; private set; }
+
 		public NetworkSimplex(IGraph graph, Func<Arc, long> lowerBound = null, Func<Arc, long> upperBound = null, Func<Node, long> supply = null, Func<Arc, double> cost = null)
 		{
 			this.Graph = graph;
 			Func<Arc, long> func = lowerBound;
-			if (lowerBound == null)
+			if (lowerBound == null && (func = NetworkSimplex.<>c.<>9__33_0) == null)
 			{
-				func = (Arc x) => 0L;
+				func = (NetworkSimplex.<>c.<>9__33_0 = (Arc x) => 0L);
 			}
 			this.LowerBound = func;
 			Func<Arc, long> func2 = upperBound;
-			if (upperBound == null)
+			if (upperBound == null && (func2 = NetworkSimplex.<>c.<>9__33_1) == null)
 			{
-				func2 = (Arc x) => long.MaxValue;
+				func2 = (NetworkSimplex.<>c.<>9__33_1 = (Arc x) => long.MaxValue);
 			}
 			this.UpperBound = func2;
 			Func<Node, long> func3 = supply;
-			if (supply == null)
+			if (supply == null && (func3 = NetworkSimplex.<>c.<>9__33_2) == null)
 			{
-				func3 = (Node x) => 0L;
+				func3 = (NetworkSimplex.<>c.<>9__33_2 = (Node x) => 0L);
 			}
 			this.Supply = func3;
 			Func<Arc, double> func4 = cost;
-			if (cost == null)
+			if (cost == null && (func4 = NetworkSimplex.<>c.<>9__33_3) == null)
 			{
-				func4 = (Arc x) => 1.0;
+				func4 = (NetworkSimplex.<>c.<>9__33_3 = (Arc x) => 1.0);
 			}
 			this.Cost = func4;
 			this.Epsilon = 1.0;
@@ -46,18 +58,6 @@ namespace Satsuma
 			this.Clear();
 		}
 
-		public IGraph Graph { get; private set; }
-
-		public Func<Arc, long> LowerBound { get; private set; }
-
-		public Func<Arc, long> UpperBound { get; private set; }
-
-		public Func<Node, long> Supply { get; private set; }
-
-		public Func<Arc, double> Cost { get; private set; }
-
-		public SimplexState State { get; private set; }
-
 		public long Flow(Arc arc)
 		{
 			if (this.Saturated.Contains(arc))
@@ -70,7 +70,11 @@ namespace Satsuma
 				return num;
 			}
 			num = this.LowerBound(arc);
-			return (num != long.MinValue) ? num : 0L;
+			if (num != -9223372036854775808L)
+			{
+				return num;
+			}
+			return 0L;
 		}
 
 		public IEnumerable<KeyValuePair<Arc, long>> Forest
@@ -100,17 +104,17 @@ namespace Satsuma
 			foreach (Arc arc in this.Graph.Arcs(ArcFilter.All))
 			{
 				this.LowerBound(arc);
-				long num = this.UpperBound(arc);
-				if (num < 9223372036854775807L)
+				if (this.UpperBound(arc) < 9223372036854775807L)
 				{
 					this.Saturated.Add(arc);
 				}
-				long num2 = this.Flow(arc);
-				Dictionary<Node, long> dictionary2;
-				Node node2;
-				(dictionary2 = dictionary)[node2 = this.Graph.U(arc)] = dictionary2[node2] - num2;
-				Node node3;
-				(dictionary2 = dictionary)[node3 = this.Graph.V(arc)] = dictionary2[node3] + num2;
+				long num = this.Flow(arc);
+				Dictionary<Node, long> dictionary2 = dictionary;
+				Node node2 = this.Graph.U(arc);
+				dictionary2[node2] -= num;
+				dictionary2 = dictionary;
+				node2 = this.Graph.V(arc);
+				dictionary2[node2] += num;
 			}
 			this.Potential = new Dictionary<Node, double>();
 			this.MyGraph = new Supergraph(this.Graph);
@@ -118,13 +122,13 @@ namespace Satsuma
 			this.Potential[this.ArtificialNode] = 0.0;
 			this.ArtificialArcs = new HashSet<Arc>();
 			Dictionary<Node, Arc> dictionary3 = new Dictionary<Node, Arc>();
-			foreach (Node node4 in this.Graph.Nodes())
+			foreach (Node node3 in this.Graph.Nodes())
 			{
-				long num3 = dictionary[node4];
-				Arc arc2 = ((num3 <= 0L) ? this.MyGraph.AddArc(this.ArtificialNode, node4, Directedness.Directed) : this.MyGraph.AddArc(node4, this.ArtificialNode, Directedness.Directed));
-				this.Potential[node4] = (double)((num3 <= 0L) ? 1 : (-1));
+				long num2 = dictionary[node3];
+				Arc arc2 = ((num2 > 0L) ? this.MyGraph.AddArc(node3, this.ArtificialNode, Directedness.Directed) : this.MyGraph.AddArc(this.ArtificialNode, node3, Directedness.Directed));
+				this.Potential[node3] = (double)((num2 > 0L) ? (-1) : 1);
 				this.ArtificialArcs.Add(arc2);
-				dictionary3[node4] = arc2;
+				dictionary3[node3] = arc2;
 			}
 			this.Tree = new Dictionary<Arc, long>();
 			this.TreeSubgraph = new Subgraph(this.MyGraph);
@@ -141,17 +145,37 @@ namespace Satsuma
 
 		private long ActualLowerBound(Arc arc)
 		{
-			return (!this.ArtificialArcs.Contains(arc)) ? this.LowerBound(arc) : 0L;
+			if (!this.ArtificialArcs.Contains(arc))
+			{
+				return this.LowerBound(arc);
+			}
+			return 0L;
 		}
 
 		private long ActualUpperBound(Arc arc)
 		{
-			return (!this.ArtificialArcs.Contains(arc)) ? this.UpperBound(arc) : ((this.State != SimplexState.FirstPhase) ? 0L : long.MaxValue);
+			if (!this.ArtificialArcs.Contains(arc))
+			{
+				return this.UpperBound(arc);
+			}
+			if (this.State != SimplexState.FirstPhase)
+			{
+				return 0L;
+			}
+			return long.MaxValue;
 		}
 
 		private double ActualCost(Arc arc)
 		{
-			return (!this.ArtificialArcs.Contains(arc)) ? ((this.State != SimplexState.FirstPhase) ? this.Cost(arc) : 0.0) : 1.0;
+			if (this.ArtificialArcs.Contains(arc))
+			{
+				return 1.0;
+			}
+			if (this.State != SimplexState.FirstPhase)
+			{
+				return this.Cost(arc);
+			}
+			return 0.0;
 		}
 
 		private static ulong MySubtract(long a, long b)
@@ -195,13 +219,13 @@ namespace Satsuma
 				}
 				if (this.EnteringArcEnumerator.Current == arc)
 				{
-					goto Block_8;
+					goto IL_011B;
 				}
 			}
 			arc2 = arc3;
 			num = num2;
 			flag = flag2;
-			Block_8:
+			IL_011B:
 			if (arc2 == Arc.Invalid)
 			{
 				if (this.State == SimplexState.FirstPhase)
@@ -221,6 +245,7 @@ namespace Satsuma
 						{
 							Parent = this
 						}.Run(this.TreeSubgraph, null);
+						return;
 					}
 				}
 				else
@@ -237,14 +262,14 @@ namespace Satsuma
 			foreach (Node node3 in path.Nodes())
 			{
 				Arc arc5 = path.NextArc(node3);
-				((!(this.MyGraph.U(arc5) == node3)) ? list2 : list).Add(arc5);
+				((this.MyGraph.U(arc5) == node3) ? list : list2).Add(arc5);
 			}
-			ulong num3 = ((num >= 0.0) ? NetworkSimplex.MySubtract(this.Flow(arc2), this.ActualLowerBound(arc2)) : NetworkSimplex.MySubtract(this.ActualUpperBound(arc2), this.Flow(arc2)));
+			ulong num3 = ((num < 0.0) ? NetworkSimplex.MySubtract(this.ActualUpperBound(arc2), this.Flow(arc2)) : NetworkSimplex.MySubtract(this.Flow(arc2), this.ActualLowerBound(arc2)));
 			Arc arc6 = arc2;
 			bool flag3 = !flag;
 			foreach (Arc arc7 in list)
 			{
-				ulong num4 = ((num >= 0.0) ? NetworkSimplex.MySubtract(this.Tree[arc7], this.ActualLowerBound(arc7)) : NetworkSimplex.MySubtract(this.ActualUpperBound(arc7), this.Tree[arc7]));
+				ulong num4 = ((num < 0.0) ? NetworkSimplex.MySubtract(this.ActualUpperBound(arc7), this.Tree[arc7]) : NetworkSimplex.MySubtract(this.Tree[arc7], this.ActualLowerBound(arc7)));
 				if (num4 < num3)
 				{
 					num3 = num4;
@@ -254,7 +279,7 @@ namespace Satsuma
 			}
 			foreach (Arc arc8 in list2)
 			{
-				ulong num5 = ((num <= 0.0) ? NetworkSimplex.MySubtract(this.Tree[arc8], this.ActualLowerBound(arc8)) : NetworkSimplex.MySubtract(this.ActualUpperBound(arc8), this.Tree[arc8]));
+				ulong num5 = ((num > 0.0) ? NetworkSimplex.MySubtract(this.ActualUpperBound(arc8), this.Tree[arc8]) : NetworkSimplex.MySubtract(this.Tree[arc8], this.ActualLowerBound(arc8)));
 				if (num5 < num3)
 				{
 					num3 = num5;
@@ -270,32 +295,21 @@ namespace Satsuma
 					this.State = SimplexState.Unbounded;
 					return;
 				}
-				num6 = (long)((num >= 0.0) ? (-(long)num3) : num3);
+				num6 = (long)((num < 0.0) ? num3 : (-(long)num3));
 				foreach (Arc arc9 in list)
 				{
-					Dictionary<Arc, long> dictionary;
-					Arc arc10;
-					(dictionary = this.Tree)[arc10 = arc9] = dictionary[arc10] + num6;
+					Dictionary<Arc, long> dictionary = this.Tree;
+					Arc arc10 = arc9;
+					dictionary[arc10] += num6;
 				}
 				foreach (Arc arc11 in list2)
 				{
-					Dictionary<Arc, long> dictionary;
-					Arc arc12;
-					(dictionary = this.Tree)[arc12 = arc11] = dictionary[arc12] - num6;
+					Dictionary<Arc, long> dictionary = this.Tree;
+					Arc arc10 = arc11;
+					dictionary[arc10] -= num6;
 				}
 			}
-			if (arc6 == arc2)
-			{
-				if (flag)
-				{
-					this.Saturated.Remove(arc2);
-				}
-				else
-				{
-					this.Saturated.Add(arc2);
-				}
-			}
-			else
+			if (!(arc6 == arc2))
 			{
 				this.Tree.Remove(arc6);
 				this.TreeSubgraph.Enable(arc6, false);
@@ -318,7 +332,14 @@ namespace Satsuma
 					this.Saturated.Remove(arc2);
 				}
 				this.TreeSubgraph.Enable(arc2, true);
+				return;
 			}
+			if (flag)
+			{
+				this.Saturated.Remove(arc2);
+				return;
+			}
+			this.Saturated.Add(arc2);
 		}
 
 		public void Run()
@@ -363,7 +384,7 @@ namespace Satsuma
 				else
 				{
 					Node node2 = this.Parent.MyGraph.Other(arc, node);
-					this.Parent.Potential[node] = this.Parent.Potential[node2] + ((!(node == this.Parent.MyGraph.V(arc))) ? (-this.Parent.ActualCost(arc)) : this.Parent.ActualCost(arc));
+					this.Parent.Potential[node] = this.Parent.Potential[node2] + ((node == this.Parent.MyGraph.V(arc)) ? this.Parent.ActualCost(arc) : (-this.Parent.ActualCost(arc)));
 				}
 				return true;
 			}
@@ -380,8 +401,8 @@ namespace Satsuma
 
 			protected override bool NodeEnter(Node node, Arc arc)
 			{
-				Dictionary<Node, double> potential;
-				(potential = this.Parent.Potential)[node] = potential[node] + this.Diff;
+				Dictionary<Node, double> potential = this.Parent.Potential;
+				potential[node] += this.Diff;
 				return true;
 			}
 

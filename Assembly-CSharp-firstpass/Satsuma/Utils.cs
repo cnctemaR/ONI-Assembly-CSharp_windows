@@ -25,9 +25,7 @@ namespace Satsuma
 			{
 				return v;
 			}
-			V v2 = new V();
-			dict[key] = v2;
-			return v2;
+			return dict[key] = new V();
 		}
 
 		public static void RemoveAll<T>(HashSet<T> set, Func<T, bool> condition)
@@ -53,7 +51,7 @@ namespace Satsuma
 				if (element.Equals(list[i]))
 				{
 					list.RemoveAt(i);
-					break;
+					return;
 				}
 			}
 		}

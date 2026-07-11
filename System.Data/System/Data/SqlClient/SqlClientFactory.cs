@@ -1,64 +1,72 @@
 ﻿using System;
 using System.Data.Common;
+using System.Data.Sql;
 using System.Security;
 using System.Security.Permissions;
+using Unity;
 
 namespace System.Data.SqlClient
 {
-	public sealed class SqlClientFactory : DbProviderFactory
+	public sealed class SqlClientFactory : DbProviderFactory, IServiceProvider
 	{
-		internal SqlClientFactory()
+		private SqlClientFactory()
 		{
+		}
+
+		public override DbCommand CreateCommand()
+		{
+			return new SqlCommand();
+		}
+
+		public override DbCommandBuilder CreateCommandBuilder()
+		{
+			return new SqlCommandBuilder();
+		}
+
+		public override DbConnection CreateConnection()
+		{
+			return new SqlConnection();
+		}
+
+		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
+		{
+			return new SqlConnectionStringBuilder();
+		}
+
+		public override DbDataAdapter CreateDataAdapter()
+		{
+			return new SqlDataAdapter();
+		}
+
+		public override DbParameter CreateParameter()
+		{
+			return new SqlParameter();
 		}
 
 		public override bool CanCreateDataSourceEnumerator
 		{
 			get
 			{
-				throw null;
+				return true;
 			}
-		}
-
-		public override DbCommand CreateCommand()
-		{
-			throw null;
-		}
-
-		public override DbCommandBuilder CreateCommandBuilder()
-		{
-			throw null;
-		}
-
-		public override DbConnection CreateConnection()
-		{
-			throw null;
-		}
-
-		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
-		{
-			throw null;
-		}
-
-		public override DbDataAdapter CreateDataAdapter()
-		{
-			throw null;
 		}
 
 		public override DbDataSourceEnumerator CreateDataSourceEnumerator()
 		{
-			throw null;
-		}
-
-		public override DbParameter CreateParameter()
-		{
-			throw null;
+			return SqlDataSourceEnumerator.Instance;
 		}
 
 		public override CodeAccessPermission CreatePermission(PermissionState state)
 		{
-			throw null;
+			return new SqlClientPermission(state);
 		}
 
-		public static readonly SqlClientFactory Instance;
+		object IServiceProvider.GetService(Type serviceType)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		public static readonly SqlClientFactory Instance = new SqlClientFactory();
 	}
 }

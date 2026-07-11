@@ -1,5 +1,6 @@
 ﻿using System;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -18,7 +19,7 @@ public class TemperatureSwitchSideScreen : SideScreenContent, IRender200ms
 			this.OnConditionButtonClicked(true);
 		};
 		LocText component = this.coolerToggle.transform.GetChild(0).GetComponent<LocText>();
-		LocText component2 = this.warmerToggle.transform.GetChild(0).GetComponent<LocText>();
+		TMP_Text component2 = this.warmerToggle.transform.GetChild(0).GetComponent<LocText>();
 		component.SetText(UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.COLDER_BUTTON);
 		component2.SetText(UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.WARMER_BUTTON);
 		Slider.SliderEvent sliderEvent = new Slider.SliderEvent();
@@ -73,14 +74,12 @@ public class TemperatureSwitchSideScreen : SideScreenContent, IRender200ms
 			this.warmerToggle.isOn = true;
 			this.coolerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 			this.warmerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
+			return;
 		}
-		else
-		{
-			this.coolerToggle.isOn = true;
-			this.warmerToggle.isOn = false;
-			this.coolerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
-			this.warmerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
-		}
+		this.coolerToggle.isOn = true;
+		this.warmerToggle.isOn = false;
+		this.coolerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
+		this.warmerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 	}
 
 	private void UpdateTargetTemperatureLabel()

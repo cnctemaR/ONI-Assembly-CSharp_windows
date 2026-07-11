@@ -50,8 +50,7 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 			PrimaryElement primaryElement = this.storage.FindPrimaryElement(this.exhaustElement);
 			if (primaryElement != null)
 			{
-				int num2 = Grid.PosToCell(vector);
-				SimMessages.AddRemoveSubstance(num2, primaryElement.ElementID, null, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, true, -1);
+				SimMessages.AddRemoveSubstance(Grid.PosToCell(vector), primaryElement.ElementID, null, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, true, -1);
 				primaryElement.Mass = 0f;
 				primaryElement.ModifyDiseaseCount(int.MinValue, "Polymerizer.Exhaust");
 			}

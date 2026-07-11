@@ -9,15 +9,15 @@ using UnityEngine;
 
 public class TuningSystem
 {
+	public static void Init()
+	{
+	}
+
 	static TuningSystem()
 	{
 		TuningSystem.InitializeTuning();
 		TuningSystem.ListenForFileChanges();
 		TuningSystem.Load();
-	}
-
-	public static void Init()
-	{
 	}
 
 	private static void ListenForFileChanges()
@@ -49,16 +49,11 @@ public class TuningSystem
 		foreach (Type type in App.GetCurrentDomainTypes())
 		{
 			Type baseType = type.BaseType;
-			if (baseType != null && baseType.IsGenericType)
+			if (!(baseType == null) && baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(TuningData<>))
 			{
-				if (baseType.GetGenericTypeDefinition() == typeof(TuningData<>))
-				{
-					Type type2 = baseType.GetGenericArguments()[0];
-					object obj = Activator.CreateInstance(type2);
-					TuningSystem._TuningValues[obj.GetType()] = obj;
-					FieldInfo field = baseType.GetField("_TuningData", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-					field.SetValue(null, obj);
-				}
+				object obj = Activator.CreateInstance(baseType.GetGenericArguments()[0]);
+				TuningSystem._TuningValues[obj.GetType()] = obj;
+				baseType.GetField("_TuningData", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy).SetValue(null, obj);
 			}
 		}
 	}
@@ -94,35 +89,30 @@ public class TuningSystem
 		}
 		foreach (string text in array)
 		{
-			if (!string.IsNullOrEmpty(text))
+			if (!string.IsNullOrEmpty(text) && FileSystem.FileExists(text))
 			{
-				bool flag = FileSystem.FileExists(text);
-				if (flag)
+				foreach (KeyValuePair<string, object> keyValuePair in JsonConvert.DeserializeObject<Dictionary<string, object>>(FileSystem.ConvertToText(FileSystem.ReadBytes(text))))
 				{
-					string text2 = FileSystem.ConvertToText(FileSystem.ReadBytes(text));
-					Dictionary<string, object> dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(text2);
-					foreach (KeyValuePair<string, object> keyValuePair in dictionary)
+					Type type = null;
+					Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+					for (int j = 0; j < assemblies.Length; j++)
 					{
-						Type type = null;
-						foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-						{
-							type = assembly.GetType(keyValuePair.Key);
-							if (type != null)
-							{
-								break;
-							}
-						}
+						type = assemblies[j].GetType(keyValuePair.Key);
 						if (type != null)
 						{
-							if (TuningSystem._TuningValues.ContainsKey(type))
-							{
-								JsonConvert.PopulateObject(keyValuePair.Value.ToString(), TuningSystem._TuningValues[type]);
-							}
-							else
-							{
-								object obj = JsonConvert.DeserializeObject(keyValuePair.Value.ToString(), type);
-								TuningSystem._TuningValues[type] = obj;
-							}
+							break;
+						}
+					}
+					if (type != null)
+					{
+						if (TuningSystem._TuningValues.ContainsKey(type))
+						{
+							JsonConvert.PopulateObject(keyValuePair.Value.ToString(), TuningSystem._TuningValues[type]);
+						}
+						else
+						{
+							object obj = JsonConvert.DeserializeObject(keyValuePair.Value.ToString(), type);
+							TuningSystem._TuningValues[type] = obj;
 						}
 					}
 				}

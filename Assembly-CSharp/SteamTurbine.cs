@@ -119,9 +119,9 @@ public class SteamTurbine : Generator
 
 	public static void InitializeStatusItems()
 	{
-		SteamTurbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		SteamTurbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
 		SteamTurbine.inputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_INPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
-		SteamTurbine.inputPartiallyBlockedStatusItem = new StatusItem("TURBINE_PARTIALLY_BLOCKED_INPUT", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+		SteamTurbine.inputPartiallyBlockedStatusItem = new StatusItem("TURBINE_PARTIALLY_BLOCKED_INPUT", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		SteamTurbine.inputPartiallyBlockedStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolvePartialBlockedStatus);
 		SteamTurbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 		SteamTurbine.insufficientMassStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
@@ -130,7 +130,7 @@ public class SteamTurbine : Generator
 		SteamTurbine.insufficientTemperatureStatusItem = new StatusItem("TURBINE_INSUFFICIENT_TEMPERATURE", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 		SteamTurbine.insufficientTemperatureStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
 		SteamTurbine.insufficientTemperatureStatusItem.resolveTooltipCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
-		SteamTurbine.activeWattageStatusItem = new StatusItem("TURBINE_ACTIVE_WATTAGE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.Power.ID, true, 129022);
+		SteamTurbine.activeWattageStatusItem = new StatusItem("TURBINE_ACTIVE_WATTAGE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.Power.ID, true, 129022);
 		SteamTurbine.activeWattageStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolveWattageStatus);
 	}
 
@@ -185,18 +185,16 @@ public class SteamTurbine : Generator
 				if (component.Mass > num2)
 				{
 					num2 = Mathf.Min(component.Mass, this.pumpKGRate * dt);
-					float num3 = this.JoulesToGenerate(component);
-					num = Mathf.Min(num3 * (num2 / this.pumpKGRate), base.WattageRating * dt);
-					float num4 = this.HeatFromCoolingSteam(component);
-					float num5 = num4 * (num2 / component.Mass);
-					float num6 = num2 / component.Mass;
-					int num7 = Mathf.RoundToInt((float)component.DiseaseCount * num6);
+					num = Mathf.Min(this.JoulesToGenerate(component) * (num2 / this.pumpKGRate), base.WattageRating * dt);
+					float num3 = this.HeatFromCoolingSteam(component) * (num2 / component.Mass);
+					float num4 = num2 / component.Mass;
+					int num5 = Mathf.RoundToInt((float)component.DiseaseCount * num4);
 					component.Mass -= num2;
-					component.ModifyDiseaseCount(-num7, "SteamTurbine.EnergySim200ms");
-					float num8 = ((this.lastSampleTime <= 0f) ? 1f : (Time.time - this.lastSampleTime));
+					component.ModifyDiseaseCount(-num5, "SteamTurbine.EnergySim200ms");
+					float num6 = ((this.lastSampleTime > 0f) ? (Time.time - this.lastSampleTime) : 1f);
 					this.lastSampleTime = Time.time;
-					GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, num5 * this.wasteHeatToTurbinePercent, BUILDINGS.PREFABS.STEAMTURBINE2.HEAT_SOURCE, num8);
-					this.liquidStorage.AddLiquid(this.destElem, num2, this.outputElementTemperature, component.DiseaseIdx, num7, false, true);
+					GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, num3 * this.wasteHeatToTurbinePercent, BUILDINGS.PREFABS.STEAMTURBINE2.HEAT_SOURCE, num6);
+					this.liquidStorage.AddLiquid(this.destElem, num2, this.outputElementTemperature, component.DiseaseIdx, num5, false, true);
 				}
 			}
 		}
@@ -218,8 +216,7 @@ public class SteamTurbine : Generator
 
 	public float JoulesToGenerate(PrimaryElement steam)
 	{
-		float temperature = steam.Temperature;
-		float num = (temperature - this.outputElementTemperature) / (this.idealSourceElementTemperature - this.outputElementTemperature);
+		float num = (steam.Temperature - this.outputElementTemperature) / (this.idealSourceElementTemperature - this.outputElementTemperature);
 		return base.WattageRating * (float)Math.Pow((double)num, 1.0);
 	}
 
@@ -378,7 +375,9 @@ public class SteamTurbine : Generator
 				Element element = Grid.Element[num];
 				if (element.IsLiquid || element.IsSolid)
 				{
-					base.master.BlockedInputs++;
+					SteamTurbine master = base.master;
+					int blockedInputs = master.BlockedInputs;
+					master.BlockedInputs = blockedInputs + 1;
 				}
 			}
 			KSelectable component = base.GetComponent<KSelectable>();
@@ -397,6 +396,7 @@ public class SteamTurbine : Generator
 				if (currentState != base.sm.operational.tooHot)
 				{
 					base.smi.GoTo(base.sm.operational.tooHot);
+					return;
 				}
 			}
 			else if (flag)
@@ -404,6 +404,7 @@ public class SteamTurbine : Generator
 				if (currentState != base.sm.operational.active)
 				{
 					base.smi.GoTo(base.sm.operational.active);
+					return;
 				}
 			}
 			else if (currentState != base.sm.operational.idle)
@@ -444,8 +445,7 @@ public class SteamTurbine : Generator
 			this.insufficientMassHandle = this.UpdateStatusItem(SteamTurbine.insufficientMassStatusItem, this.insufficientMass, this.insufficientMassHandle, component);
 			this.insufficientTemperatureHandle = this.UpdateStatusItem(SteamTurbine.insufficientTemperatureStatusItem, this.insufficientTemperature, this.insufficientTemperatureHandle, component);
 			this.buildingTooHotHandle = this.UpdateStatusItem(SteamTurbine.buildingTooHotItem, this.buildingTooHot, this.buildingTooHotHandle, component);
-			bool isActive = base.master.operational.IsActive;
-			StatusItem statusItem = ((!isActive) ? Db.Get().BuildingStatusItems.GeneratorOffline : SteamTurbine.activeWattageStatusItem);
+			StatusItem statusItem = (base.master.operational.IsActive ? SteamTurbine.activeWattageStatusItem : Db.Get().BuildingStatusItems.GeneratorOffline);
 			this.activeWattageHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, base.master);
 		}
 

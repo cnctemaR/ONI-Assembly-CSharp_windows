@@ -4,12 +4,6 @@ namespace YamlDotNet.Core.Events
 {
 	public abstract class ParsingEvent
 	{
-		internal ParsingEvent(Mark start, Mark end)
-		{
-			this.start = start;
-			this.end = end;
-		}
-
 		public virtual int NestingIncrease
 		{
 			get
@@ -37,6 +31,12 @@ namespace YamlDotNet.Core.Events
 		}
 
 		public abstract void Accept(IParsingEventVisitor visitor);
+
+		internal ParsingEvent(Mark start, Mark end)
+		{
+			this.start = start;
+			this.end = end;
+		}
 
 		private readonly Mark start;
 

@@ -45,8 +45,7 @@ public class LogicCritterCountSensorConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.RegisterLogicPorts(go, LogicCritterCountSensorConfig.OUTPUT_PORT);
-		LogicCritterCountSensor logicCritterCountSensor = go.AddOrGet<LogicCritterCountSensor>();
-		logicCritterCountSensor.manuallyControlled = false;
+		go.AddOrGet<LogicCritterCountSensor>().manuallyControlled = false;
 	}
 
 	public static string ID = "LogicCritterCountSensor";

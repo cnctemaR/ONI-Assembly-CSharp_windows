@@ -11,27 +11,35 @@ namespace System.Data.OleDb
 	public sealed class OleDbPermissionAttribute : DBDataPermissionAttribute
 	{
 		public OleDbPermissionAttribute(SecurityAction action)
-			: base((SecurityAction)0)
+			: base(action)
 		{
 		}
 
+		[Obsolete("Provider property has been deprecated.  Use the Add method.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete]
 		public string Provider
 		{
 			get
 			{
-				throw null;
+				string providers = this._providers;
+				if (providers == null)
+				{
+					return ADP.StrEmpty;
+				}
+				return providers;
 			}
 			set
 			{
+				this._providers = value;
 			}
 		}
 
 		public override IPermission CreatePermission()
 		{
-			throw null;
+			return new OleDbPermission(this);
 		}
+
+		private string _providers;
 	}
 }

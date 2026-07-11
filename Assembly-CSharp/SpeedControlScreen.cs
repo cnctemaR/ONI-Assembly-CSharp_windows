@@ -30,9 +30,9 @@ public class SpeedControlScreen : KScreen
 		this.mediumButton = this.speedButtonWidget_medium.GetComponent<KToggle>();
 		this.fastButton = this.speedButtonWidget_fast.GetComponent<KToggle>();
 		KToggle[] array = new KToggle[] { this.pauseButton, this.slowButton, this.mediumButton, this.fastButton };
-		foreach (KToggle ktoggle in array)
+		for (int i = 0; i < array.Length; i++)
 		{
-			ktoggle.soundPlayer.Enabled = false;
+			array[i].soundPlayer.Enabled = false;
 		}
 		this.slowButton.onClick += delegate
 		{
@@ -81,33 +81,26 @@ public class SpeedControlScreen : KScreen
 	public void SetSpeed(int Speed)
 	{
 		this.speed = Speed % 3;
-		int num = this.speed;
-		if (num != 0)
+		switch (this.speed)
 		{
-			if (num != 1)
-			{
-				if (num == 2)
-				{
-					this.fastButton.Select();
-					this.slowButton.isOn = false;
-					this.mediumButton.isOn = false;
-					this.fastButton.isOn = true;
-				}
-			}
-			else
-			{
-				this.mediumButton.Select();
-				this.slowButton.isOn = false;
-				this.mediumButton.isOn = true;
-				this.fastButton.isOn = false;
-			}
-		}
-		else
-		{
+		case 0:
 			this.slowButton.Select();
 			this.slowButton.isOn = true;
 			this.mediumButton.isOn = false;
 			this.fastButton.isOn = false;
+			break;
+		case 1:
+			this.mediumButton.Select();
+			this.slowButton.isOn = false;
+			this.mediumButton.isOn = true;
+			this.fastButton.isOn = false;
+			break;
+		case 2:
+			this.fastButton.Select();
+			this.slowButton.isOn = false;
+			this.mediumButton.isOn = false;
+			this.fastButton.isOn = true;
+			break;
 		}
 		this.OnSpeedChange();
 	}
@@ -131,11 +124,9 @@ public class SpeedControlScreen : KScreen
 		if (this.IsPaused)
 		{
 			this.Unpause(playsound);
+			return;
 		}
-		else
-		{
-			this.Pause(playsound);
-		}
+		this.Pause(playsound);
 	}
 
 	public void Pause(bool playSound = true)
@@ -207,16 +198,19 @@ public class SpeedControlScreen : KScreen
 		if (this.IsPaused)
 		{
 			Time.timeScale = 0f;
+			return;
 		}
-		else if (this.speed == 0)
+		if (this.speed == 0)
 		{
 			Time.timeScale = this.normalSpeed;
+			return;
 		}
-		else if (this.speed == 1)
+		if (this.speed == 1)
 		{
 			Time.timeScale = this.fastSpeed;
+			return;
 		}
-		else if (this.speed == 2)
+		if (this.speed == 2)
 		{
 			Time.timeScale = this.ultraSpeed;
 		}
@@ -227,20 +221,23 @@ public class SpeedControlScreen : KScreen
 		if (e.TryConsume(global::Action.TogglePause))
 		{
 			this.TogglePause(true);
+			return;
 		}
-		else if (e.TryConsume(global::Action.CycleSpeed))
+		if (e.TryConsume(global::Action.CycleSpeed))
 		{
 			this.PlaySpeedChangeSound((float)((this.speed + 1) % 3 + 1));
 			this.SetSpeed(this.speed + 1);
 			this.OnSpeedChange();
+			return;
 		}
-		else if (e.TryConsume(global::Action.SpeedUp))
+		if (e.TryConsume(global::Action.SpeedUp))
 		{
 			this.speed++;
 			this.speed = Math.Min(this.speed, 2);
 			this.SetSpeed(this.speed);
+			return;
 		}
-		else if (e.TryConsume(global::Action.SlowDown))
+		if (e.TryConsume(global::Action.SlowDown))
 		{
 			this.speed--;
 			this.speed = Math.Max(this.speed, 0);

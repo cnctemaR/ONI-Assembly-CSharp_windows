@@ -5,27 +5,6 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal class TlsStream : Stream
 	{
-		public TlsStream()
-		{
-			this.buffer = new MemoryStream(0);
-			this.canRead = false;
-			this.canWrite = true;
-		}
-
-		public TlsStream(byte[] data)
-		{
-			if (data != null)
-			{
-				this.buffer = new MemoryStream(data);
-			}
-			else
-			{
-				this.buffer = new MemoryStream();
-			}
-			this.canRead = true;
-			this.canWrite = false;
-		}
-
 		public bool EOF
 		{
 			get
@@ -78,6 +57,27 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
+		public TlsStream()
+		{
+			this.buffer = new MemoryStream(0);
+			this.canRead = false;
+			this.canWrite = true;
+		}
+
+		public TlsStream(byte[] data)
+		{
+			if (data != null)
+			{
+				this.buffer = new MemoryStream(data);
+			}
+			else
+			{
+				this.buffer = new MemoryStream();
+			}
+			this.canRead = true;
+			this.canWrite = false;
+		}
+
 		private byte[] ReadSmallValue(int length)
 		{
 			if (length > 4)
@@ -90,15 +90,14 @@ namespace Mono.Security.Protocol.Tls
 			}
 			if (this.Read(this.temp, 0, length) != length)
 			{
-				throw new TlsException(string.Format("buffer underrun", new object[0]));
+				throw new TlsException(string.Format("buffer underrun", Array.Empty<object>()));
 			}
 			return this.temp;
 		}
 
 		public new byte ReadByte()
 		{
-			byte[] array = this.ReadSmallValue(1);
-			return array[0];
+			return this.ReadSmallValue(1)[0];
 		}
 
 		public short ReadInt16()
@@ -231,8 +230,6 @@ namespace Mono.Security.Protocol.Tls
 			throw new InvalidOperationException("Write operations are not allowed by this stream");
 		}
 
-		private const int temp_size = 4;
-
 		private bool canRead;
 
 		private bool canWrite;
@@ -240,5 +237,7 @@ namespace Mono.Security.Protocol.Tls
 		private MemoryStream buffer;
 
 		private byte[] temp;
+
+		private const int temp_size = 4;
 	}
 }

@@ -36,9 +36,9 @@ public class EggCrackerConfig : IBuildingConfig
 		complexFabricator.duplicantOperated = true;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
-		ComplexFabricatorWorkable complexFabricatorWorkable = go.AddOrGet<ComplexFabricatorWorkable>();
+		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
-		complexFabricatorWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_egg_cracker_kanim") };
+		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_egg_cracker_kanim") };
 		complexFabricator.outputOffset = new Vector3(1f, 1f, 0f);
 		Prioritizable.AddRef(go);
 		go.AddOrGet<EggCracker>();

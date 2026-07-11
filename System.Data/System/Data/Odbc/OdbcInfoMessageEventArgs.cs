@@ -1,18 +1,21 @@
 ﻿using System;
+using System.Text;
+using Unity;
 
 namespace System.Data.Odbc
 {
 	public sealed class OdbcInfoMessageEventArgs : EventArgs
 	{
-		internal OdbcInfoMessageEventArgs()
+		internal OdbcInfoMessageEventArgs(OdbcErrorCollection errors)
 		{
+			this._errors = errors;
 		}
 
 		public OdbcErrorCollection Errors
 		{
 			get
 			{
-				throw null;
+				return this._errors;
 			}
 		}
 
@@ -20,13 +23,30 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				throw null;
+				StringBuilder stringBuilder = new StringBuilder();
+				foreach (object obj in this.Errors)
+				{
+					OdbcError odbcError = (OdbcError)obj;
+					if (0 < stringBuilder.Length)
+					{
+						stringBuilder.Append(Environment.NewLine);
+					}
+					stringBuilder.Append(odbcError.Message);
+				}
+				return stringBuilder.ToString();
 			}
 		}
 
 		public override string ToString()
 		{
-			throw null;
+			return this.Message;
 		}
+
+		internal OdbcInfoMessageEventArgs()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		private OdbcErrorCollection _errors;
 	}
 }

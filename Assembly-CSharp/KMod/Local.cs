@@ -8,6 +8,44 @@ namespace KMod
 {
 	public class Local : IDistributionPlatform
 	{
+		public string folder { get; private set; }
+
+		public Label.DistributionPlatform distribution_platform { get; private set; }
+
+		public string GetDirectory()
+		{
+			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), this.folder));
+		}
+
+		private void Subscribe(string id, long timestamp, IFileSource file_source)
+		{
+			FileHandle fileHandle = file_source.GetFileSystem().FindFileHandle(Path.Combine(file_source.GetRoot(), "mod.yaml"));
+			Local.Header header = ((fileHandle.full_path != null) ? YamlIO.LoadFile<Local.Header>(fileHandle, null, null) : null);
+			if (header == null)
+			{
+				header = new Local.Header
+				{
+					title = id,
+					description = id
+				};
+			}
+			Mod mod = new Mod(new Label
+			{
+				id = id,
+				distribution_platform = this.distribution_platform,
+				version = (long)id.GetHashCode(),
+				title = header.title
+			}, header.description, file_source, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_LOCAL_MOD, delegate
+			{
+				Application.OpenURL("file://" + file_source.GetRoot());
+			});
+			if (file_source.GetType() == typeof(Directory))
+			{
+				mod.status = Mod.Status.Installed;
+			}
+			Global.Instance.modManager.Subscribe(mod, this);
+		}
+
 		public Local(string folder, Label.DistributionPlatform distribution_platform)
 		{
 			this.folder = folder;
@@ -22,45 +60,6 @@ namespace KMod
 				string name = directoryInfo2.Name;
 				this.Subscribe(name, directoryInfo2.LastWriteTime.ToFileTime(), new Directory(directoryInfo2.FullName));
 			}
-		}
-
-		public string folder { get; private set; }
-
-		public Label.DistributionPlatform distribution_platform { get; private set; }
-
-		public string GetDirectory()
-		{
-			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), this.folder));
-		}
-
-		private void Subscribe(string id, long timestamp, IFileSource file_source)
-		{
-			FileHandle fileHandle = file_source.GetFileSystem().FindFileHandle(Path.Combine(file_source.GetRoot(), "mod.yaml"));
-			Local.Header header = ((fileHandle.full_path == null) ? null : YamlIO.LoadFile<Local.Header>(fileHandle, null, null));
-			if (header == null)
-			{
-				header = new Local.Header
-				{
-					title = id,
-					description = id
-				};
-			}
-			Label label = new Label
-			{
-				id = id,
-				distribution_platform = this.distribution_platform,
-				version = (long)id.GetHashCode(),
-				title = header.title
-			};
-			Mod mod = new Mod(label, header.description, file_source, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_LOCAL_MOD, delegate
-			{
-				Application.OpenURL("file://" + file_source.GetRoot());
-			});
-			if (file_source.GetType() == typeof(Directory))
-			{
-				mod.status = Mod.Status.Installed;
-			}
-			Global.Instance.modManager.Subscribe(mod, this);
 		}
 
 		private class Header

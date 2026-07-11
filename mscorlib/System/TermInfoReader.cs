@@ -70,7 +70,7 @@ namespace System
 			}
 			int num = this.booleansOffset;
 			num = (int)(num + boolean);
-			return this.buffer[num] != 0;
+			return this.buffer[num] > 0;
 		}
 
 		public int Get(TermInfoNumbers number)
@@ -159,7 +159,7 @@ namespace System
 				num++;
 			}
 			byte[] array = new byte[num];
-			Buffer.BlockCopyInternal(buffer, offset, array, 0, num);
+			Buffer.InternalBlockCopy(buffer, offset, array, 0, num);
 			return array;
 		}
 

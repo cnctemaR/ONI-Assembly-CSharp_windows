@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public TypeLibImportClassAttribute(Type importClass)
 		{
-			this._importClass = importClass.ToString();
+			this._importClassName = importClass.ToString();
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this._importClass;
+				return this._importClassName;
 			}
 		}
 
-		private string _importClass;
+		internal string _importClassName;
 	}
 }

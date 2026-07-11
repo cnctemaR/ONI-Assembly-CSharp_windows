@@ -21,17 +21,14 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	{
 		this.width = width;
 		this.height = height;
-		bool flag = width % 2 == 0;
-		if (flag)
+		if (width % 2 == 0)
 		{
 			this.pivot = new Vector3(-0.5f, 0.5f, 0f);
 			this.visualizerOffset = new Vector3(0.5f, 0f, 0f);
+			return;
 		}
-		else
-		{
-			this.pivot = new Vector3(0f, 0.5f, 0f);
-			this.visualizerOffset = Vector3.zero;
-		}
+		this.pivot = new Vector3(0f, 0.5f, 0f);
+		this.visualizerOffset = Vector3.zero;
 	}
 
 	public Orientation Rotate()
@@ -39,16 +36,16 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		switch (this.permittedRotations)
 		{
 		case PermittedRotations.R90:
-			this.orientation = ((this.orientation != Orientation.Neutral) ? Orientation.Neutral : Orientation.R90);
+			this.orientation = ((this.orientation == Orientation.Neutral) ? Orientation.R90 : Orientation.Neutral);
 			break;
 		case PermittedRotations.R360:
 			this.orientation = (this.orientation + 1) % Orientation.NumRotations;
 			break;
 		case PermittedRotations.FlipH:
-			this.orientation = ((this.orientation != Orientation.Neutral) ? Orientation.Neutral : Orientation.FlipH);
+			this.orientation = ((this.orientation == Orientation.Neutral) ? Orientation.FlipH : Orientation.Neutral);
 			break;
 		case PermittedRotations.FlipV:
-			this.orientation = ((this.orientation != Orientation.Neutral) ? Orientation.Neutral : Orientation.FlipV);
+			this.orientation = ((this.orientation == Orientation.Neutral) ? Orientation.FlipV : Orientation.Neutral);
 			break;
 		}
 		this.OrientVisualizer(this.orientation);
@@ -75,11 +72,11 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	public float GetVisualizerRotation()
 	{
 		PermittedRotations permittedRotations = this.permittedRotations;
-		if (permittedRotations != PermittedRotations.R360 && permittedRotations != PermittedRotations.R90)
+		if (permittedRotations - PermittedRotations.R90 <= 1)
 		{
-			return 0f;
+			return -90f * (float)this.orientation;
 		}
-		return -90f * (float)this.orientation;
+		return 0f;
 	}
 
 	public bool GetVisualizerFlipX()
@@ -155,37 +152,36 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		{
 		case Orientation.R90:
 			num = -90f;
-			goto IL_0119;
+			goto IL_010B;
 		case Orientation.R180:
 			num = -180f;
-			goto IL_0119;
+			goto IL_010B;
 		case Orientation.R270:
 			num = -270f;
-			goto IL_0119;
+			goto IL_010B;
 		case Orientation.FlipH:
 			component.offset = new Vector2((float)(this.width % 2 - 1), 0.5f * (float)this.height);
 			component.size = new Vector2((float)this.width, (float)this.height);
-			goto IL_0119;
+			goto IL_010B;
 		case Orientation.FlipV:
 			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
 			component.size = new Vector2((float)this.width, (float)this.height);
-			goto IL_0119;
+			goto IL_010B;
 		}
 		component.offset = new Vector2(0f, 0.5f * (float)this.height);
 		component.size = new Vector2((float)this.width, (float)this.height);
-		IL_0119:
+		IL_010B:
 		if (num != 0f)
 		{
 			Matrix2x3 matrix2x = Matrix2x3.Translate(-this.pivot);
 			Matrix2x3 matrix2x2 = Matrix2x3.Rotate(num * 0.017453292f);
-			Matrix2x3 matrix2x3 = Matrix2x3.Translate(this.pivot);
-			Matrix2x3 matrix2x4 = matrix2x3 * matrix2x2 * matrix2x;
+			Matrix2x3 matrix2x3 = Matrix2x3.Translate(this.pivot) * matrix2x2 * matrix2x;
 			Vector2 vector = new Vector2(-0.5f * (float)this.width, 0f);
 			Vector2 vector2 = new Vector2(0.5f * (float)this.width, (float)this.height);
 			Vector2 vector3 = new Vector2(0f, 0.5f * (float)this.height);
-			vector = matrix2x4.MultiplyPoint(vector);
-			vector2 = matrix2x4.MultiplyPoint(vector2);
-			vector3 = matrix2x4.MultiplyPoint(vector3);
+			vector = matrix2x3.MultiplyPoint(vector);
+			vector2 = matrix2x3.MultiplyPoint(vector2);
+			vector3 = matrix2x3.MultiplyPoint(vector3);
 			float num2 = Mathf.Min(vector.x, vector2.x);
 			float num3 = Mathf.Max(vector.x, vector2.x);
 			float num4 = Mathf.Min(vector.y, vector2.y);
@@ -257,7 +253,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
-			return this.orientation != Orientation.Neutral;
+			return this.orientation > Orientation.Neutral;
 		}
 	}
 

@@ -6,15 +6,23 @@ namespace Microsoft.SqlServer.Server
 	[Serializable]
 	public sealed class SqlProcedureAttribute : Attribute
 	{
+		public SqlProcedureAttribute()
+		{
+			this.m_fName = null;
+		}
+
 		public string Name
 		{
 			get
 			{
-				throw null;
+				return this.m_fName;
 			}
 			set
 			{
+				this.m_fName = value;
 			}
 		}
+
+		private string m_fName;
 	}
 }

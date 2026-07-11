@@ -18,15 +18,15 @@ public class LogicCircuitManager
 
 	private void Refresh(float dt)
 	{
-		bool isDirty = this.conduitSystem.IsDirty;
-		if (isDirty)
+		if (this.conduitSystem.IsDirty)
 		{
 			this.conduitSystem.Update();
 			LogicCircuitNetwork.logicSoundRegister.Clear();
 			this.PropagateSignals(true);
 			this.elapsedTime = 0f;
+			return;
 		}
-		else if (this.conduitSystem.GetNetworks().Count > 0 && SpeedControlScreen.Instance != null && !SpeedControlScreen.Instance.IsPaused)
+		if (this.conduitSystem.GetNetworks().Count > 0 && SpeedControlScreen.Instance != null && !SpeedControlScreen.Instance.IsPaused)
 		{
 			this.elapsedTime += dt;
 			while (this.elapsedTime > LogicCircuitManager.ClockTickInterval)
@@ -42,13 +42,12 @@ public class LogicCircuitManager
 		IList<UtilityNetwork> networks = Game.Instance.logicCircuitSystem.GetNetworks();
 		foreach (UtilityNetwork utilityNetwork in networks)
 		{
-			LogicCircuitNetwork logicCircuitNetwork = (LogicCircuitNetwork)utilityNetwork;
-			logicCircuitNetwork.UpdateLogicValue();
+			((LogicCircuitNetwork)utilityNetwork).UpdateLogicValue();
 		}
 		foreach (UtilityNetwork utilityNetwork2 in networks)
 		{
-			LogicCircuitNetwork logicCircuitNetwork2 = (LogicCircuitNetwork)utilityNetwork2;
-			logicCircuitNetwork2.SendLogicEvents(force_send_events, logicCircuitNetwork2.id);
+			LogicCircuitNetwork logicCircuitNetwork = (LogicCircuitNetwork)utilityNetwork2;
+			logicCircuitNetwork.SendLogicEvents(force_send_events, logicCircuitNetwork.id);
 		}
 	}
 

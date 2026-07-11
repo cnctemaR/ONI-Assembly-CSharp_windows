@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Security;
 using System.Text;
 using Mono.Security;
 
@@ -10,16 +13,24 @@ namespace System.IO
 	public class BinaryWriter : IDisposable
 	{
 		protected BinaryWriter()
-			: this(Stream.Null, Encoding.UTF8UnmarkedUnsafe)
 		{
+			this.OutStream = Stream.Null;
+			this._buffer = new byte[16];
+			this._encoding = new UTF8Encoding(false, true);
+			this._encoder = this._encoding.GetEncoder();
 		}
 
 		public BinaryWriter(Stream output)
-			: this(output, Encoding.UTF8UnmarkedUnsafe)
+			: this(output, new UTF8Encoding(false, true), false)
 		{
 		}
 
 		public BinaryWriter(Stream output, Encoding encoding)
+			: this(output, encoding, false)
+		{
+		}
+
+		public BinaryWriter(Stream output, Encoding encoding, bool leaveOpen)
 		{
 			if (output == null)
 			{
@@ -31,24 +42,13 @@ namespace System.IO
 			}
 			if (!output.CanWrite)
 			{
-				throw new ArgumentException(Locale.GetText("Stream does not support writing or already closed."));
+				throw new ArgumentException(Environment.GetResourceString("Stream was not writable."));
 			}
 			this.OutStream = output;
-			this.m_encoding = encoding;
-			this.buffer = new byte[16];
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		public virtual Stream BaseStream
-		{
-			get
-			{
-				return this.OutStream;
-			}
+			this._buffer = new byte[16];
+			this._encoding = encoding;
+			this._encoder = this._encoding.GetEncoder();
+			this._leaveOpen = leaveOpen;
 		}
 
 		public virtual void Close()
@@ -58,13 +58,29 @@ namespace System.IO
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing && this.OutStream != null)
+			if (disposing)
 			{
+				if (this._leaveOpen)
+				{
+					this.OutStream.Flush();
+					return;
+				}
 				this.OutStream.Close();
 			}
-			this.buffer = null;
-			this.m_encoding = null;
-			this.disposed = true;
+		}
+
+		public void Dispose()
+		{
+			this.Dispose(true);
+		}
+
+		public virtual Stream BaseStream
+		{
+			get
+			{
+				this.Flush();
+				return this.OutStream;
+			}
 		}
 
 		public virtual void Flush()
@@ -79,29 +95,23 @@ namespace System.IO
 
 		public virtual void Write(bool value)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.buffer[0] = ((!value) ? 0 : 1);
-			this.OutStream.Write(this.buffer, 0, 1);
+			this._buffer[0] = (value ? 1 : 0);
+			this.OutStream.Write(this._buffer, 0, 1);
 		}
 
 		public virtual void Write(byte value)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
 			this.OutStream.WriteByte(value);
+		}
+
+		[CLSCompliant(false)]
+		public virtual void Write(sbyte value)
+		{
+			this.OutStream.WriteByte((byte)value);
 		}
 
 		public virtual void Write(byte[] buffer)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
@@ -111,275 +121,211 @@ namespace System.IO
 
 		public virtual void Write(byte[] buffer, int index, int count)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
 			this.OutStream.Write(buffer, index, count);
 		}
 
-		public virtual void Write(char ch)
+		[SecuritySafeCritical]
+		public unsafe virtual void Write(char ch)
 		{
-			if (this.disposed)
+			if (char.IsSurrogate(ch))
 			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
+				throw new ArgumentException(Environment.GetResourceString("Unicode surrogate characters must be written out as pairs together in the same call, not individually. Consider passing in a character array instead."));
 			}
-			char[] array = new char[] { ch };
-			byte[] bytes = this.m_encoding.GetBytes(array, 0, 1);
-			this.OutStream.Write(bytes, 0, bytes.Length);
+			byte[] array;
+			byte* ptr;
+			if ((array = this._buffer) == null || array.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array[0];
+			}
+			int bytes = this._encoder.GetBytes(&ch, 1, ptr, this._buffer.Length, true);
+			array = null;
+			this.OutStream.Write(this._buffer, 0, bytes);
 		}
 
 		public virtual void Write(char[] chars)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
 			if (chars == null)
 			{
 				throw new ArgumentNullException("chars");
 			}
-			byte[] bytes = this.m_encoding.GetBytes(chars, 0, chars.Length);
+			byte[] bytes = this._encoding.GetBytes(chars, 0, chars.Length);
 			this.OutStream.Write(bytes, 0, bytes.Length);
 		}
 
 		public virtual void Write(char[] chars, int index, int count)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			if (chars == null)
-			{
-				throw new ArgumentNullException("chars");
-			}
-			byte[] bytes = this.m_encoding.GetBytes(chars, index, count);
+			byte[] bytes = this._encoding.GetBytes(chars, index, count);
 			this.OutStream.Write(bytes, 0, bytes.Length);
 		}
 
-		public unsafe virtual void Write(decimal value)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			if (BitConverter.IsLittleEndian)
-			{
-				for (int i = 0; i < 16; i++)
-				{
-					if (i < 4)
-					{
-						this.buffer[i + 12] = *((ref value) + i);
-					}
-					else if (i < 8)
-					{
-						this.buffer[i + 4] = *((ref value) + i);
-					}
-					else if (i < 12)
-					{
-						this.buffer[i - 8] = *((ref value) + i);
-					}
-					else
-					{
-						this.buffer[i - 8] = *((ref value) + i);
-					}
-				}
-			}
-			else
-			{
-				for (int j = 0; j < 16; j++)
-				{
-					if (j < 4)
-					{
-						this.buffer[15 - j] = *((ref value) + j);
-					}
-					else if (j < 8)
-					{
-						this.buffer[15 - j] = *((ref value) + j);
-					}
-					else if (j < 12)
-					{
-						this.buffer[11 - j] = *((ref value) + j);
-					}
-					else
-					{
-						this.buffer[19 - j] = *((ref value) + j);
-					}
-				}
-			}
-			this.OutStream.Write(this.buffer, 0, 16);
-		}
-
+		[SecuritySafeCritical]
 		public virtual void Write(double value)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
 			this.OutStream.Write(BitConverterLE.GetBytes(value), 0, 8);
+		}
+
+		public virtual void Write(decimal value)
+		{
+			decimal.GetBytes(value, this._buffer);
+			this.OutStream.Write(this._buffer, 0, 16);
 		}
 
 		public virtual void Write(short value)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.buffer[0] = (byte)value;
-			this.buffer[1] = (byte)(value >> 8);
-			this.OutStream.Write(this.buffer, 0, 2);
-		}
-
-		public virtual void Write(int value)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.buffer[0] = (byte)value;
-			this.buffer[1] = (byte)(value >> 8);
-			this.buffer[2] = (byte)(value >> 16);
-			this.buffer[3] = (byte)(value >> 24);
-			this.OutStream.Write(this.buffer, 0, 4);
-		}
-
-		public virtual void Write(long value)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			int i = 0;
-			int num = 0;
-			while (i < 8)
-			{
-				this.buffer[i] = (byte)(value >> num);
-				i++;
-				num += 8;
-			}
-			this.OutStream.Write(this.buffer, 0, 8);
-		}
-
-		[CLSCompliant(false)]
-		public virtual void Write(sbyte value)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.buffer[0] = (byte)value;
-			this.OutStream.Write(this.buffer, 0, 1);
-		}
-
-		public virtual void Write(float value)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.OutStream.Write(BitConverterLE.GetBytes(value), 0, 4);
-		}
-
-		public virtual void Write(string value)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			int byteCount = this.m_encoding.GetByteCount(value);
-			this.Write7BitEncodedInt(byteCount);
-			if (this.stringBuffer == null)
-			{
-				this.stringBuffer = new byte[512];
-				this.maxCharsPerRound = 512 / this.m_encoding.GetMaxByteCount(1);
-			}
-			int num = 0;
-			int num2;
-			for (int i = value.Length; i > 0; i -= num2)
-			{
-				num2 = ((i <= this.maxCharsPerRound) ? i : this.maxCharsPerRound);
-				int bytes = this.m_encoding.GetBytes(value, num, num2, this.stringBuffer, 0);
-				this.OutStream.Write(this.stringBuffer, 0, bytes);
-				num += num2;
-			}
+			this._buffer[0] = (byte)value;
+			this._buffer[1] = (byte)(value >> 8);
+			this.OutStream.Write(this._buffer, 0, 2);
 		}
 
 		[CLSCompliant(false)]
 		public virtual void Write(ushort value)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.buffer[0] = (byte)value;
-			this.buffer[1] = (byte)(value >> 8);
-			this.OutStream.Write(this.buffer, 0, 2);
+			this._buffer[0] = (byte)value;
+			this._buffer[1] = (byte)(value >> 8);
+			this.OutStream.Write(this._buffer, 0, 2);
+		}
+
+		public virtual void Write(int value)
+		{
+			this._buffer[0] = (byte)value;
+			this._buffer[1] = (byte)(value >> 8);
+			this._buffer[2] = (byte)(value >> 16);
+			this._buffer[3] = (byte)(value >> 24);
+			this.OutStream.Write(this._buffer, 0, 4);
 		}
 
 		[CLSCompliant(false)]
 		public virtual void Write(uint value)
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
-			}
-			this.buffer[0] = (byte)value;
-			this.buffer[1] = (byte)(value >> 8);
-			this.buffer[2] = (byte)(value >> 16);
-			this.buffer[3] = (byte)(value >> 24);
-			this.OutStream.Write(this.buffer, 0, 4);
+			this._buffer[0] = (byte)value;
+			this._buffer[1] = (byte)(value >> 8);
+			this._buffer[2] = (byte)(value >> 16);
+			this._buffer[3] = (byte)(value >> 24);
+			this.OutStream.Write(this._buffer, 0, 4);
+		}
+
+		public virtual void Write(long value)
+		{
+			this._buffer[0] = (byte)value;
+			this._buffer[1] = (byte)(value >> 8);
+			this._buffer[2] = (byte)(value >> 16);
+			this._buffer[3] = (byte)(value >> 24);
+			this._buffer[4] = (byte)(value >> 32);
+			this._buffer[5] = (byte)(value >> 40);
+			this._buffer[6] = (byte)(value >> 48);
+			this._buffer[7] = (byte)(value >> 56);
+			this.OutStream.Write(this._buffer, 0, 8);
 		}
 
 		[CLSCompliant(false)]
 		public virtual void Write(ulong value)
 		{
-			if (this.disposed)
+			this._buffer[0] = (byte)value;
+			this._buffer[1] = (byte)(value >> 8);
+			this._buffer[2] = (byte)(value >> 16);
+			this._buffer[3] = (byte)(value >> 24);
+			this._buffer[4] = (byte)(value >> 32);
+			this._buffer[5] = (byte)(value >> 40);
+			this._buffer[6] = (byte)(value >> 48);
+			this._buffer[7] = (byte)(value >> 56);
+			this.OutStream.Write(this._buffer, 0, 8);
+		}
+
+		[SecuritySafeCritical]
+		public virtual void Write(float value)
+		{
+			this.OutStream.Write(BitConverterLE.GetBytes(value), 0, 4);
+		}
+
+		[SecuritySafeCritical]
+		public unsafe virtual void Write(string value)
+		{
+			if (value == null)
 			{
-				throw new ObjectDisposedException("BinaryWriter", "Cannot write to a closed BinaryWriter");
+				throw new ArgumentNullException("value");
 			}
-			int i = 0;
+			int byteCount = this._encoding.GetByteCount(value);
+			this.Write7BitEncodedInt(byteCount);
+			if (this._largeByteBuffer == null)
+			{
+				this._largeByteBuffer = new byte[256];
+				this._maxChars = this._largeByteBuffer.Length / this._encoding.GetMaxByteCount(1);
+			}
+			if (byteCount <= this._largeByteBuffer.Length)
+			{
+				this._encoding.GetBytes(value, 0, value.Length, this._largeByteBuffer, 0);
+				this.OutStream.Write(this._largeByteBuffer, 0, byteCount);
+				return;
+			}
 			int num = 0;
-			while (i < 8)
+			int num2;
+			for (int i = value.Length; i > 0; i -= num2)
 			{
-				this.buffer[i] = (byte)(value >> num);
-				i++;
-				num += 8;
+				num2 = ((i > this._maxChars) ? this._maxChars : i);
+				if (num < 0 || num2 < 0 || checked(num + num2) > value.Length)
+				{
+					throw new ArgumentOutOfRangeException("charCount");
+				}
+				int bytes;
+				fixed (string text = value)
+				{
+					char* ptr = text;
+					if (ptr != null)
+					{
+						ptr += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					byte[] array;
+					byte* ptr2;
+					if ((array = this._largeByteBuffer) == null || array.Length == 0)
+					{
+						ptr2 = null;
+					}
+					else
+					{
+						ptr2 = &array[0];
+					}
+					bytes = this._encoder.GetBytes(checked(ptr + num), num2, ptr2, this._largeByteBuffer.Length, num2 == i);
+					array = null;
+				}
+				this.OutStream.Write(this._largeByteBuffer, 0, bytes);
+				num += num2;
 			}
-			this.OutStream.Write(this.buffer, 0, 8);
 		}
 
 		protected void Write7BitEncodedInt(int value)
 		{
-			do
+			uint num;
+			for (num = (uint)value; num >= 128U; num >>= 7)
 			{
-				int num = (value >> 7) & 33554431;
-				byte b = (byte)(value & 127);
-				if (num != 0)
-				{
-					b |= 128;
-				}
-				this.Write(b);
-				value = num;
+				this.Write((byte)(num | 128U));
 			}
-			while (value != 0);
+			this.Write((byte)num);
 		}
 
 		public static readonly BinaryWriter Null = new BinaryWriter();
 
 		protected Stream OutStream;
 
-		private Encoding m_encoding;
+		private byte[] _buffer;
 
-		private byte[] buffer;
+		private Encoding _encoding;
 
-		private bool disposed;
+		private Encoder _encoder;
 
-		private byte[] stringBuffer;
+		[OptionalField]
+		private bool _leaveOpen;
 
-		private int maxCharsPerRound;
+		[OptionalField]
+		private char[] _tmpOneCharBuffer;
+
+		private byte[] _largeByteBuffer;
+
+		private int _maxChars;
+
+		private const int LargeByteBufferSize = 256;
 	}
 }

@@ -3,13 +3,15 @@ using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[Serializable]
-	public class MethodCall : ISerializable, IInternalMessage, IMessage, IMethodCallMessage, IMethodMessage, ISerializationRootObject
+	public class MethodCall : IMethodCallMessage, IMethodMessage, IMessage, ISerializable, IInternalMessage, ISerializationRootObject
 	{
 		public MethodCall(Header[] h1)
 		{
@@ -57,16 +59,14 @@ namespace System.Runtime.Remoting.Messaging
 			if (msg is IMethodMessage)
 			{
 				this.CopyFrom((IMethodMessage)msg);
+				return;
 			}
-			else
+			foreach (object obj in msg.Properties)
 			{
-				foreach (object obj in msg.Properties)
-				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-					this.InitMethodProperty((string)dictionaryEntry.Key, dictionaryEntry.Value);
-				}
-				this.Init();
+				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+				this.InitMethodProperty((string)dictionaryEntry.Key, dictionaryEntry.Value);
 			}
+			this.Init();
 		}
 
 		internal MethodCall(string uri, string typeName, string methodName, object[] args)
@@ -79,32 +79,31 @@ namespace System.Runtime.Remoting.Messaging
 			this.ResolveMethod();
 		}
 
+		internal MethodCall(object handlerObject, BinaryMethodCallMessage smuggledMsg)
+		{
+			if (handlerObject != null)
+			{
+				this._uri = handlerObject as string;
+				if (this._uri == null && handlerObject is MarshalByRefObject)
+				{
+					throw new NotImplementedException("MarshalByRefObject.GetIdentity");
+				}
+			}
+			this._typeName = smuggledMsg.TypeName;
+			this._methodName = smuggledMsg.MethodName;
+			this._methodSignature = (Type[])smuggledMsg.MethodSignature;
+			this._args = smuggledMsg.Args;
+			this._genericArguments = smuggledMsg.InstantiationArgs;
+			this._callContext = smuggledMsg.LogicalCallContext;
+			this.ResolveMethod();
+			if (smuggledMsg.HasProperties)
+			{
+				smuggledMsg.PopulateMessageProperties(this.Properties);
+			}
+		}
+
 		internal MethodCall()
 		{
-		}
-
-		string IInternalMessage.Uri
-		{
-			get
-			{
-				return this.Uri;
-			}
-			set
-			{
-				this.Uri = value;
-			}
-		}
-
-		Identity IInternalMessage.TargetIdentity
-		{
-			get
-			{
-				return this._targetIdentity;
-			}
-			set
-			{
-				this._targetIdentity = value;
-			}
 		}
 
 		internal void CopyFrom(IMethodMessage call)
@@ -121,33 +120,73 @@ namespace System.Runtime.Remoting.Messaging
 
 		internal virtual void InitMethodProperty(string key, object value)
 		{
-			switch (key)
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(key);
+			if (num <= 1619225942U)
 			{
-			case "__TypeName":
-				this._typeName = (string)value;
-				return;
-			case "__MethodName":
+				if (num != 990701179U)
+				{
+					if (num != 1201911322U)
+					{
+						if (num == 1619225942U)
+						{
+							if (key == "__Args")
+							{
+								this._args = (object[])value;
+								return;
+							}
+						}
+					}
+					else if (key == "__CallContext")
+					{
+						this._callContext = (LogicalCallContext)value;
+						return;
+					}
+				}
+				else if (key == "__Uri")
+				{
+					this._uri = (string)value;
+					return;
+				}
+			}
+			else if (num <= 2850677384U)
+			{
+				if (num != 2010141056U)
+				{
+					if (num == 2850677384U)
+					{
+						if (key == "__GenericArguments")
+						{
+							this._genericArguments = (Type[])value;
+							return;
+						}
+					}
+				}
+				else if (key == "__TypeName")
+				{
+					this._typeName = (string)value;
+					return;
+				}
+			}
+			else if (num != 3166241401U)
+			{
+				if (num == 3679129400U)
+				{
+					if (key == "__MethodSignature")
+					{
+						this._methodSignature = (Type[])value;
+						return;
+					}
+				}
+			}
+			else if (key == "__MethodName")
+			{
 				this._methodName = (string)value;
-				return;
-			case "__MethodSignature":
-				this._methodSignature = (Type[])value;
-				return;
-			case "__Args":
-				this._args = (object[])value;
-				return;
-			case "__CallContext":
-				this._callContext = (LogicalCallContext)value;
-				return;
-			case "__Uri":
-				this._uri = (string)value;
-				return;
-			case "__GenericArguments":
-				this._genericArguments = (Type[])value;
 				return;
 			}
 			this.Properties[key] = value;
 		}
 
+		[SecurityCritical]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("__TypeName", this._typeName);
@@ -169,6 +208,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public int ArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args.Length;
@@ -177,6 +217,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] Args
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._args;
@@ -185,14 +226,16 @@ namespace System.Runtime.Remoting.Messaging
 
 		public bool HasVarArgs
 		{
+			[SecurityCritical]
 			get
 			{
-				return (this.MethodBase.CallingConvention | CallingConventions.VarArgs) != (CallingConventions)0;
+				return (this.MethodBase.CallingConvention | CallingConventions.VarArgs) > (CallingConventions)0;
 			}
 		}
 
 		public int InArgCount
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._inArgInfo == null)
@@ -205,6 +248,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object[] InArgs
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._inArgInfo == null)
@@ -217,6 +261,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public LogicalCallContext LogicalCallContext
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._callContext == null)
@@ -229,6 +274,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public MethodBase MethodBase
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodBase == null)
@@ -241,6 +287,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string MethodName
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodName == null)
@@ -253,6 +300,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public object MethodSignature
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._methodSignature == null && this._methodBase != null)
@@ -270,6 +318,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public virtual IDictionary Properties
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this.ExternalProperties == null)
@@ -282,13 +331,14 @@ namespace System.Runtime.Remoting.Messaging
 
 		internal virtual void InitDictionary()
 		{
-			MethodCallDictionary methodCallDictionary = new MethodCallDictionary(this);
-			this.ExternalProperties = methodCallDictionary;
-			this.InternalProperties = methodCallDictionary.GetInternalProperties();
+			MCMDictionary mcmdictionary = new MCMDictionary(this);
+			this.ExternalProperties = mcmdictionary;
+			this.InternalProperties = mcmdictionary.GetInternalProperties();
 		}
 
 		public string TypeName
 		{
+			[SecurityCritical]
 			get
 			{
 				if (this._typeName == null)
@@ -301,6 +351,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		public string Uri
 		{
+			[SecurityCritical]
 			get
 			{
 				return this._uri;
@@ -311,16 +362,31 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		string IInternalMessage.Uri
+		{
+			get
+			{
+				return this.Uri;
+			}
+			set
+			{
+				this.Uri = value;
+			}
+		}
+
+		[SecurityCritical]
 		public object GetArg(int argNum)
 		{
 			return this._args[argNum];
 		}
 
+		[SecurityCritical]
 		public string GetArgName(int index)
 		{
 			return this._methodBase.GetParameters()[index].Name;
 		}
 
+		[SecurityCritical]
 		public object GetInArg(int argNum)
 		{
 			if (this._inArgInfo == null)
@@ -330,6 +396,7 @@ namespace System.Runtime.Remoting.Messaging
 			return this._args[this._inArgInfo.GetInOutArgIndex(argNum)];
 		}
 
+		[SecurityCritical]
 		public string GetInArgName(int index)
 		{
 			if (this._inArgInfo == null)
@@ -356,7 +423,7 @@ namespace System.Runtime.Remoting.Messaging
 				Type serverTypeForUri = RemotingServices.GetServerTypeForUri(this._uri);
 				if (serverTypeForUri == null)
 				{
-					string text = ((this._typeName == null) ? string.Empty : (" (" + this._typeName + ")"));
+					string text = ((this._typeName != null) ? (" (" + this._typeName + ")") : "");
 					throw new RemotingException("Requested service not found" + text + ". No receiver for uri " + this._uri);
 				}
 				Type type = this.CastTo(this._typeName, serverTypeForUri);
@@ -403,15 +470,16 @@ namespace System.Runtime.Remoting.Messaging
 			{
 				return serverType;
 			}
-			for (Type type = serverType.BaseType; type != null; type = type.BaseType)
+			Type type = serverType.BaseType;
+			while (type != null)
 			{
 				if (clientType == type.FullName)
 				{
 					return type;
 				}
+				type = type.BaseType;
 			}
-			Type[] interfaces = serverType.GetInterfaces();
-			foreach (Type type2 in interfaces)
+			foreach (Type type2 in serverType.GetInterfaces())
 			{
 				if (clientType == type2.FullName)
 				{
@@ -424,7 +492,7 @@ namespace System.Runtime.Remoting.Messaging
 		private static string GetTypeNameFromAssemblyQualifiedName(string aqname)
 		{
 			int num = aqname.IndexOf("]]");
-			int num2 = aqname.IndexOf(',', (num != -1) ? (num + 2) : 0);
+			int num2 = aqname.IndexOf(',', (num == -1) ? 0 : (num + 2));
 			if (num2 != -1)
 			{
 				aqname = aqname.Substring(0, num2).Trim();
@@ -436,6 +504,23 @@ namespace System.Runtime.Remoting.Messaging
 		public void RootSetObjectData(SerializationInfo info, StreamingContext ctx)
 		{
 			throw new NotImplementedException();
+		}
+
+		Identity IInternalMessage.TargetIdentity
+		{
+			get
+			{
+				return this._targetIdentity;
+			}
+			set
+			{
+				this._targetIdentity = value;
+			}
+		}
+
+		bool IInternalMessage.HasProperties()
+		{
+			return this.ExternalProperties != null || this.InternalProperties != null;
 		}
 
 		private Type[] GenericArguments

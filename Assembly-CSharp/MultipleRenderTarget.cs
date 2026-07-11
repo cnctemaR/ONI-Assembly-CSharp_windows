@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 using UnityEngine;
 
 public class MultipleRenderTarget : MonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Camera> onSetupComplete;
 
 	private void Start()
@@ -16,21 +14,20 @@ public class MultipleRenderTarget : MonoBehaviour
 	private IEnumerator SetupProxy()
 	{
 		yield return null;
-		Camera camera = base.GetComponent<Camera>();
-		GameObject new_camera_go = new GameObject();
-		Camera new_camera = new_camera_go.AddComponent<Camera>();
-		new_camera.CopyFrom(camera);
-		this.renderProxy = new_camera.gameObject.AddComponent<MultipleRenderTargetProxy>();
-		new_camera.name = camera.name + " MRT";
-		new_camera.transform.parent = camera.transform;
-		new_camera.transform.SetLocalPosition(Vector3.zero);
-		new_camera.depth = camera.depth - 1f;
-		camera.cullingMask = 0;
-		camera.clearFlags = CameraClearFlags.Color;
-		this.quad = new FullScreenQuad("MultipleRenderTarget", camera, true);
+		Camera component = base.GetComponent<Camera>();
+		Camera camera = new GameObject().AddComponent<Camera>();
+		camera.CopyFrom(component);
+		this.renderProxy = camera.gameObject.AddComponent<MultipleRenderTargetProxy>();
+		camera.name = component.name + " MRT";
+		camera.transform.parent = component.transform;
+		camera.transform.SetLocalPosition(Vector3.zero);
+		camera.depth = component.depth - 1f;
+		component.cullingMask = 0;
+		component.clearFlags = CameraClearFlags.Color;
+		this.quad = new FullScreenQuad("MultipleRenderTarget", component, true);
 		if (this.onSetupComplete != null)
 		{
-			this.onSetupComplete(new_camera);
+			this.onSetupComplete(camera);
 		}
 		yield break;
 	}

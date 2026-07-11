@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,26 +19,13 @@ public class InputBindingsScreen : KModalScreen
 
 	private string GetModifierString(Modifier modifiers)
 	{
-		string text = string.Empty;
-		IEnumerator enumerator = Enum.GetValues(typeof(Modifier)).GetEnumerator();
-		try
+		string text = "";
+		foreach (object obj in Enum.GetValues(typeof(Modifier)))
 		{
-			while (enumerator.MoveNext())
+			Modifier modifier = (Modifier)obj;
+			if ((modifiers & modifier) != Modifier.None)
 			{
-				object obj = enumerator.Current;
-				Modifier modifier = (Modifier)obj;
-				if ((modifiers & modifier) != Modifier.None)
-				{
-					text = text + " + " + modifier.ToString();
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				text = text + " + " + modifier.ToString();
 			}
 		}
 		return text;
@@ -119,7 +106,7 @@ public class InputBindingsScreen : KModalScreen
 			if (binding.mGroup == this.screens[this.activeScreen] && binding.mRebindable)
 			{
 				GameObject gameObject = this.entryPool.GetFreeElement(this.parent, true).gameObject;
-				LocText componentInChildren = gameObject.transform.GetChild(0).GetComponentInChildren<LocText>();
+				TMP_Text componentInChildren = gameObject.transform.GetChild(0).GetComponentInChildren<LocText>();
 				string text3 = "STRINGS.INPUT_BINDINGS." + binding.mGroup.ToUpper() + "." + binding.mAction.ToString().ToUpper();
 				componentInChildren.text = Strings.Get(text3);
 				LocText key_label = gameObject.transform.GetChild(1).GetComponentInChildren<LocText>();
@@ -149,10 +136,10 @@ public class InputBindingsScreen : KModalScreen
 		if (this.waitingForKeyPress)
 		{
 			Modifier modifier = Modifier.None;
-			modifier |= ((!this.IsKeyDown(KeyCode.LeftAlt) && !this.IsKeyDown(KeyCode.RightAlt)) ? Modifier.None : Modifier.Alt);
-			modifier |= ((!this.IsKeyDown(KeyCode.LeftControl) && !this.IsKeyDown(KeyCode.RightControl)) ? Modifier.None : Modifier.Ctrl);
-			modifier |= ((!this.IsKeyDown(KeyCode.LeftShift) && !this.IsKeyDown(KeyCode.RightShift)) ? Modifier.None : Modifier.Shift);
-			modifier |= ((!this.IsKeyDown(KeyCode.CapsLock)) ? Modifier.None : Modifier.CapsLock);
+			modifier |= ((this.IsKeyDown(KeyCode.LeftAlt) || this.IsKeyDown(KeyCode.RightAlt)) ? Modifier.Alt : Modifier.None);
+			modifier |= ((this.IsKeyDown(KeyCode.LeftControl) || this.IsKeyDown(KeyCode.RightControl)) ? Modifier.Ctrl : Modifier.None);
+			modifier |= ((this.IsKeyDown(KeyCode.LeftShift) || this.IsKeyDown(KeyCode.RightShift)) ? Modifier.Shift : Modifier.None);
+			modifier |= (this.IsKeyDown(KeyCode.CapsLock) ? Modifier.CapsLock : Modifier.None);
 			bool flag = false;
 			for (int i = 0; i < InputBindingsScreen.validKeys.Length; i++)
 			{
@@ -190,16 +177,10 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
-			if (new_binding.IsBindingEqual(bindingEntry2) && (bindingEntry2.mGroup == null || bindingEntry2.mGroup == activeScreen || bindingEntry2.mGroup == "Root" || activeScreen == "Root"))
+			if (new_binding.IsBindingEqual(bindingEntry2) && (bindingEntry2.mGroup == null || bindingEntry2.mGroup == activeScreen || bindingEntry2.mGroup == "Root" || activeScreen == "Root") && (!(activeScreen == "Root") || !bindingEntry2.mIgnoreRootConflics) && (!(bindingEntry2.mGroup == "Root") || !new_binding.mIgnoreRootConflics))
 			{
-				if (!(activeScreen == "Root") || !bindingEntry2.mIgnoreRootConflics)
-				{
-					if (!(bindingEntry2.mGroup == "Root") || !new_binding.mIgnoreRootConflics)
-					{
-						bindingEntry = bindingEntry2;
-						break;
-					}
-				}
+				bindingEntry = bindingEntry2;
+				break;
 			}
 		}
 		return bindingEntry;
@@ -215,11 +196,9 @@ public class InputBindingsScreen : KModalScreen
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.Deactivate();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
@@ -233,29 +212,27 @@ public class InputBindingsScreen : KModalScreen
 		if (num == 0)
 		{
 			this.Deactivate();
+			return;
+		}
+		string text;
+		if (num == 1)
+		{
+			BindingEntry firstUnbound = this.GetFirstUnbound();
+			text = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.UNBOUND_ACTION, firstUnbound.mAction.ToString());
 		}
 		else
 		{
-			string text;
-			if (num == 1)
-			{
-				BindingEntry firstUnbound = this.GetFirstUnbound();
-				text = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.UNBOUND_ACTION, firstUnbound.mAction.ToString());
-			}
-			else
-			{
-				text = UI.FRONTEND.INPUT_BINDINGS_SCREEN.MULTIPLE_UNBOUND_ACTIONS;
-			}
-			this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
-			this.confirmDialog.PopupConfirmDialog(text, delegate
-			{
-				this.Deactivate();
-			}, delegate
-			{
-				this.confirmDialog.Deactivate();
-			}, null, null, null, null, null, null, true);
-			this.confirmDialog.gameObject.SetActive(true);
+			text = UI.FRONTEND.INPUT_BINDINGS_SCREEN.MULTIPLE_UNBOUND_ACTIONS;
 		}
+		this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+		this.confirmDialog.PopupConfirmDialog(text, delegate
+		{
+			this.Deactivate();
+		}, delegate
+		{
+			this.confirmDialog.Deactivate();
+		}, null, null, null, null, null, null, true);
+		this.confirmDialog.gameObject.SetActive(true);
 	}
 
 	private int NumUnboundActions()
@@ -264,12 +241,9 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
-			if (bindingEntry.mKeyCode == KKeyCode.None)
+			if (bindingEntry.mKeyCode == KKeyCode.None && (BuildMenu.UseHotkeyBuildMenu() || !bindingEntry.mIgnoreRootConflics))
 			{
-				if (BuildMenu.UseHotkeyBuildMenu() || !bindingEntry.mIgnoreRootConflics)
-				{
-					num++;
-				}
+				num++;
 			}
 		}
 		return num;
@@ -333,17 +307,15 @@ public class InputBindingsScreen : KModalScreen
 			{
 				BindingEntry duplicatedBinding = this.GetDuplicatedBinding(this.screens[this.activeScreen], bindingEntry);
 				GameInputMapping.KeyBindings[i] = bindingEntry;
-				LocText componentInChildren = this.activeButton.GetComponentInChildren<LocText>();
-				componentInChildren.text = this.GetBindingText(bindingEntry);
+				this.activeButton.GetComponentInChildren<LocText>().text = this.GetBindingText(bindingEntry);
 				if (duplicatedBinding.mAction != global::Action.Invalid && duplicatedBinding.mAction != this.actionToRebind)
 				{
 					this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
-					string text = "STRINGS.INPUT_BINDINGS." + duplicatedBinding.mGroup.ToUpper() + "." + duplicatedBinding.mAction.ToString().ToUpper();
-					string text2 = Strings.Get(text);
+					string text = Strings.Get("STRINGS.INPUT_BINDINGS." + duplicatedBinding.mGroup.ToUpper() + "." + duplicatedBinding.mAction.ToString().ToUpper());
 					string bindingText = this.GetBindingText(duplicatedBinding);
-					string text3 = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.DUPLICATE, text2, bindingText);
+					string text2 = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.DUPLICATE, text, bindingText);
 					this.Unbind(duplicatedBinding.mAction);
-					this.confirmDialog.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null, true);
+					this.confirmDialog.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null, true);
 					this.confirmDialog.gameObject.SetActive(true);
 				}
 				Global.Instance.GetInputManager().RebindControls();
@@ -351,7 +323,7 @@ public class InputBindingsScreen : KModalScreen
 				this.actionToRebind = global::Action.NumActions;
 				this.activeButton = null;
 				this.BuildDisplay();
-				break;
+				return;
 			}
 		}
 	}

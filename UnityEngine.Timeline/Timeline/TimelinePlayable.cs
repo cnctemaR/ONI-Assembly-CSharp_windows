@@ -41,12 +41,7 @@ namespace UnityEngine.Timeline
 			this.m_ActiveClips = new List<RuntimeElement>(num);
 			this.m_EvaluateCallbacks.Clear();
 			this.m_PlayableCache.Clear();
-			this.AllocateDefaultTracks(graph, timelinePlayable, list, go);
 			this.CompileTrackList(graph, timelinePlayable, list, go, createOutputs);
-		}
-
-		private void AllocateDefaultTracks(PlayableGraph graph, Playable timelinePlayable, IList<TrackAsset> tracks, GameObject go)
-		{
 		}
 
 		private void CompileTrackList(PlayableGraph graph, Playable timelinePlayable, IEnumerable<TrackAsset> tracks, GameObject go, bool createOutputs)
@@ -159,25 +154,36 @@ namespace UnityEngine.Timeline
 				double time = playable.GetTime<Playable>();
 				this.m_ActiveBit = ((this.m_ActiveBit != 0) ? 0 : 1);
 				this.m_CurrentListOfActiveClips.Clear();
-				this.m_IntervalTree.IntersectsWith(DiscreteTime.GetNearestTick(time), this.m_ActiveBit, ref this.m_CurrentListOfActiveClips);
-				for (int i = 0; i < this.m_ActiveClips.Count; i++)
+				this.m_IntervalTree.IntersectsWith(DiscreteTime.GetNearestTick(time), this.m_ActiveBit, this.m_CurrentListOfActiveClips);
+				foreach (RuntimeElement runtimeElement in this.m_CurrentListOfActiveClips)
 				{
-					RuntimeElement runtimeElement = this.m_ActiveClips[i];
-					if (runtimeElement.intervalBit != this.m_ActiveBit)
+					runtimeElement.intervalBit = this.m_ActiveBit;
+					if (frameData.timeLooped)
 					{
-						runtimeElement.enable = false;
+						runtimeElement.Reset();
+					}
+				}
+				double duration = playable.GetDuration<Playable>();
+				foreach (RuntimeElement runtimeElement2 in this.m_ActiveClips)
+				{
+					if (runtimeElement2.intervalBit != this.m_ActiveBit)
+					{
+						double num = (double)DiscreteTime.FromTicks(runtimeElement2.intervalEnd);
+						double num2 = ((!frameData.timeLooped) ? Math.Min(time, num) : Math.Min(num, duration));
+						runtimeElement2.EvaluateAt(num2, frameData);
+						runtimeElement2.enable = false;
 					}
 				}
 				this.m_ActiveClips.Clear();
-				for (int j = 0; j < this.m_CurrentListOfActiveClips.Count; j++)
+				for (int i = 0; i < this.m_CurrentListOfActiveClips.Count; i++)
 				{
-					this.m_CurrentListOfActiveClips[j].EvaluateAt(time, frameData);
-					this.m_ActiveClips.Add(this.m_CurrentListOfActiveClips[j]);
+					this.m_CurrentListOfActiveClips[i].EvaluateAt(time, frameData);
+					this.m_ActiveClips.Add(this.m_CurrentListOfActiveClips[i]);
 				}
 				int count = this.m_EvaluateCallbacks.Count;
-				for (int k = 0; k < count; k++)
+				for (int j = 0; j < count; j++)
 				{
-					this.m_EvaluateCallbacks[k].Evaluate();
+					this.m_EvaluateCallbacks[j].Evaluate();
 				}
 			}
 		}
@@ -185,6 +191,11 @@ namespace UnityEngine.Timeline
 		private void CacheTrack(TrackAsset track, Playable playable, int port, Playable parent)
 		{
 			this.m_PlayableCache[track] = playable;
+		}
+
+		private static void ForAOTCompilationOnly()
+		{
+			new List<IntervalTree<RuntimeElement>.Entry>();
 		}
 
 		private IntervalTree<RuntimeElement> m_IntervalTree = new IntervalTree<RuntimeElement>();

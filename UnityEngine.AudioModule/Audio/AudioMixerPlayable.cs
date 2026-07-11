@@ -6,13 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Audio
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that controls an audio mixer.</para>
-	/// </summary>
 	[StaticAccessor("AudioMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
-	[NativeHeader("Modules/Audio/Public/Director/AudioMixerPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Audio/Public/Director/AudioMixerPlayable.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioMixerPlayable.bindings.h")]
 	public struct AudioMixerPlayable : IPlayable, IEquatable<AudioMixerPlayable>
 	{
@@ -69,6 +66,7 @@ namespace UnityEngine.Audio
 			return this.GetHandle() == other.GetHandle();
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CreateAudioMixerPlayableInternal(ref PlayableGraph graph, int inputCount, bool normalizeInputVolumes, ref PlayableHandle handle);
 

@@ -4,25 +4,6 @@ namespace Mono.Security.Protocol.Tls.Handshake
 {
 	internal abstract class HandshakeMessage : TlsStream
 	{
-		public HandshakeMessage(Context context, HandshakeType handshakeType)
-			: this(context, handshakeType, ContentType.Handshake)
-		{
-		}
-
-		public HandshakeMessage(Context context, HandshakeType handshakeType, ContentType contentType)
-		{
-			this.context = context;
-			this.handshakeType = handshakeType;
-			this.contentType = contentType;
-		}
-
-		public HandshakeMessage(Context context, HandshakeType handshakeType, byte[] data)
-			: base(data)
-		{
-			this.context = context;
-			this.handshakeType = handshakeType;
-		}
-
 		public Context Context
 		{
 			get
@@ -47,6 +28,25 @@ namespace Mono.Security.Protocol.Tls.Handshake
 			}
 		}
 
+		public HandshakeMessage(Context context, HandshakeType handshakeType)
+			: this(context, handshakeType, ContentType.Handshake)
+		{
+		}
+
+		public HandshakeMessage(Context context, HandshakeType handshakeType, ContentType contentType)
+		{
+			this.context = context;
+			this.handshakeType = handshakeType;
+			this.contentType = contentType;
+		}
+
+		public HandshakeMessage(Context context, HandshakeType handshakeType, byte[] data)
+			: base(data)
+		{
+			this.context = context;
+			this.handshakeType = handshakeType;
+		}
+
 		protected abstract void ProcessAsTls1();
 
 		protected abstract void ProcessAsSsl3();
@@ -54,24 +54,33 @@ namespace Mono.Security.Protocol.Tls.Handshake
 		public void Process()
 		{
 			SecurityProtocolType securityProtocol = this.Context.SecurityProtocol;
-			if (securityProtocol != SecurityProtocolType.Default)
+			if (securityProtocol <= SecurityProtocolType.Ssl2)
 			{
-				if (securityProtocol != SecurityProtocolType.Ssl2)
+				if (securityProtocol != SecurityProtocolType.Default)
 				{
-					if (securityProtocol == SecurityProtocolType.Ssl3)
+					if (securityProtocol != SecurityProtocolType.Ssl2)
 					{
-						this.ProcessAsSsl3();
-						return;
+						goto IL_003B;
 					}
-					if (securityProtocol == SecurityProtocolType.Tls)
-					{
-						goto IL_0037;
-					}
+					goto IL_003B;
 				}
-				throw new NotSupportedException("Unsupported security protocol type");
 			}
-			IL_0037:
+			else
+			{
+				if (securityProtocol == SecurityProtocolType.Ssl3)
+				{
+					this.ProcessAsSsl3();
+					return;
+				}
+				if (securityProtocol != SecurityProtocolType.Tls)
+				{
+					goto IL_003B;
+				}
+			}
 			this.ProcessAsTls1();
+			return;
+			IL_003B:
+			throw new NotSupportedException("Unsupported security protocol type");
 		}
 
 		public virtual void Update()

@@ -48,7 +48,7 @@ public class GameAudioSheets : AudioSheets
 		bool flag = true;
 		if (sound_name.Contains(":disable_camera_position_scaling"))
 		{
-			sound_name = sound_name.Replace(":disable_camera_position_scaling", string.Empty);
+			sound_name = sound_name.Replace(":disable_camera_position_scaling", "");
 			flag = false;
 		}
 		if (type == "FloorSoundEvent")
@@ -60,9 +60,7 @@ public class GameAudioSheets : AudioSheets
 			bool flag2 = type == "LoopingSoundEvent";
 			string[] array = sound_name.Split(new char[] { ':' });
 			sound_name = array[0];
-			string text = sound_name;
-			bool flag3 = flag2;
-			soundEvent = new SoundEvent(file_name, text, frame, true, flag3, min_interval, false);
+			soundEvent = new SoundEvent(file_name, sound_name, frame, true, flag2, min_interval, false);
 			for (int i = 1; i < array.Length; i++)
 			{
 				if (array[i] == "IGNORE_PAUSE")
@@ -117,9 +115,7 @@ public class GameAudioSheets : AudioSheets
 		}
 		else if (type == "CreatureVariationSoundEvent")
 		{
-			string text2 = sound_name;
-			bool flag3 = type == "LoopingSoundEvent";
-			soundEvent = new CreatureVariationSoundEvent(file_name, text2, frame, true, flag3, min_interval, false);
+			soundEvent = new CreatureVariationSoundEvent(file_name, sound_name, frame, true, type == "LoopingSoundEvent", min_interval, false);
 		}
 		else if (type == "CountedSoundEvent")
 		{

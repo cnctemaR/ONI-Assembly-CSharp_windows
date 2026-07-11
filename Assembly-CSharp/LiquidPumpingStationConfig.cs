@@ -33,8 +33,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		LiquidPumpingStation liquidPumpingStation = go.AddOrGet<LiquidPumpingStation>();
-		liquidPumpingStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_waterpump_kanim") };
+		go.AddOrGet<LiquidPumpingStation>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_waterpump_kanim") };
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = false;
 		storage.allowItemRemoval = true;

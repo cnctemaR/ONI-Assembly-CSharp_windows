@@ -5,7 +5,7 @@ namespace System.Net.Configuration
 {
 	public sealed class NetSectionGroup : ConfigurationSectionGroup
 	{
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public NetSectionGroup()
 		{
 		}
@@ -72,7 +72,7 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public static NetSectionGroup GetSectionGroup(Configuration config)
 		{
 			throw new NotImplementedException();

@@ -68,22 +68,26 @@ public class ModifierModuleNodeEditor : BaseNodeEditor
 		{
 			Curve curve = module3D as Curve;
 			curve.ClearControlPoints();
-			List<ControlPoint> controls = value2.GetControls();
-			foreach (ControlPoint controlPoint in controls)
+			using (List<ControlPoint>.Enumerator enumerator = value2.GetControls().GetEnumerator())
 			{
-				curve.AddControlPoint(controlPoint);
+				while (enumerator.MoveNext())
+				{
+					ControlPoint controlPoint = enumerator.Current;
+					curve.AddControlPoint(controlPoint);
+				}
+				goto IL_013B;
 			}
 		}
-		else if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace)
+		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace)
 		{
 			Terrace terrace = module3D as Terrace;
 			terrace.ClearControlPoints();
 			foreach (float num in value3.points)
 			{
-				float num2 = num;
-				terrace.AddControlPoint(num2);
+				terrace.AddControlPoint(num);
 			}
 		}
+		IL_013B:
 		this.Outputs[0].SetValue<IModule3D>(module3D);
 		return true;
 	}

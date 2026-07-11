@@ -6,9 +6,6 @@ using UnityEngineInternal;
 
 namespace UnityEngine.Events
 {
-	/// <summary>
-	///   <para>One argument version of UnityEvent.</para>
-	/// </summary>
 	[Serializable]
 	public abstract class UnityEvent<T0> : UnityEventBase
 	{

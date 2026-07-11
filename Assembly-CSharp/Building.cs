@@ -12,7 +12,11 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	{
 		get
 		{
-			return (!(this.rotatable != null)) ? Orientation.Neutral : this.rotatable.GetOrientation();
+			if (!(this.rotatable != null))
+			{
+				return Orientation.Neutral;
+			}
+			return this.rotatable.GetOrientation();
 		}
 	}
 
@@ -54,8 +58,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		Orientation orientation = this.Orientation;
 		for (int i = 0; i < this.Def.PlacementOffsets.Length; i++)
 		{
-			CellOffset cellOffset = this.Def.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.Def.PlacementOffsets[i], orientation);
 			int num2 = Grid.OffsetCell(num, rotatedCellOffset);
 			this.placementCells[i] = num2;
 		}
@@ -89,8 +92,9 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			if (component.Element == null)
 			{
 				DeserializeWarnings.Instance.PrimaryElementHasNoElement.Warn(base.name + " primary element has no element.", base.gameObject);
+				return;
 			}
-			else if (!(this is BuildingUnderConstruction))
+			if (!(this is BuildingUnderConstruction))
 			{
 				DeserializeWarnings.Instance.BuildingTemeperatureIsZeroKelvin.Warn(base.name + " is at zero degrees kelvin. Resetting temperature.", null);
 				component.Temperature = component.Element.defaultValues.temperature;
@@ -115,16 +119,15 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		{
 			component2.iconOffset.y = 0.3f;
 		}
-		KPrefabID component3 = base.GetComponent<KPrefabID>();
-		if (component3.HasTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
+		if (base.GetComponent<KPrefabID>().HasTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
 		{
 			this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, base.gameObject, this.GetExtents(), GameScenePartitioner.Instance.industrialBuildings, null);
 		}
 		if (this.Def.Deprecated && base.GetComponent<KSelectable>() != null)
 		{
-			KSelectable component4 = base.GetComponent<KSelectable>();
-			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
-			component4.AddStatusItem(Building.deprecatedBuildingStatusItem, null);
+			KSelectable component3 = base.GetComponent<KSelectable>();
+			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			component3.AddStatusItem(Building.deprecatedBuildingStatusItem, null);
 		}
 	}
 
@@ -152,13 +155,16 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 
 	public CellOffset GetRotatedOffset(CellOffset offset)
 	{
-		return (!(this.rotatable != null)) ? offset : this.rotatable.GetRotatedCellOffset(offset);
+		if (!(this.rotatable != null))
+		{
+			return offset;
+		}
+		return this.rotatable.GetRotatedCellOffset(offset);
 	}
 
 	private int GetBottomLeftCell()
 	{
-		Vector3 position = base.transform.GetPosition();
-		return Grid.PosToCell(position);
+		return Grid.PosToCell(base.transform.GetPosition());
 	}
 
 	public int GetPowerInputCell()
@@ -213,7 +219,11 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 
 	private SimHashes GetVisualizationElementID(PrimaryElement pe)
 	{
-		return (!(this is BuildingComplete)) ? SimHashes.Void : pe.ElementID;
+		if (!(this is BuildingComplete))
+		{
+			return SimHashes.Void;
+		}
+		return pe.ElementID;
 	}
 
 	public void RunOnArea(Action<int> callback)
@@ -351,11 +361,6 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	public int GetCell()
 	{
 		return Grid.PosToCell(this);
-	}
-
-	Transform IApproachable.get_transform()
-	{
-		return base.transform;
 	}
 
 	public BuildingDef Def;

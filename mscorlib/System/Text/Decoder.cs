@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Text
 {
@@ -7,21 +9,30 @@ namespace System.Text
 	[Serializable]
 	public abstract class Decoder
 	{
+		internal void SerializeDecoder(SerializationInfo info)
+		{
+			info.AddValue("m_fallback", this.m_fallback);
+		}
+
 		[ComVisible(false)]
 		public DecoderFallback Fallback
 		{
 			get
 			{
-				return this.fallback;
+				return this.m_fallback;
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException();
+					throw new ArgumentNullException("value");
 				}
-				this.fallback = value;
-				this.fallback_buffer = null;
+				if (this.m_fallbackBuffer != null && this.m_fallbackBuffer.Remaining > 0)
+				{
+					throw new ArgumentException(Environment.GetResourceString("Cannot change fallback when buffer is not empty. Previous Convert() call left data in the fallback buffer."), "value");
+				}
+				this.m_fallback = value;
+				this.m_fallbackBuffer = null;
 			}
 		}
 
@@ -30,171 +41,173 @@ namespace System.Text
 		{
 			get
 			{
-				if (this.fallback_buffer == null)
+				if (this.m_fallbackBuffer == null)
 				{
-					this.fallback_buffer = this.fallback.CreateFallbackBuffer();
+					if (this.m_fallback != null)
+					{
+						this.m_fallbackBuffer = this.m_fallback.CreateFallbackBuffer();
+					}
+					else
+					{
+						this.m_fallbackBuffer = DecoderFallback.ReplacementFallback.CreateFallbackBuffer();
+					}
 				}
-				return this.fallback_buffer;
+				return this.m_fallbackBuffer;
 			}
 		}
 
-		public abstract int GetCharCount(byte[] bytes, int index, int count);
-
-		public abstract int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex);
-
-		[ComVisible(false)]
-		public virtual int GetCharCount(byte[] bytes, int index, int count, bool flush)
+		internal bool InternalHasFallbackBuffer
 		{
-			if (flush)
+			get
 			{
-				this.Reset();
+				return this.m_fallbackBuffer != null;
 			}
-			return this.GetCharCount(bytes, index, count);
-		}
-
-		[ComVisible(false)]
-		[CLSCompliant(false)]
-		public unsafe virtual int GetCharCount(byte* bytes, int count, bool flush)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count");
-			}
-			byte[] array = new byte[count];
-			Marshal.Copy((IntPtr)((void*)bytes), array, 0, count);
-			return this.GetCharCount(array, 0, count, flush);
-		}
-
-		public virtual int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, bool flush)
-		{
-			this.CheckArguments(bytes, byteIndex, byteCount);
-			this.CheckArguments(chars, charIndex);
-			if (flush)
-			{
-				this.Reset();
-			}
-			return this.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
-		}
-
-		[ComVisible(false)]
-		[CLSCompliant(false)]
-		public unsafe virtual int GetChars(byte* bytes, int byteCount, char* chars, int charCount, bool flush)
-		{
-			this.CheckArguments(chars, charCount, bytes, byteCount);
-			char[] array = new char[charCount];
-			Marshal.Copy((IntPtr)((void*)chars), array, 0, charCount);
-			byte[] array2 = new byte[byteCount];
-			Marshal.Copy((IntPtr)((void*)bytes), array2, 0, byteCount);
-			return this.GetChars(array2, 0, byteCount, array, 0, flush);
 		}
 
 		[ComVisible(false)]
 		public virtual void Reset()
 		{
-			if (this.fallback_buffer != null)
+			byte[] array = new byte[0];
+			char[] array2 = new char[this.GetCharCount(array, 0, 0, true)];
+			this.GetChars(array, 0, 0, array2, 0, true);
+			if (this.m_fallbackBuffer != null)
 			{
-				this.fallback_buffer.Reset();
+				this.m_fallbackBuffer.Reset();
 			}
 		}
 
-		[CLSCompliant(false)]
+		public abstract int GetCharCount(byte[] bytes, int index, int count);
+
 		[ComVisible(false)]
-		public unsafe virtual void Convert(byte* bytes, int byteCount, char* chars, int charCount, bool flush, out int bytesUsed, out int charsUsed, out bool completed)
+		public virtual int GetCharCount(byte[] bytes, int index, int count, bool flush)
 		{
-			this.CheckArguments(chars, charCount, bytes, byteCount);
-			bytesUsed = byteCount;
-			for (;;)
+			return this.GetCharCount(bytes, index, count);
+		}
+
+		[ComVisible(false)]
+		[SecurityCritical]
+		[CLSCompliant(false)]
+		public unsafe virtual int GetCharCount(byte* bytes, int count, bool flush)
+		{
+			if (bytes == null)
 			{
-				charsUsed = this.GetCharCount(bytes, bytesUsed, flush);
-				if (charsUsed <= charCount)
-				{
-					break;
-				}
-				flush = false;
-				bytesUsed >>= 1;
+				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
 			}
-			completed = bytesUsed == byteCount;
-			charsUsed = this.GetChars(bytes, bytesUsed, chars, charCount, flush);
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			byte[] array = new byte[count];
+			for (int i = 0; i < count; i++)
+			{
+				array[i] = bytes[i];
+			}
+			return this.GetCharCount(array, 0, count);
+		}
+
+		public abstract int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex);
+
+		public virtual int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, bool flush)
+		{
+			return this.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
+		}
+
+		[ComVisible(false)]
+		[CLSCompliant(false)]
+		[SecurityCritical]
+		public unsafe virtual int GetChars(byte* bytes, int byteCount, char* chars, int charCount, bool flush)
+		{
+			if (chars == null || bytes == null)
+			{
+				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", Environment.GetResourceString("Array cannot be null."));
+			}
+			if (byteCount < 0 || charCount < 0)
+			{
+				throw new ArgumentOutOfRangeException((byteCount < 0) ? "byteCount" : "charCount", Environment.GetResourceString("Non-negative number required."));
+			}
+			byte[] array = new byte[byteCount];
+			for (int i = 0; i < byteCount; i++)
+			{
+				array[i] = bytes[i];
+			}
+			char[] array2 = new char[charCount];
+			int chars2 = this.GetChars(array, 0, byteCount, array2, 0, flush);
+			if (chars2 < charCount)
+			{
+				charCount = chars2;
+			}
+			for (int i = 0; i < charCount; i++)
+			{
+				chars[i] = array2[i];
+			}
+			return charCount;
 		}
 
 		[ComVisible(false)]
 		public virtual void Convert(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, int charCount, bool flush, out int bytesUsed, out int charsUsed, out bool completed)
 		{
-			this.CheckArguments(bytes, byteIndex, byteCount);
-			this.CheckArguments(chars, charIndex);
-			if (charCount < 0 || chars.Length < charIndex + charCount)
+			if (bytes == null || chars == null)
 			{
-				throw new ArgumentOutOfRangeException("charCount");
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
 			}
-			bytesUsed = byteCount;
-			for (;;)
+			if (byteIndex < 0 || byteCount < 0)
 			{
-				charsUsed = this.GetCharCount(bytes, byteIndex, bytesUsed, flush);
-				if (charsUsed <= charCount)
+				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (charIndex < 0 || charCount < 0)
+			{
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (bytes.Length - byteIndex < byteCount)
+			{
+				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+			}
+			if (chars.Length - charIndex < charCount)
+			{
+				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+			}
+			for (bytesUsed = byteCount; bytesUsed > 0; bytesUsed /= 2)
+			{
+				if (this.GetCharCount(bytes, byteIndex, bytesUsed, flush) <= charCount)
 				{
-					break;
+					charsUsed = this.GetChars(bytes, byteIndex, bytesUsed, chars, charIndex, flush);
+					completed = bytesUsed == byteCount && (this.m_fallbackBuffer == null || this.m_fallbackBuffer.Remaining == 0);
+					return;
 				}
 				flush = false;
-				bytesUsed >>= 1;
 			}
-			completed = bytesUsed == byteCount;
-			charsUsed = this.GetChars(bytes, byteIndex, bytesUsed, chars, charIndex, flush);
+			throw new ArgumentException(Environment.GetResourceString("Conversion buffer overflow."));
 		}
 
-		private void CheckArguments(char[] chars, int charIndex)
+		[SecurityCritical]
+		[CLSCompliant(false)]
+		[ComVisible(false)]
+		public unsafe virtual void Convert(byte* bytes, int byteCount, char* chars, int charCount, bool flush, out int bytesUsed, out int charsUsed, out bool completed)
 		{
-			if (chars == null)
+			if (chars == null || bytes == null)
 			{
-				throw new ArgumentNullException("chars");
+				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", Environment.GetResourceString("Array cannot be null."));
 			}
-			if (charIndex < 0 || chars.Length <= charIndex)
+			if (byteCount < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("charIndex");
+				throw new ArgumentOutOfRangeException((byteCount < 0) ? "byteCount" : "charCount", Environment.GetResourceString("Non-negative number required."));
 			}
+			for (bytesUsed = byteCount; bytesUsed > 0; bytesUsed /= 2)
+			{
+				if (this.GetCharCount(bytes, bytesUsed, flush) <= charCount)
+				{
+					charsUsed = this.GetChars(bytes, bytesUsed, chars, charCount, flush);
+					completed = bytesUsed == byteCount && (this.m_fallbackBuffer == null || this.m_fallbackBuffer.Remaining == 0);
+					return;
+				}
+				flush = false;
+			}
+			throw new ArgumentException(Environment.GetResourceString("Conversion buffer overflow."));
 		}
 
-		private void CheckArguments(byte[] bytes, int byteIndex, int byteCount)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (byteIndex < 0 || bytes.Length <= byteIndex)
-			{
-				throw new ArgumentOutOfRangeException("byteIndex");
-			}
-			if (byteCount < 0 || bytes.Length < byteIndex + byteCount)
-			{
-				throw new ArgumentOutOfRangeException("byteCount");
-			}
-		}
+		internal DecoderFallback m_fallback;
 
-		private unsafe void CheckArguments(char* chars, int charCount, byte* bytes, int byteCount)
-		{
-			if (chars == null)
-			{
-				throw new ArgumentNullException("chars");
-			}
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (charCount < 0)
-			{
-				throw new ArgumentOutOfRangeException("charCount");
-			}
-			if (byteCount < 0)
-			{
-				throw new ArgumentOutOfRangeException("byteCount");
-			}
-		}
-
-		private DecoderFallback fallback = new DecoderReplacementFallback();
-
-		private DecoderFallbackBuffer fallback_buffer;
+		[NonSerialized]
+		internal DecoderFallbackBuffer m_fallbackBuffer;
 	}
 }

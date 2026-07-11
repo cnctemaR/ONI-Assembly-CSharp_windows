@@ -978,16 +978,20 @@ namespace UnityEngine.UI
 		{
 			if (this.MayDrag(eventData))
 			{
-				Vector2 vector;
-				RectTransformUtility.ScreenPointToLocalPointInRectangle(this.textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out vector);
-				this.caretSelectPositionInternal = this.GetCharacterIndexFromPosition(vector) + this.m_DrawStart;
-				this.MarkGeometryAsDirty();
-				this.m_DragPositionOutOfBounds = !RectTransformUtility.RectangleContainsScreenPoint(this.textComponent.rectTransform, eventData.position, eventData.pressEventCamera);
-				if (this.m_DragPositionOutOfBounds && this.m_DragCoroutine == null)
+				Vector2 zero = Vector2.zero;
+				if (MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
 				{
-					this.m_DragCoroutine = base.StartCoroutine(this.MouseDragOutsideRect(eventData));
+					Vector2 vector;
+					RectTransformUtility.ScreenPointToLocalPointInRectangle(this.textComponent.rectTransform, zero, eventData.pressEventCamera, out vector);
+					this.caretSelectPositionInternal = this.GetCharacterIndexFromPosition(vector) + this.m_DrawStart;
+					this.MarkGeometryAsDirty();
+					this.m_DragPositionOutOfBounds = !RectTransformUtility.RectangleContainsScreenPoint(this.textComponent.rectTransform, eventData.position, eventData.pressEventCamera);
+					if (this.m_DragPositionOutOfBounds && this.m_DragCoroutine == null)
+					{
+						this.m_DragCoroutine = base.StartCoroutine(this.MouseDragOutsideRect(eventData));
+					}
+					eventData.Use();
 				}
-				eventData.Use();
 			}
 		}
 
@@ -995,8 +999,13 @@ namespace UnityEngine.UI
 		{
 			while (this.m_UpdateDrag && this.m_DragPositionOutOfBounds)
 			{
+				Vector2 position = Vector2.zero;
+				if (!MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref position))
+				{
+					break;
+				}
 				Vector2 localMousePos;
-				RectTransformUtility.ScreenPointToLocalPointInRectangle(this.textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
+				RectTransformUtility.ScreenPointToLocalPointInRectangle(this.textComponent.rectTransform, position, eventData.pressEventCamera, out localMousePos);
 				Rect rect = this.textComponent.rectTransform.rect;
 				if (this.multiLine)
 				{
@@ -1019,7 +1028,15 @@ namespace UnityEngine.UI
 				}
 				this.UpdateLabel();
 				float delay = ((!this.multiLine) ? 0.05f : 0.1f);
-				yield return new WaitForSecondsRealtime(delay);
+				if (this.m_WaitForSecondsRealtime == null)
+				{
+					this.m_WaitForSecondsRealtime = new WaitForSecondsRealtime(delay);
+				}
+				else
+				{
+					this.m_WaitForSecondsRealtime.waitTime = delay;
+				}
+				yield return this.m_WaitForSecondsRealtime;
 			}
 			this.m_DragCoroutine = null;
 			yield break;
@@ -1051,7 +1068,7 @@ namespace UnityEngine.UI
 				if (allowInput)
 				{
 					Vector2 vector;
-					RectTransformUtility.ScreenPointToLocalPointInRectangle(this.textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out vector);
+					RectTransformUtility.ScreenPointToLocalPointInRectangle(this.textComponent.rectTransform, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector);
 					int num = this.GetCharacterIndexFromPosition(vector) + this.m_DrawStart;
 					this.caretPositionInternal = num;
 					this.caretSelectPositionInternal = num;
@@ -1626,22 +1643,25 @@ namespace UnityEngine.UI
 
 		protected virtual void Append(char input)
 		{
-			if (!this.m_ReadOnly && this.text.Length < 16382)
+			if (!char.IsSurrogate(input))
 			{
-				if (this.InPlaceEditing())
+				if (!this.m_ReadOnly && this.text.Length < 16382)
 				{
-					int num = Math.Min(this.selectionFocusPosition, this.selectionAnchorPosition);
-					if (this.onValidateInput != null)
+					if (this.InPlaceEditing())
 					{
-						input = this.onValidateInput(this.text, num, input);
-					}
-					else if (this.characterValidation != InputField.CharacterValidation.None)
-					{
-						input = this.Validate(this.text, num, input);
-					}
-					if (input != '\0')
-					{
-						this.Insert(input);
+						int num = Math.Min(this.selectionFocusPosition, this.selectionAnchorPosition);
+						if (this.onValidateInput != null)
+						{
+							input = this.onValidateInput(this.text, num, input);
+						}
+						else if (this.characterValidation != InputField.CharacterValidation.None)
+						{
+							input = this.Validate(this.text, num, input);
+						}
+						if (input != '\0')
+						{
+							this.Insert(input);
+						}
 					}
 				}
 			}
@@ -2528,13 +2548,13 @@ namespace UnityEngine.UI
 		[SerializeField]
 		private InputField.OnValidateInput m_OnValidateInput;
 
+		[FormerlySerializedAs("selectionColor")]
 		[SerializeField]
 		private Color m_CaretColor = new Color(0.19607843f, 0.19607843f, 0.19607843f, 1f);
 
 		[SerializeField]
 		private bool m_CustomCaretColor = false;
 
-		[FormerlySerializedAs("selectionColor")]
 		[SerializeField]
 		private Color m_SelectionColor = new Color(0.65882355f, 0.80784315f, 1f, 0.7529412f);
 
@@ -2599,6 +2619,8 @@ namespace UnityEngine.UI
 		private bool m_WasCanceled = false;
 
 		private bool m_HasDoneFocusTransition = false;
+
+		private WaitForSecondsRealtime m_WaitForSecondsRealtime;
 
 		private const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 

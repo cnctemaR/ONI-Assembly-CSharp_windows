@@ -1,12 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Base class for AnimationClips and BlendTrees.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/Motion.h")]
 	public class Motion : Object
 	{
@@ -64,11 +62,13 @@ namespace UnityEngine
 		}
 
 		[Obsolete("ValidateIfRetargetable is not supported anymore, please use isHumanMotion instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool ValidateIfRetargetable(bool val)
 		{
 			return false;
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("isAnimatorMotion is not supported anymore, please use !legacy instead.", true)]
 		public bool isAnimatorMotion { get; }
 

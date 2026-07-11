@@ -57,16 +57,12 @@ public class PressureDoorConfig : IBuildingConfig
 		go.AddOrGet<AccessControl>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.Door;
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 5f;
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Door;
+		go.AddOrGet<Workable>().workTime = 5f;
 		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
-		AccessControl component = go.GetComponent<AccessControl>();
-		component.controlEnabled = true;
-		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
-		component2.initialAnim = "closed";
+		go.GetComponent<AccessControl>().controlEnabled = true;
+		go.GetComponent<KBatchedAnimController>().initialAnim = "closed";
 	}
 
 	public const string ID = "PressureDoor";

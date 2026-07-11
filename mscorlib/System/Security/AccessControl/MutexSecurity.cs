@@ -1,15 +1,24 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 
 namespace System.Security.AccessControl
 {
 	public sealed class MutexSecurity : NativeObjectSecurity
 	{
 		public MutexSecurity()
+			: base(false, ResourceType.KernelObject)
 		{
 		}
 
 		public MutexSecurity(string name, AccessControlSections includeSections)
+			: base(false, ResourceType.KernelObject, name, includeSections, new NativeObjectSecurity.ExceptionFromErrorCode(MutexSecurity.MutexExceptionFromErrorCode), null)
+		{
+		}
+
+		internal MutexSecurity(SafeHandle handle, AccessControlSections includeSections)
+			: base(false, ResourceType.KernelObject, handle, includeSections, new NativeObjectSecurity.ExceptionFromErrorCode(MutexSecurity.MutexExceptionFromErrorCode), null)
 		{
 		}
 
@@ -42,40 +51,34 @@ namespace System.Security.AccessControl
 			return new MutexAccessRule(identityReference, (MutexRights)accessMask, type);
 		}
 
-		[MonoTODO]
 		public void AddAccessRule(MutexAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.AddAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public bool RemoveAccessRule(MutexAccessRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAccessRuleAll(MutexAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleAll(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAccessRuleSpecific(MutexAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleSpecific(rule);
 		}
 
-		[MonoTODO]
 		public void ResetAccessRule(MutexAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.ResetAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public void SetAccessRule(MutexAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAccessRule(rule);
 		}
 
 		public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
@@ -83,34 +86,38 @@ namespace System.Security.AccessControl
 			return new MutexAuditRule(identityReference, (MutexRights)accessMask, flags);
 		}
 
-		[MonoTODO]
 		public void AddAuditRule(MutexAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.AddAuditRule(rule);
 		}
 
-		[MonoTODO]
 		public bool RemoveAuditRule(MutexAuditRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAuditRule(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAuditRuleAll(MutexAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAuditRuleAll(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAuditRuleSpecific(MutexAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAuditRuleSpecific(rule);
 		}
 
-		[MonoTODO]
 		public void SetAuditRule(MutexAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAuditRule(rule);
+		}
+
+		private static Exception MutexExceptionFromErrorCode(int errorCode, string name, SafeHandle handle, object context)
+		{
+			if (errorCode == 2)
+			{
+				return new WaitHandleCannotBeOpenedException();
+			}
+			return NativeObjectSecurity.DefaultExceptionFromErrorCode(errorCode, name, handle, context);
 		}
 	}
 }

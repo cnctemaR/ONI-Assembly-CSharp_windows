@@ -10,11 +10,9 @@ namespace ClipperLib
 			if (_lo < 0L)
 			{
 				this.hi = -1L;
+				return;
 			}
-			else
-			{
-				this.hi = 0L;
-			}
+			this.hi = 0L;
 		}
 
 		public Int128(long _hi, ulong _lo)
@@ -140,7 +138,11 @@ namespace ClipperLib
 				num8 += 1L;
 			}
 			Int128 @int = new Int128(num8, num9);
-			return (!flag) ? @int : (-@int);
+			if (!flag)
+			{
+				return @int;
+			}
+			return -@int;
 		}
 
 		private long hi;

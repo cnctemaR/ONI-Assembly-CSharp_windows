@@ -12,9 +12,10 @@ namespace Database
 			{
 				if (plantablePlot.Occupant != null)
 				{
-					foreach (Tag tag in plantablePlot.possibleDepositObjectTags)
+					Tag[] possibleDepositObjectTags = plantablePlot.possibleDepositObjectTags;
+					for (int i = 0; i < possibleDepositObjectTags.Length; i++)
 					{
-						if (tag != GameTags.DecorSeed)
+						if (possibleDepositObjectTags[i] != GameTags.DecorSeed)
 						{
 							return false;
 						}

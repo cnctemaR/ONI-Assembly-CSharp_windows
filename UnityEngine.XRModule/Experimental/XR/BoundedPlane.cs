@@ -6,49 +6,25 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.XR
 {
-	/// <summary>
-	///   <para>Structure describing a bounded plane representing a real-world surface.</para>
-	/// </summary>
-	[NativeConditional("ENABLE_XR")]
-	[NativeHeader("XRScriptingClasses.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Modules/XR/XRPrefix.h")]
 	[NativeHeader("Modules/XR/Subsystems/Planes/XRBoundedPlane.h")]
+	[NativeConditional("ENABLE_XR")]
+	[UsedByNativeCode]
+	[NativeHeader("XRScriptingClasses.h")]
 	public struct BoundedPlane
 	{
-		/// <summary>
-		///   <para>A session-unique identifier for the plane.</para>
-		/// </summary>
 		public TrackableId Id { get; set; }
 
-		/// <summary>
-		///   <para>A session-unique identifier for the BoundedPlane that subsumed this plane.</para>
-		/// </summary>
 		public TrackableId SubsumedById { get; set; }
 
-		/// <summary>
-		///   <para>Pose of the plane in device space.</para>
-		/// </summary>
 		public Pose Pose { get; set; }
 
-		/// <summary>
-		///   <para>Center point of the plane in device space.</para>
-		/// </summary>
 		public Vector3 Center { get; set; }
 
-		/// <summary>
-		///   <para>Current size of the plane.</para>
-		/// </summary>
 		public Vector2 Size { get; set; }
 
-		/// <summary>
-		///   <para>The alignment of the plane, e.g., horizontal or vertical.</para>
-		/// </summary>
 		public PlaneAlignment Alignment { get; set; }
 
-		/// <summary>
-		///   <para>Current width of the plane.</para>
-		/// </summary>
 		public float Width
 		{
 			get
@@ -57,9 +33,6 @@ namespace UnityEngine.Experimental.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Current height of the plane.</para>
-		/// </summary>
 		public float Height
 		{
 			get
@@ -68,9 +41,6 @@ namespace UnityEngine.Experimental.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Normal vector of the plane in device space.</para>
-		/// </summary>
 		public Vector3 Normal
 		{
 			get
@@ -79,9 +49,6 @@ namespace UnityEngine.Experimental.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the infinite Plane associated with this BoundedPlane.</para>
-		/// </summary>
 		public Plane Plane
 		{
 			get

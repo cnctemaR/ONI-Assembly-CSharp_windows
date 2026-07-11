@@ -5,6 +5,10 @@ using System.Reflection;
 [Serializable]
 public class LocString
 {
+	public string text { get; private set; }
+
+	public StringKey key { get; private set; }
+
 	public LocString(string text)
 	{
 		this.text = text;
@@ -22,10 +26,6 @@ public class LocString
 		this.text = text;
 		this.key = default(StringKey);
 	}
-
-	public string text { get; private set; }
-
-	public StringKey key { get; private set; }
 
 	public static implicit operator LocString(string text)
 	{
@@ -63,12 +63,12 @@ public class LocString
 		string text = parent_path;
 		if (text == null)
 		{
-			text = string.Empty;
+			text = "";
 		}
 		text = text + type.Name + ".";
 		foreach (FieldInfo fieldInfo in fields)
 		{
-			if (fieldInfo.FieldType == typeof(LocString))
+			if (!(fieldInfo.FieldType != typeof(LocString)))
 			{
 				string text2 = text + fieldInfo.Name;
 				LocString locString = (LocString)fieldInfo.GetValue(null);
@@ -78,9 +78,10 @@ public class LocString
 				fieldInfo.SetValue(null, locString);
 			}
 		}
-		foreach (Type type2 in type.GetNestedTypes(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
+		Type[] nestedTypes = type.GetNestedTypes(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+		for (int i = 0; i < nestedTypes.Length; i++)
 		{
-			LocString.CreateLocStringKeys(type2, text);
+			LocString.CreateLocStringKeys(nestedTypes[i], text);
 		}
 	}
 
@@ -88,9 +89,9 @@ public class LocString
 	{
 		List<string> list = new List<string>();
 		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-		foreach (FieldInfo fieldInfo in fields)
+		for (int i = 0; i < fields.Length; i++)
 		{
-			LocString locString = (LocString)fieldInfo.GetValue(null);
+			LocString locString = (LocString)fields[i].GetValue(null);
 			list.Add(locString.text);
 		}
 		return list.ToArray();

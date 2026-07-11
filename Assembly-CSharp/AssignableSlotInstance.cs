@@ -3,12 +3,6 @@ using UnityEngine;
 
 public abstract class AssignableSlotInstance
 {
-	public AssignableSlotInstance(Assignables assignables, AssignableSlot slot)
-	{
-		this.slot = slot;
-		this.assignables = assignables;
-	}
-
 	public Assignables assignables { get; private set; }
 
 	public GameObject gameObject
@@ -17,6 +11,12 @@ public abstract class AssignableSlotInstance
 		{
 			return this.assignables.gameObject;
 		}
+	}
+
+	public AssignableSlotInstance(Assignables assignables, AssignableSlot slot)
+	{
+		this.slot = slot;
+		this.assignables = assignables;
 	}
 
 	public void Assign(Assignable assignable)

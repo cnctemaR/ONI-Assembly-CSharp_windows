@@ -35,8 +35,8 @@ public class FilterSideScreen : SideScreenContent
 		{
 			return;
 		}
-		this.everythingElseHeaderLabel.text = ((component.filterElementState != Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
-		Element element = ((!component.SelectedTag.IsValid) ? ElementLoader.FindElementByHash(SimHashes.Void) : ElementLoader.GetElement(component.SelectedTag));
+		this.everythingElseHeaderLabel.text = ((component.filterElementState == Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID);
+		Element element = (component.SelectedTag.IsValid ? ElementLoader.GetElement(component.SelectedTag) : ElementLoader.FindElementByHash(SimHashes.Void));
 		this.SetFilterElement(element);
 		this.Configure(component);
 	}
@@ -86,7 +86,7 @@ public class FilterSideScreen : SideScreenContent
 		{
 			return;
 		}
-		LocString locString = ((component.filterElementState != Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS);
+		LocString locString = ((component.filterElementState == Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS : UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID);
 		this.currentSelectionLabel.text = string.Format(locString, UI.UISIDESCREENS.FILTERSIDESCREEN.NOELEMENTSELECTED);
 		if (element != null)
 		{

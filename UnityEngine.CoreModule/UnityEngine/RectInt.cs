@@ -5,11 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A 2D Rectangle defined by x, y, width, height with integers.</para>
-	/// </summary>
 	[UsedByNativeCode]
-	public struct RectInt
+	public struct RectInt : IEquatable<RectInt>
 	{
 		public RectInt(int xMin, int yMin, int width, int height)
 		{
@@ -27,9 +24,6 @@ namespace UnityEngine
 			this.m_Height = size.y;
 		}
 
-		/// <summary>
-		///   <para>Left coordinate of the rectangle.</para>
-		/// </summary>
 		public int x
 		{
 			get
@@ -42,9 +36,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Top coordinate of the rectangle.</para>
-		/// </summary>
 		public int y
 		{
 			get
@@ -57,9 +48,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Center coordinate of the rectangle.</para>
-		/// </summary>
 		public Vector2 center
 		{
 			get
@@ -68,9 +56,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Lower left corner of the rectangle.</para>
-		/// </summary>
 		public Vector2Int min
 		{
 			get
@@ -84,9 +69,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Upper right corner of the rectangle.</para>
-		/// </summary>
 		public Vector2Int max
 		{
 			get
@@ -100,9 +82,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Width of the rectangle.</para>
-		/// </summary>
 		public int width
 		{
 			get
@@ -115,9 +94,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Height of the rectangle.</para>
-		/// </summary>
 		public int height
 		{
 			get
@@ -130,9 +106,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the minimum X value of the RectInt.</para>
-		/// </summary>
 		public int xMin
 		{
 			get
@@ -147,9 +120,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the minimum Y value of the RectInt.</para>
-		/// </summary>
 		public int yMin
 		{
 			get
@@ -164,9 +134,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the maximum X value of the RectInt.</para>
-		/// </summary>
 		public int xMax
 		{
 			get
@@ -179,9 +146,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the maximum Y value of the RectInt.</para>
-		/// </summary>
 		public int yMax
 		{
 			get
@@ -194,9 +158,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the position (x, y) of the RectInt.</para>
-		/// </summary>
 		public Vector2Int position
 		{
 			get
@@ -210,9 +171,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the width and height of the RectInt.</para>
-		/// </summary>
 		public Vector2Int size
 		{
 			get
@@ -226,51 +184,33 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the bounds to the min and max value of the rect.</para>
-		/// </summary>
-		/// <param name="minPosition"></param>
-		/// <param name="maxPosition"></param>
 		public void SetMinMax(Vector2Int minPosition, Vector2Int maxPosition)
 		{
 			this.min = minPosition;
 			this.max = maxPosition;
 		}
 
-		/// <summary>
-		///   <para>Clamps the position and size of the RectInt to the given bounds.</para>
-		/// </summary>
-		/// <param name="bounds">Bounds to clamp the RectInt.</param>
 		public void ClampToBounds(RectInt bounds)
 		{
 			this.position = new Vector2Int(Math.Max(Math.Min(bounds.xMax, this.position.x), bounds.xMin), Math.Max(Math.Min(bounds.yMax, this.position.y), bounds.yMin));
 			this.size = new Vector2Int(Math.Min(bounds.xMax - this.position.x, this.size.x), Math.Min(bounds.yMax - this.position.y, this.size.y));
 		}
 
-		/// <summary>
-		///   <para>Returns true if the given position is within the RectInt.</para>
-		/// </summary>
-		/// <param name="position">Position to check.</param>
-		/// <param name="inclusive">Whether the max limits are included in the check.</param>
-		/// <returns>
-		///   <para>Whether the position is within the RectInt.</para>
-		/// </returns>
 		public bool Contains(Vector2Int position)
 		{
-			return position.x >= this.m_XMin && position.y >= this.m_YMin && position.x < this.m_XMin + this.m_Width && position.y < this.m_YMin + this.m_Height;
+			return position.x >= this.xMin && position.y >= this.yMin && position.x < this.xMax && position.y < this.yMax;
 		}
 
-		/// <summary>
-		///   <para>Returns the x, y, width and height of the RectInt.</para>
-		/// </summary>
 		public override string ToString()
 		{
 			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[] { this.x, this.y, this.width, this.height });
 		}
 
-		/// <summary>
-		///   <para>A RectInt.PositionCollection that contains all positions within the RectInt.</para>
-		/// </summary>
+		public bool Equals(RectInt other)
+		{
+			return this.m_XMin == other.m_XMin && this.m_YMin == other.m_YMin && this.m_Width == other.m_Width && this.m_Height == other.m_Height;
+		}
+
 		public RectInt.PositionEnumerator allPositionsWithin
 		{
 			get
@@ -287,9 +227,6 @@ namespace UnityEngine
 
 		private int m_Height;
 
-		/// <summary>
-		///   <para>An iterator that allows you to iterate over all positions within the RectInt.</para>
-		/// </summary>
 		public struct PositionEnumerator : IEnumerator<Vector2Int>, IEnumerator, IDisposable
 		{
 			public PositionEnumerator(Vector2Int min, Vector2Int max)
@@ -300,23 +237,11 @@ namespace UnityEngine
 				this.Reset();
 			}
 
-			/// <summary>
-			///   <para>Returns this as an iterator that allows you to iterate over all positions within the RectInt.</para>
-			/// </summary>
-			/// <returns>
-			///   <para>This RectInt.PositionEnumerator.</para>
-			/// </returns>
 			public RectInt.PositionEnumerator GetEnumerator()
 			{
 				return this;
 			}
 
-			/// <summary>
-			///   <para>Moves the enumerator to the next position.</para>
-			/// </summary>
-			/// <returns>
-			///   <para>Whether the enumerator has successfully moved to the next position.</para>
-			/// </returns>
 			public bool MoveNext()
 			{
 				bool flag;
@@ -341,18 +266,12 @@ namespace UnityEngine
 				return flag;
 			}
 
-			/// <summary>
-			///   <para>Resets this enumerator to its starting state.</para>
-			/// </summary>
 			public void Reset()
 			{
 				this._current = this._min;
 				this._current.x = this._current.x - 1;
 			}
 
-			/// <summary>
-			///   <para>Current position of the enumerator.</para>
-			/// </summary>
 			public Vector2Int Current
 			{
 				get

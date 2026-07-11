@@ -35,8 +35,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
-		conduitConsumer.conduitType = ConduitType.Liquid;
+		go.AddOrGet<ConduitConsumer>().conduitType = ConduitType.Liquid;
 		MicrobeMusher microbeMusher = go.AddOrGet<MicrobeMusher>();
 		microbeMusher.mushbarSpawnOffset = new Vector3(1f, 0f, 0f);
 		go.AddOrGet<FabricatorIngredientStatusManager>();
@@ -59,8 +58,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("MushBar".ToTag(), 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array, array2);
-		MushBarConfig.recipe = new ComplexRecipe(text, array, array2)
+		MushBarConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array, array2), array, array2)
 		{
 			time = 40f,
 			description = ITEMS.FOOD.MUSHBAR.RECIPEDESC,
@@ -77,8 +75,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("BasicPlantBar".ToTag(), 1f)
 		};
-		string text2 = ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array3, array4);
-		BasicPlantBarConfig.recipe = new ComplexRecipe(text2, array3, array4)
+		BasicPlantBarConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array3, array4), array3, array4)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.BASICPLANTBAR.RECIPEDESC,
@@ -95,8 +92,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Tofu".ToTag(), 1f)
 		};
-		string text3 = ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array5, array6);
-		TofuConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		TofuConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array5, array6), array5, array6)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.TOFU.RECIPEDESC,
@@ -113,8 +109,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("FruitCake".ToTag(), 1f)
 		};
-		string text4 = ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array7, array8);
-		FruitCakeConfig.recipe = new ComplexRecipe(text4, array7, array8)
+		FruitCakeConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array7, array8), array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.FRUITCAKE.RECIPEDESC,

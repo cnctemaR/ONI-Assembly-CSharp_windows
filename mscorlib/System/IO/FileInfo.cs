@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 using System.Security.AccessControl;
+using System.Text;
 
 namespace System.IO
 {
@@ -9,101 +11,79 @@ namespace System.IO
 	[Serializable]
 	public sealed class FileInfo : FileSystemInfo
 	{
+		[SecuritySafeCritical]
 		public FileInfo(string fileName)
 		{
 			if (fileName == null)
 			{
 				throw new ArgumentNullException("fileName");
 			}
-			base.CheckPath(fileName);
-			this.OriginalPath = fileName;
-			this.FullPath = Path.GetFullPath(fileName);
+			this.Init(fileName, true);
 		}
 
+		[SecurityCritical]
+		private void Init(string fileName, bool checkHost)
+		{
+			this.OriginalPath = fileName;
+			string fullPathInternal = Path.GetFullPathInternal(fileName);
+			this._name = Path.GetFileName(fileName);
+			this.FullPath = fullPathInternal;
+			base.DisplayPath = this.GetDisplayPath(fileName);
+		}
+
+		private string GetDisplayPath(string originalPath)
+		{
+			return originalPath;
+		}
+
+		[SecurityCritical]
 		private FileInfo(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
+			this._name = Path.GetFileName(this.OriginalPath);
+			base.DisplayPath = this.GetDisplayPath(this.OriginalPath);
 		}
 
-		internal override void InternalRefresh()
+		internal FileInfo(string fullPath, bool ignoreThis)
 		{
-			this.exists = File.Exists(this.FullPath);
-		}
-
-		public override bool Exists
-		{
-			get
-			{
-				base.Refresh(false);
-				return this.stat.Attributes != MonoIO.InvalidFileAttributes && (this.stat.Attributes & FileAttributes.Directory) == (FileAttributes)0 && this.exists;
-			}
+			this._name = Path.GetFileName(fullPath);
+			this.OriginalPath = this._name;
+			this.FullPath = fullPath;
+			base.DisplayPath = this._name;
 		}
 
 		public override string Name
 		{
 			get
 			{
-				return Path.GetFileName(this.FullPath);
+				return this._name;
 			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				if (!this.Exists)
-				{
-					throw new FileNotFoundException("Could not find file \"" + this.OriginalPath + "\".", this.OriginalPath);
-				}
-				return (this.stat.Attributes & FileAttributes.ReadOnly) != (FileAttributes)0;
-			}
-			set
-			{
-				if (!this.Exists)
-				{
-					throw new FileNotFoundException("Could not find file \"" + this.OriginalPath + "\".", this.OriginalPath);
-				}
-				FileAttributes fileAttributes = File.GetAttributes(this.FullPath);
-				if (value)
-				{
-					fileAttributes |= FileAttributes.ReadOnly;
-				}
-				else
-				{
-					fileAttributes &= ~FileAttributes.ReadOnly;
-				}
-				File.SetAttributes(this.FullPath, fileAttributes);
-			}
-		}
-
-		[ComVisible(false)]
-		[MonoLimitation("File encryption isn't supported (even on NTFS).")]
-		public void Encrypt()
-		{
-			throw new NotSupportedException(Locale.GetText("File encryption isn't supported on any file system."));
-		}
-
-		[MonoLimitation("File encryption isn't supported (even on NTFS).")]
-		[ComVisible(false)]
-		public void Decrypt()
-		{
-			throw new NotSupportedException(Locale.GetText("File encryption isn't supported on any file system."));
 		}
 
 		public long Length
 		{
+			[SecuritySafeCritical]
 			get
 			{
-				if (!this.Exists)
+				if (this._dataInitialised == -1)
 				{
-					throw new FileNotFoundException("Could not find file \"" + this.OriginalPath + "\".", this.OriginalPath);
+					base.Refresh();
 				}
-				return this.stat.Length;
+				if (this._dataInitialised != 0)
+				{
+					__Error.WinIOError(this._dataInitialised, base.DisplayPath);
+				}
+				if ((this._data.fileAttributes & FileAttributes.Directory) != (FileAttributes)0)
+				{
+					__Error.WinIOError(2, base.DisplayPath);
+				}
+				return this._data.Length;
 			}
 		}
 
 		public string DirectoryName
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				return Path.GetDirectoryName(this.FullPath);
@@ -114,23 +94,89 @@ namespace System.IO
 		{
 			get
 			{
-				return new DirectoryInfo(this.DirectoryName);
+				string directoryName = this.DirectoryName;
+				if (directoryName == null)
+				{
+					return null;
+				}
+				return new DirectoryInfo(directoryName);
 			}
 		}
 
+		public bool IsReadOnly
+		{
+			get
+			{
+				return (base.Attributes & FileAttributes.ReadOnly) > (FileAttributes)0;
+			}
+			set
+			{
+				if (value)
+				{
+					base.Attributes |= FileAttributes.ReadOnly;
+					return;
+				}
+				base.Attributes &= ~FileAttributes.ReadOnly;
+			}
+		}
+
+		public FileSecurity GetAccessControl()
+		{
+			return File.GetAccessControl(this.FullPath, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+		}
+
+		public FileSecurity GetAccessControl(AccessControlSections includeSections)
+		{
+			return File.GetAccessControl(this.FullPath, includeSections);
+		}
+
+		public void SetAccessControl(FileSecurity fileSecurity)
+		{
+			File.SetAccessControl(this.FullPath, fileSecurity);
+		}
+
+		[SecuritySafeCritical]
 		public StreamReader OpenText()
 		{
-			return new StreamReader(this.Open(FileMode.Open, FileAccess.Read));
+			return new StreamReader(this.FullPath, Encoding.UTF8, true, StreamReader.DefaultBufferSize, false);
 		}
 
 		public StreamWriter CreateText()
 		{
-			return new StreamWriter(this.Open(FileMode.Create, FileAccess.Write));
+			return new StreamWriter(this.FullPath, false);
 		}
 
 		public StreamWriter AppendText()
 		{
-			return new StreamWriter(this.Open(FileMode.Append, FileAccess.Write));
+			return new StreamWriter(this.FullPath, true);
+		}
+
+		public FileInfo CopyTo(string destFileName)
+		{
+			if (destFileName == null)
+			{
+				throw new ArgumentNullException("destFileName", Environment.GetResourceString("File name cannot be null."));
+			}
+			if (destFileName.Length == 0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Empty file name is not legal."), "destFileName");
+			}
+			destFileName = File.InternalCopy(this.FullPath, destFileName, false, true);
+			return new FileInfo(destFileName, false);
+		}
+
+		public FileInfo CopyTo(string destFileName, bool overwrite)
+		{
+			if (destFileName == null)
+			{
+				throw new ArgumentNullException("destFileName", Environment.GetResourceString("File name cannot be null."));
+			}
+			if (destFileName.Length == 0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Empty file name is not legal."), "destFileName");
+			}
+			destFileName = File.InternalCopy(this.FullPath, destFileName, overwrite, true);
+			return new FileInfo(destFileName, false);
 		}
 
 		public FileStream Create()
@@ -138,19 +184,69 @@ namespace System.IO
 			return File.Create(this.FullPath);
 		}
 
-		public FileStream OpenRead()
+		[SecuritySafeCritical]
+		public override void Delete()
 		{
-			return this.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+			MonoIOError monoIOError;
+			if (MonoIO.ExistsDirectory(this.FullPath, out monoIOError))
+			{
+				__Error.WinIOError(5, base.DisplayPath);
+			}
+			if (!MonoIO.DeleteFile(this.FullPath, out monoIOError))
+			{
+				int num = (int)monoIOError;
+				if (num == 2)
+				{
+					return;
+				}
+				__Error.WinIOError(num, base.DisplayPath);
+			}
 		}
 
-		public FileStream OpenWrite()
+		[ComVisible(false)]
+		public void Decrypt()
 		{
-			return this.Open(FileMode.OpenOrCreate, FileAccess.Write);
+			File.Decrypt(this.FullPath);
+		}
+
+		[ComVisible(false)]
+		public void Encrypt()
+		{
+			File.Encrypt(this.FullPath);
+		}
+
+		public override bool Exists
+		{
+			[SecuritySafeCritical]
+			get
+			{
+				bool flag;
+				try
+				{
+					if (this._dataInitialised == -1)
+					{
+						base.Refresh();
+					}
+					if (this._dataInitialised != 0)
+					{
+						flag = false;
+					}
+					else
+					{
+						flag = (this._data.fileAttributes & FileAttributes.Directory) == (FileAttributes)0;
+					}
+				}
+				catch
+				{
+					flag = false;
+				}
+				return flag;
+			}
 		}
 
 		public FileStream Open(FileMode mode)
 		{
-			return this.Open(mode, FileAccess.ReadWrite);
+			return this.Open(mode, FileAccess.ReadWrite, FileShare.None);
 		}
 
 		public FileStream Open(FileMode mode, FileAccess access)
@@ -163,47 +259,18 @@ namespace System.IO
 			return new FileStream(this.FullPath, mode, access, share);
 		}
 
-		public override void Delete()
+		public FileStream OpenRead()
 		{
-			MonoIOError monoIOError;
-			if (!MonoIO.Exists(this.FullPath, out monoIOError))
-			{
-				return;
-			}
-			if (MonoIO.ExistsDirectory(this.FullPath, out monoIOError))
-			{
-				throw new UnauthorizedAccessException("Access to the path \"" + this.FullPath + "\" is denied.");
-			}
-			if (!MonoIO.DeleteFile(this.FullPath, out monoIOError))
-			{
-				throw MonoIO.GetException(this.OriginalPath, monoIOError);
-			}
+			return new FileStream(this.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, false);
 		}
 
+		public FileStream OpenWrite()
+		{
+			return new FileStream(this.FullPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+		}
+
+		[SecuritySafeCritical]
 		public void MoveTo(string destFileName)
-		{
-			if (destFileName == null)
-			{
-				throw new ArgumentNullException("destFileName");
-			}
-			if (destFileName == this.Name || destFileName == this.FullName)
-			{
-				return;
-			}
-			if (!File.Exists(this.FullPath))
-			{
-				throw new FileNotFoundException();
-			}
-			File.Move(this.FullPath, destFileName);
-			this.FullPath = Path.GetFullPath(destFileName);
-		}
-
-		public FileInfo CopyTo(string destFileName)
-		{
-			return this.CopyTo(destFileName, false);
-		}
-
-		public FileInfo CopyTo(string destFileName, bool overwrite)
 		{
 			if (destFileName == null)
 			{
@@ -211,81 +278,39 @@ namespace System.IO
 			}
 			if (destFileName.Length == 0)
 			{
-				throw new ArgumentException("An empty file name is not valid.", "destFileName");
+				throw new ArgumentException(Environment.GetResourceString("Empty file name is not legal."), "destFileName");
 			}
-			string fullPath = Path.GetFullPath(destFileName);
-			if (overwrite && File.Exists(fullPath))
+			string fullPathInternal = Path.GetFullPathInternal(destFileName);
+			MonoIOError monoIOError;
+			if (!MonoIO.MoveFile(this.FullPath, fullPathInternal, out monoIOError))
 			{
-				File.Delete(fullPath);
+				__Error.WinIOError((int)monoIOError, string.Empty);
 			}
-			File.Copy(this.FullPath, fullPath);
-			return new FileInfo(fullPath);
-		}
-
-		public override string ToString()
-		{
-			return this.OriginalPath;
-		}
-
-		public FileSecurity GetAccessControl()
-		{
-			throw new NotImplementedException();
-		}
-
-		public FileSecurity GetAccessControl(AccessControlSections includeSections)
-		{
-			throw new NotImplementedException();
+			this.FullPath = fullPathInternal;
+			this.OriginalPath = destFileName;
+			this._name = Path.GetFileName(fullPathInternal);
+			base.DisplayPath = this.GetDisplayPath(destFileName);
+			this._dataInitialised = -1;
 		}
 
 		[ComVisible(false)]
 		public FileInfo Replace(string destinationFileName, string destinationBackupFileName)
 		{
-			if (!this.Exists)
-			{
-				throw new FileNotFoundException();
-			}
-			if (destinationFileName == null)
-			{
-				throw new ArgumentNullException("destinationFileName");
-			}
-			if (destinationFileName.Length == 0)
-			{
-				throw new ArgumentException("An empty file name is not valid.", "destinationFileName");
-			}
-			string fullPath = Path.GetFullPath(destinationFileName);
-			if (!File.Exists(fullPath))
-			{
-				throw new FileNotFoundException();
-			}
-			FileAttributes attributes = File.GetAttributes(fullPath);
-			if ((attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-			{
-				throw new UnauthorizedAccessException();
-			}
-			if (destinationBackupFileName != null)
-			{
-				if (destinationBackupFileName.Length == 0)
-				{
-					throw new ArgumentException("An empty file name is not valid.", "destinationBackupFileName");
-				}
-				File.Copy(fullPath, Path.GetFullPath(destinationBackupFileName), true);
-			}
-			File.Copy(this.FullPath, fullPath, true);
-			File.Delete(this.FullPath);
-			return new FileInfo(fullPath);
+			return this.Replace(destinationFileName, destinationBackupFileName, false);
 		}
 
 		[ComVisible(false)]
 		public FileInfo Replace(string destinationFileName, string destinationBackupFileName, bool ignoreMetadataErrors)
 		{
-			throw new NotImplementedException();
+			File.Replace(this.FullPath, destinationFileName, destinationBackupFileName, ignoreMetadataErrors);
+			return new FileInfo(destinationFileName);
 		}
 
-		public void SetAccessControl(FileSecurity fileSecurity)
+		public override string ToString()
 		{
-			throw new NotImplementedException();
+			return base.DisplayPath;
 		}
 
-		private bool exists;
+		private string _name;
 	}
 }

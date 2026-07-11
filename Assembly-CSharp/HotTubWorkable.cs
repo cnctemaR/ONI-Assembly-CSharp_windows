@@ -40,7 +40,7 @@ public class HotTubWorkable : Workable, IWorkerPrioritizable
 
 	public override Vector3 GetFacingTarget()
 	{
-		return base.transform.GetPosition() + ((!this.faceLeft) ? Vector3.right : Vector3.left);
+		return base.transform.GetPosition() + (this.faceLeft ? Vector3.left : Vector3.right);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

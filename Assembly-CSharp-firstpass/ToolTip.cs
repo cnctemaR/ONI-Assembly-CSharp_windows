@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	public string toolTip
 	{
@@ -51,32 +51,34 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 			this.tooltipPivot = new Vector2(1f, 0f);
 			this.tooltipPositionOffset = new Vector2(0f, 20f);
 			this.parentPositionAnchor = new Vector2(0.5f, 0.5f);
-			break;
+			return;
 		case ToolTip.TooltipPosition.TopCenter:
 			this.tooltipPivot = new Vector2(0.5f, 0f);
 			this.tooltipPositionOffset = new Vector2(0f, 20f);
 			this.parentPositionAnchor = new Vector2(0.5f, 0.5f);
-			break;
+			return;
 		case ToolTip.TooltipPosition.TopRight:
 			this.tooltipPivot = new Vector2(0f, 0f);
 			this.tooltipPositionOffset = new Vector2(0f, 20f);
 			this.parentPositionAnchor = new Vector2(0.5f, 0.5f);
-			break;
+			return;
 		case ToolTip.TooltipPosition.BottomLeft:
 			this.tooltipPivot = new Vector2(1f, 1f);
 			this.tooltipPositionOffset = new Vector2(0f, -25f);
 			this.parentPositionAnchor = new Vector2(0.5f, 0.5f);
-			break;
+			return;
 		case ToolTip.TooltipPosition.BottomCenter:
 			this.tooltipPivot = new Vector2(0.5f, 1f);
 			this.tooltipPositionOffset = new Vector2(0f, -25f);
 			this.parentPositionAnchor = new Vector2(0.5f, 0.5f);
-			break;
+			return;
 		case ToolTip.TooltipPosition.BottomRight:
 			this.tooltipPivot = new Vector2(0f, 1f);
 			this.tooltipPositionOffset = new Vector2(0f, -25f);
 			this.parentPositionAnchor = new Vector2(0.5f, 0.5f);
-			break;
+			return;
+		default:
+			return;
 		}
 	}
 
@@ -133,13 +135,13 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 			if (!string.IsNullOrEmpty(text))
 			{
 				this.AddMultiStringTooltip(text, PluginAssets.Instance.defaultTextStyleSetting);
+				return;
 			}
 		}
 		else if (this.OnComplexToolTip != null)
 		{
 			this.ClearMultiStringTooltip();
-			List<Tuple<string, ScriptableObject>> list = this.OnComplexToolTip();
-			foreach (Tuple<string, ScriptableObject> tuple in list)
+			foreach (global::Tuple<string, ScriptableObject> tuple in this.OnComplexToolTip())
 			{
 				this.AddMultiStringTooltip(tuple.first, tuple.second);
 			}
@@ -198,11 +200,9 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		if (is_over)
 		{
 			ToolTipScreen.Instance.SetToolTip(this);
+			return;
 		}
-		else
-		{
-			ToolTipScreen.Instance.ClearToolTip(this);
-		}
+		ToolTipScreen.Instance.ClearToolTip(this);
 	}
 
 	protected override void OnCleanUp()
@@ -235,7 +235,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	public bool UseFixedStringKey;
 
-	public string FixedStringKey = string.Empty;
+	public string FixedStringKey = "";
 
 	private List<string> multiStringToolTips = new List<string>();
 
@@ -267,7 +267,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	private Func<string> _OnToolTip;
 
-	public Func<List<Tuple<string, ScriptableObject>>> OnComplexToolTip;
+	public Func<List<global::Tuple<string, ScriptableObject>>> OnComplexToolTip;
 
 	private static readonly global::EventSystem.IntraObjectHandler<ToolTip> OnClickDelegate = new global::EventSystem.IntraObjectHandler<ToolTip>(delegate(ToolTip component, object data)
 	{

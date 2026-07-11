@@ -6,11 +6,7 @@ public class DrowningStates : GameStateMachine<DrowningStates, DrowningStates.In
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.drown;
-		GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State root = this.root;
-		string text = CREATURES.STATUSITEMS.DROWNING.NAME;
-		string text2 = CREATURES.STATUSITEMS.DROWNING.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).TagTransition(GameTags.Creatures.Drowning, null, true);
+		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.DROWNING.NAME, CREATURES.STATUSITEMS.DROWNING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).TagTransition(GameTags.Creatures.Drowning, null, true);
 		this.drown.PlayAnim("drown_pre").QueueAnim("drown_loop", true, null).Transition(this.drown_pst, new StateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.Transition.ConditionCallback(this.UpdateSafeCell), UpdateRate.SIM_1000ms);
 		this.drown_pst.PlayAnim("drown_pst").OnAnimQueueComplete(this.move_to_safe);
 		this.move_to_safe.MoveTo((DrowningStates.Instance smi) => smi.safeCell, null, null, false);
@@ -19,8 +15,7 @@ public class DrowningStates : GameStateMachine<DrowningStates, DrowningStates.In
 	public bool UpdateSafeCell(DrowningStates.Instance smi)
 	{
 		Navigator component = smi.GetComponent<Navigator>();
-		DrowningMonitor component2 = smi.GetComponent<DrowningMonitor>();
-		DrowningStates.EscapeCellQuery escapeCellQuery = new DrowningStates.EscapeCellQuery(component2);
+		DrowningStates.EscapeCellQuery escapeCellQuery = new DrowningStates.EscapeCellQuery(smi.GetComponent<DrowningMonitor>());
 		component.RunQuery(escapeCellQuery);
 		smi.safeCell = escapeCellQuery.GetResultCell();
 		return smi.safeCell != Grid.InvalidCell;

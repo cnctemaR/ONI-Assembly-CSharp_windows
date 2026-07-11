@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Sockets;
-using Mono.Posix;
 
 namespace Mono.Unix
 {

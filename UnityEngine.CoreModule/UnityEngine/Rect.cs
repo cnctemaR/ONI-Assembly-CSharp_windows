@@ -5,21 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A 2D Rectangle defined by X and Y position, width and height.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Math/Rect.h")]
 	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
+	[NativeHeader("Runtime/Math/Rect.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Rect : IEquatable<Rect>
 	{
-		/// <summary>
-		///   <para>Creates a new rectangle.</para>
-		/// </summary>
-		/// <param name="x">The X value the rect is measured from.</param>
-		/// <param name="y">The Y value the rect is measured from.</param>
-		/// <param name="width">The width of the rectangle.</param>
-		/// <param name="height">The height of the rectangle.</param>
 		public Rect(float x, float y, float width, float height)
 		{
 			this.m_XMin = x;
@@ -28,11 +18,6 @@ namespace UnityEngine
 			this.m_Height = height;
 		}
 
-		/// <summary>
-		///   <para>Creates a rectangle given a size and position.</para>
-		/// </summary>
-		/// <param name="position">The position of the minimum corner of the rect.</param>
-		/// <param name="size">The width and height of the rect.</param>
 		public Rect(Vector2 position, Vector2 size)
 		{
 			this.m_XMin = position.x;
@@ -41,10 +26,6 @@ namespace UnityEngine
 			this.m_Height = size.y;
 		}
 
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="source"></param>
 		public Rect(Rect source)
 		{
 			this.m_XMin = source.m_XMin;
@@ -53,9 +34,6 @@ namespace UnityEngine
 			this.m_Height = source.m_Height;
 		}
 
-		/// <summary>
-		///   <para>Shorthand for writing new Rect(0,0,0,0).</para>
-		/// </summary>
 		public static Rect zero
 		{
 			[CompilerGenerated]
@@ -65,28 +43,11 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Creates a rectangle from min/max coordinate values.</para>
-		/// </summary>
-		/// <param name="xmin">The minimum X coordinate.</param>
-		/// <param name="ymin">The minimum Y coordinate.</param>
-		/// <param name="xmax">The maximum X coordinate.</param>
-		/// <param name="ymax">The maximum Y coordinate.</param>
-		/// <returns>
-		///   <para>A rectangle matching the specified coordinates.</para>
-		/// </returns>
 		public static Rect MinMaxRect(float xmin, float ymin, float xmax, float ymax)
 		{
 			return new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 		}
 
-		/// <summary>
-		///   <para>Set components of an existing Rect.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
 		public void Set(float x, float y, float width, float height)
 		{
 			this.m_XMin = x;
@@ -95,9 +56,6 @@ namespace UnityEngine
 			this.m_Height = height;
 		}
 
-		/// <summary>
-		///   <para>The X coordinate of the rectangle.</para>
-		/// </summary>
 		public float x
 		{
 			get
@@ -110,9 +68,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The Y coordinate of the rectangle.</para>
-		/// </summary>
 		public float y
 		{
 			get
@@ -125,9 +80,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The X and Y position of the rectangle.</para>
-		/// </summary>
 		public Vector2 position
 		{
 			get
@@ -141,9 +93,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The position of the center of the rectangle.</para>
-		/// </summary>
 		public Vector2 center
 		{
 			get
@@ -157,9 +106,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The position of the minimum corner of the rectangle.</para>
-		/// </summary>
 		public Vector2 min
 		{
 			get
@@ -173,9 +119,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The position of the maximum corner of the rectangle.</para>
-		/// </summary>
 		public Vector2 max
 		{
 			get
@@ -189,9 +132,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The width of the rectangle, measured from the X position.</para>
-		/// </summary>
 		public float width
 		{
 			get
@@ -204,9 +144,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The height of the rectangle, measured from the Y position.</para>
-		/// </summary>
 		public float height
 		{
 			get
@@ -219,9 +156,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The width and height of the rectangle.</para>
-		/// </summary>
 		public Vector2 size
 		{
 			get
@@ -235,9 +169,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimum X coordinate of the rectangle.</para>
-		/// </summary>
 		public float xMin
 		{
 			get
@@ -252,9 +183,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The minimum Y coordinate of the rectangle.</para>
-		/// </summary>
 		public float yMin
 		{
 			get
@@ -269,9 +197,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximum X coordinate of the rectangle.</para>
-		/// </summary>
 		public float xMax
 		{
 			get
@@ -284,9 +209,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The maximum Y coordinate of the rectangle.</para>
-		/// </summary>
 		public float yMax
 		{
 			get
@@ -299,40 +221,16 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the x and y components of point is a point inside this rectangle. If allowInverse is present and true, the width and height of the Rect are allowed to take negative values (ie, the min value is greater than the max), and the test will still work.</para>
-		/// </summary>
-		/// <param name="point">Point to test.</param>
-		/// <param name="allowInverse">Does the test allow the Rect's width and height to be negative?</param>
-		/// <returns>
-		///   <para>True if the point lies within the specified rectangle.</para>
-		/// </returns>
 		public bool Contains(Vector2 point)
 		{
 			return point.x >= this.xMin && point.x < this.xMax && point.y >= this.yMin && point.y < this.yMax;
 		}
 
-		/// <summary>
-		///   <para>Returns true if the x and y components of point is a point inside this rectangle. If allowInverse is present and true, the width and height of the Rect are allowed to take negative values (ie, the min value is greater than the max), and the test will still work.</para>
-		/// </summary>
-		/// <param name="point">Point to test.</param>
-		/// <param name="allowInverse">Does the test allow the Rect's width and height to be negative?</param>
-		/// <returns>
-		///   <para>True if the point lies within the specified rectangle.</para>
-		/// </returns>
 		public bool Contains(Vector3 point)
 		{
 			return point.x >= this.xMin && point.x < this.xMax && point.y >= this.yMin && point.y < this.yMax;
 		}
 
-		/// <summary>
-		///   <para>Returns true if the x and y components of point is a point inside this rectangle. If allowInverse is present and true, the width and height of the Rect are allowed to take negative values (ie, the min value is greater than the max), and the test will still work.</para>
-		/// </summary>
-		/// <param name="point">Point to test.</param>
-		/// <param name="allowInverse">Does the test allow the Rect's width and height to be negative?</param>
-		/// <returns>
-		///   <para>True if the point lies within the specified rectangle.</para>
-		/// </returns>
 		public bool Contains(Vector3 point, bool allowInverse)
 		{
 			bool flag;
@@ -369,21 +267,11 @@ namespace UnityEngine
 			return rect;
 		}
 
-		/// <summary>
-		///   <para>Returns true if the other rectangle overlaps this one. If allowInverse is present and true, the widths and heights of the Rects are allowed to take negative values (ie, the min value is greater than the max), and the test will still work.</para>
-		/// </summary>
-		/// <param name="other">Other rectangle to test overlapping with.</param>
-		/// <param name="allowInverse">Does the test allow the widths and heights of the Rects to be negative?</param>
 		public bool Overlaps(Rect other)
 		{
 			return other.xMax > this.xMin && other.xMin < this.xMax && other.yMax > this.yMin && other.yMin < this.yMax;
 		}
 
-		/// <summary>
-		///   <para>Returns true if the other rectangle overlaps this one. If allowInverse is present and true, the widths and heights of the Rects are allowed to take negative values (ie, the min value is greater than the max), and the test will still work.</para>
-		/// </summary>
-		/// <param name="other">Other rectangle to test overlapping with.</param>
-		/// <param name="allowInverse">Does the test allow the widths and heights of the Rects to be negative?</param>
 		public bool Overlaps(Rect other, bool allowInverse)
 		{
 			Rect rect = this;
@@ -395,21 +283,11 @@ namespace UnityEngine
 			return rect.Overlaps(other);
 		}
 
-		/// <summary>
-		///   <para>Returns a point inside a rectangle, given normalized coordinates.</para>
-		/// </summary>
-		/// <param name="rectangle">Rectangle to get a point inside.</param>
-		/// <param name="normalizedRectCoordinates">Normalized coordinates to get a point for.</param>
 		public static Vector2 NormalizedToPoint(Rect rectangle, Vector2 normalizedRectCoordinates)
 		{
 			return new Vector2(Mathf.Lerp(rectangle.x, rectangle.xMax, normalizedRectCoordinates.x), Mathf.Lerp(rectangle.y, rectangle.yMax, normalizedRectCoordinates.y));
 		}
 
-		/// <summary>
-		///   <para>Returns the normalized coordinates cooresponding the the point.</para>
-		/// </summary>
-		/// <param name="rectangle">Rectangle to get normalized coordinates inside.</param>
-		/// <param name="point">A point inside the rectangle to get normalized coordinates for.</param>
 		public static Vector2 PointToNormalized(Rect rectangle, Vector2 point)
 		{
 			return new Vector2(Mathf.InverseLerp(rectangle.x, rectangle.xMax, point.x), Mathf.InverseLerp(rectangle.y, rectangle.yMax, point.y));
@@ -440,19 +318,11 @@ namespace UnityEngine
 			return this.x.Equals(other.x) && this.y.Equals(other.y) && this.width.Equals(other.width) && this.height.Equals(other.height);
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for this Rect.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public override string ToString()
 		{
 			return UnityString.Format("(x:{0:F2}, y:{1:F2}, width:{2:F2}, height:{3:F2})", new object[] { this.x, this.y, this.width, this.height });
 		}
 
-		/// <summary>
-		///   <para>Returns a nicely formatted string for this Rect.</para>
-		/// </summary>
-		/// <param name="format"></param>
 		public string ToString(string format)
 		{
 			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]

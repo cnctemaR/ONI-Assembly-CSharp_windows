@@ -14,5 +14,9 @@ namespace UnityEngine.Timeline
 		public abstract bool enable { set; }
 
 		public abstract void EvaluateAt(double localTime, FrameData frameData);
+
+		public virtual void Reset()
+		{
+		}
 	}
 }

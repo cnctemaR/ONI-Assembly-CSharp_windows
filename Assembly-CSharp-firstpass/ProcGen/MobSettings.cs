@@ -5,12 +5,12 @@ namespace ProcGen
 	[Serializable]
 	public class MobSettings : IMerge<MobSettings>
 	{
+		public ComposableDictionary<string, Mob> MobLookupTable { get; private set; }
+
 		public MobSettings()
 		{
 			this.MobLookupTable = new ComposableDictionary<string, Mob>();
 		}
-
-		public ComposableDictionary<string, Mob> MobLookupTable { get; private set; }
 
 		public bool HasMob(string id)
 		{

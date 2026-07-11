@@ -9,7 +9,7 @@ public class LogicMemory : KMonoBehaviour
 	{
 		if (LogicMemory.infoStatusItem == null)
 		{
-			LogicMemory.infoStatusItem = new StatusItem("StoredValue", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			LogicMemory.infoStatusItem = new StatusItem("StoredValue", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			LogicMemory.infoStatusItem.resolveStringCallback = new Func<string, object, string>(LogicMemory.ResolveInfoStatusItemString);
 		}
 		base.Subscribe<LogicMemory>(-801688580, LogicMemory.OnLogicValueChangedDelegate);
@@ -41,7 +41,7 @@ public class LogicMemory : KMonoBehaviour
 				KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 				if (component != null)
 				{
-					component.Play((num == 0) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+					component.Play((num != 0) ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 		}
@@ -49,8 +49,7 @@ public class LogicMemory : KMonoBehaviour
 
 	private static string ResolveInfoStatusItemString(string format_str, object data)
 	{
-		LogicMemory logicMemory = (LogicMemory)data;
-		int outputValue = logicMemory.ports.GetOutputValue(LogicMemory.READ_PORT_ID);
+		int outputValue = ((LogicMemory)data).ports.GetOutputValue(LogicMemory.READ_PORT_ID);
 		return string.Format(BUILDINGS.PREFABS.LOGICMEMORY.STATUS_ITEM_VALUE, outputValue);
 	}
 

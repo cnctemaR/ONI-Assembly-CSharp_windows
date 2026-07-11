@@ -1,63 +1,38 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	[DefaultEvent("RowUpdated")]
-	[Designer("Microsoft.VSDesigner.Data.VS.OleDbDataAdapterDesigner, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.ComponentModel.Design.IDesigner")]
-	[ToolboxItem("Microsoft.VSDesigner.Data.VS.OleDbDataAdapterToolboxItem, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbDataAdapter : DbDataAdapter, IDataAdapter, IDbDataAdapter, ICloneable
 	{
-		public OleDbDataAdapter()
-		{
-		}
-
-		public OleDbDataAdapter(OleDbCommand selectCommand)
-		{
-		}
-
-		public OleDbDataAdapter(string selectCommandText, OleDbConnection selectConnection)
-		{
-		}
-
-		public OleDbDataAdapter(string selectCommandText, string selectConnectionString)
-		{
-		}
-
-		[DefaultValue(null)]
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public new OleDbCommand DeleteCommand
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[DefaultValue(null)]
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public new OleDbCommand InsertCommand
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[DefaultValue(null)]
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public new OleDbCommand SelectCommand
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -68,7 +43,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -79,7 +54,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -90,7 +65,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -101,80 +76,80 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		[DefaultValue(null)]
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public new OleDbCommand UpdateCommand
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
 			}
 		}
 
-		public event OleDbRowUpdatedEventHandler RowUpdated
+		public OleDbDataAdapter()
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
 		}
 
-		public event OleDbRowUpdatingEventHandler RowUpdating
+		public OleDbDataAdapter(OleDbCommand selectCommand)
 		{
-			add
-			{
-			}
-			remove
-			{
-			}
+			throw ADP.OleDb();
+		}
+
+		public OleDbDataAdapter(string selectCommandText, OleDbConnection selectConnection)
+		{
+			throw ADP.OleDb();
+		}
+
+		public OleDbDataAdapter(string selectCommandText, string selectConnectionString)
+		{
+			throw ADP.OleDb();
 		}
 
 		protected override RowUpdatedEventArgs CreateRowUpdatedEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		protected override RowUpdatingEventArgs CreateRowUpdatingEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public int Fill(DataSet dataSet, object ADODBRecordSet, string srcTable)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public int Fill(DataTable dataTable, object ADODBRecordSet)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		protected override void OnRowUpdated(RowUpdatedEventArgs value)
 		{
+			throw ADP.OleDb();
 		}
 
 		protected override void OnRowUpdating(RowUpdatingEventArgs value)
 		{
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
+		public event OleDbRowUpdatedEventHandler RowUpdated;
+
+		public event OleDbRowUpdatingEventHandler RowUpdating;
+
 		object ICloneable.Clone()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 	}
 }

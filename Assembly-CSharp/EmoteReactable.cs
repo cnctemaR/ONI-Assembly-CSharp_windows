@@ -55,11 +55,9 @@ public class EmoteReactable : Reactable
 		if (this.currentStep >= 0 && this.emoteSteps[this.currentStep].timeout > 0f && this.emoteSteps[this.currentStep].timeout < this.elapsed)
 		{
 			this.NextStep(null);
+			return;
 		}
-		else
-		{
-			this.elapsed += dt;
-		}
+		this.elapsed += dt;
 	}
 
 	protected override void InternalBegin()
@@ -120,34 +118,32 @@ public class EmoteReactable : Reactable
 		if (this.currentStep >= this.emoteSteps.Count || this.kbac == null)
 		{
 			base.End();
+			return;
+		}
+		if (this.emoteSteps[this.currentStep].anim != HashedString.Invalid)
+		{
+			this.kbac.Play(this.emoteSteps[this.currentStep].anim, this.emoteSteps[this.currentStep].mode, 1f, 0f);
+			if (this.kbac.IsStopped())
+			{
+				DebugUtil.DevAssertArgs(false, new object[]
+				{
+					"Emote is missing anim:",
+					this.emoteSteps[this.currentStep].anim
+				});
+				this.emoteSteps[this.currentStep].timeout = 0.25f;
+			}
+		}
+		if (this.emoteSteps[this.currentStep].timeout <= 0f)
+		{
+			this.kbac.onAnimComplete += this.NextStep;
 		}
 		else
 		{
-			if (this.emoteSteps[this.currentStep].anim != HashedString.Invalid)
-			{
-				this.kbac.Play(this.emoteSteps[this.currentStep].anim, this.emoteSteps[this.currentStep].mode, 1f, 0f);
-				if (this.kbac.IsStopped())
-				{
-					DebugUtil.DevAssertArgs(false, new object[]
-					{
-						"Emote is missing anim:",
-						this.emoteSteps[this.currentStep].anim
-					});
-					this.emoteSteps[this.currentStep].timeout = 0.25f;
-				}
-			}
-			if (this.emoteSteps[this.currentStep].timeout <= 0f)
-			{
-				this.kbac.onAnimComplete += this.NextStep;
-			}
-			else
-			{
-				this.elapsed = 0f;
-			}
-			if (this.emoteSteps[this.currentStep].startcb != null)
-			{
-				this.emoteSteps[this.currentStep].startcb(this.reactor);
-			}
+			this.elapsed = 0f;
+		}
+		if (this.emoteSteps[this.currentStep].startcb != null)
+		{
+			this.emoteSteps[this.currentStep].startcb(this.reactor);
 		}
 	}
 

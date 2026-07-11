@@ -85,12 +85,7 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 
 		public bool IsMorning()
 		{
-			if (ScheduleManager.Instance == null || base.master.kPrefabID.PrefabTag == GameTags.MinionSelectPreview)
-			{
-				return false;
-			}
-			int blockIdx = global::Schedule.GetBlockIdx();
-			return blockIdx < TRAITS.EARLYBIRD_SCHEDULEBLOCK;
+			return !(ScheduleManager.Instance == null) && !(base.master.kPrefabID.PrefabTag == GameTags.MinionSelectPreview) && global::Schedule.GetBlockIdx() < TRAITS.EARLYBIRD_SCHEDULEBLOCK;
 		}
 	}
 

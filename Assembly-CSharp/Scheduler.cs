@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class Scheduler : IScheduler
 {
-	public Scheduler(SchedulerClock clock)
-	{
-		this.clock = clock;
-	}
-
 	public int Count
 	{
 		get
 		{
 			return this.entries.Count;
 		}
+	}
+
+	public Scheduler(SchedulerClock clock)
+	{
+		this.clock = clock;
 	}
 
 	public float GetTime()
@@ -24,8 +24,7 @@ public class Scheduler : IScheduler
 	private SchedulerHandle Schedule(SchedulerEntry entry)
 	{
 		this.entries.Enqueue(entry.time, entry);
-		SchedulerHandle schedulerHandle = new SchedulerHandle(this, entry);
-		return schedulerHandle;
+		return new SchedulerHandle(this, entry);
 	}
 
 	private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
@@ -73,25 +72,21 @@ public class Scheduler : IScheduler
 			return;
 		}
 		int count = this.Count;
-		int i = 0;
+		int num = 0;
 		using (new KProfiler.Region("Scheduler.Update", null))
 		{
 			float time = this.clock.GetTime();
 			if (this.previousTime != time)
 			{
 				this.previousTime = time;
-				while (i < count)
+				while (num < count && time >= this.entries.Peek().Key)
 				{
-					if (time < this.entries.Peek().Key)
-					{
-						break;
-					}
 					SchedulerEntry value = this.entries.Dequeue().Value;
 					if (value.callback != null)
 					{
 						value.callback(value.callbackData);
 					}
-					i++;
+					num++;
 				}
 			}
 		}

@@ -18,8 +18,7 @@ public class BasicBoosterConfig : IEntityConfig
 		{
 			new ComplexRecipe.RecipeElement("BasicBooster".ToTag(), 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2);
-		BasicBoosterConfig.recipe = new ComplexRecipe(text, array, array2)
+		BasicBoosterConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 50f,
 			description = ITEMS.PILLS.BASICBOOSTER.RECIPEDESC,

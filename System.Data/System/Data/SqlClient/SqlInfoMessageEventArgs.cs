@@ -1,26 +1,33 @@
 ﻿using System;
+using Unity;
 
 namespace System.Data.SqlClient
 {
 	public sealed class SqlInfoMessageEventArgs : EventArgs
 	{
-		internal SqlInfoMessageEventArgs()
+		internal SqlInfoMessageEventArgs(SqlException exception)
 		{
+			this._exception = exception;
 		}
 
 		public SqlErrorCollection Errors
 		{
 			get
 			{
-				throw null;
+				return this._exception.Errors;
 			}
+		}
+
+		private bool ShouldSerializeErrors()
+		{
+			return this._exception != null && 0 < this._exception.Errors.Count;
 		}
 
 		public string Message
 		{
 			get
 			{
-				throw null;
+				return this._exception.Message;
 			}
 		}
 
@@ -28,13 +35,20 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				throw null;
+				return this._exception.Source;
 			}
 		}
 
 		public override string ToString()
 		{
-			throw null;
+			return this.Message;
 		}
+
+		internal SqlInfoMessageEventArgs()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		private SqlException _exception;
 	}
 }

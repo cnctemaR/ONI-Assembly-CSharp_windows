@@ -9,28 +9,26 @@ namespace System
 	public class UnauthorizedAccessException : SystemException
 	{
 		public UnauthorizedAccessException()
-			: base(Locale.GetText("Access to the requested resource is not authorized."))
+			: base(Environment.GetResourceString("Attempted to perform an unauthorized operation."))
 		{
-			base.HResult = -2146233088;
+			base.SetErrorCode(-2147024891);
 		}
 
 		public UnauthorizedAccessException(string message)
 			: base(message)
 		{
-			base.HResult = -2146233088;
+			base.SetErrorCode(-2147024891);
 		}
 
 		public UnauthorizedAccessException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.HResult = -2146233088;
+			base.SetErrorCode(-2147024891);
 		}
 
 		protected UnauthorizedAccessException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		private const int Result = -2146233088;
 	}
 }

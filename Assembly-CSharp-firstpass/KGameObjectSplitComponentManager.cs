@@ -15,13 +15,11 @@ public abstract class KGameObjectSplitComponentManager<Header, Payload> : KSplit
 		if (!KComponentCleanUp.InCleanUpPhase)
 		{
 			this.cleanupList.Add(cleanupInfo);
+			return;
 		}
-		else
-		{
-			base.RemoveFromCleanupList(go);
-			this.OnCleanUp(handle);
-			base.InternalRemoveComponent(cleanupInfo);
-		}
+		base.RemoveFromCleanupList(go);
+		this.OnCleanUp(handle);
+		base.InternalRemoveComponent(cleanupInfo);
 	}
 
 	public HandleVector<int>.Handle GetHandle(GameObject obj)

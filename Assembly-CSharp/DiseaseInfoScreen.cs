@@ -61,9 +61,7 @@ public class DiseaseInfoScreen : TargetScreen
 				this.diseaseSourcePanel.SetLabel("source_" + j.ToString(), list[j].text, list[j].tooltipText);
 			}
 		}
-		if (this.CreateImmuneInfo())
-		{
-		}
+		this.CreateImmuneInfo();
 		if (!this.CreateDiseaseInfo())
 		{
 			this.currentGermsPanel.SetTitle(UI.DETAILTABS.DISEASE.NO_CURRENT_GERMS);
@@ -136,15 +134,15 @@ public class DiseaseInfoScreen : TargetScreen
 						flag3 = true;
 					}
 				}
-				string text = string.Empty;
+				string text = "";
 				float num;
 				if (!flag)
 				{
 					num = 0f;
-					string text2 = string.Empty;
+					string text2 = "";
 					for (int m = 0; m < list.Count; m++)
 					{
-						if (text2 != string.Empty)
+						if (text2 != "")
 						{
 							text2 += ", ";
 						}
@@ -155,16 +153,16 @@ public class DiseaseInfoScreen : TargetScreen
 				else if (flag3)
 				{
 					num = 0f;
-					string text3 = string.Empty;
+					string text3 = "";
 					for (int n = 0; n < list3.Count; n++)
 					{
-						if (text3 != string.Empty)
+						if (text3 != "")
 						{
 							text3 += ", ";
 						}
 						text3 += Db.Get().traits.Get(list3[n]).Name;
 					}
-					if (text != string.Empty)
+					if (text != "")
 					{
 						text += "\n";
 					}
@@ -173,16 +171,16 @@ public class DiseaseInfoScreen : TargetScreen
 				else if (flag2)
 				{
 					num = 0f;
-					string text4 = string.Empty;
+					string text4 = "";
 					for (int num2 = 0; num2 < list2.Count; num2++)
 					{
-						if (text4 != string.Empty)
+						if (text4 != "")
 						{
 							text4 += ", ";
 						}
 						text4 += Db.Get().effects.Get(list2[num2]).Name;
 					}
-					if (text != string.Empty)
+					if (text != "")
 					{
 						text += "\n";
 					}
@@ -196,7 +194,7 @@ public class DiseaseInfoScreen : TargetScreen
 				{
 					num = GermExposureMonitor.GetContractionChance(smi.GetResistanceToExposureType(exposureTypeForDisease, 3f));
 				}
-				string text5 = ((!(text != string.Empty)) ? string.Format(DUPLICANTS.DISEASES.CONTRACTION_PROBABILITY, GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None), this.selectedTarget.GetProperName(), sicknessForDisease.Name) : text);
+				string text5 = ((text != "") ? text : string.Format(DUPLICANTS.DISEASES.CONTRACTION_PROBABILITY, GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None), this.selectedTarget.GetProperName(), sicknessForDisease.Name));
 				this.immuneSystemPanel.SetLabel("disease_" + disease.Id, "    • " + disease.Name + ": " + GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None), string.Format(DUPLICANTS.DISEASES.RESISTANCES_PANEL_TOOLTIP, text5, sicknessForDisease.Name));
 			}
 			return true;
@@ -206,13 +204,12 @@ public class DiseaseInfoScreen : TargetScreen
 
 	private bool CreateDiseaseInfo()
 	{
-		PrimaryElement component = this.selectedTarget.GetComponent<PrimaryElement>();
-		if (component != null)
+		if (this.selectedTarget.GetComponent<PrimaryElement>() != null)
 		{
 			return this.CreateDiseaseInfo_PrimaryElement();
 		}
-		CellSelectionObject component2 = this.selectedTarget.GetComponent<CellSelectionObject>();
-		return component2 != null && this.CreateDiseaseInfo_CellSelectionObject(component2);
+		CellSelectionObject component = this.selectedTarget.GetComponent<CellSelectionObject>();
+		return component != null && this.CreateDiseaseInfo_CellSelectionObject(component);
 	}
 
 	private string GetFormattedHalfLife(float hl)
@@ -277,7 +274,7 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			this.currentGermsPanel.SetLabel("finalhalflife", UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEUTRAL, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEUTRAL_TOOLTIP);
 		}
-		this.currentGermsPanel.SetLabel("factors", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TITLE, new object[0]), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TOOLTIP);
+		this.currentGermsPanel.SetLabel("factors", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TITLE, Array.Empty<object>()), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TOOLTIP);
 		bool flag = false;
 		if ((float)diseaseCount < growthRuleForElement.minCountPerKG * environmentMass)
 		{
@@ -301,14 +298,7 @@ public class DiseaseInfoScreen : TargetScreen
 				TagGrowthRule growthRuleForTag = disease.GetGrowthRuleForTag(tag);
 				if (growthRuleForTag != null)
 				{
-					CollapsibleDetailContentPanel collapsibleDetailContentPanel = this.currentGermsPanel;
-					string text = "tag_" + num4;
-					string text2 = growthRuleForTag.Name();
-					float? populationHalfLife = growthRuleForTag.populationHalfLife;
-					string formattedGrowthEntry = this.GetFormattedGrowthEntry(text2, populationHalfLife.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL);
-					string text3 = growthRuleForTag.Name();
-					float? populationHalfLife2 = growthRuleForTag.populationHalfLife;
-					collapsibleDetailContentPanel.SetLabel(text, formattedGrowthEntry, this.GetFormattedGrowthEntry(text3, populationHalfLife2.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL_TOOLTIP));
+					this.currentGermsPanel.SetLabel("tag_" + num4, this.GetFormattedGrowthEntry(growthRuleForTag.Name(), growthRuleForTag.populationHalfLife.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL), this.GetFormattedGrowthEntry(growthRuleForTag.Name(), growthRuleForTag.populationHalfLife.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL_TOOLTIP));
 				}
 				num4++;
 			}
@@ -334,11 +324,9 @@ public class DiseaseInfoScreen : TargetScreen
 			if (num5 > 0f)
 			{
 				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP);
+				return;
 			}
-			else
-			{
-				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
-			}
+			this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
 		}
 	}
 

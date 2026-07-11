@@ -22,7 +22,7 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 
 	public void PlaySequence()
 	{
-		if (this.sequence != null && this.sequence.Length > 0)
+		if (this.sequence != null && this.sequence.Length != 0)
 		{
 			if (this.mb != null)
 			{
@@ -39,14 +39,12 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 		{
 			this.kbac.Play(new HashedString(this.sequence[this.currentIndex].anim), this.sequence[this.currentIndex].mode, this.sequence[this.currentIndex].speed, 0f);
 			this.currentIndex++;
+			return;
 		}
-		else
+		this.kbac.onAnimComplete -= this.PlayNext;
+		if (this.mb != null)
 		{
-			this.kbac.onAnimComplete -= this.PlayNext;
-			if (this.mb != null)
-			{
-				this.mb.Resume("AnimSequencer");
-			}
+			this.mb.Resume("AnimSequencer");
 		}
 	}
 

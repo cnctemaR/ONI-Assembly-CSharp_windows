@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
 	[ComVisible(true)]
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class PropertyDescriptor : MemberDescriptor
 	{
-		protected PropertyDescriptor(MemberDescriptor reference)
-			: base(reference)
-		{
-		}
-
-		protected PropertyDescriptor(MemberDescriptor reference, Attribute[] attrs)
-			: base(reference, attrs)
-		{
-		}
-
 		protected PropertyDescriptor(string name, Attribute[] attrs)
 			: base(name, attrs)
+		{
+		}
+
+		protected PropertyDescriptor(MemberDescriptor descr)
+			: base(descr)
+		{
+		}
+
+		protected PropertyDescriptor(MemberDescriptor descr, Attribute[] attrs)
+			: base(descr, attrs)
 		{
 		}
 
@@ -29,10 +30,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.converter == null && this.PropertyType != null)
+				AttributeCollection attributes = this.Attributes;
+				if (this.converter == null)
 				{
-					TypeConverterAttribute typeConverterAttribute = (TypeConverterAttribute)this.Attributes[typeof(TypeConverterAttribute)];
-					if (typeConverterAttribute != null && typeConverterAttribute != TypeConverterAttribute.Default)
+					TypeConverterAttribute typeConverterAttribute = (TypeConverterAttribute)attributes[typeof(TypeConverterAttribute)];
+					if (typeConverterAttribute.ConverterTypeName != null && typeConverterAttribute.ConverterTypeName.Length > 0)
 					{
 						Type typeFromName = this.GetTypeFromName(typeConverterAttribute.ConverterTypeName);
 						if (typeFromName != null && typeof(TypeConverter).IsAssignableFrom(typeFromName))
@@ -53,44 +55,21 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				foreach (Attribute attribute in this.AttributeArray)
-				{
-					if (attribute is LocalizableAttribute)
-					{
-						return ((LocalizableAttribute)attribute).IsLocalizable;
-					}
-				}
-				return false;
+				return LocalizableAttribute.Yes.Equals(this.Attributes[typeof(LocalizableAttribute)]);
 			}
 		}
 
 		public abstract bool IsReadOnly { get; }
 
-		public abstract Type PropertyType { get; }
-
-		public virtual bool SupportsChangeEvents
-		{
-			get
-			{
-				return false;
-			}
-		}
-
 		public DesignerSerializationVisibility SerializationVisibility
 		{
 			get
 			{
-				foreach (Attribute attribute in this.AttributeArray)
-				{
-					if (attribute is DesignerSerializationVisibilityAttribute)
-					{
-						DesignerSerializationVisibilityAttribute designerSerializationVisibilityAttribute = (DesignerSerializationVisibilityAttribute)attribute;
-						return designerSerializationVisibilityAttribute.Visibility;
-					}
-				}
-				return DesignerSerializationVisibility.Visible;
+				return ((DesignerSerializationVisibilityAttribute)this.Attributes[typeof(DesignerSerializationVisibilityAttribute)]).Visibility;
 			}
 		}
+
+		public abstract Type PropertyType { get; }
 
 		public virtual void AddValueChanged(object component, EventHandler handler)
 		{
@@ -102,19 +81,190 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("handler");
 			}
-			if (this.notifiers == null)
+			if (this.valueChangedHandlers == null)
 			{
-				this.notifiers = new Hashtable();
+				this.valueChangedHandlers = new Hashtable();
 			}
-			EventHandler eventHandler = (EventHandler)this.notifiers[component];
-			if (eventHandler != null)
+			EventHandler eventHandler = (EventHandler)this.valueChangedHandlers[component];
+			this.valueChangedHandlers[component] = Delegate.Combine(eventHandler, handler);
+		}
+
+		public abstract bool CanResetValue(object component);
+
+		public override bool Equals(object obj)
+		{
+			try
 			{
-				eventHandler = (EventHandler)Delegate.Combine(eventHandler, handler);
-				this.notifiers[component] = eventHandler;
+				if (obj == this)
+				{
+					return true;
+				}
+				if (obj == null)
+				{
+					return false;
+				}
+				PropertyDescriptor propertyDescriptor = obj as PropertyDescriptor;
+				if (propertyDescriptor != null && propertyDescriptor.NameHashCode == this.NameHashCode && propertyDescriptor.PropertyType == this.PropertyType && propertyDescriptor.Name.Equals(this.Name))
+				{
+					return true;
+				}
 			}
-			else
+			catch
 			{
-				this.notifiers[component] = handler;
+			}
+			return false;
+		}
+
+		protected object CreateInstance(Type type)
+		{
+			Type[] array = new Type[] { typeof(Type) };
+			if (type.GetConstructor(array) != null)
+			{
+				return TypeDescriptor.CreateInstance(null, type, array, new object[] { this.PropertyType });
+			}
+			return TypeDescriptor.CreateInstance(null, type, null, null);
+		}
+
+		protected override void FillAttributes(IList attributeList)
+		{
+			this.converter = null;
+			this.editors = null;
+			this.editorTypes = null;
+			this.editorCount = 0;
+			base.FillAttributes(attributeList);
+		}
+
+		public PropertyDescriptorCollection GetChildProperties()
+		{
+			return this.GetChildProperties(null, null);
+		}
+
+		public PropertyDescriptorCollection GetChildProperties(Attribute[] filter)
+		{
+			return this.GetChildProperties(null, filter);
+		}
+
+		public PropertyDescriptorCollection GetChildProperties(object instance)
+		{
+			return this.GetChildProperties(instance, null);
+		}
+
+		public virtual PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
+		{
+			if (instance == null)
+			{
+				return TypeDescriptor.GetProperties(this.PropertyType, filter);
+			}
+			return TypeDescriptor.GetProperties(instance, filter);
+		}
+
+		public virtual object GetEditor(Type editorBaseType)
+		{
+			object obj = null;
+			AttributeCollection attributes = this.Attributes;
+			if (this.editorTypes != null)
+			{
+				for (int i = 0; i < this.editorCount; i++)
+				{
+					if (this.editorTypes[i] == editorBaseType)
+					{
+						return this.editors[i];
+					}
+				}
+			}
+			if (obj == null)
+			{
+				for (int j = 0; j < attributes.Count; j++)
+				{
+					EditorAttribute editorAttribute = attributes[j] as EditorAttribute;
+					if (editorAttribute != null)
+					{
+						Type typeFromName = this.GetTypeFromName(editorAttribute.EditorBaseTypeName);
+						if (editorBaseType == typeFromName)
+						{
+							Type typeFromName2 = this.GetTypeFromName(editorAttribute.EditorTypeName);
+							if (typeFromName2 != null)
+							{
+								obj = this.CreateInstance(typeFromName2);
+								break;
+							}
+						}
+					}
+				}
+				if (obj == null)
+				{
+					obj = TypeDescriptor.GetEditor(this.PropertyType, editorBaseType);
+				}
+				if (this.editorTypes == null)
+				{
+					this.editorTypes = new Type[5];
+					this.editors = new object[5];
+				}
+				if (this.editorCount >= this.editorTypes.Length)
+				{
+					Type[] array = new Type[this.editorTypes.Length * 2];
+					object[] array2 = new object[this.editors.Length * 2];
+					Array.Copy(this.editorTypes, array, this.editorTypes.Length);
+					Array.Copy(this.editors, array2, this.editors.Length);
+					this.editorTypes = array;
+					this.editors = array2;
+				}
+				this.editorTypes[this.editorCount] = editorBaseType;
+				object[] array3 = this.editors;
+				int num = this.editorCount;
+				this.editorCount = num + 1;
+				array3[num] = obj;
+			}
+			return obj;
+		}
+
+		public override int GetHashCode()
+		{
+			return this.NameHashCode ^ this.PropertyType.GetHashCode();
+		}
+
+		protected override object GetInvocationTarget(Type type, object instance)
+		{
+			object obj = base.GetInvocationTarget(type, instance);
+			ICustomTypeDescriptor customTypeDescriptor = obj as ICustomTypeDescriptor;
+			if (customTypeDescriptor != null)
+			{
+				obj = customTypeDescriptor.GetPropertyOwner(this);
+			}
+			return obj;
+		}
+
+		protected Type GetTypeFromName(string typeName)
+		{
+			if (typeName == null || typeName.Length == 0)
+			{
+				return null;
+			}
+			Type type = Type.GetType(typeName);
+			Type type2 = null;
+			if (this.ComponentType != null && (type == null || this.ComponentType.Assembly.FullName.Equals(type.Assembly.FullName)))
+			{
+				int num = typeName.IndexOf(',');
+				if (num != -1)
+				{
+					typeName = typeName.Substring(0, num);
+				}
+				type2 = this.ComponentType.Assembly.GetType(typeName);
+			}
+			return type2 ?? type;
+		}
+
+		public abstract object GetValue(object component);
+
+		protected virtual void OnValueChanged(object component, EventArgs e)
+		{
+			if (component != null && this.valueChangedHandlers != null)
+			{
+				EventHandler eventHandler = (EventHandler)this.valueChangedHandlers[component];
+				if (eventHandler != null)
+				{
+					eventHandler(component, e);
+				}
 			}
 		}
 
@@ -128,186 +278,50 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("handler");
 			}
-			if (this.notifiers == null)
+			if (this.valueChangedHandlers != null)
 			{
-				return;
+				EventHandler eventHandler = (EventHandler)this.valueChangedHandlers[component];
+				eventHandler = (EventHandler)Delegate.Remove(eventHandler, handler);
+				if (eventHandler != null)
+				{
+					this.valueChangedHandlers[component] = eventHandler;
+					return;
+				}
+				this.valueChangedHandlers.Remove(component);
 			}
-			EventHandler eventHandler = (EventHandler)this.notifiers[component];
-			eventHandler = (EventHandler)Delegate.Remove(eventHandler, handler);
-			if (eventHandler == null)
-			{
-				this.notifiers.Remove(component);
-			}
-			else
-			{
-				this.notifiers[component] = eventHandler;
-			}
-		}
-
-		protected override void FillAttributes(IList attributeList)
-		{
-			base.FillAttributes(attributeList);
-		}
-
-		protected override object GetInvocationTarget(Type type, object instance)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			if (instance == null)
-			{
-				throw new ArgumentNullException("instance");
-			}
-			if (instance is CustomTypeDescriptor)
-			{
-				CustomTypeDescriptor customTypeDescriptor = (CustomTypeDescriptor)instance;
-				return customTypeDescriptor.GetPropertyOwner(this);
-			}
-			return base.GetInvocationTarget(type, instance);
 		}
 
 		protected internal EventHandler GetValueChangedHandler(object component)
 		{
-			if (component == null || this.notifiers == null)
+			if (component != null && this.valueChangedHandlers != null)
 			{
-				return null;
+				return (EventHandler)this.valueChangedHandlers[component];
 			}
-			return (EventHandler)this.notifiers[component];
+			return null;
 		}
-
-		protected virtual void OnValueChanged(object component, EventArgs e)
-		{
-			if (this.notifiers == null)
-			{
-				return;
-			}
-			EventHandler eventHandler = (EventHandler)this.notifiers[component];
-			if (eventHandler == null)
-			{
-				return;
-			}
-			eventHandler(component, e);
-		}
-
-		public abstract object GetValue(object component);
-
-		public abstract void SetValue(object component, object value);
 
 		public abstract void ResetValue(object component);
 
-		public abstract bool CanResetValue(object component);
+		public abstract void SetValue(object component, object value);
 
 		public abstract bool ShouldSerializeValue(object component);
 
-		protected object CreateInstance(Type type)
+		public virtual bool SupportsChangeEvents
 		{
-			if (type == null || this.PropertyType == null)
-			{
-				return null;
-			}
-			Type[] array = new Type[] { typeof(Type) };
-			ConstructorInfo constructor = type.GetConstructor(array);
-			object obj;
-			if (constructor != null)
-			{
-				object[] array2 = new object[] { this.PropertyType };
-				obj = TypeDescriptor.CreateInstance(null, type, array, array2);
-			}
-			else
-			{
-				obj = TypeDescriptor.CreateInstance(null, type, null, null);
-			}
-			return obj;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (!base.Equals(obj))
+			get
 			{
 				return false;
 			}
-			PropertyDescriptor propertyDescriptor = obj as PropertyDescriptor;
-			return propertyDescriptor != null && propertyDescriptor.PropertyType == this.PropertyType;
-		}
-
-		public PropertyDescriptorCollection GetChildProperties()
-		{
-			return this.GetChildProperties(null, null);
-		}
-
-		public PropertyDescriptorCollection GetChildProperties(object instance)
-		{
-			return this.GetChildProperties(instance, null);
-		}
-
-		public PropertyDescriptorCollection GetChildProperties(Attribute[] filter)
-		{
-			return this.GetChildProperties(null, filter);
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		public virtual PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
-		{
-			return TypeDescriptor.GetProperties(instance, filter);
-		}
-
-		public virtual object GetEditor(Type editorBaseType)
-		{
-			Type type = null;
-			Attribute[] attributeArray = this.AttributeArray;
-			if (attributeArray != null && attributeArray.Length != 0)
-			{
-				foreach (Attribute attribute in attributeArray)
-				{
-					EditorAttribute editorAttribute = attribute as EditorAttribute;
-					if (editorAttribute != null)
-					{
-						type = this.GetTypeFromName(editorAttribute.EditorTypeName);
-						if (type != null && type.IsSubclassOf(editorBaseType))
-						{
-							break;
-						}
-					}
-				}
-			}
-			object obj = null;
-			if (type != null)
-			{
-				obj = this.CreateInstance(type);
-			}
-			if (obj == null)
-			{
-				obj = TypeDescriptor.GetEditor(this.PropertyType, editorBaseType);
-			}
-			return obj;
-		}
-
-		protected Type GetTypeFromName(string typeName)
-		{
-			if (typeName == null || this.ComponentType == null || typeName.Trim().Length == 0)
-			{
-				return null;
-			}
-			Type type = Type.GetType(typeName);
-			if (type == null)
-			{
-				int num = typeName.IndexOf(",");
-				if (num != -1)
-				{
-					typeName = typeName.Substring(0, num);
-				}
-				type = this.ComponentType.Assembly.GetType(typeName);
-			}
-			return type;
 		}
 
 		private TypeConverter converter;
 
-		private Hashtable notifiers;
+		private Hashtable valueChangedHandlers;
+
+		private object[] editors;
+
+		private Type[] editorTypes;
+
+		private int editorCount;
 	}
 }

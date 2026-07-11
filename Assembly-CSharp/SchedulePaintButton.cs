@@ -25,7 +25,7 @@ public class SchedulePaintButton : KMonoBehaviour
 
 	public void SetToggle(bool on)
 	{
-		this.toggle.ChangeState((!on) ? 0 : 1);
+		this.toggle.ChangeState(on ? 1 : 0);
 	}
 
 	[SerializeField]

@@ -4,10 +4,10 @@ namespace System.Net.Sockets
 {
 	public struct IPPacketInformation
 	{
-		internal IPPacketInformation(IPAddress address, int iface)
+		internal IPPacketInformation(IPAddress address, int networkInterface)
 		{
 			this.address = address;
-			this.iface = iface;
+			this.networkInterface = networkInterface;
 		}
 
 		public IPAddress Address
@@ -22,37 +22,41 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.iface;
+				return this.networkInterface;
 			}
+		}
+
+		public static bool operator ==(IPPacketInformation packetInformation1, IPPacketInformation packetInformation2)
+		{
+			return packetInformation1.Equals(packetInformation2);
+		}
+
+		public static bool operator !=(IPPacketInformation packetInformation1, IPPacketInformation packetInformation2)
+		{
+			return !packetInformation1.Equals(packetInformation2);
 		}
 
 		public override bool Equals(object comparand)
 		{
+			if (comparand == null)
+			{
+				return false;
+			}
 			if (!(comparand is IPPacketInformation))
 			{
 				return false;
 			}
 			IPPacketInformation ippacketInformation = (IPPacketInformation)comparand;
-			return ippacketInformation.iface == this.iface && ippacketInformation.address.Equals(this.address);
+			return this.address.Equals(ippacketInformation.address) && this.networkInterface == ippacketInformation.networkInterface;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.address.GetHashCode() + this.iface;
-		}
-
-		public static bool operator ==(IPPacketInformation p1, IPPacketInformation p2)
-		{
-			return p1.Equals(p2);
-		}
-
-		public static bool operator !=(IPPacketInformation p1, IPPacketInformation p2)
-		{
-			return !p1.Equals(p2);
+			return this.address.GetHashCode() + this.networkInterface.GetHashCode();
 		}
 
 		private IPAddress address;
 
-		private int iface;
+		private int networkInterface;
 	}
 }

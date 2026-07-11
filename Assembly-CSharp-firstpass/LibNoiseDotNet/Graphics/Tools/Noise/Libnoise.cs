@@ -191,12 +191,20 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 
 		public static int FastFloor(double x)
 		{
-			return (x < 0.0) ? ((int)x - 1) : ((int)x);
+			if (x < 0.0)
+			{
+				return (int)x - 1;
+			}
+			return (int)x;
 		}
 
 		public static int FastFloor(float x)
 		{
-			return (x < 0f) ? ((int)x - 1) : ((int)x);
+			if (x < 0f)
+			{
+				return (int)x - 1;
+			}
+			return (int)x;
 		}
 
 		public const string VERSION = "1.0.0 B";

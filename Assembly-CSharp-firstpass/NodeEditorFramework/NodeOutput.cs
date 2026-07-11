@@ -131,11 +131,9 @@ namespace NodeEditorFramework
 			if (Value == null || this.typeData.Type.IsAssignableFrom(Value.GetType()))
 			{
 				this.value = Value;
+				return;
 			}
-			else
-			{
-				global::Debug.LogError("Trying to SetValue of type " + Value.GetType().FullName + " for Output Type: " + this.typeData.Type.FullName);
-			}
+			global::Debug.LogError("Trying to SetValue of type " + Value.GetType().FullName + " for Output Type: " + this.typeData.Type.FullName);
 		}
 
 		public T GetValue<T>()
@@ -160,11 +158,9 @@ namespace NodeEditorFramework
 			if (this.typeData.Type.IsAssignableFrom(typeof(T)))
 			{
 				this.value = Value;
+				return;
 			}
-			else
-			{
-				global::Debug.LogError("Trying to SetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName);
-			}
+			global::Debug.LogError("Trying to SetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName);
 		}
 
 		public void ResetValue()
@@ -192,7 +188,11 @@ namespace NodeEditorFramework
 
 		public override Node GetNodeAcrossConnection()
 		{
-			return (this.connections.Count <= 0) ? null : this.connections[0].body;
+			if (this.connections.Count <= 0)
+			{
+				return null;
+			}
+			return this.connections[0].body;
 		}
 
 		private static GUIStyle _defaultStyle;

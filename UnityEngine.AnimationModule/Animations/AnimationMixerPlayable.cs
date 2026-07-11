@@ -6,11 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that controls an animation mixer.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationMixerPlayable.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationMixerPlayable.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationMixerPlayable.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
@@ -28,15 +25,14 @@ namespace UnityEngine.Animations
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates an AnimationMixerPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph that will contain the new AnimationMixerPlayable.</param>
-		/// <param name="inputCount">The number of inputs that the mixer will update.</param>
-		/// <param name="normalizeWeights">True to force a weight normalization of the inputs.</param>
-		/// <returns>
-		///   <para>A new AnimationMixerPlayable linked to the PlayableGraph.</para>
-		/// </returns>
+		public static AnimationMixerPlayable Null
+		{
+			get
+			{
+				return AnimationMixerPlayable.m_NullPlayable;
+			}
+		}
+
 		public static AnimationMixerPlayable Create(PlayableGraph graph, int inputCount = 0, bool normalizeWeights = false)
 		{
 			PlayableHandle playableHandle = AnimationMixerPlayable.CreateHandle(graph, inputCount, normalizeWeights);
@@ -79,6 +75,7 @@ namespace UnityEngine.Animations
 			return this.GetHandle() == other.GetHandle();
 		}
 
+		[NativeThrows]
 		private static bool CreateHandleInternal(PlayableGraph graph, int inputCount, bool normalizeWeights, ref PlayableHandle handle)
 		{
 			return AnimationMixerPlayable.CreateHandleInternal_Injected(ref graph, inputCount, normalizeWeights, ref handle);
@@ -88,5 +85,7 @@ namespace UnityEngine.Animations
 		private static extern bool CreateHandleInternal_Injected(ref PlayableGraph graph, int inputCount, bool normalizeWeights, ref PlayableHandle handle);
 
 		private PlayableHandle m_Handle;
+
+		private static readonly AnimationMixerPlayable m_NullPlayable = new AnimationMixerPlayable(PlayableHandle.Null);
 	}
 }

@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				return false;
 			}
 			string value = scalar.Value;
-			return value == string.Empty || value == "~" || value == "null" || value == "Null" || value == "NULL";
+			return value == "" || value == "~" || value == "null" || value == "Null" || value == "NULL";
 		}
 	}
 }

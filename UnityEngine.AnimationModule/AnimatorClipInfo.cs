@@ -5,17 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Information about clip being played and blended by the Animator.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	public struct AnimatorClipInfo
 	{
-		/// <summary>
-		///   <para>Returns the animation clip played by the Animator.</para>
-		/// </summary>
 		public AnimationClip clip
 		{
 			get
@@ -24,9 +18,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the blending weight used by the Animator to blend this clip.</para>
-		/// </summary>
 		public float weight
 		{
 			get

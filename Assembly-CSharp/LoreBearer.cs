@@ -20,13 +20,7 @@ public class LoreBearer : KMonoBehaviour
 
 	private void RefreshUserMenu(object data = null)
 	{
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "action_follow_cam";
-		string text2 = UI.USERMENUACTIONS.READLORE.NAME;
-		global::System.Action action = new global::System.Action(this.OnClickRead);
-		string text3 = UI.USERMENUACTIONS.READLORE.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_follow_cam", UI.USERMENUACTIONS.READLORE.NAME, new global::System.Action(this.OnClickRead), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.READLORE.TOOLTIP, true), 1f);
 	}
 
 	private Action<InfoDialogScreen> OpenCodex(string key)
@@ -38,11 +32,9 @@ public class LoreBearer : KMonoBehaviour
 			if (entryForLock == null)
 			{
 				KCrashReporter.Assert(false, "Missing codex entry: " + key);
+				return;
 			}
-			else
-			{
-				ManagementMenu.Instance.OpenCodexToEntry(entryForLock);
-			}
+			ManagementMenu.Instance.OpenCodexToEntry(entryForLock);
 		};
 	}
 
@@ -68,12 +60,11 @@ public class LoreBearer : KMonoBehaviour
 				string text2 = "SEARCH" + global::UnityEngine.Random.Range(1, 6);
 				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_COMPUTER_SUCCESS." + text2));
 				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex(text));
+				return;
 			}
-			else
-			{
-				string text3 = "SEARCH" + global::UnityEngine.Random.Range(1, 8);
-				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_COMPUTER_FAIL." + text3));
-			}
+			string text3 = "SEARCH" + global::UnityEngine.Random.Range(1, 8);
+			infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_COMPUTER_FAIL." + text3));
+			return;
 		}
 		else if (base.gameObject.name == "GeneShuffler" || base.gameObject.name == "MassiveHeatSink")
 		{
@@ -83,69 +74,74 @@ public class LoreBearer : KMonoBehaviour
 				string text5 = "SEARCH" + global::UnityEngine.Random.Range(1, 3);
 				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_TECHNOLOGY_SUCCESS." + text5));
 				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex(text4));
+				return;
 			}
-			else
-			{
-				string text6 = "SEARCH1";
-				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_FAIL." + text6));
-			}
-		}
-		else if (base.gameObject.name == "PropReceptionDesk")
-		{
-			Game.Instance.unlocks.Unlock("email_pens");
-			infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_ELLIESDESK);
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("email_pens"));
-		}
-		else if (base.gameObject.name == "PropFacilityDesk")
-		{
-			Game.Instance.unlocks.Unlock("journal_magazine");
-			infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_STERNSDESK);
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("journal_magazine"));
-		}
-		else if (base.gameObject.name == "HeadquartersComplete")
-		{
-			Game.Instance.unlocks.Unlock("pod_evacuation");
-			infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_POD);
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("pod_evacuation"));
-		}
-		else if (base.gameObject.name == "PropFacilityDisplay")
-		{
-			Game.Instance.unlocks.Unlock("display_prop1");
-			infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY);
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("display_prop1"));
-		}
-		else if (base.gameObject.name == "PropFacilityDisplay2")
-		{
-			Game.Instance.unlocks.Unlock("display_prop2");
-			infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY);
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("display_prop2"));
-		}
-		else if (base.gameObject.name == "PropFacilityDisplay3")
-		{
-			Game.Instance.unlocks.Unlock("display_prop3");
-			infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY);
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("display_prop3"));
-		}
-		else if (base.gameObject.name == "PropFacilityGlobeDroors")
-		{
-			Game.Instance.unlocks.Unlock("journal_newspaper");
-			infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_CABINET"));
-			infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("journal_newspaper"));
+			string text6 = "SEARCH1";
+			infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_FAIL." + text6));
+			return;
 		}
 		else
 		{
+			if (base.gameObject.name == "PropReceptionDesk")
+			{
+				Game.Instance.unlocks.Unlock("email_pens");
+				infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_ELLIESDESK);
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("email_pens"));
+				return;
+			}
+			if (base.gameObject.name == "PropFacilityDesk")
+			{
+				Game.Instance.unlocks.Unlock("journal_magazine");
+				infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_STERNSDESK);
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("journal_magazine"));
+				return;
+			}
+			if (base.gameObject.name == "HeadquartersComplete")
+			{
+				Game.Instance.unlocks.Unlock("pod_evacuation");
+				infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_POD);
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("pod_evacuation"));
+				return;
+			}
+			if (base.gameObject.name == "PropFacilityDisplay")
+			{
+				Game.Instance.unlocks.Unlock("display_prop1");
+				infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY);
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("display_prop1"));
+				return;
+			}
+			if (base.gameObject.name == "PropFacilityDisplay2")
+			{
+				Game.Instance.unlocks.Unlock("display_prop2");
+				infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY);
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("display_prop2"));
+				return;
+			}
+			if (base.gameObject.name == "PropFacilityDisplay3")
+			{
+				Game.Instance.unlocks.Unlock("display_prop3");
+				infoDialogScreen.AddPlainText(UI.USERMENUACTIONS.READLORE.SEARCH_DISPLAY);
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("display_prop3"));
+				return;
+			}
+			if (base.gameObject.name == "PropFacilityGlobeDroors")
+			{
+				Game.Instance.unlocks.Unlock("journal_newspaper");
+				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_CABINET"));
+				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex("journal_newspaper"));
+				return;
+			}
 			string text7 = Game.Instance.unlocks.UnlockNext("journals");
 			if (text7 != null)
 			{
 				string text8 = "SEARCH" + global::UnityEngine.Random.Range(1, 6);
 				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_SUCCESS." + text8));
 				infoDialogScreen.AddOption(UI.USERMENUACTIONS.READLORE.GOTODATABASE, this.OpenCodex(text7));
+				return;
 			}
-			else
-			{
-				string text9 = "SEARCH1";
-				infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_FAIL." + text9));
-			}
+			string text9 = "SEARCH1";
+			infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_FAIL." + text9));
+			return;
 		}
 	}
 

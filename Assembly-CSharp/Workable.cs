@@ -38,13 +38,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public virtual float GetPercentComplete()
 	{
-		return (this.workTimeRemaining > this.workTime) ? (-1f) : (1f - this.workTimeRemaining / this.workTime);
+		if (this.workTimeRemaining > this.workTime)
+		{
+			return -1f;
+		}
+		return 1f - this.workTimeRemaining / this.workTime;
 	}
 
 	public virtual Workable.AnimInfo GetAnim(Worker worker)
 	{
 		Workable.AnimInfo animInfo = default(Workable.AnimInfo);
-		if (this.overrideAnims != null && this.overrideAnims.Length > 0)
+		if (this.overrideAnims != null && this.overrideAnims.Length != 0)
 		{
 			animInfo.overrideAnims = this.overrideAnims;
 		}
@@ -100,8 +104,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			}
 			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		}
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.HasChores, false);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.HasChores, false);
 		this.lightEfficiencyBonusStatusItem = Db.Get().DuplicantStatusItems.LightWorkEfficiencyBonus;
 		this.ShowProgressBar(this.alwaysShowProgressBar && this.workTimeRemaining < this.GetWorkTime());
 		this.UpdateStatusItem(null);
@@ -122,11 +125,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 				if (!MinionResume.AnyMinionHasPerk(this.requiredSkillPerk))
 				{
 					this.workStatusItemHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ColonyLacksRequiredSkillPerk, this.requiredSkillPerk);
+					return;
 				}
-				else
-				{
-					this.workStatusItemHandle = component.AddStatusItem(this.readyForSkillWorkStatusItem, this.requiredSkillPerk);
-				}
+				this.workStatusItemHandle = component.AddStatusItem(this.readyForSkillWorkStatusItem, this.requiredSkillPerk);
+				return;
 			}
 		}
 		else if (this.workingStatusItem != null)
@@ -169,13 +171,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStarted);
 		}
 		this.numberOfUses++;
-		if (base.gameObject.GetComponent<KSelectable>() != null && base.gameObject.GetComponent<KSelectable>().IsSelected && this.worker.gameObject.GetComponent<LoopingSounds>() != null)
+		if (this.worker != null)
 		{
-			this.worker.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
-		}
-		else if (this.worker.gameObject.GetComponent<KSelectable>() != null && this.worker.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
-		{
-			base.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
+			if (base.gameObject.GetComponent<KSelectable>() != null && base.gameObject.GetComponent<KSelectable>().IsSelected && this.worker.gameObject.GetComponent<LoopingSounds>() != null)
+			{
+				this.worker.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
+				return;
+			}
+			if (this.worker.gameObject.GetComponent<KSelectable>() != null && this.worker.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
+			{
+				base.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
+			}
 		}
 	}
 
@@ -203,8 +209,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			int num2 = Grid.PosToCell(worker.gameObject);
 			if (Grid.IsValidCell(num2))
 			{
-				int num3 = Grid.LightIntensity[num2];
-				if (num3 > 0)
+				if (Grid.LightIntensity[num2] > 0)
 				{
 					this.currentlyLit = true;
 					num += DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS;
@@ -238,7 +243,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public virtual string GetConversationTopic()
 	{
 		KPrefabID component = base.GetComponent<KPrefabID>();
-		return (!component.HasTag(GameTags.NotConversationTopic)) ? component.PrefabTag.Name : null;
+		if (!component.HasTag(GameTags.NotConversationTopic))
+		{
+			return component.PrefabTag.Name;
+		}
+		return null;
 	}
 
 	public float GetAttributeExperienceMultiplier()
@@ -374,7 +383,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	{
 		if (this.offsetTracker == null)
 		{
-			this.offsetTracker = new StandardOffsetTracker(new CellOffset[] { default(CellOffset) });
+			this.offsetTracker = new StandardOffsetTracker(new CellOffset[1]);
 		}
 		return this.offsetTracker.GetOffsets(cell);
 	}
@@ -409,8 +418,9 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 				this.progressBar = ProgressBar.CreateProgressBar(this, new Func<float>(this.GetPercentComplete));
 			}
 			this.progressBar.gameObject.SetActive(true);
+			return;
 		}
-		else if (this.progressBar != null)
+		if (this.progressBar != null)
 		{
 			this.progressBar.gameObject.DeleteObject();
 			this.progressBar = null;
@@ -529,11 +539,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.offsetTracker.ForceRefresh();
 		}
-	}
-
-	Transform IApproachable.get_transform()
-	{
-		return base.transform;
 	}
 
 	public float workTime;

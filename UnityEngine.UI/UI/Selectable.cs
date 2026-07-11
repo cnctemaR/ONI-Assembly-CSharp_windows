@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Selectable", 70)]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[SelectionBase]
 	[DisallowMultipleComponent]
 	public class Selectable : UIBehaviour, IMoveHandler, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler, IEventSystemHandler
@@ -224,6 +224,12 @@ namespace UnityEngine.UI
 			}
 			this.m_CurrentSelectionState = selectionState;
 			this.InternalEvaluateAndTransitionToSelectionState(true);
+		}
+
+		protected override void OnTransformParentChanged()
+		{
+			base.OnTransformParentChanged();
+			this.OnCanvasGroupChanged();
 		}
 
 		private void OnSetProperty()

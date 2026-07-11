@@ -27,15 +27,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public void Deserialize(IReader reader)
 	{
-		byte b = reader.ReadByte();
-		NavType navType = (NavType)b;
+		NavType navType = (NavType)reader.ReadByte();
 		if (!SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 11))
 		{
 			int num = reader.ReadInt32();
 			for (int i = 0; i < num; i++)
 			{
-				byte b2 = reader.ReadByte();
-				NavType navType2 = (NavType)b2;
+				NavType navType2 = (NavType)reader.ReadByte();
 				int num2 = reader.ReadInt32();
 				if (this.distanceTravelledByNavType.ContainsKey(navType2))
 				{
@@ -44,9 +42,10 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			}
 		}
 		bool flag = false;
-		foreach (NavType navType3 in this.NavGrid.ValidNavTypes)
+		NavType[] validNavTypes = this.NavGrid.ValidNavTypes;
+		for (int j = 0; j < validNavTypes.Length; j++)
 		{
-			if (navType3 == navType)
+			if (validNavTypes[j] == navType)
 			{
 				flag = true;
 				break;
@@ -67,8 +66,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.simRenderLoadBalance = true;
 		this.autoRegisterSimRender = false;
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
-		PathProber component = base.GetComponent<PathProber>();
-		component.SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
+		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
 		this.distanceTravelledByNavType = new Dictionary<NavType, int>();
 		for (int i = 0; i < 10; i++)
 		{
@@ -101,7 +99,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (offsets == null)
 		{
-			offsets = new CellOffset[] { default(CellOffset) };
+			offsets = new CellOffset[1];
 		}
 		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 		return this.GoTo(this.targetLocator, offsets, NavigationTactics.ReduceTravelDistance);
@@ -111,7 +109,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (offsets == null)
 		{
-			offsets = new CellOffset[] { default(CellOffset) };
+			offsets = new CellOffset[1];
 		}
 		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 		return this.GoTo(this.targetLocator, offsets, tactic);
@@ -248,13 +246,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		base.smi.sm.moveTarget.Set(null, base.smi);
 		this.transitionDriver.EndTransition();
 		HashedString idleAnim = this.NavGrid.GetIdleAnim(this.CurrentNavType);
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
+		base.GetComponent<KAnimControllerBase>().Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 		if (arrived_at_destination)
 		{
 			base.smi.GoTo(base.smi.sm.arrived);
+			return;
 		}
-		else if (base.smi.GetCurrentState() == base.smi.sm.moving)
+		if (base.smi.GetCurrentState() == base.smi.sm.moving)
 		{
 			this.ClearReservedCell();
 			base.smi.GoTo(base.smi.sm.failed);
@@ -352,36 +350,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			return;
 		}
-		string text;
-		string text2;
-		global::System.Action action;
-		string text3;
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (NavPathDrawer.Instance.GetNavigator() != this)
-		{
-			text = "action_navigable_regions";
-			text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME;
-			action = new global::System.Action(this.OnDrawPaths);
-			text3 = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			text3 = "action_navigable_regions";
-			text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF;
-			action = new global::System.Action(this.OnDrawPaths);
-			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 0.1f);
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		text = "action_follow_cam";
-		text2 = UI.USERMENUACTIONS.FOLLOWCAM.NAME;
-		action = new global::System.Action(this.OnFollowCam);
-		text3 = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.3f);
+		KIconButtonMenu.ButtonInfo buttonInfo = ((NavPathDrawer.Instance.GetNavigator() != this) ? new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 0.1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_follow_cam", UI.USERMENUACTIONS.FOLLOWCAM.NAME, new global::System.Action(this.OnFollowCam), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP, true), 0.3f);
 	}
 
 	private void OnFollowCam()
@@ -389,11 +360,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		if (CameraController.Instance.followTarget == base.transform)
 		{
 			CameraController.Instance.ClearFollowTarget();
+			return;
 		}
-		else
-		{
-			CameraController.Instance.SetFollowTarget(base.transform);
-		}
+		CameraController.Instance.SetFollowTarget(base.transform);
 	}
 
 	private void OnDrawPaths()
@@ -401,11 +370,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		if (NavPathDrawer.Instance.GetNavigator() != this)
 		{
 			NavPathDrawer.Instance.SetNavigator(this);
+			return;
 		}
-		else
-		{
-			NavPathDrawer.Instance.ClearNavigator();
-		}
+		NavPathDrawer.Instance.ClearNavigator();
 	}
 
 	private void OnSelectObject(object data)
@@ -415,8 +382,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public void OnStore(object data)
 	{
-		bool flag = data is Storage || (data != null && (bool)data);
-		if (flag)
+		if (data is Storage || (data != null && (bool)data))
 		{
 			this.Stop(false);
 		}

@@ -4,21 +4,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-	/// </summary>
 	[ExcludeFromPreset]
-	[ExcludeFromObjectFactory]
 	[Obsolete("MovieTexture is deprecated. Use VideoPlayer instead.", false)]
+	[ExcludeFromObjectFactory]
 	public sealed class MovieTexture : Texture
 	{
 		private MovieTexture()
 		{
 		}
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public void Play()
 		{
 			MovieTexture.INTERNAL_CALL_Play(this);
@@ -28,9 +22,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Play(MovieTexture self);
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public void Stop()
 		{
 			MovieTexture.INTERNAL_CALL_Stop(this);
@@ -40,9 +31,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Stop(MovieTexture self);
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public void Pause()
 		{
 			MovieTexture.INTERNAL_CALL_Pause(this);
@@ -52,9 +40,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Pause(MovieTexture self);
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public extern AudioClip audioClip
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -62,9 +47,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public extern bool loop
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -75,9 +57,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public extern bool isPlaying
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -85,9 +64,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public extern bool isReadyToPlay
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -95,9 +71,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>MovieTexture has been deprecated. Refer to the new movie playback solution VideoPlayer.</para>
-		/// </summary>
 		public extern float duration
 		{
 			[GeneratedByOldBindingsGenerator]

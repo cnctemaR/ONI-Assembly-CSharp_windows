@@ -118,8 +118,7 @@ public class WattsonMessage : KScreen
 				{
 					chorePre.Cancel("Done looping");
 					EmoteChore emoteChore = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
-					EmoteChore emoteChore2 = emoteChore;
-					emoteChore2.onComplete = (Action<Chore>)Delegate.Combine(emoteChore2.onComplete, new Action<Chore>(delegate(Chore param)
+					emoteChore.onComplete = (Action<Chore>)Delegate.Combine(emoteChore.onComplete, new Action<Chore>(delegate(Chore param)
 					{
 						this.birthsComplete++;
 						if (this.birthsComplete == Components.LiveMinionIdentities.Count - 1)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -20,49 +19,6 @@ namespace System.Net.NetworkInformation
 			throw new NotImplementedException();
 		}
 
-		private void ParseRouteInfo(string iface)
-		{
-			try
-			{
-				this.gateways = new IPAddressCollection();
-				using (StreamReader streamReader = new StreamReader("/proc/net/route"))
-				{
-					streamReader.ReadLine();
-					string text;
-					while ((text = streamReader.ReadLine()) != null)
-					{
-						text = text.Trim();
-						if (text.Length != 0)
-						{
-							string[] array = text.Split(new char[] { '\t' });
-							if (array.Length >= 3)
-							{
-								string text2 = array[2].Trim();
-								byte[] array2 = new byte[4];
-								if (text2.Length == 8 && iface.Equals(array[0], StringComparison.OrdinalIgnoreCase))
-								{
-									for (int i = 0; i < 4; i++)
-									{
-										if (!byte.TryParse(text2.Substring(i * 2, 2), NumberStyles.HexNumber, null, out array2[3 - i]))
-										{
-										}
-									}
-									IPAddress ipaddress = new IPAddress(array2);
-									if (!ipaddress.Equals(IPAddress.Any))
-									{
-										this.gateways.Add(ipaddress);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			catch
-			{
-			}
-		}
-
 		private void ParseResolvConf()
 		{
 			try
@@ -71,7 +27,7 @@ namespace System.Net.NetworkInformation
 				if (!(lastWriteTime <= this.last_parse))
 				{
 					this.last_parse = lastWriteTime;
-					this.dns_suffix = string.Empty;
+					this.dns_suffix = "";
 					this.dns_servers = new IPAddressCollection();
 					using (StreamReader streamReader = new StreamReader("/etc/resolv.conf"))
 					{
@@ -81,28 +37,27 @@ namespace System.Net.NetworkInformation
 							text = text.Trim();
 							if (text.Length != 0 && text[0] != '#')
 							{
-								global::System.Text.RegularExpressions.Match match = UnixIPInterfaceProperties.ns.Match(text);
+								Match match = UnixIPInterfaceProperties.ns.Match(text);
 								if (match.Success)
 								{
 									try
 									{
 										string text2 = match.Groups["address"].Value;
 										text2 = text2.Trim();
-										this.dns_servers.Add(IPAddress.Parse(text2));
+										this.dns_servers.InternalAdd(IPAddress.Parse(text2));
+										continue;
 									}
 									catch
 									{
+										continue;
 									}
 								}
-								else
+								match = UnixIPInterfaceProperties.search.Match(text);
+								if (match.Success)
 								{
-									match = UnixIPInterfaceProperties.search.Match(text);
-									if (match.Success)
-									{
-										string text2 = match.Groups["domain"].Value;
-										string[] array = text2.Split(new char[] { ',' });
-										this.dns_suffix = array[0].Trim();
-									}
+									string text2 = match.Groups["domain"].Value;
+									string[] array = text2.Split(new char[] { ',' });
+									this.dns_suffix = array[0].Trim();
 								}
 							}
 						}
@@ -112,29 +67,27 @@ namespace System.Net.NetworkInformation
 			catch
 			{
 			}
-			finally
-			{
-				this.dns_servers.SetReadOnly();
-			}
 		}
 
 		public override IPAddressInformationCollection AnycastAddresses
 		{
 			get
 			{
-				List<IPAddress> list = new List<IPAddress>();
-				return IPAddressInformationImplCollection.LinuxFromAnycast(list);
+				IPAddressInformationCollection ipaddressInformationCollection = new IPAddressInformationCollection();
+				foreach (IPAddress ipaddress in this.addresses)
+				{
+					ipaddressInformationCollection.InternalAdd(new SystemIPAddressInformation(ipaddress, false, false));
+				}
+				return ipaddressInformationCollection;
 			}
 		}
 
-		[global::System.MonoTODO("Always returns an empty collection.")]
+		[MonoTODO("Always returns an empty collection.")]
 		public override IPAddressCollection DhcpServerAddresses
 		{
 			get
 			{
-				IPAddressCollection ipaddressCollection = new IPAddressCollection();
-				ipaddressCollection.SetReadOnly();
-				return ipaddressCollection;
+				return new IPAddressCollection();
 			}
 		}
 
@@ -156,20 +109,7 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		public override GatewayIPAddressInformationCollection GatewayAddresses
-		{
-			get
-			{
-				this.ParseRouteInfo(this.iface.Name.ToString());
-				if (this.gateways.Count > 0)
-				{
-					return new LinuxGatewayIPAddressInformationCollection(this.gateways);
-				}
-				return LinuxGatewayIPAddressInformationCollection.Empty;
-			}
-		}
-
-		[global::System.MonoTODO("Always returns true")]
+		[MonoTODO("Always returns true")]
 		public override bool IsDnsEnabled
 		{
 			get
@@ -178,7 +118,7 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		[global::System.MonoTODO("Always returns false")]
+		[MonoTODO("Always returns false")]
 		public override bool IsDynamicDnsEnabled
 		{
 			get
@@ -191,16 +131,16 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				List<IPAddress> list = new List<IPAddress>();
+				MulticastIPAddressInformationCollection multicastIPAddressInformationCollection = new MulticastIPAddressInformationCollection();
 				foreach (IPAddress ipaddress in this.addresses)
 				{
 					byte[] addressBytes = ipaddress.GetAddressBytes();
 					if (addressBytes[0] >= 224 && addressBytes[0] <= 239)
 					{
-						list.Add(ipaddress);
+						multicastIPAddressInformationCollection.InternalAdd(new SystemMulticastIPAddressInformation(new SystemIPAddressInformation(ipaddress, true, false)));
 					}
 				}
-				return MulticastIPAddressInformationImplCollection.LinuxFromList(list);
+				return multicastIPAddressInformationCollection;
 			}
 		}
 
@@ -208,17 +148,17 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				List<IPAddress> list = new List<IPAddress>();
+				UnicastIPAddressInformationCollection unicastIPAddressInformationCollection = new UnicastIPAddressInformationCollection();
 				foreach (IPAddress ipaddress in this.addresses)
 				{
-					global::System.Net.Sockets.AddressFamily addressFamily = ipaddress.AddressFamily;
-					if (addressFamily != global::System.Net.Sockets.AddressFamily.InterNetwork)
+					AddressFamily addressFamily = ipaddress.AddressFamily;
+					if (addressFamily != AddressFamily.InterNetwork)
 					{
-						if (addressFamily == global::System.Net.Sockets.AddressFamily.InterNetworkV6)
+						if (addressFamily == AddressFamily.InterNetworkV6)
 						{
 							if (!ipaddress.IsIPv6Multicast)
 							{
-								list.Add(ipaddress);
+								unicastIPAddressInformationCollection.InternalAdd(new LinuxUnicastIPAddressInformation(ipaddress));
 							}
 						}
 					}
@@ -227,15 +167,15 @@ namespace System.Net.NetworkInformation
 						byte b = ipaddress.GetAddressBytes()[0];
 						if (b < 224 || b > 239)
 						{
-							list.Add(ipaddress);
+							unicastIPAddressInformationCollection.InternalAdd(new LinuxUnicastIPAddressInformation(ipaddress));
 						}
 					}
 				}
-				return UnicastIPAddressInformationImplCollection.LinuxFromList(list);
+				return unicastIPAddressInformationCollection;
 			}
 		}
 
-		[global::System.MonoTODO("Always returns an empty collection.")]
+		[MonoTODO("Always returns an empty collection.")]
 		public override IPAddressCollection WinsServersAddresses
 		{
 			get
@@ -252,14 +192,12 @@ namespace System.Net.NetworkInformation
 
 		private IPAddressCollection dns_servers;
 
-		private IPAddressCollection gateways;
+		private static Regex ns = new Regex("\\s*nameserver\\s+(?<address>.*)");
+
+		private static Regex search = new Regex("\\s*search\\s+(?<domain>.*)");
 
 		private string dns_suffix;
 
 		private DateTime last_parse;
-
-		private static global::System.Text.RegularExpressions.Regex ns = new global::System.Text.RegularExpressions.Regex("\\s*nameserver\\s+(?<address>.*)");
-
-		private static global::System.Text.RegularExpressions.Regex search = new global::System.Text.RegularExpressions.Regex("\\s*search\\s+(?<domain>.*)");
 	}
 }

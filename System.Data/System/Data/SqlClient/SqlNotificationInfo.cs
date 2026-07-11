@@ -4,23 +4,24 @@ namespace System.Data.SqlClient
 {
 	public enum SqlNotificationInfo
 	{
-		AlreadyChanged = -2,
-		Alter = 5,
-		Delete = 3,
+		Truncate,
+		Insert,
+		Update,
+		Delete,
 		Drop,
-		Error = 7,
-		Expired = 12,
-		Insert = 1,
-		Invalid = 9,
-		Isolation = 11,
-		Options = 10,
-		PreviousFire = 14,
-		Query = 8,
-		Resource = 13,
-		Restart = 6,
-		TemplateLimit = 15,
-		Truncate = 0,
+		Alter,
+		Restart,
+		Error,
+		Query,
+		Invalid,
+		Options,
+		Isolation,
+		Expired,
+		Resource,
+		PreviousFire,
+		TemplateLimit,
+		Merge,
 		Unknown = -1,
-		Update = 2
+		AlreadyChanged = -2
 	}
 }

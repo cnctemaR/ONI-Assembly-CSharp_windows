@@ -15,7 +15,7 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 			return;
 		}
 		KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
-		Vector3 vector = ((!(component != null)) ? (gameObject.transform.GetPosition() + Vector3.down) : component.GetWorldPivot());
+		Vector3 vector = ((component != null) ? component.GetWorldPivot() : (gameObject.transform.GetPosition() + Vector3.down));
 		base.transform.SetPosition(vector + this.offset);
 		if (value_src != null)
 		{
@@ -44,13 +44,11 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 				}
 				else
 				{
-					GameObject gameObject2 = Util.KInstantiateUI(this.germsImage.gameObject, this.germsImage.transform.parent.gameObject, true);
-					image = gameObject2.GetComponent<Image>();
+					image = Util.KInstantiateUI(this.germsImage.gameObject, this.germsImage.transform.parent.gameObject, true).GetComponent<Image>();
 					this.displayedDiseases.Add(image);
 				}
 				image.color = disease.overlayColour;
-				ToolTip component2 = image.GetComponent<ToolTip>();
-				component2.toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value);
+				image.GetComponent<ToolTip>().toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value);
 				num2++;
 			}
 		}

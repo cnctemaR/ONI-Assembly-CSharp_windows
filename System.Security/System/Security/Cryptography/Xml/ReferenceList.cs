@@ -4,55 +4,80 @@ using System.Runtime.CompilerServices;
 
 namespace System.Security.Cryptography.Xml
 {
-	public sealed class ReferenceList : IEnumerable, IList, ICollection
+	public sealed class ReferenceList : IList, ICollection, IEnumerable
 	{
 		public ReferenceList()
 		{
-			this.list = new ArrayList();
+			this._references = new ArrayList();
 		}
 
-		object IList.this[int index]
+		public IEnumerator GetEnumerator()
 		{
-			get
-			{
-				return this[index];
-			}
-			set
-			{
-				this[index] = (EncryptedReference)value;
-			}
-		}
-
-		bool IList.IsFixedSize
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		bool IList.IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
+			return this._references.GetEnumerator();
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.list.Count;
+				return this._references.Count;
 			}
 		}
 
-		public bool IsSynchronized
+		public int Add(object value)
 		{
-			get
+			if (value == null)
 			{
-				return this.list.IsSynchronized;
+				throw new ArgumentNullException("value");
 			}
+			if (!(value is DataReference) && !(value is KeyReference))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			return this._references.Add(value);
+		}
+
+		public void Clear()
+		{
+			this._references.Clear();
+		}
+
+		public bool Contains(object value)
+		{
+			return this._references.Contains(value);
+		}
+
+		public int IndexOf(object value)
+		{
+			return this._references.IndexOf(value);
+		}
+
+		public void Insert(int index, object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (!(value is DataReference) && !(value is KeyReference))
+			{
+				throw new ArgumentException("Type of input object is invalid.", "value");
+			}
+			this._references.Insert(index, value);
+		}
+
+		public void Remove(object value)
+		{
+			this._references.Remove(value);
+		}
+
+		public void RemoveAt(int index)
+		{
+			this._references.RemoveAt(index);
+		}
+
+		public EncryptedReference Item(int index)
+		{
+			return (EncryptedReference)this._references[index];
 		}
 
 		[IndexerName("ItemOf")]
@@ -60,11 +85,52 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return (EncryptedReference)this.list[index];
+				return this.Item(index);
 			}
 			set
 			{
-				this.list[index] = value;
+				((IList)this)[index] = value;
+			}
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				return this._references[index];
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				if (!(value is DataReference) && !(value is KeyReference))
+				{
+					throw new ArgumentException("Type of input object is invalid.", "value");
+				}
+				this._references[index] = value;
+			}
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			this._references.CopyTo(array, index);
+		}
+
+		bool IList.IsFixedSize
+		{
+			get
+			{
+				return this._references.IsFixedSize;
+			}
+		}
+
+		bool IList.IsReadOnly
+		{
+			get
+			{
+				return this._references.IsReadOnly;
 			}
 		}
 
@@ -72,68 +138,18 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this.list.SyncRoot;
+				return this._references.SyncRoot;
 			}
 		}
 
-		public int Add(object value)
+		public bool IsSynchronized
 		{
-			if (!(value is EncryptedReference))
+			get
 			{
-				throw new ArgumentException("value");
+				return this._references.IsSynchronized;
 			}
-			return this.list.Add(value);
 		}
 
-		public void Clear()
-		{
-			this.list.Clear();
-		}
-
-		public bool Contains(object value)
-		{
-			return this.list.Contains(value);
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.list.CopyTo(array, index);
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.list.GetEnumerator();
-		}
-
-		public EncryptedReference Item(int index)
-		{
-			return (EncryptedReference)this.list[index];
-		}
-
-		public int IndexOf(object value)
-		{
-			return this.list.IndexOf(value);
-		}
-
-		public void Insert(int index, object value)
-		{
-			if (!(value is EncryptedReference))
-			{
-				throw new ArgumentException("value");
-			}
-			this.list.Insert(index, value);
-		}
-
-		public void Remove(object value)
-		{
-			this.list.Remove(value);
-		}
-
-		public void RemoveAt(int index)
-		{
-			this.list.RemoveAt(index);
-		}
-
-		private ArrayList list;
+		private ArrayList _references;
 	}
 }

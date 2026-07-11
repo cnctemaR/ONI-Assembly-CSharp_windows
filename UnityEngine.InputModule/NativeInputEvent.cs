@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace UnityEngineInternal.Input
 {
-	[StructLayout(LayoutKind.Explicit, Size = 20)]
+	[StructLayout(LayoutKind.Explicit, Pack = 1, Size = 20)]
 	public struct NativeInputEvent
 	{
 		public NativeInputEvent(NativeInputEventType type, int sizeInBytes, int deviceId, double time)

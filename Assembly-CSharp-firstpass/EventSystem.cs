@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class EventSystem
@@ -81,7 +83,7 @@ public class EventSystem
 			if (this.subscribedEvents[i].hash == eventName && this.subscribedEvents[i].handler == handler && this.subscribedEvents[i].go == target)
 			{
 				this.subscribedEvents.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}
@@ -93,7 +95,9 @@ public class EventSystem
 
 	public int Subscribe(int hash, Action<object> handler)
 	{
-		this.entries.Add(new EventSystem.Entry(hash, handler, ++this.nextId));
+		int num = this.nextId + 1;
+		this.nextId = num;
+		this.entries.Add(new EventSystem.Entry(hash, handler, num));
 		return this.nextId;
 	}
 
@@ -107,13 +111,13 @@ public class EventSystem
 				if (this.currentlyTriggering == 0)
 				{
 					this.entries.RemoveAt(i);
-					break;
+					return;
 				}
 				this.dirty = true;
 				EventSystem.Entry entry = this.entries[i];
 				entry.handler = null;
 				this.entries[i] = entry;
-				break;
+				return;
 			}
 			else
 			{
@@ -124,22 +128,25 @@ public class EventSystem
 
 	public void Unsubscribe(int id)
 	{
-		for (int i = 0; i < this.entries.size; i++)
+		int i = 0;
+		while (i < this.entries.size)
 		{
 			if (this.entries[i].id == id)
 			{
 				if (this.currentlyTriggering == 0)
 				{
 					this.entries.RemoveAt(i);
+					return;
 				}
-				else
-				{
-					this.dirty = true;
-					EventSystem.Entry entry = this.entries[i];
-					entry.handler = null;
-					this.entries[i] = entry;
-				}
-				break;
+				this.dirty = true;
+				EventSystem.Entry entry = this.entries[i];
+				entry.handler = null;
+				this.entries[i] = entry;
+				return;
+			}
+			else
+			{
+				i++;
 			}
 		}
 	}
@@ -147,8 +154,7 @@ public class EventSystem
 	public int Subscribe(GameObject target, int eventName, Action<object> handler)
 	{
 		this.RegisterEvent(target, eventName, handler);
-		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
-		return orCreateObject.GetEventSystem().Subscribe(eventName, handler);
+		return KObjectManager.Instance.GetOrCreateObject(target).GetEventSystem().Subscribe(eventName, handler);
 	}
 
 	public int Subscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler)
@@ -176,8 +182,7 @@ public class EventSystem
 		{
 			return;
 		}
-		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
-		orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);
+		KObjectManager.Instance.GetOrCreateObject(target).GetEventSystem().Unsubscribe(eventName, handler);
 	}
 
 	public void Unsubscribe(int eventName, int subscribeHandle, bool suppressWarnings = false)
@@ -194,12 +199,10 @@ public class EventSystem
 		if (this.currentlyTriggering == 0)
 		{
 			this.intraObjectRoutes.RemoveAtSwap(num);
+			return;
 		}
-		else
-		{
-			this.dirty = true;
-			this.intraObjectRoutes[num] = default(EventSystem.IntraObjectRoute);
-		}
+		this.dirty = true;
+		this.intraObjectRoutes[num] = default(EventSystem.IntraObjectRoute);
 	}
 
 	public void Unsubscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings)
@@ -227,9 +230,9 @@ public class EventSystem
 
 	public void Unsubscribe(string[] eventNames, Action<object> handler)
 	{
-		foreach (string text in eventNames)
+		for (int i = 0; i < eventNames.Length; i++)
 		{
-			int num = Hash.SDBMLower(text);
+			int num = Hash.SDBMLower(eventNames[i]);
 			this.Unsubscribe(num, handler);
 		}
 	}
@@ -309,9 +312,15 @@ public class EventSystem
 
 	public class IntraObjectHandler<ComponentType> : EventSystem.IntraObjectHandlerBase
 	{
+		public static bool IsStatic(Delegate del)
+		{
+			return del.Target == null || del.Target.GetType().GetCustomAttributes(false).OfType<CompilerGeneratedAttribute>()
+				.Any<CompilerGeneratedAttribute>();
+		}
+
 		public IntraObjectHandler(Action<ComponentType, object> handler)
 		{
-			global::Debug.Assert(handler.Method.IsStatic);
+			global::Debug.Assert(EventSystem.IntraObjectHandler<ComponentType>.IsStatic(handler));
 			this.handler = handler;
 		}
 
@@ -333,7 +342,7 @@ public class EventSystem
 
 		public override string ToString()
 		{
-			return ((this.handler.Target == null) ? "STATIC" : this.handler.Target.GetType().ToString()) + "." + this.handler.Method.ToString();
+			return ((this.handler.Target != null) ? this.handler.Target.GetType().ToString() : "STATIC") + "." + this.handler.Method.ToString();
 		}
 
 		private Action<ComponentType, object> handler;

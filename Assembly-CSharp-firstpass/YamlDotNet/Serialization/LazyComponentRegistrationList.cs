@@ -47,9 +47,11 @@ namespace YamlDotNet.Serialization
 		{
 			get
 			{
-				for (int i = this.entries.Count - 1; i >= 0; i--)
+				int num;
+				for (int i = this.entries.Count - 1; i >= 0; i = num)
 				{
 					yield return this.entries[i].Factory;
+					num = i - 1;
 				}
 				yield break;
 			}

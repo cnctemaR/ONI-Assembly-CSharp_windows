@@ -46,8 +46,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
-		Generator generator = go.AddOrGet<Generator>();
-		generator.powerDistributionOrder = 10;
+		go.AddOrGet<Generator>().powerDistributionOrder = 10;
 		ManualGenerator manualGenerator = go.AddOrGet<ManualGenerator>();
 		manualGenerator.SetSliderValue(50f, 0);
 		manualGenerator.workLayer = Grid.SceneLayer.BuildingFront;

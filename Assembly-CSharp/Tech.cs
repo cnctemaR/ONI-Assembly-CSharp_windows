@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class Tech : Resource
 {
-	public Tech(string id, ResourceSet parent, string name, string desc, ResourceTreeNode node)
-		: base(id, parent, name)
-	{
-		this.desc = desc;
-		this.node = node;
-	}
-
 	public Vector2 center
 	{
 		get
@@ -43,6 +36,13 @@ public class Tech : Resource
 		}
 	}
 
+	public Tech(string id, ResourceSet parent, string name, string desc, ResourceTreeNode node)
+		: base(id, parent, name)
+	{
+		this.desc = desc;
+		this.node = node;
+	}
+
 	public bool CanAfford(ResearchPointInventory pointInventory)
 	{
 		foreach (KeyValuePair<string, float> keyValuePair in this.costsByResearchTypeID)
@@ -57,7 +57,7 @@ public class Tech : Resource
 
 	public string CostString(ResearchTypes types)
 	{
-		string text = string.Empty;
+		string text = "";
 		foreach (KeyValuePair<string, float> keyValuePair in this.costsByResearchTypeID)
 		{
 			text += string.Format("{0}:{1}", types.GetResearchType(keyValuePair.Key).name.ToString(), keyValuePair.Value.ToString());
@@ -78,11 +78,14 @@ public class Tech : Resource
 
 	public bool ArePrerequisitesComplete()
 	{
-		foreach (Tech tech in this.requiredTech)
+		using (List<Tech>.Enumerator enumerator = this.requiredTech.GetEnumerator())
 		{
-			if (!tech.IsComplete())
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (!enumerator.Current.IsComplete())
+				{
+					return false;
+				}
 			}
 		}
 		return true;

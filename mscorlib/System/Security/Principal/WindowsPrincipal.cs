@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
+using System.Security.Permissions;
+using Unity;
 
 namespace System.Security.Principal
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class WindowsPrincipal : IPrincipal
+	public class WindowsPrincipal : ClaimsPrincipal
 	{
 		public WindowsPrincipal(WindowsIdentity ntIdentity)
 		{
@@ -17,7 +21,7 @@ namespace System.Security.Principal
 			this._identity = ntIdentity;
 		}
 
-		public virtual IIdentity Identity
+		public override IIdentity Identity
 		{
 			get
 			{
@@ -27,7 +31,7 @@ namespace System.Security.Principal
 
 		public virtual bool IsInRole(int rid)
 		{
-			if (WindowsPrincipal.IsPosix)
+			if (Environment.IsUnix)
 			{
 				return WindowsPrincipal.IsMemberOfGroupId(this.Token, (IntPtr)rid);
 			}
@@ -67,13 +71,15 @@ namespace System.Security.Principal
 			return this.IsInRole(text);
 		}
 
-		public virtual bool IsInRole(string role)
+		[SecuritySafeCritical]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
+		public override bool IsInRole(string role)
 		{
 			if (role == null)
 			{
 				return false;
 			}
-			if (WindowsPrincipal.IsPosix)
+			if (Environment.IsUnix)
 			{
 				return WindowsPrincipal.IsMemberOfGroupName(this.Token, role);
 			}
@@ -94,32 +100,23 @@ namespace System.Security.Principal
 
 		public virtual bool IsInRole(WindowsBuiltInRole role)
 		{
-			if (!WindowsPrincipal.IsPosix)
+			if (!Environment.IsUnix)
 			{
 				return this.IsInRole((int)role);
 			}
-			if (role != WindowsBuiltInRole.Administrator)
+			if (role == WindowsBuiltInRole.Administrator)
 			{
-				return false;
+				string text = "root";
+				return this.IsInRole(text);
 			}
-			string text = "root";
-			return this.IsInRole(text);
+			return false;
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("not implemented")]
+		[ComVisible(false)]
 		public virtual bool IsInRole(SecurityIdentifier sid)
 		{
 			throw new NotImplementedException();
-		}
-
-		private static bool IsPosix
-		{
-			get
-			{
-				int platform = (int)Environment.Platform;
-				return platform == 128 || platform == 4 || platform == 6;
-			}
 		}
 
 		private IntPtr Token
@@ -135,6 +132,24 @@ namespace System.Security.Principal
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool IsMemberOfGroupName(IntPtr user, string group);
+
+		public virtual IEnumerable<Claim> DeviceClaims
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return 0;
+			}
+		}
+
+		public virtual IEnumerable<Claim> UserClaims
+		{
+			get
+			{
+				ThrowStub.ThrowNotSupportedException();
+				return 0;
+			}
+		}
 
 		private WindowsIdentity _identity;
 

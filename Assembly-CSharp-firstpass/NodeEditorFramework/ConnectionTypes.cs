@@ -38,7 +38,7 @@ namespace NodeEditorFramework
 				}
 				else
 				{
-					typeData = ((ConnectionTypes.types.Values.Count > 0) ? ConnectionTypes.types.Values.First<TypeData>((TypeData data) => data.isValid() && data.Type == type) : null);
+					typeData = ((ConnectionTypes.types.Values.Count <= 0) ? null : ConnectionTypes.types.Values.First<TypeData>((TypeData data) => data.isValid() && data.Type == type));
 					if (typeData == null)
 					{
 						ConnectionTypes.types.Add(typeName, typeData = new TypeData(type));
@@ -54,7 +54,7 @@ namespace NodeEditorFramework
 			{
 				ConnectionTypes.FetchTypes();
 			}
-			TypeData typeData = ((ConnectionTypes.types.Values.Count > 0) ? ConnectionTypes.types.Values.First<TypeData>((TypeData data) => data.isValid() && data.Type == type) : null);
+			TypeData typeData = ((ConnectionTypes.types.Values.Count <= 0) ? null : ConnectionTypes.types.Values.First<TypeData>((TypeData data) => data.isValid() && data.Type == type));
 			if (typeData == null)
 			{
 				ConnectionTypes.types.Add(type.Name, typeData = new TypeData(type));
@@ -69,10 +69,9 @@ namespace NodeEditorFramework
 				"None",
 				new TypeData(typeof(object))
 			} };
-			IEnumerable<Assembly> enumerable = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+			foreach (Assembly assembly2 in from assembly in AppDomain.CurrentDomain.GetAssemblies()
 				where assembly.FullName.Contains("Assembly")
-				select assembly;
-			foreach (Assembly assembly2 in enumerable)
+				select assembly)
 			{
 				foreach (Type type in from T in assembly2.GetTypes()
 					where T.IsClass && !T.IsAbstract && T.GetInterfaces().Contains(typeof(IConnectionTypeDeclaration))

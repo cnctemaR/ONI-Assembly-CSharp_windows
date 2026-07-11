@@ -21,8 +21,7 @@ public class CreatureFeeder : KMonoBehaviour
 		{
 			return;
 		}
-		GameObject gameObject = data as GameObject;
-		gameObject.GetComponent<Effects>().Add(this.effectId, true);
+		(data as GameObject).GetComponent<Effects>().Add(this.effectId, true);
 	}
 
 	public string effectId;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System
 {
@@ -8,36 +9,40 @@ namespace System
 	[Serializable]
 	public class ObjectDisposedException : InvalidOperationException
 	{
-		public ObjectDisposedException(string objectName)
-			: base(Locale.GetText("The object was used after being disposed."))
+		private ObjectDisposedException()
+			: this(null, Environment.GetResourceString("Cannot access a disposed object."))
 		{
-			this.obj_name = objectName;
-			this.msg = Locale.GetText("The object was used after being disposed.");
+		}
+
+		public ObjectDisposedException(string objectName)
+			: this(objectName, Environment.GetResourceString("Cannot access a disposed object."))
+		{
 		}
 
 		public ObjectDisposedException(string objectName, string message)
 			: base(message)
 		{
-			this.obj_name = objectName;
-			this.msg = message;
+			base.SetErrorCode(-2146232798);
+			this.objectName = objectName;
 		}
 
 		public ObjectDisposedException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-		}
-
-		protected ObjectDisposedException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this.obj_name = info.GetString("ObjectName");
+			base.SetErrorCode(-2146232798);
 		}
 
 		public override string Message
 		{
 			get
 			{
-				return this.msg;
+				string text = this.ObjectName;
+				if (text == null || text.Length == 0)
+				{
+					return base.Message;
+				}
+				string resourceString = Environment.GetResourceString("Object name: '{0}'.", new object[] { text });
+				return base.Message + Environment.NewLine + resourceString;
 			}
 		}
 
@@ -45,18 +50,27 @@ namespace System
 		{
 			get
 			{
-				return this.obj_name;
+				if (this.objectName == null && !CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
+				{
+					return string.Empty;
+				}
+				return this.objectName;
 			}
 		}
 
+		protected ObjectDisposedException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+			this.objectName = info.GetString("ObjectName");
+		}
+
+		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
-			info.AddValue("ObjectName", this.obj_name);
+			info.AddValue("ObjectName", this.ObjectName, typeof(string));
 		}
 
-		private string obj_name;
-
-		private string msg;
+		private string objectName;
 	}
 }

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Runtime.ConstrainedExecution;
+using System.Runtime.ExceptionServices;
 
 namespace System.Security
 {
 	[MonoTODO("work in progress - encryption is missing")]
-	public sealed class SecureString : CriticalFinalizerObject, IDisposable
+	public sealed class SecureString : IDisposable
 	{
 		public SecureString()
 		{
@@ -46,6 +46,7 @@ namespace System.Security
 			}
 		}
 
+		[HandleProcessCorruptedStateExceptions]
 		public void AppendChar(char c)
 		{
 			if (this.disposed)
@@ -64,7 +65,9 @@ namespace System.Security
 			{
 				this.Decrypt();
 				int num = this.length * 2;
-				this.Alloc(++this.length, true);
+				int num2 = this.length + 1;
+				this.length = num2;
+				this.Alloc(num2, true);
 				this.data[num++] = (byte)(c >> 8);
 				this.data[num++] = (byte)c;
 			}
@@ -97,6 +100,7 @@ namespace System.Security
 			};
 		}
 
+		[SecuritySafeCritical]
 		public void Dispose()
 		{
 			this.disposed = true;
@@ -108,6 +112,7 @@ namespace System.Security
 			this.length = 0;
 		}
 
+		[HandleProcessCorruptedStateExceptions]
 		public void InsertAt(int index, char c)
 		{
 			if (this.disposed)
@@ -130,11 +135,13 @@ namespace System.Security
 			try
 			{
 				this.Decrypt();
-				this.Alloc(++this.length, true);
-				int num = index * 2;
-				Buffer.BlockCopy(this.data, num, this.data, num + 2, this.data.Length - num - 2);
-				this.data[num++] = (byte)(c >> 8);
-				this.data[num] = (byte)c;
+				int num = this.length + 1;
+				this.length = num;
+				this.Alloc(num, true);
+				int num2 = index * 2;
+				Buffer.BlockCopy(this.data, num2, this.data, num2 + 2, this.data.Length - num2 - 2);
+				this.data[num2++] = (byte)(c >> 8);
+				this.data[num2] = (byte)c;
 			}
 			finally
 			{
@@ -156,6 +163,7 @@ namespace System.Security
 			this.read_only = true;
 		}
 
+		[HandleProcessCorruptedStateExceptions]
 		public void RemoveAt(int index)
 		{
 			if (this.disposed)
@@ -173,8 +181,10 @@ namespace System.Security
 			try
 			{
 				this.Decrypt();
-				Buffer.BlockCopy(this.data, index + 1, this.data, index, this.data.Length - index - 1);
-				this.Alloc(--this.length, true);
+				Buffer.BlockCopy(this.data, index * 2 + 2, this.data, index * 2, this.data.Length - index * 2 - 2);
+				int num = this.length - 1;
+				this.length = num;
+				this.Alloc(num, true);
 			}
 			finally
 			{
@@ -182,6 +192,7 @@ namespace System.Security
 			}
 		}
 
+		[HandleProcessCorruptedStateExceptions]
 		public void SetAt(int index, char c)
 		{
 			if (this.disposed)
@@ -211,15 +222,17 @@ namespace System.Security
 
 		private void Encrypt()
 		{
-			if (this.data == null || this.data.Length > 0)
+			if (this.data != null)
 			{
+				int num = this.data.Length;
 			}
 		}
 
 		private void Decrypt()
 		{
-			if (this.data == null || this.data.Length > 0)
+			if (this.data != null)
 			{
+				int num = this.data.Length;
 			}
 		}
 
@@ -229,7 +242,7 @@ namespace System.Security
 			{
 				throw new ArgumentOutOfRangeException("length", "< 0 || > 65536");
 			}
-			int num = (length >> 3) + (((length & 7) != 0) ? 1 : 0) << 4;
+			int num = (length >> 3) + (((length & 7) == 0) ? 0 : 1) << 4;
 			if (realloc && this.data != null && num == this.data.Length)
 			{
 				return;
@@ -240,11 +253,9 @@ namespace System.Security
 				Array.Copy(this.data, 0, array, 0, Math.Min(this.data.Length, array.Length));
 				Array.Clear(this.data, 0, this.data.Length);
 				this.data = array;
+				return;
 			}
-			else
-			{
-				this.data = new byte[num];
-			}
+			this.data = new byte[num];
 		}
 
 		internal byte[] GetBuffer()

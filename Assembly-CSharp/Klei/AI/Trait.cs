@@ -27,16 +27,12 @@ namespace Klei.AI
 
 		public string GetTooltip()
 		{
-			string text = this.description;
-			text += this.GetAttributeModifiersString(true);
-			text += this.GetDisabledChoresString(true);
-			text += this.GetIgnoredEffectsString(true);
-			return text + this.GetExtendedTooltipStr();
+			return this.description + this.GetAttributeModifiersString(true) + this.GetDisabledChoresString(true) + this.GetIgnoredEffectsString(true) + this.GetExtendedTooltipStr();
 		}
 
 		public string GetAttributeModifiersString(bool list_entry)
 		{
-			string text = string.Empty;
+			string text = "";
 			foreach (AttributeModifier attributeModifier in this.SelfModifiers)
 			{
 				Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
@@ -51,7 +47,7 @@ namespace Klei.AI
 
 		public string GetDisabledChoresString(bool list_entry)
 		{
-			string text = string.Empty;
+			string text = "";
 			if (this.disabledChoreGroups != null)
 			{
 				string text2 = DUPLICANTS.TRAITS.CANNOT_DO_TASK;
@@ -73,8 +69,8 @@ namespace Klei.AI
 
 		public string GetIgnoredEffectsString(bool list_entry)
 		{
-			string text = string.Empty;
-			if (this.ignoredEffects != null && this.ignoredEffects.Length > 0)
+			string text = "";
+			if (this.ignoredEffects != null && this.ignoredEffects.Length != 0)
 			{
 				foreach (string text2 in this.ignoredEffects)
 				{
@@ -91,12 +87,11 @@ namespace Klei.AI
 
 		public string GetExtendedTooltipStr()
 		{
-			string text = string.Empty;
+			string text = "";
 			if (this.ExtendedTooltip != null)
 			{
-				foreach (Delegate @delegate in this.ExtendedTooltip.GetInvocationList())
+				foreach (Func<string> func in this.ExtendedTooltip.GetInvocationList())
 				{
-					Func<string> func = (Func<string>)@delegate;
 					text = text + "\n" + func();
 				}
 			}

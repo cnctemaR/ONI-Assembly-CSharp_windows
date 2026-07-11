@@ -5,25 +5,25 @@ using UnityEngine.UI;
 
 public class CodexLabelWithIcon : CodexWidget<CodexLabelWithIcon>
 {
+	public CodexImage icon { get; set; }
+
+	public CodexText label { get; set; }
+
 	public CodexLabelWithIcon()
 	{
 	}
 
-	public CodexLabelWithIcon(string text, CodexTextStyle style, Tuple<Sprite, Color> coloredSprite)
+	public CodexLabelWithIcon(string text, CodexTextStyle style, global::Tuple<Sprite, Color> coloredSprite)
 	{
 		this.icon = new CodexImage(coloredSprite);
 		this.label = new CodexText(text, style);
 	}
 
-	public CodexLabelWithIcon(string text, CodexTextStyle style, Tuple<Sprite, Color> coloredSprite, int iconWidth, int iconHeight)
+	public CodexLabelWithIcon(string text, CodexTextStyle style, global::Tuple<Sprite, Color> coloredSprite, int iconWidth, int iconHeight)
 	{
 		this.icon = new CodexImage(iconWidth, iconHeight, coloredSprite);
 		this.label = new CodexText(text, style);
 	}
-
-	public CodexImage icon { get; set; }
-
-	public CodexText label { get; set; }
 
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
 	{

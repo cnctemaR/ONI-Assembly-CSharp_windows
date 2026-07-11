@@ -59,11 +59,9 @@ public class Butcherable : Workable, ISaveLoadable
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.OnButcherComplete();
+			return;
 		}
-		else
-		{
-			this.ActivateChore(null);
-		}
+		this.ActivateChore(null);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -72,7 +70,7 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore == null) ? new KIconButtonMenu.ButtonInfo("action_harvest", "Meatify", new global::System.Action(this.OnClickButcher), global::Action.NumActions, null, null, null, string.Empty, true) : new KIconButtonMenu.ButtonInfo("action_harvest", "Cancel Meatify", new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, string.Empty, true));
+		KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore != null) ? new KIconButtonMenu.ButtonInfo("action_harvest", "Cancel Meatify", new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, "", true) : new KIconButtonMenu.ButtonInfo("action_harvest", "Meatify", new global::System.Action(this.OnClickButcher), global::Action.NumActions, null, null, null, "", true));
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 

@@ -165,18 +165,19 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			this.effects.Remove("LightWounds");
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
-			break;
+			return;
 		case Health.HealthState.Alright:
 			this.effects.Remove("LightWounds");
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
-			break;
+			return;
 		case Health.HealthState.Scuffed:
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
 			if (!this.effects.HasEffect("LightWounds"))
 			{
 				this.effects.Add("LightWounds", true);
+				return;
 			}
 			break;
 		case Health.HealthState.Injured:
@@ -185,6 +186,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			if (!this.effects.HasEffect("ModerateWounds"))
 			{
 				this.effects.Add("ModerateWounds", true);
+				return;
 			}
 			break;
 		case Health.HealthState.Critical:
@@ -193,18 +195,21 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			if (!this.effects.HasEffect("SevereWounds"))
 			{
 				this.effects.Add("SevereWounds", true);
+				return;
 			}
 			break;
 		case Health.HealthState.Incapacitated:
 			this.effects.Remove("LightWounds");
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
-			break;
+			return;
 		case Health.HealthState.Dead:
 			this.effects.Remove("LightWounds");
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
 			break;
+		default:
+			return;
 		}
 	}
 
@@ -259,11 +264,9 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			if (this.State != Health.HealthState.Dead && this.State != Health.HealthState.Perfect && this.State != Health.HealthState.Alright)
 			{
 				component.SetStatusItem(Db.Get().StatusItemCategories.Hitpoints, Db.Get().CreatureStatusItems.HealthStatus, this.State);
+				return;
 			}
-			else
-			{
-				component.SetStatusItem(Db.Get().StatusItemCategories.Hitpoints, null, null);
-			}
+			component.SetStatusItem(Db.Get().StatusItemCategories.Hitpoints, null, null);
 		}
 	}
 
@@ -285,8 +288,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	private void Kill()
 	{
-		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
-		if (smi != null)
+		if (base.gameObject.GetSMI<DeathMonitor.Instance>() != null)
 		{
 			base.gameObject.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Slain);
 		}

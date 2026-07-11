@@ -7,12 +7,12 @@ namespace NodeEditorFramework
 	[AttributeUsage(AttributeTargets.Method)]
 	public class ContextFillerAttribute : Attribute
 	{
+		public ContextType contextType { get; private set; }
+
 		public ContextFillerAttribute(ContextType type)
 		{
 			this.contextType = type;
 		}
-
-		public ContextType contextType { get; private set; }
 
 		internal static bool AssureValidity(MethodInfo method, ContextFillerAttribute attr)
 		{

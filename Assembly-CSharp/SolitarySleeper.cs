@@ -65,6 +65,7 @@ public class SolitarySleeper : StateMachineComponent<SolitarySleeper.StatesInsta
 					if (smi.GetCurrentState() != this.suffering)
 					{
 						smi.GoTo(this.suffering);
+						return;
 					}
 				}
 				else if (smi.GetCurrentState() != this.satisfied)

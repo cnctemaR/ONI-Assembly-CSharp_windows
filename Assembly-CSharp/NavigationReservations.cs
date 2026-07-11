@@ -22,12 +22,10 @@ public class NavigationReservations : KMonoBehaviour
 		if (!this.cellOccupancyDensity.ContainsKey(cell))
 		{
 			this.cellOccupancyDensity.Add(cell, 1);
+			return;
 		}
-		else
-		{
-			Dictionary<int, int> dictionary;
-			(dictionary = this.cellOccupancyDensity)[cell] = dictionary[cell] + 1;
-		}
+		Dictionary<int, int> dictionary = this.cellOccupancyDensity;
+		dictionary[cell]++;
 	}
 
 	public void RemoveOccupancy(int cell)

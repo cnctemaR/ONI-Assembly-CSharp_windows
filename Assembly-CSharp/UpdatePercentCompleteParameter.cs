@@ -30,7 +30,8 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 				if (!(workable == null))
 				{
 					float percentComplete = workable.GetPercentComplete();
-					entry.ev.setParameterValueByIndex(entry.parameterIdx, percentComplete);
+					EventInstance ev = entry.ev;
+					ev.setParameterValueByIndex(entry.parameterIdx, percentComplete);
 				}
 			}
 		}
@@ -43,7 +44,7 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 			if (this.entries[i].ev.handle == sound.ev.handle)
 			{
 				this.entries.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}

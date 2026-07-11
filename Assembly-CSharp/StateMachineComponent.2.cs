@@ -27,7 +27,7 @@ public class StateMachineComponent<StateMachineInstanceType> : StateMachineCompo
 		if (this._smi != null)
 		{
 			this._smi.StopSM("StateMachineComponent.OnCleanUp");
-			this._smi = (StateMachineInstanceType)((object)null);
+			this._smi = default(StateMachineInstanceType);
 		}
 	}
 
@@ -36,8 +36,7 @@ public class StateMachineComponent<StateMachineInstanceType> : StateMachineCompo
 		base.OnCmpEnable();
 		if (base.isSpawned)
 		{
-			StateMachineInstanceType smi = this.smi;
-			smi.StartSM();
+			this.smi.StartSM();
 		}
 	}
 

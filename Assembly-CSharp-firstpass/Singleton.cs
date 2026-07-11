@@ -33,7 +33,7 @@ public abstract class Singleton<T> where T : class, new()
 		object @lock = Singleton<T>._lock;
 		lock (@lock)
 		{
-			Singleton<T>._instance = (T)((object)null);
+			Singleton<T>._instance = default(T);
 		}
 	}
 

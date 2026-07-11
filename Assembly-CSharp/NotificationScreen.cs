@@ -68,7 +68,7 @@ public class NotificationScreen : KScreen
 	private void OnNewMessage(object data)
 	{
 		Message message = (Message)data;
-		this.notifier.Add(new MessageNotification(message), string.Empty);
+		this.notifier.Add(new MessageNotification(message), "");
 	}
 
 	private void ShowMessage(MessageNotification mn)
@@ -114,21 +114,21 @@ public class NotificationScreen : KScreen
 		base.OnSpawn();
 		this.initTime = KTime.Instance.UnscaledGameTime;
 		LocText[] array = this.LabelPrefab.GetComponentsInChildren<LocText>();
-		foreach (LocText locText in array)
+		for (int i = 0; i < array.Length; i++)
 		{
-			locText.color = this.normalColor;
+			array[i].color = this.normalColor;
 		}
 		array = this.MessagesPrefab.GetComponentsInChildren<LocText>();
-		foreach (LocText locText2 in array)
+		for (int i = 0; i < array.Length; i++)
 		{
-			locText2.color = this.normalColor;
+			array[i].color = this.normalColor;
 		}
 		base.Subscribe(Messenger.Instance.gameObject, 1558809273, new Action<object>(this.OnNewMessage));
 		foreach (Message message in Messenger.Instance.Messages)
 		{
 			Notification notification = new MessageNotification(message);
 			notification.playSound = false;
-			this.notifier.Add(notification, string.Empty);
+			this.notifier.Add(notification, "");
 		}
 	}
 
@@ -141,7 +141,10 @@ public class NotificationScreen : KScreen
 	private void AddNotification(Notification notification)
 	{
 		this.notifications.Add(notification);
-		notification.Idx = this.notificationIncrement++;
+		Notification notification2 = notification;
+		int i = this.notificationIncrement;
+		this.notificationIncrement = i + 1;
+		notification2.Idx = i;
 		NotificationScreen.Entry entry = null;
 		this.entriesByMessage.TryGetValue(notification.titleText, out entry);
 		if (entry == null)
@@ -168,12 +171,18 @@ public class NotificationScreen : KScreen
 			{
 				colors.normalColor = this.messageColorBG;
 				global::Debug.Assert(notification.GetType() == typeof(MessageNotification), string.Format("Notification: \"{0}\" is not of type MessageNotification", notification.titleText));
+				Predicate<Notification> <>9__3;
 				componentsInChildren[1].onClick.AddListener(delegate
 				{
-					List<Notification> list = this.notifications.FindAll((Notification n) => n.titleText == notification.titleText);
-					foreach (Notification notification2 in list)
+					List<Notification> list = this.notifications;
+					Predicate<Notification> predicate;
+					if ((predicate = <>9__3) == null)
 					{
-						MessageNotification messageNotification2 = (MessageNotification)notification2;
+						predicate = (<>9__3 = (Notification n) => n.titleText == notification.titleText);
+					}
+					foreach (Notification notification3 in list.FindAll(predicate))
+					{
+						MessageNotification messageNotification2 = (MessageNotification)notification3;
 						Messenger.Instance.RemoveMessage(messageNotification2.message);
 						messageNotification2.Clear();
 					}
@@ -199,18 +208,27 @@ public class NotificationScreen : KScreen
 					ToolTip componentInChildren2 = label.GetComponentInChildren<ToolTip>();
 					componentInChildren2.ClearMultiStringTooltip();
 					componentInChildren2.AddMultiStringTooltip(notification.ToolTip(entry.notifications, notification.tooltipData), this.TooltipTextStyle);
-					return string.Empty;
+					return "";
 				};
 			}
 			entry = new NotificationScreen.Entry(label);
 			this.entriesByMessage[notification.titleText] = entry;
 			this.entries.Add(entry);
 			LocText[] componentsInChildren2 = label.GetComponentsInChildren<LocText>();
-			foreach (LocText locText in componentsInChildren2)
+			i = 0;
+			while (i < componentsInChildren2.Length)
 			{
-				NotificationType type = notification.Type;
-				switch (type)
+				LocText locText = componentsInChildren2[i];
+				switch (notification.Type)
 				{
+				case NotificationType.Bad:
+					locText.color = this.badColor;
+					componentInChildren.sprite = this.icon_bad;
+					break;
+				case NotificationType.Good:
+				case NotificationType.BadMinor:
+				case NotificationType.Neutral:
+					goto IL_03A7;
 				case NotificationType.Tutorial:
 					locText.color = this.warningColor;
 					componentInChildren.sprite = this.icon_warning;
@@ -235,20 +253,11 @@ public class NotificationScreen : KScreen
 					componentInChildren.sprite = this.icon_bad;
 					break;
 				default:
-					if (type != NotificationType.Bad)
-					{
-						locText.color = this.normalColor;
-						componentInChildren.sprite = this.icon_normal;
-					}
-					else
-					{
-						locText.color = this.badColor;
-						componentInChildren.sprite = this.icon_bad;
-					}
-					break;
+					goto IL_03A7;
 				}
+				IL_03C0:
 				componentInChildren.color = locText.color;
-				string text = string.Empty;
+				string text = "";
 				if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
 				{
 					this.PlayDingSound(notification, 0);
@@ -261,6 +270,12 @@ public class NotificationScreen : KScreen
 				{
 					global::Debug.Log("Notification(" + notification.titleText + "):" + text);
 				}
+				i++;
+				continue;
+				IL_03A7:
+				locText.color = this.normalColor;
+				componentInChildren.sprite = this.icon_normal;
+				goto IL_03C0;
 			}
 		}
 		entry.Add(notification);
@@ -375,27 +390,25 @@ public class NotificationScreen : KScreen
 		if (nextClickedNotification.customClickCallback != null)
 		{
 			nextClickedNotification.customClickCallback(nextClickedNotification.customClickData);
+			return;
 		}
-		else
+		if (nextClickedNotification.clickFocus != null)
 		{
-			if (nextClickedNotification.clickFocus != null)
+			Vector3 position = nextClickedNotification.clickFocus.GetPosition();
+			position.z = -40f;
+			CameraController.Instance.SetTargetPos(position, 8f, true);
+			if (nextClickedNotification.clickFocus.GetComponent<KSelectable>() != null)
 			{
-				Vector3 position = nextClickedNotification.clickFocus.GetPosition();
-				position.z = -40f;
-				CameraController.Instance.SetTargetPos(position, 8f, true);
-				if (nextClickedNotification.clickFocus.GetComponent<KSelectable>() != null)
-				{
-					SelectTool.Instance.Select(nextClickedNotification.clickFocus.GetComponent<KSelectable>(), false);
-				}
+				SelectTool.Instance.Select(nextClickedNotification.clickFocus.GetComponent<KSelectable>(), false);
 			}
-			else if (nextClickedNotification.Notifier != null)
-			{
-				SelectTool.Instance.Select(nextClickedNotification.Notifier.GetComponent<KSelectable>(), false);
-			}
-			if (nextClickedNotification.Type == NotificationType.Messages)
-			{
-				this.ShowMessage((MessageNotification)nextClickedNotification);
-			}
+		}
+		else if (nextClickedNotification.Notifier != null)
+		{
+			SelectTool.Instance.Select(nextClickedNotification.Notifier.GetComponent<KSelectable>(), false);
+		}
+		if (nextClickedNotification.Type == NotificationType.Messages)
+		{
+			this.ShowMessage((MessageNotification)nextClickedNotification);
 		}
 	}
 
@@ -540,7 +553,10 @@ public class NotificationScreen : KScreen
 		{
 			get
 			{
-				return this.notifications[this.clickIdx++ % this.notifications.Count];
+				List<Notification> list = this.notifications;
+				int num = this.clickIdx;
+				this.clickIdx = num + 1;
+				return list[num % this.notifications.Count];
 			}
 		}
 

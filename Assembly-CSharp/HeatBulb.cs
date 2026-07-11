@@ -41,16 +41,14 @@ public class HeatBulb : KMonoBehaviour, ISim200ms
 				this.lightSource.enabled = true;
 			}
 			this.kjConsumed -= num7;
+			return;
 		}
-		else
+		if (this.lightSource.enabled)
 		{
-			if (this.lightSource.enabled)
-			{
-				this.kanim.Play("close", KAnim.PlayMode.Once, 1f, 0f);
-				this.kanim.Queue("off", KAnim.PlayMode.Once, 1f, 0f);
-			}
-			this.lightSource.enabled = false;
+			this.kanim.Play("close", KAnim.PlayMode.Once, 1f, 0f);
+			this.kanim.Queue("off", KAnim.PlayMode.Once, 1f, 0f);
 		}
+		this.lightSource.enabled = false;
 	}
 
 	[SerializeField]

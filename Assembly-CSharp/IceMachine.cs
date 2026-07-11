@@ -23,16 +23,15 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 		float num = this.heatRemovalRate * dt / (float)this.waterStorage.items.Count;
 		foreach (GameObject gameObject in this.waterStorage.items)
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			GameUtil.DeltaThermalEnergy(component, -num, smi.master.targetTemperature);
+			GameUtil.DeltaThermalEnergy(gameObject.GetComponent<PrimaryElement>(), -num, smi.master.targetTemperature);
 		}
 		for (int i = this.waterStorage.items.Count; i > 0; i--)
 		{
 			GameObject gameObject2 = this.waterStorage.items[i - 1];
 			if (gameObject2 && gameObject2.GetComponent<PrimaryElement>().Temperature < gameObject2.GetComponent<PrimaryElement>().Element.lowTemp)
 			{
-				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
-				this.waterStorage.AddOre(component2.Element.lowTempTransitionTarget, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, false, true);
+				PrimaryElement component = gameObject2.GetComponent<PrimaryElement>();
+				this.waterStorage.AddOre(component.Element.lowTempTransitionTarget, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, false, true);
 				this.waterStorage.ConsumeIgnoringDisease(gameObject2);
 			}
 		}

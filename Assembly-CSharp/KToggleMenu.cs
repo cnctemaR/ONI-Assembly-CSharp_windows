@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KToggleMenu : KScreen
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KToggleMenu.OnSelect onSelect;
 
 	public void Setup(IList<KToggleMenu.ToggleInfo> toggleInfo)
@@ -34,7 +32,7 @@ public class KToggleMenu : KScreen
 		{
 			return;
 		}
-		Transform transform = ((!(this.toggleParent != null)) ? base.transform : this.toggleParent);
+		Transform transform = ((this.toggleParent != null) ? this.toggleParent : base.transform);
 		for (int i = 0; i < this.toggleInfo.Count; i++)
 		{
 			int idx = i;
@@ -53,8 +51,7 @@ public class KToggleMenu : KScreen
 				{
 					this.OnClick(idx);
 				};
-				Text text = ktoggle2.GetComponentsInChildren<Text>(true)[0];
-				text.text = toggleInfo.text;
+				ktoggle2.GetComponentsInChildren<Text>(true)[0].text = toggleInfo.text;
 				toggleInfo.toggle = ktoggle2;
 				this.toggles.Add(ktoggle2);
 			}
@@ -88,7 +85,7 @@ public class KToggleMenu : KScreen
 			if (hotKey != global::Action.NumActions && e.TryConsume(hotKey))
 			{
 				this.toggles[i].Click();
-				break;
+				return;
 			}
 		}
 	}

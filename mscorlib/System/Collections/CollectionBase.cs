@@ -5,187 +5,16 @@ namespace System.Collections
 {
 	[ComVisible(true)]
 	[Serializable]
-	public abstract class CollectionBase : IEnumerable, ICollection, IList
+	public abstract class CollectionBase : IList, ICollection, IEnumerable
 	{
 		protected CollectionBase()
 		{
+			this.list = new ArrayList();
 		}
 
 		protected CollectionBase(int capacity)
 		{
 			this.list = new ArrayList(capacity);
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.InnerList.CopyTo(array, index);
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.InnerList.SyncRoot;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.InnerList.IsSynchronized;
-			}
-		}
-
-		int IList.Add(object value)
-		{
-			this.OnValidate(value);
-			int count = this.InnerList.Count;
-			this.OnInsert(count, value);
-			this.InnerList.Add(value);
-			try
-			{
-				this.OnInsertComplete(count, value);
-			}
-			catch
-			{
-				this.InnerList.RemoveAt(count);
-				throw;
-			}
-			return count;
-		}
-
-		bool IList.Contains(object value)
-		{
-			return this.InnerList.Contains(value);
-		}
-
-		int IList.IndexOf(object value)
-		{
-			return this.InnerList.IndexOf(value);
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			this.OnValidate(value);
-			this.OnInsert(index, value);
-			this.InnerList.Insert(index, value);
-			try
-			{
-				this.OnInsertComplete(index, value);
-			}
-			catch
-			{
-				this.InnerList.RemoveAt(index);
-				throw;
-			}
-		}
-
-		void IList.Remove(object value)
-		{
-			this.OnValidate(value);
-			int num = this.InnerList.IndexOf(value);
-			if (num == -1)
-			{
-				throw new ArgumentException("The element cannot be found.", "value");
-			}
-			this.OnRemove(num, value);
-			this.InnerList.Remove(value);
-			this.OnRemoveComplete(num, value);
-		}
-
-		bool IList.IsFixedSize
-		{
-			get
-			{
-				return this.InnerList.IsFixedSize;
-			}
-		}
-
-		bool IList.IsReadOnly
-		{
-			get
-			{
-				return this.InnerList.IsReadOnly;
-			}
-		}
-
-		object IList.this[int index]
-		{
-			get
-			{
-				return this.InnerList[index];
-			}
-			set
-			{
-				if (index < 0 || index >= this.InnerList.Count)
-				{
-					throw new ArgumentOutOfRangeException("index");
-				}
-				this.OnValidate(value);
-				object obj = this.InnerList[index];
-				this.OnSet(index, obj, value);
-				this.InnerList[index] = value;
-				try
-				{
-					this.OnSetComplete(index, obj, value);
-				}
-				catch
-				{
-					this.InnerList[index] = obj;
-					throw;
-				}
-			}
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.InnerList.Count;
-			}
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.InnerList.GetEnumerator();
-		}
-
-		public void Clear()
-		{
-			this.OnClear();
-			this.InnerList.Clear();
-			this.OnClearComplete();
-		}
-
-		public void RemoveAt(int index)
-		{
-			object obj = this.InnerList[index];
-			this.OnValidate(obj);
-			this.OnRemove(index, obj);
-			this.InnerList.RemoveAt(index);
-			this.OnRemoveComplete(index, obj);
-		}
-
-		[ComVisible(false)]
-		public int Capacity
-		{
-			get
-			{
-				if (this.list == null)
-				{
-					this.list = new ArrayList();
-				}
-				return this.list.Capacity;
-			}
-			set
-			{
-				if (this.list == null)
-				{
-					this.list = new ArrayList();
-				}
-				this.list.Capacity = value;
-			}
 		}
 
 		protected ArrayList InnerList
@@ -208,11 +37,202 @@ namespace System.Collections
 			}
 		}
 
-		protected virtual void OnClear()
+		[ComVisible(false)]
+		public int Capacity
 		{
+			get
+			{
+				return this.InnerList.Capacity;
+			}
+			set
+			{
+				this.InnerList.Capacity = value;
+			}
 		}
 
-		protected virtual void OnClearComplete()
+		public int Count
+		{
+			get
+			{
+				if (this.list != null)
+				{
+					return this.list.Count;
+				}
+				return 0;
+			}
+		}
+
+		public void Clear()
+		{
+			this.OnClear();
+			this.InnerList.Clear();
+			this.OnClearComplete();
+		}
+
+		public void RemoveAt(int index)
+		{
+			if (index < 0 || index >= this.Count)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+			}
+			object obj = this.InnerList[index];
+			this.OnValidate(obj);
+			this.OnRemove(index, obj);
+			this.InnerList.RemoveAt(index);
+			try
+			{
+				this.OnRemoveComplete(index, obj);
+			}
+			catch
+			{
+				this.InnerList.Insert(index, obj);
+				throw;
+			}
+		}
+
+		bool IList.IsReadOnly
+		{
+			get
+			{
+				return this.InnerList.IsReadOnly;
+			}
+		}
+
+		bool IList.IsFixedSize
+		{
+			get
+			{
+				return this.InnerList.IsFixedSize;
+			}
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get
+			{
+				return this.InnerList.IsSynchronized;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return this.InnerList.SyncRoot;
+			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this.InnerList.CopyTo(array, index);
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				if (index < 0 || index >= this.Count)
+				{
+					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				}
+				return this.InnerList[index];
+			}
+			set
+			{
+				if (index < 0 || index >= this.Count)
+				{
+					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				}
+				this.OnValidate(value);
+				object obj = this.InnerList[index];
+				this.OnSet(index, obj, value);
+				this.InnerList[index] = value;
+				try
+				{
+					this.OnSetComplete(index, obj, value);
+				}
+				catch
+				{
+					this.InnerList[index] = obj;
+					throw;
+				}
+			}
+		}
+
+		bool IList.Contains(object value)
+		{
+			return this.InnerList.Contains(value);
+		}
+
+		int IList.Add(object value)
+		{
+			this.OnValidate(value);
+			this.OnInsert(this.InnerList.Count, value);
+			int num = this.InnerList.Add(value);
+			try
+			{
+				this.OnInsertComplete(num, value);
+			}
+			catch
+			{
+				this.InnerList.RemoveAt(num);
+				throw;
+			}
+			return num;
+		}
+
+		void IList.Remove(object value)
+		{
+			this.OnValidate(value);
+			int num = this.InnerList.IndexOf(value);
+			if (num < 0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Cannot remove the specified item because it was not found in the specified Collection."));
+			}
+			this.OnRemove(num, value);
+			this.InnerList.RemoveAt(num);
+			try
+			{
+				this.OnRemoveComplete(num, value);
+			}
+			catch
+			{
+				this.InnerList.Insert(num, value);
+				throw;
+			}
+		}
+
+		int IList.IndexOf(object value)
+		{
+			return this.InnerList.IndexOf(value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			if (index < 0 || index > this.Count)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+			}
+			this.OnValidate(value);
+			this.OnInsert(index, value);
+			this.InnerList.Insert(index, value);
+			try
+			{
+				this.OnInsertComplete(index, value);
+			}
+			catch
+			{
+				this.InnerList.RemoveAt(index);
+				throw;
+			}
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return this.InnerList.GetEnumerator();
+		}
+
+		protected virtual void OnSet(int index, object oldValue, object newValue)
 		{
 		}
 
@@ -220,7 +240,7 @@ namespace System.Collections
 		{
 		}
 
-		protected virtual void OnInsertComplete(int index, object value)
+		protected virtual void OnClear()
 		{
 		}
 
@@ -228,24 +248,28 @@ namespace System.Collections
 		{
 		}
 
-		protected virtual void OnRemoveComplete(int index, object value)
+		protected virtual void OnValidate(object value)
 		{
-		}
-
-		protected virtual void OnSet(int index, object oldValue, object newValue)
-		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
 		}
 
 		protected virtual void OnSetComplete(int index, object oldValue, object newValue)
 		{
 		}
 
-		protected virtual void OnValidate(object value)
+		protected virtual void OnInsertComplete(int index, object value)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("CollectionBase.OnValidate: Invalid parameter value passed to method: null");
-			}
+		}
+
+		protected virtual void OnClearComplete()
+		{
+		}
+
+		protected virtual void OnRemoveComplete(int index, object value)
+		{
 		}
 
 		private ArrayList list;

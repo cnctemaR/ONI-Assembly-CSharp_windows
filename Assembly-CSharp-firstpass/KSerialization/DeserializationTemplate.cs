@@ -124,11 +124,9 @@ namespace KSerialization
 					if (typeInfo.subTypes[0].type != null)
 					{
 						typeInfo.type = typeInfo.subTypes[0].type.MakeArrayType();
+						return typeInfo;
 					}
-					else
-					{
-						typeInfo.type = null;
-					}
+					typeInfo.type = null;
 					return typeInfo;
 				case SerializationTypeInfo.Colour:
 					typeInfo.type = typeof(Color);
@@ -137,33 +135,33 @@ namespace KSerialization
 				throw new ArgumentException("unknown type");
 			}
 			Type type = null;
-			switch (serializationTypeInfo)
+			if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
 			{
-			case SerializationTypeInfo.Pair:
-				type = typeof(KeyValuePair<, >);
-				break;
-			case SerializationTypeInfo.Dictionary:
-				type = typeof(Dictionary<, >);
-				break;
-			case SerializationTypeInfo.List:
-				type = typeof(List<>);
-				break;
-			case SerializationTypeInfo.HashSet:
-				type = typeof(HashSet<>);
-				break;
-			case SerializationTypeInfo.Queue:
-				type = typeof(Queue<>);
-				break;
-			default:
-			{
-				if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
+				switch (serializationTypeInfo)
 				{
+				case SerializationTypeInfo.Pair:
+					type = typeof(KeyValuePair<, >);
+					break;
+				case SerializationTypeInfo.Dictionary:
+					type = typeof(Dictionary<, >);
+					break;
+				case SerializationTypeInfo.List:
+					type = typeof(List<>);
+					break;
+				case SerializationTypeInfo.HashSet:
+					type = typeof(HashSet<>);
+					break;
+				case SerializationTypeInfo.Queue:
+					type = typeof(Queue<>);
+					break;
+				default:
 					throw new ArgumentException("unknown type");
 				}
+			}
+			else
+			{
 				string text2 = reader.ReadKleiString();
 				typeInfo.type = Manager.GetType(text2);
-				break;
-			}
 			}
 			byte b2 = reader.ReadByte();
 			Type[] array = new Type[(int)b2];

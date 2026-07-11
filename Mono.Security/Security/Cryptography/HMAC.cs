@@ -5,36 +5,6 @@ namespace Mono.Security.Cryptography
 {
 	internal class HMAC : KeyedHashAlgorithm
 	{
-		public HMAC()
-		{
-			this.hash = MD5.Create();
-			this.HashSizeValue = this.hash.HashSize;
-			byte[] array = new byte[64];
-			RNGCryptoServiceProvider rngcryptoServiceProvider = new RNGCryptoServiceProvider();
-			rngcryptoServiceProvider.GetNonZeroBytes(array);
-			this.KeyValue = (byte[])array.Clone();
-			this.Initialize();
-		}
-
-		public HMAC(string hashName, byte[] rgbKey)
-		{
-			if (hashName == null || hashName.Length == 0)
-			{
-				hashName = "MD5";
-			}
-			this.hash = HashAlgorithm.Create(hashName);
-			this.HashSizeValue = this.hash.HashSize;
-			if (rgbKey.Length > 64)
-			{
-				this.KeyValue = this.hash.ComputeHash(rgbKey);
-			}
-			else
-			{
-				this.KeyValue = (byte[])rgbKey.Clone();
-			}
-			this.Initialize();
-		}
-
 		public override byte[] Key
 		{
 			get
@@ -57,6 +27,31 @@ namespace Mono.Security.Cryptography
 				}
 				this.initializePad();
 			}
+		}
+
+		public HMAC()
+		{
+			this.hash = MD5.Create();
+			this.HashSizeValue = this.hash.HashSize;
+			byte[] array = new byte[64];
+			new RNGCryptoServiceProvider().GetNonZeroBytes(array);
+			this.KeyValue = (byte[])array.Clone();
+			this.Initialize();
+		}
+
+		public HMAC(HashAlgorithm ha, byte[] rgbKey)
+		{
+			this.hash = ha;
+			this.HashSizeValue = this.hash.HashSize;
+			if (rgbKey.Length > 64)
+			{
+				this.KeyValue = this.hash.ComputeHash(rgbKey);
+			}
+			else
+			{
+				this.KeyValue = (byte[])rgbKey.Clone();
+			}
+			this.Initialize();
 		}
 
 		public override void Initialize()

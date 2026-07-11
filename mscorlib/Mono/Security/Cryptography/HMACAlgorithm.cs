@@ -61,11 +61,9 @@ namespace Mono.Security.Cryptography
 				if (value != null && value.Length > 64)
 				{
 					this.key = this.algo.ComputeHash(value);
+					return;
 				}
-				else
-				{
-					this.key = (byte[])value.Clone();
-				}
+				this.key = (byte[])value.Clone();
 			}
 		}
 

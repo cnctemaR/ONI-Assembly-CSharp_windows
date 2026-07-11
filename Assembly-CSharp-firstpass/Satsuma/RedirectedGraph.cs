@@ -14,12 +14,20 @@ namespace Satsuma
 
 		public Node U(Arc arc)
 		{
-			return (this.getDirection(arc) != RedirectedGraph.Direction.Backward) ? this.graph.U(arc) : this.graph.V(arc);
+			if (this.getDirection(arc) != RedirectedGraph.Direction.Backward)
+			{
+				return this.graph.U(arc);
+			}
+			return this.graph.V(arc);
 		}
 
 		public Node V(Arc arc)
 		{
-			return (this.getDirection(arc) != RedirectedGraph.Direction.Backward) ? this.graph.V(arc) : this.graph.U(arc);
+			if (this.getDirection(arc) != RedirectedGraph.Direction.Backward)
+			{
+				return this.graph.V(arc);
+			}
+			return this.graph.U(arc);
 		}
 
 		public bool IsEdge(Arc arc)
@@ -34,9 +42,13 @@ namespace Satsuma
 
 		public IEnumerable<Arc> Arcs(ArcFilter filter = ArcFilter.All)
 		{
-			return (filter != ArcFilter.All) ? (from x in this.graph.Arcs(ArcFilter.All)
-				where this.getDirection(x) == RedirectedGraph.Direction.Edge
-				select x) : this.graph.Arcs(ArcFilter.All);
+			if (filter != ArcFilter.All)
+			{
+				return from x in this.graph.Arcs(ArcFilter.All)
+					where this.getDirection(x) == RedirectedGraph.Direction.Edge
+					select x;
+			}
+			return this.graph.Arcs(ArcFilter.All);
 		}
 
 		private IEnumerable<Arc> FilterArcs(Node u, IEnumerable<Arc> arcs, ArcFilter filter)
@@ -87,7 +99,11 @@ namespace Satsuma
 
 		public int ArcCount(ArcFilter filter = ArcFilter.All)
 		{
-			return (filter != ArcFilter.All) ? this.Arcs(filter).Count<Arc>() : this.graph.ArcCount(ArcFilter.All);
+			if (filter != ArcFilter.All)
+			{
+				return this.Arcs(filter).Count<Arc>();
+			}
+			return this.graph.ArcCount(ArcFilter.All);
 		}
 
 		public int ArcCount(Node u, ArcFilter filter = ArcFilter.All)

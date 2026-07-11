@@ -1,12 +1,11 @@
 ﻿using System;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Mask", 13)]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	[DisallowMultipleComponent]
 	public class Mask : UIBehaviour, ICanvasRaycastFilter, IMaterialModifier
@@ -155,7 +154,6 @@ namespace UnityEngine.UI
 		private RectTransform m_RectTransform;
 
 		[SerializeField]
-		[FormerlySerializedAs("m_ShowGraphic")]
 		private bool m_ShowMaskGraphic = true;
 
 		[NonSerialized]

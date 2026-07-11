@@ -6,15 +6,15 @@ namespace ProcGen
 	[Serializable]
 	public class ComposableDictionary<Key, Value> : IMerge<ComposableDictionary<Key, Value>>
 	{
+		public Dictionary<Key, Value> add { get; private set; }
+
+		public List<Key> remove { get; private set; }
+
 		public ComposableDictionary()
 		{
 			this.add = new Dictionary<Key, Value>();
 			this.remove = new List<Key>();
 		}
-
-		public Dictionary<Key, Value> add { get; private set; }
-
-		public List<Key> remove { get; private set; }
 
 		private void VerifyConsolidated()
 		{

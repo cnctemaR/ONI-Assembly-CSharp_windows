@@ -1,22 +1,27 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using Unity;
 
 namespace System.Net
 {
 	public class ServicePoint
 	{
-		internal ServicePoint(global::System.Uri uri, int connectionLimit, int maxIdleTime)
+		internal ServicePoint(Uri uri, int connectionLimit, int maxIdleTime)
 		{
+			this.sendContinue = true;
+			this.hostE = new object();
+			base..ctor();
 			this.uri = uri;
 			this.connectionLimit = connectionLimit;
 			this.maxIdleTime = maxIdleTime;
 			this.currentConnections = 0;
-			this.idleSince = DateTime.Now;
+			this.idleSince = DateTime.UtcNow;
 		}
 
-		public global::System.Uri Address
+		public Uri Address
 		{
 			get
 			{
@@ -41,23 +46,7 @@ namespace System.Net
 			}
 		}
 
-		public X509Certificate Certificate
-		{
-			get
-			{
-				return this.certificate;
-			}
-		}
-
-		public X509Certificate ClientCertificate
-		{
-			get
-			{
-				return this.clientCertificate;
-			}
-		}
-
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public int ConnectionLeaseTimeout
 		{
 			get
@@ -106,15 +95,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.idleSince;
-			}
-			internal set
-			{
-				object obj = this.locker;
-				lock (obj)
-				{
-					this.idleSince = value;
-				}
+				return this.idleSince.ToLocalTime();
 			}
 		}
 
@@ -130,7 +111,14 @@ namespace System.Net
 				{
 					throw new ArgumentOutOfRangeException();
 				}
-				this.maxIdleTime = value;
+				lock (this)
+				{
+					this.maxIdleTime = value;
+					if (this.idleTimer != null)
+					{
+						this.idleTimer.Change(this.maxIdleTime, this.maxIdleTime);
+					}
+				}
 			}
 		}
 
@@ -142,7 +130,7 @@ namespace System.Net
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public int ReceiveBufferSize
 		{
 			get
@@ -199,6 +187,53 @@ namespace System.Net
 			}
 		}
 
+		public void SetTcpKeepAlive(bool enabled, int keepAliveTime, int keepAliveInterval)
+		{
+			if (enabled)
+			{
+				if (keepAliveTime <= 0)
+				{
+					throw new ArgumentOutOfRangeException("keepAliveTime", "Must be greater than 0");
+				}
+				if (keepAliveInterval <= 0)
+				{
+					throw new ArgumentOutOfRangeException("keepAliveInterval", "Must be greater than 0");
+				}
+			}
+			this.tcp_keepalive = enabled;
+			this.tcp_keepalive_time = keepAliveTime;
+			this.tcp_keepalive_interval = keepAliveInterval;
+		}
+
+		internal void KeepAliveSetup(Socket socket)
+		{
+			if (!this.tcp_keepalive)
+			{
+				return;
+			}
+			byte[] array = new byte[12];
+			ServicePoint.PutBytes(array, this.tcp_keepalive ? 1U : 0U, 0);
+			ServicePoint.PutBytes(array, (uint)this.tcp_keepalive_time, 4);
+			ServicePoint.PutBytes(array, (uint)this.tcp_keepalive_interval, 8);
+			socket.IOControl((IOControlCode)((ulong)(-1744830460)), array, null);
+		}
+
+		private static void PutBytes(byte[] bytes, uint v, int offset)
+		{
+			if (BitConverter.IsLittleEndian)
+			{
+				bytes[offset] = (byte)(v & 255U);
+				bytes[offset + 1] = (byte)((v & 65280U) >> 8);
+				bytes[offset + 2] = (byte)((v & 16711680U) >> 16);
+				bytes[offset + 3] = (byte)((v & 4278190080U) >> 24);
+				return;
+			}
+			bytes[offset + 3] = (byte)(v & 255U);
+			bytes[offset + 2] = (byte)((v & 65280U) >> 8);
+			bytes[offset + 1] = (byte)((v & 16711680U) >> 16);
+			bytes[offset] = (byte)((v & 4278190080U) >> 24);
+		}
+
 		internal bool UsesProxy
 		{
 			get
@@ -223,23 +258,115 @@ namespace System.Net
 			}
 		}
 
-		internal bool AvailableForRecycling
+		private WebConnectionGroup GetConnectionGroup(string name)
 		{
-			get
+			if (name == null)
 			{
-				return this.CurrentConnections == 0 && this.maxIdleTime != -1 && DateTime.Now >= this.IdleSince.AddMilliseconds((double)this.maxIdleTime);
+				name = "";
 			}
+			WebConnectionGroup webConnectionGroup;
+			if (this.groups != null && this.groups.TryGetValue(name, out webConnectionGroup))
+			{
+				return webConnectionGroup;
+			}
+			webConnectionGroup = new WebConnectionGroup(this, name);
+			webConnectionGroup.ConnectionClosed += delegate(object s, EventArgs e)
+			{
+				this.currentConnections--;
+			};
+			if (this.groups == null)
+			{
+				this.groups = new Dictionary<string, WebConnectionGroup>();
+			}
+			this.groups.Add(name, webConnectionGroup);
+			return webConnectionGroup;
 		}
 
-		internal Hashtable Groups
+		private void RemoveConnectionGroup(WebConnectionGroup group)
+		{
+			if (this.groups == null || this.groups.Count == 0)
+			{
+				throw new InvalidOperationException();
+			}
+			this.groups.Remove(group.Name);
+		}
+
+		private bool CheckAvailableForRecycling(out DateTime outIdleSince)
+		{
+			outIdleSince = DateTime.MinValue;
+			List<WebConnectionGroup> list = null;
+			List<WebConnectionGroup> list2 = null;
+			ServicePoint servicePoint = this;
+			TimeSpan timeSpan;
+			lock (servicePoint)
+			{
+				if (this.groups == null || this.groups.Count == 0)
+				{
+					this.idleSince = DateTime.MinValue;
+					return true;
+				}
+				timeSpan = TimeSpan.FromMilliseconds((double)this.maxIdleTime);
+				list = new List<WebConnectionGroup>(this.groups.Values);
+			}
+			foreach (WebConnectionGroup webConnectionGroup in list)
+			{
+				if (webConnectionGroup.TryRecycle(timeSpan, ref outIdleSince))
+				{
+					if (list2 == null)
+					{
+						list2 = new List<WebConnectionGroup>();
+					}
+					list2.Add(webConnectionGroup);
+				}
+			}
+			servicePoint = this;
+			bool flag2;
+			lock (servicePoint)
+			{
+				this.idleSince = outIdleSince;
+				if (list2 != null && this.groups != null)
+				{
+					foreach (WebConnectionGroup webConnectionGroup2 in list2)
+					{
+						if (this.groups.ContainsKey(webConnectionGroup2.Name))
+						{
+							this.RemoveConnectionGroup(webConnectionGroup2);
+						}
+					}
+				}
+				if (this.groups != null && this.groups.Count == 0)
+				{
+					this.groups = null;
+				}
+				if (this.groups == null)
+				{
+					if (this.idleTimer != null)
+					{
+						this.idleTimer.Dispose();
+						this.idleTimer = null;
+					}
+					flag2 = true;
+				}
+				else
+				{
+					flag2 = false;
+				}
+			}
+			return flag2;
+		}
+
+		private void IdleTimerCallback(object obj)
+		{
+			DateTime dateTime;
+			this.CheckAvailableForRecycling(out dateTime);
+		}
+
+		private bool HasTimedOut
 		{
 			get
 			{
-				if (this.groups == null)
-				{
-					this.groups = new Hashtable();
-				}
-				return this.groups;
+				int dnsRefreshTimeout = ServicePointManager.DnsRefreshTimeout;
+				return dnsRefreshTimeout != -1 && this.lastDnsResolve + TimeSpan.FromMilliseconds((double)dnsRefreshTimeout) < DateTime.UtcNow;
 			}
 		}
 
@@ -250,14 +377,14 @@ namespace System.Net
 				object obj = this.hostE;
 				lock (obj)
 				{
-					if (this.host != null)
-					{
-						return this.host;
-					}
 					string text = this.uri.Host;
-					if (this.uri.HostNameType == global::System.UriHostNameType.IPv6 || this.uri.HostNameType == global::System.UriHostNameType.IPv4)
+					if (this.uri.HostNameType == UriHostNameType.IPv6 || this.uri.HostNameType == UriHostNameType.IPv4)
 					{
-						if (this.uri.HostNameType == global::System.UriHostNameType.IPv6)
+						if (this.host != null)
+						{
+							return this.host;
+						}
+						if (this.uri.HostNameType == UriHostNameType.IPv6)
 						{
 							text = text.Substring(1, text.Length - 2);
 						}
@@ -265,13 +392,21 @@ namespace System.Net
 						this.host.AddressList = new IPAddress[] { IPAddress.Parse(text) };
 						return this.host;
 					}
-					try
+					else
 					{
-						this.host = Dns.GetHostByName(text);
-					}
-					catch
-					{
-						return null;
+						if (!this.HasTimedOut && this.host != null)
+						{
+							return this.host;
+						}
+						this.lastDnsResolve = DateTime.UtcNow;
+						try
+						{
+							this.host = Dns.GetHostEntry(text);
+						}
+						catch
+						{
+							return null;
+						}
 					}
 				}
 				return this.host;
@@ -283,79 +418,91 @@ namespace System.Net
 			this.protocolVersion = version;
 		}
 
-		private WebConnectionGroup GetConnectionGroup(string name)
-		{
-			if (name == null)
-			{
-				name = string.Empty;
-			}
-			WebConnectionGroup webConnectionGroup = this.Groups[name] as WebConnectionGroup;
-			if (webConnectionGroup != null)
-			{
-				return webConnectionGroup;
-			}
-			webConnectionGroup = new WebConnectionGroup(this, name);
-			this.Groups[name] = webConnectionGroup;
-			return webConnectionGroup;
-		}
-
 		internal EventHandler SendRequest(HttpWebRequest request, string groupName)
 		{
-			object obj = this.locker;
 			WebConnection connection;
-			lock (obj)
+			lock (this)
 			{
-				WebConnectionGroup connectionGroup = this.GetConnectionGroup(groupName);
-				connection = connectionGroup.GetConnection(request);
+				bool flag2;
+				connection = this.GetConnectionGroup(groupName).GetConnection(request, out flag2);
+				if (flag2)
+				{
+					this.currentConnections++;
+					if (this.idleTimer == null)
+					{
+						this.idleTimer = new Timer(new TimerCallback(this.IdleTimerCallback), null, this.maxIdleTime, this.maxIdleTime);
+					}
+				}
 			}
 			return connection.SendRequest(request);
 		}
 
 		public bool CloseConnectionGroup(string connectionGroupName)
 		{
-			object obj = this.locker;
-			lock (obj)
+			WebConnectionGroup webConnectionGroup = null;
+			lock (this)
 			{
-				WebConnectionGroup connectionGroup = this.GetConnectionGroup(connectionGroupName);
-				if (connectionGroup != null)
+				webConnectionGroup = this.GetConnectionGroup(connectionGroupName);
+				if (webConnectionGroup != null)
 				{
-					connectionGroup.Close();
-					return true;
+					this.RemoveConnectionGroup(webConnectionGroup);
 				}
+			}
+			if (webConnectionGroup != null)
+			{
+				webConnectionGroup.Close();
+				return true;
 			}
 			return false;
 		}
 
-		internal void IncrementConnection()
+		public X509Certificate Certificate
 		{
-			object obj = this.locker;
-			lock (obj)
+			get
 			{
-				this.currentConnections++;
-				this.idleSince = DateTime.Now.AddMilliseconds(1000000.0);
-			}
-		}
-
-		internal void DecrementConnection()
-		{
-			object obj = this.locker;
-			lock (obj)
-			{
-				this.currentConnections--;
-				if (this.currentConnections == 0)
+				object serverCertificateOrBytes = this.m_ServerCertificateOrBytes;
+				if (serverCertificateOrBytes != null && serverCertificateOrBytes.GetType() == typeof(byte[]))
 				{
-					this.idleSince = DateTime.Now;
+					return (X509Certificate)(this.m_ServerCertificateOrBytes = new X509Certificate((byte[])serverCertificateOrBytes));
 				}
+				return serverCertificateOrBytes as X509Certificate;
 			}
 		}
 
-		internal void SetCertificates(X509Certificate client, X509Certificate server)
+		internal void UpdateServerCertificate(X509Certificate certificate)
 		{
-			this.certificate = server;
-			this.clientCertificate = client;
+			if (certificate != null)
+			{
+				this.m_ServerCertificateOrBytes = certificate.GetRawCertData();
+				return;
+			}
+			this.m_ServerCertificateOrBytes = null;
 		}
 
-		internal bool CallEndPointDelegate(global::System.Net.Sockets.Socket sock, IPEndPoint remote)
+		public X509Certificate ClientCertificate
+		{
+			get
+			{
+				object clientCertificateOrBytes = this.m_ClientCertificateOrBytes;
+				if (clientCertificateOrBytes != null && clientCertificateOrBytes.GetType() == typeof(byte[]))
+				{
+					return (X509Certificate)(this.m_ClientCertificateOrBytes = new X509Certificate((byte[])clientCertificateOrBytes));
+				}
+				return clientCertificateOrBytes as X509Certificate;
+			}
+		}
+
+		internal void UpdateClientCertificate(X509Certificate certificate)
+		{
+			if (certificate != null)
+			{
+				this.m_ClientCertificateOrBytes = certificate.GetRawCertData();
+				return;
+			}
+			this.m_ClientCertificateOrBytes = null;
+		}
+
+		internal bool CallEndPointDelegate(Socket sock, IPEndPoint remote)
 		{
 			if (this.endPointCallback == null)
 			{
@@ -383,7 +530,7 @@ namespace System.Net
 					{
 						sock.Bind(ipendPoint);
 					}
-					catch (global::System.Net.Sockets.SocketException)
+					catch (SocketException)
 					{
 						num++;
 						continue;
@@ -394,7 +541,17 @@ namespace System.Net
 			}
 		}
 
-		private global::System.Uri uri;
+		internal Socket GetConnection(PooledStream PooledStream, object owner, bool async, out IPAddress address, ref Socket abortSocket, ref Socket abortSocket6)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal ServicePoint()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		private readonly Uri uri;
 
 		private int connectionLimit;
 
@@ -404,28 +561,36 @@ namespace System.Net
 
 		private DateTime idleSince;
 
+		private DateTime lastDnsResolve;
+
 		private Version protocolVersion;
-
-		private X509Certificate certificate;
-
-		private X509Certificate clientCertificate;
 
 		private IPHostEntry host;
 
 		private bool usesProxy;
 
-		private Hashtable groups;
+		private Dictionary<string, WebConnectionGroup> groups;
 
-		private bool sendContinue = true;
+		private bool sendContinue;
 
 		private bool useConnect;
 
-		private object locker = new object();
-
-		private object hostE = new object();
+		private object hostE;
 
 		private bool useNagle;
 
 		private BindIPEndPoint endPointCallback;
+
+		private bool tcp_keepalive;
+
+		private int tcp_keepalive_time;
+
+		private int tcp_keepalive_interval;
+
+		private Timer idleTimer;
+
+		private object m_ServerCertificateOrBytes;
+
+		private object m_ClientCertificateOrBytes;
 	}
 }

@@ -9,18 +9,14 @@ public static class BaseMoleConfig
 	public static GameObject BaseMole(string id, string name, string desc, string traitId, string anim_file, bool is_baby)
 	{
 		float num = 25f;
-		KAnimFile anim = Assets.GetAnim(anim_file);
-		string text = "idle_loop";
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", 10, true, false, 123.149994f, 673.15f, 73.149994f, 773.15f);
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
-		DiggerMonitor.Def def = gameObject.AddOrGetDef<DiggerMonitor.Def>();
-		def.depthToDig = MoleTuning.DEPTH_TO_HIDE;
+		gameObject.AddOrGetDef<DiggerMonitor.Def>().depthToDig = MoleTuning.DEPTH_TO_HIDE;
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Walker, false);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Walker, false);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new FallStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
 			.Add(new DrowningStates.Def(), true)
@@ -38,13 +34,14 @@ public static class BaseMoleConfig
 			.Add(new LayEggStates.Def(), true)
 			.Add(new CreatureSleepStates.Def(), true)
 			.Add(new EatStates.Def(), true)
-			.Add(new NestingPoopState.Def((!is_baby) ? SimHashes.Regolith.CreateTag() : Tag.Invalid), true)
+			.Add(new NestingPoopState.Def(is_baby ? Tag.Invalid : SimHashes.Regolith.CreateTag()), true)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
-			.PopInterruptGroup();
-		IdleStates.Def def2 = new IdleStates.Def();
-		def2.customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim);
-		ChoreTable.Builder builder2 = builder.Add(def2, true);
-		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.MoleSpecies, null);
+			.PopInterruptGroup()
+			.Add(new IdleStates.Def
+			{
+				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim)
+			}, true);
+		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MoleSpecies, null);
 		return gameObject;
 	}
 
@@ -60,8 +57,7 @@ public static class BaseMoleConfig
 
 	private static HashedString CustomIdleAnim(IdleStates.Instance smi, ref HashedString pre_anim)
 	{
-		Navigator component = smi.gameObject.GetComponent<Navigator>();
-		if (component.CurrentNavType == NavType.Solid)
+		if (smi.gameObject.GetComponent<Navigator>().CurrentNavType == NavType.Solid)
 		{
 			int num = global::UnityEngine.Random.Range(0, BaseMoleConfig.SolidIdleAnims.Length);
 			return BaseMoleConfig.SolidIdleAnims[num];

@@ -3,14 +3,8 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.GlobalIllumination
 {
-	/// <summary>
-	///   <para>Contains normalized linear color values for red, green, blue in the range of 0 to 1, and an additional intensity value.</para>
-	/// </summary>
 	public struct LinearColor
 	{
-		/// <summary>
-		///   <para>The red color value in the range of 0.0 to 1.0.</para>
-		/// </summary>
 		public float red
 		{
 			get
@@ -27,9 +21,6 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 		}
 
-		/// <summary>
-		///   <para>The green color value in the range of 0.0 to 1.0.</para>
-		/// </summary>
 		public float green
 		{
 			get
@@ -46,9 +37,6 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 		}
 
-		/// <summary>
-		///   <para>The blue color value in the range of 0.0 to 1.0.</para>
-		/// </summary>
 		public float blue
 		{
 			get
@@ -65,9 +53,6 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 		}
 
-		/// <summary>
-		///   <para>The intensity value used to scale the red, green and blue values.</para>
-		/// </summary>
 		public float intensity
 		{
 			get
@@ -84,14 +69,6 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 		}
 
-		/// <summary>
-		///   <para>Converts a Light's color value to a normalized linear color value, automatically handling gamma conversion if necessary.</para>
-		/// </summary>
-		/// <param name="color">Light color.</param>
-		/// <param name="intensity">Light intensity.</param>
-		/// <returns>
-		///   <para>Returns the normalized linear color value.</para>
-		/// </returns>
 		public static LinearColor Convert(Color color, float intensity)
 		{
 			Color color2 = ((!GraphicsSettings.lightsUseLinearIntensity) ? color.RGBMultiplied(intensity).linear : color.linear.RGBMultiplied(intensity));
@@ -114,12 +91,6 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			return linearColor;
 		}
 
-		/// <summary>
-		///   <para>Returns a black color.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Returns a black color.</para>
-		/// </returns>
 		public static LinearColor Black()
 		{
 			LinearColor linearColor;

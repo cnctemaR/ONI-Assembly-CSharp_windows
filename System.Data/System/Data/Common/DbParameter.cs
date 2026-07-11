@@ -3,43 +3,33 @@ using System.ComponentModel;
 
 namespace System.Data.Common
 {
-	public abstract class DbParameter : MarshalByRefObject, IDataParameter, IDbDataParameter
+	public abstract class DbParameter : MarshalByRefObject, IDbDataParameter, IDataParameter
 	{
 		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[RefreshProperties(RefreshProperties.All)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public abstract DbType DbType { get; set; }
 
-		[DefaultValue(ParameterDirection.Input)]
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		public abstract void ResetDbType();
+
 		[RefreshProperties(RefreshProperties.All)]
+		[DefaultValue(ParameterDirection.Input)]
 		public abstract ParameterDirection Direction { get; set; }
 
-		[Browsable(false)]
-		[DesignOnly(true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignOnly(true)]
+		[Browsable(false)]
 		public abstract bool IsNullable { get; set; }
 
 		[DefaultValue("")]
 		public abstract string ParameterName { get; set; }
 
-		public abstract int Size { get; set; }
-
-		[DefaultValue("")]
-		public abstract string SourceColumn { get; set; }
-
-		[DefaultValue(false)]
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		[RefreshProperties(RefreshProperties.All)]
-		public abstract bool SourceColumnNullMapping { get; set; }
-
-		[DefaultValue(DataRowVersion.Current)]
-		public abstract DataRowVersion SourceVersion { get; set; }
-
 		byte IDbDataParameter.Precision
 		{
 			get
 			{
-				throw null;
+				return 0;
 			}
 			set
 			{
@@ -50,7 +40,53 @@ namespace System.Data.Common
 		{
 			get
 			{
-				throw null;
+				return 0;
+			}
+			set
+			{
+			}
+		}
+
+		public virtual byte Precision
+		{
+			get
+			{
+				return ((IDbDataParameter)this).Precision;
+			}
+			set
+			{
+				((IDbDataParameter)this).Precision = value;
+			}
+		}
+
+		public virtual byte Scale
+		{
+			get
+			{
+				return ((IDbDataParameter)this).Scale;
+			}
+			set
+			{
+				((IDbDataParameter)this).Scale = value;
+			}
+		}
+
+		public abstract int Size { get; set; }
+
+		[DefaultValue("")]
+		public abstract string SourceColumn { get; set; }
+
+		[RefreshProperties(RefreshProperties.All)]
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[DefaultValue(false)]
+		public abstract bool SourceColumnNullMapping { get; set; }
+
+		[DefaultValue(DataRowVersion.Current)]
+		public virtual DataRowVersion SourceVersion
+		{
+			get
+			{
+				return DataRowVersion.Default;
 			}
 			set
 			{
@@ -60,8 +96,5 @@ namespace System.Data.Common
 		[DefaultValue(null)]
 		[RefreshProperties(RefreshProperties.All)]
 		public abstract object Value { get; set; }
-
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		public abstract void ResetDbType();
 	}
 }

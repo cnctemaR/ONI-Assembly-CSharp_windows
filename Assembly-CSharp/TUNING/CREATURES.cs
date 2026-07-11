@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Klei.AI;
 using STRINGS;
 
 namespace TUNING
@@ -119,28 +120,40 @@ namespace TUNING
 		{
 			private static global::System.Action CreateDietaryModifier(string id, Tag eggTag, TagBits foodTags, float modifierPerCal)
 			{
+				FertilityModifier.FertilityModFn <>9__2;
 				return delegate
 				{
 					string text = CREATURES.FERTILITY_MODIFIERS.DIET.NAME;
 					string text2 = CREATURES.FERTILITY_MODIFIERS.DIET.DESC;
 					List<Tag> foodTagsActual = foodTags.GetTagsVerySlow();
-					Db.Get().CreateFertilityModifier(id, eggTag, text, text2, delegate(string descStr)
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag eggTag2 = eggTag;
+					string text3 = text;
+					string text4 = text2;
+					Func<string, string> func = delegate(string descStr)
 					{
-						string text3 = string.Join(", ", foodTagsActual.Select<Tag, string>(new Func<Tag, string>(GameTagExtensions.ProperName)).ToArray<string>());
-						descStr = string.Format(descStr, text3);
+						string text5 = string.Join(", ", foodTagsActual.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
+						descStr = string.Format(descStr, text5);
 						return descStr;
-					}, delegate(FertilityMonitor.Instance inst, Tag eggType)
+					};
+					FertilityModifier.FertilityModFn fertilityModFn;
+					if ((fertilityModFn = <>9__2) == null)
 					{
-						inst.gameObject.Subscribe(-2038961714, delegate(object data)
+						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
 						{
-							CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
-							TagBits tagBits = new TagBits(caloriesConsumedEvent.tag);
-							if (foodTags.HasAny(ref tagBits))
+							inst.gameObject.Subscribe(-2038961714, delegate(object data)
 							{
-								inst.AddBreedingChance(eggType, caloriesConsumedEvent.calories * modifierPerCal);
-							}
+								CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
+								TagBits tagBits = new TagBits(caloriesConsumedEvent.tag);
+								if (foodTags.HasAny(ref tagBits))
+								{
+									inst.AddBreedingChance(eggType, caloriesConsumedEvent.calories * modifierPerCal);
+								}
+							});
 						});
-					});
+					}
+					modifierSet.CreateFertilityModifier(id2, eggTag2, text3, text4, func, fertilityModFn);
 				};
 			}
 
@@ -151,66 +164,102 @@ namespace TUNING
 
 			private static global::System.Action CreateNearbyCreatureModifier(string id, Tag eggTag, Tag nearbyCreature, float modifierPerSecond, bool alsoInvert)
 			{
+				Func<string, string> <>9__1;
+				FertilityModifier.FertilityModFn <>9__2;
 				return delegate
 				{
-					string text = ((modifierPerSecond >= 0f) ? CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE.NAME : CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE_NEG.NAME);
-					string text2 = ((modifierPerSecond >= 0f) ? CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE.DESC : CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE_NEG.DESC);
-					Db.Get().CreateFertilityModifier(id, eggTag, text, text2, (string descStr) => string.Format(descStr, nearbyCreature.ProperName()), delegate(FertilityMonitor.Instance inst, Tag eggType)
+					string text = ((modifierPerSecond < 0f) ? CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE_NEG.NAME : CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE.NAME);
+					string text2 = ((modifierPerSecond < 0f) ? CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE_NEG.DESC : CREATURES.FERTILITY_MODIFIERS.NEARBY_CREATURE.DESC);
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag eggTag2 = eggTag;
+					string text3 = text;
+					string text4 = text2;
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
 					{
-						NearbyCreatureMonitor.Instance instance = inst.gameObject.GetSMI<NearbyCreatureMonitor.Instance>();
-						if (instance == null)
+						func = (<>9__1 = (string descStr) => string.Format(descStr, nearbyCreature.ProperName()));
+					}
+					FertilityModifier.FertilityModFn fertilityModFn;
+					if ((fertilityModFn = <>9__2) == null)
+					{
+						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
 						{
-							instance = new NearbyCreatureMonitor.Instance(inst.master);
-							instance.StartSM();
-						}
-						instance.OnUpdateNearbyCreatures += delegate(float dt, List<KPrefabID> creatures)
-						{
-							bool flag = false;
-							foreach (KPrefabID kprefabID in creatures)
+							NearbyCreatureMonitor.Instance instance = inst.gameObject.GetSMI<NearbyCreatureMonitor.Instance>();
+							if (instance == null)
 							{
-								if (kprefabID.PrefabTag == nearbyCreature)
+								instance = new NearbyCreatureMonitor.Instance(inst.master);
+								instance.StartSM();
+							}
+							instance.OnUpdateNearbyCreatures += delegate(float dt, List<KPrefabID> creatures)
+							{
+								bool flag = false;
+								using (List<KPrefabID>.Enumerator enumerator = creatures.GetEnumerator())
 								{
-									flag = true;
-									break;
+									while (enumerator.MoveNext())
+									{
+										if (enumerator.Current.PrefabTag == nearbyCreature)
+										{
+											flag = true;
+											break;
+										}
+									}
 								}
-							}
-							if (flag)
-							{
-								inst.AddBreedingChance(eggType, dt * modifierPerSecond);
-							}
-							else if (alsoInvert)
-							{
-								inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
-							}
-						};
-					});
+								if (flag)
+								{
+									inst.AddBreedingChance(eggType, dt * modifierPerSecond);
+									return;
+								}
+								if (alsoInvert)
+								{
+									inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
+								}
+							};
+						});
+					}
+					modifierSet.CreateFertilityModifier(id2, eggTag2, text3, text4, func, fertilityModFn);
 				};
 			}
 
 			private static global::System.Action CreateTemperatureModifier(string id, Tag eggTag, float minTemp, float maxTemp, float modifierPerSecond, bool alsoInvert)
 			{
+				Func<string, string> <>9__1;
+				FertilityModifier.FertilityModFn <>9__2;
 				return delegate
 				{
 					string text = CREATURES.FERTILITY_MODIFIERS.TEMPERATURE.NAME;
-					Db.Get().CreateFertilityModifier(id, eggTag, text, null, (string src) => string.Format(CREATURES.FERTILITY_MODIFIERS.TEMPERATURE.DESC, GameUtil.GetFormattedTemperature(minTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(maxTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), delegate(FertilityMonitor.Instance inst, Tag eggType)
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag eggTag2 = eggTag;
+					string text2 = text;
+					string text3 = null;
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
 					{
-						TemperatureVulnerable component = inst.master.GetComponent<TemperatureVulnerable>();
-						if (component != null)
+						func = (<>9__1 = (string src) => string.Format(CREATURES.FERTILITY_MODIFIERS.TEMPERATURE.DESC, GameUtil.GetFormattedTemperature(minTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(maxTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)));
+					}
+					FertilityModifier.FertilityModFn fertilityModFn;
+					if ((fertilityModFn = <>9__2) == null)
+					{
+						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
 						{
-							component.OnTemperature += delegate(float dt, float newTemp)
+							TemperatureVulnerable component = inst.master.GetComponent<TemperatureVulnerable>();
+							if (component != null)
 							{
-								if (newTemp > minTemp && newTemp < maxTemp)
+								component.OnTemperature += delegate(float dt, float newTemp)
 								{
-									inst.AddBreedingChance(eggType, dt * modifierPerSecond);
-								}
-								else if (alsoInvert)
-								{
-									inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
-								}
-							};
-						}
-						else
-						{
+									if (newTemp > minTemp && newTemp < maxTemp)
+									{
+										inst.AddBreedingChance(eggType, dt * modifierPerSecond);
+										return;
+									}
+									if (alsoInvert)
+									{
+										inst.AddBreedingChance(eggType, dt * -modifierPerSecond);
+									}
+								};
+								return;
+							}
 							DebugUtil.LogErrorArgs(new object[]
 							{
 								"Ack! Trying to add temperature modifier",
@@ -219,8 +268,9 @@ namespace TUNING
 								inst.master.name,
 								"but it's not temperature vulnerable!"
 							});
-						}
-					});
+						});
+					}
+					modifierSet.CreateFertilityModifier(id2, eggTag2, text2, text3, func, fertilityModFn);
 				};
 			}
 

@@ -5,12 +5,6 @@ namespace YamlDotNet.Core.Tokens
 	[Serializable]
 	public abstract class Token
 	{
-		protected Token(Mark start, Mark end)
-		{
-			this.start = start;
-			this.end = end;
-		}
-
 		public Mark Start
 		{
 			get
@@ -25,6 +19,12 @@ namespace YamlDotNet.Core.Tokens
 			{
 				return this.end;
 			}
+		}
+
+		protected Token(Mark start, Mark end)
+		{
+			this.start = start;
+			this.end = end;
 		}
 
 		private readonly Mark start;

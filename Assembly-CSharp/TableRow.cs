@@ -49,7 +49,7 @@ public class TableRow : KMonoBehaviour
 	{
 		this.minion = minion;
 		KImage componentInChildren = base.GetComponentInChildren<KImage>(true);
-		componentInChildren.colorStyleSetting = ((minion != null) ? this.style_setting_minion : this.style_setting_default);
+		componentInChildren.colorStyleSetting = ((minion == null) ? this.style_setting_default : this.style_setting_minion);
 		componentInChildren.ColorState = KImage.ColorSelector.Inactive;
 		CanvasGroup component = base.GetComponent<CanvasGroup>();
 		if (component != null && minion as StoredMinionIdentity != null)
@@ -83,7 +83,7 @@ public class TableRow : KMonoBehaviour
 				{
 					gameObject.GetComponentInChildren<LayoutElement>().minWidth += 3f;
 				}
-				if (column.Value.scrollerID != string.Empty)
+				if (column.Value.scrollerID != "")
 				{
 					foreach (string text in column.Value.screen.column_scrollers)
 					{
@@ -105,8 +105,7 @@ public class TableRow : KMonoBehaviour
 									}
 								});
 								this.scrollers.Add(text, scroll_rect.content.gameObject);
-								Transform transform = scroll_rect.content.transform.parent.Find("Border");
-								if (transform != null)
+								if (scroll_rect.content.transform.parent.Find("Border") != null)
 								{
 									this.scrollerBorders.Add(text, scroll_rect.content.transform.parent.Find("Border").gameObject);
 								}
@@ -142,16 +141,13 @@ public class TableRow : KMonoBehaviour
 			RectTransform rectTransform = keyValuePair2.Value.rectTransform();
 			float width = rectTransform.rect.width;
 			keyValuePair2.Value.transform.SetParent(base.gameObject.transform);
-			RectTransform rectTransform2 = rectTransform;
-			Vector2 vector = new Vector2(0f, 1f);
-			rectTransform.anchorMax = vector;
-			rectTransform2.anchorMin = vector;
+			rectTransform.anchorMin = (rectTransform.anchorMax = new Vector2(0f, 1f));
 			rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
-			RectTransform rectTransform3 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform();
-			Vector3 vector2 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform3.sizeDelta.x / 2f, -1f * (rectTransform3.sizeDelta.y / 2f), 0f);
-			vector2.y = 0f;
+			RectTransform rectTransform2 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform();
+			Vector3 vector = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform2.sizeDelta.x / 2f, -1f * (rectTransform2.sizeDelta.y / 2f), 0f);
+			vector.y = 0f;
 			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, 374f);
-			rectTransform.SetLocalPosition(vector2 + Vector3.up * rectTransform.GetLocalPosition().y + Vector3.up * -rectTransform.anchoredPosition.y);
+			rectTransform.SetLocalPosition(vector + Vector3.up * rectTransform.GetLocalPosition().y + Vector3.up * -rectTransform.anchoredPosition.y);
 		}
 	}
 

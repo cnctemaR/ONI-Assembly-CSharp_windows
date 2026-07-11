@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Experimental.UIElements.StyleEnums;
 using UnityEngine.StyleSheets;
+using UnityEngine.Yoga;
 
 namespace UnityEngine.Experimental.UIElements.StyleSheets
 {
@@ -21,7 +22,6 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			this.maxHeight.Apply(other.maxHeight, mode);
 			this.minWidth.Apply(other.minWidth, mode);
 			this.minHeight.Apply(other.minHeight, mode);
-			this.flex.Apply(other.flex, mode);
 			this.flexBasis.Apply(other.flexBasis, mode);
 			this.flexGrow.Apply(other.flexGrow, mode);
 			this.flexShrink.Apply(other.flexShrink, mode);
@@ -34,28 +34,24 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			this.marginTop.Apply(other.marginTop, mode);
 			this.marginRight.Apply(other.marginRight, mode);
 			this.marginBottom.Apply(other.marginBottom, mode);
-			this.borderLeft.Apply(other.borderLeft, mode);
-			this.borderTop.Apply(other.borderTop, mode);
-			this.borderRight.Apply(other.borderRight, mode);
-			this.borderBottom.Apply(other.borderBottom, mode);
 			this.paddingLeft.Apply(other.paddingLeft, mode);
 			this.paddingTop.Apply(other.paddingTop, mode);
 			this.paddingRight.Apply(other.paddingRight, mode);
 			this.paddingBottom.Apply(other.paddingBottom, mode);
 			this.positionType.Apply(other.positionType, mode);
 			this.alignSelf.Apply(other.alignSelf, mode);
-			this.textAlignment.Apply(other.textAlignment, mode);
-			this.fontStyle.Apply(other.fontStyle, mode);
+			this.unityTextAlign.Apply(other.unityTextAlign, mode);
+			this.fontStyleAndWeight.Apply(other.fontStyleAndWeight, mode);
 			this.textClipping.Apply(other.textClipping, mode);
 			this.fontSize.Apply(other.fontSize, mode);
 			this.font.Apply(other.font, mode);
 			this.wordWrap.Apply(other.wordWrap, mode);
-			this.textColor.Apply(other.textColor, mode);
+			this.color.Apply(other.color, mode);
 			this.flexDirection.Apply(other.flexDirection, mode);
 			this.backgroundColor.Apply(other.backgroundColor, mode);
 			this.borderColor.Apply(other.borderColor, mode);
 			this.backgroundImage.Apply(other.backgroundImage, mode);
-			this.backgroundSize.Apply(other.backgroundSize, mode);
+			this.backgroundScaleMode.Apply(other.backgroundScaleMode, mode);
 			this.alignItems.Apply(other.alignItems, mode);
 			this.alignContent.Apply(other.alignContent, mode);
 			this.justifyContent.Apply(other.justifyContent, mode);
@@ -79,7 +75,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		public void WriteToGUIStyle(GUIStyle style)
 		{
-			style.alignment = (TextAnchor)this.textAlignment.GetSpecifiedValueOrDefault((int)style.alignment);
+			style.alignment = (TextAnchor)this.unityTextAlign.GetSpecifiedValueOrDefault((int)style.alignment);
 			style.wordWrap = this.wordWrap.GetSpecifiedValueOrDefault(style.wordWrap);
 			style.clipping = (TextClipping)this.textClipping.GetSpecifiedValueOrDefault((int)style.clipping);
 			if (this.font.value != null)
@@ -87,7 +83,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				style.font = this.font.value;
 			}
 			style.fontSize = this.fontSize.GetSpecifiedValueOrDefault(style.fontSize);
-			style.fontStyle = (FontStyle)this.fontStyle.GetSpecifiedValueOrDefault((int)style.fontStyle);
+			style.fontStyle = (FontStyle)this.fontStyleAndWeight.GetSpecifiedValueOrDefault((int)style.fontStyle);
 			this.AssignRect(style.margin, ref this.marginLeft, ref this.marginTop, ref this.marginRight, ref this.marginBottom);
 			this.AssignRect(style.padding, ref this.paddingLeft, ref this.paddingTop, ref this.paddingRight, ref this.paddingBottom);
 			this.AssignRect(style.border, ref this.sliceLeft, ref this.sliceTop, ref this.sliceRight, ref this.sliceBottom);
@@ -103,7 +99,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		private void AssignState(GUIStyleState state)
 		{
-			state.textColor = this.textColor.GetSpecifiedValueOrDefault(state.textColor);
+			state.textColor = this.color.GetSpecifiedValueOrDefault(state.textColor);
 			if (this.backgroundImage.value != null)
 			{
 				state.background = this.backgroundImage.value;
@@ -124,6 +120,93 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			rect.top = (int)top.GetSpecifiedValueOrDefault((float)rect.top);
 			rect.right = (int)right.GetSpecifiedValueOrDefault((float)rect.right);
 			rect.bottom = (int)bottom.GetSpecifiedValueOrDefault((float)rect.bottom);
+		}
+
+		public void ApplyLayoutValues()
+		{
+			if (this.yogaNode == null)
+			{
+				this.yogaNode = new YogaNode(null);
+			}
+			this.SyncWithLayout(this.yogaNode);
+		}
+
+		public StyleValue<float> FlexBasisToFloat()
+		{
+			StyleValue<float> styleValue;
+			if (this.flexBasis.value.isKeyword)
+			{
+				if (this.flexBasis.value.keyword == StyleValueKeyword.Auto)
+				{
+					styleValue = new StyleValue<float>(-1f, this.flexBasis.specificity);
+				}
+				else
+				{
+					styleValue = new StyleValue<float>(0f, this.flexBasis.specificity);
+				}
+			}
+			else
+			{
+				styleValue = new StyleValue<float>(this.flexBasis.value.floatValue, this.flexBasis.specificity);
+			}
+			return styleValue;
+		}
+
+		public void SyncWithLayout(YogaNode targetNode)
+		{
+			targetNode.Flex = float.NaN;
+			float specifiedValueOrDefault = this.FlexBasisToFloat().GetSpecifiedValueOrDefault(float.NaN);
+			if (specifiedValueOrDefault == -1f)
+			{
+				targetNode.FlexBasis = YogaValue.Auto();
+			}
+			else
+			{
+				targetNode.FlexBasis = specifiedValueOrDefault;
+			}
+			targetNode.FlexGrow = this.flexGrow.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.FlexShrink = this.flexShrink.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.Left = this.positionLeft.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.Top = this.positionTop.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.Right = this.positionRight.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.Bottom = this.positionBottom.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MarginLeft = this.marginLeft.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MarginTop = this.marginTop.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MarginRight = this.marginRight.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MarginBottom = this.marginBottom.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.PaddingLeft = this.paddingLeft.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.PaddingTop = this.paddingTop.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.PaddingRight = this.paddingRight.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.PaddingBottom = this.paddingBottom.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.BorderLeftWidth = this.borderLeftWidth.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.BorderTopWidth = this.borderTopWidth.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.BorderRightWidth = this.borderRightWidth.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.BorderBottomWidth = this.borderBottomWidth.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.Width = this.width.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.Height = this.height.GetSpecifiedValueOrDefault(float.NaN);
+			PositionType value = (PositionType)this.positionType.value;
+			if (value != PositionType.Absolute && value != PositionType.Manual)
+			{
+				if (value == PositionType.Relative)
+				{
+					targetNode.PositionType = YogaPositionType.Relative;
+				}
+			}
+			else
+			{
+				targetNode.PositionType = YogaPositionType.Absolute;
+			}
+			targetNode.Overflow = (YogaOverflow)this.overflow.value;
+			targetNode.AlignSelf = (YogaAlign)this.alignSelf.value;
+			targetNode.MaxWidth = this.maxWidth.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MaxHeight = this.maxHeight.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MinWidth = this.minWidth.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.MinHeight = this.minHeight.GetSpecifiedValueOrDefault(float.NaN);
+			targetNode.FlexDirection = (YogaFlexDirection)this.flexDirection.value;
+			targetNode.AlignContent = (YogaAlign)this.alignContent.GetSpecifiedValueOrDefault(1);
+			targetNode.AlignItems = (YogaAlign)this.alignItems.GetSpecifiedValueOrDefault(4);
+			targetNode.JustifyContent = (YogaJustify)this.justifyContent.value;
+			targetNode.Wrap = (YogaWrap)this.flexWrap.value;
 		}
 
 		internal void ApplyRule(StyleSheet registry, int specificity, StyleRule rule, StylePropertyID[] propertyIDs)
@@ -160,17 +243,8 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				case StylePropertyID.PaddingBottom:
 					registry.Apply<float>(values, specificity, ref this.paddingBottom, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
 					break;
-				case StylePropertyID.BorderLeft:
-					registry.Apply<float>(values, specificity, ref this.borderLeft, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
-					break;
-				case StylePropertyID.BorderTop:
-					registry.Apply<float>(values, specificity, ref this.borderTop, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
-					break;
-				case StylePropertyID.BorderRight:
-					registry.Apply<float>(values, specificity, ref this.borderRight, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
-					break;
-				case StylePropertyID.BorderBottom:
-					registry.Apply<float>(values, specificity, ref this.borderBottom, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
+				case StylePropertyID.Position:
+					registry.Apply<int>(values, specificity, ref this.positionType, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<Position>));
 					break;
 				case StylePropertyID.PositionType:
 					registry.Apply<int>(values, specificity, ref this.positionType, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<PositionType>));
@@ -205,11 +279,8 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				case StylePropertyID.MaxHeight:
 					registry.Apply<float>(values, specificity, ref this.maxHeight, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
 					break;
-				case StylePropertyID.Flex:
-					registry.Apply<float>(values, specificity, ref this.flex, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
-					break;
 				case StylePropertyID.FlexBasis:
-					registry.Apply<float>(values, specificity, ref this.flexBasis, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
+					registry.Apply<FloatOrKeyword>(values, specificity, ref this.flexBasis, new HandlesApplicatorFunction<FloatOrKeyword>(StyleSheetApplicator.ApplyFloatOrKeyword));
 					break;
 				case StylePropertyID.FlexGrow:
 					registry.Apply<float>(values, specificity, ref this.flexGrow, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
@@ -259,23 +330,23 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 				case StylePropertyID.AlignItems:
 					registry.Apply<int>(values, specificity, ref this.alignItems, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<Align>));
 					break;
-				case StylePropertyID.TextAlignment:
-					registry.Apply<int>(values, specificity, ref this.textAlignment, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<TextAnchor>));
+				case StylePropertyID.UnityTextAlign:
+					registry.Apply<int>(values, specificity, ref this.unityTextAlign, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<TextAnchor>));
 					break;
 				case StylePropertyID.TextClipping:
 					registry.Apply<int>(values, specificity, ref this.textClipping, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<TextClipping>));
 					break;
 				case StylePropertyID.Font:
-					registry.Apply<Font>(values, specificity, ref this.font, new HandlesApplicatorFunction<Font>(StyleSheetApplicator.ApplyResource<Font>));
+					registry.Apply<Font>(values, specificity, ref this.font, new HandlesApplicatorFunction<Font>(StyleSheetApplicator.ApplyFont));
 					break;
 				case StylePropertyID.FontSize:
 					registry.Apply<int>(values, specificity, ref this.fontSize, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyInt));
 					break;
-				case StylePropertyID.FontStyle:
-					registry.Apply<int>(values, specificity, ref this.fontStyle, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<FontStyle>));
+				case StylePropertyID.FontStyleAndWeight:
+					registry.Apply<int>(values, specificity, ref this.fontStyleAndWeight, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyEnum<FontStyle>));
 					break;
-				case StylePropertyID.BackgroundSize:
-					registry.Apply<int>(values, specificity, ref this.backgroundSize, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyInt));
+				case StylePropertyID.BackgroundScaleMode:
+					registry.Apply<int>(values, specificity, ref this.backgroundScaleMode, new HandlesApplicatorFunction<int>(StyleSheetApplicator.ApplyInt));
 					break;
 				case StylePropertyID.Cursor:
 					registry.Apply<CursorStyle>(values, specificity, ref this.cursor, new HandlesApplicatorFunction<CursorStyle>(StyleSheetApplicator.ApplyCursor));
@@ -287,10 +358,10 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 					registry.Apply<bool>(values, specificity, ref this.wordWrap, new HandlesApplicatorFunction<bool>(StyleSheetApplicator.ApplyBool));
 					break;
 				case StylePropertyID.BackgroundImage:
-					registry.Apply<Texture2D>(values, specificity, ref this.backgroundImage, new HandlesApplicatorFunction<Texture2D>(StyleSheetApplicator.ApplyResource<Texture2D>));
+					registry.Apply<Texture2D>(values, specificity, ref this.backgroundImage, new HandlesApplicatorFunction<Texture2D>(StyleSheetApplicator.ApplyImage));
 					break;
-				case StylePropertyID.TextColor:
-					registry.Apply<Color>(values, specificity, ref this.textColor, new HandlesApplicatorFunction<Color>(StyleSheetApplicator.ApplyColor));
+				case StylePropertyID.Color:
+					registry.Apply<Color>(values, specificity, ref this.color, new HandlesApplicatorFunction<Color>(StyleSheetApplicator.ApplyColor));
 					break;
 				case StylePropertyID.BackgroundColor:
 					registry.Apply<Color>(values, specificity, ref this.backgroundColor, new HandlesApplicatorFunction<Color>(StyleSheetApplicator.ApplyColor));
@@ -322,9 +393,12 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 					registry.Apply<float>(values, specificity, ref this.borderBottomLeftRadius, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
 					registry.Apply<float>(values, specificity, ref this.borderBottomRightRadius, new HandlesApplicatorFunction<float>(StyleSheetApplicator.ApplyFloat));
 					break;
+				case StylePropertyID.Flex:
+					registry.ApplyShorthand(values, specificity, this, new ShorthandApplicatorFunction(StyleSheetApplicator.ApplyFlexShorthand));
+					break;
 				case StylePropertyID.Margin:
 				case StylePropertyID.Padding:
-					goto IL_0D95;
+					goto IL_0CF4;
 				case StylePropertyID.Custom:
 				{
 					if (this.m_CustomProperties == null)
@@ -342,11 +416,11 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 					break;
 				}
 				default:
-					goto IL_0D95;
+					goto IL_0CF4;
 				}
 				i++;
 				continue;
-				IL_0D95:
+				IL_0CF4:
 				throw new ArgumentException(string.Format("Non exhaustive switch statement (value={0})", stylePropertyID));
 			}
 		}
@@ -371,9 +445,15 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 			this.ApplyCustomProperty<Color>(propertyName, ref target, StyleValueType.Color, new HandlesApplicatorFunction<Color>(StyleSheetApplicator.ApplyColor));
 		}
 
-		public void ApplyCustomProperty<T>(string propertyName, ref StyleValue<T> target) where T : Object
+		public void ApplyCustomProperty(string propertyName, ref StyleValue<Texture2D> target)
 		{
-			this.ApplyCustomProperty<T>(propertyName, ref target, StyleValueType.ResourcePath, new HandlesApplicatorFunction<T>(StyleSheetApplicator.ApplyResource<T>));
+			StyleValue<Texture2D> styleValue = default(StyleValue<Texture2D>);
+			CustomProperty customProperty;
+			if (this.m_CustomProperties != null && this.m_CustomProperties.TryGetValue(propertyName, out customProperty))
+			{
+				customProperty.data.Apply<Texture2D>(customProperty.handles, customProperty.specificity, ref styleValue, new HandlesApplicatorFunction<Texture2D>(StyleSheetApplicator.ApplyImage));
+			}
+			target.Apply(styleValue, StylePropertyApplyMode.CopyIfNotInline);
 		}
 
 		public void ApplyCustomProperty(string propertyName, ref StyleValue<string> target)
@@ -411,6 +491,8 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		internal readonly bool isShared;
 
+		internal YogaNode yogaNode;
+
 		internal Dictionary<string, CustomProperty> m_CustomProperties;
 
 		internal StyleValue<float> width;
@@ -425,9 +507,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		internal StyleValue<float> minHeight;
 
-		internal StyleValue<float> flex;
-
-		internal StyleValue<float> flexBasis;
+		internal StyleValue<FloatOrKeyword> flexBasis;
 
 		internal StyleValue<float> flexShrink;
 
@@ -451,14 +531,6 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		internal StyleValue<float> marginBottom;
 
-		internal StyleValue<float> borderLeft;
-
-		internal StyleValue<float> borderTop;
-
-		internal StyleValue<float> borderRight;
-
-		internal StyleValue<float> borderBottom;
-
 		internal StyleValue<float> paddingLeft;
 
 		internal StyleValue<float> paddingTop;
@@ -471,9 +543,9 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		internal StyleValue<int> alignSelf;
 
-		internal StyleValue<int> textAlignment;
+		internal StyleValue<int> unityTextAlign;
 
-		internal StyleValue<int> fontStyle;
+		internal StyleValue<int> fontStyleAndWeight;
 
 		internal StyleValue<int> textClipping;
 
@@ -483,7 +555,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		internal StyleValue<bool> wordWrap;
 
-		internal StyleValue<Color> textColor;
+		internal StyleValue<Color> color;
 
 		internal StyleValue<int> flexDirection;
 
@@ -493,7 +565,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		internal StyleValue<Texture2D> backgroundImage;
 
-		internal StyleValue<int> backgroundSize;
+		internal StyleValue<int> backgroundScaleMode;
 
 		internal StyleValue<int> alignItems;
 
@@ -532,5 +604,9 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 		internal StyleValue<CursorStyle> cursor;
 
 		internal StyleValue<int> visibility;
+
+		internal const Align DefaultAlignContent = Align.FlexStart;
+
+		internal const Align DefaultAlignItems = Align.Stretch;
 	}
 }

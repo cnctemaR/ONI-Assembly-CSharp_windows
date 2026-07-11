@@ -7,64 +7,98 @@ namespace System.Xml.Schema
 	[Serializable]
 	public class XmlSchemaValidationException : XmlSchemaException
 	{
-		public XmlSchemaValidationException()
-		{
-		}
-
-		public XmlSchemaValidationException(string message)
-			: base(message)
-		{
-		}
-
 		protected XmlSchemaValidationException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
 
-		public XmlSchemaValidationException(string message, Exception innerException, int lineNumber, int linePosition)
-			: base(message, lineNumber, linePosition, null, null, innerException)
-		{
-		}
-
-		internal XmlSchemaValidationException(string message, int lineNumber, int linePosition, XmlSchemaObject sourceObject, string sourceUri, Exception innerException)
-			: base(message, lineNumber, linePosition, sourceObject, sourceUri, innerException)
-		{
-		}
-
-		internal XmlSchemaValidationException(string message, object sender, string sourceUri, XmlSchemaObject sourceObject, Exception innerException)
-			: base(message, sender, sourceUri, sourceObject, innerException)
-		{
-		}
-
-		internal XmlSchemaValidationException(string message, XmlSchemaObject sourceObject, Exception innerException)
-			: base(message, sourceObject, innerException)
-		{
-		}
-
-		public XmlSchemaValidationException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
-
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
 		}
 
-		protected internal void SetSourceObject(object o)
+		public XmlSchemaValidationException()
+			: base(null)
 		{
-			this.source_object = o;
+		}
+
+		public XmlSchemaValidationException(string message)
+			: base(message, null, 0, 0)
+		{
+		}
+
+		public XmlSchemaValidationException(string message, Exception innerException)
+			: base(message, innerException, 0, 0)
+		{
+		}
+
+		public XmlSchemaValidationException(string message, Exception innerException, int lineNumber, int linePosition)
+			: base(message, innerException, lineNumber, linePosition)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string[] args)
+			: base(res, args, null, null, 0, 0, null)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string arg)
+			: base(res, new string[] { arg }, null, null, 0, 0, null)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string arg, string sourceUri, int lineNumber, int linePosition)
+			: base(res, new string[] { arg }, null, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string sourceUri, int lineNumber, int linePosition)
+			: base(res, null, null, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string[] args, string sourceUri, int lineNumber, int linePosition)
+			: base(res, args, null, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string[] args, Exception innerException, string sourceUri, int lineNumber, int linePosition)
+			: base(res, args, innerException, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaValidationException(string res, string[] args, object sourceNode)
+			: base(res, args, null, null, 0, 0, null)
+		{
+			this.sourceNodeObject = sourceNode;
+		}
+
+		internal XmlSchemaValidationException(string res, string[] args, string sourceUri, object sourceNode)
+			: base(res, args, null, sourceUri, 0, 0, null)
+		{
+			this.sourceNodeObject = sourceNode;
+		}
+
+		internal XmlSchemaValidationException(string res, string[] args, string sourceUri, int lineNumber, int linePosition, XmlSchemaObject source, object sourceNode)
+			: base(res, args, null, sourceUri, lineNumber, linePosition, source)
+		{
+			this.sourceNodeObject = sourceNode;
 		}
 
 		public object SourceObject
 		{
 			get
 			{
-				return this.source_object;
+				return this.sourceNodeObject;
 			}
 		}
 
-		private object source_object;
+		protected internal void SetSourceObject(object sourceObject)
+		{
+			this.sourceNodeObject = sourceObject;
+		}
+
+		private object sourceNodeObject;
 	}
 }

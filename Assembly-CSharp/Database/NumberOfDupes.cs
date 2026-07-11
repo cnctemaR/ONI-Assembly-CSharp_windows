@@ -6,11 +6,6 @@ namespace Database
 {
 	public class NumberOfDupes : VictoryColonyAchievementRequirement
 	{
-		public NumberOfDupes(int num)
-		{
-			this.numDupes = num;
-		}
-
 		public override string Name()
 		{
 			return string.Format(COLONY_ACHIEVEMENTS.THRIVING.REQUIREMENTS.MINIMUM_DUPLICANTS, this.numDupes);
@@ -19,6 +14,11 @@ namespace Database
 		public override string Description()
 		{
 			return string.Format(COLONY_ACHIEVEMENTS.THRIVING.REQUIREMENTS.MINIMUM_DUPLICANTS_DESCRIPTION, this.numDupes);
+		}
+
+		public NumberOfDupes(int num)
+		{
+			this.numDupes = num;
 		}
 
 		public override bool Success()
@@ -38,7 +38,7 @@ namespace Database
 
 		public override string GetProgress(bool complete)
 		{
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.POPULATION, (!complete) ? Components.LiveMinionIdentities.Items.Count : this.numDupes, this.numDupes);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.POPULATION, complete ? this.numDupes : Components.LiveMinionIdentities.Items.Count, this.numDupes);
 		}
 
 		private int numDupes;

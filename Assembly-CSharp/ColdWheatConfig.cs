@@ -12,10 +12,8 @@ public class ColdWheatConfig : IEntityConfig
 		string text2 = global::STRINGS.CREATURES.SPECIES.COLDWHEAT.NAME;
 		string text3 = global::STRINGS.CREATURES.SPECIES.COLDWHEAT.DESC;
 		float num = 1f;
-		KAnimFile kanimFile = Assets.GetAnim("coldwheat_kanim");
-		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 255f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("coldwheat_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 255f);
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 118.149994f, 218.15f, 278.15f, 358.15f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
@@ -39,17 +37,9 @@ public class ColdWheatConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
-		GameObject gameObject2 = gameObject;
-		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.DigOnly;
-		text4 = "ColdWheatSeed";
-		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.NAME;
-		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.DESC;
-		kanimFile = Assets.GetAnim("seed_coldwheat_kanim");
-		List<Tag> list = new List<Tag> { GameTags.CropSeed };
-		text = global::STRINGS.CREATURES.SPECIES.COLDWHEAT.DOMESTICATEDDESC;
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, string.Empty, true);
-		EntityTemplates.ExtendEntityToFood(gameObject3, FOOD.FOOD_TYPES.COLD_WHEAT_SEED);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "ColdWheat_preview", Assets.GetAnim("coldwheat_kanim"), "place", 1, 1);
+		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.DigOnly, "ColdWheatSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.DESC, Assets.GetAnim("seed_coldwheat_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, global::STRINGS.CREATURES.SPECIES.COLDWHEAT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", true);
+		EntityTemplates.ExtendEntityToFood(gameObject2, FOOD.FOOD_TYPES.COLD_WHEAT_SEED);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "ColdWheat_preview", Assets.GetAnim("coldwheat_kanim"), "place", 1, 1);
 		SoundEventVolumeCache.instance.AddVolume("coldwheat_kanim", "ColdWheat_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("coldwheat_kanim", "ColdWheat_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

@@ -7,19 +7,17 @@ public static class AsyncLoadManager<AsyncLoaderType>
 	public static void Run()
 	{
 		List<AsyncLoader> list = new List<AsyncLoader>();
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+		for (int i = 0; i < assemblies.Length; i++)
 		{
-			foreach (Type type in assembly.GetTypes())
+			foreach (Type type in assemblies[i].GetTypes())
 			{
-				if (!type.IsAbstract)
+				if (!type.IsAbstract && typeof(AsyncLoaderType).IsAssignableFrom(type))
 				{
-					if (typeof(AsyncLoaderType).IsAssignableFrom(type))
-					{
-						AsyncLoader asyncLoader = (AsyncLoader)Activator.CreateInstance(type);
-						list.Add(asyncLoader);
-						AsyncLoadManager<AsyncLoaderType>.loaders[type] = asyncLoader;
-						asyncLoader.CollectLoaders(list);
-					}
+					AsyncLoader asyncLoader = (AsyncLoader)Activator.CreateInstance(type);
+					list.Add(asyncLoader);
+					AsyncLoadManager<AsyncLoaderType>.loaders[type] = asyncLoader;
+					asyncLoader.CollectLoaders(list);
 				}
 			}
 		}

@@ -38,6 +38,7 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 			if (!component.HasStatusItem(Db.Get().BuildingStatusItems.UnderPressure))
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.UnderPressure, null);
+				return;
 			}
 		}
 		else if (component.HasStatusItem(Db.Get().BuildingStatusItems.UnderPressure))
@@ -72,16 +73,15 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 		float num = this.coolingRate * dt;
 		foreach (GameObject gameObject in this.iceStorage.items)
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			GameUtil.DeltaThermalEnergy(component, num, this.targetTemperature);
+			GameUtil.DeltaThermalEnergy(gameObject.GetComponent<PrimaryElement>(), num, this.targetTemperature);
 		}
 		for (int i = this.iceStorage.items.Count; i > 0; i--)
 		{
 			GameObject gameObject2 = this.iceStorage.items[i - 1];
 			if (gameObject2 != null && gameObject2.GetComponent<PrimaryElement>().Temperature > gameObject2.GetComponent<PrimaryElement>().Element.highTemp && gameObject2.GetComponent<PrimaryElement>().Element.HasTransitionUp)
 			{
-				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
-				this.iceStorage.AddLiquid(component2.Element.highTempTransitionTarget, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, false, true);
+				PrimaryElement component = gameObject2.GetComponent<PrimaryElement>();
+				this.iceStorage.AddLiquid(component.Element.highTempTransitionTarget, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, false, true);
 				this.iceStorage.ConsumeIgnoringDisease(gameObject2);
 			}
 		}
@@ -95,9 +95,7 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 		}
 		if (!this.liquidStorage.IsEmpty())
 		{
-			Storage storage = this.liquidStorage;
-			Vector3 vector = new Vector3(1f, 0f, 0f);
-			storage.DropAll(false, false, vector, true);
+			this.liquidStorage.DropAll(false, false, new Vector3(1f, 0f, 0f), true);
 		}
 		this.UpdateMeter();
 	}

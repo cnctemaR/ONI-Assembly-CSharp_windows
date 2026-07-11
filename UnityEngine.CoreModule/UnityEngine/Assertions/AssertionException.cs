@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Assertions
 {
-	/// <summary>
-	///   <para>An exception that is thrown on a failure. Assertions.Assert._raiseExceptions needs to be set to true.</para>
-	/// </summary>
 	public class AssertionException : Exception
 	{
 		public AssertionException(string message, string userMessage)

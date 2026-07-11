@@ -77,50 +77,47 @@ public class ResearchSideScreen : SideScreenContent
 		if (activeResearch == null)
 		{
 			this.DescriptionText.text = "<b>" + UI.UISIDESCREENS.RESEARCHSIDESCREEN.NOSELECTEDRESEARCH + "</b>";
+			return;
 		}
-		else
+		string text = "";
+		if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
 		{
-			string text = string.Empty;
-			if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
-			{
-				text += "<color=#7f7f7f>";
-			}
-			text = text + "<b>" + activeResearch.tech.Name + "</b>";
-			if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
-			{
-				text += "</color>";
-			}
-			foreach (KeyValuePair<string, float> keyValuePair in activeResearch.tech.costsByResearchTypeID)
-			{
-				if (keyValuePair.Value != 0f)
-				{
-					bool flag = keyValuePair.Key == component.research_point_type_id;
-					text += "\n   ";
-					text += "<b>";
-					if (!flag)
-					{
-						text += "<color=#7f7f7f>";
-					}
-					string text2 = text;
-					text = string.Concat(new object[]
-					{
-						text2,
-						"- ",
-						Research.Instance.researchTypes.GetResearchType(keyValuePair.Key).name,
-						": ",
-						activeResearch.progressInventory.PointsByTypeID[keyValuePair.Key],
-						"/",
-						activeResearch.tech.costsByResearchTypeID[keyValuePair.Key]
-					});
-					if (!flag)
-					{
-						text += "</color>";
-					}
-					text += "</b>";
-				}
-			}
-			this.DescriptionText.text = text;
+			text += "<color=#7f7f7f>";
 		}
+		text = text + "<b>" + activeResearch.tech.Name + "</b>";
+		if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
+		{
+			text += "</color>";
+		}
+		foreach (KeyValuePair<string, float> keyValuePair in activeResearch.tech.costsByResearchTypeID)
+		{
+			if (keyValuePair.Value != 0f)
+			{
+				bool flag = keyValuePair.Key == component.research_point_type_id;
+				text += "\n   ";
+				text += "<b>";
+				if (!flag)
+				{
+					text += "<color=#7f7f7f>";
+				}
+				text = string.Concat(new object[]
+				{
+					text,
+					"- ",
+					Research.Instance.researchTypes.GetResearchType(keyValuePair.Key).name,
+					": ",
+					activeResearch.progressInventory.PointsByTypeID[keyValuePair.Key],
+					"/",
+					activeResearch.tech.costsByResearchTypeID[keyValuePair.Key]
+				});
+				if (!flag)
+				{
+					text += "</color>";
+				}
+				text += "</b>";
+			}
+		}
+		this.DescriptionText.text = text;
 	}
 
 	public KButton selectResearchButton;

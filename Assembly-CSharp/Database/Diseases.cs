@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 
 namespace Database
@@ -17,11 +18,14 @@ namespace Database
 		public static bool IsValidID(string id)
 		{
 			bool flag = false;
-			foreach (Disease disease in Db.Get().Diseases.resources)
+			using (List<Disease>.Enumerator enumerator = Db.Get().Diseases.resources.GetEnumerator())
 			{
-				if (disease.Id == id)
+				while (enumerator.MoveNext())
 				{
-					flag = true;
+					if (enumerator.Current.Id == id)
+					{
+						flag = true;
+					}
 				}
 			}
 			return flag;

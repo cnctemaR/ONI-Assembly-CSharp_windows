@@ -6,23 +6,12 @@ using UnityEngine.Video;
 
 namespace UnityEngine.Experimental.Video
 {
-	/// <summary>
-	///   <para>Extension methods for the Video.VideoPlayer class.</para>
-	/// </summary>
-	[NativeHeader("VideoScriptingClasses.h")]
-	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
-	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoPlayerExtensions.bindings.h")]
 	[StaticAccessor("VideoPlayerExtensionsBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("VideoScriptingClasses.h")]
+	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoPlayerExtensions.bindings.h")]
+	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
 	public static class VideoPlayerExtensions
 	{
-		/// <summary>
-		///   <para>Return the Experimental.Audio.AudioSampleProvider for the specified track, used to receive audio samples during playback.</para>
-		/// </summary>
-		/// <param name="vp">The "this" pointer for the extension method.</param>
-		/// <param name="trackIndex">The audio track index for which the sample provider is queried.</param>
-		/// <returns>
-		///   <para>The sample provider for the specified track.</para>
-		/// </returns>
 		public static AudioSampleProvider GetAudioSampleProvider(this VideoPlayer vp, ushort trackIndex)
 		{
 			ushort controlledAudioTrackCount = vp.controlledAudioTrackCount;

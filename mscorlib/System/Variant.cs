@@ -22,98 +22,165 @@ namespace System
 			{
 				this.vt = 16;
 				this.cVal = (sbyte)obj;
+				return;
 			}
-			else if (type == typeof(byte))
+			if (type == typeof(byte))
 			{
 				this.vt = 17;
 				this.bVal = (byte)obj;
+				return;
 			}
-			else if (type == typeof(short))
+			if (type == typeof(short))
 			{
 				this.vt = 2;
 				this.iVal = (short)obj;
+				return;
 			}
-			else if (type == typeof(ushort))
+			if (type == typeof(ushort))
 			{
 				this.vt = 18;
 				this.uiVal = (ushort)obj;
+				return;
 			}
-			else if (type == typeof(int))
+			if (type == typeof(int))
 			{
 				this.vt = 3;
 				this.lVal = (int)obj;
+				return;
 			}
-			else if (type == typeof(uint))
+			if (type == typeof(uint))
 			{
 				this.vt = 19;
 				this.ulVal = (uint)obj;
+				return;
 			}
-			else if (type == typeof(long))
+			if (type == typeof(long))
 			{
 				this.vt = 20;
 				this.llVal = (long)obj;
+				return;
 			}
-			else if (type == typeof(ulong))
+			if (type == typeof(ulong))
 			{
 				this.vt = 21;
 				this.ullVal = (ulong)obj;
+				return;
 			}
-			else if (type == typeof(float))
+			if (type == typeof(float))
 			{
 				this.vt = 4;
 				this.fltVal = (float)obj;
+				return;
 			}
-			else if (type == typeof(double))
+			if (type == typeof(double))
 			{
 				this.vt = 5;
 				this.dblVal = (double)obj;
+				return;
 			}
-			else if (type == typeof(string))
+			if (type == typeof(string))
 			{
 				this.vt = 8;
 				this.bstrVal = Marshal.StringToBSTR((string)obj);
+				return;
 			}
-			else if (type == typeof(bool))
+			if (type == typeof(bool))
 			{
 				this.vt = 11;
-				this.lVal = ((!(bool)obj) ? 0 : (-1));
+				this.lVal = (((bool)obj) ? (-1) : 0);
+				return;
 			}
-			else if (type == typeof(BStrWrapper))
+			if (type == typeof(BStrWrapper))
 			{
 				this.vt = 8;
 				this.bstrVal = Marshal.StringToBSTR(((BStrWrapper)obj).WrappedObject);
+				return;
 			}
-			else if (type == typeof(UnknownWrapper))
+			if (type == typeof(UnknownWrapper))
 			{
 				this.vt = 13;
 				this.pdispVal = Marshal.GetIUnknownForObject(((UnknownWrapper)obj).WrappedObject);
+				return;
 			}
-			else if (type == typeof(DispatchWrapper))
+			if (type == typeof(DispatchWrapper))
 			{
 				this.vt = 9;
 				this.pdispVal = Marshal.GetIDispatchForObject(((DispatchWrapper)obj).WrappedObject);
+				return;
 			}
-			else
+			try
 			{
-				try
-				{
-					this.pdispVal = Marshal.GetIDispatchForObject(obj);
-					this.vt = 9;
-					return;
-				}
-				catch
-				{
-				}
-				try
-				{
-					this.vt = 13;
-					this.pdispVal = Marshal.GetIUnknownForObject(obj);
-				}
-				catch (Exception ex)
-				{
-					throw new NotImplementedException(string.Format("Variant couldn't handle object of type {0}", obj.GetType()), ex);
-				}
+				this.pdispVal = Marshal.GetIDispatchForObject(obj);
+				this.vt = 9;
+				return;
 			}
+			catch
+			{
+			}
+			try
+			{
+				this.vt = 13;
+				this.pdispVal = Marshal.GetIUnknownForObject(obj);
+			}
+			catch (Exception ex)
+			{
+				throw new NotImplementedException(string.Format("Variant couldn't handle object of type {0}", obj.GetType()), ex);
+			}
+		}
+
+		public static object GetValueAt(int vt, IntPtr addr)
+		{
+			object obj = null;
+			switch (vt)
+			{
+			case 2:
+				obj = Marshal.ReadInt16(addr);
+				break;
+			case 3:
+				obj = Marshal.ReadInt32(addr);
+				break;
+			case 4:
+				obj = Marshal.PtrToStructure(addr, typeof(float));
+				break;
+			case 5:
+				obj = Marshal.PtrToStructure(addr, typeof(double));
+				break;
+			case 8:
+				obj = Marshal.PtrToStringBSTR(Marshal.ReadIntPtr(addr));
+				break;
+			case 9:
+			case 13:
+			{
+				IntPtr intPtr = Marshal.ReadIntPtr(addr);
+				if (intPtr != IntPtr.Zero)
+				{
+					obj = Marshal.GetObjectForIUnknown(intPtr);
+				}
+				break;
+			}
+			case 11:
+				obj = Marshal.ReadInt16(addr) != 0;
+				break;
+			case 16:
+				obj = (sbyte)Marshal.ReadByte(addr);
+				break;
+			case 17:
+				obj = Marshal.ReadByte(addr);
+				break;
+			case 18:
+				obj = (ushort)Marshal.ReadInt16(addr);
+				break;
+			case 19:
+				obj = (uint)Marshal.ReadInt32(addr);
+				break;
+			case 20:
+				obj = Marshal.ReadInt64(addr);
+				break;
+			case 21:
+				obj = (ulong)Marshal.ReadInt64(addr);
+				break;
+			}
+			return obj;
 		}
 
 		public object GetValue()
@@ -122,48 +189,40 @@ namespace System
 			switch (this.vt)
 			{
 			case 2:
-				obj = this.iVal;
-				break;
+				return this.iVal;
 			case 3:
-				obj = this.lVal;
-				break;
+				return this.lVal;
 			case 4:
-				obj = this.fltVal;
-				break;
+				return this.fltVal;
 			case 5:
-				obj = this.dblVal;
-				break;
+				return this.dblVal;
 			case 8:
-				obj = Marshal.PtrToStringBSTR(this.bstrVal);
-				break;
+				return Marshal.PtrToStringBSTR(this.bstrVal);
 			case 9:
 			case 13:
 				if (this.pdispVal != IntPtr.Zero)
 				{
-					obj = Marshal.GetObjectForIUnknown(this.pdispVal);
+					return Marshal.GetObjectForIUnknown(this.pdispVal);
 				}
-				break;
+				return obj;
 			case 11:
-				obj = this.boolVal != 0;
-				break;
+				return this.boolVal != 0;
 			case 16:
-				obj = this.cVal;
-				break;
+				return this.cVal;
 			case 17:
-				obj = this.bVal;
-				break;
+				return this.bVal;
 			case 18:
-				obj = this.uiVal;
-				break;
+				return this.uiVal;
 			case 19:
-				obj = this.ulVal;
-				break;
+				return this.ulVal;
 			case 20:
-				obj = this.llVal;
-				break;
+				return this.llVal;
 			case 21:
-				obj = this.ullVal;
-				break;
+				return this.ullVal;
+			}
+			if ((this.vt & 16384) == 16384 && this.pdispVal != IntPtr.Zero)
+			{
+				obj = Variant.GetValueAt((int)(this.vt & -16385), this.pdispVal);
 			}
 			return obj;
 		}
@@ -173,8 +232,9 @@ namespace System
 			if (this.vt == 8)
 			{
 				Marshal.FreeBSTR(this.bstrVal);
+				return;
 			}
-			else if ((this.vt == 9 || this.vt == 13) && this.pdispVal != IntPtr.Zero)
+			if ((this.vt == 9 || this.vt == 13) && this.pdispVal != IntPtr.Zero)
 			{
 				Marshal.Release(this.pdispVal);
 			}

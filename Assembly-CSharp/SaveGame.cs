@@ -52,10 +52,8 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		SaveGame.Instance = this;
-		ColonyRationMonitor.Instance instance = new ColonyRationMonitor.Instance(this);
-		instance.StartSM();
-		VignetteManager.Instance instance2 = new VignetteManager.Instance(this);
-		instance2.StartSM();
+		new ColonyRationMonitor.Instance(this).StartSM();
+		new VignetteManager.Instance(this).StartSM();
 		this.entombedItemManager = base.gameObject.AddComponent<EntombedItemManager>();
 		this.worldGen = SaveLoader.Instance.worldGen;
 		this.worldGenSpawner = base.gameObject.AddComponent<WorldGenSpawner>();
@@ -83,10 +81,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 383949U;
+		header.buildVersion = 393231U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
-		header.compression = ((!isCompressed) ? 0 : 1);
+		header.compression = (isCompressed ? 1 : 0);
 		return bytes;
 	}
 
@@ -100,8 +98,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		{
 			header.compression = br.ReadInt32();
 		}
-		byte[] array = br.ReadBytes(header.headerSize);
-		SaveGame.GameInfo gameInfo = SaveGame.GetGameInfo(array);
+		SaveGame.GameInfo gameInfo = SaveGame.GetGameInfo(br.ReadBytes(header.headerSize));
 		if (gameInfo.IsVersionOlderThan(7, 14) && gameInfo.worldTraits != null)
 		{
 			string[] worldTraits = gameInfo.worldTraits;
@@ -134,31 +131,32 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		Game.Instance.Trigger(-1917495436, null);
 	}
 
-	public List<Tuple<string, ScriptableObject>> GetColonyToolTip()
+	public List<global::Tuple<string, ScriptableObject>> GetColonyToolTip()
 	{
-		List<Tuple<string, ScriptableObject>> list = new List<Tuple<string, ScriptableObject>>();
-		list.Add(new Tuple<string, ScriptableObject>(this.baseName, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+		List<global::Tuple<string, ScriptableObject>> list = new List<global::Tuple<string, ScriptableObject>>();
+		list.Add(new global::Tuple<string, ScriptableObject>(this.baseName, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
 		if (GameClock.Instance != null)
 		{
-			list.Add(new Tuple<string, ScriptableObject>(" ", null));
-			list.Add(new Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, GameUtil.GetCurrentCycle()), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
-			list.Add(new Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+			list.Add(new global::Tuple<string, ScriptableObject>(" ", null));
+			list.Add(new global::Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, GameUtil.GetCurrentCycle()), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+			list.Add(new global::Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), ToolTipScreen.Instance.defaultTooltipBodyStyle));
 		}
 		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(SaveLoader.Instance.GameInfo.worldID);
-		list.Add(new Tuple<string, ScriptableObject>(" ", null));
-		list.Add(new Tuple<string, ScriptableObject>(Strings.Get(worldData.name), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+		list.Add(new global::Tuple<string, ScriptableObject>(" ", null));
+		list.Add(new global::Tuple<string, ScriptableObject>(Strings.Get(worldData.name), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
 		if (SaveLoader.Instance.GameInfo.worldTraits != null)
 		{
-			foreach (string text in SaveLoader.Instance.GameInfo.worldTraits)
+			string[] worldTraits = SaveLoader.Instance.GameInfo.worldTraits;
+			for (int i = 0; i < worldTraits.Length; i++)
 			{
-				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, false);
+				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(worldTraits[i], false);
 				if (cachedTrait != null)
 				{
-					list.Add(new Tuple<string, ScriptableObject>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+					list.Add(new global::Tuple<string, ScriptableObject>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
 				}
 				else
 				{
-					list.Add(new Tuple<string, ScriptableObject>(WORLD_TRAITS.MISSING_TRAIT, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+					list.Add(new global::Tuple<string, ScriptableObject>(WORLD_TRAITS.MISSING_TRAIT, ToolTipScreen.Instance.defaultTooltipBodyStyle));
 				}
 			}
 		}
@@ -205,7 +203,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		{
 			get
 			{
-				return 0 != this.compression;
+				return this.compression != 0;
 			}
 		}
 

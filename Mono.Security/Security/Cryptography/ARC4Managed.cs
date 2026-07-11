@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace Mono.Security.Cryptography
 {
-	public class ARC4Managed : RC4, IDisposable, ICryptoTransform
+	public class ARC4Managed : RC4, ICryptoTransform, IDisposable
 	{
 		public ARC4Managed()
 		{
@@ -38,11 +38,19 @@ namespace Mono.Security.Cryptography
 		{
 			get
 			{
-				return (byte[])this.key.Clone();
+				if (this.KeyValue == null)
+				{
+					this.GenerateKey();
+				}
+				return (byte[])this.KeyValue.Clone();
 			}
 			set
 			{
-				this.key = (byte[])value.Clone();
+				if (value == null)
+				{
+					throw new ArgumentNullException("Key");
+				}
+				this.KeyValue = (this.key = (byte[])value.Clone());
 				this.KeySetup(this.key);
 			}
 		}
@@ -74,7 +82,7 @@ namespace Mono.Security.Cryptography
 
 		public override void GenerateKey()
 		{
-			this.Key = KeyBuilder.Key(this.KeySizeValue >> 3);
+			this.KeyValue = KeyBuilder.Key(this.KeySizeValue >> 3);
 		}
 
 		public bool CanTransformMultipleBlocks
@@ -137,7 +145,7 @@ namespace Mono.Security.Cryptography
 			}
 			if (inputOffset > inputBuffer.Length - inputCount)
 			{
-				throw new ArgumentException("inputBuffer", Locale.GetText("Overflow"));
+				throw new ArgumentException(Locale.GetText("Overflow"), "inputBuffer");
 			}
 		}
 
@@ -154,7 +162,7 @@ namespace Mono.Security.Cryptography
 			}
 			if (outputOffset > outputBuffer.Length - inputCount)
 			{
-				throw new ArgumentException("outputBuffer", Locale.GetText("Overflow"));
+				throw new ArgumentException(Locale.GetText("Overflow"), "outputBuffer");
 			}
 			return this.InternalTransformBlock(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
 		}

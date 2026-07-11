@@ -39,7 +39,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				{
 					foreach (GameObject gameObject in storage.items)
 					{
-						pooledList.Add((!(gameObject != null)) ? null : gameObject.GetComponent<KMonoBehaviour>());
+						pooledList.Add((gameObject != null) ? gameObject.GetComponent<KMonoBehaviour>() : null);
 					}
 				}
 			}
@@ -102,13 +102,10 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			if (!(kmonoBehaviour2 == null))
 			{
 				int navigationCost = component3.GetNavigationCost(Grid.PosToCell(kmonoBehaviour2.gameObject.transform.GetPosition()));
-				if (navigationCost != -1)
+				if (navigationCost != -1 && (navigationCost < num6 || num6 == -1))
 				{
-					if (navigationCost < num6 || num6 == -1)
-					{
-						num6 = navigationCost;
-						smi.targetEdible = kmonoBehaviour2.gameObject;
-					}
+					num6 = navigationCost;
+					smi.targetEdible = kmonoBehaviour2.gameObject;
 				}
 			}
 		}

@@ -32,7 +32,7 @@ namespace TUNING
 
 		public const float HEAT_GENERATION_EFFICIENCY = 0.012f;
 
-		public const float DUPLICANT_BASE_GENERATION_KILOWATTS = 0.083680004f;
+		public const float DUPLICANT_BASE_GENERATION_KILOWATTS = 0.08368001f;
 
 		public const float STANDARD_STRESS_PENALTY = 0.016666668f;
 
@@ -581,14 +581,14 @@ namespace TUNING
 
 			public const float RETREAT_AMOUNT = 72.72727f;
 
-			public const float SUFFOCATE_AMOUNT = 45.454544f;
+			public const float SUFFOCATE_AMOUNT = 45.454548f;
 
 			public const float BREATH_RATE = 0.90909094f;
 		}
 
 		public class LIGHT
 		{
-			public const int LUX_SUNBURN = 71999;
+			public const int LUX_SUNBURN = 72000;
 
 			public const float SUNBURN_DELAY_TIME = 120f;
 

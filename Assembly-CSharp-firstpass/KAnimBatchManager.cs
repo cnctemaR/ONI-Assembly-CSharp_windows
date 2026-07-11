@@ -100,8 +100,7 @@ public class KAnimBatchManager
 
 	public static Vector2I ControllerToChunkXY(KAnimConverter.IAnimConverter controller)
 	{
-		Vector2I cellXY = controller.GetCellXY();
-		return KAnimBatchManager.CellXYToChunkXY(cellXY);
+		return KAnimBatchManager.CellXYToChunkXY(controller.GetCellXY());
 	}
 
 	public void Register(KAnimConverter.IAnimConverter controller)
@@ -204,15 +203,12 @@ public class KAnimBatchManager
 			{
 				KAnimBatch batch = batchSet.GetBatch(i);
 				float num = 0.01f / (float)(1 + batch.id % 256);
-				if (batch.size != 0 && batch.active)
+				if (batch.size != 0 && batch.active && batch.materialType != KAnimBatchGroup.MaterialType.UI)
 				{
-					if (batch.materialType != KAnimBatchGroup.MaterialType.UI)
-					{
-						Vector3 zero = Vector3.zero;
-						zero.z = batch.position.z + num;
-						int layer = batch.layer;
-						Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetMaterial(batch.materialType), layer, null, 0, batch.matProperties);
-					}
+					Vector3 zero = Vector3.zero;
+					zero.z = batch.position.z + num;
+					int layer = batch.layer;
+					Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetMaterial(batch.materialType), layer, null, 0, batch.matProperties);
 				}
 			}
 		}

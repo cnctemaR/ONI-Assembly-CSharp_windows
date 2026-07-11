@@ -149,7 +149,7 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchText);
 			bool flag = NativeMethods.ISteamUtils_GetEnteredGamepadTextInput(CSteamAPIContext.GetSteamUtils(), intPtr, cchText);
-			pchText = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			pchText = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
 		}
@@ -216,7 +216,7 @@ namespace Steamworks
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchInputMessage))
 			{
 				int num = NativeMethods.ISteamUtils_FilterText(CSteamAPIContext.GetSteamUtils(), intPtr, nByteSizeOutFilteredText, utf8StringHandle, bLegalOnly);
-				pchOutFilteredText = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+				pchOutFilteredText = ((num != -1) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 				Marshal.FreeHGlobal(intPtr);
 				num2 = num;
 			}

@@ -29,7 +29,13 @@ namespace System.IO.IsolatedStorage
 
 		public bool MoveNext()
 		{
-			return this._storages != null && ++this._pos < this._storages.Length;
+			if (this._storages == null)
+			{
+				return false;
+			}
+			int num = this._pos + 1;
+			this._pos = num;
+			return num < this._storages.Length;
 		}
 
 		public void Reset()

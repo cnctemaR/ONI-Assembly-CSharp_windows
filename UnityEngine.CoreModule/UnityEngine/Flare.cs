@@ -4,9 +4,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A flare asset. Read more about flares in the.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Camera/Flare.h")]
 	public sealed class Flare : Object
 	{

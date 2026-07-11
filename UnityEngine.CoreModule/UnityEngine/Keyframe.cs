@@ -3,17 +3,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A single keyframe that can be injected into an animation curve.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	public struct Keyframe
 	{
-		/// <summary>
-		///   <para>Create a keyframe.</para>
-		/// </summary>
-		/// <param name="time"></param>
-		/// <param name="value"></param>
 		public Keyframe(float time, float value)
 		{
 			this.m_Time = time;
@@ -25,13 +17,6 @@ namespace UnityEngine
 			this.m_OutWeight = 0f;
 		}
 
-		/// <summary>
-		///   <para>Create a keyframe.</para>
-		/// </summary>
-		/// <param name="time"></param>
-		/// <param name="value"></param>
-		/// <param name="inTangent"></param>
-		/// <param name="outTangent"></param>
 		public Keyframe(float time, float value, float inTangent, float outTangent)
 		{
 			this.m_Time = time;
@@ -43,15 +28,6 @@ namespace UnityEngine
 			this.m_OutWeight = 0f;
 		}
 
-		/// <summary>
-		///   <para>Create a keyframe.</para>
-		/// </summary>
-		/// <param name="time"></param>
-		/// <param name="value"></param>
-		/// <param name="inTangent"></param>
-		/// <param name="outTangent"></param>
-		/// <param name="inWeight"></param>
-		/// <param name="outWeight"></param>
 		public Keyframe(float time, float value, float inTangent, float outTangent, float inWeight, float outWeight)
 		{
 			this.m_Time = time;
@@ -63,9 +39,6 @@ namespace UnityEngine
 			this.m_OutWeight = outWeight;
 		}
 
-		/// <summary>
-		///   <para>The time of the keyframe.</para>
-		/// </summary>
 		public float time
 		{
 			get
@@ -78,9 +51,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The value of the curve at keyframe.</para>
-		/// </summary>
 		public float value
 		{
 			get
@@ -93,9 +63,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the incoming tangent for this key. The incoming tangent affects the slope of the curve from the previous key to this key.</para>
-		/// </summary>
 		public float inTangent
 		{
 			get
@@ -108,9 +75,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the outgoing tangent for this key. The outgoing tangent affects the slope of the curve from this key to the next key.</para>
-		/// </summary>
 		public float outTangent
 		{
 			get
@@ -123,9 +87,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the incoming weight for this key. The incoming weight affects the slope of the curve from the previous key to this key.</para>
-		/// </summary>
 		public float inWeight
 		{
 			get
@@ -138,9 +99,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets the outgoing weight for this key. The outgoing weight affects the slope of the curve from this key to the next key.</para>
-		/// </summary>
 		public float outWeight
 		{
 			get
@@ -153,9 +111,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Weighted mode for the keyframe.</para>
-		/// </summary>
 		public WeightedMode weightedMode
 		{
 			get
@@ -168,10 +123,7 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>TangentMode is deprecated.  Use AnimationUtility.SetKeyLeftTangentMode or AnimationUtility.SetKeyRightTangentMode instead.</para>
-		/// </summary>
-		[Obsolete("Use AnimationUtility.SetLeftTangentMode, AnimationUtility.SetRightTangentMode, AnimationUtility.GetLeftTangentMode or AnimationUtility.GetRightTangentMode instead.")]
+		[Obsolete("Use AnimationUtility.SetKeyLeftTangentMode, AnimationUtility.SetKeyRightTangentMode, AnimationUtility.GetKeyLeftTangentMode or AnimationUtility.GetKeyRightTangentMode instead.")]
 		public int tangentMode
 		{
 			get

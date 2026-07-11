@@ -5,16 +5,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A component that will render to the screen after all normal rendering has completed when attached to a Canvas. Designed for GUI application.</para>
-	/// </summary>
 	[NativeHeader("Runtime/UI/CanvasRenderer.h")]
 	[NativeClass("UI::CanvasRenderer")]
 	public sealed class CanvasRenderer : Component
 	{
-		/// <summary>
-		///   <para>Enable 'render stack' pop draw call.</para>
-		/// </summary>
 		public extern bool hasPopInstruction
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -23,9 +17,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of materials usable by this renderer.</para>
-		/// </summary>
 		public extern int materialCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -34,9 +25,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The number of materials usable by this renderer. Used internally for masking.</para>
-		/// </summary>
 		public extern int popMaterialCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -45,27 +33,18 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Depth of the renderer relative to the root canvas.</para>
-		/// </summary>
 		public extern int absoluteDepth
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>True if any change has occured that would invalidate the positions of generated geometry.</para>
-		/// </summary>
 		public extern bool hasMoved
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Indicates whether geometry emitted by this renderer can be ignored when the vertex color alpha is close to zero for every vertex of the mesh.</para>
-		/// </summary>
 		public extern bool cullTransparentMesh
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -74,10 +53,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>True if rect clipping has been enabled on this renderer.
-		/// See Also: CanvasRenderer.EnableRectClipping, CanvasRenderer.DisableRectClipping.</para>
-		/// </summary>
 		[NativeProperty("RectClipping", false, TargetType.Function)]
 		public extern bool hasRectClipping
 		{
@@ -85,9 +60,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Depth of the renderer realative to the parent canvas.</para>
-		/// </summary>
 		[NativeProperty("Depth", false, TargetType.Function)]
 		public extern int relativeDepth
 		{
@@ -95,9 +67,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Indicates whether geometry emitted by this renderer is ignored.</para>
-		/// </summary>
 		[NativeProperty("ShouldCull", false, TargetType.Function)]
 		public extern bool cull
 		{
@@ -107,24 +76,14 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Is the UIRenderer a mask component.</para>
-		/// </summary>
 		[Obsolete("isMask is no longer supported.See EnableClipping for vertex clipping configuration", false)]
 		public bool isMask { get; set; }
 
-		/// <summary>
-		///   <para>Set the color of the renderer. Will be multiplied with the UIVertex color and the Canvas color.</para>
-		/// </summary>
-		/// <param name="color">Renderer multiply color.</param>
 		public void SetColor(Color color)
 		{
 			this.SetColor_Injected(ref color);
 		}
 
-		/// <summary>
-		///   <para>Get the current color of the renderer.</para>
-		/// </summary>
 		public Color GetColor()
 		{
 			Color color;
@@ -132,95 +91,43 @@ namespace UnityEngine
 			return color;
 		}
 
-		/// <summary>
-		///   <para>Enables rect clipping on the CanvasRendered. Geometry outside of the specified rect will be clipped (not rendered).</para>
-		/// </summary>
-		/// <param name="rect"></param>
 		public void EnableRectClipping(Rect rect)
 		{
 			this.EnableRectClipping_Injected(ref rect);
 		}
 
-		/// <summary>
-		///   <para>Disables rectangle clipping for this CanvasRenderer.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void DisableRectClipping();
 
-		/// <summary>
-		///   <para>Set the material for the canvas renderer. If a texture is specified then it will be used as the 'MainTex' instead of the material's 'MainTex'.
-		/// See Also: CanvasRenderer.SetMaterialCount, CanvasRenderer.SetTexture.</para>
-		/// </summary>
-		/// <param name="material">Material for rendering.</param>
-		/// <param name="texture">Material texture overide.</param>
-		/// <param name="index">Material index.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetMaterial(Material material, int index);
 
-		/// <summary>
-		///   <para>Gets the current Material assigned to the CanvasRenderer.</para>
-		/// </summary>
-		/// <param name="index">The material index to retrieve (0 if this parameter is omitted).</param>
-		/// <returns>
-		///   <para>Result.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Material GetMaterial(int index);
 
-		/// <summary>
-		///   <para>Set the material for the canvas renderer. Used internally for masking.</para>
-		/// </summary>
-		/// <param name="material"></param>
-		/// <param name="index"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetPopMaterial(Material material, int index);
 
-		/// <summary>
-		///   <para>Gets the current Material assigned to the CanvasRenderer. Used internally for masking.</para>
-		/// </summary>
-		/// <param name="index"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Material GetPopMaterial(int index);
 
-		/// <summary>
-		///   <para>Sets the texture used by this renderer's material.</para>
-		/// </summary>
-		/// <param name="texture"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetTexture(Texture texture);
 
-		/// <summary>
-		///   <para>The Alpha Texture that will be passed to the Shader under the _AlphaTex property.</para>
-		/// </summary>
-		/// <param name="texture">The Texture to be passed.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAlphaTexture(Texture texture);
 
-		/// <summary>
-		///   <para>Sets the Mesh used by this renderer.</para>
-		/// </summary>
-		/// <param name="mesh"></param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetMesh(Mesh mesh);
 
-		/// <summary>
-		///   <para>Remove all cached vertices.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Clear();
 
-		/// <summary>
-		///   <para>Get the current alpha of the renderer.</para>
-		/// </summary>
 		public float GetAlpha()
 		{
 			return this.GetColor().a;
 		}
 
-		/// <summary>
-		///   <para>Set the alpha of the renderer. Will be multiplied with the UIVertex alpha and the Canvas alpha.</para>
-		/// </summary>
-		/// <param name="alpha">Alpha.</param>
 		public void SetAlpha(float alpha)
 		{
 			Color color = this.GetColor();
@@ -228,13 +135,9 @@ namespace UnityEngine
 			this.SetColor(color);
 		}
 
-		/// <summary>
-		///   <para>Set the material for the canvas renderer. If a texture is specified then it will be used as the 'MainTex' instead of the material's 'MainTex'.
-		/// See Also: CanvasRenderer.SetMaterialCount, CanvasRenderer.SetTexture.</para>
-		/// </summary>
-		/// <param name="material">Material for rendering.</param>
-		/// <param name="texture">Material texture overide.</param>
-		/// <param name="index">Material index.</param>
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern float GetInheritedAlpha();
+
 		public void SetMaterial(Material material, Texture texture)
 		{
 			this.materialCount = Math.Max(1, this.materialCount);
@@ -242,13 +145,6 @@ namespace UnityEngine
 			this.SetTexture(texture);
 		}
 
-		/// <summary>
-		///   <para>Gets the current Material assigned to the CanvasRenderer.</para>
-		/// </summary>
-		/// <param name="index">The material index to retrieve (0 if this parameter is omitted).</param>
-		/// <returns>
-		///   <para>Result.</para>
-		/// </returns>
 		public Material GetMaterial()
 		{
 			return this.GetMaterial(0);
@@ -291,11 +187,6 @@ namespace UnityEngine
 			this.SetVertices(vertices.ToArray(), vertices.Count);
 		}
 
-		/// <summary>
-		///   <para>Set the vertices for the UIRenderer.</para>
-		/// </summary>
-		/// <param name="vertices">Array of vertices to set.</param>
-		/// <param name="size">Number of vertices to set.</param>
 		[Obsolete("UI System now uses meshes.Generate a mesh and use 'SetMesh' instead", false)]
 		public void SetVertices(UIVertex[] vertices, int size)
 		{

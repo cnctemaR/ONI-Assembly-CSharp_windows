@@ -8,20 +8,14 @@ namespace Delaunay
 {
 	public sealed class Edge
 	{
-		private Edge()
-		{
-			this._edgeIndex = Edge._nedges++;
-			this.Init();
-		}
-
 		public static Edge CreateBisectingEdge(Site site0, Site site1)
 		{
 			Vector2 coord = site1.Coord;
 			Vector2 coord2 = site0.Coord;
 			float num = coord2.x - coord.x;
 			float num2 = coord2.y - coord.y;
-			float num3 = ((num <= 0f) ? (-num) : num);
-			float num4 = ((num2 <= 0f) ? (-num2) : num2);
+			float num3 = ((num > 0f) ? num : (-num));
+			float num4 = ((num2 > 0f) ? num2 : (-num2));
 			float num5 = coord.x * num + coord.y * num2 + (num * num + num2 * num2) * 0.5f;
 			float num6;
 			float num7;
@@ -97,7 +91,11 @@ namespace Delaunay
 
 		public Vertex Vertex(Side leftRight)
 		{
-			return (leftRight != Side.LEFT) ? this._rightVertex : this._leftVertex;
+			if (leftRight != Side.LEFT)
+			{
+				return this._rightVertex;
+			}
+			return this._leftVertex;
 		}
 
 		public void SetVertex(Side leftRight, Vertex v)
@@ -105,11 +103,9 @@ namespace Delaunay
 			if (leftRight == Side.LEFT)
 			{
 				this._leftVertex = v;
+				return;
 			}
-			else
-			{
-				this._rightVertex = v;
-			}
+			this._rightVertex = v;
 		}
 
 		public bool IsPartOfConvexHull()
@@ -203,6 +199,12 @@ namespace Delaunay
 			Edge._pool.Push(this);
 		}
 
+		private Edge()
+		{
+			this._edgeIndex = Edge._nedges++;
+			this.Init();
+		}
+
 		private void Init()
 		{
 			this._sites = new Dictionary<Side, Site>();
@@ -219,9 +221,9 @@ namespace Delaunay
 				", ",
 				this._sites[Side.RIGHT].ToString(),
 				"; endVertices ",
-				(this._leftVertex == null) ? "null" : this._leftVertex.vertexIndex.ToString(),
+				(this._leftVertex != null) ? this._leftVertex.vertexIndex.ToString() : "null",
 				", ",
-				(this._rightVertex == null) ? "null" : this._rightVertex.vertexIndex.ToString(),
+				(this._rightVertex != null) ? this._rightVertex.vertexIndex.ToString() : "null",
 				"::"
 			});
 		}
@@ -347,12 +349,10 @@ namespace Delaunay
 			{
 				this._clippedVertices[Side.LEFT] = new Vector2?(new Vector2(num2, num));
 				this._clippedVertices[Side.RIGHT] = new Vector2?(new Vector2(num4, num3));
+				return;
 			}
-			else
-			{
-				this._clippedVertices[Side.RIGHT] = new Vector2?(new Vector2(num2, num));
-				this._clippedVertices[Side.LEFT] = new Vector2?(new Vector2(num4, num3));
-			}
+			this._clippedVertices[Side.RIGHT] = new Vector2?(new Vector2(num2, num));
+			this._clippedVertices[Side.LEFT] = new Vector2?(new Vector2(num4, num3));
 		}
 
 		public void ClipVertices(Polygon bounds)
@@ -376,12 +376,10 @@ namespace Delaunay
 			{
 				this._clippedVertices[Side.LEFT] = lineSegment2.p0;
 				this._clippedVertices[Side.RIGHT] = lineSegment2.p1;
+				return;
 			}
-			else
-			{
-				this._clippedVertices[Side.RIGHT] = lineSegment2.p0;
-				this._clippedVertices[Side.LEFT] = lineSegment2.p1;
-			}
+			this._clippedVertices[Side.RIGHT] = lineSegment2.p0;
+			this._clippedVertices[Side.LEFT] = lineSegment2.p1;
 		}
 
 		private static Stack<Edge> _pool = new Stack<Edge>();

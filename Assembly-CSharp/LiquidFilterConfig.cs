@@ -35,8 +35,7 @@ public class LiquidFilterConfig : IBuildingConfig
 
 	private void AttachPort(GameObject go)
 	{
-		ConduitSecondaryOutput conduitSecondaryOutput = go.AddComponent<ConduitSecondaryOutput>();
-		conduitSecondaryOutput.portInfo = this.secondaryPort;
+		go.AddComponent<ConduitSecondaryOutput>().portInfo = this.secondaryPort;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -55,10 +54,8 @@ public class LiquidFilterConfig : IBuildingConfig
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<Structure>();
-		ElementFilter elementFilter = go.AddOrGet<ElementFilter>();
-		elementFilter.portInfo = this.secondaryPort;
-		Filterable filterable = go.AddOrGet<Filterable>();
-		filterable.filterElementState = Filterable.ElementState.Liquid;
+		go.AddOrGet<ElementFilter>().portInfo = this.secondaryPort;
+		go.AddOrGet<Filterable>().filterElementState = Filterable.ElementState.Liquid;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

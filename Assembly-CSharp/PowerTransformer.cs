@@ -34,17 +34,15 @@ public class PowerTransformer : Generator
 		if (this.operational.IsOperational)
 		{
 			this.battery.joulesLostPerSecond = 0f;
+			return;
 		}
-		else
-		{
-			this.battery.joulesLostPerSecond = 3.3333333f;
-		}
+		this.battery.joulesLostPerSecond = 3.3333333f;
 	}
 
 	public override void EnergySim200ms(float dt)
 	{
 		base.EnergySim200ms(dt);
-		float num = ((!this.operational.IsOperational) ? 0f : Math.Min(this.battery.JoulesAvailable, base.WattageRating * dt));
+		float num = (this.operational.IsOperational ? Math.Min(this.battery.JoulesAvailable, base.WattageRating * dt) : 0f);
 		base.AssignJoulesAvailable(num);
 		ushort circuitID = this.battery.CircuitID;
 		ushort circuitID2 = base.CircuitID;

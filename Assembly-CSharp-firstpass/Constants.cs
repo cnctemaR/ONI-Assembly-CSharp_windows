@@ -83,7 +83,7 @@ public static class Constants
 
 	public const int LOGIC_SOUND_INTERVAL_COUNTER = 2;
 
-	public const float LOGIC_SOUND_VOLUME_COOLDOWN = 5f;
+	public const float LOGIC_SOUND_VOLUME_COOLDOWN = 3f;
 
 	public const float DEFAULT_SOUND_EVENT_VOLUME = 1f;
 

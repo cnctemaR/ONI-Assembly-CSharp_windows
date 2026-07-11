@@ -9,27 +9,22 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		{
 			smi.OnHealthChanged(data);
 		});
-		this.healthy.EventTransition(GameHashes.HealthChanged, this.wounded, (WoundMonitor.Instance smi) => smi.health.State != Health.HealthState.Perfect);
+		this.healthy.EventTransition(GameHashes.HealthChanged, this.wounded, (WoundMonitor.Instance smi) => smi.health.State > Health.HealthState.Perfect);
 		this.wounded.ToggleUrge(Db.Get().Urges.Heal).Enter(delegate(WoundMonitor.Instance smi)
 		{
-			Health.HealthState state = smi.health.State;
-			if (state != Health.HealthState.Critical)
+			switch (smi.health.State)
 			{
-				if (state != Health.HealthState.Injured)
-				{
-					if (state == Health.HealthState.Scuffed)
-					{
-						smi.GoTo(this.wounded.light);
-					}
-				}
-				else
-				{
-					smi.GoTo(this.wounded.medium);
-				}
-			}
-			else
-			{
+			case Health.HealthState.Scuffed:
+				smi.GoTo(this.wounded.light);
+				return;
+			case Health.HealthState.Injured:
+				smi.GoTo(this.wounded.medium);
+				return;
+			case Health.HealthState.Critical:
 				smi.GoTo(this.wounded.heavy);
+				return;
+			default:
+				return;
 			}
 		}).EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi)
 		{
@@ -156,16 +151,20 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			{
 			case Health.HealthState.Perfect:
 				base.smi.GoTo(base.sm.healthy);
+				return;
+			case Health.HealthState.Alright:
 				break;
 			case Health.HealthState.Scuffed:
 				base.smi.GoTo(base.sm.wounded.light);
 				break;
 			case Health.HealthState.Injured:
 				base.smi.GoTo(base.sm.wounded.medium);
-				break;
+				return;
 			case Health.HealthState.Critical:
 				base.smi.GoTo(base.sm.wounded.heavy);
-				break;
+				return;
+			default:
+				return;
 			}
 		}
 
@@ -178,8 +177,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		{
 			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
 			Ownables soleOwner = base.gameObject.GetComponent<MinionIdentity>().GetSoleOwner();
-			AssignableSlotInstance slot = soleOwner.GetSlot(clinic);
-			if (slot.assignable == null)
+			if (soleOwner.GetSlot(clinic).assignable == null)
 			{
 				soleOwner.AutoAssignSlot(clinic);
 			}

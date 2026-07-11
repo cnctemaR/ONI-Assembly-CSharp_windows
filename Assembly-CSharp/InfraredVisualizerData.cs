@@ -4,25 +4,6 @@ using UnityEngine;
 
 public struct InfraredVisualizerData
 {
-	public InfraredVisualizerData(GameObject go)
-	{
-		this.controller = go.GetComponent<KBatchedAnimController>();
-		if (this.controller != null)
-		{
-			this.temperatureAmount = Db.Get().Amounts.Temperature.Lookup(go);
-			this.structureTemperature = GameComps.StructureTemperatures.GetHandle(go);
-			this.primaryElement = go.GetComponent<PrimaryElement>();
-			this.temperatureVulnerable = go.GetComponent<TemperatureVulnerable>();
-		}
-		else
-		{
-			this.temperatureAmount = null;
-			this.structureTemperature = HandleVector<int>.InvalidHandle;
-			this.primaryElement = null;
-			this.temperatureVulnerable = null;
-		}
-	}
-
 	public void Update()
 	{
 		float num = 0f;
@@ -48,6 +29,23 @@ public struct InfraredVisualizerData
 		}
 		Color32 color = SimDebugView.Instance.NormalizedTemperature(num);
 		this.controller.OverlayColour = color;
+	}
+
+	public InfraredVisualizerData(GameObject go)
+	{
+		this.controller = go.GetComponent<KBatchedAnimController>();
+		if (this.controller != null)
+		{
+			this.temperatureAmount = Db.Get().Amounts.Temperature.Lookup(go);
+			this.structureTemperature = GameComps.StructureTemperatures.GetHandle(go);
+			this.primaryElement = go.GetComponent<PrimaryElement>();
+			this.temperatureVulnerable = go.GetComponent<TemperatureVulnerable>();
+			return;
+		}
+		this.temperatureAmount = null;
+		this.structureTemperature = HandleVector<int>.InvalidHandle;
+		this.primaryElement = null;
+		this.temperatureVulnerable = null;
 	}
 
 	public KAnimControllerBase controller;

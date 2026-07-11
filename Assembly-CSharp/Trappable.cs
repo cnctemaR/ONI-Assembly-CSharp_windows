@@ -69,15 +69,12 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 	public void OnStore(object data)
 	{
 		Storage storage = data as Storage;
-		Trap trap = ((!storage) ? null : storage.GetComponent<Trap>());
-		if (trap)
+		if (storage ? storage.GetComponent<Trap>() : null)
 		{
 			base.gameObject.AddTag(GameTags.Trapped);
+			return;
 		}
-		else
-		{
-			base.gameObject.RemoveTag(GameTags.Trapped);
-		}
+		base.gameObject.RemoveTag(GameTags.Trapped);
 	}
 
 	private bool registered;

@@ -6,29 +6,6 @@ namespace YamlDotNet.Core.Events
 {
 	public class DocumentStart : ParsingEvent
 	{
-		public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
-			: base(start, end)
-		{
-			this.version = version;
-			this.tags = tags;
-			this.isImplicit = isImplicit;
-		}
-
-		public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
-			: this(version, tags, isImplicit, Mark.Empty, Mark.Empty)
-		{
-		}
-
-		public DocumentStart(Mark start, Mark end)
-			: this(null, null, true, start, end)
-		{
-		}
-
-		public DocumentStart()
-			: this(null, null, true, Mark.Empty, Mark.Empty)
-		{
-		}
-
 		public override int NestingIncrease
 		{
 			get
@@ -69,9 +46,32 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
+		public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
+			: base(start, end)
+		{
+			this.version = version;
+			this.tags = tags;
+			this.isImplicit = isImplicit;
+		}
+
+		public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
+			: this(version, tags, isImplicit, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		public DocumentStart(Mark start, Mark end)
+			: this(null, null, true, start, end)
+		{
+		}
+
+		public DocumentStart()
+			: this(null, null, true, Mark.Empty, Mark.Empty)
+		{
+		}
+
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "Document start [isImplicit = {0}]", new object[] { this.isImplicit });
+			return string.Format(CultureInfo.InvariantCulture, "Document start [isImplicit = {0}]", this.isImplicit);
 		}
 
 		public override void Accept(IParsingEventVisitor visitor)

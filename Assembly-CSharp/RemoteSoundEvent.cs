@@ -14,8 +14,7 @@ public class RemoteSoundEvent : SoundEvent
 	{
 		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
 		vector.z = 0f;
-		GameObject gameObject = behaviour.controller.gameObject;
-		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		if (SoundEvent.ObjectIsSelectedAndVisible(behaviour.controller.gameObject))
 		{
 			vector = SoundEvent.AudioHighlightListenerPosition(vector);
 		}

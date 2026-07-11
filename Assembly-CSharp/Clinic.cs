@@ -114,9 +114,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 			}
 			if (!flag && this.IsValidEffect(this.diseaseEffect))
 			{
-				MinionModifiers component2 = minionIdentity.GetComponent<MinionModifiers>();
-				Sicknesses sicknesses = component2.sicknesses;
-				flag = sicknesses.Count > 0;
+				flag = minionIdentity.GetComponent<MinionModifiers>().sicknesses.Count > 0;
 			}
 		}
 		return flag;
@@ -135,7 +133,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 
 	private bool IsHealthBelowThreshold(GameObject minion)
 	{
-		Health health = ((!(minion != null)) ? null : minion.GetComponent<Health>());
+		Health health = ((minion != null) ? minion.GetComponent<Health>() : null);
 		if (health != null)
 		{
 			float num = health.hitPoints / health.maxHitPoints;
@@ -149,7 +147,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 
 	private bool IsValidEffect(string effect)
 	{
-		return effect != null && effect != string.Empty;
+		return effect != null && effect != "";
 	}
 
 	private bool AllowDoctoring()
@@ -281,8 +279,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NOT_BEING_ATTACKED,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Clinic clinic = (Clinic)data;
-			return clinic.IsHealthBelowThreshold(context.consumerState.gameObject);
+			return ((Clinic)data).IsHealthBelowThreshold(context.consumerState.gameObject);
 		}
 	};
 
@@ -297,8 +294,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Clinic.ClinicSM.Instance smi) => smi.GetComponent<Operational>().IsOperational).Enter(delegate(Clinic.ClinicSM.Instance smi)
 			{
-				Assignable component = smi.master.GetComponent<Assignable>();
-				component.Unassign();
+				smi.master.GetComponent<Assignable>().Unassign();
 			});
 			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Clinic.ClinicSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.AssigneeChanged, this.unoperational, null)
 				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => smi.master.CreateWorkChore(Db.Get().ChoreTypes.Heal, false, true, PriorityScreen.PriorityClass.personalNeeds, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
@@ -319,8 +315,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 				smi.StartEffect(smi.master.healthEffect, false);
 				smi.StartEffect(smi.master.diseaseEffect, false);
 				bool flag = false;
-				Worker worker = smi.master.worker;
-				if (worker != null)
+				if (smi.master.worker != null)
 				{
 					flag = smi.HasEffect(smi.master.doctoredHealthEffect) || smi.HasEffect(smi.master.doctoredDiseaseEffect) || smi.HasEffect(smi.master.doctoredPlaceholderEffect);
 				}
@@ -329,11 +324,9 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 					if (flag)
 					{
 						smi.GoTo(this.operational.healing.doctored);
+						return;
 					}
-					else
-					{
-						smi.StartDoctorChore();
-					}
+					smi.StartDoctorChore();
 				}
 			}).Exit(delegate(Clinic.ClinicSM.Instance smi)
 			{
@@ -349,10 +342,10 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 			});
 			this.operational.healing.doctored.Enter(delegate(Clinic.ClinicSM.Instance smi)
 			{
-				Effects component2 = smi.master.worker.GetComponent<Effects>();
+				Effects component = smi.master.worker.GetComponent<Effects>();
 				if (smi.HasEffect(smi.master.doctoredPlaceholderEffect))
 				{
-					EffectInstance effectInstance = component2.Get(smi.master.doctoredPlaceholderEffect);
+					EffectInstance effectInstance = component.Get(smi.master.doctoredPlaceholderEffect);
 					EffectInstance effectInstance2 = smi.StartEffect(smi.master.doctoredDiseaseEffect, true);
 					if (effectInstance2 != null)
 					{
@@ -365,38 +358,37 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 						float num2 = effectInstance.effect.duration - effectInstance.timeRemaining;
 						effectInstance3.timeRemaining = effectInstance3.effect.duration - num2;
 					}
-					component2.Remove(smi.master.doctoredPlaceholderEffect);
+					component.Remove(smi.master.doctoredPlaceholderEffect);
 				}
 			}).ScheduleGoTo(delegate(Clinic.ClinicSM.Instance smi)
 			{
-				Worker worker2 = smi.master.worker;
-				Effects component3 = worker2.GetComponent<Effects>();
+				Effects component2 = smi.master.worker.GetComponent<Effects>();
 				float num3 = smi.master.doctorVisitInterval;
 				if (smi.HasEffect(smi.master.doctoredHealthEffect))
 				{
-					EffectInstance effectInstance4 = component3.Get(smi.master.doctoredHealthEffect);
+					EffectInstance effectInstance4 = component2.Get(smi.master.doctoredHealthEffect);
 					num3 = Mathf.Min(num3, effectInstance4.GetTimeRemaining());
 				}
 				if (smi.HasEffect(smi.master.doctoredDiseaseEffect))
 				{
-					EffectInstance effectInstance4 = component3.Get(smi.master.doctoredDiseaseEffect);
+					EffectInstance effectInstance4 = component2.Get(smi.master.doctoredDiseaseEffect);
 					num3 = Mathf.Min(num3, effectInstance4.GetTimeRemaining());
 				}
 				return num3;
 			}, this.operational.healing.undoctored).Exit(delegate(Clinic.ClinicSM.Instance smi)
 			{
-				Effects component4 = smi.master.worker.GetComponent<Effects>();
+				Effects component3 = smi.master.worker.GetComponent<Effects>();
 				if (smi.HasEffect(smi.master.doctoredDiseaseEffect) || smi.HasEffect(smi.master.doctoredHealthEffect))
 				{
-					EffectInstance effectInstance5 = component4.Get(smi.master.doctoredDiseaseEffect);
+					EffectInstance effectInstance5 = component3.Get(smi.master.doctoredDiseaseEffect);
 					if (effectInstance5 == null)
 					{
-						effectInstance5 = component4.Get(smi.master.doctoredHealthEffect);
+						effectInstance5 = component3.Get(smi.master.doctoredHealthEffect);
 					}
 					EffectInstance effectInstance6 = smi.StartEffect(smi.master.doctoredPlaceholderEffect, true);
 					effectInstance6.timeRemaining = effectInstance6.effect.duration - (effectInstance5.effect.duration - effectInstance5.timeRemaining);
-					component4.Remove(smi.master.doctoredDiseaseEffect);
-					component4.Remove(smi.master.doctoredHealthEffect);
+					component3.Remove(smi.master.doctoredDiseaseEffect);
+					component3.Remove(smi.master.doctoredHealthEffect);
 				}
 			});
 		}
@@ -455,9 +447,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 				bool flag = false;
 				if (base.master.IsValidEffect(effect))
 				{
-					Worker worker = base.smi.master.worker;
-					Effects component = worker.GetComponent<Effects>();
-					flag = component.HasEffect(effect);
+					flag = base.smi.master.worker.GetComponent<Effects>().HasEffect(effect);
 				}
 				return flag;
 			}

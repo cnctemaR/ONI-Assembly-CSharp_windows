@@ -75,12 +75,6 @@ public class VignetteManager : GameStateMachine<VignetteManager, VignetteManager
 
 	public new class Instance : GameStateMachine<VignetteManager, VignetteManager.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
-		{
-			VignetteManager.Instance.instance = this;
-		}
-
 		public static void DestroyInstance()
 		{
 			VignetteManager.Instance.instance = null;
@@ -91,17 +85,25 @@ public class VignetteManager : GameStateMachine<VignetteManager, VignetteManager
 			return VignetteManager.Instance.instance;
 		}
 
+		public Instance(IStateMachineTarget master)
+			: base(master)
+		{
+			VignetteManager.Instance.instance = this;
+		}
+
 		public void UpdateState(float dt)
 		{
 			if (this.IsRedAlert())
 			{
 				base.smi.GoTo(base.sm.on.red);
+				return;
 			}
-			else if (this.IsYellowAlert())
+			if (this.IsYellowAlert())
 			{
 				base.smi.GoTo(base.sm.on.yellow);
+				return;
 			}
-			else if (!this.IsOn())
+			if (!this.IsOn())
 			{
 				base.smi.GoTo(base.sm.off);
 			}

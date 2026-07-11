@@ -10,8 +10,7 @@ public struct SoundCuller
 
 	public bool IsAudibleNoCameraScaling(Vector2 pos, float falloff_distance_sq)
 	{
-		float num = (pos.x - this.cameraPos.x) * (pos.x - this.cameraPos.x) + (pos.y - this.cameraPos.y) * (pos.y - this.cameraPos.y);
-		return num < falloff_distance_sq;
+		return (pos.x - this.cameraPos.x) * (pos.x - this.cameraPos.x) + (pos.y - this.cameraPos.y) * (pos.y - this.cameraPos.y) < falloff_distance_sq;
 	}
 
 	public bool IsAudible(Vector2 pos, float falloff_distance_sq)
@@ -43,7 +42,7 @@ public struct SoundCuller
 			num2 = 0f;
 		}
 		float extraYRange = TuningData<SoundCuller.Tuning>.Get().extraYRange;
-		num2 = ((num2 >= extraYRange) ? extraYRange : num2);
+		num2 = ((num2 < extraYRange) ? num2 : extraYRange);
 		float num3 = num2 * num2 / (4f * this.zoomScaler);
 		num3 *= num;
 		Vector3 vector = new Vector3(pos.x, pos.y + num3, 0f);
@@ -64,8 +63,7 @@ public struct SoundCuller
 		soundCuller.max = new Vector3(vector.x, vector.y, 0f);
 		soundCuller.cameraPos = main.transform.GetPosition();
 		Audio audio = Audio.Get();
-		float orthographicSize = CameraController.Instance.cameras[0].orthographicSize;
-		float num = orthographicSize / (audio.listenerReferenceZ - audio.listenerMinZ);
+		float num = CameraController.Instance.cameras[0].orthographicSize / (audio.listenerReferenceZ - audio.listenerMinZ);
 		if (num <= 0f)
 		{
 			num = 2f;

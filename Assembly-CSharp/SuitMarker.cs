@@ -10,7 +10,7 @@ public class SuitMarker : KMonoBehaviour
 	{
 		get
 		{
-			DebugUtil.Assert(this.onlyTraverseIfUnequipAvailable == ((byte)(this.gridFlags & Grid.SuitMarker.Flags.OnlyTraverseIfUnequipAvailable) != 0));
+			DebugUtil.Assert(this.onlyTraverseIfUnequipAvailable == (this.gridFlags & Grid.SuitMarker.Flags.OnlyTraverseIfUnequipAvailable) > (Grid.SuitMarker.Flags)0);
 			return this.onlyTraverseIfUnequipAvailable;
 		}
 		set
@@ -24,7 +24,7 @@ public class SuitMarker : KMonoBehaviour
 	{
 		get
 		{
-			return (byte)(this.gridFlags & Grid.SuitMarker.Flags.Rotated) != 0;
+			return (this.gridFlags & Grid.SuitMarker.Flags.Rotated) > (Grid.SuitMarker.Flags)0;
 		}
 		set
 		{
@@ -36,7 +36,7 @@ public class SuitMarker : KMonoBehaviour
 	{
 		get
 		{
-			return (byte)(this.gridFlags & Grid.SuitMarker.Flags.Operational) != 0;
+			return (this.gridFlags & Grid.SuitMarker.Flags.Operational) > (Grid.SuitMarker.Flags)0;
 		}
 		set
 		{
@@ -70,7 +70,7 @@ public class SuitMarker : KMonoBehaviour
 
 	public void GetAttachedLockers(List<SuitLocker> suit_lockers)
 	{
-		int num = ((!this.isRotated) ? (-1) : 1);
+		int num = (this.isRotated ? 1 : (-1));
 		int num2 = 1;
 		for (;;)
 		{
@@ -103,8 +103,7 @@ public class SuitMarker : KMonoBehaviour
 
 	public static bool DoesTraversalDirectionRequireSuit(int source_cell, int dest_cell, Grid.SuitMarker.Flags flags)
 	{
-		bool flag = Grid.CellColumn(dest_cell) > Grid.CellColumn(source_cell);
-		return flag == ((byte)(flags & Grid.SuitMarker.Flags.Rotated) == 0);
+		return Grid.CellColumn(dest_cell) > Grid.CellColumn(source_cell) == ((flags & Grid.SuitMarker.Flags.Rotated) == (Grid.SuitMarker.Flags)0);
 	}
 
 	public bool DoesTraversalDirectionRequireSuit(int source_cell, int dest_cell)
@@ -138,7 +137,7 @@ public class SuitMarker : KMonoBehaviour
 		bool flag = kprefabID != null;
 		if (flag != this.hasAvailableSuit)
 		{
-			base.GetComponent<KAnimControllerBase>().Play((!flag) ? "no_suit" : "off", KAnim.PlayMode.Once, 1f, 0f);
+			base.GetComponent<KAnimControllerBase>().Play(flag ? "off" : "no_suit", KAnim.PlayMode.Once, 1f, 0f);
 			this.hasAvailableSuit = flag;
 		}
 		Grid.UpdateSuitMarker(this.cell, num2, num, this.gridFlags, this.PathFlag);
@@ -150,12 +149,10 @@ public class SuitMarker : KMonoBehaviour
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SuitMarkerTraversalOnlyWhenRoomAvailable, null);
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SuitMarkerTraversalAnytime, false);
+			return;
 		}
-		else
-		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SuitMarkerTraversalOnlyWhenRoomAvailable, false);
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SuitMarkerTraversalAnytime, null);
-		}
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SuitMarkerTraversalOnlyWhenRoomAvailable, false);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SuitMarkerTraversalAnytime, null);
 	}
 
 	private void OnEnableTraverseIfUnequipAvailable()
@@ -175,11 +172,9 @@ public class SuitMarker : KMonoBehaviour
 		if (state)
 		{
 			this.gridFlags |= flag;
+			return;
 		}
-		else
-		{
-			this.gridFlags &= ~flag;
-		}
+		this.gridFlags &= ~flag;
 	}
 
 	private void OnOperationalChanged(bool isOperational)
@@ -190,25 +185,8 @@ public class SuitMarker : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (!this.OnlyTraverseIfUnequipAvailable)
-		{
-			string text = "action_clearance";
-			string text2 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.NAME;
-			global::System.Action action = new global::System.Action(this.OnEnableTraverseIfUnequipAvailable);
-			string text3 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_clearance";
-			string text2 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.NAME;
-			global::System.Action action = new global::System.Action(this.OnDisableTraverseIfUnequipAvailable);
-			string text = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = ((!this.OnlyTraverseIfUnequipAvailable) ? new KIconButtonMenu.ButtonInfo("action_clearance", UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.NAME, new global::System.Action(this.OnEnableTraverseIfUnequipAvailable), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_clearance", UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.NAME, new global::System.Action(this.OnDisableTraverseIfUnequipAvailable), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.TOOLTIP, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	protected override void OnCleanUp()
@@ -290,17 +268,16 @@ public class SuitMarker : KMonoBehaviour
 			{
 				return false;
 			}
-			int num = (int)transition.navGridTransition.x;
-			if (num == 0)
+			int x = (int)transition.navGridTransition.x;
+			if (x == 0)
 			{
 				return false;
 			}
-			MinionIdentity component = new_reactor.GetComponent<MinionIdentity>();
-			if (component.GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
+			if (new_reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
 			{
-				return (num >= 0 || !this.suitMarker.isRotated) && (num <= 0 || this.suitMarker.isRotated);
+				return (x >= 0 || !this.suitMarker.isRotated) && (x <= 0 || this.suitMarker.isRotated);
 			}
-			return (num <= 0 || !this.suitMarker.isRotated) && (num >= 0 || this.suitMarker.isRotated) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), new_reactor.GetComponent<KPrefabID>().InstanceID);
+			return (x <= 0 || !this.suitMarker.isRotated) && (x >= 0 || this.suitMarker.isRotated) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), new_reactor.GetComponent<KPrefabID>().InstanceID);
 		}
 
 		protected override void InternalBegin()
@@ -323,7 +300,7 @@ public class SuitMarker : KMonoBehaviour
 
 		public override void Update(float dt)
 		{
-			Facing facing = ((!this.reactor) ? null : this.reactor.GetComponent<Facing>());
+			Facing facing = (this.reactor ? this.reactor.GetComponent<Facing>() : null);
 			if (facing && this.suitMarker)
 			{
 				facing.SetFacing(this.suitMarker.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH);
@@ -351,15 +328,14 @@ public class SuitMarker : KMonoBehaviour
 			reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
 			bool flag2 = false;
 			Navigator component = reactor.GetComponent<Navigator>();
-			bool flag3 = component != null && (byte)(component.flags & this.suitMarker.PathFlag) != 0;
+			bool flag3 = component != null && (component.flags & this.suitMarker.PathFlag) > PathFinder.PotentialPath.Flags.None;
 			if (flag || flag3)
 			{
 				ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
 				this.suitMarker.GetAttachedLockers(pooledList);
 				foreach (SuitLocker suitLocker in pooledList)
 				{
-					KPrefabID fullyChargedOutfit = suitLocker.GetFullyChargedOutfit();
-					if (fullyChargedOutfit != null && flag)
+					if (suitLocker.GetFullyChargedOutfit() != null && flag)
 					{
 						suitLocker.EquipTo(equipment);
 						flag2 = true;
@@ -397,7 +373,7 @@ public class SuitMarker : KMonoBehaviour
 				Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
 				assignable.Unassign();
 				Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null);
-				assignable.GetComponent<Notifier>().Add(notification, string.Empty);
+				assignable.GetComponent<Notifier>().Add(notification, "");
 			}
 		}
 

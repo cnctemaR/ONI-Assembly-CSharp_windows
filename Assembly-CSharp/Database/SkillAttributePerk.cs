@@ -7,7 +7,7 @@ namespace Database
 	public class SkillAttributePerk : SkillPerk
 	{
 		public SkillAttributePerk(string id, string attributeId, float modifierBonus, string modifierDesc)
-			: base(id, string.Empty, null, null, delegate(MinionResume identity)
+			: base(id, "", null, null, delegate(MinionResume identity)
 			{
 			}, false)
 		{

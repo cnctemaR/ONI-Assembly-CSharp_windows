@@ -53,7 +53,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			{
 				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 			}
-			int num = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
+			int num = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
 			if (num != -1)
 			{
 				songInfo.ev.setParameterValue("variation", (float)num);
@@ -63,6 +63,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			if (songInfo.dynamic)
 			{
 				this.activeDynamicSong = songInfo;
+				return;
 			}
 		}
 		else
@@ -88,45 +89,43 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				songInfo.ev.start();
 				songInfo.ev.release();
 				this.activeSongs[song_name] = songInfo;
+				return;
 			}
-			else
+			int num2 = 0;
+			foreach (string text in this.activeSongs.Keys)
 			{
-				int num2 = 0;
-				foreach (string text in this.activeSongs.Keys)
+				MusicManager.SongInfo songInfo3 = this.activeSongs[text];
+				if (!songInfo3.interruptsActiveMusic && songInfo3.priority > num2)
 				{
-					MusicManager.SongInfo songInfo3 = this.activeSongs[text];
-					if (!songInfo3.interruptsActiveMusic && songInfo3.priority > num2)
+					num2 = songInfo3.priority;
+				}
+			}
+			if (songInfo.priority >= num2)
+			{
+				for (int j = 0; j < list.Count; j++)
+				{
+					MusicManager.SongInfo songInfo4 = this.activeSongs[list[j]];
+					FMOD.Studio.EventInstance ev = songInfo4.ev;
+					if (!songInfo4.interruptsActiveMusic)
 					{
-						num2 = songInfo3.priority;
+						ev.setParameterValue("interrupted_dimmed", 1f);
+						ev.stop(STOP_MODE.ALLOWFADEOUT);
+						this.activeSongs.Remove(list[j]);
+						list.Remove(list[j]);
 					}
 				}
-				if (songInfo.priority >= num2)
+				songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
+				if (!songInfo.ev.isValid())
 				{
-					for (int j = 0; j < list.Count; j++)
-					{
-						MusicManager.SongInfo songInfo4 = this.activeSongs[list[j]];
-						FMOD.Studio.EventInstance ev = songInfo4.ev;
-						if (!songInfo4.interruptsActiveMusic)
-						{
-							ev.setParameterValue("interrupted_dimmed", 1f);
-							ev.stop(STOP_MODE.ALLOWFADEOUT);
-							this.activeSongs.Remove(list[j]);
-							list.Remove(list[j]);
-						}
-					}
-					songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
-					if (!songInfo.ev.isValid())
-					{
-						DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
-					}
-					int num3 = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
-					if (num3 != -1)
-					{
-						songInfo.ev.setParameterValue("variation", (float)num3);
-					}
-					songInfo.ev.start();
-					this.activeSongs[song_name] = songInfo;
+					DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 				}
+				int num3 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
+				if (num3 != -1)
+				{
+					songInfo.ev.setParameterValue("variation", (float)num3);
+				}
+				songInfo.ev.start();
+				this.activeSongs[song_name] = songInfo;
 			}
 		}
 	}
@@ -276,11 +275,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		if (paused)
 		{
 			base.StartCoroutine(this.FadeToPause(inst, fadeTime));
+			return;
 		}
-		else
-		{
-			base.StartCoroutine(this.FadeToUnpause(inst, fadeTime));
-		}
+		base.StartCoroutine(this.FadeToUnpause(inst, fadeTime));
 	}
 
 	private IEnumerator FadeToPause(FMOD.Studio.EventInstance inst, float fadeTime)
@@ -290,12 +287,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		inst.getVolume(out startVolume, out targetVolume);
 		targetVolume = 0f;
 		float lerpTime = 0f;
-		float lerpedVolume = 0f;
 		while (lerpTime < 1f)
 		{
 			lerpTime += Time.unscaledDeltaTime / fadeTime;
-			lerpedVolume = Mathf.Lerp(startVolume, targetVolume, lerpTime);
-			inst.setVolume(lerpedVolume);
+			float num = Mathf.Lerp(startVolume, targetVolume, lerpTime);
+			inst.setVolume(num);
 			yield return null;
 		}
 		inst.setPaused(true);
@@ -309,13 +305,12 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		inst.getVolume(out startVolume, out targetVolume);
 		targetVolume = 1f;
 		float lerpTime = 0f;
-		float lerpedVolume = 0f;
 		inst.setPaused(false);
 		while (lerpTime < 1f)
 		{
 			lerpTime += Time.unscaledDeltaTime / fadeTime;
-			lerpedVolume = Mathf.Lerp(startVolume, targetVolume, lerpTime);
-			inst.setVolume(lerpedVolume);
+			float num = Mathf.Lerp(startVolume, targetVolume, lerpTime);
+			inst.setVolume(num);
 			yield return null;
 		}
 		yield break;
@@ -372,7 +367,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			return;
 		}
 		this.Log("DynamicMusic song " + nextDynamicSong + " did not start.");
-		string text2 = string.Empty;
+		string text2 = "";
 		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
 		{
 			text2 = text2 + keyValuePair.Key + ", ";
@@ -385,7 +380,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		if (this.activeDynamicSong != null)
 		{
-			STOP_MODE stop_MODE = ((!stopImmediate) ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE);
+			STOP_MODE stop_MODE = (stopImmediate ? STOP_MODE.IMMEDIATE : STOP_MODE.ALLOWFADEOUT);
 			this.Log("Stop DynamicMusic: " + Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent));
 			this.StopSong(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), true, stop_MODE);
 			this.activeDynamicSong = null;
@@ -395,7 +390,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public string GetNextDynamicSong()
 	{
-		string text = string.Empty;
+		string text = "";
 		if (this.alwaysPlayMusic && this.nextMusicType == MusicManager.TypeOfMusic.None)
 		{
 			while (this.nextMusicType == MusicManager.TypeOfMusic.None)
@@ -403,27 +398,20 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				this.CycleToNextMusicType();
 			}
 		}
-		MusicManager.TypeOfMusic typeOfMusic = this.nextMusicType;
-		if (typeOfMusic != MusicManager.TypeOfMusic.DynamicSong)
+		switch (this.nextMusicType)
 		{
-			if (typeOfMusic != MusicManager.TypeOfMusic.MiniSong)
-			{
-				if (typeOfMusic == MusicManager.TypeOfMusic.None)
-				{
-					text = "NONE";
-					this.activePlaylist = null;
-				}
-			}
-			else
-			{
-				text = this.miniSongPlaylist.GetNextSong();
-				this.activePlaylist = this.miniSongPlaylist;
-			}
-		}
-		else
-		{
+		case MusicManager.TypeOfMusic.DynamicSong:
 			text = this.fullSongPlaylist.GetNextSong();
 			this.activePlaylist = this.fullSongPlaylist;
+			break;
+		case MusicManager.TypeOfMusic.MiniSong:
+			text = this.miniSongPlaylist.GetNextSong();
+			this.activePlaylist = this.miniSongPlaylist;
+			break;
+		case MusicManager.TypeOfMusic.None:
+			text = "NONE";
+			this.activePlaylist = null;
+			break;
 		}
 		this.CycleToNextMusicType();
 		return text;
@@ -431,7 +419,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private void CycleToNextMusicType()
 	{
-		this.musicTypeIterator = ++this.musicTypeIterator % this.musicStyleOrder.Length;
+		int num = this.musicTypeIterator + 1;
+		this.musicTypeIterator = num;
+		this.musicTypeIterator = num % this.musicStyleOrder.Length;
 		this.nextMusicType = this.musicStyleOrder[this.musicTypeIterator];
 	}
 
@@ -501,7 +491,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		if (this.DynamicMusicIsActive())
 		{
 			string simpleSoundEventName = Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent);
-			this.SetSongParameter(simpleSoundEventName, "playHook", (!this.activeDynamicSong.playHook) ? 0f : 1f, true);
+			this.SetSongParameter(simpleSoundEventName, "playHook", this.activeDynamicSong.playHook ? 1f : 0f, true);
 			this.activePlaylist.songMap[simpleSoundEventName].playHook = !this.activePlaylist.songMap[simpleSoundEventName].playHook;
 		}
 	}
@@ -794,7 +784,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 		public List<string> unplayedSongs = new List<string>();
 
-		private string lastSongPlayed = string.Empty;
+		private string lastSongPlayed = "";
 	}
 
 	public enum TypeOfMusic

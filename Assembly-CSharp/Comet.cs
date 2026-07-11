@@ -43,19 +43,16 @@ public class Comet : KMonoBehaviour, ISim33ms
 		float num3 = num2 * 3.1415927f / 180f;
 		float num4 = global::UnityEngine.Random.Range(this.spawnVelocity.x, this.spawnVelocity.y);
 		this.velocity = new Vector2(-Mathf.Cos(num3) * num4, Mathf.Sin(num3) * num4);
-		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-		component2.Rotation = -num2 - 90f;
+		base.GetComponent<KBatchedAnimController>().Rotation = -num2 - 90f;
 		if (this.addTiles > 0)
 		{
 			float num5 = global::UnityEngine.Random.Range(0.95f, 0.98f);
 			this.explosionMass = num * (1f - num5);
 			this.addTileMass = num * num5;
+			return;
 		}
-		else
-		{
-			this.explosionMass = num;
-			this.addTileMass = 0f;
-		}
+		this.explosionMass = num;
+		this.addTileMass = 0f;
 	}
 
 	[ContextMenu("Explode")]
@@ -74,23 +71,20 @@ public class Comet : KMonoBehaviour, ISim33ms
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			GameObject gameObject = (scenePartitionerEntry.obj as Pickupable).gameObject;
-			if (!(gameObject.GetComponent<MinionIdentity>() != null))
+			if (!(gameObject.GetComponent<MinionIdentity>() != null) && gameObject.GetDef<CreatureFallMonitor.Def>() == null)
 			{
-				if (gameObject.GetDef<CreatureFallMonitor.Def>() == null)
+				Vector2 vector4 = (gameObject.transform.GetPosition() - pos).normalized;
+				vector4 += new Vector2(0f, 0.55f);
+				vector4 *= 0.5f * global::UnityEngine.Random.Range(this.explosionSpeedRange.x, this.explosionSpeedRange.y);
+				if (GameComps.Fallers.Has(gameObject))
 				{
-					Vector2 vector4 = (gameObject.transform.GetPosition() - pos).normalized;
-					vector4 += new Vector2(0f, 0.55f);
-					vector4 *= 0.5f * global::UnityEngine.Random.Range(this.explosionSpeedRange.x, this.explosionSpeedRange.y);
-					if (GameComps.Fallers.Has(gameObject))
-					{
-						GameComps.Fallers.Remove(gameObject);
-					}
-					if (GameComps.Gravities.Has(gameObject))
-					{
-						GameComps.Gravities.Remove(gameObject);
-					}
-					GameComps.Fallers.Add(gameObject, vector4);
+					GameComps.Fallers.Remove(gameObject);
 				}
+				if (GameComps.Gravities.Has(gameObject))
+				{
+					GameComps.Gravities.Remove(gameObject);
+				}
+				GameComps.Fallers.Add(gameObject, vector4);
 			}
 		}
 		pooledList.Recycle();
@@ -110,7 +104,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				}
 			}
 		}
-		float num5 = ((num <= 0) ? 1f : (this.explosionMass / (float)num));
+		float num5 = ((num > 0) ? (this.explosionMass / (float)num) : 1f);
 		float num6 = global::UnityEngine.Random.Range(this.explosionTemperatureRange.x, this.explosionTemperatureRange.y);
 		for (int k = 0; k < num; k++)
 		{
@@ -155,7 +149,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				depth = 0
 			});
 			GameUtil.FloodFillConditional(pooledQueue, new Func<int, bool>(this.SpawnTilesCellTest), pooledHashSet2, pooledHashSet, 10);
-			float num9 = ((num8 <= 0) ? 1f : (this.addTileMass / (float)this.addTiles));
+			float num9 = ((num8 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
 			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
 			foreach (int num10 in pooledHashSet)
 			{
@@ -250,14 +244,11 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 		else
 		{
-			WorldDamage instance = WorldDamage.Instance;
-			float num6 = num2;
-			string text = BUILDINGS.DAMAGESOURCES.COMET;
-			num5 = instance.ApplyDamage(cell, num6, prev_cell, -1, text, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET);
+			num5 = WorldDamage.Instance.ApplyDamage(cell, num2, prev_cell, -1, BUILDINGS.DAMAGESOURCES.COMET, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET);
 		}
 		this.destroyedCells.Add(cell);
-		float num7 = num5 / num2;
-		return input_damage * (1f - num7);
+		float num6 = num5 / num2;
+		return input_damage * (1f - num6);
 	}
 
 	private void DamageThings(Vector3 pos, int cell, int damage)
@@ -273,8 +264,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			Building component2 = gameObject.GetComponent<Building>();
 			if (component != null && !this.damagedEntities.Contains(gameObject))
 			{
-				KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
-				float num = ((!component3.HasTag(GameTags.Bunker)) ? ((float)damage) : ((float)damage * this.bunkerDamageMultiplier));
+				float num = (gameObject.GetComponent<KPrefabID>().HasTag(GameTags.Bunker) ? ((float)damage * this.bunkerDamageMultiplier) : ((float)damage));
 				if (component2 != null && component2.Def != null)
 				{
 					this.PlayBuildingDamageSound(component2.Def, Grid.CellToPos(cell), gameObject);
@@ -293,12 +283,11 @@ public class Comet : KMonoBehaviour, ISim33ms
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
-			Health component4 = pickupable.GetComponent<Health>();
-			if (component4 != null && !this.damagedEntities.Contains(pickupable.gameObject))
+			Health component3 = pickupable.GetComponent<Health>();
+			if (component3 != null && !this.damagedEntities.Contains(pickupable.gameObject))
 			{
-				KPrefabID component5 = pickupable.GetComponent<KPrefabID>();
-				float num2 = ((!component5.HasTag(GameTags.Bunker)) ? ((float)damage) : ((float)damage * this.bunkerDamageMultiplier));
-				component4.Damage(num2);
+				float num2 = (pickupable.GetComponent<KPrefabID>().HasTag(GameTags.Bunker) ? ((float)damage * this.bunkerDamageMultiplier) : ((float)damage));
+				component3.Damage(num2);
 				this.damagedEntities.Add(pickupable.gameObject);
 			}
 		}
@@ -313,12 +302,11 @@ public class Comet : KMonoBehaviour, ISim33ms
 		while (num2 > -6f)
 		{
 			num2 -= 1f;
-			float num3 = Mathf.Ceil(position.y + num2) - 0.2f;
-			num2 = num3 - position.y;
-			float num4 = num2 * num;
-			Vector3 vector = new Vector3(num4, num2, 0f);
-			int num5 = Grid.PosToCell(position + vector);
-			if (Grid.IsValidCell(num5) && Grid.Solid[num5])
+			num2 = Mathf.Ceil(position.y + num2) - 0.2f - position.y;
+			float num3 = num2 * num;
+			Vector3 vector = new Vector3(num3, num2, 0f);
+			int num4 = Grid.PosToCell(position + vector);
+			if (Grid.IsValidCell(num4) && Grid.Solid[num4])
 			{
 				return vector.magnitude;
 			}
@@ -362,17 +350,15 @@ public class Comet : KMonoBehaviour, ISim33ms
 	{
 		if (def != null)
 		{
-			string text = StringFormatter.Combine("MeteorDamage_Building_", def.AudioCategory);
-			string text2 = GlobalAssets.GetSound(text, false);
-			if (text2 == null)
+			string text = GlobalAssets.GetSound(StringFormatter.Combine("MeteorDamage_Building_", def.AudioCategory), false);
+			if (text == null)
 			{
-				text = "MeteorDamage_Building_Metal";
-				text2 = GlobalAssets.GetSound(text, false);
+				text = GlobalAssets.GetSound("MeteorDamage_Building_Metal", false);
 			}
-			if (text2 != null && CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text2))
+			if (text != null && CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text))
 			{
 				float volume = this.GetVolume(building_go);
-				KFMOD.PlayOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(pos, false), volume);
+				KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos, false), volume);
 			}
 		}
 	}
@@ -434,6 +420,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		if (CameraController.Instance.IsAudibleSound(pos, sound))
 		{
 			float volume = this.GetVolume(base.gameObject);
+			pos.z = 0f;
 			EventInstance eventInstance = KFMOD.BeginOneShot(sound, pos, volume);
 			eventInstance.setParameterValue("userVolume_SFX", KPlayerPrefs.GetFloat("Volume_SFX"));
 			KFMOD.EndOneShot(eventInstance);

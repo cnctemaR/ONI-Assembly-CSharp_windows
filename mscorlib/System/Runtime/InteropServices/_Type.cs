@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
+	[TypeLibImportClass(typeof(Type))]
+	[Guid("BCA8B44D-AAD6-3A86-8AB7-03349F4F2DA2")]
 	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("BCA8B44D-AAD6-3A86-8AB7-03349F4F2DA2")]
-	[TypeLibImportClass(typeof(Type))]
 	public interface _Type
 	{
 		bool Equals(object other);

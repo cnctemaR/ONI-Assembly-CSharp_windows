@@ -81,11 +81,10 @@ public class KGlobalAnimParser
 	public static void ParseAnimData(KBatchGroupData data, HashedString fileNameHash, FastReader reader, KAnimFileData animFile)
 	{
 		KGlobalAnimParser.CheckHeader("ANIM", reader);
-		uint num = reader.ReadUInt32();
-		KGlobalAnimParser.Assert(num == 5U, "Invalid anim.bytes version");
+		KGlobalAnimParser.Assert(reader.ReadUInt32() == 5U, "Invalid anim.bytes version");
 		reader.ReadInt32();
 		reader.ReadInt32();
-		int num2 = reader.ReadInt32();
+		int num = reader.ReadInt32();
 		animFile.maxVisSymbolFrames = 0;
 		animFile.animCount = 0;
 		animFile.frameCount = 0;
@@ -94,7 +93,7 @@ public class KGlobalAnimParser
 		animFile.animBatchTag = data.groupID;
 		data.animIndex.Add(fileNameHash, data.anims.Count);
 		animFile.firstElementIndex = data.frameElements.Count;
-		for (int i = 0; i < num2; i++)
+		for (int i = 0; i < num; i++)
 		{
 			KAnim.Anim anim = new KAnim.Anim(animFile, data.anims.Count);
 			anim.name = reader.ReadKleiString();
@@ -112,21 +111,21 @@ public class KGlobalAnimParser
 			for (int j = 0; j < anim.numFrames; j++)
 			{
 				KAnim.Anim.Frame frame = default(KAnim.Anim.Frame);
+				float num2 = reader.ReadSingle();
 				float num3 = reader.ReadSingle();
 				float num4 = reader.ReadSingle();
 				float num5 = reader.ReadSingle();
-				float num6 = reader.ReadSingle();
-				frame.bbox = new AABB3(new Vector3(num3 - num5 * 0.5f, -(num4 + num6 * 0.5f), 0f) * 0.005f, new Vector3(num3 + num5 * 0.5f, -(num4 - num6 * 0.5f), 0f) * 0.005f);
-				float num7 = Math.Max(Math.Abs(frame.bbox.max.x), Math.Abs(frame.bbox.min.x));
-				float num8 = Math.Max(Math.Abs(frame.bbox.max.y), Math.Abs(frame.bbox.min.y));
-				float num9 = Math.Max(num7, num8);
-				anim.unScaledSize.x = Math.Max(anim.unScaledSize.x, num7 / 0.005f);
-				anim.unScaledSize.y = Math.Max(anim.unScaledSize.y, num8 / 0.005f);
-				anim.scaledBoundingRadius = Math.Max(anim.scaledBoundingRadius, Mathf.Sqrt(num9 * num9 + num9 * num9));
+				frame.bbox = new AABB3(new Vector3(num2 - num4 * 0.5f, -(num3 + num5 * 0.5f), 0f) * 0.005f, new Vector3(num2 + num4 * 0.5f, -(num3 - num5 * 0.5f), 0f) * 0.005f);
+				float num6 = Math.Max(Math.Abs(frame.bbox.max.x), Math.Abs(frame.bbox.min.x));
+				float num7 = Math.Max(Math.Abs(frame.bbox.max.y), Math.Abs(frame.bbox.min.y));
+				float num8 = Math.Max(num6, num7);
+				anim.unScaledSize.x = Math.Max(anim.unScaledSize.x, num6 / 0.005f);
+				anim.unScaledSize.y = Math.Max(anim.unScaledSize.y, num7 / 0.005f);
+				anim.scaledBoundingRadius = Math.Max(anim.scaledBoundingRadius, Mathf.Sqrt(num8 * num8 + num8 * num8));
 				frame.idx = data.animFrames.Count;
 				frame.firstElementIdx = data.frameElements.Count;
 				frame.numElements = reader.ReadInt32();
-				int num10 = 0;
+				int num9 = 0;
 				for (int k = 0; k < frame.numElements; k++)
 				{
 					KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
@@ -135,28 +134,28 @@ public class KGlobalAnimParser
 					frameElement.frame = reader.ReadInt32();
 					frameElement.folder = new KAnimHashedString(reader.ReadInt32());
 					frameElement.flags = reader.ReadInt32();
+					float num10 = reader.ReadSingle();
 					float num11 = reader.ReadSingle();
 					float num12 = reader.ReadSingle();
 					float num13 = reader.ReadSingle();
+					frameElement.multColour = new Color(num13, num12, num11, num10);
 					float num14 = reader.ReadSingle();
-					frameElement.multColour = new Color(num14, num13, num12, num11);
 					float num15 = reader.ReadSingle();
 					float num16 = reader.ReadSingle();
 					float num17 = reader.ReadSingle();
 					float num18 = reader.ReadSingle();
 					float num19 = reader.ReadSingle();
-					float num20 = reader.ReadSingle();
 					reader.ReadSingle();
-					frameElement.transform.m00 = num15;
-					frameElement.transform.m01 = num17;
-					frameElement.transform.m02 = num19;
-					frameElement.transform.m10 = num16;
-					frameElement.transform.m11 = num18;
-					frameElement.transform.m12 = num20;
+					frameElement.transform.m00 = num14;
+					frameElement.transform.m01 = num16;
+					frameElement.transform.m02 = num18;
+					frameElement.transform.m10 = num15;
+					frameElement.transform.m11 = num17;
+					frameElement.transform.m12 = num19;
 					int symbolIndex = data.GetSymbolIndex(frameElement.symbol);
 					if (symbolIndex == -1)
 					{
-						num10++;
+						num9++;
 						frameElement.symbol = KGlobalAnimParser.MISSING_SYMBOL;
 					}
 					else
@@ -166,14 +165,14 @@ public class KGlobalAnimParser
 						animFile.elementCount++;
 					}
 				}
-				frame.numElements -= num10;
+				frame.numElements -= num9;
 				data.animFrames.Add(frame);
 				animFile.frameCount++;
 			}
 			data.AddAnim(anim);
 			animFile.animCount++;
 		}
-		global::Debug.Assert(num2 == animFile.animCount);
+		global::Debug.Assert(num == animFile.animCount);
 		data.animCount[fileNameHash] = animFile.animCount;
 		animFile.maxVisSymbolFrames = Math.Max(animFile.maxVisSymbolFrames, reader.ReadInt32());
 		data.UpdateMaxVisibleSymbols(animFile.maxVisSymbolFrames);
@@ -195,13 +194,10 @@ public class KGlobalAnimParser
 	{
 		KGlobalAnimParser.CheckHeader("BILD", reader);
 		int num = reader.ReadInt32();
-		if (num != 10)
+		if (num != 10 && num != 9)
 		{
-			if (num != 9)
-			{
-				global::Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }));
-				return -1;
-			}
+			global::Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }));
+			return -1;
 		}
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(data.groupID);
 		if (group == null)
@@ -219,7 +215,7 @@ public class KGlobalAnimParser
 		build.symbols = new KAnim.Build.Symbol[num2];
 		build.frames = new KAnim.Build.SymbolFrame[num3];
 		build.name = reader.ReadKleiString();
-		build.batchTag = ((!group.swapTarget.IsValid) ? data.groupID : group.target);
+		build.batchTag = (group.swapTarget.IsValid ? group.target : data.groupID);
 		build.fileHash = fileNameHash;
 		int num4 = 0;
 		for (int i = 0; i < build.symbols.Length; i++)

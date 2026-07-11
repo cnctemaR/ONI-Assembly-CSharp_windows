@@ -21,7 +21,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.closeButton.onClick += this.OnDone;
 		this.doneButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.DONE_BUTTON);
 		bool flag = QualitySettings.GetQualityLevel() == 1;
-		this.lowResToggle.ChangeState((!flag) ? 0 : 1);
+		this.lowResToggle.ChangeState(flag ? 1 : 0);
 		MultiToggle multiToggle = this.lowResToggle;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnLowResToggle));
 		this.lowResToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.LOWRES);
@@ -35,7 +35,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		}));
 		this.resolutionDropdown.options = this.options;
 		this.resolutionDropdown.onValueChanged.AddListener(new UnityAction<int>(this.OnResolutionChanged));
-		this.fullscreenToggle.ChangeState((!Screen.fullScreen) ? 0 : 1);
+		this.fullscreenToggle.ChangeState(Screen.fullScreen ? 1 : 0);
 		MultiToggle multiToggle2 = this.fullscreenToggle;
 		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.OnFullscreenToggle));
 		this.fullscreenToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.FULLSCREEN);
@@ -81,7 +81,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			QualitySettings.SetQualityLevel(num, true);
 		}
-		DebugUtil.LogArgs(new object[] { string.Format("Low Res Textures? {0}", (num != 1) ? "No" : "Yes") });
+		DebugUtil.LogArgs(new object[] { string.Format("Low Res Textures? {0}", (num == 1) ? "Yes" : "No") });
 	}
 
 	public static void SetResolutionFromPrefs()
@@ -95,7 +95,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 			int @int = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
 			int int2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
 			int int3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
-			bool flag2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, (!Screen.fullScreen) ? 0 : 1) == 1;
+			bool flag2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, Screen.fullScreen ? 1 : 0) == 1;
 			if (int2 <= 1 || @int <= 1)
 			{
 				DebugUtil.LogArgs(new object[] { "Saved resolution was invalid, ignoring..." });
@@ -186,7 +186,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionWidthKey, settings.resolution.width);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKey, settings.resolution.refreshRate);
-		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (!settings.fullscreen) ? 0 : 1);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, settings.fullscreen ? 1 : 0);
 	}
 
 	private void UpdateUIScale(float value)
@@ -202,7 +202,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void UpdateSliderLabel()
 	{
-		if (this.CanvasScalers != null && this.CanvasScalers.Length > 0 && this.CanvasScalers[0] != null)
+		if (this.CanvasScalers != null && this.CanvasScalers.Length != 0 && this.CanvasScalers[0] != null)
 		{
 			this.uiScaleSlider.value = this.CanvasScalers[0].GetUserScale() * 100f;
 			this.sliderLabel.text = this.uiScaleSlider.value + "%";
@@ -215,11 +215,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.resolutionDropdown.Hide();
 			this.Deactivate();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	private void BuildOptions()
@@ -259,7 +257,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 				break;
 			}
 		}
-		return (num != -1) ? num : num2;
+		if (num != -1)
+		{
+			return num;
+		}
+		return num2;
 	}
 
 	private GraphicsOptionsScreen.Settings CaptureSettings()
@@ -317,25 +319,25 @@ internal class GraphicsOptionsScreen : KModalScreen
 		if (settings.fullscreen && this.fullscreenToggle.CurrentState == 0)
 		{
 			this.applyButton.isInteractable = true;
+			return;
 		}
-		else if (!settings.fullscreen && this.fullscreenToggle.CurrentState == 1)
+		if (!settings.fullscreen && this.fullscreenToggle.CurrentState == 1)
 		{
 			this.applyButton.isInteractable = true;
+			return;
 		}
-		else if (settings.lowRes != this.lowResToggle.CurrentState)
+		if (settings.lowRes != this.lowResToggle.CurrentState)
 		{
 			this.applyButton.isInteractable = true;
+			return;
 		}
-		else
-		{
-			int resolutionIndex = this.GetResolutionIndex(settings.resolution);
-			this.applyButton.isInteractable = this.resolutionDropdown.value != resolutionIndex;
-		}
+		int resolutionIndex = this.GetResolutionIndex(settings.resolution);
+		this.applyButton.isInteractable = this.resolutionDropdown.value != resolutionIndex;
 	}
 
 	private void OnFullscreenToggle()
 	{
-		this.fullscreenToggle.ChangeState((this.fullscreenToggle.CurrentState != 0) ? 0 : 1);
+		this.fullscreenToggle.ChangeState((this.fullscreenToggle.CurrentState == 0) ? 1 : 0);
 		this.RefreshApplyButton();
 	}
 
@@ -346,7 +348,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void OnLowResToggle()
 	{
-		this.lowResToggle.ChangeState((this.lowResToggle.CurrentState != 0) ? 0 : 1);
+		this.lowResToggle.ChangeState((this.lowResToggle.CurrentState == 0) ? 1 : 0);
 		this.RefreshApplyButton();
 	}
 

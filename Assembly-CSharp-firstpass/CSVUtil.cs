@@ -7,7 +7,7 @@ public static class CSVUtil
 {
 	public static bool IsValidColumn(string[,] grid, int col)
 	{
-		return grid[col, 0] != null && grid[col, 0] != string.Empty;
+		return grid[col, 0] != null && grid[col, 0] != "";
 	}
 
 	public static void ParseData<T>(object def, string[,] grid, int row)
@@ -43,93 +43,101 @@ public static class CSVUtil
 		if (field.FieldType.IsEnum)
 		{
 			object obj = null;
-			if (val != null && val != string.Empty && CSVUtil.EnumTryParse(field.FieldType, val, out obj))
+			if (val != null && val != "" && CSVUtil.EnumTryParse(field.FieldType, val, out obj))
 			{
 				field.SetValue(target, obj);
+				return;
 			}
 		}
-		else if (field.FieldType == typeof(string))
+		else
 		{
-			field.SetValue(target, val);
-		}
-		else if (field.FieldType == typeof(bool))
-		{
-			if (val.Contains("1"))
+			if (field.FieldType == typeof(string))
 			{
-				field.SetValue(target, true);
+				field.SetValue(target, val);
+				return;
 			}
-			else
+			if (field.FieldType == typeof(bool))
 			{
+				if (val.Contains("1"))
+				{
+					field.SetValue(target, true);
+					return;
+				}
 				field.SetValue(target, val.ToLower() == "true");
-			}
-		}
-		else if (field.FieldType == typeof(float))
-		{
-			field.SetValue(target, (!(val == string.Empty)) ? float.Parse(val) : 0f);
-		}
-		else if (field.FieldType == typeof(int))
-		{
-			field.SetValue(target, (!(val == string.Empty)) ? int.Parse(val) : 0);
-		}
-		else if (field.FieldType == typeof(byte))
-		{
-			field.SetValue(target, byte.Parse(val));
-		}
-		else if (field.FieldType == typeof(Tag))
-		{
-			field.SetValue(target, new Tag(val));
-		}
-		else if (field.FieldType == typeof(CellOffset))
-		{
-			if (val == null || val == string.Empty)
-			{
-				field.SetValue(target, default(CellOffset));
+				return;
 			}
 			else
 			{
-				string[] array = val.Split(new char[] { ',' });
-				field.SetValue(target, new CellOffset(int.Parse(array[0]), int.Parse(array[1])));
-			}
-		}
-		else if (field.FieldType == typeof(Vector3))
-		{
-			if (val == null || val == string.Empty)
-			{
-				field.SetValue(target, Vector3.zero);
-			}
-			else
-			{
-				string[] array2 = val.Split(new char[] { ',' });
-				field.SetValue(target, new Vector3(float.Parse(array2[0]), float.Parse(array2[1]), float.Parse(array2[2])));
-			}
-		}
-		else if (typeof(Array).IsAssignableFrom(field.FieldType))
-		{
-			string[] array3 = val.Split(CSVUtil._listSeparators);
-			Type elementType = field.FieldType.GetElementType();
-			Array array4 = Array.CreateInstance(elementType, array3.Length);
-			int num = 0;
-			for (int i = 0; i < array3.Length; i++)
-			{
-				string text = array3[i].Trim();
-				if (text != string.Empty)
+				if (field.FieldType == typeof(float))
 				{
-					num++;
+					field.SetValue(target, (val == "") ? 0f : float.Parse(val));
+					return;
+				}
+				if (field.FieldType == typeof(int))
+				{
+					field.SetValue(target, (val == "") ? 0 : int.Parse(val));
+					return;
+				}
+				if (field.FieldType == typeof(byte))
+				{
+					field.SetValue(target, byte.Parse(val));
+					return;
+				}
+				if (field.FieldType == typeof(Tag))
+				{
+					field.SetValue(target, new Tag(val));
+					return;
+				}
+				if (field.FieldType == typeof(CellOffset))
+				{
+					if (val == null || val == "")
+					{
+						field.SetValue(target, default(CellOffset));
+						return;
+					}
+					string[] array = val.Split(new char[] { ',' });
+					field.SetValue(target, new CellOffset(int.Parse(array[0]), int.Parse(array[1])));
+					return;
+				}
+				else if (field.FieldType == typeof(Vector3))
+				{
+					if (val == null || val == "")
+					{
+						field.SetValue(target, Vector3.zero);
+						return;
+					}
+					string[] array2 = val.Split(new char[] { ',' });
+					field.SetValue(target, new Vector3(float.Parse(array2[0]), float.Parse(array2[1]), float.Parse(array2[2])));
+					return;
+				}
+				else if (typeof(Array).IsAssignableFrom(field.FieldType))
+				{
+					string[] array3 = val.Split(CSVUtil._listSeparators);
+					Type elementType = field.FieldType.GetElementType();
+					Array array4 = Array.CreateInstance(elementType, array3.Length);
+					int num = 0;
+					for (int i = 0; i < array3.Length; i++)
+					{
+						if (array3[i].Trim() != "")
+						{
+							num++;
+						}
+					}
+					array4 = Array.CreateInstance(elementType, num);
+					num = 0;
+					for (int j = 0; j < array3.Length; j++)
+					{
+						string text = array3[j].Trim();
+						if (text != "")
+						{
+							object obj2 = Convert.ChangeType(text, elementType);
+							array4.SetValue(obj2, num);
+							num++;
+						}
+					}
+					field.SetValue(target, array4);
 				}
 			}
-			array4 = Array.CreateInstance(elementType, num);
-			num = 0;
-			for (int j = 0; j < array3.Length; j++)
-			{
-				string text2 = array3[j].Trim();
-				if (text2 != string.Empty)
-				{
-					object obj2 = Convert.ChangeType(text2, elementType);
-					array4.SetValue(obj2, num);
-					num++;
-				}
-			}
-			field.SetValue(target, array4);
 		}
 	}
 
@@ -173,13 +181,14 @@ public static class CSVUtil
 			return false;
 		}
 		ulong num = 0UL;
-		foreach (string text in array)
+		string[] array2 = array;
+		for (int i = 0; i < array2.Length; i++)
 		{
-			string text2 = text.Trim();
-			if (text2.Length != 0)
+			string text = array2[i].Trim();
+			if (text.Length != 0)
 			{
 				object obj;
-				if (!CSVUtil.EnumToObject(type, underlyingType, names, values, text2, out obj))
+				if (!CSVUtil.EnumToObject(type, underlyingType, names, values, text, out obj))
 				{
 					value = Activator.CreateInstance(type);
 					return false;
@@ -196,18 +205,18 @@ public static class CSVUtil
 				case TypeCode.Byte:
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
-					goto IL_0160;
+					goto IL_0137;
 				default:
-					goto IL_0160;
+					goto IL_0137;
 				}
-				IL_0173:
+				IL_0145:
 				num |= num2;
-				goto IL_017A;
-				IL_0160:
+				goto IL_014C;
+				IL_0137:
 				num2 = Convert.ToUInt64(obj, CultureInfo.InvariantCulture);
-				goto IL_0173;
+				goto IL_0145;
 			}
-			IL_017A:;
+			IL_014C:;
 		}
 		value = Enum.ToObject(type, num);
 		return true;

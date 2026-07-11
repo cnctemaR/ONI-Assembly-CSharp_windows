@@ -2,25 +2,14 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Attribute to make a string be edited with a multi-line textfield.</para>
-	/// </summary>
 	[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
 	public sealed class MultilineAttribute : PropertyAttribute
 	{
-		/// <summary>
-		///   <para>Attribute used to make a string value be shown in a multiline textarea.</para>
-		/// </summary>
-		/// <param name="lines">How many lines of text to make room for. Default is 3.</param>
 		public MultilineAttribute()
 		{
 			this.lines = 3;
 		}
 
-		/// <summary>
-		///   <para>Attribute used to make a string value be shown in a multiline textarea.</para>
-		/// </summary>
-		/// <param name="lines">How many lines of text to make room for. Default is 3.</param>
 		public MultilineAttribute(int lines)
 		{
 			this.lines = lines;

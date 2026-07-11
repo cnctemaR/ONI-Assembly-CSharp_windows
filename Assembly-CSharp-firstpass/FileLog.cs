@@ -4,12 +4,6 @@ using System.IO;
 
 public class FileLog
 {
-	private FileLog(string filename)
-	{
-		this.writer = new StreamWriter(filename);
-		this.writer.AutoFlush = true;
-	}
-
 	[Conditional("ENABLE_LOG")]
 	public static void Initialize(string filename)
 	{
@@ -26,6 +20,12 @@ public class FileLog
 		FileLog.instance = null;
 	}
 
+	private FileLog(string filename)
+	{
+		this.writer = new StreamWriter(filename);
+		this.writer.AutoFlush = true;
+	}
+
 	[Conditional("ENABLE_LOG")]
 	public static void Log(params object[] objs)
 	{
@@ -40,14 +40,14 @@ public class FileLog
 
 	private static string BuildString(object[] objs)
 	{
-		string text = string.Empty;
-		if (objs.Length > 0)
+		string text = "";
+		if (objs.Length != 0)
 		{
-			text = ((objs[0] == null) ? "null" : objs[0].ToString());
+			text = ((objs[0] != null) ? objs[0].ToString() : "null");
 			for (int i = 1; i < objs.Length; i++)
 			{
 				object obj = objs[i];
-				text = text + " " + ((obj == null) ? "null" : obj.ToString());
+				text = text + " " + ((obj != null) ? obj.ToString() : "null");
 			}
 		}
 		return text;

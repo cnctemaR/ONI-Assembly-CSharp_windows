@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class HarvestDesignatable : KMonoBehaviour
 {
-	protected HarvestDesignatable()
-	{
-		this.onEnableOverlayDelegate = new Action<object>(this.OnEnableOverlay);
-	}
-
 	public bool InPlanterBox
 	{
 		get
@@ -36,6 +31,11 @@ public class HarvestDesignatable : KMonoBehaviour
 		{
 			return this.harvestWhenReady;
 		}
+	}
+
+	protected HarvestDesignatable()
+	{
+		this.onEnableOverlayDelegate = new Action<object>(this.OnEnableOverlay);
 	}
 
 	protected override void OnPrefabInit()
@@ -88,11 +88,9 @@ public class HarvestDesignatable : KMonoBehaviour
 		if (base.GetComponent<AttackableBase>() == null)
 		{
 			this.HarvestWhenReadyOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.HarvestWhenReadyOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
-			OccupyArea component = base.GetComponent<OccupyArea>();
-			Extents extents = component.GetExtents();
-			KPrefabID component2 = base.GetComponent<KPrefabID>();
+			Extents extents = base.GetComponent<OccupyArea>().GetExtents();
 			Vector3 vector;
-			if (component2.HasTag(GameTags.Hanging))
+			if (base.GetComponent<KPrefabID>().HasTag(GameTags.Hanging))
 			{
 				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
 			}
@@ -115,11 +113,9 @@ public class HarvestDesignatable : KMonoBehaviour
 		if ((HashedString)data == OverlayModes.Harvest.ID)
 		{
 			this.CreateOverlayIcon();
+			return;
 		}
-		else
-		{
-			this.DestroyOverlayIcon();
-		}
+		this.DestroyOverlayIcon();
 	}
 
 	private void RefreshOverlayIcon(object data = null)
@@ -142,12 +138,10 @@ public class HarvestDesignatable : KMonoBehaviour
 			{
 				component.GetReference("On").gameObject.SetActive(true);
 				component.GetReference("Off").gameObject.SetActive(false);
+				return;
 			}
-			else
-			{
-				component.GetReference("On").gameObject.SetActive(false);
-				component.GetReference("Off").gameObject.SetActive(true);
-			}
+			component.GetReference("On").gameObject.SetActive(false);
+			component.GetReference("Off").gameObject.SetActive(true);
 		}
 	}
 
@@ -165,6 +159,7 @@ public class HarvestDesignatable : KMonoBehaviour
 			{
 				this.isInPlanterBox = true;
 				this.SetHarvestWhenReady(this.defaultHarvestStateWhenPlanted);
+				return;
 			}
 		}
 		else
@@ -185,8 +180,7 @@ public class HarvestDesignatable : KMonoBehaviour
 			this.OnCancel(null);
 			if (this.CanBeHarvested() && this.isInPlanterBox)
 			{
-				KSelectable component = base.GetComponent<KSelectable>();
-				component.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
 			}
 		}
 		base.Trigger(-266953818, null);
@@ -225,33 +219,16 @@ public class HarvestDesignatable : KMonoBehaviour
 	{
 		if (this.showUserMenuButtons)
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo;
-			if (this.harvestWhenReady)
+			KIconButtonMenu.ButtonInfo buttonInfo = (this.harvestWhenReady ? new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.NAME, delegate
 			{
-				string text = "action_harvest";
-				string text2 = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.NAME;
-				global::System.Action action = delegate
-				{
-					this.OnClickCancelHarvestWhenReady();
-					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.PLANT_DO_NOT_HARVEST, base.transform, 1.5f, false);
-				};
-				string text3 = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.TOOLTIP;
-				buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-			}
-			else
+				this.OnClickCancelHarvestWhenReady();
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.PLANT_DO_NOT_HARVEST, base.transform, 1.5f, false);
+			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.HARVEST_WHEN_READY.NAME, delegate
 			{
-				string text3 = "action_harvest";
-				string text2 = UI.USERMENUACTIONS.HARVEST_WHEN_READY.NAME;
-				global::System.Action action = delegate
-				{
-					this.OnClickHarvestWhenReady();
-					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.PLANT_MARK_FOR_HARVEST, base.transform, 1.5f, false);
-				};
-				string text = UI.USERMENUACTIONS.HARVEST_WHEN_READY.TOOLTIP;
-				buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-			}
-			KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+				this.OnClickHarvestWhenReady();
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.PLANT_MARK_FOR_HARVEST, base.transform, 1.5f, false);
+			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.HARVEST_WHEN_READY.TOOLTIP, true));
+			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 		}
 	}
 

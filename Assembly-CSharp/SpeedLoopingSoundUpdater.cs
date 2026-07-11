@@ -25,7 +25,8 @@ public class SpeedLoopingSoundUpdater : LoopingSoundParameterUpdater
 		float speedParameterValue = SpeedLoopingSoundUpdater.GetSpeedParameterValue();
 		foreach (SpeedLoopingSoundUpdater.Entry entry in this.entries)
 		{
-			entry.ev.setParameterValueByIndex(entry.parameterIdx, speedParameterValue);
+			EventInstance ev = entry.ev;
+			ev.setParameterValueByIndex(entry.parameterIdx, speedParameterValue);
 		}
 	}
 
@@ -36,7 +37,7 @@ public class SpeedLoopingSoundUpdater : LoopingSoundParameterUpdater
 			if (this.entries[i].ev.handle == sound.ev.handle)
 			{
 				this.entries.RemoveAt(i);
-				break;
+				return;
 			}
 		}
 	}

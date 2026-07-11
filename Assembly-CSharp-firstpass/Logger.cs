@@ -2,16 +2,16 @@
 
 public abstract class Logger
 {
-	public Logger(string name)
-	{
-		this.name = name;
-	}
-
 	public bool enableConsoleLogging { get; set; }
 
 	public bool breakOnLog { get; set; }
 
 	public abstract int Count { get; }
+
+	public Logger(string name)
+	{
+		this.name = name;
+	}
 
 	public string GetName()
 	{

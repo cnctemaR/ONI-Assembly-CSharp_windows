@@ -36,8 +36,9 @@ public class SkillPerkMissingComplainer : KMonoBehaviour
 		if (!flag && this.workStatusItemHandle == Guid.Empty)
 		{
 			this.workStatusItemHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ColonyLacksRequiredSkillPerk, this.requiredSkillPerk);
+			return;
 		}
-		else if (flag && this.workStatusItemHandle != Guid.Empty)
+		if (flag && this.workStatusItemHandle != Guid.Empty)
 		{
 			component.RemoveStatusItem(this.workStatusItemHandle, false);
 			this.workStatusItemHandle = Guid.Empty;

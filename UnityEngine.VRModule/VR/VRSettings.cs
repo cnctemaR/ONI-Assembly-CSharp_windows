@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace UnityEngine.VR
 {
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	[Obsolete("VRSettings has been moved and renamed.  Use UnityEngine.XR.XRSettings instead (UnityUpgradable)", true)]
 	public static class VRSettings
 	{

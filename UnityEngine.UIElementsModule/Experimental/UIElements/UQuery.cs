@@ -5,9 +5,6 @@ using UnityEngine.StyleSheets;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>UQuery is a set of extension methods allowing you to select individual or collection of visualElements inside a complex hierarchy.</para>
-	/// </summary>
 	public static class UQuery
 	{
 		private static UQuery.FirstQueryMatcher s_First = new UQuery.FirstQueryMatcher();
@@ -49,29 +46,42 @@ namespace UnityEngine.Experimental.UIElements
 
 		private abstract class UQueryMatcher : HierarchyTraversal
 		{
-			public override bool ShouldSkipElement(VisualElement element)
+			public override void Traverse(VisualElement element)
+			{
+				this.m_MatchersUsedInRecursion = new List<RuleMatcher>(this.m_Matchers);
+				base.Traverse(element);
+			}
+
+			protected virtual bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 			{
 				return false;
 			}
 
-			protected override bool MatchSelectorPart(VisualElement element, StyleSelector selector, StyleSelectorPart part)
+			private static void NoProcessResult(VisualElement e, MatchResultInfo i)
 			{
-				bool flag;
-				if (part.type == StyleSelectorType.Predicate)
-				{
-					UQuery.IVisualPredicateWrapper visualPredicateWrapper = part.tempData as UQuery.IVisualPredicateWrapper;
-					flag = visualPredicateWrapper != null && visualPredicateWrapper.Predicate(element);
-				}
-				else
-				{
-					flag = base.MatchSelectorPart(element, selector, part);
-				}
-				return flag;
 			}
 
-			public override void Traverse(VisualElement element)
+			public override void TraverseRecursive(VisualElement element, int depth)
 			{
-				this.TraverseRecursive(element, 0, new List<RuleMatcher>(this.m_Matchers));
+				int count = this.m_MatchersUsedInRecursion.Count;
+				int count2 = this.m_MatchersUsedInRecursion.Count;
+				for (int i = 0; i < count2; i++)
+				{
+					RuleMatcher ruleMatcher = this.m_MatchersUsedInRecursion[i];
+					if (StyleSelectorHelper.MatchRightToLeft(element, ruleMatcher.complexSelector, new Action<VisualElement, MatchResultInfo>(UQuery.UQueryMatcher.NoProcessResult)))
+					{
+						if (this.OnRuleMatchedElement(ruleMatcher, element))
+						{
+							return;
+						}
+					}
+				}
+				base.Recurse(element, depth);
+				if (this.m_MatchersUsedInRecursion.Count > count)
+				{
+					this.m_MatchersUsedInRecursion.RemoveRange(count, this.m_MatchersUsedInRecursion.Count - count);
+					return;
+				}
 			}
 
 			public virtual void Run(VisualElement root, List<RuleMatcher> matchers)
@@ -81,6 +91,8 @@ namespace UnityEngine.Experimental.UIElements
 			}
 
 			internal List<RuleMatcher> m_Matchers;
+
+			internal List<RuleMatcher> m_MatchersUsedInRecursion;
 		}
 
 		private abstract class SingleQueryMatcher : UQuery.UQueryMatcher
@@ -96,7 +108,7 @@ namespace UnityEngine.Experimental.UIElements
 
 		private class FirstQueryMatcher : UQuery.SingleQueryMatcher
 		{
-			public override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
+			protected override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 			{
 				if (base.match == null)
 				{
@@ -108,7 +120,7 @@ namespace UnityEngine.Experimental.UIElements
 
 		private class LastQueryMatcher : UQuery.SingleQueryMatcher
 		{
-			public override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
+			protected override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 			{
 				base.match = element;
 				return false;
@@ -136,7 +148,7 @@ namespace UnityEngine.Experimental.UIElements
 				base.Run(root, matchers);
 			}
 
-			public override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
+			protected override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 			{
 				this.matchCount++;
 				if (this.matchCount == this._matchIndex)
@@ -151,9 +163,6 @@ namespace UnityEngine.Experimental.UIElements
 			private int _matchIndex;
 		}
 
-		/// <summary>
-		///   <para>Utility Object that contructs a set of selection rules to be ran on a root visual element.</para>
-		/// </summary>
 		public struct QueryBuilder<T> where T : VisualElement
 		{
 			public QueryBuilder(VisualElement visualElement)
@@ -506,9 +515,6 @@ namespace UnityEngine.Experimental.UIElements
 			private int negatedPseudoStatesMask;
 		}
 
-		/// <summary>
-		///   <para>Query object containing all the selection rules. Can be saved and rerun later without re-allocating memory.</para>
-		/// </summary>
 		public struct QueryState<T> where T : VisualElement
 		{
 			internal QueryState(VisualElement element, List<RuleMatcher> matchers)
@@ -597,7 +603,7 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				public List<T> matches { get; set; }
 
-				public override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
+				protected override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 				{
 					this.matches.Add(element as T);
 					return false;
@@ -613,7 +619,7 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				internal Action<T> callBack { get; set; }
 
-				public override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
+				protected override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 				{
 					T t = element as T;
 					if (t != null)
@@ -630,7 +636,7 @@ namespace UnityEngine.Experimental.UIElements
 
 				public List<TReturnType> result { get; set; }
 
-				public override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
+				protected override bool OnRuleMatchedElement(RuleMatcher matcher, VisualElement element)
 				{
 					T t = element as T;
 					if (t != null)

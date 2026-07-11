@@ -26,9 +26,12 @@ public class EquippableBalloonConfig : IEquipmentConfig
 			}
 			MinionAssignablesProxy component = soleOwner.GetComponent<MinionAssignablesProxy>();
 			Effects component2 = (component.target as KMonoBehaviour).GetComponent<Effects>();
-			component2.Add("HasBalloon", false);
-			this.fx = new BalloonFX.Instance((component.target as KMonoBehaviour).GetComponent<KMonoBehaviour>());
-			this.fx.StartSM();
+			if (component2 != null)
+			{
+				component2.Add("HasBalloon", false);
+				this.fx = new BalloonFX.Instance((component.target as KMonoBehaviour).GetComponent<KMonoBehaviour>());
+				this.fx.StartSM();
+			}
 		}
 	}
 
@@ -45,7 +48,10 @@ public class EquippableBalloonConfig : IEquipmentConfig
 			if (component.target != null)
 			{
 				Effects component2 = (component.target as KMonoBehaviour).GetComponent<Effects>();
-				component2.Remove("HasBalloon");
+				if (component2 != null)
+				{
+					component2.Remove("HasBalloon");
+				}
 			}
 		}
 		if (this.fx != null)

@@ -79,7 +79,7 @@ namespace UnityEngine.Timeline
 
 		public override void OnBehaviourPause(Playable playable, FrameData info)
 		{
-			if (!(this.m_Instance == null))
+			if (this.m_Instance != null && info.effectivePlayState == PlayState.Paused)
 			{
 				this.m_Instance.SetActive(false);
 			}

@@ -134,29 +134,29 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 
 	public virtual void SetConnectionStatus(CircuitManager.ConnectionStatus connection_status)
 	{
-		if (connection_status != CircuitManager.ConnectionStatus.NotConnected)
+		switch (connection_status)
 		{
-			if (connection_status != CircuitManager.ConnectionStatus.Unpowered)
-			{
-				if (connection_status == CircuitManager.ConnectionStatus.Powered)
-				{
-					if (!this.IsPowered && this.circuitOverloadTime <= 0f)
-					{
-						this.IsPowered = true;
-						this.PlayCircuitSound("powered");
-					}
-				}
-			}
-			else if (this.IsPowered && base.GetComponent<Battery>() == null)
+		case CircuitManager.ConnectionStatus.NotConnected:
+			this.IsPowered = false;
+			return;
+		case CircuitManager.ConnectionStatus.Unpowered:
+			if (this.IsPowered && base.GetComponent<Battery>() == null)
 			{
 				this.IsPowered = false;
 				this.circuitOverloadTime = 6f;
 				this.PlayCircuitSound("overdraw");
+				return;
 			}
-		}
-		else
-		{
-			this.IsPowered = false;
+			break;
+		case CircuitManager.ConnectionStatus.Powered:
+			if (!this.IsPowered && this.circuitOverloadTime <= 0f)
+			{
+				this.IsPowered = true;
+				this.PlayCircuitSound("powered");
+			}
+			break;
+		default:
+			return;
 		}
 	}
 
@@ -185,7 +185,9 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 			num = 0f;
 		}
 		float num2 = (Time.time - num) / this.soundDecayTime;
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition(), false), 1f);
+		Vector3 position = base.transform.GetPosition();
+		position.z = 0f;
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(position, false), 1f);
 		eventInstance.setParameterValue("timeSinceLast", num2);
 		KFMOD.EndOneShot(eventInstance);
 		this.lastTimeSoundPlayed[state] = Time.time;

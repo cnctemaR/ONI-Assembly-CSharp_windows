@@ -80,11 +80,14 @@ namespace NodeEditorFramework
 			node.InitBase();
 			if (connectingOutput != null)
 			{
-				foreach (NodeInput nodeInput in node.Inputs)
+				using (List<NodeInput>.Enumerator enumerator = node.Inputs.GetEnumerator())
 				{
-					if (nodeInput.TryApplyConnection(connectingOutput))
+					while (enumerator.MoveNext())
 					{
-						break;
+						if (enumerator.Current.TryApplyConnection(connectingOutput))
+						{
+							break;
+						}
 					}
 				}
 			}
@@ -162,12 +165,11 @@ namespace NodeEditorFramework
 			Rect rect = this.rect;
 			rect.position += NodeEditor.curEditorState.zoomPanAdjust + NodeEditor.curEditorState.panOffset;
 			this.contentOffset = new Vector2(0f, 20f);
-			Rect rect2 = new Rect(rect.x, rect.y, rect.width, this.contentOffset.y);
-			GUI.Label(rect2, base.name, (!(NodeEditor.curEditorState.selectedNode == this)) ? NodeEditorGUI.nodeBox : NodeEditorGUI.nodeBoxBold);
-			Rect rect3 = new Rect(rect.x, rect.y + this.contentOffset.y, rect.width, rect.height - this.contentOffset.y);
-			GUI.BeginGroup(rect3, GUI.skin.box);
-			rect3.position = Vector2.zero;
-			GUILayout.BeginArea(rect3, GUI.skin.box);
+			GUI.Label(new Rect(rect.x, rect.y, rect.width, this.contentOffset.y), base.name, (NodeEditor.curEditorState.selectedNode == this) ? NodeEditorGUI.nodeBoxBold : NodeEditorGUI.nodeBox);
+			Rect rect2 = new Rect(rect.x, rect.y + this.contentOffset.y, rect.width, rect.height - this.contentOffset.y);
+			GUI.BeginGroup(rect2, GUI.skin.box);
+			rect2.position = Vector2.zero;
+			GUILayout.BeginArea(rect2, GUI.skin.box);
 			GUI.changed = false;
 			this.NodeGUI();
 			GUILayout.EndArea();
@@ -446,7 +448,7 @@ namespace NodeEditorFramework
 			this.startRecursiveSearchNode = null;
 		}
 
-		public Rect rect = default(Rect);
+		public Rect rect;
 
 		internal Vector2 contentOffset = Vector2.zero;
 

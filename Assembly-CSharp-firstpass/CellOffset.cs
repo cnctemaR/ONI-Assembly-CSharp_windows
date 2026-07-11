@@ -4,6 +4,14 @@ using UnityEngine;
 [Serializable]
 public struct CellOffset : IEquatable<CellOffset>
 {
+	public static CellOffset none
+	{
+		get
+		{
+			return new CellOffset(0, 0);
+		}
+	}
+
 	public CellOffset(int x, int y)
 	{
 		this.x = x;
@@ -14,14 +22,6 @@ public struct CellOffset : IEquatable<CellOffset>
 	{
 		this.x = Mathf.RoundToInt(offset.x);
 		this.y = Mathf.RoundToInt(offset.y);
-	}
-
-	public static CellOffset none
-	{
-		get
-		{
-			return new CellOffset(0, 0);
-		}
 	}
 
 	public Vector2I ToVector2I()

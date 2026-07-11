@@ -8,11 +8,6 @@ namespace Delaunay
 {
 	public sealed class Halfedge : Delaunay.Utils.IDisposable
 	{
-		public Halfedge(Edge edge = null, Side? lr = null)
-		{
-			this.Init(edge, lr);
-		}
-
 		public static Halfedge Create(Edge edge, Side? lr)
 		{
 			if (Halfedge._pool.Count > 0)
@@ -25,6 +20,11 @@ namespace Delaunay
 		public static Halfedge CreateDummy()
 		{
 			return Halfedge.Create(null, null);
+		}
+
+		public Halfedge(Edge edge = null, Side? lr = null)
+		{
+			this.Init(edge, lr);
 		}
 
 		private Halfedge Init(Edge edge, Side? lr)
@@ -79,13 +79,25 @@ namespace Delaunay
 		{
 			Vector2 coord = this.edge.rightSite.Coord;
 			bool flag = p.x > coord.x;
-			if (flag && this.leftRight == Side.LEFT)
+			Side? side;
+			Side side2;
+			if (flag)
 			{
-				return true;
+				side = this.leftRight;
+				side2 = Side.LEFT;
+				if ((side.GetValueOrDefault() == side2) & (side != null))
+				{
+					return true;
+				}
 			}
-			if (!flag && this.leftRight == Side.RIGHT)
+			if (!flag)
 			{
-				return false;
+				side = this.leftRight;
+				side2 = Side.RIGHT;
+				if ((side.GetValueOrDefault() == side2) & (side != null))
+				{
+					return false;
+				}
 			}
 			bool flag3;
 			if ((double)this.edge.a == 1.0)
@@ -128,7 +140,13 @@ namespace Delaunay
 				float num7 = num4 - coord.y;
 				flag3 = num5 * num5 > num6 * num6 + num7 * num7;
 			}
-			return (!(this.leftRight == Side.LEFT)) ? (!flag3) : flag3;
+			side = this.leftRight;
+			side2 = Side.LEFT;
+			if (!((side.GetValueOrDefault() == side2) & (side != null)))
+			{
+				return !flag3;
+			}
+			return flag3;
 		}
 
 		private static Stack<Halfedge> _pool = new Stack<Halfedge>();

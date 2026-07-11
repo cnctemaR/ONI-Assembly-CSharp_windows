@@ -5,6 +5,14 @@ namespace Satsuma
 {
 	public sealed class Bipartition
 	{
+		public IGraph Graph { get; private set; }
+
+		public bool Bipartite { get; private set; }
+
+		public HashSet<Node> RedNodes { get; private set; }
+
+		public HashSet<Node> BlueNodes { get; private set; }
+
 		public Bipartition(IGraph graph, Bipartition.Flags flags = Bipartition.Flags.None)
 		{
 			this.Graph = graph;
@@ -21,14 +29,6 @@ namespace Satsuma
 				Parent = this
 			}.Run(graph, null);
 		}
-
-		public IGraph Graph { get; private set; }
-
-		public bool Bipartite { get; private set; }
-
-		public HashSet<Node> RedNodes { get; private set; }
-
-		public HashSet<Node> BlueNodes { get; private set; }
 
 		[Flags]
 		public enum Flags

@@ -12,11 +12,9 @@ namespace Database
 
 		public void Load(TextAsset tree_file)
 		{
-			ResourceTreeLoader<ResourceTreeNode> resourceTreeLoader = new ResourceTreeLoader<ResourceTreeNode>(tree_file);
-			foreach (ResourceTreeNode resourceTreeNode in resourceTreeLoader)
+			foreach (ResourceTreeNode resourceTreeNode in new ResourceTreeLoader<ResourceTreeNode>(tree_file))
 			{
-				string text = resourceTreeNode.Id.Substring(0, 1);
-				if (string.Equals(text, "_"))
+				if (string.Equals(resourceTreeNode.Id.Substring(0, 1), "_"))
 				{
 					new TechTreeTitle(resourceTreeNode.Id, this, Strings.Get("STRINGS.RESEARCH.TREES.TITLE" + resourceTreeNode.Id.ToUpper()), resourceTreeNode);
 				}

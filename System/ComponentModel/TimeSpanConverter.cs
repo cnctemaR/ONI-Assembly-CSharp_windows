@@ -2,9 +2,11 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class TimeSpanConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -14,21 +16,25 @@ namespace System.ComponentModel
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType == typeof(string) || destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor) || base.CanConvertTo(context, destinationType);
+			return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
 		}
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value.GetType() == typeof(string))
+			if (value is string)
 			{
-				string text = (string)value;
+				string text = ((string)value).Trim();
 				try
 				{
-					return TimeSpan.Parse(text);
+					return TimeSpan.Parse(text, culture);
 				}
-				catch
+				catch (FormatException ex)
 				{
-					throw new FormatException(text + "is not valid for a TimeSpan.");
+					throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
+					{
+						(string)value,
+						"TimeSpan"
+					}), ex);
 				}
 			}
 			return base.ConvertFrom(context, culture, value);
@@ -36,17 +42,16 @@ namespace System.ComponentModel
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (value is TimeSpan)
+			if (destinationType == null)
 			{
-				TimeSpan timeSpan = (TimeSpan)value;
-				if (destinationType == typeof(string) && value != null)
+				throw new ArgumentNullException("destinationType");
+			}
+			if (destinationType == typeof(InstanceDescriptor) && value is TimeSpan)
+			{
+				MethodInfo method = typeof(TimeSpan).GetMethod("Parse", new Type[] { typeof(string) });
+				if (method != null)
 				{
-					return timeSpan.ToString();
-				}
-				if (destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor))
-				{
-					ConstructorInfo constructor = typeof(TimeSpan).GetConstructor(new Type[] { typeof(long) });
-					return new global::System.ComponentModel.Design.Serialization.InstanceDescriptor(constructor, new object[] { timeSpan.Ticks });
+					return new InstanceDescriptor(method, new object[] { value.ToString() });
 				}
 			}
 			return base.ConvertTo(context, culture, value, destinationType);

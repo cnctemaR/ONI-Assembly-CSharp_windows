@@ -23,7 +23,7 @@ public static class OffsetGroups
 		Dictionary<CellOffset[][], Dictionary<CellOffset[], CellOffset[][]>> dictionary = null;
 		Dictionary<CellOffset[], CellOffset[][]> dictionary2 = null;
 		CellOffset[][] array = null;
-		if (OffsetGroups.reachabilityTableCache.TryGetValue(area_offsets, out dictionary) && dictionary.TryGetValue(table, out dictionary2) && dictionary2.TryGetValue((filter != null) ? filter : OffsetGroups.nullFilter, out array))
+		if (OffsetGroups.reachabilityTableCache.TryGetValue(area_offsets, out dictionary) && dictionary.TryGetValue(table, out dictionary2) && dictionary2.TryGetValue((filter == null) ? OffsetGroups.nullFilter : filter, out array))
 		{
 			return array;
 		}
@@ -52,17 +52,14 @@ public static class OffsetGroups
 			}
 			foreach (CellOffset[] array3 in table)
 			{
-				if (filter == null || Array.IndexOf<CellOffset>(filter, array3[0]) == -1)
+				if ((filter == null || Array.IndexOf<CellOffset>(filter, array3[0]) == -1) && array3[0] + cellOffset4 == cellOffset3)
 				{
-					if (array3[0] + cellOffset4 == cellOffset3)
+					CellOffset[] array4 = new CellOffset[array3.Length];
+					for (int k = 0; k < array3.Length; k++)
 					{
-						CellOffset[] array4 = new CellOffset[array3.Length];
-						for (int m = 0; m < array3.Length; m++)
-						{
-							array4[m] = array3[m] + cellOffset4;
-						}
-						list.Add(array4);
+						array4[k] = array3[k] + cellOffset4;
 					}
+					list.Add(array4);
 				}
 			}
 		}
@@ -78,11 +75,11 @@ public static class OffsetGroups
 			dictionary2 = new Dictionary<CellOffset[], CellOffset[][]>();
 			dictionary.Add(table, dictionary2);
 		}
-		dictionary2.Add((filter != null) ? filter : OffsetGroups.nullFilter, array);
+		dictionary2.Add((filter == null) ? OffsetGroups.nullFilter : filter, array);
 		return array;
 	}
 
-	public static CellOffset[] Use = new CellOffset[] { default(CellOffset) };
+	public static CellOffset[] Use = new CellOffset[1];
 
 	public static CellOffset[] Chat = new CellOffset[]
 	{

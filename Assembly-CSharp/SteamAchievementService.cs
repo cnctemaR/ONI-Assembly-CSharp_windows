@@ -66,7 +66,7 @@ public class SteamAchievementService : MonoBehaviour
 
 	private void RefreshStats()
 	{
-		bool flag = SteamUserStats.RequestCurrentStats();
+		SteamUserStats.RequestCurrentStats();
 	}
 
 	private void OnUserStatsReceived(UserStatsReceived_t data)

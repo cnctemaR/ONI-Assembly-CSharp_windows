@@ -1,41 +1,39 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeNamespace : CodeObject
 	{
-		public CodeNamespace()
-		{
-		}
-
-		public CodeNamespace(string name)
-		{
-			this.name = name;
-		}
-
 		public event EventHandler PopulateComments;
 
 		public event EventHandler PopulateImports;
 
 		public event EventHandler PopulateTypes;
 
-		public CodeCommentStatementCollection Comments
+		public CodeNamespace()
+		{
+		}
+
+		public CodeNamespace(string name)
+		{
+			this.Name = name;
+		}
+
+		public CodeTypeDeclarationCollection Types
 		{
 			get
 			{
-				if (this.comments == null)
+				if ((this._populated & 4) == 0)
 				{
-					this.comments = new CodeCommentStatementCollection();
-					if (this.PopulateComments != null)
+					this._populated |= 4;
+					EventHandler populateTypes = this.PopulateTypes;
+					if (populateTypes != null)
 					{
-						this.PopulateComments(this, EventArgs.Empty);
+						populateTypes(this, EventArgs.Empty);
 					}
 				}
-				return this.comments;
+				return this._classes;
 			}
 		}
 
@@ -43,15 +41,16 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.imports == null)
+				if ((this._populated & 1) == 0)
 				{
-					this.imports = new CodeNamespaceImportCollection();
-					if (this.PopulateImports != null)
+					this._populated |= 1;
+					EventHandler populateImports = this.PopulateImports;
+					if (populateImports != null)
 					{
-						this.PopulateImports(this, EventArgs.Empty);
+						populateImports(this, EventArgs.Empty);
 					}
 				}
-				return this.imports;
+				return this._imports;
 			}
 		}
 
@@ -59,44 +58,45 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.name == null)
-				{
-					return string.Empty;
-				}
-				return this.name;
+				return this._name ?? string.Empty;
 			}
 			set
 			{
-				this.name = value;
+				this._name = value;
 			}
 		}
 
-		public CodeTypeDeclarationCollection Types
+		public CodeCommentStatementCollection Comments
 		{
 			get
 			{
-				if (this.classes == null)
+				if ((this._populated & 2) == 0)
 				{
-					this.classes = new CodeTypeDeclarationCollection();
-					if (this.PopulateTypes != null)
+					this._populated |= 2;
+					EventHandler populateComments = this.PopulateComments;
+					if (populateComments != null)
 					{
-						this.PopulateTypes(this, EventArgs.Empty);
+						populateComments(this, EventArgs.Empty);
 					}
 				}
-				return this.classes;
+				return this._comments;
 			}
 		}
 
-		private CodeCommentStatementCollection comments;
+		private string _name;
 
-		private CodeNamespaceImportCollection imports;
+		private readonly CodeNamespaceImportCollection _imports = new CodeNamespaceImportCollection();
 
-		private CodeNamespaceCollection namespaces;
+		private readonly CodeCommentStatementCollection _comments = new CodeCommentStatementCollection();
 
-		private CodeTypeDeclarationCollection classes;
+		private readonly CodeTypeDeclarationCollection _classes = new CodeTypeDeclarationCollection();
 
-		private string name;
+		private int _populated;
 
-		private int populated;
+		private const int ImportsCollection = 1;
+
+		private const int CommentsCollection = 2;
+
+		private const int TypesCollection = 4;
 	}
 }

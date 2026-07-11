@@ -2,6 +2,7 @@
 
 namespace System.Data.OleDb
 {
+	[MonoTODO("OleDb is not implemented.")]
 	public static class OleDbMetaDataCollectionNames
 	{
 		public static readonly string Catalogs;

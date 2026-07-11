@@ -13,12 +13,16 @@ public class SuitMarkerConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
+		float[] array = new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
-		}, refined_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		};
+		string[] array2 = refined_METALS;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.PreventIdleTraversalPastBuilding = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "SuitMarker");
@@ -33,8 +37,7 @@ public class SuitMarkerConfig : IBuildingConfig
 			new Tag("SuitLocker")
 		};
 		suitMarker.PathFlag = PathFinder.PotentialPath.Flags.HasAtmoSuit;
-		AnimTileable animTileable = go.AddOrGet<AnimTileable>();
-		animTileable.tags = new Tag[]
+		go.AddOrGet<AnimTileable>().tags = new Tag[]
 		{
 			new Tag("SuitMarker"),
 			new Tag("SuitLocker")

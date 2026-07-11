@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
 public class Filterable : KMonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Tag> onFilterChanged;
 
 	public Tag SelectedTag
@@ -33,24 +31,17 @@ public class Filterable : KMonoBehaviour
 				bool flag = true;
 				if (this.filterElementState != Filterable.ElementState.None)
 				{
-					Filterable.ElementState elementState = this.filterElementState;
-					if (elementState != Filterable.ElementState.Gas)
+					switch (this.filterElementState)
 					{
-						if (elementState != Filterable.ElementState.Liquid)
-						{
-							if (elementState == Filterable.ElementState.Solid)
-							{
-								flag = element.IsSolid;
-							}
-						}
-						else
-						{
-							flag = element.IsLiquid;
-						}
-					}
-					else
-					{
+					case Filterable.ElementState.Solid:
+						flag = element.IsSolid;
+						break;
+					case Filterable.ElementState.Liquid:
+						flag = element.IsLiquid;
+						break;
+					case Filterable.ElementState.Gas:
 						flag = element.IsGas;
+						break;
 					}
 				}
 				if (flag)
@@ -71,8 +62,7 @@ public class Filterable : KMonoBehaviour
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		Filterable component = gameObject.GetComponent<Filterable>();
+		Filterable component = ((GameObject)data).GetComponent<Filterable>();
 		if (component != null)
 		{
 			this.SelectedTag = component.SelectedTag;

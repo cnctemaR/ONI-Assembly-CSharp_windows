@@ -2,15 +2,8 @@
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Filter settings for ScriptableRenderContext.DrawRenderers.</para>
-	/// </summary>
 	public struct FilterRenderersSettings
 	{
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="initializeValues">Specifies whether the values of the struct should be initialized.</param>
 		public FilterRenderersSettings(bool initializeValues = false)
 		{
 			this = default(FilterRenderersSettings);
@@ -19,12 +12,10 @@ namespace UnityEngine.Experimental.Rendering
 				this.m_RenderQueueRange = RenderQueueRange.all;
 				this.m_LayerMask = -1;
 				this.m_RenderingLayerMask = uint.MaxValue;
+				this.m_ExcludeMotionVectorObjects = 0;
 			}
 		}
 
-		/// <summary>
-		///   <para>Render objects whose material render queue in inside this range.</para>
-		/// </summary>
 		public RenderQueueRange renderQueueRange
 		{
 			get
@@ -37,9 +28,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Only render objects in the given layer mask.</para>
-		/// </summary>
 		public int layerMask
 		{
 			get
@@ -52,9 +40,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The rendering layer mask to use when filtering available renderers for drawing.</para>
-		/// </summary>
 		public uint renderingLayerMask
 		{
 			get
@@ -67,10 +52,24 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
+		public bool excludeMotionVectorObjects
+		{
+			get
+			{
+				return this.m_ExcludeMotionVectorObjects != 0;
+			}
+			set
+			{
+				this.m_ExcludeMotionVectorObjects = ((!value) ? 0 : 1);
+			}
+		}
+
 		private RenderQueueRange m_RenderQueueRange;
 
 		private int m_LayerMask;
 
 		private uint m_RenderingLayerMask;
+
+		private int m_ExcludeMotionVectorObjects;
 	}
 }

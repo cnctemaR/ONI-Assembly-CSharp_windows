@@ -40,8 +40,7 @@ public class BuildingLoader : KMonoBehaviour
 		GameObject gameObject = this.CreateTemplate();
 		gameObject.AddOrGet<BuildingUnderConstruction>();
 		gameObject.AddOrGet<Constructable>();
-		Storage storage = gameObject.AddComponent<Storage>();
-		storage.doDiseaseTransfer = false;
+		gameObject.AddComponent<Storage>().doDiseaseTransfer = false;
 		gameObject.AddOrGet<Cancellable>();
 		gameObject.AddOrGet<Prioritizable>();
 		gameObject.AddOrGet<Notifier>();
@@ -63,7 +62,7 @@ public class BuildingLoader : KMonoBehaviour
 
 	private static bool Add2DComponents(BuildingDef def, GameObject go, string initialAnimState = null, bool no_collider = false, int layer = -1)
 	{
-		bool flag = def.AnimFiles != null && def.AnimFiles.Length > 0;
+		bool flag = def.AnimFiles != null && def.AnimFiles.Length != 0;
 		if (layer == -1)
 		{
 			layer = LayerMask.NameToLayer("Default");
@@ -97,7 +96,7 @@ public class BuildingLoader : KMonoBehaviour
 					{
 						initialAnimState = "closed";
 					}
-					kbatchedAnimController.initialAnim = ((initialAnimState == null) ? def.DefaultAnimState : initialAnimState);
+					kbatchedAnimController.initialAnim = ((initialAnimState != null) ? initialAnimState : def.DefaultAnimState);
 				}
 				kbatchedAnimController.SetFGLayer(def.ForegroundLayer);
 				kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.Default;
@@ -122,7 +121,7 @@ public class BuildingLoader : KMonoBehaviour
 		if (!required && t != null)
 		{
 			global::UnityEngine.Object.DestroyImmediate(t, true);
-			t = (T)((object)null);
+			t = default(T);
 		}
 		else if (required && t == null)
 		{
@@ -147,17 +146,15 @@ public class BuildingLoader : KMonoBehaviour
 	{
 		GameObject gameObject = this.CreateBuilding(def, this.constructionTemplate, null);
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
-		KSelectable component = gameObject.GetComponent<KSelectable>();
-		component.SetName(def.Name);
+		gameObject.GetComponent<KSelectable>().SetName(def.Name);
 		for (int i = 0; i < def.Mass.Length; i++)
 		{
 			gameObject.GetComponent<PrimaryElement>().MassPerUnit += def.Mass[i];
 		}
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
-		Constructable component2 = gameObject.GetComponent<Constructable>();
-		component2.SetWorkTime(def.ConstructionTime);
-		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
+		gameObject.GetComponent<Constructable>().SetWorkTime(def.ConstructionTime);
+		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
@@ -181,15 +178,14 @@ public class BuildingLoader : KMonoBehaviour
 	{
 		go.name = def.PrefabID + "Complete";
 		go.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
-		KSelectable component = go.GetComponent<KSelectable>();
-		component.SetName(def.Name);
-		PrimaryElement component2 = go.GetComponent<PrimaryElement>();
-		component2.MassPerUnit = 0f;
+		go.GetComponent<KSelectable>().SetName(def.Name);
+		PrimaryElement component = go.GetComponent<PrimaryElement>();
+		component.MassPerUnit = 0f;
 		for (int i = 0; i < def.Mass.Length; i++)
 		{
-			component2.MassPerUnit += def.Mass[i];
+			component.MassPerUnit += def.Mass[i];
 		}
-		component2.Temperature = 273.15f;
+		component.Temperature = 273.15f;
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
 		if (def.Invincible)
 		{
@@ -202,8 +198,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		int num = LayerMask.NameToLayer("Default");
 		go.layer = num;
-		Building component3 = go.GetComponent<BuildingComplete>();
-		component3.Def = def;
+		go.GetComponent<BuildingComplete>().Def = def;
 		if (def.InputConduitType != ConduitType.None || def.OutputConduitType != ConduitType.None)
 		{
 			go.AddComponent<BuildingConduitEndpoints>();
@@ -213,7 +208,7 @@ public class BuildingLoader : KMonoBehaviour
 			global::Debug.Log(def.Name + " is not yet a 2d building!");
 		}
 		BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(go, def.RequiresPowerInput);
-		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(go, def.PermittedRotations != PermittedRotations.Unrotatable);
+		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(go, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
@@ -233,7 +228,7 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			requireInputs.SetRequirements(def.RequiresPowerInput, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
 		}
-		BuildingLoader.UpdateComponentRequirement<RequireOutputs>(go, def.OutputConduitType != ConduitType.None);
+		BuildingLoader.UpdateComponentRequirement<RequireOutputs>(go, def.OutputConduitType > ConduitType.None);
 		BuildingLoader.UpdateComponentRequirement<Operational>(go, !def.isUtility);
 		if (def.Floodable)
 		{
@@ -268,8 +263,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.AttachmentSlotTag != Tag.Invalid)
 		{
-			AttachableBuilding attachableBuilding = BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(go, true);
-			attachableBuilding.attachableToTag = def.AttachmentSlotTag;
+			BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(go, true).attachableToTag = def.AttachmentSlotTag;
 		}
 		KPrefabID kprefabID = BuildingLoader.AddID(go, def.PrefabID);
 		kprefabID.defaultLayer = num;
@@ -290,20 +284,18 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			component.fgLayer = Grid.SceneLayer.NoLayer;
 		}
-		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
+		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
 		}
-		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "Preview");
-		kprefabID.defaultLayer = num;
-		KSelectable component2 = gameObject.GetComponent<KSelectable>();
-		component2.SetName(def.Name);
+		BuildingLoader.AddID(gameObject, def.PrefabID + "Preview").defaultLayer = num;
+		gameObject.GetComponent<KSelectable>().SetName(def.Name);
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
-		KAnimGraphTileVisualizer component3 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-		if (component3 != null)
+		KAnimGraphTileVisualizer component2 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+		if (component2 != null)
 		{
-			global::UnityEngine.Object.DestroyImmediate(component3);
+			global::UnityEngine.Object.DestroyImmediate(component2);
 		}
 		if (def.RequiresPowerInput)
 		{

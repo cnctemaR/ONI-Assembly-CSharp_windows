@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,13 +26,12 @@ public class GroupSelectorWidget : MonoBehaviour
 	{
 		if (!this.IsSubPanelOpen())
 		{
-			int num = this.RebuildSubPanelOptions();
-			if (num > 0)
+			if (this.RebuildSubPanelOptions() > 0)
 			{
-				GridLayoutGroup component = this.unselectedItemsPanel.GetComponent<GridLayoutGroup>();
-				component.constraintCount = Mathf.Min(this.numExpectedPanelColumns, this.unselectedItemsPanel.childCount);
+				this.unselectedItemsPanel.GetComponent<GridLayoutGroup>().constraintCount = Mathf.Min(this.numExpectedPanelColumns, this.unselectedItemsPanel.childCount);
 				this.unselectedItemsPanel.gameObject.SetActive(true);
 				this.unselectedItemsPanel.GetComponent<Selectable>().Select();
+				return;
 			}
 		}
 		else
@@ -94,8 +92,7 @@ public class GroupSelectorWidget : MonoBehaviour
 				}
 			}
 		}
-		ToolTip component3 = gameObject.GetComponent<ToolTip>();
-		component3.OnToolTip = () => this.itemCallbacks.getItemHoverText(this.widgetID, this.options[idx].userData, is_selected_item);
+		gameObject.GetComponent<ToolTip>().OnToolTip = () => this.itemCallbacks.getItemHoverText(this.widgetID, this.options[idx].userData, is_selected_item);
 		return gameObject;
 	}
 
@@ -112,23 +109,9 @@ public class GroupSelectorWidget : MonoBehaviour
 
 	private void ClearSubPanelOptions()
 	{
-		IEnumerator enumerator = this.unselectedItemsPanel.transform.GetEnumerator();
-		try
+		foreach (object obj in this.unselectedItemsPanel.transform)
 		{
-			while (enumerator.MoveNext())
-			{
-				object obj = enumerator.Current;
-				Transform transform = (Transform)obj;
-				Util.KDestroyGameObject(transform.gameObject);
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
-			}
+			Util.KDestroyGameObject(((Transform)obj).gameObject);
 		}
 	}
 
@@ -138,18 +121,21 @@ public class GroupSelectorWidget : MonoBehaviour
 		if (list.Count > 0)
 		{
 			this.ClearSubPanelOptions();
-			foreach (int num in list)
+			using (IEnumerator<int> enumerator = list.GetEnumerator())
 			{
-				if (!this.selectedOptionIndices.Contains(num))
+				while (enumerator.MoveNext())
 				{
-					this.CreateItem(num, new Action<int>(this.OnItemAdded), this.unselectedItemsPanel.gameObject, false);
+					int num = enumerator.Current;
+					if (!this.selectedOptionIndices.Contains(num))
+					{
+						this.CreateItem(num, new Action<int>(this.OnItemAdded), this.unselectedItemsPanel.gameObject, false);
+					}
 				}
+				goto IL_007E;
 			}
 		}
-		else
-		{
-			this.CloseSubPanel();
-		}
+		this.CloseSubPanel();
+		IL_007E:
 		return list.Count;
 	}
 

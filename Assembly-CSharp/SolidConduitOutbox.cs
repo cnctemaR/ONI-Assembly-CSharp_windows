@@ -13,7 +13,7 @@ public class SolidConduitOutbox : StateMachineComponent<SolidConduitOutbox.SMIns
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
+		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		base.Subscribe<SolidConduitOutbox>(-1697596308, SolidConduitOutbox.OnStorageChangedDelegate);
 		this.UpdateMeter();
 		base.smi.StartSM();

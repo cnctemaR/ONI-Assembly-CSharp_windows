@@ -129,9 +129,7 @@ public class StoryMessageScreen : KScreen
 
 	protected override void OnDeactivate()
 	{
-		if (base.IsActive())
-		{
-		}
+		base.IsActive();
 		base.OnDeactivate();
 		MusicManager.instance.StopSong("Music_Victory_01_Message", true, STOP_MODE.ALLOWFADEOUT);
 		if (this.restoreInterfaceOnClose)

@@ -24,12 +24,11 @@ public class SaveUpgradeWarning : KMonoBehaviour
 
 	private void OnLoad(Game.GameSaveData data)
 	{
-		List<SaveUpgradeWarning.Upgrade> list = new List<SaveUpgradeWarning.Upgrade>
+		foreach (SaveUpgradeWarning.Upgrade upgrade in new List<SaveUpgradeWarning.Upgrade>
 		{
 			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper)),
 			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper))
-		};
-		foreach (SaveUpgradeWarning.Upgrade upgrade in list)
+		})
 		{
 			if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(upgrade.major, upgrade.minor))
 			{
@@ -46,8 +45,7 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		{
 			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 			{
-				Effects component = minionIdentity.GetComponent<Effects>();
-				component.Add(morale_effect, true);
+				minionIdentity.GetComponent<Effects>().Add(morale_effect, true);
 			}
 			screen.Deactivate();
 		});

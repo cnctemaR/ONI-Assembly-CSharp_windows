@@ -126,8 +126,7 @@ namespace Klei.AI
 
 		public float GetPercentComplete(string attribute_id)
 		{
-			AttributeLevel attributeLevel = this.GetAttributeLevel(attribute_id);
-			return attributeLevel.GetPercentComplete();
+			return this.GetAttributeLevel(attribute_id).GetPercentComplete();
 		}
 
 		public int GetMaxLevel()

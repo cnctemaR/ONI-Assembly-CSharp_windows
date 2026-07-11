@@ -11,8 +11,7 @@ public class EggConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, mass, true, Assets.GetAnim(anim), "idle", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.8f, true, 0, SimHashes.Creature, null);
 		gameObject.AddOrGet<KBoxCollider2D>().offset = new Vector2f(0f, 0.36f);
-		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
-		pickupable.sortOrder = SORTORDER.EGGS + egg_sort_order;
+		gameObject.AddOrGet<Pickupable>().sortOrder = SORTORDER.EGGS + egg_sort_order;
 		gameObject.AddOrGet<Effects>();
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.AddTag(GameTags.Egg, false);
@@ -21,8 +20,7 @@ public class EggConfig
 		IncubationMonitor.Def def = gameObject.AddOrGetDef<IncubationMonitor.Def>();
 		def.spawnedCreature = creature_id;
 		def.baseIncubationRate = base_incubation_rate;
-		OvercrowdingMonitor.Def def2 = gameObject.AddOrGetDef<OvercrowdingMonitor.Def>();
-		def2.spaceRequiredPerCreature = 0;
+		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = 0;
 		global::UnityEngine.Object.Destroy(gameObject.GetComponent<EntitySplitter>());
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 		string text = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RESULT_DESCRIPTION, name);

@@ -5,11 +5,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 {
 	public class NoiseMapBuilderSphere : NoiseMapBuilder
 	{
-		public NoiseMapBuilderSphere()
-		{
-			this.SetBounds(-90f, 90f, -180f, 180f);
-		}
-
 		public float EastLonBound
 		{
 			get
@@ -40,6 +35,11 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Builder
 			{
 				return this._westLonBound;
 			}
+		}
+
+		public NoiseMapBuilderSphere()
+		{
+			this.SetBounds(-90f, 90f, -180f, 180f);
 		}
 
 		public void SetBounds(float southLatBound, float northLatBound, float westLonBound, float eastLonBound)

@@ -3,12 +3,12 @@ using FMOD.Studio;
 
 public abstract class OneShotSoundParameterUpdater
 {
+	public HashedString parameter { get; private set; }
+
 	public OneShotSoundParameterUpdater(HashedString parameter)
 	{
 		this.parameter = parameter;
 	}
-
-	public HashedString parameter { get; private set; }
 
 	public virtual void Update(float dt)
 	{

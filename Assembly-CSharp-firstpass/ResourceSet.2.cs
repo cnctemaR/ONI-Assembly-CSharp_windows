@@ -5,15 +5,6 @@ using System.Reflection;
 [Serializable]
 public class ResourceSet<T> : ResourceSet where T : Resource
 {
-	public ResourceSet()
-	{
-	}
-
-	public ResourceSet(string id, ResourceSet parent)
-		: base(id, parent)
-	{
-	}
-
 	public T this[int idx]
 	{
 		get
@@ -35,22 +26,33 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		return this.resources[idx];
 	}
 
+	public ResourceSet()
+	{
+	}
+
+	public ResourceSet(string id, ResourceSet parent)
+		: base(id, parent)
+	{
+	}
+
 	public override void Initialize()
 	{
 		foreach (T t in this.resources)
 		{
-			Resource resource = t;
-			resource.Initialize();
+			t.Initialize();
 		}
 	}
 
 	public bool Exists(string id)
 	{
-		foreach (T t in this.resources)
+		using (List<T>.Enumerator enumerator = this.resources.GetEnumerator())
 		{
-			if (t.Id == id)
+			while (enumerator.MoveNext())
 			{
-				return true;
+				if (enumerator.Current.Id == id)
+				{
+					return true;
+				}
 			}
 		}
 		return false;
@@ -65,7 +67,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 				return t;
 			}
 		}
-		return (T)((object)null);
+		return default(T);
 	}
 
 	public T Get(HashedString id)
@@ -84,7 +86,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 			": ",
 			id
 		}));
-		return (T)((object)null);
+		return default(T);
 	}
 
 	public T Get(string id)
@@ -97,7 +99,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 			}
 		}
 		Debug.LogError("Could not find " + typeof(T).ToString() + ": " + id);
-		return (T)((object)null);
+		return default(T);
 	}
 
 	public override Resource Add(Resource resource)
@@ -116,7 +118,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		if (resource == null)
 		{
 			Debug.LogError("Tried to add a null to the resource set");
-			return (T)((object)null);
+			return default(T);
 		}
 		this.resources.Add(resource);
 		return resource;
@@ -124,19 +126,14 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 
 	public void ResolveReferences()
 	{
-		Type type = base.GetType();
-		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-		foreach (FieldInfo fieldInfo in fields)
+		foreach (FieldInfo fieldInfo in base.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
 		{
-			if (fieldInfo.FieldType.IsSubclassOf(typeof(Resource)))
+			if (fieldInfo.FieldType.IsSubclassOf(typeof(Resource)) && fieldInfo.GetValue(this) == null)
 			{
-				if (fieldInfo.GetValue(this) == null)
+				Resource resource = this.Get(fieldInfo.Name);
+				if (resource != null)
 				{
-					Resource resource = this.Get(fieldInfo.Name);
-					if (resource != null)
-					{
-						fieldInfo.SetValue(this, resource);
-					}
+					fieldInfo.SetValue(this, resource);
 				}
 			}
 		}

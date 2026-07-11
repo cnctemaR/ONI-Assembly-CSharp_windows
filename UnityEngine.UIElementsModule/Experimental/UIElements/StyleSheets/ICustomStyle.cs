@@ -12,7 +12,7 @@ namespace UnityEngine.Experimental.UIElements.StyleSheets
 
 		void ApplyCustomProperty(string propertyName, ref StyleValue<Color> target);
 
-		void ApplyCustomProperty<T>(string propertyName, ref StyleValue<T> target) where T : Object;
+		void ApplyCustomProperty(string propertyName, ref StyleValue<Texture2D> target);
 
 		void ApplyCustomProperty(string propertyName, ref StyleValue<string> target);
 	}

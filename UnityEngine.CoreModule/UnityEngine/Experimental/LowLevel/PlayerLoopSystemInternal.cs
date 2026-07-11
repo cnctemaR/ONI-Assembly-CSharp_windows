@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.LowLevel
 {
-	[NativeType(Header = "Runtime/Misc/PlayerLoop.h")]
 	[RequiredByNativeCode]
+	[NativeType(Header = "Runtime/Misc/PlayerLoop.h")]
 	internal struct PlayerLoopSystemInternal
 	{
 		public Type type;

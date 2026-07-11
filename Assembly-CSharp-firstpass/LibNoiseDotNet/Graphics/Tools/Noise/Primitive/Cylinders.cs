@@ -4,16 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 {
 	public class Cylinders : PrimitiveModule, IModule3D, IModule
 	{
-		public Cylinders()
-			: this(1f)
-		{
-		}
-
-		public Cylinders(float frequency)
-		{
-			this._frequency = frequency;
-		}
-
 		public float Frequency
 		{
 			get
@@ -24,6 +14,16 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 			{
 				this._frequency = value;
 			}
+		}
+
+		public Cylinders()
+			: this(1f)
+		{
+		}
+
+		public Cylinders(float frequency)
+		{
+			this._frequency = frequency;
 		}
 
 		public float GetValue(float x, float y, float z)

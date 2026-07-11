@@ -4,9 +4,6 @@ using UnityEngine.Experimental.UIElements.StyleSheets;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>A VisualElement representing a source texture.</para>
-	/// </summary>
 	public class Image : VisualElement
 	{
 		public Image()
@@ -16,9 +13,6 @@ namespace UnityEngine.Experimental.UIElements
 			base.requireMeasureFunction = true;
 		}
 
-		/// <summary>
-		///   <para>The source texture of the Image element.</para>
-		/// </summary>
 		public StyleValue<Texture> image
 		{
 			get
@@ -27,9 +21,9 @@ namespace UnityEngine.Experimental.UIElements
 			}
 			set
 			{
-				if (StyleValueUtils.ApplyAndCompare<Texture>(ref this.m_Image, value))
+				if (StyleValueUtils.ApplyAndCompareObject<Texture>(ref this.m_Image, value))
 				{
-					base.Dirty(ChangeType.Layout | ChangeType.Repaint);
+					base.IncrementVersion(VersionChangeType.Layout | VersionChangeType.Repaint);
 					if (this.m_Image.value == null)
 					{
 						this.m_UV = new Rect(0f, 0f, 1f, 1f);
@@ -38,9 +32,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>The source rectangle inside the texture relative to the top left corner.</para>
-		/// </summary>
 		public Rect sourceRect
 		{
 			get
@@ -53,9 +44,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>The base texture coordinates of the Image relative to the bottom left corner.</para>
-		/// </summary>
 		public Rect uv
 		{
 			get
@@ -78,7 +66,7 @@ namespace UnityEngine.Experimental.UIElements
 			{
 				if (StyleValueUtils.ApplyAndCompare(ref this.m_ScaleMode, new StyleValue<int>((int)value.value, value.specificity)))
 				{
-					base.Dirty(ChangeType.Layout);
+					base.IncrementVersion(VersionChangeType.Layout);
 				}
 			}
 		}
@@ -112,15 +100,10 @@ namespace UnityEngine.Experimental.UIElements
 			return vector;
 		}
 
-		internal override void DoRepaint(IStylePainter painter)
+		protected override void DoRepaint(IStylePainter painter)
 		{
-			base.DoRepaint(painter);
 			Texture specifiedValueOrDefault = this.image.GetSpecifiedValueOrDefault(null);
-			if (specifiedValueOrDefault == null)
-			{
-				Debug.LogWarning("null texture passed to GUI.DrawTexture");
-			}
-			else
+			if (!(specifiedValueOrDefault == null))
 			{
 				TextureStylePainterParameters textureStylePainterParameters = new TextureStylePainterParameters
 				{
@@ -130,14 +113,17 @@ namespace UnityEngine.Experimental.UIElements
 					color = GUI.color,
 					scaleMode = this.scaleMode
 				};
-				painter.DrawTexture(textureStylePainterParameters);
+				IStylePainterInternal stylePainterInternal = (IStylePainterInternal)painter;
+				stylePainterInternal.DrawTexture(textureStylePainterParameters);
 			}
 		}
 
 		protected override void OnStyleResolved(ICustomStyle elementStyle)
 		{
 			base.OnStyleResolved(elementStyle);
-			elementStyle.ApplyCustomProperty<Texture>("image", ref this.m_Image);
+			StyleValue<Texture2D> styleValue = new StyleValue<Texture2D>(this.m_Image.value as Texture2D, this.m_Image.specificity);
+			elementStyle.ApplyCustomProperty("image", ref styleValue);
+			this.m_Image = new StyleValue<Texture>(styleValue.value, styleValue.specificity);
 			elementStyle.ApplyCustomProperty("image-size", ref this.m_ScaleMode);
 		}
 
@@ -178,21 +164,12 @@ namespace UnityEngine.Experimental.UIElements
 
 		private Rect m_UV;
 
-		/// <summary>
-		///   <para>Instantiates an Image using the data read from a UXML file.</para>
-		/// </summary>
-		public class ImageFactory : UxmlFactory<Image, Image.ImageUxmlTraits>
+		public new class UxmlFactory : UxmlFactory<Image, Image.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the Image.</para>
-		/// </summary>
-		public class ImageUxmlTraits : VisualElement.VisualElementUxmlTraits
+		public new class UxmlTraits : VisualElement.UxmlTraits
 		{
-			/// <summary>
-			///   <para>Returns an empty enumerable, as images generally do not have children.</para>
-			/// </summary>
 			public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
 			{
 				get

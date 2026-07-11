@@ -8,31 +8,6 @@ using UnityEngine;
 
 public class MemorySnapshot
 {
-	public MemorySnapshot()
-	{
-		MemorySnapshot.Lineage lineage = new MemorySnapshot.Lineage(null, null, null, null, null, null);
-		foreach (Type type in App.GetCurrentDomainTypes())
-		{
-			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
-			{
-				if (fieldInfo.IsStatic)
-				{
-					this.statics.Add(fieldInfo);
-					lineage.parent0 = fieldInfo.DeclaringType;
-					this.fieldsToProcess.Add(new MemorySnapshot.FieldArgs(fieldInfo, lineage));
-				}
-			}
-		}
-		this.CountAll();
-		foreach (global::UnityEngine.Object @object in Resources.FindObjectsOfTypeAll(typeof(global::UnityEngine.Object)))
-		{
-			lineage.obj = @object;
-			lineage.parent0 = @object.GetType();
-			this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(@object.GetType(), "Object." + @object.name, lineage));
-		}
-		this.CountAll();
-	}
-
 	public static MemorySnapshot.TypeData GetTypeData(Type type, Dictionary<int, MemorySnapshot.TypeData> types)
 	{
 		int hashCode = type.GetHashCode();
@@ -103,14 +78,13 @@ public class MemorySnapshot
 			if (typeof(Array).IsAssignableFrom(refArgs.reference_type) && refArgs.lineage.obj != null)
 			{
 				Array array = refArgs.lineage.obj as Array;
-				detailInfo.numArrayEntries += ((array == null) ? 0 : array.Length);
+				detailInfo.numArrayEntries += ((array != null) ? array.Length : 0);
 			}
 			this.detailTypeCount[text] = detailInfo;
 		}
 		if (refArgs.reference_type.IsClass)
 		{
-			MemorySnapshot.TypeData typeData = MemorySnapshot.GetTypeData(refArgs.reference_type, this.types);
-			typeData.refCount++;
+			MemorySnapshot.GetTypeData(refArgs.reference_type, this.types).refCount++;
 			MemorySnapshot.IncrementFieldCount(this.fieldCounts, refArgs.field_name);
 		}
 		if (refArgs.lineage.obj == null)
@@ -128,21 +102,21 @@ public class MemorySnapshot
 		{
 			return;
 		}
-		MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(refArgs.lineage.obj.GetType(), this.types);
-		if (typeData2.type.IsClass)
+		MemorySnapshot.TypeData typeData = MemorySnapshot.GetTypeData(refArgs.lineage.obj.GetType(), this.types);
+		if (typeData.type.IsClass)
 		{
-			typeData2.instanceCount++;
-			if (typeof(Array).IsAssignableFrom(typeData2.type))
+			typeData.instanceCount++;
+			if (typeof(Array).IsAssignableFrom(typeData.type))
 			{
 				Array array2 = refArgs.lineage.obj as Array;
-				typeData2.numArrayEntries += ((array2 == null) ? 0 : array2.Length);
+				typeData.numArrayEntries += ((array2 != null) ? array2.Length : 0);
 			}
 			MemorySnapshot.HierarchyNode hierarchyNode = new MemorySnapshot.HierarchyNode(refArgs.lineage.parent0, refArgs.lineage.parent1, refArgs.lineage.parent2, refArgs.lineage.parent3, refArgs.lineage.parent4);
 			int num = 0;
-			typeData2.hierarchies.TryGetValue(hierarchyNode, out num);
-			typeData2.hierarchies[hierarchyNode] = num + 1;
+			typeData.hierarchies.TryGetValue(hierarchyNode, out num);
+			typeData.hierarchies[hierarchyNode] = num + 1;
 		}
-		foreach (FieldInfo fieldInfo in typeData2.fields)
+		foreach (FieldInfo fieldInfo in typeData.fields)
 		{
 			this.fieldsToProcess.Add(new MemorySnapshot.FieldArgs(fieldInfo, new MemorySnapshot.Lineage(refArgs.lineage.obj, refArgs.lineage.parent3, refArgs.lineage.parent2, refArgs.lineage.parent1, refArgs.lineage.parent0, fieldInfo.DeclaringType)));
 		}
@@ -154,28 +128,15 @@ public class MemorySnapshot
 			{
 				type = collection.GetType().GetElementType();
 			}
-			else if (collection.GetType().GetGenericArguments().Length > 0)
+			else if (collection.GetType().GetGenericArguments().Length != 0)
 			{
 				type = collection.GetType().GetGenericArguments()[0];
 			}
 			if (!MemorySnapshot.ShouldExclude(type))
 			{
-				IEnumerator enumerator2 = collection.GetEnumerator();
-				try
+				foreach (object obj in collection)
 				{
-					while (enumerator2.MoveNext())
-					{
-						object obj = enumerator2.Current;
-						this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(type, refArgs.field_name + ".Item", new MemorySnapshot.Lineage(obj, refArgs.lineage.parent3, refArgs.lineage.parent2, refArgs.lineage.parent1, refArgs.lineage.parent0, collection.GetType())));
-					}
-				}
-				finally
-				{
-					IDisposable disposable;
-					if ((disposable = enumerator2 as IDisposable) != null)
-					{
-						disposable.Dispose();
-					}
+					this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(type, refArgs.field_name + ".Item", new MemorySnapshot.Lineage(obj, refArgs.lineage.parent3, refArgs.lineage.parent2, refArgs.lineage.parent1, refArgs.lineage.parent0, collection.GetType())));
 				}
 			}
 		}
@@ -225,6 +186,31 @@ public class MemorySnapshot
 				this.CountReference(referenceArgs);
 			}
 		}
+	}
+
+	public MemorySnapshot()
+	{
+		MemorySnapshot.Lineage lineage = new MemorySnapshot.Lineage(null, null, null, null, null, null);
+		foreach (Type type in App.GetCurrentDomainTypes())
+		{
+			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
+			{
+				if (fieldInfo.IsStatic)
+				{
+					this.statics.Add(fieldInfo);
+					lineage.parent0 = fieldInfo.DeclaringType;
+					this.fieldsToProcess.Add(new MemorySnapshot.FieldArgs(fieldInfo, lineage));
+				}
+			}
+		}
+		this.CountAll();
+		foreach (global::UnityEngine.Object @object in Resources.FindObjectsOfTypeAll(typeof(global::UnityEngine.Object)))
+		{
+			lineage.obj = @object;
+			lineage.parent0 = @object.GetType();
+			this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(@object.GetType(), "Object." + @object.name, lineage));
+		}
+		this.CountAll();
 	}
 
 	public void WriteTypeDetails(MemorySnapshot compare)

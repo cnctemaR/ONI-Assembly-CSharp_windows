@@ -8,15 +8,12 @@ using UnityEngine.Video;
 
 namespace UnityEngine.Experimental.Video
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that controls playback of a VideoClip.</para>
-	/// </summary>
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
 	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
-	[NativeHeader("Modules/Video/Public/VideoClip.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[RequiredByNativeCode]
 	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Video/Public/VideoClip.h")]
+	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
 	public struct VideoClipPlayable : IPlayable, IEquatable<VideoClipPlayable>
 	{
 		internal VideoClipPlayable(PlayableHandle handle)
@@ -31,15 +28,6 @@ namespace UnityEngine.Experimental.Video
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates a VideoClipPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph object that will own the VideoClipPlayable.</param>
-		/// <param name="looping">Indicates if VideoClip loops when it reaches the end.</param>
-		/// <param name="clip">VideoClip used to produce textures in the PlayableGraph.</param>
-		/// <returns>
-		///   <para>A VideoClipPlayable linked to the PlayableGraph.</para>
-		/// </returns>
 		public static VideoClipPlayable Create(PlayableGraph graph, VideoClip clip, bool looping)
 		{
 			PlayableHandle playableHandle = VideoClipPlayable.CreateHandle(graph, clip, looping);
@@ -169,36 +157,47 @@ namespace UnityEngine.Experimental.Video
 			}
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern VideoClip GetClipInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetClipInternal(ref PlayableHandle hdl, VideoClip clip);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetLoopedInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLoopedInternal(ref PlayableHandle hdl, bool looped);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetIsPlayingInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern double GetStartDelayInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetStartDelayInternal(ref PlayableHandle hdl, double delay);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern double GetPauseDelayInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetPauseDelayInternal(ref PlayableHandle hdl, double delay);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool InternalCreateVideoClipPlayable(ref PlayableGraph graph, VideoClip clip, bool looping, ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
 

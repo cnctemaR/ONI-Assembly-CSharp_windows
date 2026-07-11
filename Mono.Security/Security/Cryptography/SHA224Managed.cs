@@ -8,6 +8,7 @@ namespace Mono.Security.Cryptography
 		{
 			this._H = new uint[8];
 			this._ProcessingBuffer = new byte[64];
+			this.buff = new uint[64];
 			this.Initialize();
 		}
 
@@ -101,45 +102,51 @@ namespace Mono.Security.Cryptography
 
 		private void ProcessBlock(byte[] inputBuffer, int inputOffset)
 		{
+			uint[] k = SHAConstants.K1;
+			uint[] array = this.buff;
 			this.count += 64UL;
-			uint[] array = new uint[64];
 			for (int i = 0; i < 16; i++)
 			{
 				array[i] = (uint)(((int)inputBuffer[inputOffset + 4 * i] << 24) | ((int)inputBuffer[inputOffset + 4 * i + 1] << 16) | ((int)inputBuffer[inputOffset + 4 * i + 2] << 8) | (int)inputBuffer[inputOffset + 4 * i + 3]);
 			}
 			for (int i = 16; i < 64; i++)
 			{
-				array[i] = this.Ro1(array[i - 2]) + array[i - 7] + this.Ro0(array[i - 15]) + array[i - 16];
+				uint num = array[i - 15];
+				num = ((num >> 7) | (num << 25)) ^ ((num >> 18) | (num << 14)) ^ (num >> 3);
+				uint num2 = array[i - 2];
+				num2 = ((num2 >> 17) | (num2 << 15)) ^ ((num2 >> 19) | (num2 << 13)) ^ (num2 >> 10);
+				array[i] = num2 + array[i - 7] + num + array[i - 16];
 			}
-			uint num = this._H[0];
-			uint num2 = this._H[1];
-			uint num3 = this._H[2];
-			uint num4 = this._H[3];
-			uint num5 = this._H[4];
-			uint num6 = this._H[5];
-			uint num7 = this._H[6];
-			uint num8 = this._H[7];
+			uint num3 = this._H[0];
+			uint num4 = this._H[1];
+			uint num5 = this._H[2];
+			uint num6 = this._H[3];
+			uint num7 = this._H[4];
+			uint num8 = this._H[5];
+			uint num9 = this._H[6];
+			uint num10 = this._H[7];
 			for (int i = 0; i < 64; i++)
 			{
-				uint num9 = num8 + this.Sig1(num5) + this.Ch(num5, num6, num7) + SHAConstants.K1[i] + array[i];
-				uint num10 = this.Sig0(num) + this.Maj(num, num2, num3);
+				uint num = num10 + (((num7 >> 6) | (num7 << 26)) ^ ((num7 >> 11) | (num7 << 21)) ^ ((num7 >> 25) | (num7 << 7))) + ((num7 & num8) ^ (~num7 & num9)) + k[i] + array[i];
+				uint num2 = ((num3 >> 2) | (num3 << 30)) ^ ((num3 >> 13) | (num3 << 19)) ^ ((num3 >> 22) | (num3 << 10));
+				num2 += (num3 & num4) ^ (num3 & num5) ^ (num4 & num5);
+				num10 = num9;
+				num9 = num8;
 				num8 = num7;
-				num7 = num6;
+				num7 = num6 + num;
 				num6 = num5;
-				num5 = num4 + num9;
+				num5 = num4;
 				num4 = num3;
-				num3 = num2;
-				num2 = num;
-				num = num9 + num10;
+				num3 = num + num2;
 			}
-			this._H[0] += num;
-			this._H[1] += num2;
-			this._H[2] += num3;
-			this._H[3] += num4;
-			this._H[4] += num5;
-			this._H[5] += num6;
-			this._H[6] += num7;
-			this._H[7] += num8;
+			this._H[0] += num3;
+			this._H[1] += num4;
+			this._H[2] += num5;
+			this._H[3] += num6;
+			this._H[4] += num7;
+			this._H[5] += num8;
+			this._H[6] += num9;
+			this._H[7] += num10;
 		}
 
 		private void ProcessFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
@@ -190,5 +197,7 @@ namespace Mono.Security.Cryptography
 		private byte[] _ProcessingBuffer;
 
 		private int _ProcessingBufferCount;
+
+		private uint[] buff;
 	}
 }

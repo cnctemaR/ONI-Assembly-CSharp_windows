@@ -8,7 +8,7 @@ public static class Strings
 		string text = "MISSING";
 		foreach (StringKey stringKey in keys)
 		{
-			if (text != string.Empty)
+			if (text != "")
 			{
 				text += ".";
 			}
@@ -57,7 +57,7 @@ public static class Strings
 
 	public static void PrintTable()
 	{
-		Strings.RootTable.Print(string.Empty);
+		Strings.RootTable.Print("");
 	}
 
 	private static StringTable RootTable = new StringTable();

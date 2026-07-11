@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Mono.Unix.Native;
 
 namespace Mono.Unix
@@ -106,8 +107,7 @@ namespace Mono.Unix
 			}
 			set
 			{
-				int num = Syscall.chmod(this.FullPath, value);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num);
+				UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.chmod(this.FullPath, value));
 			}
 		}
 
@@ -125,8 +125,7 @@ namespace Mono.Unix
 			get
 			{
 				this.AssertValid();
-				int st_mode = (int)this.stat.st_mode;
-				return (FileAccessPermissions)(st_mode & 511);
+				return (FileAccessPermissions)(this.stat.st_mode & FilePermissions.ACCESSPERMS);
 			}
 			set
 			{
@@ -143,8 +142,7 @@ namespace Mono.Unix
 			get
 			{
 				this.AssertValid();
-				int st_mode = (int)this.stat.st_mode;
-				return (FileSpecialAttributes)(st_mode & 3584);
+				return (FileSpecialAttributes)(this.stat.st_mode & (FilePermissions.S_ISUID | FilePermissions.S_ISGID | FilePermissions.S_ISVTX));
 			}
 			set
 			{
@@ -242,7 +240,7 @@ namespace Mono.Unix
 			get
 			{
 				this.AssertValid();
-				return NativeConvert.ToDateTime(this.stat.st_atime);
+				return NativeConvert.ToDateTime(this.stat.st_atime, this.stat.st_atime_nsec);
 			}
 		}
 
@@ -259,7 +257,7 @@ namespace Mono.Unix
 			get
 			{
 				this.AssertValid();
-				return NativeConvert.ToDateTime(this.stat.st_mtime);
+				return NativeConvert.ToDateTime(this.stat.st_mtime, this.stat.st_mtime_nsec);
 			}
 		}
 
@@ -276,7 +274,7 @@ namespace Mono.Unix
 			get
 			{
 				this.AssertValid();
-				return NativeConvert.ToDateTime(this.stat.st_ctime);
+				return NativeConvert.ToDateTime(this.stat.st_ctime, this.stat.st_ctime_nsec);
 			}
 		}
 
@@ -391,21 +389,18 @@ namespace Mono.Unix
 		[CLSCompliant(false)]
 		public bool CanAccess(AccessModes mode)
 		{
-			int num = Syscall.access(this.FullPath, mode);
-			return num == 0;
+			return Syscall.access(this.FullPath, mode) == 0;
 		}
 
 		public UnixFileSystemInfo CreateLink(string path)
 		{
-			int num = Syscall.link(this.FullName, path);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.link(this.FullName, path));
 			return UnixFileSystemInfo.GetFileSystemEntry(path);
 		}
 
 		public UnixSymbolicLinkInfo CreateSymbolicLink(string path)
 		{
-			int num = Syscall.symlink(this.FullName, path);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.symlink(this.FullName, path));
 			return new UnixSymbolicLinkInfo(path);
 		}
 
@@ -456,8 +451,7 @@ namespace Mono.Unix
 		{
 			uint num = Convert.ToUInt32(owner);
 			uint num2 = Convert.ToUInt32(group);
-			int num3 = Syscall.chown(this.FullPath, num, num2);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num3);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.chown(this.FullPath, num, num2));
 		}
 
 		public void SetOwner(string owner)
@@ -527,27 +521,42 @@ namespace Mono.Unix
 
 		public static UnixFileSystemInfo GetFileSystemEntry(string path)
 		{
-			Stat stat;
-			int num = Syscall.lstat(path, out stat);
-			if (num == -1 && Stdlib.GetLastError() == Errno.ENOENT)
+			UnixFileSystemInfo unixFileSystemInfo;
+			if (UnixFileSystemInfo.TryGetFileSystemEntry(path, out unixFileSystemInfo))
 			{
-				return new UnixFileInfo(path);
+				return unixFileSystemInfo;
 			}
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
-			if (UnixFileSystemInfo.IsFileType(stat.st_mode, FilePermissions.S_IFDIR))
-			{
-				return new UnixDirectoryInfo(path, stat);
-			}
-			if (UnixFileSystemInfo.IsFileType(stat.st_mode, FilePermissions.S_IFLNK))
-			{
-				return new UnixSymbolicLinkInfo(path, stat);
-			}
-			return new UnixFileInfo(path, stat);
+			UnixMarshal.ThrowExceptionForLastError();
+			throw new DirectoryNotFoundException("UnixMarshal.ThrowExceptionForLastError didn't throw?!");
 		}
 
-		internal const FileSpecialAttributes AllSpecialAttributes = FileSpecialAttributes.SetUserId | FileSpecialAttributes.SetGroupId | FileSpecialAttributes.Sticky;
-
-		internal const FileTypes AllFileTypes = (FileTypes)61440;
+		public static bool TryGetFileSystemEntry(string path, out UnixFileSystemInfo entry)
+		{
+			Stat stat;
+			if (Syscall.lstat(path, out stat) != -1)
+			{
+				if (UnixFileSystemInfo.IsFileType(stat.st_mode, FilePermissions.S_IFDIR))
+				{
+					entry = new UnixDirectoryInfo(path, stat);
+				}
+				else if (UnixFileSystemInfo.IsFileType(stat.st_mode, FilePermissions.S_IFLNK))
+				{
+					entry = new UnixSymbolicLinkInfo(path, stat);
+				}
+				else
+				{
+					entry = new UnixFileInfo(path, stat);
+				}
+				return true;
+			}
+			if (Stdlib.GetLastError() == Errno.ENOENT)
+			{
+				entry = new UnixFileInfo(path);
+				return true;
+			}
+			entry = null;
+			return false;
+		}
 
 		private Stat stat;
 
@@ -556,5 +565,9 @@ namespace Mono.Unix
 		private string originalPath;
 
 		private bool valid;
+
+		internal const FileSpecialAttributes AllSpecialAttributes = FileSpecialAttributes.SetUserId | FileSpecialAttributes.SetGroupId | FileSpecialAttributes.Sticky;
+
+		internal const FileTypes AllFileTypes = (FileTypes)61440;
 	}
 }

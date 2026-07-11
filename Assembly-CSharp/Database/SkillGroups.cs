@@ -31,7 +31,7 @@ namespace Database
 			this.Research = base.Add(new SkillGroup("Research", Db.Get().ChoreGroups.Research.Id, DUPLICANTS.CHOREGROUPS.RESEARCH.NAME, "icon_errand_research", "icon_archetype_research"));
 			this.Research.relevantAttributes = new List<Klei.AI.Attribute> { Db.Get().ChoreGroups.Research.attribute };
 			this.Research.requiredChoreGroups = new List<string> { Db.Get().ChoreGroups.Research.Id };
-			this.Suits = base.Add(new SkillGroup("Suits", string.Empty, DUPLICANTS.ROLES.GROUPS.SUITS, "suit_overlay_icon", "icon_archetype_astronaut"));
+			this.Suits = base.Add(new SkillGroup("Suits", "", DUPLICANTS.ROLES.GROUPS.SUITS, "suit_overlay_icon", "icon_archetype_astronaut"));
 			this.Suits.relevantAttributes = new List<Klei.AI.Attribute> { Db.Get().Attributes.Athletics };
 			this.Suits.requiredChoreGroups = new List<string> { Db.Get().ChoreGroups.Hauling.Id };
 			this.Hauling = base.Add(new SkillGroup("Hauling", Db.Get().ChoreGroups.Hauling.Id, DUPLICANTS.CHOREGROUPS.HAULING.NAME, "icon_errand_supply", "icon_archetype_storage"));

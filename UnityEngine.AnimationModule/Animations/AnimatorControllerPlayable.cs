@@ -8,16 +8,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that controls an animation RuntimeAnimatorController.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
 	[StaticAccessor("AnimatorControllerPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Animation/Director/AnimatorControllerPlayable.h")]
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
 	[NativeHeader("Runtime/Animation/RuntimeAnimatorController.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimatorControllerPlayable.h")]
 	public struct AnimatorControllerPlayable : IPlayable, IEquatable<AnimatorControllerPlayable>
 	{
 		internal AnimatorControllerPlayable(PlayableHandle handle)
@@ -26,9 +23,6 @@ namespace UnityEngine.Animations
 			this.SetHandle(handle);
 		}
 
-		/// <summary>
-		///   <para>Returns an invalid AnimatorControllerPlayable.</para>
-		/// </summary>
 		public static AnimatorControllerPlayable Null
 		{
 			get
@@ -37,14 +31,6 @@ namespace UnityEngine.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Creates an AnimatorControllerPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph object that will own the AnimatorControllerPlayable.</param>
-		/// <param name="controller">The RuntimeAnimatorController that will be added in the graph.</param>
-		/// <returns>
-		///   <para>A AnimatorControllerPlayable.</para>
-		/// </returns>
 		public static AnimatorControllerPlayable Create(PlayableGraph graph, RuntimeAnimatorController controller)
 		{
 			PlayableHandle playableHandle = AnimatorControllerPlayable.CreateHandle(graph, controller);
@@ -255,6 +241,7 @@ namespace UnityEngine.Animations
 			AnimatorControllerPlayable.GetAnimatorClipInfoInternal(ref this.m_Handle, layerIndex, false, clips);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex, bool isCurrent, object clips);
 
@@ -286,9 +273,9 @@ namespace UnityEngine.Animations
 		public AnimatorControllerParameter GetParameter(int index)
 		{
 			AnimatorControllerParameter[] parametersArrayInternal = AnimatorControllerPlayable.GetParametersArrayInternal(ref this.m_Handle);
-			if (index < 0 && index >= parametersArrayInternal.Length)
+			if (index < 0 || index >= parametersArrayInternal.Length)
 			{
-				throw new IndexOutOfRangeException("index");
+				throw new IndexOutOfRangeException("Invalid parameter index.");
 			}
 			return parametersArrayInternal[index];
 		}
@@ -423,29 +410,37 @@ namespace UnityEngine.Animations
 			return AnimatorControllerPlayable.ResolveHashInternal(ref this.m_Handle, hash);
 		}
 
+		[NativeThrows]
 		private static bool CreateHandleInternal(PlayableGraph graph, RuntimeAnimatorController controller, ref PlayableHandle handle)
 		{
 			return AnimatorControllerPlayable.CreateHandleInternal_Injected(ref graph, controller, ref handle);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern RuntimeAnimatorController GetAnimatorControllerInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetLayerCountInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string GetLayerNameInternal(ref PlayableHandle handle, int layerIndex);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetLayerIndexInternal(ref PlayableHandle handle, string layerName);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float GetLayerWeightInternal(ref PlayableHandle handle, int layerIndex);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLayerWeightInternal(ref PlayableHandle handle, int layerIndex, float weight);
 
+		[NativeThrows]
 		private static AnimatorStateInfo GetCurrentAnimatorStateInfoInternal(ref PlayableHandle handle, int layerIndex)
 		{
 			AnimatorStateInfo animatorStateInfo;
@@ -453,6 +448,7 @@ namespace UnityEngine.Animations
 			return animatorStateInfo;
 		}
 
+		[NativeThrows]
 		private static AnimatorStateInfo GetNextAnimatorStateInfoInternal(ref PlayableHandle handle, int layerIndex)
 		{
 			AnimatorStateInfo animatorStateInfo;
@@ -460,6 +456,7 @@ namespace UnityEngine.Animations
 			return animatorStateInfo;
 		}
 
+		[NativeThrows]
 		private static AnimatorTransitionInfo GetAnimatorTransitionInfoInternal(ref PlayableHandle handle, int layerIndex)
 		{
 			AnimatorTransitionInfo animatorTransitionInfo;
@@ -467,24 +464,31 @@ namespace UnityEngine.Animations
 			return animatorTransitionInfo;
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnimatorClipInfo[] GetCurrentAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetAnimatorClipInfoCountInternal(ref PlayableHandle handle, int layerIndex, bool current);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnimatorClipInfo[] GetNextAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string ResolveHashInternal(ref PlayableHandle handle, int hash);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool IsInTransitionInternal(ref PlayableHandle handle, int layerIndex);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnimatorControllerParameter[] GetParametersArrayInternal(ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetParameterCountInternal(ref PlayableHandle handle);
 
@@ -492,72 +496,95 @@ namespace UnityEngine.Animations
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int StringToHash(string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CrossFadeInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, int layer, float fixedTime);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CrossFadeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, int layer, float normalizedTime);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void PlayInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, int layer, float fixedTime);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void PlayInternal(ref PlayableHandle handle, int stateNameHash, int layer, float normalizedTime);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool HasStateInternal(ref PlayableHandle handle, int layerIndex, int stateID);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetFloatString(ref PlayableHandle handle, string name, float value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetFloatID(ref PlayableHandle handle, int id, float value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float GetFloatString(ref PlayableHandle handle, string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float GetFloatID(ref PlayableHandle handle, int id);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetBoolString(ref PlayableHandle handle, string name, bool value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetBoolID(ref PlayableHandle handle, int id, bool value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetBoolString(ref PlayableHandle handle, string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetBoolID(ref PlayableHandle handle, int id);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetIntegerString(ref PlayableHandle handle, string name, int value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetIntegerID(ref PlayableHandle handle, int id, int value);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetIntegerString(ref PlayableHandle handle, string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetIntegerID(ref PlayableHandle handle, int id);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetTriggerString(ref PlayableHandle handle, string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetTriggerID(ref PlayableHandle handle, int id);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ResetTriggerString(ref PlayableHandle handle, string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ResetTriggerID(ref PlayableHandle handle, int id);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool IsParameterControlledByCurveString(ref PlayableHandle handle, string name);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool IsParameterControlledByCurveID(ref PlayableHandle handle, int id);
 

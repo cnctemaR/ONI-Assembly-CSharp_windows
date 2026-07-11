@@ -7,15 +7,15 @@ namespace Klei
 {
 	public class MemoryFileDirectory : IFileDirectory
 	{
+		public string GetID()
+		{
+			return this.id;
+		}
+
 		public MemoryFileDirectory(string id, string mount_point = "")
 		{
 			this.id = id;
 			this.mountPoint = FileSystem.Normalize(mount_point);
-		}
-
-		public string GetID()
-		{
-			return this.id;
 		}
 
 		public string GetRoot()
@@ -41,7 +41,7 @@ namespace Klei
 			string fullFilename = this.GetFullFilename(filename);
 			if (this.dataMap.ContainsKey(fullFilename))
 			{
-				throw new ArgumentException(string.Format("MemoryFileSystem: '{0}' is already mapped.", new object[0]));
+				throw new ArgumentException(string.Format("MemoryFileSystem: '{0}' is already mapped.", Array.Empty<object>()));
 			}
 			this.dataMap[fullFilename] = data;
 		}

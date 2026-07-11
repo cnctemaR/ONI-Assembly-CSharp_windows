@@ -3,11 +3,11 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("C7BD73DE-9F85-3290-88EE-090B8BDFE2DF")]
 	[TypeLibImportClass(typeof(EnumBuilder))]
 	[ComVisible(true)]
-	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("C7BD73DE-9F85-3290-88EE-090B8BDFE2DF")]
+	[CLSCompliant(false)]
 	public interface _EnumBuilder
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

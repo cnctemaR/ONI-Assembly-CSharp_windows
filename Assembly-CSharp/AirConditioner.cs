@@ -70,39 +70,31 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		for (int i = 0; i < items.Count; i++)
 		{
 			PrimaryElement component = items[i].GetComponent<PrimaryElement>();
-			if (component.Mass > 0f)
+			if (component.Mass > 0f && (!this.isLiquidConditioner || !component.Element.IsGas) && (this.isLiquidConditioner || !component.Element.IsLiquid))
 			{
-				if (!this.isLiquidConditioner || !component.Element.IsGas)
+				flag = true;
+				this.lastGasTemp = component.Temperature;
+				float num = component.Temperature + this.temperatureDelta;
+				if (num < 1f)
 				{
-					if (this.isLiquidConditioner || !component.Element.IsLiquid)
-					{
-						flag = true;
-						this.lastGasTemp = component.Temperature;
-						float num = component.Temperature + this.temperatureDelta;
-						if (num < 1f)
-						{
-							num = 1f;
-							this.lowTempLag = Mathf.Min(this.lowTempLag + dt / 5f, 1f);
-						}
-						else
-						{
-							this.lowTempLag = Mathf.Min(this.lowTempLag - dt / 5f, 0f);
-						}
-						ConduitFlow conduitFlow = ((!this.isLiquidConditioner) ? Game.Instance.gasConduitFlow : Game.Instance.liquidConduitFlow);
-						float num2 = conduitFlow.AddElement(this.cooledAirOutputCell, component.ElementID, component.Mass, num, component.DiseaseIdx, component.DiseaseCount);
-						component.KeepZeroMassObject = true;
-						float num3 = num2 / component.Mass;
-						int num4 = (int)((float)component.DiseaseCount * num3);
-						component.Mass -= num2;
-						component.ModifyDiseaseCount(-num4, "AirConditioner.UpdateState");
-						float num5 = num - component.Temperature;
-						float num6 = num5 * component.Element.specificHeatCapacity * num2;
-						float num7 = ((this.lastSampleTime <= 0f) ? 1f : (Time.time - this.lastSampleTime));
-						this.lastSampleTime = Time.time;
-						GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, -num6, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, num7);
-						break;
-					}
+					num = 1f;
+					this.lowTempLag = Mathf.Min(this.lowTempLag + dt / 5f, 1f);
 				}
+				else
+				{
+					this.lowTempLag = Mathf.Min(this.lowTempLag - dt / 5f, 0f);
+				}
+				float num2 = (this.isLiquidConditioner ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow).AddElement(this.cooledAirOutputCell, component.ElementID, component.Mass, num, component.DiseaseIdx, component.DiseaseCount);
+				component.KeepZeroMassObject = true;
+				float num3 = num2 / component.Mass;
+				int num4 = (int)((float)component.DiseaseCount * num3);
+				component.Mass -= num2;
+				component.ModifyDiseaseCount(-num4, "AirConditioner.UpdateState");
+				float num5 = (num - component.Temperature) * component.Element.specificHeatCapacity * num2;
+				float num6 = ((this.lastSampleTime > 0f) ? (Time.time - this.lastSampleTime) : 1f);
+				this.lastSampleTime = Time.time;
+				GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, -num5, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, num6);
+				break;
 			}
 		}
 		if (Time.time - this.lastSampleTime > 2f)
@@ -133,21 +125,24 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		{
 			if (this.lowTempLag >= 1f && !this.showingLowTemp)
 			{
-				this.statusHandle = ((!this.isLiquidConditioner) ? this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdGas, this) : this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdLiquid, this));
+				this.statusHandle = (this.isLiquidConditioner ? this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdLiquid, this) : this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdGas, this));
 				this.showingLowTemp = true;
 				this.showingHotEnv = false;
+				return;
 			}
-			else if (this.lowTempLag <= 0f && (this.showingHotEnv || this.showingLowTemp))
+			if (this.lowTempLag <= 0f && (this.showingHotEnv || this.showingLowTemp))
 			{
 				this.statusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Cooling, null);
 				this.showingLowTemp = false;
 				this.showingHotEnv = false;
+				return;
 			}
-			else if (this.statusHandle == Guid.Empty)
+			if (this.statusHandle == Guid.Empty)
 			{
 				this.statusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Cooling, null);
 				this.showingLowTemp = false;
 				this.showingHotEnv = false;
+				return;
 			}
 		}
 		else
@@ -160,7 +155,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string formattedTemperature = GameUtil.GetFormattedTemperature(this.temperatureDelta, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false);
-		Element element = ElementLoader.FindElementByName((!this.isLiquidConditioner) ? "Oxygen" : "Water");
+		Element element = ElementLoader.FindElementByName(this.isLiquidConditioner ? "Water" : "Oxygen");
 		float num;
 		if (this.isLiquidConditioner)
 		{
@@ -172,12 +167,12 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		}
 		float num2 = num * 1f;
 		Descriptor descriptor = default(Descriptor);
-		string text = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedHeatEnergy(num2, GameUtil.HeatEnergyFormatterUnit.Automatic), GameUtil.GetFormattedTemperature(Mathf.Abs(this.temperatureDelta), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false));
-		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedHeatEnergy(num2, GameUtil.HeatEnergyFormatterUnit.Automatic), GameUtil.GetFormattedTemperature(Mathf.Abs(this.temperatureDelta), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false));
+		string text = string.Format(this.isLiquidConditioner ? UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER, GameUtil.GetFormattedHeatEnergy(num2, GameUtil.HeatEnergyFormatterUnit.Automatic), GameUtil.GetFormattedTemperature(Mathf.Abs(this.temperatureDelta), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false));
+		string text2 = string.Format(this.isLiquidConditioner ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER, GameUtil.GetFormattedHeatEnergy(num2, GameUtil.HeatEnergyFormatterUnit.Automatic), GameUtil.GetFormattedTemperature(Mathf.Abs(this.temperatureDelta), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false));
 		descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		Descriptor descriptor2 = default(Descriptor);
-		descriptor2.SetupDescriptor(string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.GASCOOLING : UI.BUILDINGEFFECTS.LIQUIDCOOLING, formattedTemperature), string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.GASCOOLING : UI.BUILDINGEFFECTS.TOOLTIPS.LIQUIDCOOLING, formattedTemperature), Descriptor.DescriptorType.Effect);
+		descriptor2.SetupDescriptor(string.Format(this.isLiquidConditioner ? UI.BUILDINGEFFECTS.LIQUIDCOOLING : UI.BUILDINGEFFECTS.GASCOOLING, formattedTemperature), string.Format(this.isLiquidConditioner ? UI.BUILDINGEFFECTS.TOOLTIPS.LIQUIDCOOLING : UI.BUILDINGEFFECTS.TOOLTIPS.GASCOOLING, formattedTemperature), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor2);
 		return list;
 	}

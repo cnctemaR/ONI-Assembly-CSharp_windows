@@ -45,8 +45,7 @@ public class LogicTimeOfDaySensorConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.RegisterLogicPorts(go, LogicTimeOfDaySensorConfig.OUTPUT_PORT);
-		LogicTimeOfDaySensor logicTimeOfDaySensor = go.AddOrGet<LogicTimeOfDaySensor>();
-		logicTimeOfDaySensor.manuallyControlled = false;
+		go.AddOrGet<LogicTimeOfDaySensor>().manuallyControlled = false;
 	}
 
 	public static string ID = "LogicTimeOfDaySensor";

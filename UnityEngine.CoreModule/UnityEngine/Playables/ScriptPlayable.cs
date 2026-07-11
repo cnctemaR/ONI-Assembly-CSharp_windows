@@ -2,9 +2,6 @@
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>A IPlayable implementation that contains a PlayableBehaviour for the PlayableGraph. PlayableBehaviour can be used to write custom Playable that implement their own PrepareFrame callback.</para>
-	/// </summary>
 	public struct ScriptPlayable<T> : IPlayable, IEquatable<ScriptPlayable<T>> where T : class, IPlayableBehaviour, new()
 	{
 		internal ScriptPlayable(PlayableHandle handle)

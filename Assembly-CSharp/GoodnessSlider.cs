@@ -12,10 +12,7 @@ public class GoodnessSlider : KMonoBehaviour
 
 	public void UpdateValues()
 	{
-		Graphic graphic = this.text;
-		Color color = this.gradient.Evaluate(this.slider.value);
-		this.fill.color = color;
-		graphic.color = color;
+		this.text.color = (this.fill.color = this.gradient.Evaluate(this.slider.value));
 		for (int i = 0; i < this.gradient.colorKeys.Length; i++)
 		{
 			if (this.gradient.colorKeys[i].time < this.slider.value)

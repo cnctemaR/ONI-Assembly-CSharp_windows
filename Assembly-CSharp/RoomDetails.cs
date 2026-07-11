@@ -5,10 +5,9 @@ public class RoomDetails
 {
 	public static string RoomDetailString(Room room)
 	{
-		string text = string.Empty;
+		string text = "";
 		text = text + "<b>" + ROOMS.DETAILS.HEADER + "</b>";
-		RoomType roomType = room.roomType;
-		foreach (RoomDetails.Detail detail in roomType.display_details)
+		foreach (RoomDetails.Detail detail in room.roomType.display_details)
 		{
 			text = text + "\n    • " + detail.resolve_string_function(room);
 		}
@@ -42,7 +41,7 @@ public class RoomDetails
 
 	public static readonly RoomDetails.Detail ASSIGNED_TO = new RoomDetails.Detail(delegate(Room room)
 	{
-		string text = string.Empty;
+		string text = "";
 		foreach (KPrefabID kprefabID in room.GetPrimaryEntities())
 		{
 			if (!(kprefabID == null))
@@ -53,17 +52,17 @@ public class RoomDetails
 					IAssignableIdentity assignee = component.assignee;
 					if (assignee == null)
 					{
-						text += ((!(text == string.Empty)) ? ("\n<color=#BCBCBC>    • " + kprefabID.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED) : ("<color=#BCBCBC>    • " + kprefabID.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED));
+						text += ((text == "") ? ("<color=#BCBCBC>    • " + kprefabID.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED) : ("\n<color=#BCBCBC>    • " + kprefabID.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED));
 						text += "</color>";
 					}
 					else
 					{
-						text += ((!(text == string.Empty)) ? ("\n    • " + kprefabID.GetProperName() + ": " + assignee.GetProperName()) : ("    • " + kprefabID.GetProperName() + ": " + assignee.GetProperName()));
+						text += ((text == "") ? ("    • " + kprefabID.GetProperName() + ": " + assignee.GetProperName()) : ("\n    • " + kprefabID.GetProperName() + ": " + assignee.GetProperName()));
 					}
 				}
 			}
 		}
-		if (text == string.Empty)
+		if (text == "")
 		{
 			text = ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED;
 		}

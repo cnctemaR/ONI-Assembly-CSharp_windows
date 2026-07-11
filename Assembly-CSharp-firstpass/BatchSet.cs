@@ -3,15 +3,6 @@ using System.Collections.Generic;
 
 public class BatchSet
 {
-	public BatchSet(KAnimBatchGroup batchGroup, BatchKey batchKey, Vector2I spacialIdx)
-	{
-		this.idx = spacialIdx;
-		this.key = batchKey;
-		this.dirty = true;
-		this.group = batchGroup;
-		this.batches = new List<KAnimBatch>();
-	}
-
 	public KAnimBatchGroup group { get; private set; }
 
 	private protected List<KAnimBatch> batches { protected get; private set; }
@@ -33,6 +24,15 @@ public class BatchSet
 	}
 
 	public int dirtyBatchLastFrame { get; private set; }
+
+	public BatchSet(KAnimBatchGroup batchGroup, BatchKey batchKey, Vector2I spacialIdx)
+	{
+		this.idx = spacialIdx;
+		this.key = batchKey;
+		this.dirty = true;
+		this.group = batchGroup;
+		this.batches = new List<KAnimBatch>();
+	}
 
 	public void Clear()
 	{
@@ -59,8 +59,7 @@ public class BatchSet
 		{
 			Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName());
 		}
-		HashedString batchGroupID = controller.GetBatchGroupID(false);
-		if (!(batchGroupID == this.key.groupID))
+		if (!(controller.GetBatchGroupID(false) == this.key.groupID))
 		{
 			Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName());
 		}

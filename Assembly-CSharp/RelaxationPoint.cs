@@ -64,8 +64,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(worker.gameObject);
-		if (amountInstance.value <= this.stopStressingValue)
+		if (Db.Get().Amounts.Stress.Lookup(worker.gameObject).value <= this.stopStressingValue)
 		{
 			return true;
 		}

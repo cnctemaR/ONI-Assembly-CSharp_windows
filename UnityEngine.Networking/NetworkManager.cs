@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 namespace UnityEngine.Networking
 {
 	[AddComponentMenu("Network/NetworkManager")]
+	[Obsolete("The high level API classes are deprecated and will be removed in the future.")]
 	public class NetworkManager : MonoBehaviour
 	{
 		public int networkPort
@@ -391,6 +392,34 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		public static INetworkTransport defaultTransport
+		{
+			get
+			{
+				return new DefaultNetworkTransport();
+			}
+		}
+
+		public static INetworkTransport activeTransport
+		{
+			get
+			{
+				return NetworkManager.s_ActiveTransport;
+			}
+			set
+			{
+				if (NetworkManager.s_ActiveTransport != null && NetworkManager.s_ActiveTransport.IsStarted)
+				{
+					throw new InvalidOperationException("Cannot change network transport when current transport object is in use.");
+				}
+				if (value == null)
+				{
+					throw new ArgumentNullException("Cannot set active transport to null.");
+				}
+				NetworkManager.s_ActiveTransport = value;
+			}
+		}
+
 		private void Awake()
 		{
 			this.InitializeSingleton();
@@ -554,7 +583,7 @@ namespace UnityEngine.Networking
 			NetworkServer.useWebSockets = this.m_UseWebSockets;
 			if (this.m_GlobalConfig != null)
 			{
-				NetworkTransport.Init(this.m_GlobalConfig);
+				NetworkManager.activeTransport.Init(this.m_GlobalConfig);
 			}
 			if (this.m_CustomConfig && this.m_ConnectionConfig != null && config == null)
 			{
@@ -676,13 +705,13 @@ namespace UnityEngine.Networking
 			this.isNetworkActive = true;
 			if (this.m_GlobalConfig != null)
 			{
-				NetworkTransport.Init(this.m_GlobalConfig);
+				NetworkManager.activeTransport.Init(this.m_GlobalConfig);
 			}
 			this.client = new NetworkClient();
 			this.client.hostPort = hostPort;
 			if (config != null)
 			{
-				if (config.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4 && Application.platform != RuntimePlatform.PSP2)
+				if (config.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4)
 				{
 					throw new ArgumentOutOfRangeException("Platform specific protocols are not supported on this platform");
 				}
@@ -695,7 +724,7 @@ namespace UnityEngine.Networking
 				{
 					this.m_ConnectionConfig.AddChannel(this.m_Channels[i]);
 				}
-				if (this.m_ConnectionConfig.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4 && Application.platform != RuntimePlatform.PSP2)
+				if (this.m_ConnectionConfig.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4)
 				{
 					throw new ArgumentOutOfRangeException("Platform specific protocols are not supported on this platform");
 				}
@@ -769,7 +798,7 @@ namespace UnityEngine.Networking
 		{
 			this.OnStartHost();
 			NetworkClient networkClient2;
-			if (this.StartServer(config, maxConnections))
+			if (this.StartServer(null, config, maxConnections))
 			{
 				NetworkClient networkClient = this.ConnectLocalClient();
 				this.OnServerConnect(networkClient.connection);
@@ -1659,6 +1688,8 @@ namespace UnityEngine.Networking
 		private EndPoint m_EndPoint;
 
 		private bool m_ClientLoadedScene;
+
+		private static INetworkTransport s_ActiveTransport = new DefaultNetworkTransport();
 
 		public static string networkSceneName = "";
 

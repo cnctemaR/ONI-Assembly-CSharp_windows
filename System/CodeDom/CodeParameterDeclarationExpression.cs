@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeParameterDeclarationExpression : CodeExpression
 	{
@@ -14,47 +11,55 @@ namespace System.CodeDom
 
 		public CodeParameterDeclarationExpression(CodeTypeReference type, string name)
 		{
-			this.type = type;
-			this.name = name;
+			this.Type = type;
+			this.Name = name;
 		}
 
 		public CodeParameterDeclarationExpression(string type, string name)
 		{
-			this.type = new CodeTypeReference(type);
-			this.name = name;
+			this.Type = new CodeTypeReference(type);
+			this.Name = name;
 		}
 
 		public CodeParameterDeclarationExpression(Type type, string name)
 		{
-			this.type = new CodeTypeReference(type);
-			this.name = name;
+			this.Type = new CodeTypeReference(type);
+			this.Name = name;
 		}
 
 		public CodeAttributeDeclarationCollection CustomAttributes
 		{
 			get
 			{
-				if (this.customAttributes == null)
+				CodeAttributeDeclarationCollection codeAttributeDeclarationCollection;
+				if ((codeAttributeDeclarationCollection = this._customAttributes) == null)
 				{
-					this.customAttributes = new CodeAttributeDeclarationCollection();
+					codeAttributeDeclarationCollection = (this._customAttributes = new CodeAttributeDeclarationCollection());
 				}
-				return this.customAttributes;
+				return codeAttributeDeclarationCollection;
 			}
 			set
 			{
-				this.customAttributes = value;
+				this._customAttributes = value;
 			}
 		}
 
-		public FieldDirection Direction
+		public FieldDirection Direction { get; set; }
+
+		public CodeTypeReference Type
 		{
 			get
 			{
-				return this.direction;
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._type) == null)
+				{
+					codeTypeReference = (this._type = new CodeTypeReference(""));
+				}
+				return codeTypeReference;
 			}
 			set
 			{
-				this.direction = value;
+				this._type = value;
 			}
 		}
 
@@ -62,45 +67,18 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.name == null)
-				{
-					return string.Empty;
-				}
-				return this.name;
+				return this._name ?? string.Empty;
 			}
 			set
 			{
-				this.name = value;
+				this._name = value;
 			}
 		}
 
-		public CodeTypeReference Type
-		{
-			get
-			{
-				if (this.type == null)
-				{
-					this.type = new CodeTypeReference(string.Empty);
-				}
-				return this.type;
-			}
-			set
-			{
-				this.type = value;
-			}
-		}
+		private CodeTypeReference _type;
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
+		private string _name;
 
-		private CodeAttributeDeclarationCollection customAttributes;
-
-		private FieldDirection direction;
-
-		private string name;
-
-		private CodeTypeReference type;
+		private CodeAttributeDeclarationCollection _customAttributes;
 	}
 }

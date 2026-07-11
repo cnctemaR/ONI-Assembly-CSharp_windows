@@ -108,17 +108,15 @@ public class NavPathDrawer : KMonoBehaviour
 			PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(Grid.PosToCell(component), component.CurrentNavType, component.flags);
 			PathFinder.Path path = default(PathFinder.Path);
 			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(mouseCell), ref path);
-			string text = string.Empty;
-			string text2 = text;
+			string text = "";
 			text = string.Concat(new object[]
 			{
-				text2,
+				text,
 				"Source: ",
 				Grid.PosToCell(component),
 				"\n"
 			});
-			text2 = text;
-			text = string.Concat(new object[] { text2, "Dest: ", mouseCell, "\n" });
+			text = string.Concat(new object[] { text, "Dest: ", mouseCell, "\n" });
 			text = text + "Cost: " + path.cost;
 			this.DrawPath(path, component.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), Color.green);
 			DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);

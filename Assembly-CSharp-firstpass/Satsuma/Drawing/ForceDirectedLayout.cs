@@ -5,17 +5,6 @@ namespace Satsuma.Drawing
 {
 	public sealed class ForceDirectedLayout
 	{
-		public ForceDirectedLayout(IGraph graph, Func<Node, PointD> initialPositions = null, int seed = -1)
-		{
-			this.Graph = graph;
-			this.NodePositions = new Dictionary<Node, PointD>();
-			this.SpringForce = (double d) => 2.0 * Math.Log(d);
-			this.ElectricForce = (double d) => 1.0 / (d * d);
-			this.ExternalForce = null;
-			this.TemperatureAttenuation = 0.95;
-			this.Initialize(initialPositions, seed);
-		}
-
 		public IGraph Graph { get; private set; }
 
 		public Dictionary<Node, PointD> NodePositions { get; private set; }
@@ -29,6 +18,17 @@ namespace Satsuma.Drawing
 		public double Temperature { get; set; }
 
 		public double TemperatureAttenuation { get; set; }
+
+		public ForceDirectedLayout(IGraph graph, Func<Node, PointD> initialPositions = null, int seed = -1)
+		{
+			this.Graph = graph;
+			this.NodePositions = new Dictionary<Node, PointD>();
+			this.SpringForce = (double d) => 2.0 * Math.Log(d);
+			this.ElectricForce = (double d) => 1.0 / (d * d);
+			this.ExternalForce = null;
+			this.TemperatureAttenuation = 0.95;
+			this.Initialize(initialPositions, seed);
+		}
 
 		public void Initialize(Func<Node, PointD> initialPositions = null, int seed = -1)
 		{
@@ -89,9 +89,9 @@ namespace Satsuma.Drawing
 			}
 			foreach (Node node3 in this.Graph.Nodes())
 			{
-				Dictionary<Node, PointD> nodePositions;
-				Node node4;
-				(nodePositions = this.NodePositions)[node4 = node3] = nodePositions[node4] + dictionary[node3];
+				Dictionary<Node, PointD> nodePositions = this.NodePositions;
+				Node node4 = node3;
+				nodePositions[node4] += dictionary[node3];
 			}
 			this.Temperature *= this.TemperatureAttenuation;
 		}

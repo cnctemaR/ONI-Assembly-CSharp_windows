@@ -4,7 +4,7 @@ namespace System.Data.Common
 {
 	public enum CatalogLocation
 	{
-		End = 2,
-		Start = 1
+		Start = 1,
+		End
 	}
 }

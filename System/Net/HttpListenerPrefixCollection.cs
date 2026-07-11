@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity;
 
 namespace System.Net
 {
-	public class HttpListenerPrefixCollection : IEnumerable, ICollection<string>, IEnumerable<string>
+	public class HttpListenerPrefixCollection : ICollection<string>, IEnumerable<string>, IEnumerable
 	{
 		internal HttpListenerPrefixCollection(HttpListener listener)
 		{
+			this.prefixes = new List<string>();
+			base..ctor();
 			this.listener = listener;
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.prefixes.GetEnumerator();
 		}
 
 		public int Count
@@ -88,6 +86,11 @@ namespace System.Net
 			return this.prefixes.GetEnumerator();
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.prefixes.GetEnumerator();
+		}
+
 		public bool Remove(string uriPrefix)
 		{
 			this.listener.CheckDisposed();
@@ -103,7 +106,12 @@ namespace System.Net
 			return flag;
 		}
 
-		private List<string> prefixes = new List<string>();
+		internal HttpListenerPrefixCollection()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		private List<string> prefixes;
 
 		private HttpListener listener;
 	}

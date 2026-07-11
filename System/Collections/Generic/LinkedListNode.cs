@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Collections.Generic
 {
-	[ComVisible(false)]
 	public sealed class LinkedListNode<T>
 	{
 		public LinkedListNode(T value)
@@ -13,51 +11,15 @@ namespace System.Collections.Generic
 
 		internal LinkedListNode(LinkedList<T> list, T value)
 		{
-			this.container = list;
+			this.list = list;
 			this.item = value;
-			this.forward = this;
-			this.back = this;
-		}
-
-		internal LinkedListNode(LinkedList<T> list, T value, LinkedListNode<T> previousNode, LinkedListNode<T> nextNode)
-		{
-			this.container = list;
-			this.item = value;
-			this.back = previousNode;
-			this.forward = nextNode;
-			previousNode.forward = this;
-			nextNode.back = this;
-		}
-
-		internal void Detach()
-		{
-			this.back.forward = this.forward;
-			this.forward.back = this.back;
-			this.forward = (this.back = null);
-			this.container = null;
-		}
-
-		internal void SelfReference(LinkedList<T> list)
-		{
-			this.forward = this;
-			this.back = this;
-			this.container = list;
-		}
-
-		internal void InsertBetween(LinkedListNode<T> previousNode, LinkedListNode<T> nextNode, LinkedList<T> list)
-		{
-			previousNode.forward = this;
-			nextNode.back = this;
-			this.forward = nextNode;
-			this.back = previousNode;
-			this.container = list;
 		}
 
 		public LinkedList<T> List
 		{
 			get
 			{
-				return this.container;
+				return this.list;
 			}
 		}
 
@@ -65,7 +27,11 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				return (this.container == null || this.forward == this.container.first) ? null : this.forward;
+				if (this.next != null && this.next != this.list.head)
+				{
+					return this.next;
+				}
+				return null;
 			}
 		}
 
@@ -73,7 +39,11 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				return (this.container == null || this == this.container.first) ? null : this.back;
+				if (this.prev != null && this != this.list.head)
+				{
+					return this.prev;
+				}
+				return null;
 			}
 		}
 
@@ -89,12 +59,19 @@ namespace System.Collections.Generic
 			}
 		}
 
-		private T item;
+		internal void Invalidate()
+		{
+			this.list = null;
+			this.next = null;
+			this.prev = null;
+		}
 
-		private LinkedList<T> container;
+		internal LinkedList<T> list;
 
-		internal LinkedListNode<T> forward;
+		internal LinkedListNode<T> next;
 
-		internal LinkedListNode<T> back;
+		internal LinkedListNode<T> prev;
+
+		internal T item;
 	}
 }

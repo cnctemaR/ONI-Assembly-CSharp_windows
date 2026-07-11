@@ -6,24 +6,6 @@ using UnityEngine;
 [DebuggerDisplay("{x}, {y}")]
 public struct Vector2f
 {
-	public Vector2f(int a, int b)
-	{
-		this.x = (float)a;
-		this.y = (float)b;
-	}
-
-	public Vector2f(float a, float b)
-	{
-		this.x = a;
-		this.y = b;
-	}
-
-	public Vector2f(Vector2 src)
-	{
-		this.x = src.x;
-		this.y = src.y;
-	}
-
 	public float X
 	{
 		get
@@ -46,6 +28,24 @@ public struct Vector2f
 		{
 			this.y = value;
 		}
+	}
+
+	public Vector2f(int a, int b)
+	{
+		this.x = (float)a;
+		this.y = (float)b;
+	}
+
+	public Vector2f(float a, float b)
+	{
+		this.x = a;
+		this.y = b;
+	}
+
+	public Vector2f(Vector2 src)
+	{
+		this.x = src.x;
+		this.y = src.y;
 	}
 
 	public static bool operator ==(Vector2f u, Vector2f v)

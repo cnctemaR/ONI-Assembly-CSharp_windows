@@ -5,6 +5,16 @@ namespace Rendering.World
 {
 	public struct Mask
 	{
+		public Vector2 UV0 { get; private set; }
+
+		public Vector2 UV1 { get; private set; }
+
+		public Vector2 UV2 { get; private set; }
+
+		public Vector2 UV3 { get; private set; }
+
+		public bool IsOpaque { get; private set; }
+
 		public Mask(TextureAtlas atlas, int texture_idx, bool transpose, bool flip_x, bool flip_y, bool is_opaque)
 		{
 			this = default(Mask);
@@ -17,16 +27,6 @@ namespace Rendering.World
 			this.IsOpaque = is_opaque;
 			this.Refresh();
 		}
-
-		public Vector2 UV0 { get; private set; }
-
-		public Vector2 UV1 { get; private set; }
-
-		public Vector2 UV2 { get; private set; }
-
-		public Vector2 UV3 { get; private set; }
-
-		public bool IsOpaque { get; private set; }
 
 		public void SetOffset(int offset)
 		{

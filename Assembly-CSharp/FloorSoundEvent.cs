@@ -21,23 +21,18 @@ public class FloorSoundEvent : SoundEvent
 			vector = component.GetPivotSymbolPosition();
 		}
 		int num = Grid.PosToCell(vector);
-		int num2 = Grid.CellBelow(num);
-		string audioCategory = FloorSoundEvent.GetAudioCategory(num2);
-		string text = StringFormatter.Combine(audioCategory, "_", base.name);
-		string text2 = GlobalAssets.GetSound(text, true);
-		if (text2 == null)
+		string text = GlobalAssets.GetSound(StringFormatter.Combine(FloorSoundEvent.GetAudioCategory(Grid.CellBelow(num)), "_", base.name), true);
+		if (text == null)
 		{
-			text = StringFormatter.Combine("Rock_", base.name);
-			text2 = GlobalAssets.GetSound(text, true);
-			if (text2 == null)
+			text = GlobalAssets.GetSound(StringFormatter.Combine("Rock_", base.name), true);
+			if (text == null)
 			{
-				text = base.name;
-				text2 = GlobalAssets.GetSound(text, true);
+				text = GlobalAssets.GetSound(base.name, true);
 			}
 		}
 		GameObject gameObject = behaviour.controller.gameObject;
 		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
-		if (SoundEvent.IsLowPrioritySound(text2) && !base.objectIsSelectedAndVisible)
+		if (SoundEvent.IsLowPrioritySound(text) && !base.objectIsSelectedAndVisible)
 		{
 			return;
 		}
@@ -52,29 +47,29 @@ public class FloorSoundEvent : SoundEvent
 			return;
 		}
 		bool isLiquid = Grid.Element[num].IsLiquid;
-		float num3 = 0f;
+		float num2 = 0f;
 		if (isLiquid)
 		{
-			num3 = SoundUtil.GetLiquidDepth(num);
+			num2 = SoundUtil.GetLiquidDepth(num);
 			string sound = GlobalAssets.GetSound("Liquid_footstep", true);
 			if (sound != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic)))
 			{
 				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
-				if (num3 > 0f)
+				if (num2 > 0f)
 				{
-					eventInstance.setParameterValue("liquidDepth", num3);
+					eventInstance.setParameterValue("liquidDepth", num2);
 				}
 				SoundEvent.EndOneShot(eventInstance);
 			}
 		}
-		if (text2 != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text2, base.looping, this.isDynamic)))
+		if (text != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text, base.looping, this.isDynamic)))
 		{
-			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector, 1f, false);
+			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text, vector, 1f, false);
 			if (eventInstance2.isValid())
 			{
-				if (num3 > 0f)
+				if (num2 > 0f)
 				{
-					eventInstance2.setParameterValue("liquidDepth", num3);
+					eventInstance2.setParameterValue("liquidDepth", num2);
 				}
 				if (behaviour.currentAnimFile != null && behaviour.currentAnimFile.Contains("anim_loco_walk"))
 				{
@@ -104,7 +99,7 @@ public class FloorSoundEvent : SoundEvent
 					buildingDef = component.Def;
 				}
 			}
-			string text = string.Empty;
+			string text = "";
 			if (buildingDef != null)
 			{
 				string prefabID = buildingDef.PrefabID;

@@ -22,7 +22,7 @@ public class EntryDevLog
 
 	private string TrimAuthor()
 	{
-		string text = string.Empty;
+		string text = "";
 		string[] array = new string[] { "Invoke", "CreateInstance", "AwakeInternal", "Internal", "<>", "YamlDotNet", "Deserialize" };
 		string[] array2 = new string[]
 		{
@@ -50,8 +50,7 @@ public class EntryDevLog
 			{
 				flag = flag || method.Name.Contains(array2[k]);
 			}
-			flag = flag || stackTrace.GetFrame(num).GetMethod().Name.StartsWith("set_") || stackTrace.GetFrame(num).GetMethod().Name.StartsWith("Instantiate");
-			if (!flag)
+			if (!flag && !stackTrace.GetFrame(num).GetMethod().Name.StartsWith("set_") && !stackTrace.GetFrame(num).GetMethod().Name.StartsWith("Instantiate"))
 			{
 				if (i != 0)
 				{
@@ -69,14 +68,6 @@ public class EntryDevLog
 
 	public class ModificationRecord
 	{
-		public ModificationRecord(EntryDevLog.ModificationRecord.ActionType actionType, string target, object newValue, string author)
-		{
-			this.target = target;
-			this.newValue = newValue;
-			this.author = author;
-			this.actionType = actionType;
-		}
-
 		public EntryDevLog.ModificationRecord.ActionType actionType { get; private set; }
 
 		public string target { get; private set; }
@@ -84,6 +75,14 @@ public class EntryDevLog
 		public object newValue { get; private set; }
 
 		public string author { get; private set; }
+
+		public ModificationRecord(EntryDevLog.ModificationRecord.ActionType actionType, string target, object newValue, string author)
+		{
+			this.target = target;
+			this.newValue = newValue;
+			this.author = author;
+			this.actionType = actionType;
+		}
 
 		public enum ActionType
 		{

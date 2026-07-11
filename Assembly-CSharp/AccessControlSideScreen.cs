@@ -104,12 +104,19 @@ public class AccessControlSideScreen : SideScreenContent
 	{
 		bool flag = this.target.Online && (this.doorTarget == null || this.doorTarget.CurrentState == Door.ControlState.Auto);
 		this.disabledOverlay.SetActive(!flag);
-		this.headerBG.ColorState = ((!flag) ? KImage.ColorSelector.Inactive : KImage.ColorSelector.Active);
+		this.headerBG.ColorState = (flag ? KImage.ColorSelector.Active : KImage.ColorSelector.Inactive);
 	}
 
 	private void SortByPermission(bool state)
 	{
-		this.ExecuteSort<int>(this.sortByPermissionToggle, state, (MinionAssignablesProxy identity) => (int)((!this.target.IsDefaultPermission(identity)) ? this.target.GetSetPermission(identity) : ((AccessControl.Permission)(-1))), false);
+		this.ExecuteSort<int>(this.sortByPermissionToggle, state, delegate(MinionAssignablesProxy identity)
+		{
+			if (!this.target.IsDefaultPermission(identity))
+			{
+				return (int)this.target.GetSetPermission(identity);
+			}
+			return -1;
+		}, false);
 	}
 
 	private void ExecuteSort<T>(Toggle toggle, bool state, Func<MinionAssignablesProxy, T> sortFunction, bool refresh = false)
@@ -119,19 +126,17 @@ public class AccessControlSideScreen : SideScreenContent
 		{
 			return;
 		}
-		this.identityList = ((!state) ? this.identityList.OrderByDescending<MinionAssignablesProxy, T>(sortFunction).ToList<MinionAssignablesProxy>() : this.identityList.OrderBy<MinionAssignablesProxy, T>(sortFunction).ToList<MinionAssignablesProxy>());
+		this.identityList = (state ? this.identityList.OrderBy<MinionAssignablesProxy, T>(sortFunction).ToList<MinionAssignablesProxy>() : this.identityList.OrderByDescending<MinionAssignablesProxy, T>(sortFunction).ToList<MinionAssignablesProxy>());
 		if (refresh)
 		{
 			this.Refresh(this.identityList, false);
+			return;
 		}
-		else
+		for (int i = 0; i < this.identityList.Count; i++)
 		{
-			for (int i = 0; i < this.identityList.Count; i++)
+			if (this.identityRowMap.ContainsKey(this.identityList[i]))
 			{
-				if (this.identityRowMap.ContainsKey(this.identityList[i]))
-				{
-					this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
-				}
+				this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
 			}
 		}
 	}
@@ -219,7 +224,7 @@ public class AccessControlSideScreen : SideScreenContent
 							this.identityRowMap[this.identityList[j]].transform.SetSiblingIndex(j);
 						}
 					}
-					break;
+					return;
 				}
 			}
 		}
@@ -274,8 +279,8 @@ public class AccessControlSideScreen : SideScreenContent
 			global::Debug.Assert(b, "b was null");
 			GameObject targetGameObject = a.GetTargetGameObject();
 			GameObject targetGameObject2 = b.GetTargetGameObject();
-			MinionResume minionResume = ((!targetGameObject) ? null : targetGameObject.GetComponent<MinionResume>());
-			MinionResume minionResume2 = ((!targetGameObject2) ? null : targetGameObject2.GetComponent<MinionResume>());
+			MinionResume minionResume = (targetGameObject ? targetGameObject.GetComponent<MinionResume>() : null);
+			MinionResume minionResume2 = (targetGameObject2 ? targetGameObject2.GetComponent<MinionResume>() : null);
 			if (minionResume2 == null)
 			{
 				return 1;
@@ -285,27 +290,26 @@ public class AccessControlSideScreen : SideScreenContent
 				return -1;
 			}
 			int num = minionResume.CurrentRole.CompareTo(minionResume2.CurrentRole);
-			return (num != 0) ? num : AccessControlSideScreen.MinionIdentitySort.CompareByName(a, b);
+			if (num != 0)
+			{
+				return num;
+			}
+			return AccessControlSideScreen.MinionIdentitySort.CompareByName(a, b);
 		}
 
-		// Note: this type is marked as 'beforefieldinit'.
-		static MinionIdentitySort()
+		public static readonly AccessControlSideScreen.MinionIdentitySort.SortInfo[] SortInfos = new AccessControlSideScreen.MinionIdentitySort.SortInfo[]
 		{
-			AccessControlSideScreen.MinionIdentitySort.SortInfo[] array = new AccessControlSideScreen.MinionIdentitySort.SortInfo[2];
-			int num = 0;
-			AccessControlSideScreen.MinionIdentitySort.SortInfo sortInfo = new AccessControlSideScreen.MinionIdentitySort.SortInfo();
-			sortInfo.name = UI.MINION_IDENTITY_SORT.NAME;
-			sortInfo.compare = new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByName);
-			array[num] = sortInfo;
-			int num2 = 1;
-			sortInfo = new AccessControlSideScreen.MinionIdentitySort.SortInfo();
-			sortInfo.name = UI.MINION_IDENTITY_SORT.ROLE;
-			sortInfo.compare = new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByRole);
-			array[num2] = sortInfo;
-			AccessControlSideScreen.MinionIdentitySort.SortInfos = array;
-		}
-
-		public static readonly AccessControlSideScreen.MinionIdentitySort.SortInfo[] SortInfos;
+			new AccessControlSideScreen.MinionIdentitySort.SortInfo
+			{
+				name = UI.MINION_IDENTITY_SORT.NAME,
+				compare = new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByName)
+			},
+			new AccessControlSideScreen.MinionIdentitySort.SortInfo
+			{
+				name = UI.MINION_IDENTITY_SORT.ROLE,
+				compare = new Comparison<MinionAssignablesProxy>(AccessControlSideScreen.MinionIdentitySort.CompareByRole)
+			}
+		};
 
 		public class SortInfo : IListableOption
 		{

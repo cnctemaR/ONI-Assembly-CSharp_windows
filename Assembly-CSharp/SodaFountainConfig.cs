@@ -49,8 +49,7 @@ public class SodaFountainConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = 1f;
 		manualDeliveryKG.minimumMass = 0.5f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		SodaFountainWorkable sodaFountainWorkable = go.AddOrGet<SodaFountainWorkable>();
-		sodaFountainWorkable.basePriority = RELAXATION.PRIORITY.TIER5;
+		go.AddOrGet<SodaFountainWorkable>().basePriority = RELAXATION.PRIORITY.TIER5;
 		SodaFountain sodaFountain = go.AddOrGet<SodaFountain>();
 		sodaFountain.specificEffect = "SodaFountain";
 		sodaFountain.trackingEffect = "RecentlyRecDrink";

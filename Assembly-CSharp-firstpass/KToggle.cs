@@ -1,27 +1,18 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class KToggle : Toggle
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDoubleClick;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public event Action<GameObject> onRefresh;
-
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public new event Action<bool> onValueChanged;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KToggle.PointerEvent onPointerEnter;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KToggle.PointerEvent onPointerExit;
 
 	public bool GetMouseOver
@@ -48,7 +39,6 @@ public class KToggle : Toggle
 		this.ClearOnClick();
 		this.ClearPointerCallbacks();
 		this.onDoubleClick = null;
-		this.onRefresh = null;
 	}
 
 	public void Click()
@@ -81,7 +71,7 @@ public class KToggle : Toggle
 		}
 		else
 		{
-			this.soundPlayer.Play((!this.isOn) ? 1 : 0);
+			this.soundPlayer.Play(this.isOn ? 0 : 1);
 		}
 		base.gameObject.Trigger(2098165161, null);
 		this.onClick.Signal();
@@ -94,11 +84,12 @@ public class KToggle : Toggle
 			return;
 		}
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.SetActiveState(value);
+				array[i].SetActiveState(value);
 			}
 		}
 		this.ActivateFlourish(value);
@@ -108,11 +99,12 @@ public class KToggle : Toggle
 	public void ForceUpdateVisualState()
 	{
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.ResetColor();
+				array[i].ResetColor();
 			}
 		}
 	}
@@ -134,8 +126,9 @@ public class KToggle : Toggle
 		if (eventData.clickCount == 1 || this.onDoubleClick == null)
 		{
 			this.Click();
+			return;
 		}
-		else if (eventData.clickCount == 2 && this.onDoubleClick != null)
+		if (eventData.clickCount == 2 && this.onDoubleClick != null)
 		{
 			this.onDoubleClick();
 		}
@@ -143,8 +136,7 @@ public class KToggle : Toggle
 
 	public override void OnDeselect(BaseEventData eventData)
 	{
-		ToggleGroup parentToggleGroup = this.GetParentToggleGroup(eventData);
-		if (parentToggleGroup == base.group)
+		if (this.GetParentToggleGroup(eventData) == base.group)
 		{
 			base.OnDeselect(eventData);
 		}
@@ -171,8 +163,7 @@ public class KToggle : Toggle
 		{
 			foreach (Toggle toggle in base.group.ActiveToggles())
 			{
-				KToggle ktoggle = (KToggle)toggle;
-				ktoggle.Deselect();
+				((KToggle)toggle).Deselect();
 			}
 			base.group.SetAllTogglesOff();
 		}
@@ -194,11 +185,12 @@ public class KToggle : Toggle
 	public void ActivateFlourish(bool state, ImageToggleState.State ImageState)
 	{
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.SetState(ImageState);
+				array[i].SetState(ImageState);
 			}
 		}
 		this.ActivateFlourish(state);
@@ -232,11 +224,12 @@ public class KToggle : Toggle
 		}
 		KInputManager.SetUserActive();
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.OnHoverIn();
+				array[i].OnHoverIn();
 			}
 		}
 		this.soundPlayer.Play(2);
@@ -255,11 +248,12 @@ public class KToggle : Toggle
 		}
 		KInputManager.SetUserActive();
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
+		if (components != null && components.Length != 0)
 		{
-			foreach (ImageToggleState imageToggleState in components)
+			ImageToggleState[] array = components;
+			for (int i = 0; i < array.Length; i++)
 			{
-				imageToggleState.OnHoverOut();
+				array[i].OnHoverOut();
 			}
 		}
 		this.mouseOver = false;

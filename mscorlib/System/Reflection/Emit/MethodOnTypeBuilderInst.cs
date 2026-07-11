@@ -1,24 +1,84 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Reflection.Emit
 {
+	[StructLayout(LayoutKind.Sequential)]
 	internal class MethodOnTypeBuilderInst : MethodInfo
 	{
-		public MethodOnTypeBuilderInst(MonoGenericClass instantiation, MethodBuilder mb)
+		public MethodOnTypeBuilderInst(TypeBuilderInstantiation instantiation, MethodInfo base_method)
 		{
 			this.instantiation = instantiation;
-			this.mb = mb;
+			this.base_method = base_method;
 		}
 
 		internal MethodOnTypeBuilderInst(MethodOnTypeBuilderInst gmd, Type[] typeArguments)
 		{
 			this.instantiation = gmd.instantiation;
-			this.mb = gmd.mb;
+			this.base_method = gmd.base_method;
 			this.method_arguments = new Type[typeArguments.Length];
 			typeArguments.CopyTo(this.method_arguments, 0);
 			this.generic_method_definition = gmd;
+		}
+
+		internal MethodOnTypeBuilderInst(MethodInfo method, Type[] typeArguments)
+		{
+			this.instantiation = method.DeclaringType;
+			this.base_method = MethodOnTypeBuilderInst.ExtractBaseMethod(method);
+			this.method_arguments = new Type[typeArguments.Length];
+			typeArguments.CopyTo(this.method_arguments, 0);
+			if (this.base_method != method)
+			{
+				this.generic_method_definition = method;
+			}
+		}
+
+		private static MethodInfo ExtractBaseMethod(MethodInfo info)
+		{
+			if (info is MethodBuilder)
+			{
+				return info;
+			}
+			if (info is MethodOnTypeBuilderInst)
+			{
+				return ((MethodOnTypeBuilderInst)info).base_method;
+			}
+			if (info.IsGenericMethod)
+			{
+				info = info.GetGenericMethodDefinition();
+			}
+			Type declaringType = info.DeclaringType;
+			if (!declaringType.IsGenericType || declaringType.IsGenericTypeDefinition)
+			{
+				return info;
+			}
+			return (MethodInfo)declaringType.Module.ResolveMethod(info.MetadataToken);
+		}
+
+		internal Type[] GetTypeArgs()
+		{
+			if (!this.instantiation.IsGenericType || this.instantiation.IsGenericParameter)
+			{
+				return null;
+			}
+			return this.instantiation.GetGenericArguments();
+		}
+
+		internal MethodInfo RuntimeResolve()
+		{
+			MethodInfo methodInfo = this.instantiation.InternalResolve().GetMethod(this.base_method);
+			if (this.method_arguments != null)
+			{
+				Type[] array = new Type[this.method_arguments.Length];
+				for (int i = 0; i < this.method_arguments.Length; i++)
+				{
+					array[i] = this.method_arguments[i].InternalResolve();
+				}
+				methodInfo = methodInfo.MakeGenericMethod(array);
+			}
+			return methodInfo;
 		}
 
 		public override Type DeclaringType
@@ -33,7 +93,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.mb.Name;
+				return this.base_method.Name;
 			}
 		}
 
@@ -49,11 +109,15 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				if (!((ModuleBuilder)this.mb.Module).assemblyb.IsCompilerContext)
-				{
-					return this.mb.ReturnType;
-				}
-				return this.instantiation.InflateType(this.mb.ReturnType, this.method_arguments);
+				return this.base_method.ReturnType;
+			}
+		}
+
+		public override Module Module
+		{
+			get
+			{
+				return this.base_method.Module;
 			}
 		}
 
@@ -76,59 +140,38 @@ namespace System.Reflection.Emit
 		{
 			StringBuilder stringBuilder = new StringBuilder(this.ReturnType.ToString());
 			stringBuilder.Append(" ");
-			stringBuilder.Append(this.mb.Name);
+			stringBuilder.Append(this.base_method.Name);
 			stringBuilder.Append("(");
-			if (((ModuleBuilder)this.mb.Module).assemblyb.IsCompilerContext)
-			{
-				ParameterInfo[] parameters = this.GetParameters();
-				for (int i = 0; i < parameters.Length; i++)
-				{
-					if (i > 0)
-					{
-						stringBuilder.Append(", ");
-					}
-					stringBuilder.Append(parameters[i].ParameterType);
-				}
-			}
 			stringBuilder.Append(")");
 			return stringBuilder.ToString();
 		}
 
 		public override MethodImplAttributes GetMethodImplementationFlags()
 		{
-			return this.mb.GetMethodImplementationFlags();
+			return this.base_method.GetMethodImplementationFlags();
 		}
 
 		public override ParameterInfo[] GetParameters()
 		{
-			if (!((ModuleBuilder)this.mb.Module).assemblyb.IsCompilerContext)
-			{
-				throw new NotSupportedException();
-			}
-			ParameterInfo[] array = new ParameterInfo[this.mb.parameters.Length];
-			for (int i = 0; i < this.mb.parameters.Length; i++)
-			{
-				Type type = this.instantiation.InflateType(this.mb.parameters[i], this.method_arguments);
-				array[i] = new ParameterInfo((this.mb.pinfo != null) ? this.mb.pinfo[i + 1] : null, type, this, i + 1);
-			}
-			return array;
+			return this.GetParametersInternal();
+		}
+
+		internal override ParameterInfo[] GetParametersInternal()
+		{
+			throw new NotSupportedException();
 		}
 
 		public override int MetadataToken
 		{
 			get
 			{
-				if (!((ModuleBuilder)this.mb.Module).assemblyb.IsCompilerContext)
-				{
-					return base.MetadataToken;
-				}
-				return this.mb.MetadataToken;
+				return base.MetadataToken;
 			}
 		}
 
-		internal override int GetParameterCount()
+		internal override int GetParametersCount()
 		{
-			return this.mb.GetParameterCount();
+			return this.base_method.GetParametersCount();
 		}
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
@@ -148,7 +191,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.mb.Attributes;
+				return this.base_method.Attributes;
 			}
 		}
 
@@ -156,41 +199,41 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.mb.CallingConvention;
+				return this.base_method.CallingConvention;
 			}
 		}
 
-		public override MethodInfo MakeGenericMethod(params Type[] typeArguments)
+		public override MethodInfo MakeGenericMethod(params Type[] methodInstantiation)
 		{
-			if (this.mb.generic_params == null || this.method_arguments != null)
+			if (!this.base_method.IsGenericMethodDefinition || this.method_arguments != null)
 			{
-				throw new NotSupportedException();
+				throw new InvalidOperationException("Method is not a generic method definition");
 			}
-			if (typeArguments == null)
+			if (methodInstantiation == null)
 			{
-				throw new ArgumentNullException("typeArguments");
+				throw new ArgumentNullException("methodInstantiation");
 			}
-			for (int i = 0; i < typeArguments.Length; i++)
+			if (this.base_method.GetGenericArguments().Length != methodInstantiation.Length)
 			{
-				if (typeArguments[i] == null)
+				throw new ArgumentException("Incorrect length", "methodInstantiation");
+			}
+			for (int i = 0; i < methodInstantiation.Length; i++)
+			{
+				if (methodInstantiation[i] == null)
 				{
-					throw new ArgumentNullException("typeArguments");
+					throw new ArgumentNullException("methodInstantiation");
 				}
 			}
-			if (this.mb.generic_params.Length != typeArguments.Length)
-			{
-				throw new ArgumentException("Invalid argument array length");
-			}
-			return new MethodOnTypeBuilderInst(this, typeArguments);
+			return new MethodOnTypeBuilderInst(this, methodInstantiation);
 		}
 
 		public override Type[] GetGenericArguments()
 		{
-			if (this.mb.generic_params == null)
+			if (!this.base_method.IsGenericMethodDefinition)
 			{
 				return null;
 			}
-			Type[] array = this.method_arguments ?? this.mb.generic_params;
+			Type[] array = this.method_arguments ?? this.base_method.GetGenericArguments();
 			Type[] array2 = new Type[array.Length];
 			array.CopyTo(array2, 0);
 			return array2;
@@ -198,14 +241,18 @@ namespace System.Reflection.Emit
 
 		public override MethodInfo GetGenericMethodDefinition()
 		{
-			return this.generic_method_definition ?? this.mb;
+			return this.generic_method_definition ?? this.base_method;
 		}
 
 		public override bool ContainsGenericParameters
 		{
 			get
 			{
-				if (this.mb.generic_params == null)
+				if (this.base_method.ContainsGenericParameters)
+				{
+					return true;
+				}
+				if (!this.base_method.IsGenericMethodDefinition)
 				{
 					throw new NotSupportedException();
 				}
@@ -213,9 +260,10 @@ namespace System.Reflection.Emit
 				{
 					return true;
 				}
-				foreach (Type type in this.method_arguments)
+				Type[] array = this.method_arguments;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (type.ContainsGenericParameters)
+					if (array[i].ContainsGenericParameters)
 					{
 						return true;
 					}
@@ -228,7 +276,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.mb.generic_params != null && this.method_arguments == null;
+				return this.base_method.IsGenericMethodDefinition && this.method_arguments == null;
 			}
 		}
 
@@ -236,13 +284,21 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.mb.generic_params != null;
+				return this.base_method.IsGenericMethodDefinition;
 			}
 		}
 
 		public override MethodInfo GetBaseDefinition()
 		{
 			throw new NotSupportedException();
+		}
+
+		public override ParameterInfo ReturnParameter
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
 		}
 
 		public override ICustomAttributeProvider ReturnTypeCustomAttributes
@@ -253,12 +309,12 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		private MonoGenericClass instantiation;
+		private Type instantiation;
 
-		internal MethodBuilder mb;
+		private MethodInfo base_method;
 
 		private Type[] method_arguments;
 
-		private MethodOnTypeBuilderInst generic_method_definition;
+		private MethodInfo generic_method_definition;
 	}
 }

@@ -4,18 +4,6 @@ using System.Linq;
 
 public class SimAndRenderScheduler
 {
-	private SimAndRenderScheduler()
-	{
-		this.availableInterfaces[typeof(IRenderEveryTick)] = UpdateRate.RENDER_EVERY_TICK;
-		this.availableInterfaces[typeof(IRender200ms)] = UpdateRate.RENDER_200ms;
-		this.availableInterfaces[typeof(IRender1000ms)] = UpdateRate.RENDER_1000ms;
-		this.availableInterfaces[typeof(ISimEveryTick)] = UpdateRate.SIM_EVERY_TICK;
-		this.availableInterfaces[typeof(ISim33ms)] = UpdateRate.SIM_33ms;
-		this.availableInterfaces[typeof(ISim200ms)] = UpdateRate.SIM_200ms;
-		this.availableInterfaces[typeof(ISim1000ms)] = UpdateRate.SIM_1000ms;
-		this.availableInterfaces[typeof(ISim4000ms)] = UpdateRate.SIM_4000ms;
-	}
-
 	public static SimAndRenderScheduler instance
 	{
 		get
@@ -31,6 +19,18 @@ public class SimAndRenderScheduler
 	public static void DestroyInstance()
 	{
 		SimAndRenderScheduler._instance = null;
+	}
+
+	private SimAndRenderScheduler()
+	{
+		this.availableInterfaces[typeof(IRenderEveryTick)] = UpdateRate.RENDER_EVERY_TICK;
+		this.availableInterfaces[typeof(IRender200ms)] = UpdateRate.RENDER_200ms;
+		this.availableInterfaces[typeof(IRender1000ms)] = UpdateRate.RENDER_1000ms;
+		this.availableInterfaces[typeof(ISimEveryTick)] = UpdateRate.SIM_EVERY_TICK;
+		this.availableInterfaces[typeof(ISim33ms)] = UpdateRate.SIM_33ms;
+		this.availableInterfaces[typeof(ISim200ms)] = UpdateRate.SIM_200ms;
+		this.availableInterfaces[typeof(ISim1000ms)] = UpdateRate.SIM_1000ms;
+		this.availableInterfaces[typeof(ISim4000ms)] = UpdateRate.SIM_4000ms;
 	}
 
 	private static string MakeBucketId(Type updater_type, UpdateRate update_rate)
@@ -101,10 +101,9 @@ public class SimAndRenderScheduler
 	public void Add(object obj, bool load_balance = false)
 	{
 		UpdateRate[] implementedInterfaces = this.GetImplementedInterfaces(obj.GetType());
-		UpdateRate[] array = implementedInterfaces;
-		for (int i = 0; i < array.Length; i++)
+		for (int i = 0; i < implementedInterfaces.Length; i++)
 		{
-			switch (array[i])
+			switch (implementedInterfaces[i])
 			{
 			case UpdateRate.RENDER_EVERY_TICK:
 				this.renderEveryTick.Add((IRenderEveryTick)obj, load_balance);
@@ -137,10 +136,9 @@ public class SimAndRenderScheduler
 	public void Remove(object obj)
 	{
 		UpdateRate[] implementedInterfaces = this.GetImplementedInterfaces(obj.GetType());
-		UpdateRate[] array = implementedInterfaces;
-		for (int i = 0; i < array.Length; i++)
+		for (int i = 0; i < implementedInterfaces.Length; i++)
 		{
-			switch (array[i])
+			switch (implementedInterfaces[i])
 			{
 			case UpdateRate.RENDER_EVERY_TICK:
 				this.renderEveryTick.Remove((IRenderEveryTick)obj);
@@ -175,12 +173,12 @@ public class SimAndRenderScheduler
 		SimAndRenderScheduler.Entry entry;
 		if (this.bucketTable.TryGetValue(name, out entry))
 		{
-			DebugUtil.DevAssertArgs(entry.buckets.Length == ((!load_balance) ? 1 : Singleton<StateMachineUpdater>.Instance.GetFrameCount(this.GetUpdateRate<UpdateInterface>())), new object[] { "load_balance doesn't match previous registration...maybe load_balance erroneously on for a BatchUpdate type ", name, "?" });
+			DebugUtil.DevAssertArgs(entry.buckets.Length == (load_balance ? Singleton<StateMachineUpdater>.Instance.GetFrameCount(this.GetUpdateRate<UpdateInterface>()) : 1), new object[] { "load_balance doesn't match previous registration...maybe load_balance erroneously on for a BatchUpdate type ", name, "?" });
 			return entry;
 		}
 		entry = default(SimAndRenderScheduler.Entry);
 		UpdateRate updateRate = this.GetUpdateRate<UpdateInterface>();
-		int num = ((!load_balance) ? 1 : Singleton<StateMachineUpdater>.Instance.GetFrameCount(updateRate));
+		int num = (load_balance ? Singleton<StateMachineUpdater>.Instance.GetFrameCount(updateRate) : 1);
 		entry.buckets = new StateMachineUpdater.BaseUpdateBucket[num];
 		for (int i = 0; i < num; i++)
 		{
@@ -271,12 +269,12 @@ public class SimAndRenderScheduler
 
 	public class BaseUpdaterManager
 	{
+		public UpdateRate updateRate { get; private set; }
+
 		protected BaseUpdaterManager(UpdateRate update_rate)
 		{
 			this.updateRate = update_rate;
 		}
-
-		public UpdateRate updateRate { get; private set; }
 	}
 
 	public class UpdaterManager<UpdaterType> : SimAndRenderScheduler.BaseUpdaterManager
@@ -292,7 +290,7 @@ public class SimAndRenderScheduler
 			{
 				return;
 			}
-			string text = string.Empty;
+			string text = "";
 			if (!this.bucketIds.TryGetValue(updater.GetType(), out text))
 			{
 				text = SimAndRenderScheduler.MakeBucketId(updater.GetType(), base.updateRate);

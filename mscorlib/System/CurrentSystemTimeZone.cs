@@ -1,48 +1,22 @@
 ﻿using System;
-using System.Collections;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 
 namespace System
 {
 	[Serializable]
-	internal class CurrentSystemTimeZone : TimeZone, IDeserializationCallback
+	internal class CurrentSystemTimeZone : TimeZone
 	{
 		internal CurrentSystemTimeZone()
 		{
+			this.LocalTimeZone = TimeZoneInfo.Local;
 		}
-
-		internal CurrentSystemTimeZone(long lnow)
-		{
-			DateTime dateTime = new DateTime(lnow);
-			long[] array;
-			string[] array2;
-			if (!CurrentSystemTimeZone.GetTimeZoneData(dateTime.Year, out array, out array2))
-			{
-				throw new NotSupportedException(Locale.GetText("Can't get timezone name."));
-			}
-			this.m_standardName = Locale.GetText(array2[0]);
-			this.m_daylightName = Locale.GetText(array2[1]);
-			this.m_ticksOffset = array[2];
-			DaylightTime daylightTimeFromData = this.GetDaylightTimeFromData(array);
-			this.m_CachedDaylightChanges.Add(dateTime.Year, daylightTimeFromData);
-			this.OnDeserialization(daylightTimeFromData);
-		}
-
-		void IDeserializationCallback.OnDeserialization(object sender)
-		{
-			this.OnDeserialization(null);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetTimeZoneData(int year, out long[] data, out string[] names);
 
 		public override string DaylightName
 		{
 			get
 			{
-				return this.m_daylightName;
+				return this.LocalTimeZone.DaylightName;
 			}
 		}
 
@@ -50,107 +24,32 @@ namespace System
 		{
 			get
 			{
-				return this.m_standardName;
+				return this.LocalTimeZone.StandardName;
 			}
 		}
 
 		public override DaylightTime GetDaylightChanges(int year)
 		{
-			if (year < 1 || year > 9999)
-			{
-				throw new ArgumentOutOfRangeException("year", year + Locale.GetText(" is not in a range between 1 and 9999."));
-			}
-			if (year == CurrentSystemTimeZone.this_year)
-			{
-				return CurrentSystemTimeZone.this_year_dlt;
-			}
-			Hashtable cachedDaylightChanges = this.m_CachedDaylightChanges;
-			DaylightTime daylightTime2;
-			lock (cachedDaylightChanges)
-			{
-				DaylightTime daylightTime = (DaylightTime)this.m_CachedDaylightChanges[year];
-				if (daylightTime == null)
-				{
-					long[] array;
-					string[] array2;
-					if (!CurrentSystemTimeZone.GetTimeZoneData(year, out array, out array2))
-					{
-						throw new ArgumentException(Locale.GetText("Can't get timezone data for " + year));
-					}
-					daylightTime = this.GetDaylightTimeFromData(array);
-					this.m_CachedDaylightChanges.Add(year, daylightTime);
-				}
-				daylightTime2 = daylightTime;
-			}
-			return daylightTime2;
+			return this.LocalTimeZone.GetDaylightChanges(year);
 		}
 
-		public override TimeSpan GetUtcOffset(DateTime time)
+		public override TimeSpan GetUtcOffset(DateTime dateTime)
 		{
-			if (this.IsDaylightSavingTime(time))
+			if (dateTime.Kind == DateTimeKind.Utc)
 			{
-				return this.utcOffsetWithDLS;
+				return TimeSpan.Zero;
 			}
-			return this.utcOffsetWithOutDLS;
+			return this.LocalTimeZone.GetUtcOffset(dateTime);
 		}
 
-		private void OnDeserialization(DaylightTime dlt)
+		public override bool IsDaylightSavingTime(DateTime dateTime)
 		{
-			if (dlt == null)
-			{
-				CurrentSystemTimeZone.this_year = DateTime.Now.Year;
-				long[] array;
-				string[] array2;
-				if (!CurrentSystemTimeZone.GetTimeZoneData(CurrentSystemTimeZone.this_year, out array, out array2))
-				{
-					throw new ArgumentException(Locale.GetText("Can't get timezone data for " + CurrentSystemTimeZone.this_year));
-				}
-				dlt = this.GetDaylightTimeFromData(array);
-			}
-			else
-			{
-				CurrentSystemTimeZone.this_year = dlt.Start.Year;
-			}
-			this.utcOffsetWithOutDLS = new TimeSpan(this.m_ticksOffset);
-			this.utcOffsetWithDLS = new TimeSpan(this.m_ticksOffset + dlt.Delta.Ticks);
-			CurrentSystemTimeZone.this_year_dlt = dlt;
+			return dateTime.Kind != DateTimeKind.Utc && this.LocalTimeZone.IsDaylightSavingTime(dateTime);
 		}
 
-		private DaylightTime GetDaylightTimeFromData(long[] data)
-		{
-			return new DaylightTime(new DateTime(data[0]), new DateTime(data[1]), new TimeSpan(data[3]));
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool GetTimeZoneData(int year, out long[] data, out string[] names, out bool daylight_inverted);
 
-		private string m_standardName;
-
-		private string m_daylightName;
-
-		private Hashtable m_CachedDaylightChanges = new Hashtable(1);
-
-		private long m_ticksOffset;
-
-		[NonSerialized]
-		private TimeSpan utcOffsetWithOutDLS;
-
-		[NonSerialized]
-		private TimeSpan utcOffsetWithDLS;
-
-		private static int this_year;
-
-		private static DaylightTime this_year_dlt;
-
-		internal enum TimeZoneData
-		{
-			DaylightSavingStartIdx,
-			DaylightSavingEndIdx,
-			UtcOffsetIdx,
-			AdditionalDaylightOffsetIdx
-		}
-
-		internal enum TimeZoneNames
-		{
-			StandardNameIdx,
-			DaylightNameIdx
-		}
+		private readonly TimeZoneInfo LocalTimeZone;
 	}
 }

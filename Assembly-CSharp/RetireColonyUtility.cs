@@ -26,8 +26,7 @@ public static class RetireColonyUtility
 			Directory.CreateDirectory(text3);
 		}
 		string text4 = Path.Combine(text3, text2 + ".json");
-		RetiredColonyData currentColonyRetiredColonyData = RetireColonyUtility.GetCurrentColonyRetiredColonyData();
-		string text5 = JsonConvert.SerializeObject(currentColonyRetiredColonyData);
+		string text5 = JsonConvert.SerializeObject(RetireColonyUtility.GetCurrentColonyRetiredColonyData());
 		bool flag = false;
 		int num = 0;
 		while (!flag && num < 5)
@@ -38,8 +37,7 @@ public static class RetireColonyUtility
 				using (FileStream fileStream = File.Open(text4, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
 				{
 					flag = true;
-					Encoding utf = Encoding.UTF8;
-					byte[] bytes = utf.GetBytes(text5);
+					byte[] bytes = Encoding.UTF8.GetBytes(text5);
 					fileStream.Write(bytes, 0, bytes.Length);
 				}
 			}
@@ -90,7 +88,7 @@ public static class RetireColonyUtility
 				{
 					string text = string.Empty;
 					List<string> list = new List<string>();
-					List<Tuple<string, int>> list2 = new List<Tuple<string, int>>();
+					List<global::Tuple<string, int>> list2 = new List<global::Tuple<string, int>>();
 					List<RetiredColonyData.RetiredDuplicantData> list3 = new List<RetiredColonyData.RetiredDuplicantData>();
 					List<RetiredColonyData.RetiredColonyStatistic> list4 = new List<RetiredColonyData.RetiredColonyStatistic>();
 					while (jsonReader.Read())
@@ -193,7 +191,7 @@ public static class RetireColonyUtility
 									num = int.Parse(jsonReader.Value.ToString());
 								}
 							}
-							Tuple<string, int> tuple = new Tuple<string, int>(text6, num);
+							global::Tuple<string, int> tuple = new global::Tuple<string, int>(text6, num);
 							list2.Add(tuple);
 						}
 						if (jsonToken == JsonToken.StartObject && text == "Stats")
@@ -204,7 +202,7 @@ public static class RetireColonyUtility
 							}
 							string text7 = null;
 							RetiredColonyData.RetiredColonyStatistic retiredColonyStatistic = new RetiredColonyData.RetiredColonyStatistic();
-							List<Tuple<float, float>> list5 = new List<Tuple<float, float>>();
+							List<global::Tuple<float, float>> list5 = new List<global::Tuple<float, float>>();
 							while (jsonReader.Read())
 							{
 								jsonToken = jsonReader.TokenType;
@@ -257,7 +255,7 @@ public static class RetireColonyUtility
 											num3 = float.Parse(jsonReader.Value.ToString());
 										}
 									}
-									Tuple<float, float> tuple2 = new Tuple<float, float>(num2, num3);
+									global::Tuple<float, float> tuple2 = new global::Tuple<float, float>(num2, num3);
 									list5.Add(tuple2);
 								}
 							}
@@ -288,18 +286,19 @@ public static class RetireColonyUtility
 			Directory.CreateDirectory(text);
 		}
 		text = Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName());
-		foreach (string text2 in Directory.GetDirectories(text))
+		string[] directories = Directory.GetDirectories(text);
+		for (int i = 0; i < directories.Length; i++)
 		{
-			foreach (string text3 in Directory.GetFiles(text2))
+			foreach (string text2 in Directory.GetFiles(directories[i]))
 			{
-				if (text3.EndsWith(".json"))
+				if (text2.EndsWith(".json"))
 				{
 					for (int k = 0; k < RetireColonyUtility.attempt_encodings.Length; k++)
 					{
 						Encoding encoding = RetireColonyUtility.attempt_encodings[k];
 						try
 						{
-							RetiredColonyData retiredColonyData = RetireColonyUtility.LoadRetiredColony(text3, skipStats, encoding);
+							RetiredColonyData retiredColonyData = RetireColonyUtility.LoadRetiredColony(text2, skipStats, encoding);
 							if (retiredColonyData != null)
 							{
 								if (retiredColonyData.colonyName == null)
@@ -315,7 +314,7 @@ public static class RetireColonyUtility
 							global::Debug.LogWarningFormat("LoadRetiredColonies failed load {0} [{1}]: {2}", new object[]
 							{
 								encoding,
-								text3,
+								text2,
 								ex.ToString()
 							});
 						}

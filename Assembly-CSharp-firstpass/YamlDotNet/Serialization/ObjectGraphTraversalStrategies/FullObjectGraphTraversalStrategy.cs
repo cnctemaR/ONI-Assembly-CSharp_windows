@@ -48,7 +48,10 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			switch (typeCode)
 			{
 			case TypeCode.Empty:
-				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", new object[] { typeCode }));
+				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+			case TypeCode.DBNull:
+				visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
+				return;
 			case TypeCode.Boolean:
 			case TypeCode.Char:
 			case TypeCode.SByte:
@@ -67,26 +70,18 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 				visitor.VisitScalar(value, context);
 				return;
 			}
-			if (value.IsDbNull())
-			{
-				visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
-			}
 			if (value.Value == null || value.Type == typeof(TimeSpan))
 			{
 				visitor.VisitScalar(value, context);
+				return;
 			}
-			else
+			Type underlyingType = Nullable.GetUnderlyingType(value.Type);
+			if (underlyingType != null)
 			{
-				Type underlyingType = Nullable.GetUnderlyingType(value.Type);
-				if (underlyingType != null)
-				{
-					this.Traverse<TContext>(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth, context);
-				}
-				else
-				{
-					this.TraverseObject<TContext>(value, visitor, currentDepth, context);
-				}
+				this.Traverse<TContext>(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth, context);
+				return;
 			}
+			this.TraverseObject<TContext>(value, visitor, currentDepth, context);
 		}
 
 		protected virtual void TraverseObject<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
@@ -116,29 +111,16 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 		{
 			visitor.VisitMappingStart(dictionary, keyType, valueType, context);
 			bool flag = dictionary.Type.FullName.Equals("System.Dynamic.ExpandoObject");
-			IDictionaryEnumerator enumerator = ((IDictionary)dictionary.Value).GetEnumerator();
-			try
+			foreach (object obj in ((IDictionary)dictionary.Value))
 			{
-				while (enumerator.MoveNext())
+				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+				string text = (flag ? this.namingConvention.Apply(dictionaryEntry.Key.ToString()) : dictionaryEntry.Key.ToString());
+				IObjectDescriptor objectDescriptor = this.GetObjectDescriptor(text, keyType);
+				IObjectDescriptor objectDescriptor2 = this.GetObjectDescriptor(dictionaryEntry.Value, valueType);
+				if (visitor.EnterMapping(objectDescriptor, objectDescriptor2, context))
 				{
-					object obj = enumerator.Current;
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-					object obj2 = ((!flag) ? dictionaryEntry.Key : this.namingConvention.Apply(dictionaryEntry.Key.ToString()));
-					IObjectDescriptor objectDescriptor = this.GetObjectDescriptor(obj2, keyType);
-					IObjectDescriptor objectDescriptor2 = this.GetObjectDescriptor(dictionaryEntry.Value, valueType);
-					if (visitor.EnterMapping(objectDescriptor, objectDescriptor2, context))
-					{
-						this.Traverse<TContext>(objectDescriptor, visitor, currentDepth, context);
-						this.Traverse<TContext>(objectDescriptor2, visitor, currentDepth, context);
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
+					this.Traverse<TContext>(objectDescriptor, visitor, currentDepth, context);
+					this.Traverse<TContext>(objectDescriptor2, visitor, currentDepth, context);
 				}
 			}
 			visitor.VisitMappingEnd(dictionary, context);
@@ -147,24 +129,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 		private void TraverseList<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
 			Type implementedGenericInterface = ReflectionUtility.GetImplementedGenericInterface(value.Type, typeof(IEnumerable<>));
-			Type type = ((implementedGenericInterface == null) ? typeof(object) : implementedGenericInterface.GetGenericArguments()[0]);
+			Type type = ((implementedGenericInterface != null) ? implementedGenericInterface.GetGenericArguments()[0] : typeof(object));
 			visitor.VisitSequenceStart(value, type, context);
-			IEnumerator enumerator = ((IEnumerable)value.Value).GetEnumerator();
-			try
+			foreach (object obj in ((IEnumerable)value.Value))
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					this.Traverse<TContext>(this.GetObjectDescriptor(obj, type), visitor, currentDepth, context);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				this.Traverse<TContext>(this.GetObjectDescriptor(obj, type), visitor, currentDepth, context);
 			}
 			visitor.VisitSequenceEnd(value, context);
 		}

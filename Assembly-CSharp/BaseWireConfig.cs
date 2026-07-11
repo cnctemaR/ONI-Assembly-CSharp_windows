@@ -10,30 +10,26 @@ public abstract class BaseWireConfig : IBuildingConfig
 
 	public BuildingDef CreateBuildingDef(string id, string anim, float construction_time, float[] construction_mass, float insulation, EffectorValues decor, EffectorValues noise)
 	{
-		int num = 1;
-		int num2 = 1;
-		int num3 = 10;
-		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num4 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, anim, num3, construction_time, construction_mass, all_METALS, num4, buildLocationRule, decor, noise, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, 1, 1, anim, 10, construction_time, construction_mass, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, decor, noise, 0.2f);
 		buildingDef.ThermalConductivity = insulation;
-		buildingDef.Floodable = false;
-		buildingDef.Overheatable = false;
-		buildingDef.Entombable = false;
-		buildingDef.ViewMode = OverlayModes.Power.ID;
-		buildingDef.ObjectLayer = ObjectLayer.Wire;
-		buildingDef.TileLayer = ObjectLayer.WireTile;
-		buildingDef.ReplacementLayer = ObjectLayer.ReplacementWire;
-		buildingDef.AudioCategory = "Metal";
-		buildingDef.AudioSize = "small";
-		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.SceneLayer = Grid.SceneLayer.Wires;
-		buildingDef.isKAnimTile = true;
-		buildingDef.isUtility = true;
-		buildingDef.DragBuild = true;
+		BuildingDef buildingDef2 = buildingDef;
+		buildingDef2.Floodable = false;
+		BuildingDef buildingDef3 = buildingDef2;
+		buildingDef3.Overheatable = false;
+		buildingDef3.Entombable = false;
+		buildingDef3.ViewMode = OverlayModes.Power.ID;
+		buildingDef3.ObjectLayer = ObjectLayer.Wire;
+		buildingDef3.TileLayer = ObjectLayer.WireTile;
+		buildingDef3.ReplacementLayer = ObjectLayer.ReplacementWire;
+		buildingDef3.AudioCategory = "Metal";
+		buildingDef3.AudioSize = "small";
+		buildingDef3.BaseTimeUntilRepair = -1f;
+		buildingDef3.SceneLayer = Grid.SceneLayer.Wires;
+		buildingDef3.isKAnimTile = true;
+		buildingDef3.isUtility = true;
+		buildingDef3.DragBuild = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, id);
-		return buildingDef;
+		return buildingDef3;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
@@ -49,8 +45,7 @@ public abstract class BaseWireConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		Constructable component = go.GetComponent<Constructable>();
-		component.isDiggingRequired = false;
+		go.GetComponent<Constructable>().isDiggingRequired = false;
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddOrGet<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Electrical;
@@ -58,13 +53,11 @@ public abstract class BaseWireConfig : IBuildingConfig
 
 	protected void DoPostConfigureComplete(Wire.WattageRating rating, GameObject go)
 	{
-		Wire component = go.GetComponent<Wire>();
-		component.MaxWattageRating = rating;
+		go.GetComponent<Wire>().MaxWattageRating = rating;
 		float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(rating);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.MAX_WATTAGE, GameUtil.GetFormattedWattage(maxWattageAsFloat, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MAX_WATTAGE, new object[0]), Descriptor.DescriptorType.Effect);
-		Building component2 = go.GetComponent<Building>();
-		BuildingDef def = component2.Def;
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.MAX_WATTAGE, GameUtil.GetFormattedWattage(maxWattageAsFloat, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MAX_WATTAGE, Array.Empty<object>()), Descriptor.DescriptorType.Effect);
+		BuildingDef def = go.GetComponent<Building>().Def;
 		if (def.EffectDescription == null)
 		{
 			def.EffectDescription = new List<Descriptor>();

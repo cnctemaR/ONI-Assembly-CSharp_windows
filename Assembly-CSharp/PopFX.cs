@@ -7,7 +7,7 @@ public class PopFX : KMonoBehaviour
 	public void Recycle()
 	{
 		this.icon = null;
-		this.text = string.Empty;
+		this.text = "";
 		this.targetTransform = null;
 		this.lifeElapsed = 0f;
 		this.trackTarget = false;

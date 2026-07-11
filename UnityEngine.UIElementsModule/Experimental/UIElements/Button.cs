@@ -2,7 +2,7 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	public class Button : BaseTextElement
+	public class Button : TextElement
 	{
 		public Button()
 			: this(null)
@@ -17,17 +17,11 @@ namespace UnityEngine.Experimental.UIElements
 
 		public Clickable clickable;
 
-		/// <summary>
-		///   <para>Instantiates a Button using the data read from a UXML file.</para>
-		/// </summary>
-		public class ButtonFactory : UxmlFactory<Button, Button.ButtonUxmlTraits>
+		public new class UxmlFactory : UxmlFactory<Button, Button.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the UI.Button.</para>
-		/// </summary>
-		public class ButtonUxmlTraits : BaseTextElement.BaseTextElementUxmlTraits
+		public new class UxmlTraits : TextElement.UxmlTraits
 		{
 		}
 	}

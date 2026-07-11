@@ -6,20 +6,28 @@ namespace System.Data
 	[Serializable]
 	public class InvalidConstraintException : DataException
 	{
-		public InvalidConstraintException()
+		protected InvalidConstraintException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
+			throw new PlatformNotSupportedException();
 		}
 
-		protected InvalidConstraintException(SerializationInfo info, StreamingContext context)
+		public InvalidConstraintException()
+			: base("Invalid constraint.")
 		{
+			base.HResult = -2146232028;
 		}
 
 		public InvalidConstraintException(string s)
+			: base(s)
 		{
+			base.HResult = -2146232028;
 		}
 
 		public InvalidConstraintException(string message, Exception innerException)
+			: base(message, innerException)
 		{
+			base.HResult = -2146232028;
 		}
 	}
 }

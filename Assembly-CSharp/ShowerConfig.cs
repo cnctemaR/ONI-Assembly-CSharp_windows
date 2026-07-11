@@ -63,8 +63,7 @@ public class ShowerConfig : IBuildingConfig
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 10f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		RequireOutputs requireOutputs = go.AddOrGet<RequireOutputs>();
-		requireOutputs.ignoreFullPipe = true;
+		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

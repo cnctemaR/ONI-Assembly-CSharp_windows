@@ -35,8 +35,7 @@ public class IceCooledFanConfig : IBuildingConfig
 		storage2.capacityKg = 50f;
 		storage2.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		MinimumOperatingTemperature minimumOperatingTemperature = go.AddOrGet<MinimumOperatingTemperature>();
-		minimumOperatingTemperature.minimumTemperature = 273.15f;
+		go.AddOrGet<MinimumOperatingTemperature>().minimumTemperature = 273.15f;
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
 		IceCooledFan iceCooledFan = go.AddOrGet<IceCooledFan>();
@@ -56,8 +55,7 @@ public class IceCooledFanConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = this.ICE_CAPACITY * 0.2f;
 		manualDeliveryKG.minimumMass = 10f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		IceCooledFanWorkable iceCooledFanWorkable = go.AddOrGet<IceCooledFanWorkable>();
-		iceCooledFanWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_icefan_kanim") };
+		go.AddOrGet<IceCooledFanWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_icefan_kanim") };
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

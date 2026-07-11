@@ -4,15 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 {
 	public abstract class ModifierModule : IModule
 	{
-		public ModifierModule()
-		{
-		}
-
-		public ModifierModule(IModule source)
-		{
-			this._sourceModule = source;
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -23,6 +14,15 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 			{
 				this._sourceModule = value;
 			}
+		}
+
+		public ModifierModule()
+		{
+		}
+
+		public ModifierModule(IModule source)
+		{
+			this._sourceModule = source;
 		}
 
 		protected IModule _sourceModule;

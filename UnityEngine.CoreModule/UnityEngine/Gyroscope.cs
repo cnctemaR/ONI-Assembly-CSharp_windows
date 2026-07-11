@@ -1,93 +1,73 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Interface into the Gyroscope.</para>
-	/// </summary>
-	public sealed class Gyroscope
+	[NativeHeader("Runtime/Input/GetInput.h")]
+	public class Gyroscope
 	{
 		internal Gyroscope(int index)
 		{
 			this.m_GyroIndex = index;
 		}
 
+		[FreeFunction("GetGyroRotationRate")]
 		private static Vector3 rotationRate_Internal(int idx)
 		{
 			Vector3 vector;
-			Gyroscope.INTERNAL_CALL_rotationRate_Internal(idx, out vector);
+			Gyroscope.rotationRate_Internal_Injected(idx, out vector);
 			return vector;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_rotationRate_Internal(int idx, out Vector3 value);
-
+		[FreeFunction("GetGyroRotationRateUnbiased")]
 		private static Vector3 rotationRateUnbiased_Internal(int idx)
 		{
 			Vector3 vector;
-			Gyroscope.INTERNAL_CALL_rotationRateUnbiased_Internal(idx, out vector);
+			Gyroscope.rotationRateUnbiased_Internal_Injected(idx, out vector);
 			return vector;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_rotationRateUnbiased_Internal(int idx, out Vector3 value);
-
+		[FreeFunction("GetGravity")]
 		private static Vector3 gravity_Internal(int idx)
 		{
 			Vector3 vector;
-			Gyroscope.INTERNAL_CALL_gravity_Internal(idx, out vector);
+			Gyroscope.gravity_Internal_Injected(idx, out vector);
 			return vector;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_gravity_Internal(int idx, out Vector3 value);
-
+		[FreeFunction("GetUserAcceleration")]
 		private static Vector3 userAcceleration_Internal(int idx)
 		{
 			Vector3 vector;
-			Gyroscope.INTERNAL_CALL_userAcceleration_Internal(idx, out vector);
+			Gyroscope.userAcceleration_Internal_Injected(idx, out vector);
 			return vector;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_userAcceleration_Internal(int idx, out Vector3 value);
-
+		[FreeFunction("GetAttitude")]
 		private static Quaternion attitude_Internal(int idx)
 		{
 			Quaternion quaternion;
-			Gyroscope.INTERNAL_CALL_attitude_Internal(idx, out quaternion);
+			Gyroscope.attitude_Internal_Injected(idx, out quaternion);
 			return quaternion;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_attitude_Internal(int idx, out Quaternion value);
-
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("IsGyroEnabled")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool getEnabled_Internal(int idx);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("SetGyroEnabled")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void setEnabled_Internal(int idx, bool enabled);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("GetGyroUpdateInterval")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float getUpdateInterval_Internal(int idx);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("SetGyroUpdateInterval")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void setUpdateInterval_Internal(int idx, float interval);
 
-		/// <summary>
-		///   <para>Returns rotation rate as measured by the device's gyroscope.</para>
-		/// </summary>
 		public Vector3 rotationRate
 		{
 			get
@@ -96,9 +76,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns unbiased rotation rate as measured by the device's gyroscope.</para>
-		/// </summary>
 		public Vector3 rotationRateUnbiased
 		{
 			get
@@ -107,9 +84,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the gravity acceleration vector expressed in the device's reference frame.</para>
-		/// </summary>
 		public Vector3 gravity
 		{
 			get
@@ -118,9 +92,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the acceleration that the user is giving to the device.</para>
-		/// </summary>
 		public Vector3 userAcceleration
 		{
 			get
@@ -129,9 +100,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns the attitude (ie, orientation in space) of the device.</para>
-		/// </summary>
 		public Quaternion attitude
 		{
 			get
@@ -140,9 +108,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets or retrieves the enabled status of this gyroscope.</para>
-		/// </summary>
 		public bool enabled
 		{
 			get
@@ -155,9 +120,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets or retrieves gyroscope interval in seconds.</para>
-		/// </summary>
 		public float updateInterval
 		{
 			get
@@ -169,6 +131,21 @@ namespace UnityEngine
 				Gyroscope.setUpdateInterval_Internal(this.m_GyroIndex, value);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void rotationRate_Internal_Injected(int idx, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void rotationRateUnbiased_Internal_Injected(int idx, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void gravity_Internal_Injected(int idx, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void userAcceleration_Internal_Injected(int idx, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void attitude_Internal_Injected(int idx, out Quaternion ret);
 
 		private int m_GyroIndex;
 	}

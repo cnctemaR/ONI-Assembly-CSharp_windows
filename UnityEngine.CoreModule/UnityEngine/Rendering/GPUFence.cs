@@ -5,18 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>Used to manage synchronisation between tasks on async compute queues and the graphics queue.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Graphics/GPUFence.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/GPUFence.h")]
 	public struct GPUFence
 	{
-		/// <summary>
-		///   <para>Has the GPUFence passed?
-		///
-		/// Allows for CPU determination of whether the GPU has passed the point in its processing represented by the GPUFence.</para>
-		/// </summary>
 		public bool passed
 		{
 			get
@@ -68,8 +60,8 @@ namespace UnityEngine.Rendering
 			return -1;
 		}
 
-		[NativeThrows]
 		[FreeFunction("GPUFenceInternals::GetVersionNumber")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetVersionNumber(IntPtr fencePtr);
 

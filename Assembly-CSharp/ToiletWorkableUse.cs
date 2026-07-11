@@ -24,15 +24,13 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
 		if (roomOfGameObject != null)
 		{
-			RoomType roomType = roomOfGameObject.roomType;
-			roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), worker.GetComponent<Effects>());
+			roomOfGameObject.roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), worker.GetComponent<Effects>());
 		}
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		AmountInstance amountInstance = Db.Get().Amounts.Bladder.Lookup(worker);
-		amountInstance.SetValue(0f);
+		Db.Get().Amounts.Bladder.Lookup(worker).SetValue(0f);
 		this.timesUsed++;
 		base.Trigger(-350347868, worker);
 		base.OnCompleteWork(worker);

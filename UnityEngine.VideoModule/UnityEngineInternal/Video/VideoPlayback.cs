@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Video/Public/Base/MediaComponent.h")]
+	[UsedByNativeCode]
 	internal class VideoPlayback
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -47,7 +47,7 @@ namespace UnityEngineInternal.Video
 		public extern float GetDuration();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern ulong GetNumFrames();
+		public extern ulong GetFrameCount();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern uint GetPixelAspectRatioNumerator();
@@ -62,7 +62,16 @@ namespace UnityEngineInternal.Video
 		public extern bool CanNotSkipOnDrop();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetImage(Texture texture, bool skipOnDrop, out long outputFrameNum);
+		public extern void SetSkipOnDrop(bool skipOnDrop);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool GetTexture(Texture texture, out long outputFrameNum);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SeekToFrame(long frameIndex, VideoPlayback.Callback seekCompletedCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SeekToTime(double secs, VideoPlayback.Callback seekCompletedCallback);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetPlaybackSpeed();
@@ -77,5 +86,7 @@ namespace UnityEngineInternal.Video
 		public extern void SetLoop(bool value);
 
 		internal IntPtr m_Ptr;
+
+		public delegate void Callback();
 	}
 }

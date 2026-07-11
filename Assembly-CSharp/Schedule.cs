@@ -6,21 +6,9 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Schedule : ISaveLoadable, IListableOption
 {
-	public Schedule(string name, List<ScheduleGroup> defaultGroups, bool alarmActivated)
-	{
-		this.name = name;
-		this.alarmActivated = alarmActivated;
-		this.blocks = new List<ScheduleBlock>(24);
-		this.assigned = new List<Ref<Schedulable>>();
-		this.tones = this.GenerateTones();
-		this.SetBlocksToGroupDefaults(defaultGroups);
-	}
-
 	public static int GetBlockIdx()
 	{
-		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
-		int num = (int)(currentCycleAsPercentage * 24f);
-		return Math.Min(num, 23);
+		return Math.Min((int)(GameClock.Instance.GetCurrentCycleAsPercentage() * 24f), 23);
 	}
 
 	public static int GetLastBlockIdx()
@@ -31,6 +19,16 @@ public class Schedule : ISaveLoadable, IListableOption
 	public void ClearNullReferences()
 	{
 		this.assigned.RemoveAll((Ref<Schedulable> x) => x.Get() == null);
+	}
+
+	public Schedule(string name, List<ScheduleGroup> defaultGroups, bool alarmActivated)
+	{
+		this.name = name;
+		this.alarmActivated = alarmActivated;
+		this.blocks = new List<ScheduleBlock>(24);
+		this.assigned = new List<Ref<Schedulable>>();
+		this.tones = this.GenerateTones();
+		this.SetBlocksToGroupDefaults(defaultGroups);
 	}
 
 	public void SetBlocksToGroupDefaults(List<ScheduleGroup> defaultGroups)
@@ -164,11 +162,14 @@ public class Schedule : ISaveLoadable, IListableOption
 
 	public bool IsAssigned(Schedulable schedulable)
 	{
-		foreach (Ref<Schedulable> @ref in this.GetAssigned())
+		using (List<Ref<Schedulable>>.Enumerator enumerator = this.GetAssigned().GetEnumerator())
 		{
-			if (@ref.Get() == schedulable)
+			while (enumerator.MoveNext())
 			{
-				return true;
+				if (enumerator.Current.Get() == schedulable)
+				{
+					return true;
+				}
 			}
 		}
 		return false;

@@ -6,56 +6,6 @@ namespace System.IO
 {
 	internal class UnexceptionalStreamReader : StreamReader
 	{
-		public UnexceptionalStreamReader(Stream stream)
-			: base(stream)
-		{
-		}
-
-		public UnexceptionalStreamReader(Stream stream, bool detect_encoding_from_bytemarks)
-			: base(stream, detect_encoding_from_bytemarks)
-		{
-		}
-
-		public UnexceptionalStreamReader(Stream stream, Encoding encoding)
-			: base(stream, encoding)
-		{
-		}
-
-		public UnexceptionalStreamReader(Stream stream, Encoding encoding, bool detect_encoding_from_bytemarks)
-			: base(stream, encoding, detect_encoding_from_bytemarks)
-		{
-		}
-
-		public UnexceptionalStreamReader(Stream stream, Encoding encoding, bool detect_encoding_from_bytemarks, int buffer_size)
-			: base(stream, encoding, detect_encoding_from_bytemarks, buffer_size)
-		{
-		}
-
-		public UnexceptionalStreamReader(string path)
-			: base(path)
-		{
-		}
-
-		public UnexceptionalStreamReader(string path, bool detect_encoding_from_bytemarks)
-			: base(path, detect_encoding_from_bytemarks)
-		{
-		}
-
-		public UnexceptionalStreamReader(string path, Encoding encoding)
-			: base(path, encoding)
-		{
-		}
-
-		public UnexceptionalStreamReader(string path, Encoding encoding, bool detect_encoding_from_bytemarks)
-			: base(path, encoding, detect_encoding_from_bytemarks)
-		{
-		}
-
-		public UnexceptionalStreamReader(string path, Encoding encoding, bool detect_encoding_from_bytemarks, int buffer_size)
-			: base(path, encoding, detect_encoding_from_bytemarks, buffer_size)
-		{
-		}
-
 		static UnexceptionalStreamReader()
 		{
 			string newLine = Environment.NewLine;
@@ -63,6 +13,11 @@ namespace System.IO
 			{
 				UnexceptionalStreamReader.newlineChar = newLine[0];
 			}
+		}
+
+		public UnexceptionalStreamReader(Stream stream, Encoding encoding)
+			: base(stream, encoding)
+		{
 		}
 
 		public override int Peek()

@@ -50,8 +50,7 @@ public class LiquidMiniPumpConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Pump>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 2f;
+		go.AddOrGet<Storage>().capacityKg = 2f;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.configuration = ElementConsumer.Configuration.AllLiquid;
 		elementConsumer.consumptionRate = 1f;

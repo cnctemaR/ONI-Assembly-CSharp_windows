@@ -4,16 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Ping any given IP address (given in dot notation).</para>
-	/// </summary>
 	[NativeHeader("Runtime/Export/Ping.bindings.h")]
 	public sealed class Ping
 	{
-		/// <summary>
-		///   <para>Perform a ping to the supplied target IP address.</para>
-		/// </summary>
-		/// <param name="address"></param>
 		public Ping(string address)
 		{
 			this.m_Ptr = Ping.Internal_Create(address);
@@ -42,9 +35,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Internal_Create(string address);
 
-		/// <summary>
-		///   <para>Has the ping function completed?</para>
-		/// </summary>
 		public bool isDone
 		{
 			get
@@ -57,18 +47,12 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_IsDone();
 
-		/// <summary>
-		///   <para>This property contains the ping time result after isDone returns true.</para>
-		/// </summary>
 		public extern int time
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>The IP target of the ping.</para>
-		/// </summary>
 		public extern string ip
 		{
 			[NativeName("GetIP")]

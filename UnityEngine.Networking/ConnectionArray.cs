@@ -81,7 +81,7 @@ namespace UnityEngine.Networking
 			{
 				networkConnection = this.m_LocalConnections[Mathf.Abs(connId) - 1];
 			}
-			else if (connId < 0 || connId > this.m_Connections.Count)
+			else if (connId > this.m_Connections.Count)
 			{
 				if (LogFilter.logWarn)
 				{
@@ -116,7 +116,7 @@ namespace UnityEngine.Networking
 			{
 				this.m_LocalConnections[Mathf.Abs(connId) - 1] = null;
 			}
-			else if (connId < 0 || connId > this.m_Connections.Count)
+			else if (connId > this.m_Connections.Count)
 			{
 				if (LogFilter.logWarn)
 				{

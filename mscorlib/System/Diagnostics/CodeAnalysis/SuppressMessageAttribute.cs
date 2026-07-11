@@ -28,30 +28,6 @@ namespace System.Diagnostics.CodeAnalysis
 			}
 		}
 
-		public string Justification
-		{
-			get
-			{
-				return this.justification;
-			}
-			set
-			{
-				this.justification = value;
-			}
-		}
-
-		public string MessageId
-		{
-			get
-			{
-				return this.messageId;
-			}
-			set
-			{
-				this.messageId = value;
-			}
-		}
-
 		public string Scope
 		{
 			get
@@ -76,16 +52,40 @@ namespace System.Diagnostics.CodeAnalysis
 			}
 		}
 
-		private string category;
+		public string MessageId
+		{
+			get
+			{
+				return this.messageId;
+			}
+			set
+			{
+				this.messageId = value;
+			}
+		}
 
-		private string checkId;
+		public string Justification
+		{
+			get
+			{
+				return this.justification;
+			}
+			set
+			{
+				this.justification = value;
+			}
+		}
+
+		private string category;
 
 		private string justification;
 
-		private string messageId;
+		private string checkId;
 
 		private string scope;
 
 		private string target;
+
+		private string messageId;
 	}
 }

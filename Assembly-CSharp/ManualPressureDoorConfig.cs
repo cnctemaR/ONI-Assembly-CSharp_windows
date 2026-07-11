@@ -32,19 +32,15 @@ public class ManualPressureDoorConfig : IBuildingConfig
 		go.AddOrGet<AccessControl>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.Door;
-		Workable workable = go.AddOrGet<Workable>();
-		workable.workTime = 5f;
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Door;
+		go.AddOrGet<Workable>().workTime = 5f;
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		AccessControl component = go.GetComponent<AccessControl>();
-		component.controlEnabled = true;
-		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
-		component2.initialAnim = "closed";
+		go.GetComponent<AccessControl>().controlEnabled = true;
+		go.GetComponent<KBatchedAnimController>().initialAnim = "closed";
 	}
 
 	public const string ID = "ManualPressureDoor";

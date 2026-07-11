@@ -32,7 +32,7 @@ namespace NodeEditorFramework.Standard
 				NodeEditor.checkInit(true);
 				if (NodeEditor.InitiationError)
 				{
-					GUILayout.Label("Initiation failed! Check console for more information!", new GUILayoutOption[0]);
+					GUILayout.Label("Initiation failed! Check console for more information!", Array.Empty<GUILayoutOption>());
 					return;
 				}
 				try
@@ -42,7 +42,7 @@ namespace NodeEditorFramework.Standard
 						GUI.BeginGroup(this.specifiedRootRect, NodeEditorGUI.nodeSkin.box);
 					}
 					NodeEditorGUI.StartNodeGUI();
-					this.canvasRect = ((!this.screenSize) ? this.specifiedCanvasRect : new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
+					this.canvasRect = (this.screenSize ? new Rect(0f, 0f, (float)Screen.width, (float)Screen.height) : this.specifiedCanvasRect);
 					this.canvasRect.width = this.canvasRect.width - 200f;
 					this.state.canvasRect = this.canvasRect;
 					NodeEditor.DrawCanvas(this.canvas, this.state);
@@ -67,23 +67,23 @@ namespace NodeEditorFramework.Standard
 
 		public void SideGUI()
 		{
-			GUILayout.Label(new GUIContent("Node Editor (" + this.canvas.name + ")", "The currently opened canvas in the Node Editor"), new GUILayoutOption[0]);
-			this.screenSize = GUILayout.Toggle(this.screenSize, "Adapt to Screen", new GUILayoutOption[0]);
-			GUILayout.Label("FPS: " + FPSCounter.currentFPS, new GUILayoutOption[0]);
-			GUILayout.Label(new GUIContent("Node Editor (" + this.canvas.name + ")"), NodeEditorGUI.nodeLabelBold, new GUILayoutOption[0]);
-			if (GUILayout.Button(new GUIContent("New Canvas", "Loads an empty Canvas"), new GUILayoutOption[0]))
+			GUILayout.Label(new GUIContent("Node Editor (" + this.canvas.name + ")", "The currently opened canvas in the Node Editor"), Array.Empty<GUILayoutOption>());
+			this.screenSize = GUILayout.Toggle(this.screenSize, "Adapt to Screen", Array.Empty<GUILayoutOption>());
+			GUILayout.Label("FPS: " + FPSCounter.currentFPS, Array.Empty<GUILayoutOption>());
+			GUILayout.Label(new GUIContent("Node Editor (" + this.canvas.name + ")"), NodeEditorGUI.nodeLabelBold, Array.Empty<GUILayoutOption>());
+			if (GUILayout.Button(new GUIContent("New Canvas", "Loads an empty Canvas"), Array.Empty<GUILayoutOption>()))
 			{
 				this.NewNodeCanvas();
 			}
 			GUILayout.Space(6f);
-			GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 			this.sceneCanvasName = GUILayout.TextField(this.sceneCanvasName, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
 			if (GUILayout.Button(new GUIContent("Save to Scene", "Saves the Canvas to the Scene"), new GUILayoutOption[] { GUILayout.ExpandWidth(false) }))
 			{
 				this.SaveSceneNodeCanvas(this.sceneCanvasName);
 			}
 			GUILayout.EndHorizontal();
-			if (GUILayout.Button(new GUIContent("Load from Scene", "Loads the Canvas from the Scene"), new GUILayoutOption[0]))
+			if (GUILayout.Button(new GUIContent("Load from Scene", "Loads the Canvas from the Scene"), Array.Empty<GUILayoutOption>()))
 			{
 				GenericMenu genericMenu = new GenericMenu();
 				foreach (string text in NodeEditorSaveManager.GetSceneSaves())
@@ -98,16 +98,16 @@ namespace NodeEditorFramework.Standard
 				this.loadScenePos = new Vector2(lastRect.x + 2f, lastRect.yMax + 2f);
 			}
 			GUILayout.Space(6f);
-			if (GUILayout.Button(new GUIContent("Recalculate All", "Initiates complete recalculate. Usually does not need to be triggered manually."), new GUILayoutOption[0]))
+			if (GUILayout.Button(new GUIContent("Recalculate All", "Initiates complete recalculate. Usually does not need to be triggered manually."), Array.Empty<GUILayoutOption>()))
 			{
 				NodeEditor.RecalculateAll(this.canvas);
 			}
-			if (GUILayout.Button("Force Re-Init", new GUILayoutOption[0]))
+			if (GUILayout.Button("Force Re-Init", Array.Empty<GUILayoutOption>()))
 			{
 				NodeEditor.ReInit(true);
 			}
-			NodeEditorGUI.knobSize = RTEditorGUI.IntSlider(new GUIContent("Handle Size", "The size of the Node Input/Output handles"), NodeEditorGUI.knobSize, 12, 20, new GUILayoutOption[0]);
-			this.state.zoom = RTEditorGUI.Slider(new GUIContent("Zoom", "Use the Mousewheel. Seriously."), this.state.zoom, 0.6f, 2f, new GUILayoutOption[0]);
+			NodeEditorGUI.knobSize = RTEditorGUI.IntSlider(new GUIContent("Handle Size", "The size of the Node Input/Output handles"), NodeEditorGUI.knobSize, 12, 20, Array.Empty<GUILayoutOption>());
+			this.state.zoom = RTEditorGUI.Slider(new GUIContent("Zoom", "Use the Mousewheel. Seriously."), this.state.zoom, 0.6f, 2f, Array.Empty<GUILayoutOption>());
 		}
 
 		private void LoadSceneCanvasCallback(object save)
@@ -172,7 +172,7 @@ namespace NodeEditorFramework.Standard
 
 		public Rect specifiedCanvasRect;
 
-		private string sceneCanvasName = string.Empty;
+		private string sceneCanvasName = "";
 
 		private Vector2 loadScenePos;
 	}

@@ -10,14 +10,55 @@ using YamlDotNet.Serialization;
 namespace YamlDotNet.RepresentationModel
 {
 	[Serializable]
-	public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible, IEnumerable
+	public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IEnumerable, IYamlConvertible
 	{
+		public IDictionary<YamlNode, YamlNode> Children
+		{
+			get
+			{
+				return this.children;
+			}
+		}
+
+		public MappingStyle Style { get; set; }
+
 		internal YamlMappingNode(IParser parser, DocumentLoadingState state)
 		{
 			this.Load(parser, state);
 		}
 
+		private void Load(IParser parser, DocumentLoadingState state)
+		{
+			MappingStart mappingStart = parser.Expect<MappingStart>();
+			base.Load(mappingStart, state);
+			this.Style = mappingStart.Style;
+			bool flag = false;
+			while (!parser.Accept<MappingEnd>())
+			{
+				YamlNode yamlNode = YamlNode.ParseNode(parser, state);
+				YamlNode yamlNode2 = YamlNode.ParseNode(parser, state);
+				try
+				{
+					this.children.Add(yamlNode, yamlNode2);
+				}
+				catch (ArgumentException ex)
+				{
+					throw new YamlException(yamlNode.Start, yamlNode.End, "Duplicate key", ex);
+				}
+				flag |= yamlNode is YamlAliasNode || yamlNode2 is YamlAliasNode;
+			}
+			if (flag)
+			{
+				state.AddNodeWithUnresolvedAliases(this);
+			}
+			parser.Expect<MappingEnd>();
+		}
+
 		public YamlMappingNode()
+		{
+		}
+
+		public YamlMappingNode(int dummy)
 		{
 		}
 
@@ -53,43 +94,6 @@ namespace YamlDotNet.RepresentationModel
 					this.Add(yamlNode, enumerator.Current);
 				}
 			}
-		}
-
-		public IDictionary<YamlNode, YamlNode> Children
-		{
-			get
-			{
-				return this.children;
-			}
-		}
-
-		public MappingStyle Style { get; set; }
-
-		private void Load(IParser parser, DocumentLoadingState state)
-		{
-			MappingStart mappingStart = parser.Expect<MappingStart>();
-			base.Load(mappingStart, state);
-			this.Style = mappingStart.Style;
-			bool flag = false;
-			while (!parser.Accept<MappingEnd>())
-			{
-				YamlNode yamlNode = YamlNode.ParseNode(parser, state);
-				YamlNode yamlNode2 = YamlNode.ParseNode(parser, state);
-				try
-				{
-					this.children.Add(yamlNode, yamlNode2);
-				}
-				catch (ArgumentException ex)
-				{
-					throw new YamlException(yamlNode.Start, yamlNode.End, "Duplicate key", ex);
-				}
-				flag |= yamlNode is YamlAliasNode || yamlNode2 is YamlAliasNode;
-			}
-			if (flag)
-			{
-				state.AddNodeWithUnresolvedAliases(this);
-			}
-			parser.Expect<MappingEnd>();
 		}
 
 		public void Add(YamlNode key, YamlNode value)
@@ -204,16 +208,21 @@ namespace YamlDotNet.RepresentationModel
 			yield return this;
 			foreach (KeyValuePair<YamlNode, YamlNode> child in this.children)
 			{
-				foreach (YamlNode node in child.Key.SafeAllNodes(level))
+				foreach (YamlNode yamlNode in child.Key.SafeAllNodes(level))
 				{
-					yield return node;
+					yield return yamlNode;
 				}
-				foreach (YamlNode node2 in child.Value.SafeAllNodes(level))
+				IEnumerator<YamlNode> enumerator2 = null;
+				foreach (YamlNode yamlNode2 in child.Value.SafeAllNodes(level))
 				{
-					yield return node2;
+					yield return yamlNode2;
 				}
+				enumerator2 = null;
+				child = default(KeyValuePair<YamlNode, YamlNode>);
 			}
+			IEnumerator<KeyValuePair<YamlNode, YamlNode>> enumerator = null;
 			level.Decrement();
+			yield break;
 			yield break;
 		}
 
@@ -273,7 +282,7 @@ namespace YamlDotNet.RepresentationModel
 			{
 				throw new ArgumentNullException("mapping");
 			}
-			YamlMappingNode yamlMappingNode = new YamlMappingNode();
+			YamlMappingNode yamlMappingNode = new YamlMappingNode(0);
 			foreach (PropertyInfo propertyInfo in mapping.GetType().GetPublicProperties())
 			{
 				if (propertyInfo.CanRead && propertyInfo.GetGetMethod().GetParameters().Length == 0)

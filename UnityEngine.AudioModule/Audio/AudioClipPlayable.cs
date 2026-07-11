@@ -7,14 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Audio
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that controls an AudioClip.</para>
-	/// </summary>
-	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
-	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
+	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct AudioClipPlayable : IPlayable, IEquatable<AudioClipPlayable>
 	{
 		internal AudioClipPlayable(PlayableHandle handle)
@@ -29,15 +26,6 @@ namespace UnityEngine.Audio
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates an AudioClipPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph that will contain the new AnimationLayerMixerPlayable.</param>
-		/// <param name="clip">The AudioClip that will be added in the PlayableGraph.</param>
-		/// <param name="looping">True if the clip should loop, false otherwise.</param>
-		/// <returns>
-		///   <para>A AudioClipPlayable linked to the PlayableGraph.</para>
-		/// </returns>
 		public static AudioClipPlayable Create(PlayableGraph graph, AudioClip clip, bool looping)
 		{
 			PlayableHandle playableHandle = AudioClipPlayable.CreateHandle(graph, clip, looping);
@@ -105,6 +93,7 @@ namespace UnityEngine.Audio
 		}
 
 		[Obsolete("IsPlaying() has been deprecated. Use IsChannelPlaying() instead (UnityUpgradable) -> IsChannelPlaying()", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool IsPlaying()
 		{
 			return this.IsChannelPlaying();
@@ -162,36 +151,47 @@ namespace UnityEngine.Audio
 			this.m_Handle.Play();
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AudioClip GetClipInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetClipInternal(ref PlayableHandle hdl, AudioClip clip);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetLoopedInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLoopedInternal(ref PlayableHandle hdl, bool looped);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetIsChannelPlayingInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern double GetStartDelayInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetStartDelayInternal(ref PlayableHandle hdl, double delay);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern double GetPauseDelayInternal(ref PlayableHandle hdl);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetPauseDelayInternal(ref PlayableHandle hdl, double delay);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool InternalCreateAudioClipPlayable(ref PlayableGraph graph, AudioClip clip, bool looping, ref PlayableHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
 

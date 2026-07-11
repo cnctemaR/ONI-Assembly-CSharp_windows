@@ -5,16 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A capsule-shaped primitive collider.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Dynamics/CapsuleCollider.h")]
 	[RequiredByNativeCode]
 	public class CapsuleCollider : Collider
 	{
-		/// <summary>
-		///   <para>The center of the capsule, measured in the object's local space.</para>
-		/// </summary>
 		public Vector3 center
 		{
 			get
@@ -29,9 +23,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The radius of the sphere, measured in the object's local space.</para>
-		/// </summary>
 		public extern float radius
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -40,9 +31,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The height of the capsule measured in the object's local space.</para>
-		/// </summary>
 		public extern float height
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -51,9 +39,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The direction of the capsule.</para>
-		/// </summary>
 		public extern int direction
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

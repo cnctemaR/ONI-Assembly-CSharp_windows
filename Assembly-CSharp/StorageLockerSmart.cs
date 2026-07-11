@@ -26,7 +26,7 @@ public class StorageLockerSmart : StorageLocker
 		bool flag = this.filteredStorage.IsFull();
 		bool isOperational = this.operational.IsOperational;
 		bool flag2 = flag && isOperational;
-		this.ports.SendSignal(FilteredStorage.FULL_PORT_ID, (!flag2) ? 0 : 1);
+		this.ports.SendSignal(FilteredStorage.FULL_PORT_ID, flag2 ? 1 : 0);
 		this.filteredStorage.SetLogicMeter(flag2);
 		this.operational.SetActive(isOperational, false);
 	}

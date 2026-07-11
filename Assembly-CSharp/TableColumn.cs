@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class TableColumn : IRender1000ms
 {
+	public bool isRevealed
+	{
+		get
+		{
+			return this.revealed == null || this.revealed();
+		}
+	}
+
 	public TableColumn(Action<IAssignableIdentity, GameObject> on_load_action, Comparison<IAssignableIdentity> sort_comparison, Action<IAssignableIdentity, GameObject, ToolTip> on_tooltip = null, Action<IAssignableIdentity, GameObject, ToolTip> on_sort_tooltip = null, Func<bool> revealed = null, bool should_refresh_columns = false, string scrollerID = "")
 	{
 		this.on_load_action = on_load_action;
@@ -15,14 +23,6 @@ public class TableColumn : IRender1000ms
 		if (should_refresh_columns)
 		{
 			SimAndRenderScheduler.instance.Add(this, false);
-		}
-	}
-
-	public bool isRevealed
-	{
-		get
-		{
-			return this.revealed == null || this.revealed();
 		}
 	}
 
@@ -47,7 +47,7 @@ public class TableColumn : IRender1000ms
 		{
 			this.on_tooltip(tableRow.GetIdentity(), gameObject, tool_tip_instance);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	protected string GetSortTooltip(ToolTip sort_tooltip_instance)
@@ -66,7 +66,7 @@ public class TableColumn : IRender1000ms
 		{
 			this.on_sort_tooltip(tableRow.GetIdentity(), gameObject, sort_tooltip_instance);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public bool isDirty

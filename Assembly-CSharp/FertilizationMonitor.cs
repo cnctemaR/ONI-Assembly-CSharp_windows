@@ -20,9 +20,10 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		});
 		this.replanted.Enter(delegate(FertilizationMonitor.Instance smi)
 		{
-			foreach (ManualDeliveryKG manualDeliveryKG in smi.gameObject.GetComponents<ManualDeliveryKG>())
+			ManualDeliveryKG[] components = smi.gameObject.GetComponents<ManualDeliveryKG>();
+			for (int i = 0; i < components.Length; i++)
 			{
-				manualDeliveryKG.Pause(false, "replanted");
+				components[i].Pause(false, "replanted");
 			}
 			smi.UpdateFertilization(0.033333335f);
 		}).Target(this.fertilizerStorage).EventHandler(GameHashes.OnStorageChange, delegate(FertilizationMonitor.Instance smi)
@@ -85,7 +86,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 	{
 		public List<Descriptor> GetDescriptors(GameObject obj)
 		{
-			if (this.consumedElements.Length > 0)
+			if (this.consumedElements.Length != 0)
 			{
 				List<Descriptor> list = new List<Descriptor>();
 				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
@@ -127,20 +128,20 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 
 	public new class Instance : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.GameInstance, IWiltCause
 	{
-		public Instance(IStateMachineTarget master, FertilizationMonitor.Def def)
-			: base(master, def)
-		{
-			this.AddAmounts(base.gameObject);
-			this.MakeModifiers();
-			master.Subscribe(1309017699, new Action<object>(this.SetStorage));
-		}
-
 		public float total_fertilizer_available
 		{
 			get
 			{
 				return this.total_available_mass;
 			}
+		}
+
+		public Instance(IStateMachineTarget master, FertilizationMonitor.Def def)
+			: base(master, def)
+		{
+			this.AddAmounts(base.gameObject);
+			this.MakeModifiers();
+			master.Subscribe(1309017699, new Action<object>(this.SetStorage));
 		}
 
 		public virtual StatusItem GetStarvedStatusItem()
@@ -176,7 +177,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		{
 			get
 			{
-				string text = string.Empty;
+				string text = "";
 				if (base.smi.IsInsideState(base.smi.sm.replanted.fertilized.decaying.wrongFert))
 				{
 					text = this.GetIncorrectFertStatusItemMajor().resolveStringCallback(CREATURES.STATUSITEMS.WRONGFERTILIZERMAJOR.NAME, this);

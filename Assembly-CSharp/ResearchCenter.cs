@@ -57,9 +57,10 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	protected virtual Chore CreateChore()
 	{
-		WorkChore<ResearchCenter> workChore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-		workChore.preemption_cb = new Func<Chore.Precondition.Context, bool>(ResearchCenter.CanPreemptCB);
-		return workChore;
+		return new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true)
+		{
+			preemption_cb = new Func<Chore.Precondition.Context, bool>(ResearchCenter.CanPreemptCB)
+		};
 	}
 
 	private static bool CanPreemptCB(Chore.Precondition.Context context)
@@ -67,8 +68,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		Worker component = context.chore.driver.GetComponent<Worker>();
 		float num = Db.Get().AttributeConverters.ResearchSpeed.Lookup(component).Evaluate();
 		Worker worker = context.consumerState.worker;
-		float num2 = Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
-		return num2 > num;
+		return Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate() > num;
 	}
 
 	public override float GetPercentComplete()
@@ -94,8 +94,12 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		float num = ((!this.currentlyLit) ? 1f : (1f + DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS));
+		float num = (this.currentlyLit ? (1f + DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS) : 1f);
 		float num2 = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate() + num;
+		if (Game.Instance.FastWorkersModeActive)
+		{
+			num2 *= 2f;
+		}
 		this.elementConverter.SetWorkSpeedMultiplier(num2);
 		return base.OnWorkTick(worker, dt);
 	}
@@ -126,11 +130,14 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	protected bool IsAllResearchComplete()
 	{
-		foreach (Tech tech in Db.Get().Techs.resources)
+		using (List<Tech>.Enumerator enumerator = Db.Get().Techs.resources.GetEnumerator())
 		{
-			if (!tech.IsComplete())
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (!enumerator.Current.IsComplete())
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -227,38 +234,30 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 			}
 			foreach (KeyValuePair<string, float> keyValuePair2 in Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID)
 			{
-				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key] != 0f)
+				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key] != 0f && keyValuePair2.Key == this.research_point_type_id)
 				{
-					bool flag = keyValuePair2.Key == this.research_point_type_id;
-					if (flag)
+					text = text + "\n   - " + Research.Instance.researchTypes.GetResearchType(keyValuePair2.Key).name;
+					text = string.Concat(new object[]
 					{
-						text = text + "\n   - " + Research.Instance.researchTypes.GetResearchType(keyValuePair2.Key).name;
-						string text2 = text;
-						text = string.Concat(new object[]
-						{
-							text2,
-							": ",
-							keyValuePair2.Value,
-							"/",
-							Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key]
-						});
-					}
+						text,
+						": ",
+						keyValuePair2.Value,
+						"/",
+						Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key]
+					});
 				}
 			}
 			foreach (KeyValuePair<string, float> keyValuePair3 in Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID)
 			{
-				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair3.Key] != 0f)
+				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair3.Key] != 0f && !(keyValuePair3.Key == this.research_point_type_id))
 				{
-					if (!(keyValuePair3.Key == this.research_point_type_id))
+					if (num > 1)
 					{
-						if (num > 1)
-						{
-							text = text + "\n   - " + string.Format(RESEARCH.MESSAGING.RESEARCHTYPEALSOREQUIRED, Research.Instance.researchTypes.GetResearchType(keyValuePair3.Key).name);
-						}
-						else
-						{
-							text = text + "\n   - " + string.Format(RESEARCH.MESSAGING.RESEARCHTYPEREQUIRED, Research.Instance.researchTypes.GetResearchType(keyValuePair3.Key).name);
-						}
+						text = text + "\n   - " + string.Format(RESEARCH.MESSAGING.RESEARCHTYPEALSOREQUIRED, Research.Instance.researchTypes.GetResearchType(keyValuePair3.Key).name);
+					}
+					else
+					{
+						text = text + "\n   - " + string.Format(RESEARCH.MESSAGING.RESEARCHTYPEREQUIRED, Research.Instance.researchTypes.GetResearchType(keyValuePair3.Key).name);
 					}
 				}
 			}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
+using Unity;
 
 namespace System.Security.Cryptography.Pkcs
 {
@@ -105,6 +106,11 @@ namespace System.Security.Cryptography.Pkcs
 		[MonoTODO]
 		public void RemoveCounterSignature(int index)
 		{
+		}
+
+		internal SignerInfo()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private SubjectIdentifier _signer;

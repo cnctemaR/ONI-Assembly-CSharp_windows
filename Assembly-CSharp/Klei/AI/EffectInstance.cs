@@ -46,20 +46,18 @@ namespace Klei.AI
 							}
 						}
 						smi.AddOneshotReactable(selfEmoteReactable);
+						return;
 					}
-					else
+					this.reactable = new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, effect.emoteCooldown, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 					{
-						this.reactable = new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, effect.emoteCooldown, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+						anim = "react"
+					});
+					this.reactable.AddPrecondition(new Reactable.ReactablePrecondition(this.NotInATube));
+					if (effect.emotePreconditions != null)
+					{
+						foreach (Reactable.ReactablePrecondition reactablePrecondition2 in effect.emotePreconditions)
 						{
-							anim = "react"
-						});
-						this.reactable.AddPrecondition(new Reactable.ReactablePrecondition(this.NotInATube));
-						if (effect.emotePreconditions != null)
-						{
-							foreach (Reactable.ReactablePrecondition reactablePrecondition2 in effect.emotePreconditions)
-							{
-								this.reactable.AddPrecondition(reactablePrecondition2);
-							}
+							this.reactable.AddPrecondition(reactablePrecondition2);
 						}
 					}
 				}
@@ -75,8 +73,7 @@ namespace Klei.AI
 		{
 			if (this.statusItem != null)
 			{
-				KSelectable component = base.gameObject.GetComponent<KSelectable>();
-				component.RemoveStatusItem(this.statusItem, false);
+				base.gameObject.GetComponent<KSelectable>().RemoveStatusItem(this.statusItem, false);
 				this.statusItem = null;
 			}
 			if (this.reactable != null)
@@ -98,7 +95,7 @@ namespace Klei.AI
 
 		private void ConfigureStatusItem()
 		{
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.effect.description, string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.effect.description, "", this.effect.isBad ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, this.effect.isBad ? NotificationType.Bad : NotificationType.Neutral, false, OverlayModes.None.ID, 2);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}

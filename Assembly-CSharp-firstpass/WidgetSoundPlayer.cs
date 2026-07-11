@@ -5,7 +5,7 @@ public class WidgetSoundPlayer
 {
 	public virtual string GetDefaultPath(int idx)
 	{
-		return string.Empty;
+		return "";
 	}
 
 	public virtual WidgetSoundPlayer.WidgetSoundEvent[] widget_sound_events()
@@ -28,11 +28,11 @@ public class WidgetSoundPlayer
 				break;
 			}
 		}
-		if (!KInputManager.isFocused || !widgetSoundEvent.PlaySound || widgetSoundEvent.Name == null || widgetSoundEvent.Name.Length < 0 || widgetSoundEvent.Name == string.Empty)
+		if (!KInputManager.isFocused || !widgetSoundEvent.PlaySound || widgetSoundEvent.Name == null || widgetSoundEvent.Name.Length < 0 || widgetSoundEvent.Name == "")
 		{
 			return;
 		}
-		KFMOD.PlayUISound(WidgetSoundPlayer.getSoundPath((!(widgetSoundEvent.OverrideAssetName == string.Empty)) ? widgetSoundEvent.OverrideAssetName : this.GetDefaultPath(widgetSoundEvent.idx)));
+		KFMOD.PlayUISound(WidgetSoundPlayer.getSoundPath((widgetSoundEvent.OverrideAssetName == "") ? this.GetDefaultPath(widgetSoundEvent.idx) : widgetSoundEvent.OverrideAssetName));
 	}
 
 	public bool Enabled = true;

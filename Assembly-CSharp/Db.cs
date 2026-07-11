@@ -82,7 +82,7 @@ public class Db : EntityModifierSet
 		if (resource == null)
 		{
 			global::Debug.LogWarning("Could not find resource: " + guid);
-			return (ResourceType)((object)null);
+			return default(ResourceType);
 		}
 		ResourceType resourceType = (ResourceType)((object)resource);
 		if (resourceType == null)
@@ -96,7 +96,7 @@ public class Db : EntityModifierSet
 				"\nGot Type: ",
 				resource.GetType().Name
 			}));
-			return (ResourceType)((object)null);
+			return default(ResourceType);
 		}
 		return resourceType;
 	}

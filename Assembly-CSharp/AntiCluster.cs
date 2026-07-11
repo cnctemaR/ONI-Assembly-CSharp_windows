@@ -28,15 +28,13 @@ public class AntiCluster : KMonoBehaviour, ISim200ms
 		if (gameObject == null)
 		{
 			Grid.Objects[current_cell, 0] = base.gameObject;
+			return;
 		}
-		else
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+		if (component.InstanceID > component2.InstanceID)
 		{
-			KPrefabID component = base.GetComponent<KPrefabID>();
-			KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
-			if (component.InstanceID > component2.InstanceID)
-			{
-				Grid.Objects[current_cell, 0] = base.gameObject;
-			}
+			Grid.Objects[current_cell, 0] = base.gameObject;
 		}
 	}
 

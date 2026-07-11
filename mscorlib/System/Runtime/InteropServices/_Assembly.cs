@@ -7,15 +7,13 @@ using System.Security.Policy;
 
 namespace System.Runtime.InteropServices
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsDual)]
-	[TypeLibImportClass(typeof(Assembly))]
 	[Guid("17156360-2F1A-384A-BC52-FDE93C215C5B")]
-	[ComVisible(true)]
+	[InterfaceType(ComInterfaceType.InterfaceIsDual)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
+	[TypeLibImportClass(typeof(Assembly))]
 	public interface _Assembly
 	{
-		event ModuleResolveEventHandler ModuleResolve;
-
 		string ToString();
 
 		bool Equals(object other);
@@ -99,5 +97,7 @@ namespace System.Runtime.InteropServices
 		AssemblyName[] GetReferencedAssemblies();
 
 		bool GlobalAssemblyCache { get; }
+
+		event ModuleResolveEventHandler ModuleResolve;
 	}
 }

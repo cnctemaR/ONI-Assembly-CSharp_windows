@@ -10,11 +10,9 @@ namespace System.Security.Cryptography
 		{
 			this.KeySizeValue = 192;
 			this.BlockSizeValue = 64;
-			this.FeedbackSizeValue = 8;
-			this.LegalKeySizesValue = new KeySizes[1];
-			this.LegalKeySizesValue[0] = new KeySizes(128, 192, 64);
-			this.LegalBlockSizesValue = new KeySizes[1];
-			this.LegalBlockSizesValue[0] = new KeySizes(64, 64, 0);
+			this.FeedbackSizeValue = this.BlockSizeValue;
+			this.LegalBlockSizesValue = TripleDES.s_legalBlockSizes;
+			this.LegalKeySizesValue = TripleDES.s_legalKeySizes;
 		}
 
 		public override byte[] Key
@@ -23,11 +21,11 @@ namespace System.Security.Cryptography
 			{
 				if (this.KeyValue == null)
 				{
-					this.GenerateKey();
-					while (TripleDES.IsWeakKey(this.KeyValue))
+					do
 					{
 						this.GenerateKey();
 					}
+					while (TripleDES.IsWeakKey(this.KeyValue));
 				}
 				return (byte[])this.KeyValue.Clone();
 			}
@@ -35,59 +33,19 @@ namespace System.Security.Cryptography
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("Key");
+					throw new ArgumentNullException("value");
+				}
+				if (!base.ValidKeySize(value.Length * 8))
+				{
+					throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
 				}
 				if (TripleDES.IsWeakKey(value))
 				{
-					throw new CryptographicException(Locale.GetText("Weak Key"));
+					throw new CryptographicException(Environment.GetResourceString("Specified key is a known weak key for '{0}' and cannot be used."), "TripleDES");
 				}
 				this.KeyValue = (byte[])value.Clone();
+				this.KeySizeValue = value.Length * 8;
 			}
-		}
-
-		public static bool IsWeakKey(byte[] rgbKey)
-		{
-			if (rgbKey == null)
-			{
-				throw new CryptographicException(Locale.GetText("Null Key"));
-			}
-			if (rgbKey.Length == 16)
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					if (rgbKey[i] != rgbKey[i + 8])
-					{
-						return false;
-					}
-				}
-			}
-			else
-			{
-				if (rgbKey.Length != 24)
-				{
-					throw new CryptographicException(Locale.GetText("Wrong Key Length"));
-				}
-				bool flag = true;
-				for (int j = 0; j < 8; j++)
-				{
-					if (rgbKey[j] != rgbKey[j + 8])
-					{
-						flag = false;
-						break;
-					}
-				}
-				if (!flag)
-				{
-					for (int k = 8; k < 16; k++)
-					{
-						if (rgbKey[k] != rgbKey[k + 8])
-						{
-							return false;
-						}
-					}
-				}
-			}
-			return true;
 		}
 
 		public new static TripleDES Create()
@@ -99,5 +57,58 @@ namespace System.Security.Cryptography
 		{
 			return (TripleDES)CryptoConfig.CreateFromName(str);
 		}
+
+		public static bool IsWeakKey(byte[] rgbKey)
+		{
+			if (!TripleDES.IsLegalKeySize(rgbKey))
+			{
+				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+			}
+			byte[] array = Utils.FixupKeyParity(rgbKey);
+			return TripleDES.EqualBytes(array, 0, 8, 8) || (array.Length == 24 && TripleDES.EqualBytes(array, 8, 16, 8));
+		}
+
+		private static bool EqualBytes(byte[] rgbKey, int start1, int start2, int count)
+		{
+			if (start1 < 0)
+			{
+				throw new ArgumentOutOfRangeException("start1", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (start2 < 0)
+			{
+				throw new ArgumentOutOfRangeException("start2", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (start1 + count > rgbKey.Length)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
+			}
+			if (start2 + count > rgbKey.Length)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
+			}
+			for (int i = 0; i < count; i++)
+			{
+				if (rgbKey[start1 + i] != rgbKey[start2 + i])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static bool IsLegalKeySize(byte[] rgbKey)
+		{
+			return rgbKey != null && (rgbKey.Length == 16 || rgbKey.Length == 24);
+		}
+
+		private static KeySizes[] s_legalBlockSizes = new KeySizes[]
+		{
+			new KeySizes(64, 64, 0)
+		};
+
+		private static KeySizes[] s_legalKeySizes = new KeySizes[]
+		{
+			new KeySizes(128, 192, 64)
+		};
 	}
 }

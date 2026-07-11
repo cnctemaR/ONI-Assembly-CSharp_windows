@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_PropertyBuilder))]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class PropertyBuilder : PropertyInfo, _PropertyBuilder
 	{
-		internal PropertyBuilder(TypeBuilder tb, string name, PropertyAttributes attributes, Type returnType, Type[] returnModReq, Type[] returnModOpt, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
+		internal PropertyBuilder(TypeBuilder tb, string name, PropertyAttributes attributes, CallingConventions callingConvention, Type returnType, Type[] returnModReq, Type[] returnModOpt, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
 		{
 			this.name = name;
 			this.attrs = attributes;
+			this.callingConvention = callingConvention;
 			this.type = returnType;
 			this.returnModReq = returnModReq;
 			this.returnModOpt = returnModOpt;
@@ -25,26 +28,6 @@ namespace System.Reflection.Emit
 			}
 			this.typeb = tb;
 			this.table_idx = tb.get_next_table_index(this, 23, true);
-		}
-
-		void _PropertyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _PropertyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _PropertyBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _PropertyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		public override PropertyAttributes Attributes
@@ -167,8 +150,7 @@ namespace System.Reflection.Emit
 
 		public void SetCustomAttribute(CustomAttributeBuilder customBuilder)
 		{
-			string fullName = customBuilder.Ctor.ReflectedType.FullName;
-			if (fullName == "System.Runtime.CompilerServices.SpecialNameAttribute")
+			if (customBuilder.Ctor.ReflectedType.FullName == "System.Runtime.CompilerServices.SpecialNameAttribute")
 			{
 				this.attrs |= PropertyAttributes.SpecialName;
 				return;
@@ -179,12 +161,10 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
+				return;
 			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
-			}
+			this.cattrs = new CustomAttributeBuilder[1];
+			this.cattrs[0] = customBuilder;
 		}
 
 		[ComVisible(true)]
@@ -219,9 +199,34 @@ namespace System.Reflection.Emit
 			}
 		}
 
+		void _PropertyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _PropertyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _PropertyBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _PropertyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		private Exception not_supported()
 		{
 			return new NotSupportedException("The invoked member is not supported in a dynamic module.");
+		}
+
+		internal PropertyBuilder()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private PropertyAttributes attrs;
@@ -251,5 +256,7 @@ namespace System.Reflection.Emit
 		private Type[][] paramModReq;
 
 		private Type[][] paramModOpt;
+
+		private CallingConventions callingConvention;
 	}
 }

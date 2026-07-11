@@ -35,12 +35,8 @@ namespace KSerialization
 
 		public static void Print()
 		{
-			if (Stats.serializationStats.Count > 0)
-			{
-			}
-			if (Stats.deserializationStats.Count > 0)
-			{
-			}
+			int count = Stats.serializationStats.Count;
+			int count2 = Stats.deserializationStats.Count;
 		}
 
 		[Conditional("ENABLE_KSERIALIZER_STATS")]
@@ -49,10 +45,9 @@ namespace KSerialization
 			string text = header + "\n";
 			foreach (KeyValuePair<Type, Stats.StatInfo> keyValuePair in stats)
 			{
-				string text2 = text;
 				text = string.Concat(new object[]
 				{
-					text2,
+					text,
 					keyValuePair.Key.ToString(),
 					",",
 					keyValuePair.Value.numOccurrences,

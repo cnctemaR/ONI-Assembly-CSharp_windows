@@ -16,17 +16,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(Db.Get().Attributes.Digging.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DIGGING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		this.expertAthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), Db.Get().Skills.Suits1.Name, false, false, true);
-		string text = "Atmo_Suit";
-		string slot = global::TUNING.EQUIPMENT.SUITS.SLOT;
-		SimHashes simHashes = SimHashes.Dirt;
-		float num = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS;
-		string text2 = "suit_oxygen_kanim";
-		string empty = string.Empty;
-		string text3 = "body_oxygen_kanim";
-		int num2 = 6;
-		List<AttributeModifier> list2 = list;
-		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, simHashes, num, text2, empty, text3, num2, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, null);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Atmo_Suit", global::TUNING.EQUIPMENT.SUITS.SLOT, SimHashes.Dirt, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_oxygen_kanim", "", "body_oxygen_kanim", 6, list, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, new Tag[] { GameTags.Suit }, null);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));

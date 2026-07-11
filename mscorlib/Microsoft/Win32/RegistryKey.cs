@@ -2,13 +2,26 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using System.Security.Permissions;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
+using Unity;
 
 namespace Microsoft.Win32
 {
 	[ComVisible(true)]
 	public sealed class RegistryKey : MarshalByRefObject, IDisposable
 	{
+		static RegistryKey()
+		{
+			if (Path.DirectorySeparatorChar == '\\')
+			{
+				RegistryKey.RegistryApi = new Win32RegistryApi();
+				return;
+			}
+			RegistryKey.RegistryApi = new UnixRegistryApi();
+		}
+
 		internal RegistryKey(RegistryHive hiveId)
 			: this(hiveId, new IntPtr((int)hiveId), false)
 		{
@@ -30,26 +43,14 @@ namespace Microsoft.Win32
 			this.isWritable = writable;
 		}
 
-		static RegistryKey()
+		internal static bool IsEquals(RegistryKey a, RegistryKey b)
 		{
-			if (Path.DirectorySeparatorChar == '\\')
-			{
-				RegistryKey.RegistryApi = new Win32RegistryApi();
-			}
-			else
-			{
-				RegistryKey.RegistryApi = new UnixRegistryApi();
-			}
+			return a.hive == b.hive && a.handle == b.handle && a.qname == b.qname && a.isRemoteRoot == b.isRemoteRoot && a.isWritable == b.isWritable;
 		}
 
-		void IDisposable.Dispose()
+		public void Dispose()
 		{
 			GC.SuppressFinalize(this);
-			this.Close();
-		}
-
-		~RegistryKey()
-		{
 			this.Close();
 		}
 
@@ -75,6 +76,7 @@ namespace Microsoft.Win32
 			}
 			RegistryKey.RegistryApi.Close(this);
 			this.handle = null;
+			this.safe_handle = null;
 		}
 
 		public int SubKeyCount
@@ -92,6 +94,32 @@ namespace Microsoft.Win32
 			{
 				this.AssertKeyStillValid();
 				return RegistryKey.RegistryApi.ValueCount(this);
+			}
+		}
+
+		[ComVisible(false)]
+		[MonoTODO("Not implemented in Unix")]
+		public SafeRegistryHandle Handle
+		{
+			get
+			{
+				this.AssertKeyStillValid();
+				if (this.safe_handle == null)
+				{
+					IntPtr intPtr = RegistryKey.RegistryApi.GetHandle(this);
+					this.safe_handle = new SafeRegistryHandle(intPtr, true);
+				}
+				return this.safe_handle;
+			}
+		}
+
+		[ComVisible(false)]
+		[MonoLimitation("View is ignored in Mono.")]
+		public RegistryView View
+		{
+			get
+			{
+				return RegistryView.Default;
 			}
 		}
 
@@ -169,7 +197,7 @@ namespace Microsoft.Win32
 		[ComVisible(false)]
 		public RegistryValueKind GetValueKind(string name)
 		{
-			throw new NotImplementedException();
+			return RegistryKey.RegistryApi.GetValueKind(this, name);
 		}
 
 		public RegistryKey CreateSubKey(string subkey)
@@ -185,15 +213,50 @@ namespace Microsoft.Win32
 		}
 
 		[ComVisible(false)]
+		[MonoLimitation("permissionCheck is ignored in Mono")]
 		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck)
 		{
-			throw new NotImplementedException();
+			return this.CreateSubKey(subkey);
 		}
 
 		[ComVisible(false)]
+		[MonoLimitation("permissionCheck and registrySecurity are ignored in Mono")]
 		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck, RegistrySecurity registrySecurity)
 		{
-			throw new NotImplementedException();
+			return this.CreateSubKey(subkey);
+		}
+
+		[ComVisible(false)]
+		[MonoLimitation("permissionCheck is ignored in Mono")]
+		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck, RegistryOptions options)
+		{
+			this.AssertKeyStillValid();
+			this.AssertKeyNameNotNull(subkey);
+			this.AssertKeyNameLength(subkey);
+			if (!this.IsWritable)
+			{
+				throw new UnauthorizedAccessException("Cannot write to the registry key.");
+			}
+			return RegistryKey.RegistryApi.CreateSubKey(this, subkey, options);
+		}
+
+		[ComVisible(false)]
+		[MonoLimitation("permissionCheck and registrySecurity are ignored in Mono")]
+		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck, RegistryOptions registryOptions, RegistrySecurity registrySecurity)
+		{
+			return this.CreateSubKey(subkey, permissionCheck, registryOptions);
+		}
+
+		[ComVisible(false)]
+		public RegistryKey CreateSubKey(string subkey, bool writable)
+		{
+			return this.CreateSubKey(subkey, writable ? RegistryKeyPermissionCheck.ReadWriteSubTree : RegistryKeyPermissionCheck.ReadSubTree);
+		}
+
+		[ComVisible(false)]
+		public RegistryKey CreateSubKey(string subkey, bool writable, RegistryOptions options)
+		{
+			return this.CreateSubKey(subkey, writable ? RegistryKeyPermissionCheck.ReadWriteSubTree : RegistryKeyPermissionCheck.ReadSubTree, options);
 		}
 
 		public void DeleteSubKey(string subkey)
@@ -233,17 +296,27 @@ namespace Microsoft.Win32
 
 		public void DeleteSubKeyTree(string subkey)
 		{
+			this.DeleteSubKeyTree(subkey, true);
+		}
+
+		public void DeleteSubKeyTree(string subkey, bool throwOnMissingSubKey)
+		{
 			this.AssertKeyStillValid();
 			this.AssertKeyNameNotNull(subkey);
 			this.AssertKeyNameLength(subkey);
 			RegistryKey registryKey = this.OpenSubKey(subkey, true);
-			if (registryKey == null)
+			if (registryKey != null)
 			{
-				throw new ArgumentException("Cannot delete a subkey tree because the subkey does not exist.");
+				registryKey.DeleteChildKeysAndValues();
+				registryKey.Close();
+				this.DeleteSubKey(subkey, false);
+				return;
 			}
-			registryKey.DeleteChildKeysAndValues();
-			registryKey.Close();
-			this.DeleteSubKey(subkey, false);
+			if (!throwOnMissingSubKey)
+			{
+				return;
+			}
+			throw new ArgumentException("Cannot delete a subkey tree because the subkey does not exist.");
 		}
 
 		public void DeleteValue(string name)
@@ -267,12 +340,12 @@ namespace Microsoft.Win32
 
 		public RegistrySecurity GetAccessControl()
 		{
-			throw new NotImplementedException();
+			return this.GetAccessControl(AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
 		}
 
 		public RegistrySecurity GetAccessControl(AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			return new RegistrySecurity(this.Name, includeSections);
 		}
 
 		public string[] GetSubKeyNames()
@@ -287,6 +360,26 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.GetValueNames(this);
 		}
 
+		[ComVisible(false)]
+		[MonoTODO("Not implemented on unix")]
+		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static RegistryKey FromHandle(SafeRegistryHandle handle)
+		{
+			if (handle == null)
+			{
+				throw new ArgumentNullException("handle");
+			}
+			return RegistryKey.RegistryApi.FromHandle(handle);
+		}
+
+		[MonoTODO("Not implemented on unix")]
+		[ComVisible(false)]
+		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static RegistryKey FromHandle(SafeRegistryHandle handle, RegistryView view)
+		{
+			return RegistryKey.FromHandle(handle);
+		}
+
 		[MonoTODO("Not implemented on unix")]
 		public static RegistryKey OpenRemoteBaseKey(RegistryHive hKey, string machineName)
 		{
@@ -297,21 +390,69 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.OpenRemoteBaseKey(hKey, machineName);
 		}
 
+		[MonoTODO("Not implemented on unix")]
 		[ComVisible(false)]
-		public RegistryKey OpenSubKey(string name, RegistryKeyPermissionCheck permissionCheck)
+		public static RegistryKey OpenRemoteBaseKey(RegistryHive hKey, string machineName, RegistryView view)
 		{
-			throw new NotImplementedException();
+			if (machineName == null)
+			{
+				throw new ArgumentNullException("machineName");
+			}
+			return RegistryKey.RegistryApi.OpenRemoteBaseKey(hKey, machineName);
 		}
 
 		[ComVisible(false)]
+		[MonoLimitation("View is ignored in Mono")]
+		public static RegistryKey OpenBaseKey(RegistryHive hKey, RegistryView view)
+		{
+			switch (hKey)
+			{
+			case RegistryHive.ClassesRoot:
+				return Registry.ClassesRoot;
+			case RegistryHive.CurrentUser:
+				return Registry.CurrentUser;
+			case RegistryHive.LocalMachine:
+				return Registry.LocalMachine;
+			case RegistryHive.Users:
+				return Registry.Users;
+			case RegistryHive.PerformanceData:
+				return Registry.PerformanceData;
+			case RegistryHive.CurrentConfig:
+				return Registry.CurrentConfig;
+			case RegistryHive.DynData:
+				return Registry.DynData;
+			default:
+				throw new ArgumentException("hKey");
+			}
+		}
+
+		[ComVisible(false)]
+		public RegistryKey OpenSubKey(string name, RegistryKeyPermissionCheck permissionCheck)
+		{
+			return this.OpenSubKey(name, permissionCheck == RegistryKeyPermissionCheck.ReadWriteSubTree);
+		}
+
+		[ComVisible(false)]
+		[MonoLimitation("rights are ignored in Mono")]
+		public RegistryKey OpenSubKey(string name, RegistryRights rights)
+		{
+			return this.OpenSubKey(name);
+		}
+
+		[ComVisible(false)]
+		[MonoLimitation("rights are ignored in Mono")]
 		public RegistryKey OpenSubKey(string name, RegistryKeyPermissionCheck permissionCheck, RegistryRights rights)
 		{
-			throw new NotImplementedException();
+			return this.OpenSubKey(name, permissionCheck == RegistryKeyPermissionCheck.ReadWriteSubTree);
 		}
 
 		public void SetAccessControl(RegistrySecurity registrySecurity)
 		{
-			throw new NotImplementedException();
+			if (registrySecurity == null)
+			{
+				throw new ArgumentNullException("registrySecurity");
+			}
+			registrySecurity.PersistModifications(this.Name);
 		}
 
 		public override string ToString()
@@ -344,11 +485,11 @@ namespace Microsoft.Win32
 				{
 					throw new NotSupportedException();
 				}
-				return (RegistryHive)((int)this.hive);
+				return (RegistryHive)this.hive;
 			}
 		}
 
-		internal object Handle
+		internal object InternalHandle
 		{
 			get
 			{
@@ -386,16 +527,14 @@ namespace Microsoft.Win32
 			{
 				return;
 			}
-			string[] subKeyNames = this.GetSubKeyNames();
-			foreach (string text in subKeyNames)
+			foreach (string text in this.GetSubKeyNames())
 			{
 				RegistryKey registryKey = this.OpenSubKey(text, true);
 				registryKey.DeleteChildKeysAndValues();
 				registryKey.Close();
 				this.DeleteSubKey(text, false);
 			}
-			string[] valueNames = this.GetValueNames();
-			foreach (string text2 in valueNames)
+			foreach (string text2 in this.GetValueNames())
 			{
 				this.DeleteValue(text2, false);
 			}
@@ -404,8 +543,7 @@ namespace Microsoft.Win32
 		internal static string DecodeString(byte[] data)
 		{
 			string text = Encoding.Unicode.GetString(data);
-			int num = text.IndexOf('\0');
-			if (num != -1)
+			if (text.IndexOf('\0') != -1)
 			{
 				text = text.TrimEnd(new char[1]);
 			}
@@ -419,28 +557,35 @@ namespace Microsoft.Win32
 
 		private static string GetHiveName(RegistryHive hive)
 		{
-			switch (hive + -2147483648)
+			switch (hive)
 			{
-			case (RegistryHive)0:
+			case RegistryHive.ClassesRoot:
 				return "HKEY_CLASSES_ROOT";
-			case (RegistryHive)1:
+			case RegistryHive.CurrentUser:
 				return "HKEY_CURRENT_USER";
-			case (RegistryHive)2:
+			case RegistryHive.LocalMachine:
 				return "HKEY_LOCAL_MACHINE";
-			case (RegistryHive)3:
+			case RegistryHive.Users:
 				return "HKEY_USERS";
-			case (RegistryHive)4:
+			case RegistryHive.PerformanceData:
 				return "HKEY_PERFORMANCE_DATA";
-			case (RegistryHive)5:
+			case RegistryHive.CurrentConfig:
 				return "HKEY_CURRENT_CONFIG";
-			case (RegistryHive)6:
+			case RegistryHive.DynData:
 				return "HKEY_DYN_DATA";
 			default:
 				throw new NotImplementedException(string.Format("Registry hive '{0}' is not implemented.", hive.ToString()));
 			}
 		}
 
+		internal RegistryKey()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
 		private object handle;
+
+		private SafeRegistryHandle safe_handle;
 
 		private object hive;
 

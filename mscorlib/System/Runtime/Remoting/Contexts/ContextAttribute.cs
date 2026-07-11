@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Activation;
+using System.Security;
 
 namespace System.Runtime.Remoting.Contexts
 {
@@ -17,6 +17,7 @@ namespace System.Runtime.Remoting.Contexts
 
 		public virtual string Name
 		{
+			[SecurityCritical]
 			get
 			{
 				return this.AttributeName;
@@ -25,18 +26,10 @@ namespace System.Runtime.Remoting.Contexts
 
 		public override bool Equals(object o)
 		{
-			if (o == null)
-			{
-				return false;
-			}
-			if (!(o is ContextAttribute))
-			{
-				return false;
-			}
-			ContextAttribute contextAttribute = (ContextAttribute)o;
-			return !(contextAttribute.AttributeName != this.AttributeName);
+			return o != null && o is ContextAttribute && !(((ContextAttribute)o).AttributeName != this.AttributeName);
 		}
 
+		[SecurityCritical]
 		public virtual void Freeze(Context newContext)
 		{
 		}
@@ -50,16 +43,17 @@ namespace System.Runtime.Remoting.Contexts
 			return this.AttributeName.GetHashCode();
 		}
 
+		[SecurityCritical]
 		public virtual void GetPropertiesForNewContext(IConstructionCallMessage ctorMsg)
 		{
 			if (ctorMsg == null)
 			{
 				throw new ArgumentNullException("ctorMsg");
 			}
-			IList contextProperties = ctorMsg.ContextProperties;
-			contextProperties.Add(this);
+			ctorMsg.ContextProperties.Add(this);
 		}
 
+		[SecurityCritical]
 		public virtual bool IsContextOK(Context ctx, IConstructionCallMessage ctorMsg)
 		{
 			if (ctorMsg == null)
@@ -78,6 +72,7 @@ namespace System.Runtime.Remoting.Contexts
 			return property != null && this == property;
 		}
 
+		[SecurityCritical]
 		public virtual bool IsNewContextOK(Context newCtx)
 		{
 			return true;

@@ -4,23 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 {
 	public class TranslatePoint : TransformerModule, IModule3D, IModule
 	{
-		public TranslatePoint()
-		{
-		}
-
-		public TranslatePoint(IModule source)
-		{
-			this._sourceModule = source;
-		}
-
-		public TranslatePoint(IModule source, float x, float y, float z)
-			: this(source)
-		{
-			this._xTranslate = x;
-			this._yTranslate = y;
-			this._zTranslate = z;
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -67,6 +50,23 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 			{
 				this._zTranslate = value;
 			}
+		}
+
+		public TranslatePoint()
+		{
+		}
+
+		public TranslatePoint(IModule source)
+		{
+			this._sourceModule = source;
+		}
+
+		public TranslatePoint(IModule source, float x, float y, float z)
+			: this(source)
+		{
+			this._xTranslate = x;
+			this._yTranslate = y;
+			this._zTranslate = z;
 		}
 
 		public float GetValue(float x, float y, float z)

@@ -47,26 +47,23 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 		public float GetValue(float x, float y, float z)
 		{
 			float value = ((IModule3D)this._sourceModule).GetValue(x, y, z);
-			int i;
-			for (i = 0; i < this._controlPoints.Count; i++)
+			int num = 0;
+			while (num < this._controlPoints.Count && value >= this._controlPoints[num].Input)
 			{
-				if (value < this._controlPoints[i].Input)
-				{
-					break;
-				}
+				num++;
 			}
-			int num = Libnoise.Clamp(i - 2, 0, this._controlPoints.Count - 1);
-			int num2 = Libnoise.Clamp(i - 1, 0, this._controlPoints.Count - 1);
-			int num3 = Libnoise.Clamp(i, 0, this._controlPoints.Count - 1);
-			int num4 = Libnoise.Clamp(i + 1, 0, this._controlPoints.Count - 1);
-			if (num2 == num3)
+			int num2 = Libnoise.Clamp(num - 2, 0, this._controlPoints.Count - 1);
+			int num3 = Libnoise.Clamp(num - 1, 0, this._controlPoints.Count - 1);
+			int num4 = Libnoise.Clamp(num, 0, this._controlPoints.Count - 1);
+			int num5 = Libnoise.Clamp(num + 1, 0, this._controlPoints.Count - 1);
+			if (num3 == num4)
 			{
-				return this._controlPoints[num2].Output;
+				return this._controlPoints[num3].Output;
 			}
-			float input = this._controlPoints[num2].Input;
-			float input2 = this._controlPoints[num3].Input;
-			float num5 = (value - input) / (input2 - input);
-			return Libnoise.Cerp(this._controlPoints[num].Output, this._controlPoints[num2].Output, this._controlPoints[num3].Output, this._controlPoints[num4].Output, num5);
+			float input = this._controlPoints[num3].Input;
+			float input2 = this._controlPoints[num4].Input;
+			float num6 = (value - input) / (input2 - input);
+			return Libnoise.Cerp(this._controlPoints[num2].Output, this._controlPoints[num3].Output, this._controlPoints[num4].Output, this._controlPoints[num5].Output, num6);
 		}
 
 		protected void SortControlPoints()

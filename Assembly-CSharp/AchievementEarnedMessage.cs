@@ -15,7 +15,7 @@ public class AchievementEarnedMessage : Message
 
 	public override string GetMessageBody()
 	{
-		return string.Empty;
+		return "";
 	}
 
 	public override string GetTitle()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Mono.Security;
 using Mono.Security.Cryptography;
 using Mono.Security.X509;
@@ -27,7 +26,7 @@ namespace System.Security.Cryptography.X509Certificates
 			this._keyValue = new AsnEncodedData(keyValue);
 		}
 
-		internal PublicKey(X509Certificate certificate)
+		internal PublicKey(Mono.Security.X509.X509Certificate certificate)
 		{
 			bool flag = true;
 			if (certificate.KeyAlgorithm == "1.2.840.113549.1.1.1")
@@ -40,7 +39,7 @@ namespace System.Security.Cryptography.X509Certificates
 				}
 				else
 				{
-					RSAManaged rsamanaged = certificate.RSA as RSAManaged;
+					Mono.Security.Cryptography.RSAManaged rsamanaged = certificate.RSA as Mono.Security.Cryptography.RSAManaged;
 					if (rsamanaged != null && rsamanaged.PublicOnly)
 					{
 						this._key = certificate.RSA;
@@ -71,7 +70,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			this._oid = new Oid(certificate.KeyAlgorithm);
 			this._keyValue = new AsnEncodedData(this._oid, certificate.PublicKey);
-			this._params = new AsnEncodedData(this._oid, certificate.KeyAlgorithmParameters);
+			this._params = new AsnEncodedData(this._oid, certificate.KeyAlgorithmParameters ?? PublicKey.Empty);
 		}
 
 		public AsnEncodedData EncodedKeyValue
@@ -97,35 +96,19 @@ namespace System.Security.Cryptography.X509Certificates
 				if (this._key == null)
 				{
 					string value = this._oid.Value;
-					if (value != null)
+					if (!(value == "1.2.840.113549.1.1.1"))
 					{
-						if (PublicKey.<>f__switch$map16 == null)
+						if (!(value == "1.2.840.10040.4.1"))
 						{
-							PublicKey.<>f__switch$map16 = new Dictionary<string, int>(2)
-							{
-								{ "1.2.840.113549.1.1.1", 0 },
-								{ "1.2.840.10040.4.1", 1 }
-							};
+							throw new NotSupportedException(global::Locale.GetText("Cannot decode public key from unknown OID '{0}'.", new object[] { this._oid.Value }));
 						}
-						int num;
-						if (PublicKey.<>f__switch$map16.TryGetValue(value, out num))
-						{
-							if (num == 0)
-							{
-								this._key = PublicKey.DecodeRSA(this._keyValue.RawData);
-								goto IL_00D7;
-							}
-							if (num == 1)
-							{
-								this._key = PublicKey.DecodeDSA(this._keyValue.RawData, this._params.RawData);
-								goto IL_00D7;
-							}
-						}
+						this._key = PublicKey.DecodeDSA(this._keyValue.RawData, this._params.RawData);
 					}
-					string text = global::Locale.GetText("Cannot decode public key from unknown OID '{0}'.", new object[] { this._oid.Value });
-					throw new NotSupportedException(text);
+					else
+					{
+						this._key = PublicKey.DecodeRSA(this._keyValue.RawData);
+					}
 				}
-				IL_00D7:
 				return this._key;
 			}
 		}
@@ -155,13 +138,13 @@ namespace System.Security.Cryptography.X509Certificates
 			DSAParameters dsaparameters = default(DSAParameters);
 			try
 			{
-				ASN1 asn = new ASN1(rawPublicKey);
+				Mono.Security.ASN1 asn = new Mono.Security.ASN1(rawPublicKey);
 				if (asn.Tag != 2)
 				{
 					throw new CryptographicException(global::Locale.GetText("Missing DSA Y integer."));
 				}
 				dsaparameters.Y = PublicKey.GetUnsignedBigInteger(asn.Value);
-				ASN1 asn2 = new ASN1(rawParameters);
+				Mono.Security.ASN1 asn2 = new Mono.Security.ASN1(rawParameters);
 				if (asn2 == null || asn2.Tag != 48 || asn2.Count < 3)
 				{
 					throw new CryptographicException(global::Locale.GetText("Missing DSA parameters."));
@@ -176,12 +159,11 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			catch (Exception ex)
 			{
-				string text = global::Locale.GetText("Error decoding the ASN.1 structure.");
-				throw new CryptographicException(text, ex);
+				throw new CryptographicException(global::Locale.GetText("Error decoding the ASN.1 structure."), ex);
 			}
-			DSA dsa = new DSACryptoServiceProvider(dsaparameters.Y.Length << 3);
-			dsa.ImportParameters(dsaparameters);
-			return dsa;
+			DSACryptoServiceProvider dsacryptoServiceProvider = new DSACryptoServiceProvider(dsaparameters.Y.Length << 3);
+			dsacryptoServiceProvider.ImportParameters(dsaparameters);
+			return dsacryptoServiceProvider;
 		}
 
 		internal static RSA DecodeRSA(byte[] rawPublicKey)
@@ -189,17 +171,17 @@ namespace System.Security.Cryptography.X509Certificates
 			RSAParameters rsaparameters = default(RSAParameters);
 			try
 			{
-				ASN1 asn = new ASN1(rawPublicKey);
+				Mono.Security.ASN1 asn = new Mono.Security.ASN1(rawPublicKey);
 				if (asn.Count == 0)
 				{
 					throw new CryptographicException(global::Locale.GetText("Missing RSA modulus and exponent."));
 				}
-				ASN1 asn2 = asn[0];
+				Mono.Security.ASN1 asn2 = asn[0];
 				if (asn2 == null || asn2.Tag != 2)
 				{
 					throw new CryptographicException(global::Locale.GetText("Missing RSA modulus."));
 				}
-				ASN1 asn3 = asn[1];
+				Mono.Security.ASN1 asn3 = asn[1];
 				if (asn3.Tag != 2)
 				{
 					throw new CryptographicException(global::Locale.GetText("Missing RSA public exponent."));
@@ -209,13 +191,11 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			catch (Exception ex)
 			{
-				string text = global::Locale.GetText("Error decoding the ASN.1 structure.");
-				throw new CryptographicException(text, ex);
+				throw new CryptographicException(global::Locale.GetText("Error decoding the ASN.1 structure."), ex);
 			}
-			int num = rsaparameters.Modulus.Length << 3;
-			RSA rsa = new RSACryptoServiceProvider(num);
-			rsa.ImportParameters(rsaparameters);
-			return rsa;
+			RSACryptoServiceProvider rsacryptoServiceProvider = new RSACryptoServiceProvider(rsaparameters.Modulus.Length << 3);
+			rsacryptoServiceProvider.ImportParameters(rsaparameters);
+			return rsacryptoServiceProvider;
 		}
 
 		private const string rsaOid = "1.2.840.113549.1.1.1";
@@ -229,5 +209,7 @@ namespace System.Security.Cryptography.X509Certificates
 		private AsnEncodedData _params;
 
 		private Oid _oid;
+
+		private static byte[] Empty = new byte[0];
 	}
 }

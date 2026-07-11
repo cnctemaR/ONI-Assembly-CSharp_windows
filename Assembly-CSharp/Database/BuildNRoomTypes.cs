@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using KSerialization;
 using STRINGS;
@@ -16,11 +17,14 @@ namespace Database
 		public override bool Success()
 		{
 			int num = 0;
-			foreach (Room room in Game.Instance.roomProber.rooms)
+			using (List<Room>.Enumerator enumerator = Game.Instance.roomProber.rooms.GetEnumerator())
 			{
-				if (room.roomType == this.roomType)
+				while (enumerator.MoveNext())
 				{
-					num++;
+					if (enumerator.Current.roomType == this.roomType)
+					{
+						num++;
+					}
 				}
 			}
 			return num >= this.numToCreate;
@@ -42,14 +46,17 @@ namespace Database
 		public override string GetProgress(bool complete)
 		{
 			int num = 0;
-			foreach (Room room in Game.Instance.roomProber.rooms)
+			using (List<Room>.Enumerator enumerator = Game.Instance.roomProber.rooms.GetEnumerator())
 			{
-				if (room.roomType == this.roomType)
+				while (enumerator.MoveNext())
 				{
-					num++;
+					if (enumerator.Current.roomType == this.roomType)
+					{
+						num++;
+					}
 				}
 			}
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILT_N_ROOMS, this.roomType.Name, (!complete) ? num : this.numToCreate, this.numToCreate);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILT_N_ROOMS, this.roomType.Name, complete ? this.numToCreate : num, this.numToCreate);
 		}
 
 		private RoomType roomType;

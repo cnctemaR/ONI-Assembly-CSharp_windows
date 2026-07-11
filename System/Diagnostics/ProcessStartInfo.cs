@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
@@ -10,226 +12,44 @@ using Microsoft.Win32;
 
 namespace System.Diagnostics
 {
-	[global::System.ComponentModel.TypeConverter(typeof(global::System.ComponentModel.ExpandableObjectConverter))]
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[TypeConverter(typeof(ExpandableObjectConverter))]
+	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true, SelfAffectingProcessMgmt = true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class ProcessStartInfo
 	{
 		public ProcessStartInfo()
 		{
 		}
 
-		public ProcessStartInfo(string filename)
+		internal ProcessStartInfo(Process parent)
 		{
-			this.filename = filename;
+			this.weakParentProcess = new WeakReference(parent);
 		}
 
-		public ProcessStartInfo(string filename, string arguments)
+		public ProcessStartInfo(string fileName)
 		{
-			this.filename = filename;
+			this.fileName = fileName;
+		}
+
+		public ProcessStartInfo(string fileName, string arguments)
+		{
+			this.fileName = fileName;
 			this.arguments = arguments;
 		}
 
-		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
-		[global::System.ComponentModel.DefaultValue("")]
-		[MonitoringDescription("Command line agruments for this process.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public string Arguments
-		{
-			get
-			{
-				return this.arguments;
-			}
-			set
-			{
-				this.arguments = value;
-			}
-		}
-
-		[global::System.ComponentModel.DefaultValue(false)]
-		[MonitoringDescription("Start this process with a new window.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public bool CreateNoWindow
-		{
-			get
-			{
-				return this.create_no_window;
-			}
-			set
-			{
-				this.create_no_window = value;
-			}
-		}
-
-		[MonitoringDescription("Environment variables used for this process.")]
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Content)]
-		[global::System.ComponentModel.DefaultValue(null)]
-		[global::System.ComponentModel.Editor("System.Diagnostics.Design.StringDictionaryEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public global::System.Collections.Specialized.StringDictionary EnvironmentVariables
-		{
-			get
-			{
-				if (this.envVars == null)
-				{
-					this.envVars = new global::System.Collections.Specialized.ProcessStringDictionary();
-					foreach (object obj in Environment.GetEnvironmentVariables())
-					{
-						DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-						this.envVars.Add((string)dictionaryEntry.Key, (string)dictionaryEntry.Value);
-					}
-				}
-				return this.envVars;
-			}
-		}
-
-		internal bool HaveEnvVars
-		{
-			get
-			{
-				return this.envVars != null;
-			}
-		}
-
-		[global::System.ComponentModel.DefaultValue(false)]
-		[MonitoringDescription("Thread shows dialogboxes for errors.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public bool ErrorDialog
-		{
-			get
-			{
-				return this.error_dialog;
-			}
-			set
-			{
-				this.error_dialog = value;
-			}
-		}
-
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		public IntPtr ErrorDialogParentHandle
-		{
-			get
-			{
-				return this.error_dialog_parent_handle;
-			}
-			set
-			{
-				this.error_dialog_parent_handle = value;
-			}
-		}
-
-		[global::System.ComponentModel.DefaultValue("")]
-		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
-		[global::System.ComponentModel.Editor("System.Diagnostics.Design.StartFileNameEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[MonitoringDescription("The name of the resource to start this process.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public string FileName
-		{
-			get
-			{
-				return this.filename;
-			}
-			set
-			{
-				this.filename = value;
-			}
-		}
-
-		[global::System.ComponentModel.DefaultValue(false)]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		[MonitoringDescription("Errors of this process are redirected.")]
-		public bool RedirectStandardError
-		{
-			get
-			{
-				return this.redirect_standard_error;
-			}
-			set
-			{
-				this.redirect_standard_error = value;
-			}
-		}
-
-		[MonitoringDescription("Standard input of this process is redirected.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		[global::System.ComponentModel.DefaultValue(false)]
-		public bool RedirectStandardInput
-		{
-			get
-			{
-				return this.redirect_standard_input;
-			}
-			set
-			{
-				this.redirect_standard_input = value;
-			}
-		}
-
-		[global::System.ComponentModel.DefaultValue(false)]
-		[MonitoringDescription("Standart output of this process is redirected.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public bool RedirectStandardOutput
-		{
-			get
-			{
-				return this.redirect_standard_output;
-			}
-			set
-			{
-				this.redirect_standard_output = value;
-			}
-		}
-
-		public Encoding StandardErrorEncoding
-		{
-			get
-			{
-				return this.encoding_stderr;
-			}
-			set
-			{
-				this.encoding_stderr = value;
-			}
-		}
-
-		public Encoding StandardOutputEncoding
-		{
-			get
-			{
-				return this.encoding_stdout;
-			}
-			set
-			{
-				this.encoding_stdout = value;
-			}
-		}
-
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		[MonitoringDescription("Use the shell to start this process.")]
-		[global::System.ComponentModel.DefaultValue(true)]
-		public bool UseShellExecute
-		{
-			get
-			{
-				return this.use_shell_execute;
-			}
-			set
-			{
-				this.use_shell_execute = value;
-			}
-		}
-
-		[MonitoringDescription("The verb to apply to a used document.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		[global::System.ComponentModel.DefaultValue("")]
-		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.VerbConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[TypeConverter("System.Diagnostics.Design.VerbConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[MonitoringDescription("The verb to apply to the document specified by the FileName property.")]
+		[NotifyParentProperty(true)]
+		[DefaultValue("")]
 		public string Verb
 		{
 			get
 			{
+				if (this.verb == null)
+				{
+					return string.Empty;
+				}
 				return this.verb;
 			}
 			set
@@ -238,130 +58,180 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		public string[] Verbs
+		[DefaultValue("")]
+		[SettingsBindable(true)]
+		[MonitoringDescription("Command line arguments that will be passed to the application specified by the FileName property.")]
+		[NotifyParentProperty(true)]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		public string Arguments
 		{
 			get
 			{
-				string text = ((!((this.filename == null) | (this.filename.Length == 0))) ? Path.GetExtension(this.filename) : null);
-				if (text == null)
+				if (this.arguments == null)
 				{
-					return ProcessStartInfo.empty;
+					return string.Empty;
 				}
-				PlatformID platform = Environment.OSVersion.Platform;
-				switch (platform)
+				return this.arguments;
+			}
+			set
+			{
+				this.arguments = value;
+			}
+		}
+
+		[NotifyParentProperty(true)]
+		[MonitoringDescription("Whether to start the process without creating a new window to contain it.")]
+		[DefaultValue(false)]
+		public bool CreateNoWindow
+		{
+			get
+			{
+				return this.createNoWindow;
+			}
+			set
+			{
+				this.createNoWindow = value;
+			}
+		}
+
+		[Editor("System.Diagnostics.Design.StringDictionaryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[DefaultValue(null)]
+		[MonitoringDescription("Set of environment variables that apply to this process and child processes.")]
+		[NotifyParentProperty(true)]
+		public StringDictionary EnvironmentVariables
+		{
+			get
+			{
+				if (this.environmentVariables == null)
 				{
-				case PlatformID.Unix:
-				case PlatformID.MacOSX:
-					break;
-				default:
-					if (platform != (PlatformID)128)
+					this.environmentVariables = new CaseSensitiveStringDictionary();
+					if (this.weakParentProcess == null || !this.weakParentProcess.IsAlive || ((Component)this.weakParentProcess.Target).Site == null || !((Component)this.weakParentProcess.Target).Site.DesignMode)
 					{
-						RegistryKey registryKey = null;
-						RegistryKey registryKey2 = null;
-						RegistryKey registryKey3 = null;
-						string[] array;
-						try
+						foreach (object obj in global::System.Environment.GetEnvironmentVariables())
 						{
-							registryKey = Registry.ClassesRoot.OpenSubKey(text);
-							string text2 = ((registryKey == null) ? null : (registryKey.GetValue(null) as string));
-							registryKey2 = ((text2 == null) ? null : Registry.ClassesRoot.OpenSubKey(text2));
-							registryKey3 = ((registryKey2 == null) ? null : registryKey2.OpenSubKey("shell"));
-							array = ((registryKey3 == null) ? null : registryKey3.GetSubKeyNames());
+							DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+							this.environmentVariables.Add((string)dictionaryEntry.Key, (string)dictionaryEntry.Value);
 						}
-						finally
-						{
-							if (registryKey3 != null)
-							{
-								registryKey3.Close();
-							}
-							if (registryKey2 != null)
-							{
-								registryKey2.Close();
-							}
-							if (registryKey != null)
-							{
-								registryKey.Close();
-							}
-						}
-						return array;
 					}
-					break;
 				}
-				return ProcessStartInfo.empty;
+				return this.environmentVariables;
 			}
 		}
 
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		[global::System.ComponentModel.DefaultValue(typeof(ProcessWindowStyle), "Normal")]
-		[MonitoringDescription("The window style used to start this process.")]
-		public ProcessWindowStyle WindowStyle
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[DefaultValue(null)]
+		[NotifyParentProperty(true)]
+		public IDictionary<string, string> Environment
 		{
 			get
 			{
-				return this.window_style;
-			}
-			set
-			{
-				this.window_style = value;
+				if (this.environment == null)
+				{
+					this.environment = this.EnvironmentVariables.AsGenericDictionary();
+				}
+				return this.environment;
 			}
 		}
 
-		[global::System.ComponentModel.Editor("System.Diagnostics.Design.WorkingDirectoryEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[MonitoringDescription("The initial directory for this process.")]
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		[global::System.ComponentModel.DefaultValue("")]
-		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
-		public string WorkingDirectory
+		[DefaultValue(false)]
+		[MonitoringDescription("Whether the process command input is read from the Process instance's StandardInput member.")]
+		[NotifyParentProperty(true)]
+		public bool RedirectStandardInput
 		{
 			get
 			{
-				return this.working_directory;
+				return this.redirectStandardInput;
 			}
 			set
 			{
-				this.working_directory = ((value != null) ? value : string.Empty);
+				this.redirectStandardInput = value;
 			}
 		}
 
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public bool LoadUserProfile
+		[MonitoringDescription("Whether the process output is written to the Process instance's StandardOutput member.")]
+		[DefaultValue(false)]
+		[NotifyParentProperty(true)]
+		public bool RedirectStandardOutput
 		{
 			get
 			{
-				return this.load_user_profile;
+				return this.redirectStandardOutput;
 			}
 			set
 			{
-				this.load_user_profile = value;
+				this.redirectStandardOutput = value;
 			}
 		}
 
-		[global::System.ComponentModel.NotifyParentProperty(true)]
+		[DefaultValue(false)]
+		[MonitoringDescription("Whether the process's error output is written to the Process instance's StandardError member.")]
+		[NotifyParentProperty(true)]
+		public bool RedirectStandardError
+		{
+			get
+			{
+				return this.redirectStandardError;
+			}
+			set
+			{
+				this.redirectStandardError = value;
+			}
+		}
+
+		public Encoding StandardErrorEncoding
+		{
+			get
+			{
+				return this.standardErrorEncoding;
+			}
+			set
+			{
+				this.standardErrorEncoding = value;
+			}
+		}
+
+		public Encoding StandardOutputEncoding
+		{
+			get
+			{
+				return this.standardOutputEncoding;
+			}
+			set
+			{
+				this.standardOutputEncoding = value;
+			}
+		}
+
+		[MonitoringDescription("Whether to use the operating system shell to start the process.")]
+		[DefaultValue(true)]
+		[NotifyParentProperty(true)]
+		public bool UseShellExecute
+		{
+			get
+			{
+				return this.useShellExecute;
+			}
+			set
+			{
+				this.useShellExecute = value;
+			}
+		}
+
+		[NotifyParentProperty(true)]
 		public string UserName
 		{
 			get
 			{
-				return this.username;
+				if (this.userName == null)
+				{
+					return string.Empty;
+				}
+				return this.userName;
 			}
 			set
 			{
-				this.username = value;
-			}
-		}
-
-		[global::System.ComponentModel.NotifyParentProperty(true)]
-		public string Domain
-		{
-			get
-			{
-				return this.domain;
-			}
-			set
-			{
-				this.domain = value;
+				this.userName = value;
 			}
 		}
 
@@ -377,43 +247,240 @@ namespace System.Diagnostics
 			}
 		}
 
-		private string arguments = string.Empty;
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public string PasswordInClearText
+		{
+			get
+			{
+				return this.passwordInClearText;
+			}
+			set
+			{
+				this.passwordInClearText = value;
+			}
+		}
 
-		private IntPtr error_dialog_parent_handle = (IntPtr)0;
+		[NotifyParentProperty(true)]
+		public string Domain
+		{
+			get
+			{
+				if (this.domain == null)
+				{
+					return string.Empty;
+				}
+				return this.domain;
+			}
+			set
+			{
+				this.domain = value;
+			}
+		}
 
-		private string filename = string.Empty;
+		[NotifyParentProperty(true)]
+		public bool LoadUserProfile
+		{
+			get
+			{
+				return this.loadUserProfile;
+			}
+			set
+			{
+				this.loadUserProfile = value;
+			}
+		}
 
-		private string verb = string.Empty;
+		[Editor("System.Diagnostics.Design.StartFileNameEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[MonitoringDescription("The name of the application, document or URL to start.")]
+		[SettingsBindable(true)]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[NotifyParentProperty(true)]
+		[DefaultValue("")]
+		public string FileName
+		{
+			get
+			{
+				if (this.fileName == null)
+				{
+					return string.Empty;
+				}
+				return this.fileName;
+			}
+			set
+			{
+				this.fileName = value;
+			}
+		}
 
-		private string working_directory = string.Empty;
+		[SettingsBindable(true)]
+		[DefaultValue("")]
+		[MonitoringDescription("The initial working directory for the process.")]
+		[Editor("System.Diagnostics.Design.WorkingDirectoryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[NotifyParentProperty(true)]
+		public string WorkingDirectory
+		{
+			get
+			{
+				if (this.directory == null)
+				{
+					return string.Empty;
+				}
+				return this.directory;
+			}
+			set
+			{
+				this.directory = value;
+			}
+		}
 
-		private global::System.Collections.Specialized.ProcessStringDictionary envVars;
+		[NotifyParentProperty(true)]
+		[MonitoringDescription("Whether to show an error dialog to the user if there is an error.")]
+		[DefaultValue(false)]
+		public bool ErrorDialog
+		{
+			get
+			{
+				return this.errorDialog;
+			}
+			set
+			{
+				this.errorDialog = value;
+			}
+		}
 
-		private bool create_no_window;
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public IntPtr ErrorDialogParentHandle
+		{
+			get
+			{
+				return this.errorDialogParentHandle;
+			}
+			set
+			{
+				this.errorDialogParentHandle = value;
+			}
+		}
 
-		private bool error_dialog;
+		[MonitoringDescription("How the main window should be created when the process starts.")]
+		[DefaultValue(ProcessWindowStyle.Normal)]
+		[NotifyParentProperty(true)]
+		public ProcessWindowStyle WindowStyle
+		{
+			get
+			{
+				return this.windowStyle;
+			}
+			set
+			{
+				if (!Enum.IsDefined(typeof(ProcessWindowStyle), value))
+				{
+					throw new InvalidEnumArgumentException("value", (int)value, typeof(ProcessWindowStyle));
+				}
+				this.windowStyle = value;
+			}
+		}
 
-		private bool redirect_standard_error;
+		internal bool HaveEnvVars
+		{
+			get
+			{
+				return this.environmentVariables != null;
+			}
+		}
 
-		private bool redirect_standard_input;
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public string[] Verbs
+		{
+			get
+			{
+				PlatformID platform = global::System.Environment.OSVersion.Platform;
+				if (platform == PlatformID.Unix || platform == PlatformID.MacOSX || platform == (PlatformID)128)
+				{
+					return ProcessStartInfo.empty;
+				}
+				string text = (string.IsNullOrEmpty(this.fileName) ? null : Path.GetExtension(this.fileName));
+				if (text == null)
+				{
+					return ProcessStartInfo.empty;
+				}
+				RegistryKey registryKey = null;
+				RegistryKey registryKey2 = null;
+				RegistryKey registryKey3 = null;
+				string[] array;
+				try
+				{
+					registryKey = Registry.ClassesRoot.OpenSubKey(text);
+					string text2 = ((registryKey != null) ? (registryKey.GetValue(null) as string) : null);
+					registryKey2 = ((text2 != null) ? Registry.ClassesRoot.OpenSubKey(text2) : null);
+					registryKey3 = ((registryKey2 != null) ? registryKey2.OpenSubKey("shell") : null);
+					array = ((registryKey3 != null) ? registryKey3.GetSubKeyNames() : null);
+				}
+				finally
+				{
+					if (registryKey3 != null)
+					{
+						registryKey3.Close();
+					}
+					if (registryKey2 != null)
+					{
+						registryKey2.Close();
+					}
+					if (registryKey != null)
+					{
+						registryKey.Close();
+					}
+				}
+				return array;
+			}
+		}
 
-		private bool redirect_standard_output;
+		private string fileName;
 
-		private bool use_shell_execute = true;
+		private string arguments;
 
-		private ProcessWindowStyle window_style;
+		private string directory;
 
-		private Encoding encoding_stderr;
+		private string verb;
 
-		private Encoding encoding_stdout;
+		private ProcessWindowStyle windowStyle;
 
-		private string username;
+		private bool errorDialog;
+
+		private IntPtr errorDialogParentHandle;
+
+		private bool useShellExecute = true;
+
+		private string userName;
 
 		private string domain;
 
 		private SecureString password;
 
-		private bool load_user_profile;
+		private string passwordInClearText;
+
+		private bool loadUserProfile;
+
+		private bool redirectStandardInput;
+
+		private bool redirectStandardOutput;
+
+		private bool redirectStandardError;
+
+		private Encoding standardOutputEncoding;
+
+		private Encoding standardErrorEncoding;
+
+		private bool createNoWindow;
+
+		private WeakReference weakParentProcess;
+
+		internal StringDictionary environmentVariables;
+
+		private IDictionary<string, string> environment;
 
 		private static readonly string[] empty = new string[0];
 	}

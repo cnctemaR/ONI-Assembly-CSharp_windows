@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using Klei.AI;
 using STRINGS;
@@ -9,11 +8,6 @@ namespace Database
 {
 	public class MinimumMorale : VictoryColonyAchievementRequirement
 	{
-		public MinimumMorale(int minimumMorale = 16)
-		{
-			this.minimumMorale = minimumMorale;
-		}
-
 		public override string Name()
 		{
 			return string.Format(COLONY_ACHIEVEMENTS.THRIVING.REQUIREMENTS.MINIMUM_MORALE, this.minimumMorale);
@@ -24,33 +18,21 @@ namespace Database
 			return string.Format(COLONY_ACHIEVEMENTS.THRIVING.REQUIREMENTS.MINIMUM_MORALE_DESCRIPTION, this.minimumMorale);
 		}
 
+		public MinimumMorale(int minimumMorale = 16)
+		{
+			this.minimumMorale = minimumMorale;
+		}
+
 		public override bool Success()
 		{
 			bool flag = true;
-			IEnumerator enumerator = Components.MinionAssignablesProxy.GetEnumerator();
-			try
+			foreach (object obj in Components.MinionAssignablesProxy)
 			{
-				while (enumerator.MoveNext())
+				GameObject targetGameObject = ((MinionAssignablesProxy)obj).GetTargetGameObject();
+				if (targetGameObject != null && !targetGameObject.HasTag(GameTags.Dead))
 				{
-					object obj = enumerator.Current;
-					MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)obj;
-					GameObject targetGameObject = minionAssignablesProxy.GetTargetGameObject();
-					if (targetGameObject != null)
-					{
-						if (!targetGameObject.HasTag(GameTags.Dead))
-						{
-							AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(targetGameObject.GetComponent<MinionModifiers>());
-							flag = attributeInstance != null && attributeInstance.GetTotalValue() >= (float)this.minimumMorale && flag;
-						}
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
+					AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(targetGameObject.GetComponent<MinionModifiers>());
+					flag = attributeInstance != null && attributeInstance.GetTotalValue() >= (float)this.minimumMorale && flag;
 				}
 			}
 			return flag;

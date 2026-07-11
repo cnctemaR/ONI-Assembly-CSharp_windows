@@ -7,11 +7,6 @@ namespace ProcGen.Noise
 	[Serializable]
 	public class FloatList : NoiseBase
 	{
-		public FloatList()
-		{
-			this.points = new List<float>();
-		}
-
 		public override Type GetObjectType()
 		{
 			return typeof(FloatList);
@@ -19,5 +14,10 @@ namespace ProcGen.Noise
 
 		[SerializeField]
 		public List<float> points { get; set; }
+
+		public FloatList()
+		{
+			this.points = new List<float>();
+		}
 	}
 }

@@ -6,6 +6,18 @@ namespace Satsuma
 {
 	public sealed class Preflow : IFlow<double>
 	{
+		public IGraph Graph { get; private set; }
+
+		public Func<Arc, double> Capacity { get; private set; }
+
+		public Node Source { get; private set; }
+
+		public Node Target { get; private set; }
+
+		public double FlowSize { get; private set; }
+
+		public double Error { get; private set; }
+
 		public Preflow(IGraph graph, Func<Arc, double> capacity, Node source, Node target)
 		{
 			this.Graph = graph;
@@ -30,73 +42,59 @@ namespace Satsuma
 					node2 = this.Graph.Other(parentArc, node);
 					node = node2;
 				}
+				return;
 			}
-			else
+			if (double.IsNegativeInfinity(num))
 			{
-				if (double.IsNegativeInfinity(num))
+				num = 0.0;
+			}
+			this.U = (double)this.Graph.ArcCount(ArcFilter.All) * num;
+			double num2 = 0.0;
+			foreach (Arc arc in this.Graph.Arcs(this.Source, ArcFilter.Forward))
+			{
+				if (this.Graph.Other(arc, this.Source) != this.Source)
 				{
-					num = 0.0;
-				}
-				this.U = (double)this.Graph.ArcCount(ArcFilter.All) * num;
-				double num2 = 0.0;
-				foreach (Arc arc in this.Graph.Arcs(this.Source, ArcFilter.Forward))
-				{
-					if (this.Graph.Other(arc, this.Source) != this.Source)
+					num2 += this.Capacity(arc);
+					if (num2 > this.U)
 					{
-						num2 += this.Capacity(arc);
-						if (num2 > this.U)
-						{
-							break;
-						}
+						break;
 					}
 				}
-				this.U = Math.Min(this.U, num2);
-				double num3 = 0.0;
-				foreach (Arc arc2 in this.Graph.Arcs(this.Target, ArcFilter.Backward))
+			}
+			this.U = Math.Min(this.U, num2);
+			double num3 = 0.0;
+			foreach (Arc arc2 in this.Graph.Arcs(this.Target, ArcFilter.Backward))
+			{
+				if (this.Graph.Other(arc2, this.Target) != this.Target)
 				{
-					if (this.Graph.Other(arc2, this.Target) != this.Target)
+					num3 += this.Capacity(arc2);
+					if (num3 > this.U)
 					{
-						num3 += this.Capacity(arc2);
-						if (num3 > this.U)
-						{
-							break;
-						}
+						break;
 					}
 				}
-				this.U = Math.Min(this.U, num3);
-				Supergraph supergraph = new Supergraph(this.Graph);
-				Node node3 = supergraph.AddNode();
-				this.artificialArc = supergraph.AddArc(node3, this.Source, Directedness.Directed);
-				this.CapacityMultiplier = Utils.LargestPowerOfTwo(9.223372036854776E+18 / this.U);
-				if (this.CapacityMultiplier == 0.0)
-				{
-					this.CapacityMultiplier = 1.0;
-				}
-				IntegerPreflow integerPreflow = new IntegerPreflow(supergraph, new Func<Arc, long>(this.IntegralCapacity), node3, this.Target);
-				this.FlowSize = (double)integerPreflow.FlowSize / this.CapacityMultiplier;
-				this.Error = (double)this.Graph.ArcCount(ArcFilter.All) / this.CapacityMultiplier;
-				foreach (KeyValuePair<Arc, long> keyValuePair in integerPreflow.NonzeroArcs)
-				{
-					this.flow[keyValuePair.Key] = (double)keyValuePair.Value / this.CapacityMultiplier;
-				}
+			}
+			this.U = Math.Min(this.U, num3);
+			Supergraph supergraph = new Supergraph(this.Graph);
+			Node node3 = supergraph.AddNode();
+			this.artificialArc = supergraph.AddArc(node3, this.Source, Directedness.Directed);
+			this.CapacityMultiplier = Utils.LargestPowerOfTwo(9.223372036854776E+18 / this.U);
+			if (this.CapacityMultiplier == 0.0)
+			{
+				this.CapacityMultiplier = 1.0;
+			}
+			IntegerPreflow integerPreflow = new IntegerPreflow(supergraph, new Func<Arc, long>(this.IntegralCapacity), node3, this.Target);
+			this.FlowSize = (double)integerPreflow.FlowSize / this.CapacityMultiplier;
+			this.Error = (double)this.Graph.ArcCount(ArcFilter.All) / this.CapacityMultiplier;
+			foreach (KeyValuePair<Arc, long> keyValuePair in integerPreflow.NonzeroArcs)
+			{
+				this.flow[keyValuePair.Key] = (double)keyValuePair.Value / this.CapacityMultiplier;
 			}
 		}
 
-		public IGraph Graph { get; private set; }
-
-		public Func<Arc, double> Capacity { get; private set; }
-
-		public Node Source { get; private set; }
-
-		public Node Target { get; private set; }
-
-		public double FlowSize { get; private set; }
-
-		public double Error { get; private set; }
-
 		private long IntegralCapacity(Arc arc)
 		{
-			return (long)(this.CapacityMultiplier * ((!(arc == this.artificialArc)) ? Math.Min(this.U, this.Capacity(arc)) : this.U));
+			return (long)(this.CapacityMultiplier * ((arc == this.artificialArc) ? this.U : Math.Min(this.U, this.Capacity(arc))));
 		}
 
 		public IEnumerable<KeyValuePair<Arc, double>> NonzeroArcs

@@ -2,7 +2,7 @@
 
 public class KProfile : IDisposable
 {
-	public KProfile(string name, string category = "Game")
+	public KProfile(string name, string group = "Game")
 	{
 		this.name = name;
 	}

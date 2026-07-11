@@ -64,7 +64,7 @@ public class Infrared : MonoBehaviour
 
 	private void UpdateState()
 	{
-		base.enabled = this.mode != Infrared.Mode.Disabled;
+		base.enabled = this.mode > Infrared.Mode.Disabled;
 		if (base.enabled)
 		{
 			this.Update();
@@ -73,20 +73,18 @@ public class Infrared : MonoBehaviour
 
 	private void Update()
 	{
-		Infrared.Mode mode = this.mode;
-		if (mode != Infrared.Mode.Disabled)
+		switch (this.mode)
 		{
-			if (mode != Infrared.Mode.Infrared)
-			{
-				if (mode == Infrared.Mode.Disease)
-				{
-					GameComps.DiseaseContainers.UpdateOverlayColours();
-				}
-			}
-			else
-			{
-				GameComps.InfraredVisualizers.UpdateTemperature();
-			}
+		case Infrared.Mode.Disabled:
+			break;
+		case Infrared.Mode.Infrared:
+			GameComps.InfraredVisualizers.UpdateTemperature();
+			return;
+		case Infrared.Mode.Disease:
+			GameComps.DiseaseContainers.UpdateOverlayColours();
+			break;
+		default:
+			return;
 		}
 	}
 

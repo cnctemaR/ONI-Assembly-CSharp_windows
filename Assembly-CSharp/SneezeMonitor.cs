@@ -30,15 +30,13 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		{
 			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(master.gameObject);
 			this.OnSneezyChange();
-			AttributeInstance attributeInstance2 = attributeInstance;
-			attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, new global::System.Action(this.OnSneezyChange));
+			attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, new global::System.Action(this.OnSneezyChange));
 		}
 
 		public override void StopSM(string reason)
 		{
 			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(base.master.gameObject);
-			AttributeInstance attributeInstance2 = attributeInstance;
-			attributeInstance2.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance2.OnDirty, new global::System.Action(this.OnSneezyChange));
+			attributeInstance.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance.OnDirty, new global::System.Action(this.OnSneezyChange));
 			base.StopSM(reason);
 		}
 
@@ -62,12 +60,7 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		public Reactable GetReactable()
 		{
 			float num = this.NextSneezeInterval();
-			GameObject gameObject = base.master.gameObject;
-			HashedString hashedString = "Sneeze";
-			ChoreType cough = Db.Get().ChoreTypes.Cough;
-			HashedString hashedString2 = "anim_sneeze_kanim";
-			float num2 = num;
-			return new SelfEmoteReactable(gameObject, hashedString, cough, hashedString2, 0f, num2, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+			return new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, num, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 			{
 				anim = "sneeze",
 				startcb = new Action<GameObject>(this.TriggerDisurbance)

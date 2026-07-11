@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace System.IO
 {
 	[AttributeUsage(AttributeTargets.All)]
-	public class IODescriptionAttribute : global::System.ComponentModel.DescriptionAttribute
+	public class IODescriptionAttribute : DescriptionAttribute
 	{
 		public IODescriptionAttribute(string description)
 			: base(description)

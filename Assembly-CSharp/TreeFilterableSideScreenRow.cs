@@ -44,7 +44,11 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		{
 			return TreeFilterableSideScreenRow.State.Mixed;
 		}
-		return (this.rowElements.Count <= 0) ? TreeFilterableSideScreenRow.State.Off : TreeFilterableSideScreenRow.State.On;
+		if (this.rowElements.Count <= 0)
+		{
+			return TreeFilterableSideScreenRow.State.Off;
+		}
+		return TreeFilterableSideScreenRow.State.On;
 	}
 
 	protected override void OnPrefabInit()
@@ -54,16 +58,17 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
 			TreeFilterableSideScreenRow.State state = this.GetState();
-			if (state != TreeFilterableSideScreenRow.State.On)
+			if (state > TreeFilterableSideScreenRow.State.Mixed)
 			{
-				if (state == TreeFilterableSideScreenRow.State.Mixed || state == TreeFilterableSideScreenRow.State.Off)
+				if (state == TreeFilterableSideScreenRow.State.On)
 				{
-					this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+					this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+					return;
 				}
 			}
 			else
 			{
-				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
 			}
 		}));
 	}
@@ -98,25 +103,20 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 
 	public void ChangeCheckBoxState(TreeFilterableSideScreenRow.State newState)
 	{
-		if (newState != TreeFilterableSideScreenRow.State.Off)
+		switch (newState)
 		{
-			if (newState != TreeFilterableSideScreenRow.State.Mixed)
-			{
-				if (newState == TreeFilterableSideScreenRow.State.On)
-				{
-					this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
-					{
-						re.SetCheckBox(true);
-					});
-				}
-			}
-		}
-		else
-		{
+		case TreeFilterableSideScreenRow.State.Off:
 			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
 			{
 				re.SetCheckBox(false);
 			});
+			break;
+		case TreeFilterableSideScreenRow.State.On:
+			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
+			{
+				re.SetCheckBox(true);
+			});
+			break;
 		}
 		this.visualDirty = true;
 	}

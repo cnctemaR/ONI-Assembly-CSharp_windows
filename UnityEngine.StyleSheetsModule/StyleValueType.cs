@@ -10,6 +10,7 @@ namespace UnityEngine.StyleSheets
 		Float,
 		Color,
 		ResourcePath,
+		AssetReference,
 		Enum,
 		String
 	}

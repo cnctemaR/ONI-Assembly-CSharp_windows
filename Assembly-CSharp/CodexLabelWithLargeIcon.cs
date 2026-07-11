@@ -6,19 +6,19 @@ using UnityEngine.UI;
 
 public class CodexLabelWithLargeIcon : CodexLabelWithIcon
 {
+	public string linkID { get; set; }
+
 	public CodexLabelWithLargeIcon()
 	{
 	}
 
-	public CodexLabelWithLargeIcon(string text, CodexTextStyle style, Tuple<Sprite, Color> coloredSprite, string targetEntrylinkID)
+	public CodexLabelWithLargeIcon(string text, CodexTextStyle style, global::Tuple<Sprite, Color> coloredSprite, string targetEntrylinkID)
 		: base(text, style, coloredSprite, 128, 128)
 	{
 		base.icon = new CodexImage(128, 128, coloredSprite);
 		base.label = new CodexText(text, style);
 		this.linkID = targetEntrylinkID;
 	}
-
-	public string linkID { get; set; }
 
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
 	{

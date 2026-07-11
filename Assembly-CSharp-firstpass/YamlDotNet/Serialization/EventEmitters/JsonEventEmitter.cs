@@ -21,20 +21,20 @@ namespace YamlDotNet.Serialization.EventEmitters
 		{
 			eventInfo.IsPlainImplicit = true;
 			eventInfo.Style = ScalarStyle.Plain;
-			TypeCode typeCode = ((eventInfo.Source.Value == null) ? TypeCode.Empty : eventInfo.Source.Type.GetTypeCode());
+			TypeCode typeCode = ((eventInfo.Source.Value != null) ? eventInfo.Source.Type.GetTypeCode() : TypeCode.Empty);
 			switch (typeCode)
 			{
 			case TypeCode.Empty:
 				eventInfo.RenderedValue = "null";
-				goto IL_0168;
+				goto IL_014C;
 			case TypeCode.Boolean:
 				eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
-				goto IL_0168;
+				goto IL_014C;
 			case TypeCode.Char:
 			case TypeCode.String:
 				eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
 				eventInfo.Style = ScalarStyle.DoubleQuoted;
-				goto IL_0168;
+				goto IL_014C;
 			case TypeCode.SByte:
 			case TypeCode.Byte:
 			case TypeCode.Int16:
@@ -47,17 +47,17 @@ namespace YamlDotNet.Serialization.EventEmitters
 			case TypeCode.Double:
 			case TypeCode.Decimal:
 				eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-				goto IL_0168;
+				goto IL_014C;
 			case TypeCode.DateTime:
 				eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.Source.Value);
-				goto IL_0168;
+				goto IL_014C;
 			}
-			if (eventInfo.Source.Type != typeof(TimeSpan))
+			if (!(eventInfo.Source.Type == typeof(TimeSpan)))
 			{
-				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", new object[] { typeCode }));
+				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 			eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.Source.Value);
-			IL_0168:
+			IL_014C:
 			base.Emit(eventInfo, emitter);
 		}
 

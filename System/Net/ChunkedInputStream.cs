@@ -11,10 +11,10 @@ namespace System.Net
 		{
 			this.context = context;
 			WebHeaderCollection webHeaderCollection = (WebHeaderCollection)context.Request.Headers;
-			this.decoder = new ChunkStream(webHeaderCollection);
+			this.decoder = new MonoChunkStream(webHeaderCollection);
 		}
 
-		public ChunkStream Decoder
+		public MonoChunkStream Decoder
 		{
 			get
 			{
@@ -132,7 +132,7 @@ namespace System.Net
 			}
 			if (httpStreamAsyncResult.Error != null)
 			{
-				throw new HttpListenerException(400, "I/O operation aborted.");
+				throw new HttpListenerException(400, "I/O operation aborted: " + httpStreamAsyncResult.Error.Message);
 			}
 			return httpStreamAsyncResult.Count;
 		}
@@ -148,7 +148,7 @@ namespace System.Net
 
 		private bool disposed;
 
-		private ChunkStream decoder;
+		private MonoChunkStream decoder;
 
 		private HttpListenerContext context;
 

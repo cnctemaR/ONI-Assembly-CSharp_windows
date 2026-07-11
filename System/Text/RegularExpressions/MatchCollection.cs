@@ -1,30 +1,79 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class MatchCollection : ICollection, IEnumerable
 	{
-		internal MatchCollection(Match start)
+		internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
 		{
-			this.current = start;
-			this.list = new ArrayList();
+			if (startat < 0 || startat > input.Length)
+			{
+				throw new ArgumentOutOfRangeException("startat", global::SR.GetString("Start index cannot be less than 0 or greater than input length."));
+			}
+			this._regex = regex;
+			this._input = input;
+			this._beginning = beginning;
+			this._length = length;
+			this._startat = startat;
+			this._prevlen = -1;
+			this._matches = new ArrayList();
+			this._done = false;
+		}
+
+		internal Match GetMatch(int i)
+		{
+			if (i < 0)
+			{
+				return null;
+			}
+			if (this._matches.Count > i)
+			{
+				return (Match)this._matches[i];
+			}
+			if (this._done)
+			{
+				return null;
+			}
+			for (;;)
+			{
+				Match match = this._regex.Run(false, this._prevlen, this._input, this._beginning, this._length, this._startat);
+				if (!match.Success)
+				{
+					break;
+				}
+				this._matches.Add(match);
+				this._prevlen = match._length;
+				this._startat = match._textpos;
+				if (this._matches.Count > i)
+				{
+					return match;
+				}
+			}
+			this._done = true;
+			return null;
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.FullList.Count;
+				if (this._done)
+				{
+					return this._matches.Count;
+				}
+				this.GetMatch(MatchCollection.infinite);
+				return this._matches.Count;
 			}
 		}
 
-		public bool IsReadOnly
+		public object SyncRoot
 		{
 			get
 			{
-				return true;
+				return this;
 			}
 		}
 
@@ -36,117 +85,70 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
+		public bool IsReadOnly
+		{
+			get
+			{
+				return true;
+			}
+		}
+
 		public virtual Match this[int i]
 		{
 			get
 			{
-				if (i < 0 || !this.TryToGet(i))
+				Match match = this.GetMatch(i);
+				if (match == null)
 				{
 					throw new ArgumentOutOfRangeException("i");
 				}
-				return (i >= this.list.Count) ? this.current : ((Match)this.list[i]);
+				return match;
 			}
 		}
 
-		public object SyncRoot
+		public void CopyTo(Array array, int arrayIndex)
 		{
-			get
+			if (array != null && array.Rank != 1)
 			{
-				return this.list;
+				throw new ArgumentException(global::SR.GetString("Only single dimensional arrays are supported for the requested action."));
 			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.FullList.CopyTo(array, index);
+			int count = this.Count;
+			try
+			{
+				this._matches.CopyTo(array, arrayIndex);
+			}
+			catch (ArrayTypeMismatchException ex)
+			{
+				throw new ArgumentException(global::SR.GetString("Target array type is not compatible with the type of items in the collection."), ex);
+			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			IEnumerator enumerator2;
-			if (this.current.Success)
-			{
-				IEnumerator enumerator = new MatchCollection.Enumerator(this);
-				enumerator2 = enumerator;
-			}
-			else
-			{
-				enumerator2 = this.list.GetEnumerator();
-			}
-			return enumerator2;
+			return new MatchEnumerator(this);
 		}
 
-		private bool TryToGet(int i)
+		internal MatchCollection()
 		{
-			while (i > this.list.Count && this.current.Success)
-			{
-				this.list.Add(this.current);
-				this.current = this.current.NextMatch();
-			}
-			return i < this.list.Count || this.current.Success;
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private ICollection FullList
-		{
-			get
-			{
-				if (this.TryToGet(2147483647))
-				{
-					throw new SystemException("too many matches");
-				}
-				return this.list;
-			}
-		}
+		internal Regex _regex;
 
-		private Match current;
+		internal ArrayList _matches;
 
-		private ArrayList list;
+		internal bool _done;
 
-		private class Enumerator : IEnumerator
-		{
-			internal Enumerator(MatchCollection coll)
-			{
-				this.coll = coll;
-				this.index = -1;
-			}
+		internal string _input;
 
-			void IEnumerator.Reset()
-			{
-				this.index = -1;
-			}
+		internal int _beginning;
 
-			object IEnumerator.Current
-			{
-				get
-				{
-					if (this.index < 0)
-					{
-						throw new InvalidOperationException("'Current' called before 'MoveNext()'");
-					}
-					if (this.index > this.coll.list.Count)
-					{
-						throw new SystemException("MatchCollection in invalid state");
-					}
-					if (this.index == this.coll.list.Count && !this.coll.current.Success)
-					{
-						throw new InvalidOperationException("'Current' called after 'MoveNext()' returned false");
-					}
-					return (this.index >= this.coll.list.Count) ? this.coll.current : this.coll.list[this.index];
-				}
-			}
+		internal int _length;
 
-			bool IEnumerator.MoveNext()
-			{
-				if (this.index > this.coll.list.Count)
-				{
-					throw new SystemException("MatchCollection in invalid state");
-				}
-				return (this.index != this.coll.list.Count || this.coll.current.Success) && this.coll.TryToGet(++this.index);
-			}
+		internal int _startat;
 
-			private int index;
+		internal int _prevlen;
 
-			private MatchCollection coll;
-		}
+		private static int infinite = int.MaxValue;
 	}
 }

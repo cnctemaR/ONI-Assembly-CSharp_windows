@@ -5,6 +5,8 @@ namespace Database
 {
 	public class ColonyAchievement : Resource
 	{
+		public string victoryNISSnapshot { get; private set; }
+
 		public ColonyAchievement(string Id, string steamAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, string victorySnapshot = "", string icon = "")
 			: base(Id, Name)
 		{
@@ -19,11 +21,9 @@ namespace Database
 			this.shortVideoName = videoDataName;
 			this.loopVideoName = victoryLoopVideo;
 			this.victorySequence = VictorySequence;
-			this.victoryNISSnapshot = ((!string.IsNullOrEmpty(victorySnapshot)) ? victorySnapshot : AudioMixerSnapshots.Get().VictoryNISGenericSnapshot);
+			this.victoryNISSnapshot = (string.IsNullOrEmpty(victorySnapshot) ? AudioMixerSnapshots.Get().VictoryNISGenericSnapshot : victorySnapshot);
 			this.icon = icon;
 		}
-
-		public string victoryNISSnapshot { get; private set; }
 
 		public string description;
 

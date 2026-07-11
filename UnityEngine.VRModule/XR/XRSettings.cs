@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.XR
 {
-	/// <summary>
-	///   <para>Global XR related settings.</para>
-	/// </summary>
-	[NativeConditional("ENABLE_VR")]
-	[NativeHeader("Runtime/VR/VRModule.h")]
-	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
 	[NativeHeader("Runtime/VR/ScriptBindings/XR.bindings.h")]
+	[NativeConditional("ENABLE_VR")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
+	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
+	[NativeHeader("Runtime/VR/VRModule.h")]
 	public static class XRSettings
 	{
-		/// <summary>
-		///   <para>Globally enables or disables XR for the application.</para>
-		/// </summary>
 		public static extern bool enabled
 		{
 			[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
@@ -26,9 +22,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>Sets the render mode for the XR device. The render mode controls how the view of the XR device renders in the Game view and in the main window on a host PC.</para>
-		/// </summary>
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern GameViewRenderMode gameViewRenderMode
 		{
@@ -38,9 +31,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>Read-only value that can be used to determine if the XR device is active.</para>
-		/// </summary>
 		[NativeName("Active")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool isDeviceActive
@@ -49,9 +39,6 @@ namespace UnityEngine.XR
 			get;
 		}
 
-		/// <summary>
-		///   <para>This property has been deprecated. Use XRSettings.gameViewRenderMode instead.</para>
-		/// </summary>
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool showDeviceView
 		{
@@ -61,9 +48,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>This field has been deprecated. Use XRSettings.eyeTextureResolutionScale instead.</para>
-		/// </summary>
 		[Obsolete("renderScale is deprecated, use XRSettings.eyeTextureResolutionScale instead (UnityUpgradable) -> eyeTextureResolutionScale", false)]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float renderScale
@@ -74,11 +58,8 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>Controls the actual size of eye textures as a multiplier of the device's default resolution.</para>
-		/// </summary>
-		[NativeName("RenderScale")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("RenderScale")]
 		public static extern float eyeTextureResolutionScale
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -87,9 +68,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>The current width of an eye texture for the loaded device.</para>
-		/// </summary>
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern int eyeTextureWidth
 		{
@@ -97,9 +75,6 @@ namespace UnityEngine.XR
 			get;
 		}
 
-		/// <summary>
-		///   <para>The current height of an eye texture for the loaded device.</para>
-		/// </summary>
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern int eyeTextureHeight
 		{
@@ -107,12 +82,9 @@ namespace UnityEngine.XR
 			get;
 		}
 
-		/// <summary>
-		///   <para>Fetch the eye texture RenderTextureDescriptor from the active stereo device.</para>
-		/// </summary>
-		[NativeName("DefaultEyeTextureDesc")]
-		[NativeConditional("ENABLE_VR", "RenderTextureDesc()")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeConditional("ENABLE_VR", "RenderTextureDesc()")]
+		[NativeName("DefaultEyeTextureDesc")]
 		public static RenderTextureDescriptor eyeTextureDesc
 		{
 			get
@@ -123,9 +95,14 @@ namespace UnityEngine.XR
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls how much of the allocated eye texture should be used for rendering.</para>
-		/// </summary>
+		[NativeName("DeviceEyeTextureDimension")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		public static extern TextureDimension deviceEyeTextureDimension
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public static float renderViewportScale
 		{
 			get
@@ -142,8 +119,8 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[NativeName("RenderViewportScale")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("RenderViewportScale")]
 		internal static extern float renderViewportScaleInternal
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -152,9 +129,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>A scale applied to the standard occulsion mask for each platform.</para>
-		/// </summary>
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float occlusionMaskScale
 		{
@@ -164,9 +138,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>Specifies whether or not the occlusion mesh should be used when rendering. Enabled by default.</para>
-		/// </summary>
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool useOcclusionMesh
 		{
@@ -176,9 +147,6 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		/// <summary>
-		///   <para>Type of XR device that is currently loaded.</para>
-		/// </summary>
 		[NativeName("DeviceName")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern string loadedDeviceName
@@ -187,28 +155,22 @@ namespace UnityEngine.XR
 			get;
 		}
 
-		/// <summary>
-		///   <para>Loads the requested device at the beginning of the next frame.</para>
-		/// </summary>
-		/// <param name="deviceName">Name of the device from XRSettings.supportedDevices.</param>
-		/// <param name="prioritizedDeviceNameList">Prioritized list of device names from XRSettings.supportedDevices.</param>
 		public static void LoadDeviceByName(string deviceName)
 		{
 			XRSettings.LoadDeviceByName(new string[] { deviceName });
 		}
 
-		/// <summary>
-		///   <para>Loads the requested device at the beginning of the next frame.</para>
-		/// </summary>
-		/// <param name="deviceName">Name of the device from XRSettings.supportedDevices.</param>
-		/// <param name="prioritizedDeviceNameList">Prioritized list of device names from XRSettings.supportedDevices.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void LoadDeviceByName(string[] prioritizedDeviceNameList);
 
-		/// <summary>
-		///   <para>Returns a list of supported XR devices that were included at build time.</para>
-		/// </summary>
 		public static extern string[] supportedDevices
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		public static extern XRSettings.StereoRenderingMode stereoRenderingMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -216,5 +178,13 @@ namespace UnityEngine.XR
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_eyeTextureDesc_Injected(out RenderTextureDescriptor ret);
+
+		public enum StereoRenderingMode
+		{
+			MultiPass,
+			SinglePass,
+			SinglePassInstanced,
+			SinglePassMultiview
+		}
 	}
 }

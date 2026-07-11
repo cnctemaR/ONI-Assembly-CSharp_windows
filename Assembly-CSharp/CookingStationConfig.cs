@@ -56,8 +56,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("PickledMeal", 1f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("CookingStation", array, array2);
-		PickledMealConfig.recipe = new ComplexRecipe(text, array, array2)
+		PickledMealConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array, array2), array, array2)
 		{
 			time = FOOD.RECIPES.SMALL_COOK_TIME,
 			description = ITEMS.FOOD.PICKLEDMEAL.RECIPEDESC,
@@ -73,8 +72,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("FriedMushBar".ToTag(), 1f)
 		};
-		string text2 = ComplexRecipeManager.MakeRecipeID("CookingStation", array3, array4);
-		FriedMushBarConfig.recipe = new ComplexRecipe(text2, array3, array4)
+		FriedMushBarConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array3, array4), array3, array4)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.FRIEDMUSHBAR.RECIPEDESC,
@@ -90,8 +88,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("FriedMushroom", 1f)
 		};
-		string text3 = ComplexRecipeManager.MakeRecipeID("CookingStation", array5, array6);
-		FriedMushroomConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		FriedMushroomConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array5, array6), array5, array6)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.FRIEDMUSHROOM.RECIPEDESC,
@@ -107,8 +104,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("CookedMeat", 1f)
 		};
-		string text4 = ComplexRecipeManager.MakeRecipeID("CookingStation", array7, array8);
-		CookedMeatConfig.recipe = new ComplexRecipe(text4, array7, array8)
+		CookedMeatConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array7, array8), array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
@@ -124,8 +120,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("CookedFish", 1f)
 		};
-		string text5 = ComplexRecipeManager.MakeRecipeID("CookingStation", array9, array10);
-		CookedMeatConfig.recipe = new ComplexRecipe(text5, array9, array10)
+		CookedMeatConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array9, array10), array9, array10)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
@@ -141,8 +136,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("GrilledPrickleFruit", 1f)
 		};
-		string text6 = ComplexRecipeManager.MakeRecipeID("CookingStation", array11, array12);
-		GrilledPrickleFruitConfig.recipe = new ComplexRecipe(text6, array11, array12)
+		GrilledPrickleFruitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array11, array12), array11, array12)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.GRILLEDPRICKLEFRUIT.RECIPEDESC,
@@ -158,8 +152,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("ColdWheatBread", 1f)
 		};
-		string text7 = ComplexRecipeManager.MakeRecipeID("CookingStation", array13, array14);
-		ColdWheatBreadConfig.recipe = new ComplexRecipe(text7, array13, array14)
+		ColdWheatBreadConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array13, array14), array13, array14)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.COLDWHEATBREAD.RECIPEDESC,
@@ -175,8 +168,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("CookedEgg", 1f)
 		};
-		string text8 = ComplexRecipeManager.MakeRecipeID("CookingStation", array15, array16);
-		CookedEggConfig.recipe = new ComplexRecipe(text8, array15, array16)
+		CookedEggConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array15, array16), array15, array16)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.COOKEDEGG.RECIPEDESC,

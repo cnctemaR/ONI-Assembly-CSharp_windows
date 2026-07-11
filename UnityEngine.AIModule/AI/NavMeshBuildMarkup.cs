@@ -4,15 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>The NavMesh build markup allows you to control how certain objects are treated during the NavMesh build process, specifically when collecting sources for building.</para>
-	/// </summary>
 	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
 	public struct NavMeshBuildMarkup
 	{
-		/// <summary>
-		///   <para>Use this to specify whether the area type of the GameObject and its children should be overridden by the area type specified in this struct.</para>
-		/// </summary>
 		public bool overrideArea
 		{
 			get
@@ -25,9 +19,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>The area type to use when override area is enabled.</para>
-		/// </summary>
 		public int area
 		{
 			get
@@ -40,9 +31,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Use this to specify whether the GameObject and its children should be ignored.</para>
-		/// </summary>
 		public bool ignoreFromBuild
 		{
 			get
@@ -55,9 +43,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Use this to specify which GameObject (including the GameObject’s children) the markup should be applied to.</para>
-		/// </summary>
 		public Transform root
 		{
 			get

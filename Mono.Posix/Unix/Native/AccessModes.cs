@@ -2,9 +2,9 @@
 
 namespace Mono.Unix.Native
 {
+	[Flags]
 	[Map]
 	[CLSCompliant(false)]
-	[Flags]
 	public enum AccessModes
 	{
 		R_OK = 1,

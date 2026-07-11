@@ -18,10 +18,7 @@ public class PlaceTool : DragTool
 	{
 		this.active = true;
 		base.OnActivateTool();
-		GameObject prefab = Assets.GetPrefab(this.previewTag);
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
-		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(prefab, sceneLayer, null, num);
+		this.visualizer = GameUtil.KInstantiate(Assets.GetPrefab(this.previewTag), Grid.SceneLayer.Front, null, LayerMask.NameToLayer("Place"));
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -30,8 +27,7 @@ public class PlaceTool : DragTool
 		}
 		this.visualizer.SetActive(true);
 		this.ShowToolTip();
-		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
-		component2.currentDef = null;
+		base.GetComponent<BuildToolHoverTextCard>().currentDef = null;
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)
 		{
@@ -77,8 +73,7 @@ public class PlaceTool : DragTool
 			return;
 		}
 		bool flag = false;
-		EntityPreview component = this.visualizer.GetComponent<EntityPreview>();
-		if (component.Valid)
+		if (this.visualizer.GetComponent<EntityPreview>().Valid)
 		{
 			if (DebugHandler.InstantBuildMode)
 			{

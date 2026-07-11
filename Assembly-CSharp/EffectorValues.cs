@@ -16,7 +16,7 @@ public struct EffectorValues
 
 	public bool Equals(EffectorValues p)
 	{
-		return !object.ReferenceEquals(p, null) && (object.ReferenceEquals(this, p) || (base.GetType() == p.GetType() && this.amount == p.amount && this.radius == p.radius));
+		return p != null && (this == p || (!(base.GetType() != p.GetType()) && this.amount == p.amount && this.radius == p.radius));
 	}
 
 	public override int GetHashCode()
@@ -26,9 +26,9 @@ public struct EffectorValues
 
 	public static bool operator ==(EffectorValues lhs, EffectorValues rhs)
 	{
-		if (object.ReferenceEquals(lhs, null))
+		if (lhs == null)
 		{
-			return object.ReferenceEquals(rhs, null);
+			return rhs == null;
 		}
 		return lhs.Equals(rhs);
 	}

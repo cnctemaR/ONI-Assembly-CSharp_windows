@@ -22,14 +22,12 @@ namespace MIConvexHull
 			{
 				this.capacity = 32;
 				this.items = new T[32];
+				return;
 			}
-			else
-			{
-				T[] array = new T[this.capacity * 2];
-				Array.Copy(this.items, array, this.capacity);
-				this.capacity = 2 * this.capacity;
-				this.items = array;
-			}
+			T[] array = new T[this.capacity * 2];
+			Array.Copy(this.items, array, this.capacity);
+			this.capacity = 2 * this.capacity;
+			this.items = array;
 		}
 
 		public void Add(T item)
@@ -38,7 +36,10 @@ namespace MIConvexHull
 			{
 				this.EnsureCapacity();
 			}
-			this.items[this.Count++] = item;
+			T[] array = this.items;
+			int count = this.Count;
+			this.Count = count + 1;
+			array[count] = item;
 		}
 
 		public void Push(T item)
@@ -47,12 +48,18 @@ namespace MIConvexHull
 			{
 				this.EnsureCapacity();
 			}
-			this.items[this.Count++] = item;
+			T[] array = this.items;
+			int count = this.Count;
+			this.Count = count + 1;
+			array[count] = item;
 		}
 
 		public T Pop()
 		{
-			return this.items[--this.Count];
+			T[] array = this.items;
+			int num = this.Count - 1;
+			this.Count = num;
+			return array[num];
 		}
 
 		public void Clear()

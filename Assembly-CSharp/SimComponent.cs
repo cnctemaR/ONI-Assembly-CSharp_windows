@@ -68,11 +68,9 @@ public abstract class SimComponent : KMonoBehaviour, ISim200ms
 		if (this.simActive)
 		{
 			this.OnSimActivate();
+			return;
 		}
-		else
-		{
-			this.OnSimDeactivate();
-		}
+		this.OnSimDeactivate();
 	}
 
 	private void SimRegister()
@@ -104,11 +102,9 @@ public abstract class SimComponent : KMonoBehaviour, ISim200ms
 		{
 			instance.simHandle = handle;
 			instance.OnSimRegistered();
+			return;
 		}
-		else
-		{
-			static_unregister(handle);
-		}
+		static_unregister(handle);
 	}
 
 	[Conditional("ENABLE_LOGGER")]

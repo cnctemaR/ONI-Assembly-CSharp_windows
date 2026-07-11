@@ -21,8 +21,7 @@ public class ScheduleScreenEntry : KMonoBehaviour
 		});
 		int num = 0;
 		this.blockButtons = new List<ScheduleBlockButton>();
-		List<ScheduleBlock> blocks = schedule.GetBlocks();
-		int count = blocks.Count;
+		int count = schedule.GetBlocks().Count;
 		foreach (ScheduleBlock scheduleBlock in schedule.GetBlocks())
 		{
 			ScheduleBlockButton scheduleBlockButton = Util.KInstantiateUI<ScheduleBlockButton>(this.blockButtonPrefab.gameObject, this.blockButtonContainer.gameObject, true);
@@ -81,11 +80,9 @@ public class ScheduleScreenEntry : KMonoBehaviour
 		{
 			this.blankMinionWidget.transform.SetAsLastSibling();
 			this.blankMinionWidget.gameObject.SetActive(true);
+			return;
 		}
-		else
-		{
-			this.blankMinionWidget.gameObject.SetActive(false);
-		}
+		this.blankMinionWidget.gameObject.SetActive(false);
 	}
 
 	private bool MinionWidgetsNeedRebuild()
@@ -130,11 +127,11 @@ public class ScheduleScreenEntry : KMonoBehaviour
 	private void RefreshAlarmButton()
 	{
 		MultiToggle reference = this.optionsPanel.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("AlarmButton");
-		reference.ChangeState((!this.schedule.alarmActivated) ? 0 : 1);
+		reference.ChangeState(this.schedule.alarmActivated ? 1 : 0);
 		ToolTip component = reference.GetComponent<ToolTip>();
-		component.SetSimpleTooltip((!this.schedule.alarmActivated) ? UI.SCHEDULESCREEN.ALARM_BUTTON_OFF_TOOLTIP : UI.SCHEDULESCREEN.ALARM_BUTTON_ON_TOOLTIP);
+		component.SetSimpleTooltip(this.schedule.alarmActivated ? UI.SCHEDULESCREEN.ALARM_BUTTON_ON_TOOLTIP : UI.SCHEDULESCREEN.ALARM_BUTTON_OFF_TOOLTIP);
 		ToolTipScreen.Instance.MarkTooltipDirty(component);
-		this.alarmField.text = ((!this.schedule.alarmActivated) ? UI.SCHEDULESCREEN.ALARM_TITLE_DISABLED : UI.SCHEDULESCREEN.ALARM_TITLE_ENABLED);
+		this.alarmField.text = (this.schedule.alarmActivated ? UI.SCHEDULESCREEN.ALARM_TITLE_ENABLED : UI.SCHEDULESCREEN.ALARM_TITLE_DISABLED);
 	}
 
 	private void OnResetClicked()
@@ -168,32 +165,32 @@ public class ScheduleScreenEntry : KMonoBehaviour
 		{
 			foreach (ScheduleBlockType scheduleBlockType2 in scheduleBlock.allowed_types)
 			{
-				Dictionary<string, int> dictionary;
-				string id;
-				(dictionary = this.blockTypeCounts)[id = scheduleBlockType2.Id] = dictionary[id] + 1;
+				Dictionary<string, int> dictionary = this.blockTypeCounts;
+				string id = scheduleBlockType2.Id;
+				int num = dictionary[id];
+				dictionary[id] = num + 1;
 			}
 		}
 		ToolTip component = this.noteEntryRight.GetComponent<ToolTip>();
 		component.ClearMultiStringTooltip();
-		int num = 0;
+		int num2 = 0;
 		foreach (KeyValuePair<string, int> keyValuePair in this.blockTypeCounts)
 		{
 			if (keyValuePair.Value == 0)
 			{
-				num++;
+				num2++;
 				component.AddMultiStringTooltip(string.Format(UI.SCHEDULEGROUPS.NOTIME, Db.Get().ScheduleBlockTypes.Get(keyValuePair.Key).Name), null);
 			}
 		}
-		if (num > 0)
+		if (num2 > 0)
 		{
-			this.noteEntryRight.text = string.Format(UI.SCHEDULEGROUPS.MISSINGBLOCKS, num);
+			this.noteEntryRight.text = string.Format(UI.SCHEDULEGROUPS.MISSINGBLOCKS, num2);
 		}
 		else
 		{
-			this.noteEntryRight.text = string.Empty;
+			this.noteEntryRight.text = "";
 		}
-		int num2 = this.blockTypeCounts[Db.Get().ScheduleBlockTypes.Recreation.Id];
-		string breakBonus = QualityOfLifeNeed.GetBreakBonus(num2);
+		string breakBonus = QualityOfLifeNeed.GetBreakBonus(this.blockTypeCounts[Db.Get().ScheduleBlockTypes.Recreation.Id]);
 		if (breakBonus != null)
 		{
 			Effect effect = Db.Get().effects.Get(breakBonus);

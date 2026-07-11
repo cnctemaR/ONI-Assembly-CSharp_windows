@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeTypeParameterCollection : CollectionBase
 	{
@@ -13,14 +10,26 @@ namespace System.CodeDom
 		{
 		}
 
+		public CodeTypeParameterCollection(CodeTypeParameterCollection value)
+		{
+			this.AddRange(value);
+		}
+
 		public CodeTypeParameterCollection(CodeTypeParameter[] value)
 		{
 			this.AddRange(value);
 		}
 
-		public CodeTypeParameterCollection(CodeTypeParameterCollection value)
+		public CodeTypeParameter this[int index]
 		{
-			this.AddRange(value);
+			get
+			{
+				return (CodeTypeParameter)base.List[index];
+			}
+			set
+			{
+				base.List[index] = value;
+			}
 		}
 
 		public int Add(CodeTypeParameter value)
@@ -30,7 +39,7 @@ namespace System.CodeDom
 
 		public void Add(string value)
 		{
-			base.List.Add(new CodeTypeParameter(value));
+			this.Add(new CodeTypeParameter(value));
 		}
 
 		public void AddRange(CodeTypeParameter[] value)
@@ -81,18 +90,6 @@ namespace System.CodeDom
 		public void Remove(CodeTypeParameter value)
 		{
 			base.List.Remove(value);
-		}
-
-		public CodeTypeParameter this[int index]
-		{
-			get
-			{
-				return (CodeTypeParameter)base.List[index];
-			}
-			set
-			{
-				base.List[index] = value;
-			}
 		}
 	}
 }

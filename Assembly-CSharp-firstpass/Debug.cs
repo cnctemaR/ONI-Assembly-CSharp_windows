@@ -12,8 +12,7 @@ public static class Debug
 
 	private static void WriteTimeStamped(params object[] objs)
 	{
-		string text = global::Debug.TimeStamp() + DebugUtil.BuildString(objs);
-		Console.WriteLine(text);
+		Console.WriteLine(global::Debug.TimeStamp() + DebugUtil.BuildString(objs));
 	}
 
 	public static bool isDebugBuild
@@ -55,7 +54,7 @@ public static class Debug
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[INFO]",
-			(!(context != null)) ? "null" : context.name,
+			(context != null) ? context.name : "null",
 			obj
 		});
 	}
@@ -74,7 +73,7 @@ public static class Debug
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[INFO]",
-			(!(context != null)) ? "null" : context.name,
+			(context != null) ? context.name : "null",
 			string.Format(format, args)
 		});
 	}
@@ -89,7 +88,7 @@ public static class Debug
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[WARNING]",
-			(!(context != null)) ? "null" : context.name,
+			(context != null) ? context.name : "null",
 			obj
 		});
 	}
@@ -108,7 +107,7 @@ public static class Debug
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[WARNING]",
-			(!(context != null)) ? "null" : context.name,
+			(context != null) ? context.name : "null",
 			string.Format(format, args)
 		});
 	}
@@ -124,7 +123,7 @@ public static class Debug
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[ERROR]",
-			(!(context != null)) ? "null" : context.name,
+			(context != null) ? context.name : "null",
 			obj
 		});
 		global::UnityEngine.Debug.LogError(obj, context);
@@ -145,7 +144,7 @@ public static class Debug
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[ERROR]",
-			(!(context != null)) ? "null" : context.name,
+			(context != null) ? context.name : "null",
 			string.Format(format, args)
 		});
 		global::UnityEngine.Debug.LogErrorFormat(context, format, args);

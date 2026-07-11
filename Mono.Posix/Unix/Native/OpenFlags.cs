@@ -21,6 +21,8 @@ namespace Mono.Unix.Native
 		O_DIRECTORY = 65536,
 		O_DIRECT = 16384,
 		O_ASYNC = 8192,
-		O_LARGEFILE = 32768
+		O_LARGEFILE = 32768,
+		O_CLOEXEC = 524288,
+		O_PATH = 2097152
 	}
 }

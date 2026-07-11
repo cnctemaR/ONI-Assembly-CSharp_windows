@@ -45,7 +45,7 @@ public class ConditionHasMinimumMass : RocketLaunchCondition
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
 		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
 		bool flag = spacecraftDestination != null && SpacecraftManager.instance.GetDestinationAnalysisState(spacecraftDestination) == SpacecraftManager.DestinationAnalysisState.Complete;
-		string text = string.Empty;
+		string text = "";
 		if (flag)
 		{
 			if (spacecraftDestination.AvailableMass <= ConditionHasMinimumMass.CargoCapacity(spacecraftDestination, this.commandModule))
@@ -54,7 +54,7 @@ public class ConditionHasMinimumMass : RocketLaunchCondition
 			}
 			text = text + string.Format(UI.STARMAP.LAUNCHCHECKLIST.RESOURCE_MASS_TOOLTIP, spacecraftDestination.GetDestinationType().Name, GameUtil.GetFormattedMass(spacecraftDestination.AvailableMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(ConditionHasMinimumMass.CargoCapacity(spacecraftDestination, this.commandModule), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")) + "\n\n";
 		}
-		float num = ((spacecraftDestination == null) ? 0f : spacecraftDestination.AvailableMass);
+		float num = ((spacecraftDestination != null) ? spacecraftDestination.AvailableMass : 0f);
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.commandModule.GetComponent<AttachableBuilding>()))
 		{
 			CargoBay component = gameObject.GetComponent<CargoBay>();
@@ -65,10 +65,9 @@ public class ConditionHasMinimumMass : RocketLaunchCondition
 					float availableResourcesPercentage = spacecraftDestination.GetAvailableResourcesPercentage(component.storageType);
 					float num2 = Mathf.Min(component.storage.Capacity(), availableResourcesPercentage * num);
 					num -= num2;
-					string text2 = text;
 					text = string.Concat(new string[]
 					{
-						text2,
+						text,
 						component.gameObject.GetProperName(),
 						" ",
 						string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(Mathf.Min(num2, component.storage.Capacity()), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")),
@@ -77,10 +76,9 @@ public class ConditionHasMinimumMass : RocketLaunchCondition
 				}
 				else
 				{
-					string text2 = text;
 					text = string.Concat(new string[]
 					{
-						text2,
+						text,
 						component.gameObject.GetProperName(),
 						" ",
 						string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")),

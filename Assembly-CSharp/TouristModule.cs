@@ -36,7 +36,8 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 		List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
 		for (int i = storedMinionInfo.Count - 1; i >= 0; i--)
 		{
-			GameObject gameObject = component.DeserializeMinion(storedMinionInfo[i].id, Grid.CellToPos(Grid.PosToCell(base.smi.master.transform.GetPosition())));
+			MinionStorage.Info info = storedMinionInfo[i];
+			GameObject gameObject = component.DeserializeMinion(info.id, Grid.CellToPos(Grid.PosToCell(base.smi.master.transform.GetPosition())));
 			if (Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(base.smi.master.gameObject), 0, -1)])
 			{
 				gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
@@ -89,19 +90,15 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 			if (Grid.FakeFloor[num])
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.HasGantry, null);
+				return;
 			}
-			else
-			{
-				component.AddStatusItem(Db.Get().BuildingStatusItems.MissingGantry, null);
-			}
+			component.AddStatusItem(Db.Get().BuildingStatusItems.MissingGantry, null);
 		}
 	}
 
 	private Chore CreateWorkChore()
 	{
-		ChoreType astronaut = Db.Get().ChoreTypes.Astronaut;
-		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
+		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(Db.Get().ChoreTypes.Astronaut, this, null, true, null, null, null, false, null, false, true, Assets.GetAnim("anim_hat_kanim"), false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		return workChore;
 	}

@@ -2,22 +2,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	/// <summary>
-	///   <para>A NativeArray exposes a buffer of native memory to managed code, making it possible to share data between managed and native.</para>
-	/// </summary>
-	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
-	[NativeContainer]
-	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainerSupportsDeallocateOnJobCompletion]
+	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
 	[NativeContainerSupportsDeferredConvertListToArray]
 	[DebuggerDisplay("Length = {Length}")]
-	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable where T : struct
+	[NativeContainerSupportsMinMaxWriteRestriction]
+	[NativeContainer]
+	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEquatable<NativeArray<T>>, IEnumerable where T : struct
 	{
 		public NativeArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
 		{
@@ -31,13 +30,13 @@ namespace Unity.Collections
 		public NativeArray(T[] array, Allocator allocator)
 		{
 			NativeArray<T>.Allocate(array.Length, allocator, out this);
-			this.CopyFrom(array);
+			NativeArray<T>.Copy(array, this);
 		}
 
 		public NativeArray(NativeArray<T> array, Allocator allocator)
 		{
 			NativeArray<T>.Allocate(array.Length, allocator, out this);
-			this.CopyFrom(array);
+			NativeArray<T>.Copy(array, this);
 		}
 
 		private static void Allocate(int length, Allocator allocator, out NativeArray<T> array)
@@ -50,6 +49,7 @@ namespace Unity.Collections
 
 		public int Length
 		{
+			[CompilerGenerated]
 			get
 			{
 				return this.m_Length;
@@ -61,7 +61,7 @@ namespace Unity.Collections
 		{
 			if (!UnsafeUtility.IsBlittable<T>())
 			{
-				throw new ArgumentException(string.Format("{0} used in NativeArray<{0}> must be blittable", typeof(T)));
+				throw new InvalidOperationException(string.Format("{0} used in NativeArray<{1}> must be blittable.\n{2}", typeof(T), typeof(T), UnsafeUtility.GetReasonForValueTypeNonBlittable<T>()));
 			}
 		}
 
@@ -90,6 +90,7 @@ namespace Unity.Collections
 
 		public bool IsCreated
 		{
+			[CompilerGenerated]
 			get
 			{
 				return this.m_Buffer != null;
@@ -107,35 +108,29 @@ namespace Unity.Collections
 		[WriteAccessRequired]
 		public void CopyFrom(T[] array)
 		{
-			for (int i = 0; i < this.Length; i++)
-			{
-				UnsafeUtility.WriteArrayElement<T>(this.m_Buffer, i, array[i]);
-			}
+			NativeArray<T>.Copy(array, this);
 		}
 
 		[WriteAccessRequired]
 		public void CopyFrom(NativeArray<T> array)
 		{
-			array.CopyTo(this);
+			NativeArray<T>.Copy(array, this);
 		}
 
 		public void CopyTo(T[] array)
 		{
-			for (int i = 0; i < this.Length; i++)
-			{
-				array[i] = UnsafeUtility.ReadArrayElement<T>(this.m_Buffer, i);
-			}
+			NativeArray<T>.Copy(this, array);
 		}
 
 		public void CopyTo(NativeArray<T> array)
 		{
-			UnsafeUtility.MemCpy(array.m_Buffer, this.m_Buffer, (long)this.Length * (long)UnsafeUtility.SizeOf<T>());
+			NativeArray<T>.Copy(this, array);
 		}
 
 		public T[] ToArray()
 		{
 			T[] array = new T[this.Length];
-			this.CopyTo(array);
+			NativeArray<T>.Copy(this, array, this.Length);
 			return array;
 		}
 
@@ -152,6 +147,82 @@ namespace Unity.Collections
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.GetEnumerator();
+		}
+
+		public bool Equals(NativeArray<T> other)
+		{
+			return this.m_Buffer == other.m_Buffer && this.m_Length == other.m_Length;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return !object.ReferenceEquals(null, obj) && obj is NativeArray<T> && this.Equals((NativeArray<T>)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return (this.m_Buffer * 397) ^ this.m_Length;
+		}
+
+		public static bool operator ==(NativeArray<T> left, NativeArray<T> right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(NativeArray<T> left, NativeArray<T> right)
+		{
+			return !left.Equals(right);
+		}
+
+		public static void Copy(NativeArray<T> src, NativeArray<T> dst)
+		{
+			NativeArray<T>.Copy(src, 0, dst, 0, src.Length);
+		}
+
+		public static void Copy(T[] src, NativeArray<T> dst)
+		{
+			NativeArray<T>.Copy(src, 0, dst, 0, src.Length);
+		}
+
+		public static void Copy(NativeArray<T> src, T[] dst)
+		{
+			NativeArray<T>.Copy(src, 0, dst, 0, src.Length);
+		}
+
+		public static void Copy(NativeArray<T> src, NativeArray<T> dst, int length)
+		{
+			NativeArray<T>.Copy(src, 0, dst, 0, length);
+		}
+
+		public static void Copy(T[] src, NativeArray<T> dst, int length)
+		{
+			NativeArray<T>.Copy(src, 0, dst, 0, length);
+		}
+
+		public static void Copy(NativeArray<T> src, T[] dst, int length)
+		{
+			NativeArray<T>.Copy(src, 0, dst, 0, length);
+		}
+
+		public unsafe static void Copy(NativeArray<T> src, int srcIndex, NativeArray<T> dst, int dstIndex, int length)
+		{
+			UnsafeUtility.MemCpy((void*)((byte*)dst.m_Buffer + dstIndex * UnsafeUtility.SizeOf<T>()), (void*)((byte*)src.m_Buffer + srcIndex * UnsafeUtility.SizeOf<T>()), (long)(length * UnsafeUtility.SizeOf<T>()));
+		}
+
+		public unsafe static void Copy(T[] src, int srcIndex, NativeArray<T> dst, int dstIndex, int length)
+		{
+			GCHandle gchandle = GCHandle.Alloc(src, GCHandleType.Pinned);
+			IntPtr intPtr = gchandle.AddrOfPinnedObject();
+			UnsafeUtility.MemCpy((void*)((byte*)dst.m_Buffer + dstIndex * UnsafeUtility.SizeOf<T>()), (void*)((byte*)(void*)intPtr + srcIndex * UnsafeUtility.SizeOf<T>()), (long)(length * UnsafeUtility.SizeOf<T>()));
+			gchandle.Free();
+		}
+
+		public unsafe static void Copy(NativeArray<T> src, int srcIndex, T[] dst, int dstIndex, int length)
+		{
+			GCHandle gchandle = GCHandle.Alloc(dst, GCHandleType.Pinned);
+			IntPtr intPtr = gchandle.AddrOfPinnedObject();
+			UnsafeUtility.MemCpy((void*)((byte*)(void*)intPtr + dstIndex * UnsafeUtility.SizeOf<T>()), (void*)((byte*)src.m_Buffer + srcIndex * UnsafeUtility.SizeOf<T>()), (long)(length * UnsafeUtility.SizeOf<T>()));
+			gchandle.Free();
 		}
 
 		[NativeDisableUnsafePtrRestriction]
@@ -187,6 +258,7 @@ namespace Unity.Collections
 
 			public T Current
 			{
+				[CompilerGenerated]
 				get
 				{
 					return this.m_Array[this.m_Index];
@@ -195,6 +267,7 @@ namespace Unity.Collections
 
 			object IEnumerator.Current
 			{
+				[CompilerGenerated]
 				get
 				{
 					return this.Current;

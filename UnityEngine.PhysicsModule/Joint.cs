@@ -4,17 +4,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Joint is the base class for all joints.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Dynamics/Joint.h")]
 	[NativeClass("Unity::Joint")]
 	[RequireComponent(typeof(Rigidbody))]
+	[NativeHeader("Runtime/Dynamics/Joint.h")]
 	public class Joint : Component
 	{
-		/// <summary>
-		///   <para>A reference to another rigidbody this joint connects to.</para>
-		/// </summary>
 		public extern Rigidbody connectedBody
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -23,9 +17,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The Direction of the axis around which the body is constrained.</para>
-		/// </summary>
 		public Vector3 axis
 		{
 			get
@@ -40,9 +31,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The Position of the anchor around which the joints motion is constrained.</para>
-		/// </summary>
 		public Vector3 anchor
 		{
 			get
@@ -57,9 +45,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Position of the anchor relative to the connected Rigidbody.</para>
-		/// </summary>
 		public Vector3 connectedAnchor
 		{
 			get
@@ -74,9 +59,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Should the connectedAnchor be calculated automatically?</para>
-		/// </summary>
 		public extern bool autoConfigureConnectedAnchor
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -85,9 +67,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The force that needs to be applied for this joint to break.</para>
-		/// </summary>
 		public extern float breakForce
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -96,9 +75,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The torque that needs to be applied for this joint to break.</para>
-		/// </summary>
 		public extern float breakTorque
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -107,9 +83,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Enable collision between bodies connected with the joint.</para>
-		/// </summary>
 		public extern bool enableCollision
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -118,9 +91,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Toggle preprocessing for this joint.</para>
-		/// </summary>
 		public extern bool enablePreprocessing
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -129,9 +99,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The scale to apply to the inverse mass and inertia tensor of the body prior to solving the constraints.</para>
-		/// </summary>
 		public extern float massScale
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -140,9 +107,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The scale to apply to the inverse mass and inertia tensor of the connected body prior to solving the constraints.</para>
-		/// </summary>
 		public extern float connectedMassScale
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -154,9 +118,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetCurrentForces(ref Vector3 linearForce, ref Vector3 angularForce);
 
-		/// <summary>
-		///   <para>The force applied by the solver to satisfy all constraints.</para>
-		/// </summary>
 		public Vector3 currentForce
 		{
 			get
@@ -168,9 +129,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The torque applied by the solver to satisfy all constraints.</para>
-		/// </summary>
 		public Vector3 currentTorque
 		{
 			get

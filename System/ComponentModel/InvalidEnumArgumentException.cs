@@ -17,13 +17,18 @@ namespace System.ComponentModel
 		{
 		}
 
-		public InvalidEnumArgumentException(string argumentName, int invalidValue, Type enumClass)
-			: base(string.Format(CultureInfo.CurrentCulture, "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.", new object[] { argumentName, invalidValue, enumClass.Name }), argumentName)
+		public InvalidEnumArgumentException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 
-		public InvalidEnumArgumentException(string message, Exception innerException)
-			: base(message, innerException)
+		public InvalidEnumArgumentException(string argumentName, int invalidValue, Type enumClass)
+			: base(global::SR.GetString("The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.", new object[]
+			{
+				argumentName,
+				invalidValue.ToString(CultureInfo.CurrentCulture),
+				enumClass.Name
+			}), argumentName)
 		{
 		}
 

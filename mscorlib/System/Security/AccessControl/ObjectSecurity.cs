@@ -1,19 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 
 namespace System.Security.AccessControl
 {
 	public abstract class ObjectSecurity
 	{
-		internal ObjectSecurity()
+		protected ObjectSecurity()
 		{
 		}
 
-		protected ObjectSecurity(bool isContainer, bool isDS)
+		protected ObjectSecurity(CommonSecurityDescriptor securityDescriptor)
 		{
-			this.is_container = isContainer;
-			this.is_ds = isDS;
+			if (securityDescriptor == null)
+			{
+				throw new ArgumentNullException("securityDescriptor");
+			}
+			this.descriptor = securityDescriptor;
+			this.rw_lock = new ReaderWriterLock();
+		}
+
+		protected ObjectSecurity(bool isContainer, bool isDS)
+			: this(new CommonSecurityDescriptor(isContainer, isDS, ControlFlags.None, null, null, null, new DiscretionaryAcl(isContainer, isDS, 0)))
+		{
 		}
 
 		public abstract Type AccessRightType { get; }
@@ -22,39 +34,89 @@ namespace System.Security.AccessControl
 
 		public abstract Type AuditRuleType { get; }
 
-		[MonoTODO]
 		public bool AreAccessRulesCanonical
 		{
 			get
 			{
-				throw new NotImplementedException();
+				this.ReadLock();
+				bool isDiscretionaryAclCanonical;
+				try
+				{
+					isDiscretionaryAclCanonical = this.descriptor.IsDiscretionaryAclCanonical;
+				}
+				finally
+				{
+					this.ReadUnlock();
+				}
+				return isDiscretionaryAclCanonical;
 			}
 		}
 
-		[MonoTODO]
 		public bool AreAccessRulesProtected
 		{
 			get
 			{
-				throw new NotImplementedException();
+				this.ReadLock();
+				bool flag;
+				try
+				{
+					flag = (this.descriptor.ControlFlags & ControlFlags.DiscretionaryAclProtected) > ControlFlags.None;
+				}
+				finally
+				{
+					this.ReadUnlock();
+				}
+				return flag;
 			}
 		}
 
-		[MonoTODO]
 		public bool AreAuditRulesCanonical
 		{
 			get
 			{
-				throw new NotImplementedException();
+				this.ReadLock();
+				bool isSystemAclCanonical;
+				try
+				{
+					isSystemAclCanonical = this.descriptor.IsSystemAclCanonical;
+				}
+				finally
+				{
+					this.ReadUnlock();
+				}
+				return isSystemAclCanonical;
 			}
 		}
 
-		[MonoTODO]
 		public bool AreAuditRulesProtected
 		{
 			get
 			{
-				throw new NotImplementedException();
+				this.ReadLock();
+				bool flag;
+				try
+				{
+					flag = (this.descriptor.ControlFlags & ControlFlags.SystemAclProtected) > ControlFlags.None;
+				}
+				finally
+				{
+					this.ReadUnlock();
+				}
+				return flag;
+			}
+		}
+
+		internal AccessControlSections AccessControlSectionsModified
+		{
+			get
+			{
+				this.Reading();
+				return this.sections_modified;
+			}
+			set
+			{
+				this.Writing();
+				this.sections_modified = value;
 			}
 		}
 
@@ -62,11 +124,11 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.access_rules_modified;
+				return this.AreAccessControlSectionsModified(AccessControlSections.Access);
 			}
 			set
 			{
-				this.access_rules_modified = value;
+				this.SetAccessControlSectionsModified(AccessControlSections.Access, value);
 			}
 		}
 
@@ -74,11 +136,11 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.audit_rules_modified;
+				return this.AreAccessControlSectionsModified(AccessControlSections.Audit);
 			}
 			set
 			{
-				this.audit_rules_modified = value;
+				this.SetAccessControlSectionsModified(AccessControlSections.Audit, value);
 			}
 		}
 
@@ -86,11 +148,11 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.group_modified;
+				return this.AreAccessControlSectionsModified(AccessControlSections.Group);
 			}
 			set
 			{
-				this.group_modified = value;
+				this.SetAccessControlSectionsModified(AccessControlSections.Group, value);
 			}
 		}
 
@@ -98,7 +160,7 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.is_container;
+				return this.descriptor.IsContainer;
 			}
 		}
 
@@ -106,7 +168,7 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.is_ds;
+				return this.descriptor.IsDS;
 			}
 		}
 
@@ -114,11 +176,11 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.owner_modified;
+				return this.AreAccessControlSectionsModified(AccessControlSections.Owner);
 			}
 			set
 			{
-				this.owner_modified = value;
+				this.SetAccessControlSectionsModified(AccessControlSections.Owner, value);
 			}
 		}
 
@@ -126,164 +188,412 @@ namespace System.Security.AccessControl
 
 		public abstract AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags);
 
-		[MonoTODO]
 		public IdentityReference GetGroup(Type targetType)
 		{
-			throw new NotImplementedException();
+			this.ReadLock();
+			IdentityReference identityReference;
+			try
+			{
+				if (this.descriptor.Group == null)
+				{
+					identityReference = null;
+				}
+				else
+				{
+					identityReference = this.descriptor.Group.Translate(targetType);
+				}
+			}
+			finally
+			{
+				this.ReadUnlock();
+			}
+			return identityReference;
 		}
 
-		[MonoTODO]
 		public IdentityReference GetOwner(Type targetType)
 		{
-			throw new NotImplementedException();
+			this.ReadLock();
+			IdentityReference identityReference;
+			try
+			{
+				if (this.descriptor.Owner == null)
+				{
+					identityReference = null;
+				}
+				else
+				{
+					identityReference = this.descriptor.Owner.Translate(targetType);
+				}
+			}
+			finally
+			{
+				this.ReadUnlock();
+			}
+			return identityReference;
 		}
 
-		[MonoTODO]
 		public byte[] GetSecurityDescriptorBinaryForm()
 		{
-			throw new NotImplementedException();
+			this.ReadLock();
+			byte[] array2;
+			try
+			{
+				byte[] array = new byte[this.descriptor.BinaryLength];
+				this.descriptor.GetBinaryForm(array, 0);
+				array2 = array;
+			}
+			finally
+			{
+				this.ReadUnlock();
+			}
+			return array2;
 		}
 
-		[MonoTODO]
 		public string GetSecurityDescriptorSddlForm(AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			this.ReadLock();
+			string sddlForm;
+			try
+			{
+				sddlForm = this.descriptor.GetSddlForm(includeSections);
+			}
+			finally
+			{
+				this.ReadUnlock();
+			}
+			return sddlForm;
 		}
 
-		[MonoTODO]
 		public static bool IsSddlConversionSupported()
 		{
-			throw new NotImplementedException();
+			return GenericSecurityDescriptor.IsSddlConversionSupported();
 		}
 
-		[MonoTODO]
 		public virtual bool ModifyAccessRule(AccessControlModification modification, AccessRule rule, out bool modified)
 		{
-			throw new NotImplementedException();
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			if (!this.AccessRuleType.IsAssignableFrom(rule.GetType()))
+			{
+				throw new ArgumentException("rule");
+			}
+			return this.ModifyAccess(modification, rule, out modified);
 		}
 
-		[MonoTODO]
 		public virtual bool ModifyAuditRule(AccessControlModification modification, AuditRule rule, out bool modified)
 		{
-			throw new NotImplementedException();
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			if (!this.AuditRuleType.IsAssignableFrom(rule.GetType()))
+			{
+				throw new ArgumentException("rule");
+			}
+			return this.ModifyAudit(modification, rule, out modified);
 		}
 
-		[MonoTODO]
 		public virtual void PurgeAccessRules(IdentityReference identity)
 		{
-			throw new NotImplementedException();
+			if (null == identity)
+			{
+				throw new ArgumentNullException("identity");
+			}
+			this.WriteLock();
+			try
+			{
+				this.descriptor.PurgeAccessControl(ObjectSecurity.SidFromIR(identity));
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
-		[MonoTODO]
 		public virtual void PurgeAuditRules(IdentityReference identity)
 		{
-			throw new NotImplementedException();
+			if (null == identity)
+			{
+				throw new ArgumentNullException("identity");
+			}
+			this.WriteLock();
+			try
+			{
+				this.descriptor.PurgeAudit(ObjectSecurity.SidFromIR(identity));
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
-		[MonoTODO]
 		public void SetAccessRuleProtection(bool isProtected, bool preserveInheritance)
 		{
-			throw new NotImplementedException();
+			this.WriteLock();
+			try
+			{
+				this.descriptor.SetDiscretionaryAclProtection(isProtected, preserveInheritance);
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
-		[MonoTODO]
 		public void SetAuditRuleProtection(bool isProtected, bool preserveInheritance)
 		{
-			throw new NotImplementedException();
+			this.WriteLock();
+			try
+			{
+				this.descriptor.SetSystemAclProtection(isProtected, preserveInheritance);
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
-		[MonoTODO]
 		public void SetGroup(IdentityReference identity)
 		{
-			throw new NotImplementedException();
+			this.WriteLock();
+			try
+			{
+				this.descriptor.Group = ObjectSecurity.SidFromIR(identity);
+				this.GroupModified = true;
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
-		[MonoTODO]
 		public void SetOwner(IdentityReference identity)
 		{
-			throw new NotImplementedException();
+			this.WriteLock();
+			try
+			{
+				this.descriptor.Owner = ObjectSecurity.SidFromIR(identity);
+				this.OwnerModified = true;
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
-		[MonoTODO]
 		public void SetSecurityDescriptorBinaryForm(byte[] binaryForm)
 		{
-			throw new NotImplementedException();
+			this.SetSecurityDescriptorBinaryForm(binaryForm, AccessControlSections.All);
 		}
 
-		[MonoTODO]
 		public void SetSecurityDescriptorBinaryForm(byte[] binaryForm, AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			this.CopySddlForm(new CommonSecurityDescriptor(this.IsContainer, this.IsDS, binaryForm, 0), includeSections);
 		}
 
-		[MonoTODO]
 		public void SetSecurityDescriptorSddlForm(string sddlForm)
 		{
-			throw new NotImplementedException();
+			this.SetSecurityDescriptorSddlForm(sddlForm, AccessControlSections.All);
 		}
 
-		[MonoTODO]
 		public void SetSecurityDescriptorSddlForm(string sddlForm, AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			this.CopySddlForm(new CommonSecurityDescriptor(this.IsContainer, this.IsDS, sddlForm), includeSections);
+		}
+
+		private void CopySddlForm(CommonSecurityDescriptor sourceDescriptor, AccessControlSections includeSections)
+		{
+			this.WriteLock();
+			try
+			{
+				this.AccessControlSectionsModified |= includeSections;
+				if ((includeSections & AccessControlSections.Audit) != AccessControlSections.None)
+				{
+					this.descriptor.SystemAcl = sourceDescriptor.SystemAcl;
+				}
+				if ((includeSections & AccessControlSections.Access) != AccessControlSections.None)
+				{
+					this.descriptor.DiscretionaryAcl = sourceDescriptor.DiscretionaryAcl;
+				}
+				if ((includeSections & AccessControlSections.Owner) != AccessControlSections.None)
+				{
+					this.descriptor.Owner = sourceDescriptor.Owner;
+				}
+				if ((includeSections & AccessControlSections.Group) != AccessControlSections.None)
+				{
+					this.descriptor.Group = sourceDescriptor.Group;
+				}
+			}
+			finally
+			{
+				this.WriteUnlock();
+			}
 		}
 
 		protected abstract bool ModifyAccess(AccessControlModification modification, AccessRule rule, out bool modified);
 
 		protected abstract bool ModifyAudit(AccessControlModification modification, AuditRule rule, out bool modified);
 
-		[MonoTODO]
+		private Exception GetNotImplementedException()
+		{
+			return new NotImplementedException();
+		}
+
 		protected virtual void Persist(SafeHandle handle, AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			throw this.GetNotImplementedException();
 		}
 
-		[MonoTODO]
 		protected virtual void Persist(string name, AccessControlSections includeSections)
 		{
-			throw new NotImplementedException();
+			throw this.GetNotImplementedException();
 		}
 
 		[MonoTODO]
+		[HandleProcessCorruptedStateExceptions]
 		protected virtual void Persist(bool enableOwnershipPrivilege, string name, AccessControlSections includeSections)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		private void Reading()
+		{
+			if (!this.rw_lock.IsReaderLockHeld && !this.rw_lock.IsWriterLockHeld)
+			{
+				throw new InvalidOperationException("Either a read or a write lock must be held.");
+			}
+		}
+
 		protected void ReadLock()
 		{
-			throw new NotImplementedException();
+			this.rw_lock.AcquireReaderLock(-1);
 		}
 
-		[MonoTODO]
 		protected void ReadUnlock()
 		{
-			throw new NotImplementedException();
+			this.rw_lock.ReleaseReaderLock();
 		}
 
-		[MonoTODO]
+		private void Writing()
+		{
+			if (!this.rw_lock.IsWriterLockHeld)
+			{
+				throw new InvalidOperationException("Write lock must be held.");
+			}
+		}
+
 		protected void WriteLock()
 		{
-			throw new NotImplementedException();
+			this.rw_lock.AcquireWriterLock(-1);
 		}
 
-		[MonoTODO]
 		protected void WriteUnlock()
 		{
-			throw new NotImplementedException();
+			this.rw_lock.ReleaseWriterLock();
 		}
 
-		private bool is_container;
+		internal AuthorizationRuleCollection InternalGetAccessRules(bool includeExplicit, bool includeInherited, Type targetType)
+		{
+			List<AuthorizationRule> list = new List<AuthorizationRule>();
+			this.ReadLock();
+			try
+			{
+				foreach (GenericAce genericAce in this.descriptor.DiscretionaryAcl)
+				{
+					QualifiedAce qualifiedAce = genericAce as QualifiedAce;
+					if (!(null == qualifiedAce) && (!qualifiedAce.IsInherited || includeInherited) && (qualifiedAce.IsInherited || includeExplicit))
+					{
+						AccessControlType accessControlType;
+						if (qualifiedAce.AceQualifier == AceQualifier.AccessAllowed)
+						{
+							accessControlType = AccessControlType.Allow;
+						}
+						else
+						{
+							if (AceQualifier.AccessDenied != qualifiedAce.AceQualifier)
+							{
+								continue;
+							}
+							accessControlType = AccessControlType.Deny;
+						}
+						AccessRule accessRule = this.InternalAccessRuleFactory(qualifiedAce, targetType, accessControlType);
+						list.Add(accessRule);
+					}
+				}
+			}
+			finally
+			{
+				this.ReadUnlock();
+			}
+			return new AuthorizationRuleCollection(list.ToArray());
+		}
 
-		private bool is_ds;
+		internal virtual AccessRule InternalAccessRuleFactory(QualifiedAce ace, Type targetType, AccessControlType type)
+		{
+			return this.AccessRuleFactory(ace.SecurityIdentifier.Translate(targetType), ace.AccessMask, ace.IsInherited, ace.InheritanceFlags, ace.PropagationFlags, type);
+		}
 
-		private bool access_rules_modified;
+		internal AuthorizationRuleCollection InternalGetAuditRules(bool includeExplicit, bool includeInherited, Type targetType)
+		{
+			List<AuthorizationRule> list = new List<AuthorizationRule>();
+			this.ReadLock();
+			try
+			{
+				if (this.descriptor.SystemAcl != null)
+				{
+					foreach (GenericAce genericAce in this.descriptor.SystemAcl)
+					{
+						QualifiedAce qualifiedAce = genericAce as QualifiedAce;
+						if (!(null == qualifiedAce) && (!qualifiedAce.IsInherited || includeInherited) && (qualifiedAce.IsInherited || includeExplicit) && AceQualifier.SystemAudit == qualifiedAce.AceQualifier)
+						{
+							AuditRule auditRule = this.InternalAuditRuleFactory(qualifiedAce, targetType);
+							list.Add(auditRule);
+						}
+					}
+				}
+			}
+			finally
+			{
+				this.ReadUnlock();
+			}
+			return new AuthorizationRuleCollection(list.ToArray());
+		}
 
-		private bool audit_rules_modified;
+		internal virtual AuditRule InternalAuditRuleFactory(QualifiedAce ace, Type targetType)
+		{
+			return this.AuditRuleFactory(ace.SecurityIdentifier.Translate(targetType), ace.AccessMask, ace.IsInherited, ace.InheritanceFlags, ace.PropagationFlags, ace.AuditFlags);
+		}
 
-		private bool group_modified;
+		internal static SecurityIdentifier SidFromIR(IdentityReference identity)
+		{
+			if (null == identity)
+			{
+				throw new ArgumentNullException("identity");
+			}
+			return (SecurityIdentifier)identity.Translate(typeof(SecurityIdentifier));
+		}
 
-		private bool owner_modified;
+		private bool AreAccessControlSectionsModified(AccessControlSections mask)
+		{
+			return (this.AccessControlSectionsModified & mask) > AccessControlSections.None;
+		}
+
+		private void SetAccessControlSectionsModified(AccessControlSections mask, bool modified)
+		{
+			if (modified)
+			{
+				this.AccessControlSectionsModified |= mask;
+				return;
+			}
+			this.AccessControlSectionsModified &= ~mask;
+		}
+
+		internal CommonSecurityDescriptor descriptor;
+
+		private AccessControlSections sections_modified;
+
+		private ReaderWriterLock rw_lock;
 	}
 }

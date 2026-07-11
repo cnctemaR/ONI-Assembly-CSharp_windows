@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -21,42 +20,46 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 		public object DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
 		{
 			AnchorAlias anchorAlias = parser.Allow<AnchorAlias>();
-			if (anchorAlias != null)
+			if (anchorAlias == null)
 			{
-				AliasValueDeserializer.AliasState aliasState = state.Get<AliasValueDeserializer.AliasState>();
-				AliasValueDeserializer.ValuePromise valuePromise;
-				if (!aliasState.TryGetValue(anchorAlias.Value, out valuePromise))
+				string text = null;
+				NodeEvent nodeEvent = parser.Peek<NodeEvent>();
+				if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
 				{
-					valuePromise = new AliasValueDeserializer.ValuePromise(anchorAlias);
-					aliasState.Add(anchorAlias.Value, valuePromise);
+					text = nodeEvent.Anchor;
 				}
-				return (!valuePromise.HasValue) ? valuePromise : valuePromise.Value;
+				object obj = this.innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
+				if (text != null)
+				{
+					AliasValueDeserializer.AliasState aliasState = state.Get<AliasValueDeserializer.AliasState>();
+					AliasValueDeserializer.ValuePromise valuePromise;
+					if (!aliasState.TryGetValue(text, out valuePromise))
+					{
+						aliasState.Add(text, new AliasValueDeserializer.ValuePromise(obj));
+					}
+					else if (!valuePromise.HasValue)
+					{
+						valuePromise.Value = obj;
+					}
+					else
+					{
+						aliasState[text] = new AliasValueDeserializer.ValuePromise(obj);
+					}
+				}
+				return obj;
 			}
-			string text = null;
-			NodeEvent nodeEvent = parser.Peek<NodeEvent>();
-			if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
+			AliasValueDeserializer.AliasState aliasState2 = state.Get<AliasValueDeserializer.AliasState>();
+			AliasValueDeserializer.ValuePromise valuePromise2;
+			if (!aliasState2.TryGetValue(anchorAlias.Value, out valuePromise2))
 			{
-				text = nodeEvent.Anchor;
+				valuePromise2 = new AliasValueDeserializer.ValuePromise(anchorAlias);
+				aliasState2.Add(anchorAlias.Value, valuePromise2);
 			}
-			object obj = this.innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
-			if (text != null)
+			if (!valuePromise2.HasValue)
 			{
-				AliasValueDeserializer.AliasState aliasState2 = state.Get<AliasValueDeserializer.AliasState>();
-				AliasValueDeserializer.ValuePromise valuePromise2;
-				if (!aliasState2.TryGetValue(text, out valuePromise2))
-				{
-					aliasState2.Add(text, new AliasValueDeserializer.ValuePromise(obj));
-				}
-				else if (!valuePromise2.HasValue)
-				{
-					valuePromise2.Value = obj;
-				}
-				else
-				{
-					aliasState2[text] = new AliasValueDeserializer.ValuePromise(obj);
-				}
+				return valuePromise2;
 			}
-			return obj;
+			return valuePromise2.Value;
 		}
 
 		private readonly IValueDeserializer innerDeserializer;
@@ -77,6 +80,10 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
 		private sealed class ValuePromise : IValuePromise
 		{
+			public event Action<object> ValueAvailable;
+
+			public bool HasValue { get; private set; }
+
 			public ValuePromise(AnchorAlias alias)
 			{
 				this.Alias = alias;
@@ -87,11 +94,6 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 				this.HasValue = true;
 				this.value = value;
 			}
-
-			[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-			public event Action<object> ValueAvailable;
-
-			public bool HasValue { get; private set; }
 
 			public object Value
 			{

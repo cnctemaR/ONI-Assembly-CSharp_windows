@@ -138,17 +138,16 @@ public class GroundMasks : ScriptableObject
 			int num = dest_mask;
 			for (int i = 0; i < 3; i++)
 			{
-				int num2 = (num & 1) >> 0;
+				int num2 = num & 1;
 				int num3 = (num & 2) >> 1;
 				int num4 = (num & 4) >> 2;
-				int num5 = (num & 8) >> 3;
-				int num6 = (num5 << 2) | (num4 << 0) | (num3 << 3) | (num2 << 1);
-				if (this.tiles[num6].isSource)
+				int num5 = ((num & 8) >> 3 << 2) | num4 | (num3 << 3) | (num2 << 1);
+				if (this.tiles[num5].isSource)
 				{
-					array = new GroundMasks.UVData[this.tiles[num6].variationUVs.Length];
-					for (int j = 0; j < this.tiles[num6].variationUVs.Length; j++)
+					array = new GroundMasks.UVData[this.tiles[num5].variationUVs.Length];
+					for (int j = 0; j < this.tiles[num5].variationUVs.Length; j++)
 					{
-						GroundMasks.UVData uvdata = this.tiles[num6].variationUVs[j];
+						GroundMasks.UVData uvdata = this.tiles[num5].variationUVs[j];
 						GroundMasks.UVData uvdata2 = uvdata;
 						switch (i)
 						{
@@ -169,7 +168,7 @@ public class GroundMasks : ScriptableObject
 					}
 					break;
 				}
-				num = num6;
+				num = num5;
 			}
 			return array;
 		}
@@ -178,8 +177,7 @@ public class GroundMasks : ScriptableObject
 		{
 			for (int i = 1; i < this.tiles.Length; i++)
 			{
-				GroundMasks.Tile tile = this.tiles[i];
-				if (tile.variationUVs == null)
+				if (this.tiles[i].variationUVs == null)
 				{
 					DebugUtil.LogErrorArgs(new object[] { this.name, "has invalid tile at index", i });
 				}

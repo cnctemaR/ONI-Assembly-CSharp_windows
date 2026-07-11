@@ -39,6 +39,7 @@ public class Compostable : KMonoBehaviour
 			if (pickupable != null)
 			{
 				SelectTool.Instance.SelectNextFrame(pickupable.GetComponent<KSelectable>(), true);
+				return;
 			}
 		}
 		else
@@ -59,11 +60,9 @@ public class Compostable : KMonoBehaviour
 			if (base.GetComponent<Pickupable>() != null && base.GetComponent<Pickupable>().storage == null)
 			{
 				component.AddStatusItem(Db.Get().MiscStatusItems.MarkedForCompost, null);
+				return;
 			}
-			else
-			{
-				component.AddStatusItem(Db.Get().MiscStatusItems.MarkedForCompostInStorage, null);
-			}
+			component.AddStatusItem(Db.Get().MiscStatusItems.MarkedForCompostInStorage, null);
 		}
 	}
 
@@ -77,19 +76,11 @@ public class Compostable : KMonoBehaviour
 		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.isMarkedForCompost)
 		{
-			string text = "action_compost";
-			string text2 = UI.USERMENUACTIONS.COMPOST.NAME;
-			global::System.Action action = new global::System.Action(this.OnToggleCompost);
-			string text3 = UI.USERMENUACTIONS.COMPOST.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_compost", UI.USERMENUACTIONS.COMPOST.NAME, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.COMPOST.TOOLTIP, true);
 		}
 		else
 		{
-			string text3 = "action_compost";
-			string text2 = UI.USERMENUACTIONS.COMPOST.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.OnToggleCompost);
-			string text = UI.USERMENUACTIONS.COMPOST.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_compost", UI.USERMENUACTIONS.COMPOST.NAME_OFF, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.COMPOST.TOOLTIP_OFF, true);
 		}
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}

@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
+	[StaticAccessor("AnimationOffsetPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationOffsetPlayable.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationOffsetPlayable.h")]
-	[StaticAccessor("AnimationOffsetPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	internal struct AnimationOffsetPlayable : IPlayable, IEquatable<AnimationOffsetPlayable>
@@ -95,11 +95,13 @@ namespace UnityEngine.Animations
 			AnimationOffsetPlayable.SetRotationInternal(ref this.m_Handle, value);
 		}
 
+		[NativeThrows]
 		private static bool CreateHandleInternal(PlayableGraph graph, Vector3 position, Quaternion rotation, ref PlayableHandle handle)
 		{
 			return AnimationOffsetPlayable.CreateHandleInternal_Injected(ref graph, ref position, ref rotation, ref handle);
 		}
 
+		[NativeThrows]
 		private static Vector3 GetPositionInternal(ref PlayableHandle handle)
 		{
 			Vector3 vector;
@@ -107,11 +109,13 @@ namespace UnityEngine.Animations
 			return vector;
 		}
 
+		[NativeThrows]
 		private static void SetPositionInternal(ref PlayableHandle handle, Vector3 value)
 		{
 			AnimationOffsetPlayable.SetPositionInternal_Injected(ref handle, ref value);
 		}
 
+		[NativeThrows]
 		private static Quaternion GetRotationInternal(ref PlayableHandle handle)
 		{
 			Quaternion quaternion;
@@ -119,6 +123,7 @@ namespace UnityEngine.Animations
 			return quaternion;
 		}
 
+		[NativeThrows]
 		private static void SetRotationInternal(ref PlayableHandle handle, Quaternion value)
 		{
 			AnimationOffsetPlayable.SetRotationInternal_Injected(ref handle, ref value);

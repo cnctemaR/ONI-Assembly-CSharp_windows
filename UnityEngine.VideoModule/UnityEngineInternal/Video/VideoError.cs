@@ -15,6 +15,6 @@ namespace UnityEngineInternal.Video
 		BadPermissions,
 		DeviceNotAvailable,
 		ResourceNotAvailable,
-		OpenCLExecution
+		NetworkErr
 	}
 }

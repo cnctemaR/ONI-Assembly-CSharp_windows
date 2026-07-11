@@ -7,8 +7,7 @@ public class MyCmp
 {
 	private static void GetFieldDatas(List<MyCmp.FieldData> field_data_list, Type type)
 	{
-		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-		foreach (FieldInfo fieldInfo in fields)
+		foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 		{
 			foreach (object obj in fieldInfo.GetCustomAttributes(false))
 			{
@@ -18,32 +17,35 @@ public class MyCmp
 				if (flag || flag2 || flag3)
 				{
 					bool flag4 = true;
-					foreach (MyCmp.FieldData fieldData in field_data_list)
+					using (List<MyCmp.FieldData>.Enumerator enumerator = field_data_list.GetEnumerator())
 					{
-						if (fieldData.fieldInfo.Name == fieldInfo.Name)
+						while (enumerator.MoveNext())
 						{
-							flag4 = false;
-							break;
+							if (enumerator.Current.fieldInfo.Name == fieldInfo.Name)
+							{
+								flag4 = false;
+								break;
+							}
 						}
 					}
 					if (flag4)
 					{
-						MyCmp.FieldData fieldData2 = new MyCmp.FieldData();
+						MyCmp.FieldData fieldData = new MyCmp.FieldData();
 						if (flag)
 						{
-							fieldData2.myCmpType = MyCmp.MyCmpType.Add;
+							fieldData.myCmpType = MyCmp.MyCmpType.Add;
 						}
 						else if (flag2)
 						{
-							fieldData2.myCmpType = MyCmp.MyCmpType.Req;
+							fieldData.myCmpType = MyCmp.MyCmpType.Req;
 						}
 						else if (flag3)
 						{
-							fieldData2.myCmpType = MyCmp.MyCmpType.Get;
+							fieldData.myCmpType = MyCmp.MyCmpType.Get;
 						}
-						fieldData2.cmpFns = CmpUtil.GetCmpFns(fieldInfo.FieldType);
-						fieldData2.fieldInfo = fieldInfo;
-						field_data_list.Add(fieldData2);
+						fieldData.cmpFns = CmpUtil.GetCmpFns(fieldInfo.FieldType);
+						fieldData.fieldInfo = fieldInfo;
+						field_data_list.Add(fieldData);
 					}
 				}
 			}
@@ -74,9 +76,7 @@ public class MyCmp
 
 	public static void OnAwake(KMonoBehaviour c)
 	{
-		Type type = c.GetType();
-		MyCmp.FieldData[] fields = MyCmp.GetFields(type);
-		foreach (MyCmp.FieldData fieldData in fields)
+		foreach (MyCmp.FieldData fieldData in MyCmp.GetFields(c.GetType()))
 		{
 			CmpFns cmpFns = fieldData.cmpFns;
 			FieldInfo fieldInfo = fieldData.fieldInfo;
@@ -104,36 +104,33 @@ public class MyCmp
 	public static void OnStart(KMonoBehaviour c)
 	{
 		Type type = c.GetType();
-		MyCmp.FieldData[] fields = MyCmp.GetFields(type);
-		foreach (MyCmp.FieldData fieldData in fields)
+		foreach (MyCmp.FieldData fieldData in MyCmp.GetFields(type))
 		{
 			CmpFns cmpFns = fieldData.cmpFns;
 			FieldInfo fieldInfo = fieldData.fieldInfo;
 			if ((Component)fieldInfo.GetValue(c) != null)
 			{
-				Component component = fieldInfo.GetValue(c) as Component;
-				Util.SpawnComponent(component);
+				Util.SpawnComponent(fieldInfo.GetValue(c) as Component);
 			}
 			else if (fieldData.myCmpType == MyCmp.MyCmpType.Add)
 			{
-				Component component2 = cmpFns.mFindOrAddFn(c);
-				Util.SpawnComponent(component2);
+				Util.SpawnComponent(cmpFns.mFindOrAddFn(c));
 			}
 			else if (fieldData.myCmpType == MyCmp.MyCmpType.Req)
 			{
-				Component component3 = cmpFns.mRequireFn(c);
-				if (component3 == null)
+				Component component = cmpFns.mRequireFn(c);
+				if (component == null)
 				{
 					global::Debug.LogError("The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name);
 				}
-				Util.SpawnComponent(component3);
-				fieldInfo.SetValue(c, component3);
+				Util.SpawnComponent(component);
+				fieldInfo.SetValue(c, component);
 			}
 			else if (fieldData.myCmpType == MyCmp.MyCmpType.Get)
 			{
-				Component component4 = cmpFns.mFindFn(c);
-				Util.SpawnComponent(component4);
-				fieldInfo.SetValue(c, component4);
+				Component component2 = cmpFns.mFindFn(c);
+				Util.SpawnComponent(component2);
+				fieldInfo.SetValue(c, component2);
 			}
 		}
 	}

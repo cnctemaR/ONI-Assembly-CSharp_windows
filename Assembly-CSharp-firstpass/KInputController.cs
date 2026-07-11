@@ -5,19 +5,6 @@ using UnityEngine;
 
 public class KInputController : IInputHandler
 {
-	public KInputController(bool is_gamepad)
-	{
-		this.mBindings = new List<KInputBinding>();
-		this.mEvents = new List<KInputEvent>();
-		this.mDirtyBindings = false;
-		this.IsGamepad = is_gamepad;
-		this.mAxis = new float[4];
-		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[249];
-		this.mScrollState = new bool[2];
-		this.inputHandler = new KInputHandler(this, this);
-	}
-
 	public string handlerName
 	{
 		get
@@ -29,6 +16,19 @@ public class KInputController : IInputHandler
 	public KInputHandler inputHandler { get; set; }
 
 	public bool IsGamepad { get; private set; }
+
+	public KInputController(bool is_gamepad)
+	{
+		this.mBindings = new List<KInputBinding>();
+		this.mEvents = new List<KInputEvent>();
+		this.mDirtyBindings = false;
+		this.IsGamepad = is_gamepad;
+		this.mAxis = new float[4];
+		this.mActiveModifiers = Modifier.None;
+		this.mActionState = new bool[250];
+		this.mScrollState = new bool[2];
+		this.inputHandler = new KInputHandler(this, this);
+	}
 
 	public void ClearBindings()
 	{
@@ -49,7 +49,7 @@ public class KInputController : IInputHandler
 		}
 		bool[] mActionFlags = key_def.mActionFlags;
 		key_def.mIsDown = is_down;
-		InputEventType inputEventType = ((!is_down) ? InputEventType.KeyUp : InputEventType.KeyDown);
+		InputEventType inputEventType = (is_down ? InputEventType.KeyDown : InputEventType.KeyUp);
 		for (int i = 0; i < mActionFlags.Length; i++)
 		{
 			if (mActionFlags[i])
@@ -80,28 +80,28 @@ public class KInputController : IInputHandler
 		this.mKeyDefLookup.Values.CopyTo(this.mKeyDefs, 0);
 	}
 
-	private bool GetKeyDown(KKeyCode key_code)
+	public bool GetKeyDown(KKeyCode key_code)
 	{
 		bool flag = false;
 		if (key_code < KKeyCode.KleiKeys)
 		{
 			flag = Input.GetKeyDown((KeyCode)key_code);
 		}
-		else if (key_code != KKeyCode.MouseScrollUp)
+		else if (key_code != KKeyCode.MouseScrollDown)
 		{
-			if (key_code == KKeyCode.MouseScrollDown)
+			if (key_code == KKeyCode.MouseScrollUp)
 			{
-				flag = this.mScrollState[1];
+				flag = this.mScrollState[0];
 			}
 		}
 		else
 		{
-			flag = this.mScrollState[0];
+			flag = this.mScrollState[1];
 		}
 		return flag;
 	}
 
-	private bool GetKeyUp(KKeyCode key_code)
+	public bool GetKeyUp(KKeyCode key_code)
 	{
 		return key_code < KKeyCode.KleiKeys && Input.GetKeyUp((KeyCode)key_code);
 	}
@@ -114,7 +114,7 @@ public class KInputController : IInputHandler
 			if (this.GetKeyDown(kkeyCode) || Input.GetKey((KeyCode)kkeyCode))
 			{
 				this.mActiveModifiers |= modifier;
-				break;
+				return;
 			}
 		}
 	}
@@ -169,22 +169,15 @@ public class KInputController : IInputHandler
 			foreach (KInputController.KeyDef keyDef in this.mKeyDefs)
 			{
 				int mKeyCode = (int)keyDef.mKeyCode;
-				if (!this.mIgnoreKeyboard || mKeyCode >= 323)
+				if ((!this.mIgnoreKeyboard || mKeyCode >= 323) && (!this.mIgnoreMouse || ((mKeyCode < 323 || mKeyCode >= 330) && mKeyCode != 1001 && mKeyCode != 1002)))
 				{
-					if (!this.mIgnoreMouse || ((mKeyCode < 323 || mKeyCode >= 330) && mKeyCode != 1001 && mKeyCode != 1002))
+					if (this.GetKeyDown(keyDef.mKeyCode) && this.mActiveModifiers == keyDef.mModifier)
 					{
-						if (this.GetKeyDown(keyDef.mKeyCode))
-						{
-							bool flag = this.mActiveModifiers == keyDef.mModifier;
-							if (flag)
-							{
-								this.QueueButtonEvent(keyDef, true);
-							}
-						}
-						if (keyDef.mIsDown && this.GetKeyUp(keyDef.mKeyCode))
-						{
-							this.QueueButtonEvent(keyDef, false);
-						}
+						this.QueueButtonEvent(keyDef, true);
+					}
+					if (keyDef.mIsDown && this.GetKeyUp(keyDef.mKeyCode))
+					{
+						this.QueueButtonEvent(keyDef, false);
 					}
 				}
 			}
@@ -308,7 +301,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[249];
+			this.mActionFlags = new bool[250];
 		}
 
 		public KKeyCode mKeyCode;

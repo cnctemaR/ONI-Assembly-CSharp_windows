@@ -4,17 +4,6 @@ using Newtonsoft.Json.Converters;
 
 public struct BindingEntry : IEquatable<BindingEntry>
 {
-	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true, bool ignore_root_conflicts = false)
-	{
-		this.mGroup = group;
-		this.mButton = button;
-		this.mKeyCode = key_code;
-		this.mAction = action;
-		this.mModifier = modifier;
-		this.mRebindable = rebindable;
-		this.mIgnoreRootConflics = ignore_root_conflicts;
-	}
-
 	public static KKeyCode GetGamepadKeyCode(int gamepad_number, GamepadButton button)
 	{
 		switch (gamepad_number)
@@ -31,6 +20,17 @@ public struct BindingEntry : IEquatable<BindingEntry>
 			DebugUtil.Assert(false);
 			return KKeyCode.None;
 		}
+	}
+
+	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true, bool ignore_root_conflicts = false)
+	{
+		this.mGroup = group;
+		this.mButton = button;
+		this.mKeyCode = key_code;
+		this.mAction = action;
+		this.mModifier = modifier;
+		this.mRebindable = rebindable;
+		this.mIgnoreRootConflics = ignore_root_conflicts;
 	}
 
 	public bool Equals(BindingEntry other)

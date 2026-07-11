@@ -86,10 +86,12 @@ public class BinaryHeap<T> : IEnumerable<T>, IEnumerable
 
 	IEnumerator<T> IEnumerable<T>.GetEnumerator()
 	{
-		foreach (T i in this.Items)
+		foreach (T t in this.Items)
 		{
-			yield return i;
+			yield return t;
 		}
+		List<T>.Enumerator enumerator = default(List<T>.Enumerator);
+		yield break;
 		yield break;
 	}
 

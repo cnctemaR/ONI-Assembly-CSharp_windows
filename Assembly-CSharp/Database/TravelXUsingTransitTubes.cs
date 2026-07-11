@@ -51,7 +51,7 @@ namespace Database
 					num += component.distanceTravelledByNavType[this.navType];
 				}
 			}
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.TRAVELED_IN_TUBES, (!complete) ? num : this.distanceToTravel, this.distanceToTravel);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.TRAVELED_IN_TUBES, complete ? this.distanceToTravel : num, this.distanceToTravel);
 		}
 
 		private int distanceToTravel;

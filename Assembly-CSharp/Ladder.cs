@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
-using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class Ladder : KMonoBehaviour, IEffectDescriptor
@@ -26,8 +25,7 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 	{
 		base.OnCleanUp();
 		int num = Grid.PosToCell(this);
-		GameObject gameObject = Grid.Objects[num, 24];
-		if (gameObject == null)
+		if (Grid.Objects[num, 24] == null)
 		{
 			Grid.HasPole[num] = false;
 			Grid.HasLadder[num] = false;

@@ -51,18 +51,35 @@ public static class GameUtil
 	public static float GetConvertedTemperature(float temperature, bool roundOutput = false)
 	{
 		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
-		float num;
-		if (temperatureUnit == GameUtil.TemperatureUnit.Celsius)
+		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
 		{
-			num = temperature - 273.15f;
-			return (!roundOutput) ? num : Mathf.Round(num);
+			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+			{
+				if (!roundOutput)
+				{
+					return temperature;
+				}
+				return Mathf.Round(temperature);
+			}
+			else
+			{
+				float num = temperature * 1.8f - 459.67f;
+				if (!roundOutput)
+				{
+					return num;
+				}
+				return Mathf.Round(num);
+			}
 		}
-		if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+		else
 		{
-			return (!roundOutput) ? temperature : Mathf.Round(temperature);
+			float num = temperature - 273.15f;
+			if (!roundOutput)
+			{
+				return num;
+			}
+			return Mathf.Round(num);
 		}
-		num = temperature * 1.8f - 459.67f;
-		return (!roundOutput) ? num : Mathf.Round(num);
 	}
 
 	public static float GetTemperatureConvertedToKelvin(float temperature, GameUtil.TemperatureUnit fromUnit)
@@ -210,11 +227,9 @@ public static class GameUtil
 	public static float EnergyToTemperatureDelta(float kilojoules, PrimaryElement element)
 	{
 		global::Debug.Assert(element.Mass > 0f);
-		float energyInPrimaryElement = GameUtil.GetEnergyInPrimaryElement(element);
-		float num = Mathf.Max(energyInPrimaryElement - kilojoules, 1f);
+		float num = Mathf.Max(GameUtil.GetEnergyInPrimaryElement(element) - kilojoules, 1f);
 		float temperature = element.Temperature;
-		float num2 = num / (0.001f * (element.Mass * (element.Element.specificHeatCapacity * 1000f)));
-		return num2 - temperature;
+		return num / (0.001f * (element.Mass * (element.Element.specificHeatCapacity * 1000f))) - temperature;
 	}
 
 	public static float CalculateEnergyDeltaForElement(PrimaryElement element, float startTemp, float endTemp)
@@ -224,23 +239,21 @@ public static class GameUtil
 
 	public static float CalculateEnergyDeltaForElementChange(float mass, float shc, float startTemp, float endTemp)
 	{
-		float num = endTemp - startTemp;
-		return num * mass * shc;
+		return (endTemp - startTemp) * mass * shc;
 	}
 
 	public static float GetFinalTemperature(float t1, float m1, float t2, float m2)
 	{
 		float num = m1 + m2;
-		float num2 = t1 * m1 + t2 * m2;
-		float num3 = num2 / num;
-		float num4 = Mathf.Min(t1, t2);
-		float num5 = Mathf.Max(t1, t2);
-		num3 = Mathf.Clamp(num3, num4, num5);
-		if (float.IsNaN(num3) || float.IsInfinity(num3))
+		float num2 = (t1 * m1 + t2 * m2) / num;
+		float num3 = Mathf.Min(t1, t2);
+		float num4 = Mathf.Max(t1, t2);
+		num2 = Mathf.Clamp(num2, num3, num4);
+		if (float.IsNaN(num2) || float.IsInfinity(num2))
 		{
-			global::Debug.LogError(string.Format("Calculated an invalid temperature: t1={0}, m1={1}, t2={2}, m2={3}, min_temp={4}, max_temp={5}", new object[] { t1, m1, t2, m2, num4, num5 }));
+			global::Debug.LogError(string.Format("Calculated an invalid temperature: t1={0}, m1={1}, t2={2}, m2={3}, min_temp={4}, max_temp={5}", new object[] { t1, m1, t2, m2, num3, num4 }));
 		}
-		return num3;
+		return num2;
 	}
 
 	public static void ForceTotalConduction(PrimaryElement a, PrimaryElement b)
@@ -275,7 +288,11 @@ public static class GameUtil
 			PrimaryElement component2 = go.GetComponent<PrimaryElement>();
 			return GameUtil.GetUnitFormattedName(go.GetProperName(), component2.Units, upperName);
 		}
-		return (!upperName) ? go.GetProperName() : StringFormatter.ToUpper(go.GetProperName());
+		if (!upperName)
+		{
+			return go.GetProperName();
+		}
+		return StringFormatter.ToUpper(go.GetProperName());
 	}
 
 	public static string GetUnitFormattedName(string name, float count, bool upperName = false)
@@ -289,9 +306,9 @@ public static class GameUtil
 
 	public static string GetFormattedUnits(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displaySuffix = true)
 	{
-		string text = ((units != 1f) ? UI.UNITSUFFIXES.UNITS : UI.UNITSUFFIXES.UNIT);
+		string text = ((units == 1f) ? UI.UNITSUFFIXES.UNIT : UI.UNITSUFFIXES.UNITS);
 		units = GameUtil.ApplyTimeSlice(units, timeSlice);
-		string text2 = string.Empty;
+		string text2;
 		if (units == 0f)
 		{
 			text2 = "0";
@@ -323,25 +340,17 @@ public static class GameUtil
 	public static float GetRoundedTemperatureInKelvin(float kelvin)
 	{
 		float num = 0f;
-		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
-		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
+		switch (GameUtil.temperatureUnit)
 		{
-			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
-			{
-				if (temperatureUnit == GameUtil.TemperatureUnit.Kelvin)
-				{
-					num = (float)Mathf.RoundToInt(kelvin);
-				}
-			}
-			else
-			{
-				float num2 = (float)Mathf.RoundToInt(GameUtil.GetTemperatureConvertedFromKelvin(kelvin, GameUtil.TemperatureUnit.Fahrenheit));
-				num = GameUtil.GetTemperatureConvertedToKelvin(num2, GameUtil.TemperatureUnit.Fahrenheit);
-			}
-		}
-		else
-		{
+		case GameUtil.TemperatureUnit.Celsius:
 			num = GameUtil.GetTemperatureConvertedToKelvin(Mathf.Round(GameUtil.GetConvertedTemperature(Mathf.Round(kelvin), true)));
+			break;
+		case GameUtil.TemperatureUnit.Fahrenheit:
+			num = GameUtil.GetTemperatureConvertedToKelvin((float)Mathf.RoundToInt(GameUtil.GetTemperatureConvertedFromKelvin(kelvin, GameUtil.TemperatureUnit.Fahrenheit)), GameUtil.TemperatureUnit.Fahrenheit);
+			break;
+		case GameUtil.TemperatureUnit.Kelvin:
+			num = (float)Mathf.RoundToInt(kelvin);
+			break;
 		}
 		return num;
 	}
@@ -360,7 +369,7 @@ public static class GameUtil
 			temp = GameUtil.GetConvertedTemperature(temp, roundInDestinationFormat);
 		}
 		temp = GameUtil.ApplyTimeSlice(temp, timeSlice);
-		string text = string.Empty;
+		string text;
 		if (Mathf.Abs(temp) < 0.1f)
 		{
 			text = GameUtil.FloatToString(temp, "##0.####");
@@ -379,7 +388,7 @@ public static class GameUtil
 	public static string GetFormattedCaloriesForItem(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
 	{
 		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
-		return GameUtil.GetFormattedCalories((foodInfo == null) ? (-1f) : (foodInfo.CaloriesPerUnit * amount), timeSlice, forceKcal);
+		return GameUtil.GetFormattedCalories((foodInfo != null) ? (foodInfo.CaloriesPerUnit * amount) : (-1f), timeSlice, forceKcal);
 	}
 
 	public static string GetFormattedCalories(float calories, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
@@ -391,7 +400,7 @@ public static class GameUtil
 			text = UI.UNITSUFFIXES.CALORIES.KILOCALORIE;
 		}
 		calories = GameUtil.ApplyTimeSlice(calories, timeSlice);
-		string text2 = string.Empty;
+		string text2;
 		if (calories == 0f)
 		{
 			text2 = "0" + text;
@@ -414,7 +423,7 @@ public static class GameUtil
 	public static string GetFormattedPlantGrowth(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
-		string text = string.Empty;
+		string text;
 		if (Mathf.Abs(percent) == 0f)
 		{
 			text = "0";
@@ -431,14 +440,13 @@ public static class GameUtil
 		{
 			text = "##0";
 		}
-		string text2 = GameUtil.FloatToString(percent, text) + UI.UNITSUFFIXES.PERCENT + " " + UI.UNITSUFFIXES.GROWTH;
-		return GameUtil.AddTimeSliceText(text2, timeSlice);
+		return GameUtil.AddTimeSliceText(GameUtil.FloatToString(percent, text) + UI.UNITSUFFIXES.PERCENT + " " + UI.UNITSUFFIXES.GROWTH, timeSlice);
 	}
 
 	public static string GetFormattedPercent(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
-		string text = string.Empty;
+		string text;
 		if (Mathf.Abs(percent) == 0f)
 		{
 			text = "0";
@@ -455,8 +463,7 @@ public static class GameUtil
 		{
 			text = "##0";
 		}
-		string text2 = GameUtil.FloatToString(percent, text) + UI.UNITSUFFIXES.PERCENT;
-		return GameUtil.AddTimeSliceText(text2, timeSlice);
+		return GameUtil.AddTimeSliceText(GameUtil.FloatToString(percent, text) + UI.UNITSUFFIXES.PERCENT, timeSlice);
 	}
 
 	public static string GetFormattedRoundedJoules(float joules)
@@ -489,37 +496,34 @@ public static class GameUtil
 
 	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic)
 	{
-		LocString locString = string.Empty;
-		if (unit != GameUtil.WattageFormatterUnit.Automatic)
+		LocString locString = "";
+		switch (unit)
 		{
-			if (unit != GameUtil.WattageFormatterUnit.Kilowatts)
-			{
-				if (unit == GameUtil.WattageFormatterUnit.Watts)
-				{
-					locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
-				}
-			}
-			else
+		case GameUtil.WattageFormatterUnit.Watts:
+			locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+			break;
+		case GameUtil.WattageFormatterUnit.Kilowatts:
+			watts /= 1000f;
+			locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
+			break;
+		case GameUtil.WattageFormatterUnit.Automatic:
+			if (Mathf.Abs(watts) > 1000f)
 			{
 				watts /= 1000f;
 				locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
 			}
-		}
-		else if (Mathf.Abs(watts) > 1000f)
-		{
-			watts /= 1000f;
-			locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
-		}
-		else
-		{
-			locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+			else
+			{
+				locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+			}
+			break;
 		}
 		return GameUtil.FloatToString(watts, "###0.##") + locString;
 	}
 
 	public static string GetFormattedHeatEnergy(float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
 	{
-		LocString locString = string.Empty;
+		LocString locString = "";
 		string text;
 		switch (unit)
 		{
@@ -551,30 +555,27 @@ public static class GameUtil
 
 	public static string GetFormattedHeatEnergyRate(float dtu_s, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
 	{
-		LocString locString = string.Empty;
-		if (unit != GameUtil.HeatEnergyFormatterUnit.Automatic)
+		LocString locString = "";
+		switch (unit)
 		{
-			if (unit != GameUtil.HeatEnergyFormatterUnit.KDTU_S)
-			{
-				if (unit == GameUtil.HeatEnergyFormatterUnit.DTU_S)
-				{
-					locString = UI.UNITSUFFIXES.HEAT.DTU_S;
-				}
-			}
-			else
+		case GameUtil.HeatEnergyFormatterUnit.DTU_S:
+			locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+			break;
+		case GameUtil.HeatEnergyFormatterUnit.KDTU_S:
+			dtu_s /= 1000f;
+			locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
+			break;
+		case GameUtil.HeatEnergyFormatterUnit.Automatic:
+			if (Mathf.Abs(dtu_s) > 1000f)
 			{
 				dtu_s /= 1000f;
 				locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
 			}
-		}
-		else if (Mathf.Abs(dtu_s) > 1000f)
-		{
-			dtu_s /= 1000f;
-			locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
-		}
-		else
-		{
-			locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+			else
+			{
+				locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+			}
+			break;
 		}
 		return GameUtil.FloatToString(dtu_s, "###0.##") + locString;
 	}
@@ -588,7 +589,7 @@ public static class GameUtil
 	public static string GetFormattedSimple(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = null)
 	{
 		num = GameUtil.ApplyTimeSlice(num, timeSlice);
-		string text = string.Empty;
+		string text;
 		if (formatString != null)
 		{
 			text = GameUtil.FloatToString(num, formatString);
@@ -665,7 +666,7 @@ public static class GameUtil
 		{
 			GameUtil.adjectives = LocString.GetStrings(typeof(DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVES));
 		}
-		LocString locString = ((quality < 0) ? DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_FORMAT_NEGATIVE : DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_FORMAT_POSITIVE);
+		LocString locString = ((quality >= 0) ? DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_FORMAT_POSITIVE : DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_FORMAT_NEGATIVE);
 		int num = quality - DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_INDEX_OFFSET;
 		num = Mathf.Clamp(num, 0, GameUtil.adjectives.Length);
 		return string.Format(locString, GameUtil.adjectives[num], GameUtil.AddPositiveSign(quality.ToString(), quality > 0));
@@ -674,7 +675,7 @@ public static class GameUtil
 	public static string GetFormattedInfomation(float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		amount = GameUtil.ApplyTimeSlice(amount, timeSlice);
-		string text = string.Empty;
+		string text = "";
 		if (amount < 1024f)
 		{
 			text = UI.UNITSUFFIXES.INFORMATION.KILOBYTE;
@@ -796,7 +797,7 @@ public static class GameUtil
 		}
 		if (!includeSuffix)
 		{
-			text = string.Empty;
+			text = "";
 			timeSlice = GameUtil.TimeSlice.None;
 		}
 		return GameUtil.AddTimeSliceText(string.Format(floatFormat, mass) + text, timeSlice);
@@ -960,8 +961,7 @@ public static class GameUtil
 
 	public static bool FloodFillCheck<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
 	{
-		int num = GameUtil.FloodFillFind<ArgType>(fn, arg, start_cell, max_depth, stop_at_solid, stop_at_liquid);
-		return num != -1;
+		return GameUtil.FloodFillFind<ArgType>(fn, arg, start_cell, max_depth, stop_at_solid, stop_at_liquid) != -1;
 	}
 
 	public static int FloodFillFind<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
@@ -975,46 +975,37 @@ public static class GameUtil
 		while (GameUtil.FloodFillNext.Count > 0)
 		{
 			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Dequeue();
-			if (floodFillInfo.depth < max_depth)
+			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell))
 			{
-				if (Grid.IsValidCell(floodFillInfo.cell))
+				Element element = Grid.Element[floodFillInfo.cell];
+				if ((!stop_at_solid || !element.IsSolid) && (!stop_at_liquid || !element.IsLiquid) && !GameUtil.FloodFillVisited.Contains(floodFillInfo.cell))
 				{
-					Element element = Grid.Element[floodFillInfo.cell];
-					if (!stop_at_solid || !element.IsSolid)
+					GameUtil.FloodFillVisited.Add(floodFillInfo.cell);
+					if (fn(floodFillInfo.cell, arg))
 					{
-						if (!stop_at_liquid || !element.IsLiquid)
-						{
-							if (!GameUtil.FloodFillVisited.Contains(floodFillInfo.cell))
-							{
-								GameUtil.FloodFillVisited.Add(floodFillInfo.cell);
-								if (fn(floodFillInfo.cell, arg))
-								{
-									num = floodFillInfo.cell;
-									break;
-								}
-								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
-								{
-									cell = Grid.CellLeft(floodFillInfo.cell),
-									depth = floodFillInfo.depth + 1
-								});
-								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
-								{
-									cell = Grid.CellRight(floodFillInfo.cell),
-									depth = floodFillInfo.depth + 1
-								});
-								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
-								{
-									cell = Grid.CellAbove(floodFillInfo.cell),
-									depth = floodFillInfo.depth + 1
-								});
-								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
-								{
-									cell = Grid.CellBelow(floodFillInfo.cell),
-									depth = floodFillInfo.depth + 1
-								});
-							}
-						}
+						num = floodFillInfo.cell;
+						break;
 					}
+					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellLeft(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
+					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellRight(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
+					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellAbove(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
+					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellBelow(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
 				}
 			}
 		}
@@ -1038,41 +1029,35 @@ public static class GameUtil
 		while (queue.Count > 0)
 		{
 			GameUtil.FloodFillInfo floodFillInfo = queue.Dequeue();
-			if (floodFillInfo.depth < max_depth)
+			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell) && !visited_cells.Contains(floodFillInfo.cell))
 			{
-				if (Grid.IsValidCell(floodFillInfo.cell))
+				visited_cells.Add(floodFillInfo.cell);
+				if (condition(floodFillInfo.cell))
 				{
-					if (!visited_cells.Contains(floodFillInfo.cell))
+					if (valid_cells != null)
 					{
-						visited_cells.Add(floodFillInfo.cell);
-						if (condition(floodFillInfo.cell))
-						{
-							if (valid_cells != null)
-							{
-								valid_cells.Add(floodFillInfo.cell);
-							}
-							queue.Enqueue(new GameUtil.FloodFillInfo
-							{
-								cell = Grid.CellLeft(floodFillInfo.cell),
-								depth = floodFillInfo.depth + 1
-							});
-							queue.Enqueue(new GameUtil.FloodFillInfo
-							{
-								cell = Grid.CellRight(floodFillInfo.cell),
-								depth = floodFillInfo.depth + 1
-							});
-							queue.Enqueue(new GameUtil.FloodFillInfo
-							{
-								cell = Grid.CellAbove(floodFillInfo.cell),
-								depth = floodFillInfo.depth + 1
-							});
-							queue.Enqueue(new GameUtil.FloodFillInfo
-							{
-								cell = Grid.CellBelow(floodFillInfo.cell),
-								depth = floodFillInfo.depth + 1
-							});
-						}
+						valid_cells.Add(floodFillInfo.cell);
 					}
+					queue.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellLeft(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
+					queue.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellRight(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
+					queue.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellAbove(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
+					queue.Enqueue(new GameUtil.FloodFillInfo
+					{
+						cell = Grid.CellBelow(floodFillInfo.cell),
+						depth = floodFillInfo.depth + 1
+					});
 				}
 			}
 		}
@@ -1121,52 +1106,52 @@ public static class GameUtil
 		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
 		Color color6 = new Color(0.44313726f, 0.67058825f, 0.8117647f);
 		Color color7 = color4;
-		string text = string.Empty;
+		string text = "";
 		GameUtil.Hardness hardness = GameUtil.GetHardness(element);
-		if (hardness != GameUtil.Hardness.NA)
+		if (hardness <= GameUtil.Hardness.FIRM)
 		{
-			if (hardness != GameUtil.Hardness.SOFT)
+			if (hardness != GameUtil.Hardness.NA)
 			{
-				if (hardness != GameUtil.Hardness.FIRM)
+				if (hardness != GameUtil.Hardness.SOFT)
 				{
-					if (hardness != GameUtil.Hardness.VERY_FIRM)
+					if (hardness == GameUtil.Hardness.FIRM)
 					{
-						if (hardness != GameUtil.Hardness.NEARLY_IMPENETRABLE)
-						{
-							if (hardness == GameUtil.Hardness.IMPENETRABLE)
-							{
-								color7 = color;
-								text = string.Format(ELEMENTS.HARDNESS.IMPENETRABLE, element.hardness);
-							}
-						}
-						else
-						{
-							color7 = color2;
-							text = string.Format(ELEMENTS.HARDNESS.NEARLYIMPENETRABLE, element.hardness);
-						}
-					}
-					else
-					{
-						color7 = color3;
-						text = string.Format(ELEMENTS.HARDNESS.VERYFIRM, element.hardness);
+						color7 = color4;
+						text = string.Format(ELEMENTS.HARDNESS.FIRM, element.hardness);
 					}
 				}
 				else
 				{
-					color7 = color4;
-					text = string.Format(ELEMENTS.HARDNESS.FIRM, element.hardness);
+					color7 = color5;
+					text = string.Format(ELEMENTS.HARDNESS.SOFT, element.hardness);
 				}
 			}
 			else
 			{
-				color7 = color5;
-				text = string.Format(ELEMENTS.HARDNESS.SOFT, element.hardness);
+				color7 = color6;
+				text = string.Format(ELEMENTS.HARDNESS.VERYSOFT, element.hardness);
+			}
+		}
+		else if (hardness != GameUtil.Hardness.VERY_FIRM)
+		{
+			if (hardness != GameUtil.Hardness.NEARLY_IMPENETRABLE)
+			{
+				if (hardness == GameUtil.Hardness.IMPENETRABLE)
+				{
+					color7 = color;
+					text = string.Format(ELEMENTS.HARDNESS.IMPENETRABLE, element.hardness);
+				}
+			}
+			else
+			{
+				color7 = color2;
+				text = string.Format(ELEMENTS.HARDNESS.NEARLYIMPENETRABLE, element.hardness);
 			}
 		}
 		else
 		{
-			color7 = color6;
-			text = string.Format(ELEMENTS.HARDNESS.VERYSOFT, element.hardness);
+			color7 = color3;
+			text = string.Format(ELEMENTS.HARDNESS.VERYFIRM, element.hardness);
 		}
 		if (addColor)
 		{
@@ -1219,35 +1204,34 @@ public static class GameUtil
 		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
 		Color color6 = new Color(0.44313726f, 0.67058825f, 0.8117647f);
 		Color color7 = color4;
-		string text = string.Empty;
-		GameUtil.GermResistanceModifier germResistanceModifier = GameUtil.GetGermResistanceModifier(modifier);
-		switch (germResistanceModifier + 5)
+		string text = "";
+		switch (GameUtil.GetGermResistanceModifier(modifier))
 		{
-		case GameUtil.GermResistanceModifier.NONE:
+		case GameUtil.GermResistanceModifier.NEGATIVE_LARGE:
 			color7 = color4;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_LARGE, modifier);
 			break;
-		case (GameUtil.GermResistanceModifier)3:
+		case GameUtil.GermResistanceModifier.NEGATIVE_MEDIUM:
 			color7 = color3;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_MEDIUM, modifier);
 			break;
-		case (GameUtil.GermResistanceModifier)4:
+		case GameUtil.GermResistanceModifier.NEGATIVE_SMALL:
 			color7 = color2;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_SMALL, modifier);
 			break;
-		case GameUtil.GermResistanceModifier.POSITIVE_LARGE:
+		case GameUtil.GermResistanceModifier.NONE:
 			color7 = color;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NONE, modifier);
 			break;
-		case (GameUtil.GermResistanceModifier)6:
+		case GameUtil.GermResistanceModifier.POSITIVE_SMALL:
 			color7 = color5;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_SMALL, modifier);
 			break;
-		case (GameUtil.GermResistanceModifier)7:
+		case GameUtil.GermResistanceModifier.POSITIVE_MEDIUM:
 			color7 = color6;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_MEDIUM, modifier);
 			break;
-		case (GameUtil.GermResistanceModifier)10:
+		case GameUtil.GermResistanceModifier.POSITIVE_LARGE:
 			color7 = color6;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_LARGE, modifier);
 			break;
@@ -1266,8 +1250,8 @@ public static class GameUtil
 		Color color3 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
 		Color color4 = new Color(0.5254902f, 0.41960785f, 0.64705884f);
 		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
-		string text = string.Empty;
 		Color color6;
+		string text;
 		if (element.thermalConductivity >= 50f)
 		{
 			color6 = color5;
@@ -1308,7 +1292,7 @@ public static class GameUtil
 	{
 		if (!element.IsGas && !element.IsVacuum)
 		{
-			return string.Empty;
+			return "";
 		}
 		Color color = new Color(0.44313726f, 0.67058825f, 0.8117647f);
 		Color color2 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
@@ -1405,232 +1389,197 @@ public static class GameUtil
 	public static string GetKeycodeLocalized(KKeyCode key_code)
 	{
 		string text = key_code.ToString();
-		switch (key_code)
+		if (key_code <= KKeyCode.Slash)
 		{
-		case KKeyCode.Keypad0:
-			text = INPUT.NUM + " 0";
-			break;
-		case KKeyCode.Keypad1:
-			text = INPUT.NUM + " 1";
-			break;
-		case KKeyCode.Keypad2:
-			text = INPUT.NUM + " 2";
-			break;
-		case KKeyCode.Keypad3:
-			text = INPUT.NUM + " 3";
-			break;
-		case KKeyCode.Keypad4:
-			text = INPUT.NUM + " 4";
-			break;
-		case KKeyCode.Keypad5:
-			text = INPUT.NUM + " 5";
-			break;
-		case KKeyCode.Keypad6:
-			text = INPUT.NUM + " 6";
-			break;
-		case KKeyCode.Keypad7:
-			text = INPUT.NUM + " 7";
-			break;
-		case KKeyCode.Keypad8:
-			text = INPUT.NUM + " 8";
-			break;
-		case KKeyCode.Keypad9:
-			text = INPUT.NUM + " 9";
-			break;
-		case KKeyCode.KeypadPeriod:
-			text = INPUT.NUM + " " + INPUT.PERIOD;
-			break;
-		case KKeyCode.KeypadDivide:
-			text = INPUT.NUM + " /";
-			break;
-		case KKeyCode.KeypadMultiply:
-			text = INPUT.NUM + " *";
-			break;
-		case KKeyCode.KeypadMinus:
-			text = INPUT.NUM + " -";
-			break;
-		case KKeyCode.KeypadPlus:
-			text = INPUT.NUM + " +";
-			break;
-		case KKeyCode.KeypadEnter:
-			text = INPUT.NUM + " " + INPUT.ENTER;
-			break;
-		default:
+			if (key_code <= KKeyCode.Tab)
+			{
+				if (key_code == KKeyCode.None)
+				{
+					return text;
+				}
+				if (key_code == KKeyCode.Backspace)
+				{
+					return INPUT.BACKSPACE;
+				}
+				if (key_code == KKeyCode.Tab)
+				{
+					return INPUT.TAB;
+				}
+			}
+			else if (key_code <= KKeyCode.Escape)
+			{
+				if (key_code == KKeyCode.Return)
+				{
+					return INPUT.ENTER;
+				}
+				if (key_code == KKeyCode.Escape)
+				{
+					return INPUT.ESCAPE;
+				}
+			}
+			else
+			{
+				if (key_code == KKeyCode.Space)
+				{
+					return INPUT.SPACE;
+				}
+				switch (key_code)
+				{
+				case KKeyCode.Plus:
+					return "+";
+				case KKeyCode.Comma:
+					return ",";
+				case KKeyCode.Minus:
+					return "-";
+				case KKeyCode.Period:
+					return INPUT.PERIOD;
+				case KKeyCode.Slash:
+					return "/";
+				}
+			}
+		}
+		else if (key_code <= KKeyCode.Insert)
+		{
 			switch (key_code)
 			{
-			case KKeyCode.Mouse0:
-				text = INPUT.MOUSE + " 0";
+			case KKeyCode.Colon:
+				return ":";
+			case KKeyCode.Semicolon:
+				return ";";
+			case KKeyCode.Less:
 				break;
-			case KKeyCode.Mouse1:
-				text = INPUT.MOUSE + " 1";
-				break;
-			case KKeyCode.Mouse2:
-				text = INPUT.MOUSE + " 2";
-				break;
-			case KKeyCode.Mouse3:
-				text = INPUT.MOUSE + " 3";
-				break;
-			case KKeyCode.Mouse4:
-				text = INPUT.MOUSE + " 4";
-				break;
-			case KKeyCode.Mouse5:
-				text = INPUT.MOUSE + " 5";
-				break;
-			case KKeyCode.Mouse6:
-				text = INPUT.MOUSE + " 6";
-				break;
+			case KKeyCode.Equals:
+				return "=";
 			default:
 				switch (key_code)
 				{
-				case KKeyCode.RightShift:
-					text = INPUT.RIGHT_SHIFT;
+				case KKeyCode.LeftBracket:
+					return "[";
+				case KKeyCode.Backslash:
+					return "\\";
+				case KKeyCode.RightBracket:
+					return "]";
+				case KKeyCode.Caret:
+				case KKeyCode.Underscore:
 					break;
-				case KKeyCode.LeftShift:
-					text = INPUT.LEFT_SHIFT;
-					break;
-				case KKeyCode.RightControl:
-					text = INPUT.RIGHT_CTRL;
-					break;
-				case KKeyCode.LeftControl:
-					text = INPUT.LEFT_CTRL;
-					break;
-				case KKeyCode.RightAlt:
-					text = INPUT.RIGHT_ALT;
-					break;
-				case KKeyCode.LeftAlt:
-					text = INPUT.LEFT_ALT;
-					break;
+				case KKeyCode.BackQuote:
+					return INPUT.BACKQUOTE;
 				default:
 					switch (key_code)
 					{
-					case KKeyCode.Plus:
-						text = "+";
-						break;
-					case KKeyCode.Comma:
-						text = ",";
-						break;
-					case KKeyCode.Minus:
-						text = "-";
-						break;
-					case KKeyCode.Period:
-						text = INPUT.PERIOD;
-						break;
-					case KKeyCode.Slash:
-						text = "/";
-						break;
-					default:
-						switch (key_code)
-						{
-						case KKeyCode.LeftBracket:
-							text = "[";
-							break;
-						case KKeyCode.Backslash:
-							text = "\\";
-							break;
-						case KKeyCode.RightBracket:
-							text = "]";
-							break;
-						default:
-							switch (key_code)
-							{
-							case KKeyCode.Backspace:
-								text = INPUT.BACKSPACE;
-								break;
-							case KKeyCode.Tab:
-								text = INPUT.TAB;
-								break;
-							default:
-								switch (key_code)
-								{
-								case KKeyCode.Colon:
-									text = ":";
-									break;
-								case KKeyCode.Semicolon:
-									text = ";";
-									break;
-								default:
-									if (key_code != KKeyCode.MouseScrollDown)
-									{
-										if (key_code != KKeyCode.MouseScrollUp)
-										{
-											if (key_code != KKeyCode.None)
-											{
-												if (key_code != KKeyCode.Escape)
-												{
-													if (key_code != KKeyCode.Space)
-													{
-														if (KKeyCode.A <= key_code && key_code <= KKeyCode.Z)
-														{
-															text = ((char)(65 + (key_code - KKeyCode.A))).ToString();
-														}
-														else if (KKeyCode.Alpha0 <= key_code && key_code <= KKeyCode.Alpha9)
-														{
-															text = ((char)(48 + (key_code - KKeyCode.Alpha0))).ToString();
-														}
-														else if (KKeyCode.F1 <= key_code && key_code <= KKeyCode.F12)
-														{
-															text = "F" + (key_code - KKeyCode.F1 + 1).ToString();
-														}
-														else
-														{
-															global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + " using key_code.ToString()");
-														}
-													}
-													else
-													{
-														text = INPUT.SPACE;
-													}
-												}
-												else
-												{
-													text = INPUT.ESCAPE;
-												}
-											}
-										}
-										else
-										{
-											text = INPUT.MOUSE_SCROLL_UP;
-										}
-									}
-									else
-									{
-										text = INPUT.MOUSE_SCROLL_DOWN;
-									}
-									break;
-								case KKeyCode.Equals:
-									text = "=";
-									break;
-								}
-								break;
-							case KKeyCode.Return:
-								text = INPUT.ENTER;
-								break;
-							}
-							break;
-						case KKeyCode.BackQuote:
-							text = INPUT.BACKQUOTE;
-							break;
-						}
-						break;
+					case KKeyCode.Keypad0:
+						return INPUT.NUM + " 0";
+					case KKeyCode.Keypad1:
+						return INPUT.NUM + " 1";
+					case KKeyCode.Keypad2:
+						return INPUT.NUM + " 2";
+					case KKeyCode.Keypad3:
+						return INPUT.NUM + " 3";
+					case KKeyCode.Keypad4:
+						return INPUT.NUM + " 4";
+					case KKeyCode.Keypad5:
+						return INPUT.NUM + " 5";
+					case KKeyCode.Keypad6:
+						return INPUT.NUM + " 6";
+					case KKeyCode.Keypad7:
+						return INPUT.NUM + " 7";
+					case KKeyCode.Keypad8:
+						return INPUT.NUM + " 8";
+					case KKeyCode.Keypad9:
+						return INPUT.NUM + " 9";
+					case KKeyCode.KeypadPeriod:
+						return INPUT.NUM + " " + INPUT.PERIOD;
+					case KKeyCode.KeypadDivide:
+						return INPUT.NUM + " /";
+					case KKeyCode.KeypadMultiply:
+						return INPUT.NUM + " *";
+					case KKeyCode.KeypadMinus:
+						return INPUT.NUM + " -";
+					case KKeyCode.KeypadPlus:
+						return INPUT.NUM + " +";
+					case KKeyCode.KeypadEnter:
+						return INPUT.NUM + " " + INPUT.ENTER;
+					case KKeyCode.Insert:
+						return INPUT.INSERT;
 					}
 					break;
 				}
 				break;
 			}
-			break;
-		case KKeyCode.Insert:
-			text = INPUT.INSERT;
-			break;
+		}
+		else if (key_code <= KKeyCode.Mouse6)
+		{
+			switch (key_code)
+			{
+			case KKeyCode.RightShift:
+				return INPUT.RIGHT_SHIFT;
+			case KKeyCode.LeftShift:
+				return INPUT.LEFT_SHIFT;
+			case KKeyCode.RightControl:
+				return INPUT.RIGHT_CTRL;
+			case KKeyCode.LeftControl:
+				return INPUT.LEFT_CTRL;
+			case KKeyCode.RightAlt:
+				return INPUT.RIGHT_ALT;
+			case KKeyCode.LeftAlt:
+				return INPUT.LEFT_ALT;
+			default:
+				switch (key_code)
+				{
+				case KKeyCode.Mouse0:
+					return INPUT.MOUSE + " 0";
+				case KKeyCode.Mouse1:
+					return INPUT.MOUSE + " 1";
+				case KKeyCode.Mouse2:
+					return INPUT.MOUSE + " 2";
+				case KKeyCode.Mouse3:
+					return INPUT.MOUSE + " 3";
+				case KKeyCode.Mouse4:
+					return INPUT.MOUSE + " 4";
+				case KKeyCode.Mouse5:
+					return INPUT.MOUSE + " 5";
+				case KKeyCode.Mouse6:
+					return INPUT.MOUSE + " 6";
+				}
+				break;
+			}
+		}
+		else
+		{
+			if (key_code == KKeyCode.MouseScrollDown)
+			{
+				return INPUT.MOUSE_SCROLL_DOWN;
+			}
+			if (key_code == KKeyCode.MouseScrollUp)
+			{
+				return INPUT.MOUSE_SCROLL_UP;
+			}
+		}
+		if (KKeyCode.A <= key_code && key_code <= KKeyCode.Z)
+		{
+			text = ((char)(65 + (key_code - KKeyCode.A))).ToString();
+		}
+		else if (KKeyCode.Alpha0 <= key_code && key_code <= KKeyCode.Alpha9)
+		{
+			text = ((char)(48 + (key_code - KKeyCode.Alpha0))).ToString();
+		}
+		else if (KKeyCode.F1 <= key_code && key_code <= KKeyCode.F12)
+		{
+			text = "F" + (key_code - KKeyCode.F1 + 1).ToString();
+		}
+		else
+		{
+			global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + " using key_code.ToString()");
 		}
 		return text;
 	}
 
 	public static string GetActionString(global::Action action)
 	{
-		string empty = string.Empty;
+		string text = "";
 		if (action == global::Action.NumActions)
 		{
-			return empty;
+			return text;
 		}
 		BindingEntry bindingEntry = GameUtil.ActionToBinding(action);
 		KKeyCode mKeyCode = bindingEntry.mKeyCode;
@@ -1638,23 +1587,29 @@ public static class GameUtil
 		{
 			return GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
 		}
-		string text = string.Empty;
-		switch (bindingEntry.mModifier)
+		string text2 = "";
+		global::Modifier mModifier = bindingEntry.mModifier;
+		switch (mModifier)
 		{
 		case global::Modifier.Alt:
-			text = GameUtil.GetKeycodeLocalized(KKeyCode.LeftAlt).ToUpper();
+			text2 = GameUtil.GetKeycodeLocalized(KKeyCode.LeftAlt).ToUpper();
 			break;
 		case global::Modifier.Ctrl:
-			text = GameUtil.GetKeycodeLocalized(KKeyCode.LeftControl).ToUpper();
+			text2 = GameUtil.GetKeycodeLocalized(KKeyCode.LeftControl).ToUpper();
+			break;
+		case (global::Modifier)3:
 			break;
 		case global::Modifier.Shift:
-			text = GameUtil.GetKeycodeLocalized(KKeyCode.LeftShift).ToUpper();
+			text2 = GameUtil.GetKeycodeLocalized(KKeyCode.LeftShift).ToUpper();
 			break;
-		case global::Modifier.CapsLock:
-			text = GameUtil.GetKeycodeLocalized(KKeyCode.CapsLock).ToUpper();
+		default:
+			if (mModifier == global::Modifier.CapsLock)
+			{
+				text2 = GameUtil.GetKeycodeLocalized(KKeyCode.CapsLock).ToUpper();
+			}
 			break;
 		}
-		return text + " + " + GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
+		return text2 + " + " + GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
 	}
 
 	public static void CreateExplosion(Vector3 explosion_pos)
@@ -1665,8 +1620,7 @@ public static class GameUtil
 		foreach (Health health in Components.Health.Items)
 		{
 			Vector3 position = health.transform.GetPosition();
-			Vector2 vector2 = new Vector2(position.x, position.y);
-			float sqrMagnitude = (vector2 - vector).sqrMagnitude;
+			float sqrMagnitude = (new Vector2(position.x, position.y) - vector).sqrMagnitude;
 			if (num2 >= sqrMagnitude && health != null)
 			{
 				health.Damage(health.maxHitPoints);
@@ -1729,7 +1683,11 @@ public static class GameUtil
 		{
 			return null;
 		}
-		return (asset.path == null) ? asset.name : asset.path;
+		if (asset.path == null)
+		{
+			return asset.name;
+		}
+		return asset.path;
 	}
 
 	private static void SortDescriptors(List<IEffectDescriptor> descriptorList)
@@ -1950,12 +1908,9 @@ public static class GameUtil
 			{
 				foreach (Descriptor descriptor in descriptors)
 				{
-					if (!descriptor.onlyForSimpleInfoScreen || simpleInfoScreen)
+					if ((!descriptor.onlyForSimpleInfoScreen || simpleInfoScreen) && (descriptor.type == Descriptor.DescriptorType.Effect || descriptor.type == Descriptor.DescriptorType.DiseaseSource))
 					{
-						if (descriptor.type == Descriptor.DescriptorType.Effect || descriptor.type == Descriptor.DescriptorType.DiseaseSource)
-						{
-							list.Add(descriptor);
-						}
+						list.Add(descriptor);
 					}
 				}
 			}
@@ -1977,8 +1932,7 @@ public static class GameUtil
 	public static List<Descriptor> GetPlantRequirementDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(go, false);
-		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
+		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(GameUtil.GetAllDescriptors(go, false));
 		if (requirementDescriptors.Count > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
@@ -2006,8 +1960,7 @@ public static class GameUtil
 	public static List<Descriptor> GetPlantEffectDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Growing component = go.GetComponent<Growing>();
-		if (component == null)
+		if (go.GetComponent<Growing>() == null)
 		{
 			return list;
 		}
@@ -2026,7 +1979,7 @@ public static class GameUtil
 
 	public static string GetGameObjectEffectsTooltipString(GameObject go)
 	{
-		string text = string.Empty;
+		string text = "";
 		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(go, false);
 		if (gameObjectEffects.Count > 0)
 		{
@@ -2048,10 +2001,9 @@ public static class GameUtil
 		{
 			foreach (AttributeModifier attributeModifier in attributeModifiers)
 			{
-				global::Klei.AI.Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
-				string name = attribute.Name;
+				string name = Db.Get().Attributes.Get(attributeModifier.AttributeId).Name;
 				string formattedString = attributeModifier.GetFormattedString(null);
-				string text = ((attributeModifier.Value < 0f) ? "consumed" : "produced");
+				string text = ((attributeModifier.Value >= 0f) ? "produced" : "consumed");
 				string text2 = UI.GAMEOBJECTEFFECTS.EQUIPMENT_MODS.text.Replace("{Attribute}", name).Replace("{Style}", text).Replace("{Value}", formattedString);
 				list.Add(new Descriptor(text2, text2, Descriptor.DescriptorType.Effect, false));
 			}
@@ -2096,9 +2048,7 @@ public static class GameUtil
 	public static GameObject KInstantiate(GameObject original, Vector3 position, Grid.SceneLayer sceneLayer, GameObject parent, string name = null, int gameLayer = 0)
 	{
 		position.z = Grid.GetLayerZ(sceneLayer);
-		Vector3 vector = position;
-		Quaternion identity = Quaternion.identity;
-		return Util.KInstantiate(original, vector, identity, parent, name, true, gameLayer);
+		return Util.KInstantiate(original, position, Quaternion.identity, parent, name, true, gameLayer);
 	}
 
 	public static GameObject KInstantiate(GameObject original, Grid.SceneLayer sceneLayer, string name = null, int gameLayer = 0)
@@ -2113,7 +2063,7 @@ public static class GameUtil
 
 	public unsafe static void IsEmissionBlocked(int cell, out bool all_not_gaseous, out bool all_over_pressure)
 	{
-		int* ptr = stackalloc int[checked(4 * 4)];
+		int* ptr = stackalloc int[(UIntPtr)16];
 		*ptr = Grid.CellBelow(cell);
 		ptr[1] = Grid.CellLeft(cell);
 		ptr[2] = Grid.CellRight(cell);
@@ -2126,7 +2076,7 @@ public static class GameUtil
 			if (Grid.IsValidCell(num))
 			{
 				Element element = Grid.Element[num];
-				all_not_gaseous = all_not_gaseous && (!element.IsGas && !element.IsVacuum);
+				all_not_gaseous = all_not_gaseous && !element.IsGas && !element.IsVacuum;
 				all_over_pressure = all_over_pressure && ((!element.IsGas && !element.IsVacuum) || Grid.Mass[num] >= 1.8f);
 			}
 		}
@@ -2203,8 +2153,8 @@ public static class GameUtil
 
 	public static string GetKeywordStyle(GameObject go)
 	{
-		string text = string.Empty;
-		Edible component = go.GetComponent<Edible>();
+		string text = "";
+		global::UnityEngine.Object component = go.GetComponent<Edible>();
 		Equippable component2 = go.GetComponent<Equippable>();
 		MedicinalPill component3 = go.GetComponent<MedicinalPill>();
 		ResearchPointObject component4 = go.GetComponent<ResearchPointObject>();
@@ -2229,116 +2179,107 @@ public static class GameUtil
 
 	public static string GenerateRandomDuplicantName()
 	{
-		string text = string.Empty;
-		string text2 = string.Empty;
-		string text3 = string.Empty;
+		string text = "";
+		string text2 = "";
 		bool flag = global::UnityEngine.Random.Range(0f, 1f) >= 0.5f;
 		List<string> list = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.NB)));
-		list.AddRange((!flag) ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.FEMALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.MALE)));
-		text3 = list.GetRandom<string>();
-		bool flag2 = global::UnityEngine.Random.Range(0f, 1f) > 0.7f;
-		if (flag2)
+		list.AddRange(flag ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.MALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.FEMALE)));
+		string random = list.GetRandom<string>();
+		if (global::UnityEngine.Random.Range(0f, 1f) > 0.7f)
 		{
 			List<string> list2 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.NB)));
-			list2.AddRange((!flag) ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.FEMALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.MALE)));
+			list2.AddRange(flag ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.MALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.FEMALE)));
 			text = list2.GetRandom<string>();
 		}
 		if (!string.IsNullOrEmpty(text))
 		{
 			text += " ";
 		}
-		bool flag3 = global::UnityEngine.Random.Range(0f, 1f) >= 0.9f;
-		if (flag3)
+		if (global::UnityEngine.Random.Range(0f, 1f) >= 0.9f)
 		{
 			List<string> list3 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.NB)));
-			list3.AddRange((!flag) ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.FEMALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.MALE)));
+			list3.AddRange(flag ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.MALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.FEMALE)));
 			text2 = list3.GetRandom<string>();
 		}
 		if (!string.IsNullOrEmpty(text2))
 		{
 			text2 = " " + text2;
 		}
-		return text + text3 + text2;
+		return text + random + text2;
 	}
 
 	public static string GenerateRandomRocketName()
 	{
-		string text = string.Empty;
-		string text2 = string.Empty;
-		string text3 = string.Empty;
-		string text4 = string.Empty;
+		string text = "";
+		string text2 = "";
+		string text3 = "";
 		int num = 1;
 		int num2 = 2;
 		int num3 = 4;
-		List<string> list = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.NOUN)));
-		text = list.GetRandom<string>();
+		string random = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.NOUN))).GetRandom<string>();
 		int num4 = 0;
 		if (global::UnityEngine.Random.value > 0.7f)
 		{
-			List<string> list2 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.PREFIX)));
-			text2 = list2.GetRandom<string>();
+			text = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.PREFIX))).GetRandom<string>();
 			num4 |= num;
 		}
 		if (global::UnityEngine.Random.value > 0.5f)
 		{
-			List<string> list3 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.ADJECTIVE)));
-			text3 = list3.GetRandom<string>();
+			text2 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.ADJECTIVE))).GetRandom<string>();
 			num4 |= num2;
 		}
 		if (global::UnityEngine.Random.value > 0.1f)
 		{
-			List<string> list4 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.SUFFIX)));
-			text4 = list4.GetRandom<string>();
+			text3 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.SUFFIX))).GetRandom<string>();
 			num4 |= num3;
 		}
-		string text5;
+		string text4;
 		if (num4 == (num | num2 | num3))
 		{
-			text5 = NAMEGEN.ROCKET.FMT_PREFIX_ADJECTIVE_NOUN_SUFFIX;
+			text4 = NAMEGEN.ROCKET.FMT_PREFIX_ADJECTIVE_NOUN_SUFFIX;
 		}
 		else if (num4 == (num2 | num3))
 		{
-			text5 = NAMEGEN.ROCKET.FMT_ADJECTIVE_NOUN_SUFFIX;
+			text4 = NAMEGEN.ROCKET.FMT_ADJECTIVE_NOUN_SUFFIX;
 		}
 		else if (num4 == (num | num3))
 		{
-			text5 = NAMEGEN.ROCKET.FMT_PREFIX_NOUN_SUFFIX;
+			text4 = NAMEGEN.ROCKET.FMT_PREFIX_NOUN_SUFFIX;
 		}
 		else if (num4 == num3)
 		{
-			text5 = NAMEGEN.ROCKET.FMT_NOUN_SUFFIX;
+			text4 = NAMEGEN.ROCKET.FMT_NOUN_SUFFIX;
 		}
 		else if (num4 == (num | num2))
 		{
-			text5 = NAMEGEN.ROCKET.FMT_PREFIX_ADJECTIVE_NOUN;
+			text4 = NAMEGEN.ROCKET.FMT_PREFIX_ADJECTIVE_NOUN;
 		}
 		else if (num4 == num)
 		{
-			text5 = NAMEGEN.ROCKET.FMT_PREFIX_NOUN;
+			text4 = NAMEGEN.ROCKET.FMT_PREFIX_NOUN;
 		}
 		else if (num4 == num2)
 		{
-			text5 = NAMEGEN.ROCKET.FMT_ADJECTIVE_NOUN;
+			text4 = NAMEGEN.ROCKET.FMT_ADJECTIVE_NOUN;
 		}
 		else
 		{
-			text5 = NAMEGEN.ROCKET.FMT_NOUN;
+			text4 = NAMEGEN.ROCKET.FMT_NOUN;
 		}
 		DebugUtil.LogArgs(new object[]
 		{
 			"Rocket name bits:",
 			Convert.ToString(num4, 2)
 		});
-		return text5.Replace("{Prefix}", text2).Replace("{Adjective}", text3).Replace("{Noun}", text)
-			.Replace("{Suffix}", text4);
+		return text4.Replace("{Prefix}", text).Replace("{Adjective}", text2).Replace("{Noun}", random)
+			.Replace("{Suffix}", text3);
 	}
 
-	public static float GetThermalComfort(int cell, float tolerance = -0.083680004f)
+	public static float GetThermalComfort(int cell, float tolerance = -0.08368001f)
 	{
 		float num = 0f;
 		Element element = ElementLoader.FindElementByHash(SimHashes.Creature);
-		Element element2 = Grid.Element[cell];
-		if (element2.thermalConductivity != 0f)
+		if (Grid.Element[cell].thermalConductivity != 0f)
 		{
 			num = SimUtil.CalculateEnergyFlowCreatures(cell, 310.15f, element.specificHeatCapacity, element.thermalConductivity, 1f, 0.0045f);
 		}
@@ -2387,8 +2328,8 @@ public static class GameUtil
 
 	public static string GetFormattedDecor(float value, bool enforce_max = false)
 	{
-		string text = string.Empty;
-		LocString locString = ((value <= DecorMonitor.MAXIMUM_DECOR_VALUE || !enforce_max) ? UI.OVERLAYS.DECOR.VALUE : UI.OVERLAYS.DECOR.MAXIMUM_DECOR);
+		string text = "";
+		LocString locString = ((value > DecorMonitor.MAXIMUM_DECOR_VALUE && enforce_max) ? UI.OVERLAYS.DECOR.MAXIMUM_DECOR : UI.OVERLAYS.DECOR.VALUE);
 		if (enforce_max)
 		{
 			value = Math.Min(value, DecorMonitor.MAXIMUM_DECOR_VALUE);
@@ -2453,7 +2394,7 @@ public static class GameUtil
 
 	public static string GetSignificantMaterialPropertyTooltips(Element element)
 	{
-		string text = string.Empty;
+		string text = "";
 		List<Descriptor> significantMaterialPropertyDescriptors = GameUtil.GetSignificantMaterialPropertyDescriptors(element);
 		if (significantMaterialPropertyDescriptors.Count > 0)
 		{
@@ -2595,7 +2536,7 @@ public static class GameUtil
 
 	public static string GetChoreName(Chore chore, object choreData)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (chore.choreType == Db.Get().ChoreTypes.Fetch || chore.choreType == Db.Get().ChoreTypes.MachineFetch || chore.choreType == Db.Get().ChoreTypes.FabricateFetch || chore.choreType == Db.Get().ChoreTypes.FetchCritical || chore.choreType == Db.Get().ChoreTypes.PowerFetch)
 		{
 			text = chore.GetReportName(chore.gameObject.GetProperName());
@@ -2652,7 +2593,7 @@ public static class GameUtil
 		{
 			return null;
 		}
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < choreType.groups.Length; i++)
 		{
 			if (i != 0)

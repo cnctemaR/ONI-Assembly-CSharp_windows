@@ -14,20 +14,14 @@ public class NavTable
 
 	public bool IsValid(int cell, NavType nav_type = NavType.Floor)
 	{
-		if (Grid.IsValidCell(cell))
-		{
-			short num = this.NavTypeMasks[(int)nav_type];
-			return (num & this.ValidCells[cell]) != 0;
-		}
-		return false;
+		return Grid.IsValidCell(cell) && (this.NavTypeMasks[(int)nav_type] & this.ValidCells[cell]) != 0;
 	}
 
 	public void SetValid(int cell, NavType nav_type, bool is_valid)
 	{
 		short num = this.NavTypeMasks[(int)nav_type];
 		short num2 = this.ValidCells[cell];
-		bool flag = (num2 & num) != 0;
-		if (flag != is_valid)
+		if ((num2 & num) != 0 != is_valid)
 		{
 			if (is_valid)
 			{

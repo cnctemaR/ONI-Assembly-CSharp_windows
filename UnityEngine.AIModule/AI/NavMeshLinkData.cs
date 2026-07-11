@@ -2,14 +2,8 @@
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>Used for runtime manipulation of links connecting polygons of the NavMesh.</para>
-	/// </summary>
 	public struct NavMeshLinkData
 	{
-		/// <summary>
-		///   <para>Start position of the link.</para>
-		/// </summary>
 		public Vector3 startPosition
 		{
 			get
@@ -22,9 +16,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>End position of the link.</para>
-		/// </summary>
 		public Vector3 endPosition
 		{
 			get
@@ -37,9 +28,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>If positive, overrides the pathfinder cost to traverse the link.</para>
-		/// </summary>
 		public float costModifier
 		{
 			get
@@ -52,9 +40,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>If true, the link can be traversed in both directions, otherwise only from start to end position.</para>
-		/// </summary>
 		public bool bidirectional
 		{
 			get
@@ -67,9 +52,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>If positive, the link will be rectangle aligned along the line from start to end.</para>
-		/// </summary>
 		public float width
 		{
 			get
@@ -82,9 +64,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Area type of the link.</para>
-		/// </summary>
 		public int area
 		{
 			get
@@ -97,9 +76,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Specifies which agent type this link is available for.</para>
-		/// </summary>
 		public int agentTypeID
 		{
 			get

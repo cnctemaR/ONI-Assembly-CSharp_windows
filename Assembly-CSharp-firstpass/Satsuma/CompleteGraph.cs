@@ -5,6 +5,8 @@ namespace Satsuma
 {
 	public sealed class CompleteGraph : IGraph, IArcLookup
 	{
+		public bool Directed { get; private set; }
+
 		public CompleteGraph(int nodeCount, Directedness directedness)
 		{
 			this.nodeCount = nodeCount;
@@ -23,8 +25,6 @@ namespace Satsuma
 				throw new ArgumentException("Too many nodes: " + nodeCount);
 			}
 		}
-
-		public bool Directed { get; private set; }
 
 		public Node GetNode(int index)
 		{
@@ -75,9 +75,11 @@ namespace Satsuma
 
 		public IEnumerable<Node> Nodes()
 		{
-			for (int i = 0; i < this.nodeCount; i++)
+			int num;
+			for (int i = 0; i < this.nodeCount; i = num + 1)
 			{
 				yield return this.GetNode(i);
+				num = i;
 			}
 			yield break;
 		}
@@ -86,25 +88,31 @@ namespace Satsuma
 		{
 			if (this.Directed)
 			{
-				for (int i = 0; i < this.nodeCount; i++)
+				int num;
+				for (int i = 0; i < this.nodeCount; i = num + 1)
 				{
-					for (int j = 0; j < this.nodeCount; j++)
+					for (int j = 0; j < this.nodeCount; j = num + 1)
 					{
 						if (i != j)
 						{
 							yield return this.GetArcInternal(i, j);
 						}
+						num = j;
 					}
+					num = i;
 				}
 			}
 			else
 			{
-				for (int k = 0; k < this.nodeCount; k++)
+				int num;
+				for (int i = 0; i < this.nodeCount; i = num + 1)
 				{
-					for (int l = k + 1; l < this.nodeCount; l++)
+					for (int j = i + 1; j < this.nodeCount; j = num + 1)
 					{
-						yield return this.GetArcInternal(k, l);
+						yield return this.GetArcInternal(i, j);
+						num = j;
 					}
+					num = i;
 				}
 			}
 			yield break;
@@ -120,25 +128,28 @@ namespace Satsuma
 				}
 				if (filter != ArcFilter.Forward)
 				{
-					foreach (Node w in this.Nodes())
+					foreach (Node node in this.Nodes())
 					{
-						if (w != u)
+						if (node != u)
 						{
-							yield return this.GetArc(w, u);
+							yield return this.GetArc(node, u);
 						}
 					}
+					IEnumerator<Node> enumerator = null;
 				}
 			}
 			if (!this.Directed || filter != ArcFilter.Backward)
 			{
-				foreach (Node w2 in this.Nodes())
+				foreach (Node node2 in this.Nodes())
 				{
-					if (w2 != u)
+					if (node2 != u)
 					{
-						yield return this.GetArc(u, w2);
+						yield return this.GetArc(u, node2);
 					}
 				}
+				IEnumerator<Node> enumerator = null;
 			}
+			yield break;
 			yield break;
 		}
 

@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class ImportedFromTypeLibAttribute : Attribute
 	{
 		public ImportedFromTypeLibAttribute(string tlbFile)
 		{
-			this.TlbFile = tlbFile;
+			this._val = tlbFile;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this.TlbFile;
+				return this._val;
 			}
 		}
 
-		private string TlbFile;
+		internal string _val;
 	}
 }

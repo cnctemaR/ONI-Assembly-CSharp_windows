@@ -10,23 +10,6 @@ using UnityEngine.SceneManagement;
 
 public class App : MonoBehaviour
 {
-	static App()
-	{
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-		{
-			try
-			{
-				foreach (Type type in assembly.GetTypes())
-				{
-					App.types.Add(type);
-				}
-			}
-			catch (Exception)
-			{
-			}
-		}
-	}
-
 	public static string GetCurrentSceneName()
 	{
 		return App.currentSceneName;
@@ -43,14 +26,30 @@ public class App : MonoBehaviour
 		string fullPath = Path.GetFullPath(fileName);
 		string directoryName = Path.GetDirectoryName(fullPath);
 		global::Debug.LogFormat("Restarting\n\texe ({0})\n\tfull ({1})\n\tdir ({2})", new object[] { fileName, fullPath, directoryName });
-		string text = Path.Combine(directoryName, "Restarter.exe");
-		Process.Start(new ProcessStartInfo(text)
+		Process.Start(new ProcessStartInfo(Path.Combine(directoryName, "Restarter.exe"))
 		{
 			UseShellExecute = true,
 			CreateNoWindow = true,
 			Arguments = string.Format("\"{0}\"", fullPath)
 		});
 		App.Quit();
+	}
+
+	static App()
+	{
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			try
+			{
+				foreach (Type type in assembly.GetTypes())
+				{
+					App.types.Add(type);
+				}
+			}
+			catch (Exception)
+			{
+			}
+		}
 	}
 
 	public static void Quit()

@@ -6,9 +6,6 @@ using UnityEngine.Assertions.Comparers;
 
 namespace UnityEngine.Assertions
 {
-	/// <summary>
-	///   <para>The Assert class contains assertion methods for setting invariants in the code.</para>
-	/// </summary>
 	[DebuggerStepThrough]
 	public static class Assert
 	{
@@ -33,8 +30,8 @@ namespace UnityEngine.Assertions
 			Debug.LogAssertion(message);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Assert.Equals should not be used for Assertions", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new static bool Equals(object obj1, object obj2)
 		{
 			throw new InvalidOperationException("Assert.Equals should not be used for Assertions");
@@ -47,11 +44,6 @@ namespace UnityEngine.Assertions
 			throw new InvalidOperationException("Assert.ReferenceEquals should not be used for Assertions");
 		}
 
-		/// <summary>
-		///   <para>Asserts that the condition is true.</para>
-		/// </summary>
-		/// <param name="condition"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsTrue(bool condition)
 		{
@@ -61,11 +53,6 @@ namespace UnityEngine.Assertions
 			}
 		}
 
-		/// <summary>
-		///   <para>Asserts that the condition is true.</para>
-		/// </summary>
-		/// <param name="condition"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsTrue(bool condition, string message)
 		{
@@ -75,11 +62,6 @@ namespace UnityEngine.Assertions
 			}
 		}
 
-		/// <summary>
-		///   <para>Asserts that the condition is false.</para>
-		/// </summary>
-		/// <param name="condition"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsFalse(bool condition)
 		{
@@ -89,11 +71,6 @@ namespace UnityEngine.Assertions
 			}
 		}
 
-		/// <summary>
-		///   <para>Asserts that the condition is false.</para>
-		/// </summary>
-		/// <param name="condition"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsFalse(bool condition, string message)
 		{
@@ -103,112 +80,48 @@ namespace UnityEngine.Assertions
 			}
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.
-		///
-		/// Note: Every time you call the method with tolerance specified, a new instance of Assertions.Comparers.FloatComparer is created. For performance reasons you might want to instance your own comparer and pass it to the AreEqual method. If the tolerance is not specifies, a default comparer is used and the issue does not occur.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreApproximatelyEqual(float expected, float actual)
 		{
 			Assert.AreEqual<float>(expected, actual, null, FloatComparer.s_ComparerWithDefaultTolerance);
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.
-		///
-		/// Note: Every time you call the method with tolerance specified, a new instance of Assertions.Comparers.FloatComparer is created. For performance reasons you might want to instance your own comparer and pass it to the AreEqual method. If the tolerance is not specifies, a default comparer is used and the issue does not occur.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreApproximatelyEqual(float expected, float actual, string message)
 		{
 			Assert.AreEqual<float>(expected, actual, message, FloatComparer.s_ComparerWithDefaultTolerance);
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.
-		///
-		/// Note: Every time you call the method with tolerance specified, a new instance of Assertions.Comparers.FloatComparer is created. For performance reasons you might want to instance your own comparer and pass it to the AreEqual method. If the tolerance is not specifies, a default comparer is used and the issue does not occur.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreApproximatelyEqual(float expected, float actual, float tolerance)
 		{
 			Assert.AreApproximatelyEqual(expected, actual, tolerance, null);
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.
-		///
-		/// Note: Every time you call the method with tolerance specified, a new instance of Assertions.Comparers.FloatComparer is created. For performance reasons you might want to instance your own comparer and pass it to the AreEqual method. If the tolerance is not specifies, a default comparer is used and the issue does not occur.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreApproximatelyEqual(float expected, float actual, float tolerance, string message)
 		{
 			Assert.AreEqual<float>(expected, actual, message, new FloatComparer(tolerance));
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately not equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotApproximatelyEqual(float expected, float actual)
 		{
 			Assert.AreNotEqual<float>(expected, actual, null, FloatComparer.s_ComparerWithDefaultTolerance);
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately not equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotApproximatelyEqual(float expected, float actual, string message)
 		{
 			Assert.AreNotEqual<float>(expected, actual, message, FloatComparer.s_ComparerWithDefaultTolerance);
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately not equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotApproximatelyEqual(float expected, float actual, float tolerance)
 		{
 			Assert.AreNotApproximatelyEqual(expected, actual, tolerance, null);
 		}
 
-		/// <summary>
-		///   <para>Asserts that the values are approximately not equal. An absolute error check is used for approximate equality check (|a-b| &lt; tolerance). Default tolerance is 0.00001f.</para>
-		/// </summary>
-		/// <param name="tolerance">Tolerance of approximation.</param>
-		/// <param name="expected"></param>
-		/// <param name="actual"></param>
-		/// <param name="message"></param>
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotApproximatelyEqual(float expected, float actual, float tolerance, string message)
 		{
@@ -665,9 +578,6 @@ namespace UnityEngine.Assertions
 
 		internal const string UNITY_ASSERTIONS = "UNITY_ASSERTIONS";
 
-		/// <summary>
-		///   <para>Whether Unity should throw an exception on a failure.</para>
-		/// </summary>
 		public static bool raiseExceptions = false;
 	}
 }

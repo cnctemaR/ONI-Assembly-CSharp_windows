@@ -18,31 +18,31 @@ public class MarkovNameGenerator
 		foreach (string text in sampleNames)
 		{
 			string[] array = text.Split(new char[] { ',' });
-			foreach (string text2 in array)
+			for (int i = 0; i < array.Length; i++)
 			{
-				string text3 = text2.Trim().ToUpper();
-				if (text3.Length >= order + 1)
+				string text2 = array[i].Trim().ToUpper();
+				if (text2.Length >= order + 1)
 				{
-					this._samples.Add(text3);
+					this._samples.Add(text2);
 				}
 			}
 		}
-		foreach (string text4 in this._samples)
+		foreach (string text3 in this._samples)
 		{
-			for (int j = 0; j < text4.Length - order; j++)
+			for (int j = 0; j < text3.Length - order; j++)
 			{
-				string text5 = text4.Substring(j, order);
+				string text4 = text3.Substring(j, order);
 				List<char> list;
-				if (this._chains.ContainsKey(text5))
+				if (this._chains.ContainsKey(text4))
 				{
-					list = this._chains[text5];
+					list = this._chains[text4];
 				}
 				else
 				{
 					list = new List<char>();
-					this._chains[text5] = list;
+					this._chains[text4] = list;
 				}
-				list.Add(text4[j + order]);
+				list.Add(text3[j + order]);
 			}
 		}
 	}
@@ -51,7 +51,7 @@ public class MarkovNameGenerator
 	{
 		get
 		{
-			string text = string.Empty;
+			string text;
 			do
 			{
 				int num = this._rnd.Next(this._samples.Count);
@@ -60,20 +60,19 @@ public class MarkovNameGenerator
 				while (text.Length < length)
 				{
 					string text2 = text.Substring(text.Length - this._order, this._order);
-					char letter = this.GetLetter(text2);
-					if (letter == '?')
+					if (this.GetLetter(text2) == '?')
 					{
 						break;
 					}
-					text += this.GetLetter(text2);
+					text += this.GetLetter(text2).ToString();
 				}
 				if (text.Contains(" "))
 				{
 					string[] array = text.Split(new char[] { ' ' });
-					text = string.Empty;
+					text = "";
 					for (int i = 0; i < array.Length; i++)
 					{
-						if (!(array[i] == string.Empty))
+						if (!(array[i] == ""))
 						{
 							if (array[i].Length == 1)
 							{
@@ -83,7 +82,7 @@ public class MarkovNameGenerator
 							{
 								array[i] = array[i].Substring(0, 1) + array[i].Substring(1).ToLower();
 							}
-							if (text != string.Empty)
+							if (text != "")
 							{
 								text += " ";
 							}

@@ -4,23 +4,6 @@ using UnityEngine;
 
 public struct StructureTemperaturePayload
 {
-	public StructureTemperaturePayload(GameObject go)
-	{
-		this.simHandleCopy = -1;
-		this.enabled = true;
-		this.bypass = false;
-		this.overrideExtents = false;
-		this.overriddenExtents = default(Extents);
-		this.primaryElementBacking = go.GetComponent<PrimaryElement>();
-		this.overheatable = ((!(this.primaryElementBacking != null)) ? null : this.primaryElementBacking.GetComponent<Overheatable>());
-		this.building = go.GetComponent<Building>();
-		this.operational = go.GetComponent<Operational>();
-		this.pendingEnergyModifications = 0f;
-		this.maxTemperature = 10000f;
-		this.energySourcesKW = null;
-		this.isActiveStatusItemSet = false;
-	}
-
 	public PrimaryElement primaryElement
 	{
 		get
@@ -35,6 +18,23 @@ public struct StructureTemperaturePayload
 				this.overheatable = this.primaryElementBacking.GetComponent<Overheatable>();
 			}
 		}
+	}
+
+	public StructureTemperaturePayload(GameObject go)
+	{
+		this.simHandleCopy = -1;
+		this.enabled = true;
+		this.bypass = false;
+		this.overrideExtents = false;
+		this.overriddenExtents = default(Extents);
+		this.primaryElementBacking = go.GetComponent<PrimaryElement>();
+		this.overheatable = ((this.primaryElementBacking != null) ? this.primaryElementBacking.GetComponent<Overheatable>() : null);
+		this.building = go.GetComponent<Building>();
+		this.operational = go.GetComponent<Operational>();
+		this.pendingEnergyModifications = 0f;
+		this.maxTemperature = 10000f;
+		this.energySourcesKW = null;
+		this.isActiveStatusItemSet = false;
 	}
 
 	public float TotalEnergyProducedKW
@@ -62,7 +62,11 @@ public struct StructureTemperaturePayload
 
 	public Extents GetExtents()
 	{
-		return (!this.overrideExtents) ? this.building.GetExtents() : this.overriddenExtents;
+		if (!this.overrideExtents)
+		{
+			return this.building.GetExtents();
+		}
+		return this.overriddenExtents;
 	}
 
 	public float Temperature
@@ -85,7 +89,11 @@ public struct StructureTemperaturePayload
 	{
 		get
 		{
-			return (!(this.operational != null) || !this.operational.IsActive) ? 0f : this.building.Def.SelfHeatKilowattsWhenActive;
+			if (!(this.operational != null) || !this.operational.IsActive)
+			{
+				return 0f;
+			}
+			return this.building.Def.SelfHeatKilowattsWhenActive;
 		}
 	}
 
@@ -120,8 +128,7 @@ public struct StructureTemperaturePayload
 		public EnergySource(float kj, string source)
 		{
 			this.source = source;
-			int num = Mathf.RoundToInt(186f);
-			this.kw_accumulator = new RunningAverage(float.MinValue, float.MaxValue, num, true);
+			this.kw_accumulator = new RunningAverage(float.MinValue, float.MaxValue, Mathf.RoundToInt(186f), true);
 		}
 
 		public float value

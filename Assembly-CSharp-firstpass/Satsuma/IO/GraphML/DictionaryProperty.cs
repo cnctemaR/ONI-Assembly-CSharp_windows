@@ -6,17 +6,17 @@ namespace Satsuma.IO.GraphML
 {
 	public abstract class DictionaryProperty<T> : GraphMLProperty, IClearable
 	{
-		protected DictionaryProperty()
-		{
-			this.HasDefaultValue = false;
-			this.Values = new Dictionary<object, T>();
-		}
-
 		public bool HasDefaultValue { get; set; }
 
 		public T DefaultValue { get; set; }
 
 		public Dictionary<object, T> Values { get; private set; }
+
+		protected DictionaryProperty()
+		{
+			this.HasDefaultValue = false;
+			this.Values = new Dictionary<object, T>();
+		}
 
 		public void Clear()
 		{
@@ -46,11 +46,10 @@ namespace Satsuma.IO.GraphML
 				if (key == null)
 				{
 					this.HasDefaultValue = false;
+					return;
 				}
-				else
-				{
-					this.Values.Remove(key);
-				}
+				this.Values.Remove(key);
+				return;
 			}
 			else
 			{
@@ -59,11 +58,10 @@ namespace Satsuma.IO.GraphML
 				{
 					this.HasDefaultValue = true;
 					this.DefaultValue = t;
+					return;
 				}
-				else
-				{
-					this.Values[key] = t;
-				}
+				this.Values[key] = t;
+				return;
 			}
 		}
 
@@ -71,14 +69,21 @@ namespace Satsuma.IO.GraphML
 		{
 			if (key == null)
 			{
-				return (!this.HasDefaultValue) ? null : this.WriteValue(this.DefaultValue);
+				if (!this.HasDefaultValue)
+				{
+					return null;
+				}
+				return this.WriteValue(this.DefaultValue);
 			}
-			T t;
-			if (!this.Values.TryGetValue(key, out t))
+			else
 			{
-				return null;
+				T t;
+				if (!this.Values.TryGetValue(key, out t))
+				{
+					return null;
+				}
+				return this.WriteValue(t);
 			}
-			return this.WriteValue(t);
 		}
 
 		protected abstract T ReadValue(XElement x);

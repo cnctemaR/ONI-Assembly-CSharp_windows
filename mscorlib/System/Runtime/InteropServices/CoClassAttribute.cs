@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
 	public sealed class CoClassAttribute : Attribute
 	{
 		public CoClassAttribute(Type coClass)
 		{
-			this.klass = coClass;
+			this._CoClass = coClass;
 		}
 
 		public Type CoClass
 		{
 			get
 			{
-				return this.klass;
+				return this._CoClass;
 			}
 		}
 
-		private Type klass;
+		internal Type _CoClass;
 	}
 }

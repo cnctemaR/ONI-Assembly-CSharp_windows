@@ -65,21 +65,24 @@ namespace TMPro
 		public static void ReleaseStencilMaterial(Material stencilMaterial)
 		{
 			int instanceID = stencilMaterial.GetInstanceID();
-			for (int i = 0; i < TMP_MaterialManager.m_materialList.Count; i++)
+			int i = 0;
+			while (i < TMP_MaterialManager.m_materialList.Count)
 			{
 				if (TMP_MaterialManager.m_materialList[i].stencilMaterial.GetInstanceID() == instanceID)
 				{
 					if (TMP_MaterialManager.m_materialList[i].count > 1)
 					{
 						TMP_MaterialManager.m_materialList[i].count--;
+						return;
 					}
-					else
-					{
-						global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[i].stencilMaterial);
-						TMP_MaterialManager.m_materialList.RemoveAt(i);
-						stencilMaterial = null;
-					}
-					break;
+					global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[i].stencilMaterial);
+					TMP_MaterialManager.m_materialList.RemoveAt(i);
+					stencilMaterial = null;
+					return;
+				}
+				else
+				{
+					i++;
 				}
 			}
 		}
@@ -119,12 +122,10 @@ namespace TMPro
 				maskingMaterial.stencilID = stencilID;
 				maskingMaterial.count = 1;
 				TMP_MaterialManager.m_materialList.Add(maskingMaterial);
+				return;
 			}
-			else
-			{
-				stencilMaterial = TMP_MaterialManager.m_materialList[num].stencilMaterial;
-				TMP_MaterialManager.m_materialList[num].count++;
-			}
+			stencilMaterial = TMP_MaterialManager.m_materialList[num].stencilMaterial;
+			TMP_MaterialManager.m_materialList[num].count++;
 		}
 
 		public static void RemoveStencilMaterial(Material stencilMaterial)
@@ -142,8 +143,9 @@ namespace TMPro
 			if (num == -1)
 			{
 				Debug.Log("No Masking Material exists for " + baseMaterial.name);
+				return;
 			}
-			else if (TMP_MaterialManager.m_materialList[num].count > 1)
+			if (TMP_MaterialManager.m_materialList[num].count > 1)
 			{
 				TMP_MaterialManager.m_materialList[num].count--;
 				Debug.Log(string.Concat(new object[]
@@ -154,19 +156,17 @@ namespace TMPro
 					TMP_MaterialManager.m_materialList[num].count,
 					" references left."
 				}));
+				return;
 			}
-			else
+			Debug.Log(string.Concat(new object[]
 			{
-				Debug.Log(string.Concat(new object[]
-				{
-					"Removed last reference to ",
-					TMP_MaterialManager.m_materialList[num].stencilMaterial.name,
-					" with ID ",
-					TMP_MaterialManager.m_materialList[num].stencilMaterial.GetInstanceID()
-				}));
-				global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[num].stencilMaterial);
-				TMP_MaterialManager.m_materialList.RemoveAt(num);
-			}
+				"Removed last reference to ",
+				TMP_MaterialManager.m_materialList[num].stencilMaterial.name,
+				" with ID ",
+				TMP_MaterialManager.m_materialList[num].stencilMaterial.GetInstanceID()
+			}));
+			global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[num].stencilMaterial);
+			TMP_MaterialManager.m_materialList.RemoveAt(num);
 		}
 
 		public static void ClearMaterials()
@@ -178,8 +178,7 @@ namespace TMPro
 			}
 			for (int i = 0; i < TMP_MaterialManager.m_materialList.Count; i++)
 			{
-				Material stencilMaterial = TMP_MaterialManager.m_materialList[i].stencilMaterial;
-				global::UnityEngine.Object.DestroyImmediate(stencilMaterial);
+				global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[i].stencilMaterial);
 				TMP_MaterialManager.m_materialList.RemoveAt(i);
 			}
 		}
@@ -248,7 +247,11 @@ namespace TMPro
 				}
 			}
 			TMP_ListPool<Canvas>.Release(list);
-			return (!(canvas != null)) ? null : canvas.transform;
+			if (!(canvas != null))
+			{
+				return null;
+			}
+			return canvas.transform;
 		}
 
 		public static Material GetFallbackMaterial(Material sourceMaterial, Material targetMaterial)

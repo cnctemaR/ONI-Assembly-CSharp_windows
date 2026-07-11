@@ -4,6 +4,14 @@ using UnityEngine;
 
 public abstract class Reactable
 {
+	public bool IsReacting
+	{
+		get
+		{
+			return this.reactor != null;
+		}
+	}
+
 	public Reactable(GameObject gameObject, HashedString id, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false, float min_reactable_time = 0f, float min_reactor_time = 0f, float max_trigger_time = float.PositiveInfinity)
 	{
 		this.rangeHeight = range_height;
@@ -19,14 +27,6 @@ public abstract class Reactable
 		if (follow_transform)
 		{
 			this.transformId = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
-		}
-	}
-
-	public bool IsReacting
-	{
-		get
-		{
-			return this.reactor != null;
 		}
 	}
 
@@ -78,11 +78,14 @@ public abstract class Reactable
 		}
 		if (this.additionalPreconditions != null)
 		{
-			foreach (Reactable.ReactablePrecondition reactablePrecondition in this.additionalPreconditions)
+			using (List<Reactable.ReactablePrecondition>.Enumerator enumerator = this.additionalPreconditions.GetEnumerator())
 			{
-				if (!reactablePrecondition(reactor, transition))
+				while (enumerator.MoveNext())
 				{
-					return false;
+					if (!enumerator.Current(reactor, transition))
+					{
+						return false;
+					}
 				}
 			}
 		}

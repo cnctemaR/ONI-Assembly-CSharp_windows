@@ -1,41 +1,114 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace System
 {
-	[ComVisible(true)]
-	public static class Nullable
+	[DebuggerStepThrough]
+	[Serializable]
+	public struct Nullable<T> where T : struct
 	{
-		public static int Compare<T>(T? value1, T? value2) where T : struct
+		public Nullable(T value)
 		{
-			if (!value1.has_value)
-			{
-				return (!value2.has_value) ? 0 : (-1);
-			}
-			if (!value2.has_value)
-			{
-				return 1;
-			}
-			return Comparer<T>.Default.Compare(value1.value, value2.value);
+			this.has_value = true;
+			this.value = value;
 		}
 
-		public static bool Equals<T>(T? value1, T? value2) where T : struct
+		public bool HasValue
 		{
-			return value1.has_value == value2.has_value && (!value1.has_value || EqualityComparer<T>.Default.Equals(value1.value, value2.value));
+			get
+			{
+				return this.has_value;
+			}
 		}
 
-		public static Type GetUnderlyingType(Type nullableType)
+		public T Value
 		{
-			if (nullableType == null)
+			get
 			{
-				throw new ArgumentNullException("nullableType");
+				if (!this.has_value)
+				{
+					throw new InvalidOperationException("Nullable object must have a value.");
+				}
+				return this.value;
 			}
-			if (nullableType.IsGenericType && nullableType.GetGenericTypeDefinition() == typeof(Nullable<>))
-			{
-				return nullableType.GetGenericArguments()[0];
-			}
-			return null;
 		}
+
+		public override bool Equals(object other)
+		{
+			if (other == null)
+			{
+				return !this.has_value;
+			}
+			return other is T? && this.Equals((T?)other);
+		}
+
+		private bool Equals(T? other)
+		{
+			return other.has_value == this.has_value && (!this.has_value || other.value.Equals(this.value));
+		}
+
+		public override int GetHashCode()
+		{
+			if (!this.has_value)
+			{
+				return 0;
+			}
+			return this.value.GetHashCode();
+		}
+
+		public T GetValueOrDefault()
+		{
+			return this.value;
+		}
+
+		public T GetValueOrDefault(T defaultValue)
+		{
+			if (!this.has_value)
+			{
+				return defaultValue;
+			}
+			return this.value;
+		}
+
+		public override string ToString()
+		{
+			if (this.has_value)
+			{
+				return this.value.ToString();
+			}
+			return string.Empty;
+		}
+
+		public static implicit operator T?(T value)
+		{
+			return new T?(value);
+		}
+
+		public static explicit operator T(T? value)
+		{
+			return value.Value;
+		}
+
+		private static object Box(T? o)
+		{
+			if (!o.has_value)
+			{
+				return null;
+			}
+			return o.value;
+		}
+
+		private static T? Unbox(object o)
+		{
+			if (o == null)
+			{
+				return null;
+			}
+			return new T?((T)((object)o));
+		}
+
+		internal T value;
+
+		internal bool has_value;
 	}
 }

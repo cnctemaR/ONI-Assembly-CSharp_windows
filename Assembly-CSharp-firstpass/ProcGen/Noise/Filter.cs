@@ -6,6 +6,25 @@ namespace ProcGen.Noise
 {
 	public class Filter : NoiseBase
 	{
+		public override Type GetObjectType()
+		{
+			return typeof(Filter);
+		}
+
+		public NoiseFilter filter { get; set; }
+
+		public float frequency { get; set; }
+
+		public float lacunarity { get; set; }
+
+		public int octaves { get; set; }
+
+		public float offset { get; set; }
+
+		public float gain { get; set; }
+
+		public float exponent { get; set; }
+
 		public Filter()
 		{
 			this.filter = NoiseFilter.RidgedMultiFractal;
@@ -28,62 +47,46 @@ namespace ProcGen.Noise
 			this.exponent = src.exponent;
 		}
 
-		public override Type GetObjectType()
-		{
-			return typeof(Filter);
-		}
-
-		public NoiseFilter filter { get; set; }
-
-		public float frequency { get; set; }
-
-		public float lacunarity { get; set; }
-
-		public int octaves { get; set; }
-
-		public float offset { get; set; }
-
-		public float gain { get; set; }
-
-		public float exponent { get; set; }
-
 		public IModule3D CreateModule()
 		{
 			FilterModule filterModule = null;
 			NoiseFilter filter = this.filter;
 			switch (filter)
 			{
-			case NoiseFilter.Billow:
-				filterModule = new Billow();
+			case NoiseFilter.Pipe:
+				filterModule = new Pipe();
 				break;
-			case NoiseFilter.MultiFractal:
-				filterModule = new MultiFractal();
+			case NoiseFilter.SumFractal:
+				filterModule = new SumFractal();
 				break;
-			case NoiseFilter.HeterogeneousMultiFractal:
-				filterModule = new HeterogeneousMultiFractal();
-				break;
-			case NoiseFilter.HybridMultiFractal:
-				filterModule = new HybridMultiFractal();
-				break;
-			case NoiseFilter.RidgedMultiFractal:
-				filterModule = new RidgedMultiFractal();
+			case NoiseFilter.SinFractal:
+				filterModule = new SinFractal();
 				break;
 			default:
 				switch (filter)
 				{
-				case NoiseFilter.Pipe:
-					filterModule = new Pipe();
+				case NoiseFilter.Billow:
+					filterModule = new Billow();
 					break;
-				case NoiseFilter.SumFractal:
-					filterModule = new SumFractal();
+				case NoiseFilter.MultiFractal:
+					filterModule = new MultiFractal();
 					break;
-				case NoiseFilter.SinFractal:
-					filterModule = new SinFractal();
+				case NoiseFilter.HeterogeneousMultiFractal:
+					filterModule = new HeterogeneousMultiFractal();
+					break;
+				case NoiseFilter.HybridMultiFractal:
+					filterModule = new HybridMultiFractal();
+					break;
+				case NoiseFilter.RidgedMultiFractal:
+					filterModule = new RidgedMultiFractal();
+					break;
+				default:
+					if (filter == NoiseFilter.Voronoi)
+					{
+						filterModule = new Voronoi();
+					}
 					break;
 				}
-				break;
-			case NoiseFilter.Voronoi:
-				filterModule = new Voronoi();
 				break;
 			}
 			if (filterModule != null)

@@ -13,6 +13,10 @@ namespace System.Threading
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int CompareExchange(ref int location1, int value, int comparand, ref bool succeeded);
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern object CompareExchange(ref object location1, object value, object comparand);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -29,6 +33,7 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int Increment(ref int location);
 
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long Increment(ref long location);
 
@@ -53,8 +58,8 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double CompareExchange(ref double location1, double value, double comparand);
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[ComVisible(false)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern T CompareExchange<T>(ref T location1, T value, T comparand) where T : class;
 
@@ -83,5 +88,10 @@ namespace System.Threading
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long Add(ref long location1, long value);
+
+		public static void MemoryBarrier()
+		{
+			Thread.MemoryBarrier();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -10,7 +11,7 @@ namespace UnityEngine.UI
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(CanvasRenderer))]
 	[RequireComponent(typeof(RectTransform))]
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	public abstract class Graphic : UIBehaviour, ICanvasElement
 	{
 		protected Graphic()
@@ -412,6 +413,7 @@ namespace UnityEngine.UI
 			}
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use OnPopulateMesh instead.", true)]
 		protected virtual void OnFillVBO(List<UIVertex> vbo)
 		{

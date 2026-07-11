@@ -115,25 +115,8 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 		{
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (this.isMarkedForClear)
-		{
-			string text = "action_move_to_storage";
-			string text2 = UI.USERMENUACTIONS.CLEAR.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.OnClickCancel);
-			string text3 = UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
-		}
-		else
-		{
-			string text3 = "action_move_to_storage";
-			string text2 = UI.USERMENUACTIONS.CLEAR.NAME;
-			global::System.Action action = new global::System.Action(this.OnClickClear);
-			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
+		KIconButtonMenu.ButtonInfo buttonInfo = (this.isMarkedForClear ? new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF, true) : new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME, new global::System.Action(this.OnClickClear), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CLEAR.TOOLTIP, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
 	private void OnAbsorb(object data)
@@ -162,9 +145,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 			bool flag2 = false;
 			if (this.isMarkedForClear)
 			{
-				bool flag3 = GlobalChoreProvider.Instance.ClearableHasDestination(this.pickupable);
-				flag = flag3;
-				flag2 = !flag3;
+				flag2 = !(flag = GlobalChoreProvider.Instance.ClearableHasDestination(this.pickupable));
 			}
 			this.pendingClearGuid = this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClear, this.pendingClearGuid, flag, this);
 			this.pendingClearNoStorageGuid = this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClearNoStorage, this.pendingClearNoStorageGuid, flag2, this);

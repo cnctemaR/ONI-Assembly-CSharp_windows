@@ -7,9 +7,6 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Base class for texture handling. Contains functionality that is common to both Texture2D and RenderTexture classes.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
 	[UsedByNativeCode]
@@ -36,11 +33,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Sets Anisotropic limits.</para>
-		/// </summary>
-		/// <param name="forcedMin"></param>
-		/// <param name="globalMax"></param>
 		[NativeName("SetGlobalAnisoLimits")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetGlobalAnisotropicFilteringLimits(int forcedMin, int globalMax);
@@ -54,9 +46,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern TextureDimension GetDimension();
 
-		/// <summary>
-		///   <para>Width of the texture in pixels. (Read Only)</para>
-		/// </summary>
 		public virtual int width
 		{
 			get
@@ -69,9 +58,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Height of the texture in pixels. (Read Only)</para>
-		/// </summary>
 		public virtual int height
 		{
 			get
@@ -84,9 +70,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Dimensionality (type) of the texture (Read Only).</para>
-		/// </summary>
 		public virtual TextureDimension dimension
 		{
 			get
@@ -99,9 +82,12 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Texture coordinate wrapping mode.</para>
-		/// </summary>
+		public virtual extern bool isReadable
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public extern TextureWrapMode wrapMode
 		{
 			[NativeName("GetWrapModeU")]
@@ -111,9 +97,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Texture U coordinate wrapping mode.</para>
-		/// </summary>
 		public extern TextureWrapMode wrapModeU
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -122,9 +105,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Texture V coordinate wrapping mode.</para>
-		/// </summary>
 		public extern TextureWrapMode wrapModeV
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -133,9 +113,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Texture W coordinate wrapping mode for Texture3D.</para>
-		/// </summary>
 		public extern TextureWrapMode wrapModeW
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -144,9 +121,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Filtering mode of the texture.</para>
-		/// </summary>
 		public extern FilterMode filterMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -155,9 +129,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Anisotropic filtering level of the texture.</para>
-		/// </summary>
 		public extern int anisoLevel
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -166,9 +137,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Mip map bias of the texture.</para>
-		/// </summary>
 		public extern float mipMapBias
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -188,12 +156,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieve a native (underlying graphics API) pointer to the texture resource.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Pointer to an underlying graphics API texture resource.</para>
-		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetNativeTexturePtr();
 
@@ -203,24 +165,15 @@ namespace UnityEngine
 			return (int)this.GetNativeTexturePtr();
 		}
 
-		/// <summary>
-		///   <para>This counter is incremented when the texture is updated.</para>
-		/// </summary>
 		public extern uint updateCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Increment the update counter.</para>
-		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void IncrementUpdateCount();
 
-		/// <summary>
-		///   <para>The total amount of memory that would be used by all textures at mipmap level 0.</para>
-		/// </summary>
 		public static extern ulong totalTextureMemory
 		{
 			[FreeFunction("GetTextureStreamingManager().GetTotalTextureMemory")]
@@ -228,9 +181,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>This amount of texture memory would be used before the texture streaming budget is applied.</para>
-		/// </summary>
 		public static extern ulong desiredTextureMemory
 		{
 			[FreeFunction("GetTextureStreamingManager().GetDesiredTextureMemory")]
@@ -238,9 +188,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The amount of memory used by textures after the mipmap streaming and budget are applied and loading is complete.</para>
-		/// </summary>
 		public static extern ulong targetTextureMemory
 		{
 			[FreeFunction("GetTextureStreamingManager().GetTargetTextureMemory")]
@@ -248,9 +195,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The amount of memory currently being used by textures.</para>
-		/// </summary>
 		public static extern ulong currentTextureMemory
 		{
 			[FreeFunction("GetTextureStreamingManager().GetCurrentTextureMemory")]
@@ -258,9 +202,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Total amount of memory being used by non-streaming textures.</para>
-		/// </summary>
 		public static extern ulong nonStreamingTextureMemory
 		{
 			[FreeFunction("GetTextureStreamingManager().GetNonStreamingTextureMemory")]
@@ -268,9 +209,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>How many times has a texture been uploaded due to texture mipmap streaming.</para>
-		/// </summary>
 		public static extern ulong streamingMipmapUploadCount
 		{
 			[FreeFunction("GetTextureStreamingManager().GetStreamingMipmapUploadCount")]
@@ -278,9 +216,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of renderers registered with the texture streaming system.</para>
-		/// </summary>
 		public static extern ulong streamingRendererCount
 		{
 			[FreeFunction("GetTextureStreamingManager().GetStreamingRendererCount")]
@@ -288,9 +223,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of streaming textures.</para>
-		/// </summary>
 		public static extern ulong streamingTextureCount
 		{
 			[FreeFunction("GetTextureStreamingManager().GetStreamingTextureCount")]
@@ -298,9 +230,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of non-streaming textures.</para>
-		/// </summary>
 		public static extern ulong nonStreamingTextureCount
 		{
 			[FreeFunction("GetTextureStreamingManager().GetNonStreamingTextureCount")]
@@ -308,9 +237,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of streaming textures with outstanding mipmaps to be loaded.</para>
-		/// </summary>
 		public static extern ulong streamingTexturePendingLoadCount
 		{
 			[FreeFunction("GetTextureStreamingManager().GetStreamingTexturePendingLoadCount")]
@@ -318,9 +244,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Number of streaming textures with mipmaps currently loading.</para>
-		/// </summary>
 		public static extern ulong streamingTextureLoadingCount
 		{
 			[FreeFunction("GetTextureStreamingManager().GetStreamingTextureLoadingCount")]
@@ -328,16 +251,10 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Uploads additional debug information to materials using textures set to stream mip maps.</para>
-		/// </summary>
 		[FreeFunction("GetTextureStreamingManager().SetStreamingTextureMaterialDebugProperties")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStreamingTextureMaterialDebugProperties();
 
-		/// <summary>
-		///   <para>Force streaming textures to load all mipmap levels.</para>
-		/// </summary>
 		public static extern bool streamingTextureForceLoadAll
 		{
 			[FreeFunction(Name = "GetTextureStreamingManager().GetForceLoadAll")]
@@ -348,9 +265,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Force the streaming texture system to discard all unused mipmaps immediately, rather than caching them until the texture memory budget is exceeded.</para>
-		/// </summary>
 		public static extern bool streamingTextureDiscardUnusedMips
 		{
 			[FreeFunction(Name = "GetTextureStreamingManager().GetDiscardUnusedMips")]
@@ -359,6 +273,41 @@ namespace UnityEngine
 			[FreeFunction(Name = "GetTextureStreamingManager().SetDiscardUnusedMips")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		internal bool ValidateFormat(RenderTextureFormat format)
+		{
+			bool flag;
+			if (SystemInfo.SupportsRenderTextureFormat(format))
+			{
+				flag = true;
+			}
+			else
+			{
+				Debug.LogError(string.Format("RenderTexture creation failed. '{0}' is not supported on this platform. Use 'SystemInfo.SupportsRenderTextureFormat' C# API to check format support.", format.ToString()), this);
+				flag = false;
+			}
+			return flag;
+		}
+
+		internal bool ValidateFormat(TextureFormat format)
+		{
+			bool flag;
+			if (SystemInfo.SupportsTextureFormat(format))
+			{
+				flag = true;
+			}
+			else if (GraphicsFormatUtility.IsCompressedTextureFormat(format))
+			{
+				Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
+				flag = true;
+			}
+			else
+			{
+				Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported on this platform. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
+				flag = false;
+			}
+			return flag;
 		}
 
 		internal bool ValidateFormat(GraphicsFormat format, FormatUsage usage)
@@ -370,7 +319,7 @@ namespace UnityEngine
 			}
 			else
 			{
-				Debug.LogError(string.Format("'{1}' is not supported on this platform. Texture '{0}' creation failed.", base.name, format), this);
+				Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported for {1} usage on this platform. Use 'SystemInfo.IsFormatSupported' C# API to check format support.", format.ToString(), usage.ToString()), this);
 				flag = false;
 			}
 			return flag;

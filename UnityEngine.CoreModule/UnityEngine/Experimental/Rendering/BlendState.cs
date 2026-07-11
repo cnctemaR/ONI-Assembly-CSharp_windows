@@ -2,16 +2,8 @@
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Values for the blend state.</para>
-	/// </summary>
 	public struct BlendState
 	{
-		/// <summary>
-		///   <para>Creates a new blend state with the specified values.</para>
-		/// </summary>
-		/// <param name="separateMRTBlend">Determines whether each render target uses a separate blend state.</param>
-		/// <param name="alphaToMask">Turns on alpha-to-coverage.</param>
 		public BlendState(bool separateMRTBlend = false, bool alphaToMask = false)
 		{
 			this.m_BlendState0 = RenderTargetBlendState.Default;
@@ -27,9 +19,6 @@ namespace UnityEngine.Experimental.Rendering
 			this.m_Padding = 0;
 		}
 
-		/// <summary>
-		///   <para>Default values for the blend state.</para>
-		/// </summary>
 		public static BlendState Default
 		{
 			get
@@ -38,9 +27,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Determines whether each render target uses a separate blend state.</para>
-		/// </summary>
 		public bool separateMRTBlendStates
 		{
 			get
@@ -53,9 +39,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Turns on alpha-to-coverage.</para>
-		/// </summary>
 		public bool alphaToMask
 		{
 			get
@@ -68,9 +51,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 0.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState0
 		{
 			get
@@ -83,9 +63,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 1.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState1
 		{
 			get
@@ -98,9 +75,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 2.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState2
 		{
 			get
@@ -113,9 +87,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 3.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState3
 		{
 			get
@@ -128,9 +99,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 4.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState4
 		{
 			get
@@ -143,9 +111,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 5.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState5
 		{
 			get
@@ -158,9 +123,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 6.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState6
 		{
 			get
@@ -173,9 +135,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Blend state for render target 7.</para>
-		/// </summary>
 		public RenderTargetBlendState blendState7
 		{
 			get

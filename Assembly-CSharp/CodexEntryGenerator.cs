@@ -26,7 +26,7 @@ public static class CodexEntryGenerator
 				Tech tech = Db.Get().TechItems.LookupGroupForID(buildingDef.PrefabID);
 				if (tech != null)
 				{
-					list2.Add(new CodexLabelWithIcon(tech.Name, CodexTextStyle.Body, new Tuple<Sprite, Color>(Assets.GetSprite("research_type_alpha_icon"), Color.white)));
+					list2.Add(new CodexLabelWithIcon(tech.Name, CodexTextStyle.Body, new global::Tuple<Sprite, Color>(Assets.GetSprite("research_type_alpha_icon"), Color.white)));
 				}
 				list2.Add(new CodexDividerLine());
 				list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
@@ -141,20 +141,17 @@ public static class CodexEntryGenerator
 		prefabsWithComponent.AddRange(Assets.GetPrefabsWithComponent<WiltCondition>());
 		foreach (GameObject gameObject in prefabsWithComponent)
 		{
-			if (!dictionary.ContainsKey(gameObject.PrefabID().ToString()))
+			if (!dictionary.ContainsKey(gameObject.PrefabID().ToString()) && !(gameObject.GetComponent<BudUprootedMonitor>() != null))
 			{
-				if (!(gameObject.GetComponent<BudUprootedMonitor>() != null))
-				{
-					List<ContentContainer> list = new List<ContentContainer>();
-					Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
-					CodexEntryGenerator.GenerateImageContainers(first, list);
-					CodexEntryGenerator.GeneratePlantDescriptionContainers(gameObject, list);
-					CodexEntry codexEntry = new CodexEntry("PLANTS", list, gameObject.GetProperName());
-					codexEntry.parentId = "PLANTS";
-					codexEntry.icon = first;
-					CodexCache.AddEntry(gameObject.PrefabID().ToString(), codexEntry, null);
-					dictionary.Add(gameObject.PrefabID().ToString(), codexEntry);
-				}
+				List<ContentContainer> list = new List<ContentContainer>();
+				Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
+				CodexEntryGenerator.GenerateImageContainers(first, list);
+				CodexEntryGenerator.GeneratePlantDescriptionContainers(gameObject, list);
+				CodexEntry codexEntry = new CodexEntry("PLANTS", list, gameObject.GetProperName());
+				codexEntry.parentId = "PLANTS";
+				codexEntry.icon = first;
+				CodexCache.AddEntry(gameObject.PrefabID().ToString(), codexEntry, null);
+				dictionary.Add(gameObject.PrefabID().ToString(), codexEntry);
 			}
 		}
 		return dictionary;
@@ -274,9 +271,10 @@ public static class CodexEntryGenerator
 				Equippable component = gameObject.GetComponent<Equippable>();
 				if (component.def.AdditionalTags != null)
 				{
-					foreach (Tag tag in component.def.AdditionalTags)
+					Tag[] additionalTags = component.def.AdditionalTags;
+					for (int i = 0; i < additionalTags.Length; i++)
 					{
-						if (tag == GameTags.DeprecatedContent)
+						if (additionalTags[i] == GameTags.DeprecatedContent)
 						{
 							flag = true;
 							break;
@@ -333,7 +331,7 @@ public static class CodexEntryGenerator
 				containers.Add(new ContentContainer(new List<ICodexWidget>
 				{
 					new CodexImage(32, 32, Def.GetUISprite(element.highTempTransition, "ui", false)),
-					new CodexText((element.highTempTransition == null) ? string.Empty : string.Concat(new string[]
+					new CodexText((element.highTempTransition != null) ? string.Concat(new string[]
 					{
 						element.highTempTransition.name,
 						" (",
@@ -341,7 +339,7 @@ public static class CodexEntryGenerator
 						")  (",
 						GameUtil.GetFormattedTemperature(element.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
 						")"
-					}), CodexTextStyle.Body)
+					}) : "", CodexTextStyle.Body)
 				}, ContentContainer.ContentLayout.Horizontal));
 			}
 			if (element.lowTempTransition != null)
@@ -349,7 +347,7 @@ public static class CodexEntryGenerator
 				containers.Add(new ContentContainer(new List<ICodexWidget>
 				{
 					new CodexImage(32, 32, Def.GetUISprite(element.lowTempTransition, "ui", false)),
-					new CodexText((element.lowTempTransition == null) ? string.Empty : string.Concat(new string[]
+					new CodexText((element.lowTempTransition != null) ? string.Concat(new string[]
 					{
 						element.lowTempTransition.name,
 						" (",
@@ -357,7 +355,7 @@ public static class CodexEntryGenerator
 						")  (",
 						GameUtil.GetFormattedTemperature(element.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false),
 						")"
-					}), CodexTextStyle.Body)
+					}) : "", CodexTextStyle.Body)
 				}, ContentContainer.ContentLayout.Horizontal));
 			}
 			containers.Add(new ContentContainer(new List<ICodexWidget>
@@ -374,22 +372,22 @@ public static class CodexEntryGenerator
 			{
 				List<ContentContainer> list = new List<ContentContainer>();
 				string text6 = element2.name + " (" + element2.GetStateString() + ")";
-				Tuple<Sprite, Color> tuple = Def.GetUISprite(element2, "ui", false);
+				global::Tuple<Sprite, Color> tuple = Def.GetUISprite(element2, "ui", false);
 				if (tuple.first == null)
 				{
 					if (element2.id == SimHashes.Void)
 					{
 						text6 = element2.name;
-						tuple = new Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-void"), Color.white);
+						tuple = new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-void"), Color.white);
 					}
 					else if (element2.id == SimHashes.Vacuum)
 					{
 						text6 = element2.name;
-						tuple = new Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-vacuum"), Color.white);
+						tuple = new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_elements-vacuum"), Color.white);
 					}
 				}
 				CodexEntryGenerator.GenerateTitleContainers(text6, list);
-				CodexEntryGenerator.GenerateImageContainers(new Tuple<Sprite, Color>[] { tuple }, list, ContentContainer.ContentLayout.Horizontal);
+				CodexEntryGenerator.GenerateImageContainers(new global::Tuple<Sprite, Color>[] { tuple }, list, ContentContainer.ContentLayout.Horizontal);
 				action(element2, list);
 				text7 = element2.id.ToString();
 				string text8;
@@ -469,7 +467,7 @@ public static class CodexEntryGenerator
 	public static CategoryEntry GenerateCategoryEntry(string id, string name, Dictionary<string, CodexEntry> entries, Sprite icon = null, bool largeFormat = true, bool sort = true, string overrideHeader = null)
 	{
 		List<ContentContainer> list = new List<ContentContainer>();
-		CodexEntryGenerator.GenerateTitleContainers((overrideHeader != null) ? overrideHeader : name, list);
+		CodexEntryGenerator.GenerateTitleContainers((overrideHeader == null) ? name : overrideHeader, list);
 		List<CodexEntry> list2 = new List<CodexEntry>();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in entries)
 		{
@@ -577,7 +575,7 @@ public static class CodexEntryGenerator
 				ContentContainer contentContainer = new ContentContainer(new List<ICodexWidget>(), ContentContainer.ContentLayout.Grid);
 				foreach (CodexEntry codexEntry2 in list)
 				{
-					contentContainer.content.Add(new CodexLabelWithLargeIcon(codexEntry2.name, CodexTextStyle.BodyWhite, new Tuple<Sprite, Color>((!(codexEntry2.icon != null)) ? Assets.GetSprite("unknown") : codexEntry2.icon, codexEntry2.iconColor), codexEntry2.id));
+					contentContainer.content.Add(new CodexLabelWithLargeIcon(codexEntry2.name, CodexTextStyle.BodyWhite, new global::Tuple<Sprite, Color>((codexEntry2.icon != null) ? codexEntry2.icon : Assets.GetSprite("unknown"), codexEntry2.iconColor), codexEntry2.id));
 				}
 				if (categoryEntry.showBeforeGeneratedCategoryLinks)
 				{
@@ -606,7 +604,7 @@ public static class CodexEntryGenerator
 					}
 					else
 					{
-						contentContainer3.content.Add(new CodexLabelWithIcon(codexEntry3.name, CodexTextStyle.Body, new Tuple<Sprite, Color>(codexEntry3.icon, codexEntry3.iconColor), 64, 48));
+						contentContainer3.content.Add(new CodexLabelWithIcon(codexEntry3.name, CodexTextStyle.Body, new global::Tuple<Sprite, Color>(codexEntry3.icon, codexEntry3.iconColor), 64, 48));
 					}
 				}
 				if (categoryEntry.showBeforeGeneratedCategoryLinks)
@@ -698,13 +696,16 @@ public static class CodexEntryGenerator
 		list2.Add(new CodexSpacer());
 		foreach (Skill skill2 in Db.Get().Skills.resources)
 		{
-			foreach (string text2 in skill2.priorSkills)
+			using (List<string>.Enumerator enumerator = skill2.priorSkills.GetEnumerator())
 			{
-				if (text2 == skill.Id)
+				while (enumerator.MoveNext())
 				{
-					CodexText codexText5 = new CodexText(skill2.Name, CodexTextStyle.Body);
-					list2.Add(codexText5);
-					flag2 = true;
+					if (enumerator.Current == skill.Id)
+					{
+						CodexText codexText5 = new CodexText(skill2.Name, CodexTextStyle.Body);
+						list2.Add(codexText5);
+						flag2 = true;
+					}
 				}
 			}
 		}
@@ -766,14 +767,14 @@ public static class CodexEntryGenerator
 					list.Add(new ContentContainer(new List<ICodexWidget>
 					{
 						new CodexImage(64, 64, Def.GetUISprite(prefab, "ui", false)),
-						new CodexText(string.Format(UI.CODEX.RECIPE_ITEM, Assets.GetPrefab(ingredient.tag).GetProperName(), ingredient.amount, (ElementLoader.GetElement(ingredient.tag) != null) ? UI.UNITSUFFIXES.MASS.KILOGRAM.text : string.Empty), CodexTextStyle.Body)
+						new CodexText(string.Format(UI.CODEX.RECIPE_ITEM, Assets.GetPrefab(ingredient.tag).GetProperName(), ingredient.amount, (ElementLoader.GetElement(ingredient.tag) == null) ? "" : UI.UNITSUFFIXES.MASS.KILOGRAM.text), CodexTextStyle.Body)
 					}, ContentContainer.ContentLayout.Horizontal));
 				}
 			}
 			return list;
 		};
 		containers.AddRange(func(recipe));
-		GameObject gameObject = ((recipe.fabricators != null) ? Assets.GetPrefab(recipe.fabricators[0]) : null);
+		GameObject gameObject = ((recipe.fabricators == null) ? null : Assets.GetPrefab(recipe.fabricators[0]));
 		if (gameObject != null)
 		{
 			containers.Add(new ContentContainer(new List<ICodexWidget>
@@ -783,7 +784,7 @@ public static class CodexEntryGenerator
 			}, ContentContainer.ContentLayout.Vertical));
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
-				new CodexImage(64, 64, Def.GetUISpriteFromMultiObjectAnim(gameObject.GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty)),
+				new CodexImage(64, 64, Def.GetUISpriteFromMultiObjectAnim(gameObject.GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, "")),
 				new CodexText(string.Format(UI.CODEX.RECIPE_FABRICATOR, recipe.FabricationTime, gameObject.GetProperName()), CodexTextStyle.Body)
 			}, ContentContainer.ContentLayout.Horizontal));
 		}
@@ -794,11 +795,14 @@ public static class CodexEntryGenerator
 		List<Recipe> list = new List<Recipe>();
 		foreach (Recipe recipe in RecipeManager.Get().recipes)
 		{
-			foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
+			using (List<Recipe.Ingredient>.Enumerator enumerator2 = recipe.Ingredients.GetEnumerator())
 			{
-				if (ingredient.tag == prefabID)
+				while (enumerator2.MoveNext())
 				{
-					list.Add(recipe);
+					if (enumerator2.Current.tag == prefabID)
+					{
+						list.Add(recipe);
+					}
 				}
 			}
 		}
@@ -849,7 +853,7 @@ public static class CodexEntryGenerator
 		{
 			list.Add(new CodexText(component2.description, CodexTextStyle.Body));
 		}
-		string text = string.Empty;
+		string text = "";
 		List<Descriptor> plantRequirementDescriptors = GameUtil.GetPlantRequirementDescriptors(plant);
 		if (plantRequirementDescriptors.Count > 0)
 		{
@@ -861,7 +865,7 @@ public static class CodexEntryGenerator
 			list.Add(new CodexText(text, CodexTextStyle.Body));
 			list.Add(new CodexSpacer());
 		}
-		text = string.Empty;
+		text = "";
 		List<Descriptor> plantEffectDescriptors = GameUtil.GetPlantEffectDescriptors(plant);
 		if (plantEffectDescriptors.Count > 0)
 		{
@@ -912,7 +916,7 @@ public static class CodexEntryGenerator
 				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.NON_LETHAL_RANGE, GameUtil.GetFormattedTemperature(component.internalTemperatureLethal_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(component.internalTemperatureLethal_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body)
 			}, ContentContainer.ContentLayout.Vertical));
 			List<Tag> list = new List<Tag>();
-			if (def.diet.infos.Length > 0)
+			if (def.diet.infos.Length != 0)
 			{
 				if (list.Count == 0)
 				{
@@ -949,13 +953,10 @@ public static class CodexEntryGenerator
 									contentContainer.content.Add(new CodexIndentedLabelWithIcon(element.name, CodexTextStyle.Body, Def.GetUISprite(element.substance, "ui", false)));
 								}
 							}
-							else if (gameObject2 != null)
+							else if (gameObject2 != null && !list.Contains(gameObject2.PrefabID()))
 							{
-								if (!list.Contains(gameObject2.PrefabID()))
-								{
-									list.Add(gameObject2.PrefabID());
-									contentContainer.content.Add(new CodexIndentedLabelWithIcon(gameObject2.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject2, "ui", false)));
-								}
+								list.Add(gameObject2.PrefabID());
+								contentContainer.content.Add(new CodexIndentedLabelWithIcon(gameObject2.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject2, "ui", false)));
 							}
 						}
 					}
@@ -965,9 +966,10 @@ public static class CodexEntryGenerator
 			bool flag = false;
 			if (def.diet != null)
 			{
-				foreach (Diet.Info info2 in def.diet.infos)
+				Diet.Info[] array = def.diet.infos;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (info2.producedElement != null)
+					if (array[i].producedElement != null)
 					{
 						flag = true;
 						break;
@@ -985,15 +987,12 @@ public static class CodexEntryGenerator
 					}, ContentContainer.ContentLayout.Vertical);
 					containers.Add(contentContainer3);
 					List<Tag> list2 = new List<Tag>();
-					for (int k = 0; k < def.diet.infos.Length; k++)
+					for (int j = 0; j < def.diet.infos.Length; j++)
 					{
-						if (def.diet.infos[k].producedElement != Tag.Invalid)
+						if (def.diet.infos[j].producedElement != Tag.Invalid && !list2.Contains(def.diet.infos[j].producedElement))
 						{
-							if (!list2.Contains(def.diet.infos[k].producedElement))
-							{
-								list2.Add(def.diet.infos[k].producedElement);
-								contentContainer2.content.Add(new CodexIndentedLabelWithIcon(def.diet.infos[k].producedElement.ProperName(), CodexTextStyle.Body, Def.GetUISprite(def.diet.infos[k].producedElement, "ui", false)));
-							}
+							list2.Add(def.diet.infos[j].producedElement);
+							contentContainer2.content.Add(new CodexIndentedLabelWithIcon(def.diet.infos[j].producedElement.ProperName(), CodexTextStyle.Body, Def.GetUISprite(def.diet.infos[j].producedElement, "ui", false)));
 						}
 					}
 					containers.Add(contentContainer2);
@@ -1028,7 +1027,7 @@ public static class CodexEntryGenerator
 			new CodexText(string.Format(UI.CODEX.FOOD.QUALITY, GameUtil.GetFormattedFoodQuality(food.Quality)), CodexTextStyle.Body),
 			new CodexText(string.Format(UI.CODEX.FOOD.CALORIES, GameUtil.GetFormattedCalories(food.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), CodexTextStyle.Body),
 			new CodexSpacer(),
-			new CodexText((!food.CanRot) ? UI.CODEX.FOOD.NON_PERISHABLE.ToString() : string.Format(UI.CODEX.FOOD.SPOILPROPERTIES, GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedCycles(food.SpoilTime, "F1")), CodexTextStyle.Body),
+			new CodexText(food.CanRot ? string.Format(UI.CODEX.FOOD.SPOILPROPERTIES, GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedCycles(food.SpoilTime, "F1")) : UI.CODEX.FOOD.NON_PERISHABLE.ToString(), CodexTextStyle.Body),
 			new CodexSpacer()
 		}, ContentContainer.ContentLayout.Vertical));
 	}
@@ -1095,10 +1094,10 @@ public static class CodexEntryGenerator
 		containers.Add(new ContentContainer(list, layout));
 	}
 
-	private static void GenerateImageContainers(Tuple<Sprite, Color>[] sprites, List<ContentContainer> containers, ContentContainer.ContentLayout layout)
+	private static void GenerateImageContainers(global::Tuple<Sprite, Color>[] sprites, List<ContentContainer> containers, ContentContainer.ContentLayout layout)
 	{
 		List<ICodexWidget> list = new List<ICodexWidget>();
-		foreach (Tuple<Sprite, Color> tuple in sprites)
+		foreach (global::Tuple<Sprite, Color> tuple in sprites)
 		{
 			if (tuple != null)
 			{
@@ -1162,16 +1161,24 @@ public static class CodexEntryGenerator
 			new CodexText(Strings.Get("STRINGS.CODEX.HEADERS.RECEPTACLE"), CodexTextStyle.Subtitle),
 			new CodexDividerLine()
 		}, ContentContainer.ContentLayout.Vertical));
-		foreach (Tag tag in plot.possibleDepositObjectTags)
+		Tag[] possibleDepositObjectTags = plot.possibleDepositObjectTags;
+		Predicate<GameObject> <>9__0;
+		for (int i = 0; i < possibleDepositObjectTags.Length; i++)
 		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
+			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(possibleDepositObjectTags[i]);
 			if (plot.rotatable == null)
 			{
-				prefabsWithTag.RemoveAll(delegate(GameObject go)
+				List<GameObject> list = prefabsWithTag;
+				Predicate<GameObject> predicate;
+				if ((predicate = <>9__0) == null)
 				{
-					IReceptacleDirection component = go.GetComponent<IReceptacleDirection>();
-					return component != null && component.Direction != plot.Direction;
-				});
+					predicate = (<>9__0 = delegate(GameObject go)
+					{
+						IReceptacleDirection component = go.GetComponent<IReceptacleDirection>();
+						return component != null && component.Direction != plot.Direction;
+					});
+				}
+				list.RemoveAll(predicate);
 			}
 			foreach (GameObject gameObject in prefabsWithTag)
 			{

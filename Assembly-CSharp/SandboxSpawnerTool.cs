@@ -38,8 +38,7 @@ public class SandboxSpawnerTool : InterfaceTool
 		}
 		else
 		{
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(SandboxToolParameterMenu.instance.settings.Entity.PrefabTag), Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0);
-			gameObject.SetActive(true);
+			GameUtil.KInstantiate(Assets.GetPrefab(SandboxToolParameterMenu.instance.settings.Entity.PrefabTag), Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0).SetActive(true);
 		}
 		UISounds.PlaySound(UISounds.Sound.ClickObject);
 	}
@@ -66,8 +65,7 @@ public class SandboxSpawnerTool : InterfaceTool
 		Vector3 vector = Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		MinionStartingStats minionStartingStats = new MinionStartingStats(false, null);
-		minionStartingStats.Apply(gameObject);
+		new MinionStartingStats(false, null).Apply(gameObject);
 	}
 
 	protected Color radiusIndicatorColor = new Color(0.5f, 0.7f, 0.5f, 0.2f);

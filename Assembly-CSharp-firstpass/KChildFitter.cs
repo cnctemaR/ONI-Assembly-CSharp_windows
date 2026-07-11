@@ -73,9 +73,9 @@ public class KChildFitter : MonoBehaviour
 						sizeDelta.x = Mathf.Abs(num4 - num3);
 						if (this.includeLayoutGroupPadding)
 						{
-							sizeDelta.x += (float)((!(this.VLG != null)) ? 0 : (this.VLG.padding.left + this.VLG.padding.right));
-							sizeDelta.x += (float)((!(this.HLG != null)) ? 0 : (this.HLG.padding.left + this.HLG.padding.right));
-							sizeDelta.x += (float)((!(this.GLG != null)) ? 0 : (this.GLG.padding.left + this.GLG.padding.right));
+							sizeDelta.x += (float)((this.VLG != null) ? (this.VLG.padding.left + this.VLG.padding.right) : 0);
+							sizeDelta.x += (float)((this.HLG != null) ? (this.HLG.padding.left + this.HLG.padding.right) : 0);
+							sizeDelta.x += (float)((this.GLG != null) ? (this.GLG.padding.left + this.GLG.padding.right) : 0);
 						}
 					}
 					else
@@ -102,9 +102,9 @@ public class KChildFitter : MonoBehaviour
 						sizeDelta.y = Mathf.Abs(num - num2);
 						if (this.includeLayoutGroupPadding)
 						{
-							sizeDelta.y += (float)((!(this.VLG != null)) ? 0 : (this.VLG.padding.bottom + this.VLG.padding.top));
-							sizeDelta.y += (float)((!(this.HLG != null)) ? 0 : (this.HLG.padding.bottom + this.HLG.padding.top));
-							sizeDelta.y += (float)((!(this.GLG != null)) ? 0 : (this.GLG.padding.bottom + this.GLG.padding.top));
+							sizeDelta.y += (float)((this.VLG != null) ? (this.VLG.padding.bottom + this.VLG.padding.top) : 0);
+							sizeDelta.y += (float)((this.HLG != null) ? (this.HLG.padding.bottom + this.HLG.padding.top) : 0);
+							sizeDelta.y += (float)((this.GLG != null) ? (this.GLG.padding.bottom + this.GLG.padding.top) : 0);
 						}
 					}
 					else

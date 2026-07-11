@@ -39,8 +39,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 
 	public TimeOfDay.TimeRegion GetCurrentTimeRegion()
 	{
-		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
-		if (currentCycleAsPercentage >= 0.875f)
+		if (GameClock.Instance.GetCurrentCycleAsPercentage() >= 0.875f)
 		{
 			return TimeOfDay.TimeRegion.Night;
 		}
@@ -87,8 +86,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	private float UpdateSunlightIntensity()
 	{
 		float num = 0.875f;
-		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
-		float num2 = currentCycleAsPercentage / num;
+		float num2 = GameClock.Instance.GetCurrentCycleAsPercentage() / num;
 		if (num2 >= 1f)
 		{
 			num2 = 0f;
@@ -100,15 +98,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 
 	private void TriggerSoundChange(TimeOfDay.TimeRegion new_region)
 	{
-		if (new_region != TimeOfDay.TimeRegion.Day)
-		{
-			if (new_region == TimeOfDay.TimeRegion.Night)
-			{
-				AudioMixer.instance.Start(AudioMixerSnapshots.Get().NightStartedMigrated);
-				MusicManager.instance.PlaySong("Stinger_Loop_Night", false);
-			}
-		}
-		else
+		if (new_region == TimeOfDay.TimeRegion.Day)
 		{
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NightStartedMigrated, STOP_MODE.ALLOWFADEOUT);
 			if (MusicManager.instance.SongIsPlaying("Stinger_Loop_Night"))
@@ -117,7 +107,14 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			}
 			MusicManager.instance.PlaySong("Stinger_Day", false);
 			MusicManager.instance.PlayDynamicMusic();
+			return;
 		}
+		if (new_region != TimeOfDay.TimeRegion.Night)
+		{
+			return;
+		}
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NightStartedMigrated);
+		MusicManager.instance.PlaySong("Stinger_Loop_Night", false);
 	}
 
 	public void SetScale(float new_scale)

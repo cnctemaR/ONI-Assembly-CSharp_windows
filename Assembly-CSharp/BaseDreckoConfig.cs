@@ -9,29 +9,20 @@ public static class BaseDreckoConfig
 	public static GameObject BaseDrecko(string id, string name, string desc, string anim_file, string trait_id, bool is_baby, string symbol_override_prefix, float warnLowTemp, float warnHighTemp)
 	{
 		float num = 200f;
-		KAnimFile anim = Assets.GetAnim(anim_file);
-		string text = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		float num2 = (warnLowTemp + warnHighTemp) / 2f;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, (warnLowTemp + warnHighTemp) / 2f);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Walker, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
-		string text2 = "DreckoNavGrid";
+		string text = "DreckoNavGrid";
 		if (is_baby)
 		{
-			text2 = "DreckoBabyNavGrid";
+			text = "DreckoBabyNavGrid";
 		}
-		GameObject gameObject2 = gameObject;
-		FactionManager.FactionID factionID = FactionManager.FactionID.Pest;
-		string text3 = text2;
-		num2 = 1f;
-		string text4 = "Meat";
-		int num3 = 2;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, trait_id, text3, NavType.Floor, 32, num2, text4, num3, true, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2, true, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
@@ -39,8 +30,7 @@ public static class BaseDreckoConfig
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<LoopingSounds>();
-		ThreatMonitor.Def def = gameObject.AddOrGetDef<ThreatMonitor.Def>();
-		def.fleethresholdState = Health.HealthState.Dead;
+		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
@@ -60,11 +50,12 @@ public static class BaseDreckoConfig
 			.Add(new EatStates.Def(), true)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
 			.Add(new CallAdultStates.Def(), true)
-			.PopInterruptGroup();
-		IdleStates.Def def2 = new IdleStates.Def();
-		def2.customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseDreckoConfig.CustomIdleAnim);
-		ChoreTable.Builder builder2 = builder.Add(def2, true);
-		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.DreckoSpecies, symbol_override_prefix);
+			.PopInterruptGroup()
+			.Add(new IdleStates.Def
+			{
+				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseDreckoConfig.CustomIdleAnim)
+			}, true);
+		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.DreckoSpecies, symbol_override_prefix);
 		return gameObject;
 	}
 
@@ -77,12 +68,12 @@ public static class BaseDreckoConfig
 		{
 			if (currentNavType == NavType.Ceiling)
 			{
-				cellOffset = ((!facing) ? new CellOffset(-1, 1) : new CellOffset(1, 1));
+				cellOffset = (facing ? new CellOffset(1, 1) : new CellOffset(-1, 1));
 			}
 		}
 		else
 		{
-			cellOffset = ((!facing) ? new CellOffset(-1, -1) : new CellOffset(1, -1));
+			cellOffset = (facing ? new CellOffset(1, -1) : new CellOffset(-1, -1));
 		}
 		HashedString hashedString = "idle_loop";
 		int num = Grid.OffsetCell(Grid.PosToCell(smi), cellOffset);

@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel
 {
-	public interface INestedSite : IServiceProvider, ISite
+	public interface INestedSite : ISite, IServiceProvider
 	{
 		string FullName { get; }
 	}

@@ -23,17 +23,17 @@ namespace System.Data.Common
 
 		public IDataReader GetData(int i)
 		{
-			throw null;
+			return this.GetDbDataReader(i);
+		}
+
+		protected virtual DbDataReader GetDbDataReader(int i)
+		{
+			throw ADP.NotSupported();
 		}
 
 		public abstract string GetDataTypeName(int i);
 
 		public abstract DateTime GetDateTime(int i);
-
-		protected virtual DbDataReader GetDbDataReader(int i)
-		{
-			throw null;
-		}
 
 		public abstract decimal GetDecimal(int i);
 
@@ -63,76 +63,64 @@ namespace System.Data.Common
 
 		public abstract bool IsDBNull(int i);
 
-		[MonoTODO]
 		AttributeCollection ICustomTypeDescriptor.GetAttributes()
 		{
-			throw null;
+			return new AttributeCollection(null);
 		}
 
-		[MonoTODO]
 		string ICustomTypeDescriptor.GetClassName()
 		{
-			throw null;
+			return null;
 		}
 
-		[MonoTODO]
 		string ICustomTypeDescriptor.GetComponentName()
 		{
-			throw null;
+			return null;
 		}
 
-		[MonoTODO]
 		TypeConverter ICustomTypeDescriptor.GetConverter()
 		{
-			throw null;
+			return null;
 		}
 
-		[MonoTODO]
 		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
 		{
-			throw null;
+			return null;
 		}
 
-		[MonoTODO]
 		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
 		{
-			throw null;
+			return null;
 		}
 
-		[MonoTODO]
 		object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
 		{
-			throw null;
+			return null;
 		}
 
-		[MonoTODO]
 		EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
 		{
-			throw null;
+			return new EventDescriptorCollection(null);
 		}
 
-		[MonoTODO]
 		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
 		{
-			throw null;
+			return new EventDescriptorCollection(null);
 		}
 
-		[MonoTODO]
 		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
 		{
-			throw null;
+			return ((ICustomTypeDescriptor)this).GetProperties(null);
 		}
 
-		[MonoTODO]
 		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
 		{
-			throw null;
+			return new PropertyDescriptorCollection(null);
 		}
 
-		[MonoTODO]
 		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
 		{
-			throw null;
+			return this;
 		}
 	}
 }

@@ -45,7 +45,7 @@ public class MonumentSideScreen : SideScreenContent
 			Util.KDestroyGameObject(this.buttons[i]);
 		}
 		this.buttons.Clear();
-		foreach (Tuple<string, string> tuple in this.target.selectableStatesAndSymbols)
+		foreach (global::Tuple<string, string> tuple in this.target.selectableStatesAndSymbols)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.stateButtonPrefab, this.buttonContainer.gameObject, true);
 			string targetState = tuple.first;

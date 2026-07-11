@@ -6,17 +6,17 @@ using UnityEngine.UI;
 
 public class StatusItemGroup
 {
-	public StatusItemGroup(GameObject go)
-	{
-		this.gameObject = go;
-	}
-
 	public IEnumerator<StatusItemGroup.Entry> GetEnumerator()
 	{
 		return this.items.GetEnumerator();
 	}
 
 	public GameObject gameObject { get; private set; }
+
+	public StatusItemGroup(GameObject go)
+	{
+		this.gameObject = go;
+	}
 
 	public void SetOffset(Vector3 offset)
 	{
@@ -110,15 +110,18 @@ public class StatusItemGroup
 		}
 		if (!item.allowMultiples)
 		{
-			foreach (StatusItemGroup.Entry entry in this.items)
+			using (List<StatusItemGroup.Entry>.Enumerator enumerator = this.items.GetEnumerator())
 			{
-				if (entry.item.Id == item.Id)
+				while (enumerator.MoveNext())
 				{
-					throw new ArgumentException("Tried to add " + item.Id + " multiples times which is not permitted.");
+					if (enumerator.Current.item.Id == item.Id)
+					{
+						throw new ArgumentException("Tried to add " + item.Id + " multiples times which is not permitted.");
+					}
 				}
 			}
 		}
-		StatusItemGroup.Entry entry2 = new StatusItemGroup.Entry(item, category, data);
+		StatusItemGroup.Entry entry = new StatusItemGroup.Entry(item, category, data);
 		if (item.shouldNotify)
 		{
 			string notificationText = item.notificationText;
@@ -127,20 +130,20 @@ public class StatusItemGroup
 			Func<List<Notification>, object, string> func = new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip);
 			bool flag = false;
 			Notification.ClickCallback notificationClickCallback = item.notificationClickCallback;
-			entry2.notification = new Notification(notificationText, notificationType, invalid, func, item, flag, item.notificationDelay, notificationClickCallback, data, null);
-			this.gameObject.AddOrGet<Notifier>().Add(entry2.notification, string.Empty);
+			entry.notification = new Notification(notificationText, notificationType, invalid, func, item, flag, item.notificationDelay, notificationClickCallback, data, null);
+			this.gameObject.AddOrGet<Notifier>().Add(entry.notification, "");
 		}
 		if (item.ShouldShowIcon())
 		{
 			Game.Instance.AddStatusItem(this.gameObject.transform, item);
 			Game.Instance.SetStatusItemOffset(this.gameObject.transform, this.offset);
 		}
-		this.items.Add(entry2);
+		this.items.Add(entry);
 		if (this.OnAddStatusItem != null)
 		{
-			this.OnAddStatusItem(entry2, category);
+			this.OnAddStatusItem(entry, category);
 		}
-		return entry2.id;
+		return entry.id;
 	}
 
 	public Guid RemoveStatusItem(StatusItem status_item, bool immediate = false)
@@ -192,8 +195,7 @@ public class StatusItemGroup
 
 	private static string OnToolTip(List<Notification> notifications, object data)
 	{
-		StatusItem statusItem = (StatusItem)data;
-		return statusItem.notificationTooltipText + notifications.ReduceMessages(true);
+		return ((StatusItem)data).notificationTooltipText + notifications.ReduceMessages(true);
 	}
 
 	public void Destroy()

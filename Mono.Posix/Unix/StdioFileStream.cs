@@ -39,6 +39,10 @@ namespace Mono.Unix
 			this.owner = true;
 			this.file = StdioFileStream.InvalidFileStream;
 			base..ctor();
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			this.InitStream(StdioFileStream.Fopen(path, "rb"), true);
 		}
 
@@ -47,6 +51,10 @@ namespace Mono.Unix
 			this.owner = true;
 			this.file = StdioFileStream.InvalidFileStream;
 			base..ctor();
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			this.InitStream(StdioFileStream.Fopen(path, mode), true);
 		}
 
@@ -55,6 +63,10 @@ namespace Mono.Unix
 			this.owner = true;
 			this.file = StdioFileStream.InvalidFileStream;
 			base..ctor();
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			this.InitStream(StdioFileStream.Fopen(path, StdioFileStream.ToFopenMode(path, mode)), true);
 		}
 
@@ -63,6 +75,10 @@ namespace Mono.Unix
 			this.owner = true;
 			this.file = StdioFileStream.InvalidFileStream;
 			base..ctor();
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			this.InitStream(StdioFileStream.Fopen(path, StdioFileStream.ToFopenMode(path, access)), true);
 			this.InitCanReadWrite(access);
 		}
@@ -72,16 +88,16 @@ namespace Mono.Unix
 			this.owner = true;
 			this.file = StdioFileStream.InvalidFileStream;
 			base..ctor();
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			this.InitStream(StdioFileStream.Fopen(path, StdioFileStream.ToFopenMode(path, mode, access)), true);
 			this.InitCanReadWrite(access);
 		}
 
 		private static IntPtr Fopen(string path, string mode)
 		{
-			if (path == null)
-			{
-				throw new ArgumentNullException("path");
-			}
 			if (path.Length == 0)
 			{
 				throw new ArgumentException("path");
@@ -108,8 +124,7 @@ namespace Mono.Unix
 			this.owner = ownsHandle;
 			try
 			{
-				long num = (long)Stdlib.fseek(this.file, 0L, SeekFlags.SEEK_CUR);
-				if (num != -1L)
+				if ((long)Stdlib.fseek(this.file, 0L, SeekFlags.SEEK_CUR) != -1L)
 				{
 					this.canSeek = true;
 				}
@@ -243,17 +258,15 @@ namespace Mono.Unix
 				{
 					throw new NotSupportedException("Unable to obtain current file position");
 				}
-				int num2 = Stdlib.fseek(this.file, 0L, SeekFlags.SEEK_END);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num2);
-				long num3 = Stdlib.ftell(this.file);
-				if (num3 == -1L)
+				UnixMarshal.ThrowExceptionForLastErrorIf(Stdlib.fseek(this.file, 0L, SeekFlags.SEEK_END));
+				long num2 = Stdlib.ftell(this.file);
+				if (num2 == -1L)
 				{
 					UnixMarshal.ThrowExceptionForLastError();
 				}
-				num2 = Stdlib.fseek(this.file, num, SeekFlags.SEEK_SET);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num2);
+				UnixMarshal.ThrowExceptionForLastErrorIf(Stdlib.fseek(this.file, num, SeekFlags.SEEK_SET));
 				GC.KeepAlive(this);
-				return num3;
+				return num2;
 			}
 		}
 
@@ -284,8 +297,7 @@ namespace Mono.Unix
 		public void SaveFilePosition(FilePosition pos)
 		{
 			this.AssertNotDisposed();
-			int num = Stdlib.fgetpos(this.file, pos);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Stdlib.fgetpos(this.file, pos));
 			GC.KeepAlive(this);
 		}
 
@@ -296,16 +308,14 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("value");
 			}
-			int num = Stdlib.fsetpos(this.file, pos);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Stdlib.fsetpos(this.file, pos));
 			GC.KeepAlive(this);
 		}
 
 		public override void Flush()
 		{
 			this.AssertNotDisposed();
-			int num = Stdlib.fflush(this.file);
-			if (num != 0)
+			if (Stdlib.fflush(this.file) != 0)
 			{
 				UnixMarshal.ThrowExceptionForLastError();
 			}
@@ -386,18 +396,17 @@ namespace Mono.Unix
 			default:
 				throw new ArgumentException("origin");
 			}
-			int num = Stdlib.fseek(this.file, offset, seekFlags);
-			if (num != 0)
+			if (Stdlib.fseek(this.file, offset, seekFlags) != 0)
 			{
 				throw new IOException("Unable to seek", UnixMarshal.CreateExceptionForLastError());
 			}
-			long num2 = Stdlib.ftell(this.file);
-			if (num2 == -1L)
+			long num = Stdlib.ftell(this.file);
+			if (num == -1L)
 			{
 				throw new IOException("Unable to get current file position", UnixMarshal.CreateExceptionForLastError());
 			}
 			GC.KeepAlive(this);
-			return num2;
+			return num;
 		}
 
 		public override void SetLength(long value)
@@ -413,12 +422,12 @@ namespace Mono.Unix
 			{
 				throw new NotSupportedException("File Stream does not support writing");
 			}
-			ulong num;
+			long num;
 			fixed (byte* ptr = &buffer[offset])
 			{
-				num = Stdlib.fwrite((void*)ptr, 1UL, (ulong)((long)count), this.file);
+				num = (long)Stdlib.fwrite((void*)ptr, 1UL, (ulong)((long)count), this.file);
 			}
-			if (num != (ulong)((long)count))
+			if (num != (long)count)
 			{
 				UnixMarshal.ThrowExceptionForLastError();
 			}
@@ -438,8 +447,7 @@ namespace Mono.Unix
 			}
 			if (this.owner)
 			{
-				int num = Stdlib.fclose(this.file);
-				if (num != 0)
+				if (Stdlib.fclose(this.file) != 0)
 				{
 					UnixMarshal.ThrowExceptionForLastError();
 				}

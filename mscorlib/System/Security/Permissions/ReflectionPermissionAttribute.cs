@@ -48,6 +48,7 @@ namespace System.Security.Permissions
 			}
 		}
 
+		[Obsolete]
 		public bool ReflectionEmit
 		{
 			get
@@ -79,11 +80,9 @@ namespace System.Security.Permissions
 				if (value)
 				{
 					this.flags |= ReflectionPermissionFlag.RestrictedMemberAccess;
+					return;
 				}
-				else
-				{
-					this.flags -= 8;
-				}
+				this.flags -= 8;
 			}
 		}
 

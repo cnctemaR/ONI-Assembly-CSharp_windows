@@ -1,16 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.Playables
 {
-	/// <summary>
-	///   <para>Struct that holds information regarding an output of a PlayableAsset.</para>
-	/// </summary>
 	public struct PlayableBinding
 	{
-		/// <summary>
-		///   <para>The name of the output or input stream.</para>
-		/// </summary>
 		public string streamName
 		{
 			get
@@ -23,9 +18,6 @@ namespace UnityEngine.Playables
 			}
 		}
 
-		/// <summary>
-		///   <para>A reference to a UnityEngine.Object that acts a key for this binding.</para>
-		/// </summary>
 		public Object sourceObject
 		{
 			get
@@ -38,9 +30,6 @@ namespace UnityEngine.Playables
 			}
 		}
 
-		/// <summary>
-		///   <para>The type of target required by the PlayableOutput for this PlayableBinding.</para>
-		/// </summary>
 		public Type outputTargetType
 		{
 			get
@@ -50,6 +39,7 @@ namespace UnityEngine.Playables
 		}
 
 		[Obsolete("sourceBindingType is no longer supported on PlayableBinding. Use outputBindingType instead to get the required output target type, and the appropriate binding create method (e.g. AnimationPlayableBinding.Create(name, key)) to create PlayableBindings", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Type sourceBindingType
 		{
 			get
@@ -61,9 +51,7 @@ namespace UnityEngine.Playables
 			}
 		}
 
-		/// <summary>
-		///   <para>The type of the output or input stream.</para>
-		/// </summary>
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("streamType is no longer supported on PlayableBinding. Use the appropriate binding create method (e.g. AnimationPlayableBinding.Create(name, key)) instead.", true)]
 		public DataStreamType streamType
 		{
@@ -110,14 +98,8 @@ namespace UnityEngine.Playables
 
 		private PlayableBinding.CreateOutputMethod m_CreateOutputMethod;
 
-		/// <summary>
-		///   <para>A constant to represent a PlayableAsset has no bindings.</para>
-		/// </summary>
 		public static readonly PlayableBinding[] None = new PlayableBinding[0];
 
-		/// <summary>
-		///   <para>The default duration used when a PlayableOutput has no fixed duration.</para>
-		/// </summary>
 		public static readonly double DefaultDuration = double.PositiveInfinity;
 
 		[VisibleToOtherModules]

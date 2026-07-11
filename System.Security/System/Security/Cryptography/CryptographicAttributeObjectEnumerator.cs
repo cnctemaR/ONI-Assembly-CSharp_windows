@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Security.Cryptography
 {
@@ -10,19 +11,19 @@ namespace System.Security.Cryptography
 			this.enumerator = enumerable.GetEnumerator();
 		}
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.enumerator.Current;
-			}
-		}
-
 		public CryptographicAttributeObject Current
 		{
 			get
 			{
 				return (CryptographicAttributeObject)this.enumerator.Current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.enumerator.Current;
 			}
 		}
 
@@ -34,6 +35,11 @@ namespace System.Security.Cryptography
 		public void Reset()
 		{
 			this.enumerator.Reset();
+		}
+
+		internal CryptographicAttributeObjectEnumerator()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private IEnumerator enumerator;

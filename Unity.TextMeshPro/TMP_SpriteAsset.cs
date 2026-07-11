@@ -25,8 +25,7 @@ namespace TMPro
 		private Material GetDefaultSpriteMaterial()
 		{
 			ShaderUtilities.GetShaderPropertyIDs();
-			Shader shader = Shader.Find("TextMeshPro/Sprite");
-			Material material = new Material(shader);
+			Material material = new Material(Shader.Find("TextMeshPro/Sprite"));
 			material.SetTexture(ShaderUtilities.ID_MainTex, this.spriteSheet);
 			material.hideFlags = HideFlags.HideInHierarchy;
 			return material;

@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class EditableTitleBar : TitleBar
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<string> OnNameChanged;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action OnStartedEditing;
 
 	protected override void OnSpawn()
@@ -58,7 +55,8 @@ public class EditableTitleBar : TitleBar
 		int i = 0;
 		while (i < 10)
 		{
-			i++;
+			int num = i;
+			i = num + 1;
 			yield return new WaitForEndOfFrame();
 		}
 		this.EnableEditButtonClick();
@@ -135,6 +133,7 @@ public class EditableTitleBar : TitleBar
 			if (this.OnStartedEditing != null)
 			{
 				this.OnStartedEditing();
+				return;
 			}
 		}
 		else

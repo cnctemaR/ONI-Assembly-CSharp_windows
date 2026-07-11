@@ -1,42 +1,80 @@
 ﻿using System;
+using System.Threading;
 
 namespace System.Text
 {
 	[Serializable]
 	public abstract class DecoderFallback
 	{
-		public static DecoderFallback ExceptionFallback
+		private static object InternalSyncObject
 		{
 			get
 			{
-				return DecoderFallback.exception_fallback;
+				if (DecoderFallback.s_InternalSyncObject == null)
+				{
+					object obj = new object();
+					Interlocked.CompareExchange<object>(ref DecoderFallback.s_InternalSyncObject, obj, null);
+				}
+				return DecoderFallback.s_InternalSyncObject;
 			}
 		}
-
-		public abstract int MaxCharCount { get; }
 
 		public static DecoderFallback ReplacementFallback
 		{
 			get
 			{
-				return DecoderFallback.replacement_fallback;
+				if (DecoderFallback.replacementFallback == null)
+				{
+					object internalSyncObject = DecoderFallback.InternalSyncObject;
+					lock (internalSyncObject)
+					{
+						if (DecoderFallback.replacementFallback == null)
+						{
+							DecoderFallback.replacementFallback = new DecoderReplacementFallback();
+						}
+					}
+				}
+				return DecoderFallback.replacementFallback;
 			}
 		}
 
-		internal static DecoderFallback StandardSafeFallback
+		public static DecoderFallback ExceptionFallback
 		{
 			get
 			{
-				return DecoderFallback.standard_safe_fallback;
+				if (DecoderFallback.exceptionFallback == null)
+				{
+					object internalSyncObject = DecoderFallback.InternalSyncObject;
+					lock (internalSyncObject)
+					{
+						if (DecoderFallback.exceptionFallback == null)
+						{
+							DecoderFallback.exceptionFallback = new DecoderExceptionFallback();
+						}
+					}
+				}
+				return DecoderFallback.exceptionFallback;
 			}
 		}
 
 		public abstract DecoderFallbackBuffer CreateFallbackBuffer();
 
-		private static DecoderFallback exception_fallback = new DecoderExceptionFallback();
+		public abstract int MaxCharCount { get; }
 
-		private static DecoderFallback replacement_fallback = new DecoderReplacementFallback();
+		internal bool IsMicrosoftBestFitFallback
+		{
+			get
+			{
+				return this.bIsMicrosoftBestFitFallback;
+			}
+		}
 
-		private static DecoderFallback standard_safe_fallback = new DecoderReplacementFallback("\ufffd");
+		internal bool bIsMicrosoftBestFitFallback;
+
+		private static volatile DecoderFallback replacementFallback;
+
+		private static volatile DecoderFallback exceptionFallback;
+
+		private static object s_InternalSyncObject;
 	}
 }

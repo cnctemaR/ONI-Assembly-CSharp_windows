@@ -6,17 +6,6 @@ namespace Satsuma
 {
 	public sealed class Dijkstra
 	{
-		public Dijkstra(IGraph graph, Func<Arc, double> cost, DijkstraMode mode)
-		{
-			this.Graph = graph;
-			this.Cost = cost;
-			this.Mode = mode;
-			this.NullCost = ((mode != DijkstraMode.Sum) ? double.NegativeInfinity : 0.0);
-			this.distance = new Dictionary<Node, double>();
-			this.parentArc = new Dictionary<Node, Arc>();
-			this.priorityQueue = new PriorityQueue<Node, double>();
-		}
-
 		public IGraph Graph { get; private set; }
 
 		public Func<Arc, double> Cost { get; private set; }
@@ -24,6 +13,17 @@ namespace Satsuma
 		public DijkstraMode Mode { get; private set; }
 
 		public double NullCost { get; private set; }
+
+		public Dijkstra(IGraph graph, Func<Arc, double> cost, DijkstraMode mode)
+		{
+			this.Graph = graph;
+			this.Cost = cost;
+			this.Mode = mode;
+			this.NullCost = ((mode == DijkstraMode.Sum) ? 0.0 : double.NegativeInfinity);
+			this.distance = new Dictionary<Node, double>();
+			this.parentArc = new Dictionary<Node, Arc>();
+			this.priorityQueue = new PriorityQueue<Node, double>();
+		}
 
 		private void ValidateCost(double c)
 		{
@@ -70,7 +70,7 @@ namespace Satsuma
 				{
 					double num2 = this.Cost(arc);
 					this.ValidateCost(num2);
-					double num3 = ((this.Mode != DijkstraMode.Sum) ? Math.Max(num, num2) : (num + num2));
+					double num3 = ((this.Mode == DijkstraMode.Sum) ? (num + num2) : Math.Max(num, num2));
 					double positiveInfinity;
 					if (!this.priorityQueue.TryGetPriority(node2, out positiveInfinity))
 					{
@@ -152,13 +152,21 @@ namespace Satsuma
 		public double GetDistance(Node node)
 		{
 			double num;
-			return (!this.distance.TryGetValue(node, out num)) ? double.PositiveInfinity : num;
+			if (!this.distance.TryGetValue(node, out num))
+			{
+				return double.PositiveInfinity;
+			}
+			return num;
 		}
 
 		public Arc GetParentArc(Node node)
 		{
 			Arc arc;
-			return (!this.parentArc.TryGetValue(node, out arc)) ? Arc.Invalid : arc;
+			if (!this.parentArc.TryGetValue(node, out arc))
+			{
+				return Arc.Invalid;
+			}
+			return arc;
 		}
 
 		public IPath GetPath(Node node)

@@ -140,7 +140,7 @@ public class Operational : KMonoBehaviour
 
 	private void AddTimeData(bool value)
 	{
-		float num = ((!this.IsActive) ? this.inactiveStartTime : this.activeStartTime);
+		float num = (this.IsActive ? this.activeStartTime : this.inactiveStartTime);
 		float time = GameClock.Instance.GetTime();
 		float num2 = time - num;
 		if (this.IsActive)
@@ -155,11 +155,9 @@ public class Operational : KMonoBehaviour
 		if (this.IsActive)
 		{
 			this.activeStartTime = time;
+			return;
 		}
-		else
-		{
-			this.inactiveStartTime = time;
-		}
+		this.inactiveStartTime = time;
 	}
 
 	public void OnNewDay(object data)
@@ -178,9 +176,8 @@ public class Operational : KMonoBehaviour
 	{
 		if (this.IsActive)
 		{
-			float num = ((!this.IsActive) ? this.inactiveStartTime : this.activeStartTime);
-			float time = GameClock.Instance.GetTime();
-			float num2 = time - num;
+			float num = (this.IsActive ? this.activeStartTime : this.inactiveStartTime);
+			float num2 = GameClock.Instance.GetTime() - num;
 			return (this.activeTime + num2) / GameClock.Instance.GetTimeSinceStartOfCycle();
 		}
 		return this.activeTime / GameClock.Instance.GetTimeSinceStartOfCycle();

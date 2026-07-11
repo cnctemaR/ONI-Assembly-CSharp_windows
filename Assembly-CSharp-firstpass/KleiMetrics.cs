@@ -30,8 +30,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	protected string PostMetricData(Dictionary<string, object> data)
 	{
-		KleiMetrics.PostData postData = new KleiMetrics.PostData(this.CLIENT_KEY, data);
-		string text = JsonConvert.SerializeObject(postData);
+		string text = JsonConvert.SerializeObject(new KleiMetrics.PostData(this.CLIENT_KEY, data));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		if (this.isMultiThreaded)
 		{
@@ -44,13 +43,21 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 	public static string PlatformUserID()
 	{
 		DistributionPlatform.User localUser = DistributionPlatform.Inst.LocalUser;
-		return (localUser == null) ? string.Empty : localUser.Id.ToString();
+		if (localUser == null)
+		{
+			return "";
+		}
+		return localUser.Id.ToString();
 	}
 
 	public static string UserID()
 	{
 		DistributionPlatform.User localUser = DistributionPlatform.Inst.LocalUser;
-		return (localUser == null) ? string.Empty : localUser.Id.ToString();
+		if (localUser == null)
+		{
+			return "";
+		}
+		return localUser.Id.ToString();
 	}
 
 	private void IncrementSessionCount()
@@ -93,7 +100,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		if (KleiMetrics.installTimeStamp == null)
 		{
 			KleiMetrics.installTimeStamp = KPlayerPrefs.GetString("INSTALL_TIMESTAMP", null);
-			if (KleiMetrics.installTimeStamp == null || KleiMetrics.installTimeStamp == string.Empty)
+			if (KleiMetrics.installTimeStamp == null || KleiMetrics.installTimeStamp == "")
 			{
 				KleiMetrics.installTimeStamp = DateTime.UtcNow.Ticks.ToString();
 				KPlayerPrefs.SetString("INSTALL_TIMESTAMP", KleiMetrics.installTimeStamp);
@@ -223,11 +230,9 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		if (this.userSession.ContainsKey(name))
 		{
 			this.userSession[name] = var;
+			return;
 		}
-		else
-		{
-			this.userSession.Add(name, var);
-		}
+		this.userSession.Add(name, var);
 	}
 
 	public void RemoveStaticSessionVariable(string name)
@@ -264,8 +269,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 		}
 		dictionary.Add("SessionTimeSeconds", this.GetSessionTime());
-		int num = KleiMetrics.GameID();
-		if (num != -1)
+		if (KleiMetrics.GameID() != -1)
 		{
 			dictionary.Add("GameID", KleiMetrics.GameID());
 		}
@@ -332,8 +336,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			dictionary.Add("HeartBeatTimeOut", false);
 		}
-		Dictionary<string, object> hardwareStats = KleiMetrics.GetHardwareStats();
-		foreach (KeyValuePair<string, object> keyValuePair in hardwareStats)
+		foreach (KeyValuePair<string, object> keyValuePair in KleiMetrics.GetHardwareStats())
 		{
 			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 		}
@@ -456,7 +459,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			},
 			{
 				"ProcBits",
-				(IntPtr.Size != 4) ? 64 : 32
+				(IntPtr.Size == 4) ? 32 : 64
 			},
 			{
 				"CPUcount",
@@ -607,7 +610,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	private static int gameID = -1;
 
-	private static string installTimeStamp;
+	private static string installTimeStamp = null;
 
 	private static global::System.Timers.Timer heartbeatTimer;
 

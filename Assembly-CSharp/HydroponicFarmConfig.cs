@@ -37,8 +37,7 @@ public class HydroponicFarmConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
-		simCellOccupier.doReplaceElement = true;
+		go.AddOrGet<SimCellOccupier>().doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
@@ -52,10 +51,8 @@ public class HydroponicFarmConfig : IBuildingConfig
 		plantablePlot.AddDepositTag(GameTags.WaterSeed);
 		plantablePlot.occupyingObjectRelativePosition.y = 1f;
 		plantablePlot.SetFertilizationFlags(true, true);
-		CopyBuildingSettings copyBuildingSettings = go.AddOrGet<CopyBuildingSettings>();
-		copyBuildingSettings.copyGroupTag = GameTags.Farm;
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Farm;
+		BuildingTemplates.CreateDefaultStorage(go, false).SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<PlanterBox>();
 		go.AddOrGet<AnimTileable>();
 		go.AddOrGet<DropAllWorkable>();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -71,20 +70,20 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 
 	public new class Instance : GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.GameInstance
 	{
-		public Instance(IStateMachineTarget master, EggProtectionMonitor.Def def)
-			: base(master, def)
-		{
-			this.alignment = master.GetComponent<FactionAlignment>();
-			this.navigator = master.GetComponent<Navigator>();
-			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
-		}
-
 		public GameObject MainThreat
 		{
 			get
 			{
 				return this.mainThreat;
 			}
+		}
+
+		public Instance(IStateMachineTarget master, EggProtectionMonitor.Def def)
+			: base(master, def)
+		{
+			this.alignment = master.GetComponent<FactionAlignment>();
+			this.navigator = master.GetComponent<Navigator>();
+			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
 		}
 
 		public void CanProtectEgg()
@@ -113,23 +112,10 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		{
 			ListPool<KPrefabID, EggProtectionMonitor>.PooledList pooledList = ListPool<KPrefabID, EggProtectionMonitor>.Allocate();
 			pooledList.Capacity = Mathf.Max(pooledList.Capacity, Components.Pickupables.Count);
-			IEnumerator enumerator = Components.IncubationMonitors.GetEnumerator();
-			try
+			foreach (object obj in Components.IncubationMonitors)
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					IncubationMonitor.Instance instance = (IncubationMonitor.Instance)obj;
-					pooledList.Add(instance.gameObject.GetComponent<KPrefabID>());
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				IncubationMonitor.Instance instance = (IncubationMonitor.Instance)obj;
+				pooledList.Add(instance.gameObject.GetComponent<KPrefabID>());
 			}
 			ListPool<EggProtectionMonitor.Instance.Egg, EggProtectionMonitor>.PooledList pooledList2 = ListPool<EggProtectionMonitor.Instance.Egg, EggProtectionMonitor>.Allocate();
 			EggProtectionMonitor.Instance.find_eggs_job.Reset(pooledList);
@@ -143,7 +129,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 				EggProtectionMonitor.Instance.find_eggs_job.GetWorkItem(num).Finish(pooledList, pooledList2);
 			}
 			pooledList.Recycle();
-			foreach (UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry entry in instances)
+			foreach (UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry entry in new List<UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry>(instances))
 			{
 				GameObject gameObject = null;
 				int num2 = 100;
@@ -215,12 +201,12 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			{
 				return;
 			}
-			bool flag = base.smi.CheckForThreats();
-			if (flag)
+			if (base.smi.CheckForThreats())
 			{
 				this.GoToThreatened();
+				return;
 			}
-			else if (base.smi.GetCurrentState() != base.sm.guard.safe)
+			if (base.smi.GetCurrentState() != base.sm.guard.safe)
 			{
 				base.Trigger(-21431934, null);
 				base.smi.GoTo(base.sm.guard.safe);
@@ -246,30 +232,20 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.attackableEntitiesLayer, pooledList);
 			for (int i = 0; i < pooledList.Count; i++)
 			{
-				ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
-				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
-				if (!(factionAlignment.transform == null))
+				FactionAlignment factionAlignment = pooledList[i].obj as FactionAlignment;
+				if (!(factionAlignment.transform == null) && !(factionAlignment == this.alignment) && factionAlignment.IsAlignmentActive() && this.navigator.CanReach(factionAlignment.attackable))
 				{
-					if (!(factionAlignment == this.alignment))
+					bool flag = false;
+					foreach (Tag tag in base.def.allyTags)
 					{
-						if (factionAlignment.IsAlignmentActive())
+						if (factionAlignment.HasTag(tag))
 						{
-							if (this.navigator.CanReach(factionAlignment.attackable))
-							{
-								bool flag = false;
-								foreach (Tag tag in base.def.allyTags)
-								{
-									if (factionAlignment.HasTag(tag))
-									{
-										flag = true;
-									}
-								}
-								if (!flag)
-								{
-									this.threats.Add(factionAlignment);
-								}
-							}
+							flag = true;
 						}
+					}
+					if (!flag)
+					{
+						this.threats.Add(factionAlignment);
 					}
 				}
 			}

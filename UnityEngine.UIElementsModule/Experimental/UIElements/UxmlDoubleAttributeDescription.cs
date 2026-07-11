@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML double attribute.</para>
-	/// </summary>
 	public class UxmlDoubleAttributeDescription : UxmlAttributeDescription
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public UxmlDoubleAttributeDescription()
 		{
 			base.type = "double";
@@ -17,14 +11,8 @@ namespace UnityEngine.Experimental.UIElements
 			this.defaultValue = 0.0;
 		}
 
-		/// <summary>
-		///   <para>The default value for the attribute.</para>
-		/// </summary>
 		public double defaultValue { get; set; }
 
-		/// <summary>
-		///   <para>The default value for the attribute, as a string.</para>
-		/// </summary>
 		public override string defaultValueAsString
 		{
 			get
@@ -33,16 +21,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieves the value of this attribute from the attribute bag. Returns it if it is found, otherwise return defaultValue.</para>
-		/// </summary>
-		/// <param name="bag">The bag of attributes.</param>
-		/// <returns>
-		///   <para>The value of the attribute.</para>
-		/// </returns>
+		[Obsolete("Pass a creation context to the method.")]
 		public double GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyDouble(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public double GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<double>(bag, cc, new Func<string, double, double>(UxmlDoubleAttributeDescription.ConvertValueToDouble), this.defaultValue);
+		}
+
+		private static double ConvertValueToDouble(string v, double defaultValue)
+		{
+			double num;
+			double num2;
+			if (v == null || !double.TryParse(v, out num))
+			{
+				num2 = defaultValue;
+			}
+			else
+			{
+				num2 = num;
+			}
+			return num2;
 		}
 	}
 }

@@ -61,7 +61,11 @@ public class ComplexFabricatorWorkable : Workable
 	{
 		get
 		{
-			return (!(this.fabricator != null)) ? null : this.fabricator.CurrentWorkingOrder;
+			if (!(this.fabricator != null))
+			{
+				return null;
+			}
+			return this.fabricator.CurrentWorkingOrder;
 		}
 	}
 
@@ -78,7 +82,11 @@ public class ComplexFabricatorWorkable : Workable
 	public override string GetConversationTopic()
 	{
 		string conversationTopic = this.fabricator.GetConversationTopic();
-		return (conversationTopic == null) ? base.GetConversationTopic() : conversationTopic;
+		if (conversationTopic == null)
+		{
+			return base.GetConversationTopic();
+		}
+		return conversationTopic;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -91,11 +99,9 @@ public class ComplexFabricatorWorkable : Workable
 		if (this.fabricator.CurrentWorkingOrder != null)
 		{
 			this.InstantiateVisualizer(this.fabricator.CurrentWorkingOrder);
+			return;
 		}
-		else
-		{
-			DebugUtil.DevAssertArgs(false, new object[] { "ComplexFabricatorWorkable.OnStartWork called but CurrentMachineOrder is null", base.gameObject });
-		}
+		DebugUtil.DevAssertArgs(false, new object[] { "ComplexFabricatorWorkable.OnStartWork called but CurrentMachineOrder is null", base.gameObject });
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -121,9 +127,9 @@ public class ComplexFabricatorWorkable : Workable
 
 	public Chore CreateWorkChore(ChoreType choreType, float order_progress)
 	{
-		WorkChore<ComplexFabricatorWorkable> workChore = new WorkChore<ComplexFabricatorWorkable>(choreType, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		Chore chore = new WorkChore<ComplexFabricatorWorkable>(choreType, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		this.workTimeRemaining = this.GetWorkTime() * (1f - order_progress);
-		return workChore;
+		return chore;
 	}
 
 	protected override void OnCompleteWork(Worker worker)

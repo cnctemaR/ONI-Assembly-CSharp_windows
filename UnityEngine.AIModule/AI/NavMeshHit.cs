@@ -3,15 +3,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>Result information for NavMesh queries.</para>
-	/// </summary>
 	[MovedFrom("UnityEngine")]
 	public struct NavMeshHit
 	{
-		/// <summary>
-		///   <para>Position of hit.</para>
-		/// </summary>
 		public Vector3 position
 		{
 			get
@@ -24,9 +18,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Normal at the point of hit.</para>
-		/// </summary>
 		public Vector3 normal
 		{
 			get
@@ -39,9 +30,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Distance to the point of hit.</para>
-		/// </summary>
 		public float distance
 		{
 			get
@@ -54,9 +42,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Mask specifying NavMesh area at point of hit.</para>
-		/// </summary>
 		public int mask
 		{
 			get
@@ -69,9 +54,6 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Flag set when hit.</para>
-		/// </summary>
 		public bool hit
 		{
 			get

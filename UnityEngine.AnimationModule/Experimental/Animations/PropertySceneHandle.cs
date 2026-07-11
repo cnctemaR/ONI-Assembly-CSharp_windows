@@ -4,19 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Animations
 {
-	/// <summary>
-	///   <para>Handle for a Component property on an object in the scene.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Animation/Director/AnimationSceneHandles.h")]
 	public struct PropertySceneHandle
 	{
-		/// <summary>
-		///   <para>Returns whether or not the handle is valid.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <returns>
-		///   <para>Whether or not the handle is valid.</para>
-		/// </returns>
 		public bool IsValid(AnimationStream stream)
 		{
 			return this.IsValidInternal(ref stream);
@@ -43,23 +33,12 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Resolves the handle.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
 		public void Resolve(AnimationStream stream)
 		{
 			this.CheckIsValid(ref stream);
 			this.ResolveInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Returns whether or not the handle is resolved.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <returns>
-		///   <para>Returns true if the handle is resolved, false otherwise.</para>
-		/// </returns>
 		public bool IsResolved(AnimationStream stream)
 		{
 			return this.IsValidInternal(ref stream) && this.IsBound(ref stream);
@@ -78,72 +57,36 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the float property value from an object in the scene.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <returns>
-		///   <para>The float property value.</para>
-		/// </returns>
 		public float GetFloat(AnimationStream stream)
 		{
 			this.CheckIsValid(ref stream);
 			return this.GetFloatInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the float property value to an object in the scene.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <param name="value">The new float property value.</param>
 		public void SetFloat(AnimationStream stream, float value)
 		{
 			this.CheckIsValid(ref stream);
 			this.SetFloatInternal(ref stream, value);
 		}
 
-		/// <summary>
-		///   <para>Gets the integer property value from an object in the scene.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <returns>
-		///   <para>The integer property value.</para>
-		/// </returns>
 		public int GetInt(AnimationStream stream)
 		{
 			this.CheckIsValid(ref stream);
 			return this.GetIntInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the integer property value to an object in the scene.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <param name="value">The new integer property value.</param>
 		public void SetInt(AnimationStream stream, int value)
 		{
 			this.CheckIsValid(ref stream);
 			this.SetIntInternal(ref stream, value);
 		}
 
-		/// <summary>
-		///   <para>Gets the boolean property value from an object in the scene.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <returns>
-		///   <para>The boolean property value.</para>
-		/// </returns>
 		public bool GetBool(AnimationStream stream)
 		{
 			this.CheckIsValid(ref stream);
 			return this.GetBoolInternal(ref stream);
 		}
 
-		/// <summary>
-		///   <para>Sets the boolean property value to an object in the scene.</para>
-		/// </summary>
-		/// <param name="stream">The AnimationStream managing this handle.</param>
-		/// <param name="value">The new boolean property value.</param>
 		public void SetBool(AnimationStream stream, bool value)
 		{
 			this.CheckIsValid(ref stream);

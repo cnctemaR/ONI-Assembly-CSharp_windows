@@ -82,11 +82,7 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 								continue;
 							}
 							Storage component4 = component3.GetComponent<Storage>();
-							if (!component4.allowItemRemoval)
-							{
-								continue;
-							}
-							if (component4.IsEmpty())
+							if (!component4.allowItemRemoval || component4.IsEmpty())
 							{
 								continue;
 							}

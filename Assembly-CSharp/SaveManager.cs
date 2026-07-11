@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using KSerialization;
@@ -8,10 +7,8 @@ using UnityEngine;
 
 public class SaveManager : KMonoBehaviour
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<SaveLoadRoot> onRegister;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<SaveLoadRoot> onUnregister;
 
 	protected override void OnPrefabInit()
@@ -128,18 +125,14 @@ public class SaveManager : KMonoBehaviour
 		foreach (Tag tag in this.orderedKeys)
 		{
 			List<SaveLoadRoot> list = this.sceneObjects[tag];
-			int count = list.Count;
-			if (count > 0)
+			if (list.Count > 0)
 			{
 				foreach (SaveLoadRoot saveLoadRoot in list)
 				{
-					if (!(saveLoadRoot == null))
+					if (!(saveLoadRoot == null) && saveLoadRoot.GetComponent<SimCellOccupier>() != null)
 					{
-						if (saveLoadRoot.GetComponent<SimCellOccupier>() != null)
-						{
-							this.Write(tag, list, writer);
-							break;
-						}
+						this.Write(tag, list, writer);
+						break;
 					}
 				}
 			}
@@ -147,18 +140,14 @@ public class SaveManager : KMonoBehaviour
 		foreach (Tag tag2 in this.orderedKeys)
 		{
 			List<SaveLoadRoot> list2 = this.sceneObjects[tag2];
-			int count2 = list2.Count;
-			if (count2 > 0)
+			if (list2.Count > 0)
 			{
 				foreach (SaveLoadRoot saveLoadRoot2 in list2)
 				{
-					if (!(saveLoadRoot2 == null))
+					if (!(saveLoadRoot2 == null) && saveLoadRoot2.GetComponent<SimCellOccupier>() == null)
 					{
-						if (saveLoadRoot2.GetComponent<SimCellOccupier>() == null)
-						{
-							this.Write(tag2, list2, writer);
-							break;
-						}
+						this.Write(tag2, list2, writer);
+						break;
 					}
 				}
 			}
@@ -236,8 +225,7 @@ public class SaveManager : KMonoBehaviour
 					this.sceneObjects[tag] = list;
 					for (int k = 0; k < num4; k++)
 					{
-						SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
-						if (saveLoadRoot == null)
+						if (SaveLoadRoot.Load(gameObject, reader) == null)
 						{
 							global::Debug.LogError("Error loading data [" + text + "]");
 							return false;

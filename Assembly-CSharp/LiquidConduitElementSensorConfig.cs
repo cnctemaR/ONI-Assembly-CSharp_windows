@@ -32,8 +32,7 @@ public class LiquidConduitElementSensorConfig : ConduitSensorConfig
 	{
 		base.DoPostConfigureComplete(go);
 		GeneratedBuildings.RegisterLogicPorts(go, LiquidConduitElementSensorConfig.OUTPUT_PORT);
-		Filterable filterable = go.AddOrGet<Filterable>();
-		filterable.filterElementState = Filterable.ElementState.Liquid;
+		go.AddOrGet<Filterable>().filterElementState = Filterable.ElementState.Liquid;
 		ConduitElementSensor conduitElementSensor = go.AddOrGet<ConduitElementSensor>();
 		conduitElementSensor.manuallyControlled = false;
 		conduitElementSensor.conduitType = this.ConduitType;

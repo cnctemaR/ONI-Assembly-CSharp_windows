@@ -27,7 +27,7 @@ public class LocText : TextMeshProUGUI
 	[ContextMenu("Apply Settings")]
 	public void ApplySettings()
 	{
-		if (this.key != string.Empty && Application.isPlaying)
+		if (this.key != "" && Application.isPlaying)
 		{
 			StringKey stringKey = new StringKey(this.key);
 			this.text = Strings.Get(stringKey);
@@ -45,10 +45,9 @@ public class LocText : TextMeshProUGUI
 		{
 			return;
 		}
-		if (this.key != string.Empty)
+		if (this.key != "")
 		{
-			StringKey stringKey = new StringKey(this.key);
-			StringEntry stringEntry = Strings.Get(stringKey);
+			StringEntry stringEntry = Strings.Get(new StringKey(this.key));
 			this.text = stringEntry.String;
 		}
 		this.text = Localization.Fixup(this.text);
@@ -115,10 +114,9 @@ public class LocText : TextMeshProUGUI
 	internal void SwapFont(TMP_FontAsset font, bool isRightToLeft)
 	{
 		base.font = font;
-		if (this.key != string.Empty)
+		if (this.key != "")
 		{
-			StringKey stringKey = new StringKey(this.key);
-			StringEntry stringEntry = Strings.Get(stringKey);
+			StringEntry stringEntry = Strings.Get(new StringKey(this.key));
 			this.text = stringEntry.String;
 		}
 		this.text = Localization.Fixup(this.text);
@@ -141,7 +139,7 @@ public class LocText : TextMeshProUGUI
 		{
 			for (int i = 1; i < LocText.splits.Length; i++)
 			{
-				if (!(LocText.splits[i] == string.Empty))
+				if (!(LocText.splits[i] == ""))
 				{
 					int num = input.IndexOf(LocText.splits[i]);
 					input = input.Insert(num - text.Length, text3);
@@ -153,7 +151,7 @@ public class LocText : TextMeshProUGUI
 		{
 			for (int j = 0; j < LocText.splits.Length; j++)
 			{
-				if (!(LocText.splits[j] == string.Empty))
+				if (!(LocText.splits[j] == ""))
 				{
 					int num2 = input.IndexOf(LocText.splits[j]);
 					if (num2 != 0)

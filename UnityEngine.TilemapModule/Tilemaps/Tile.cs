@@ -3,16 +3,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
-	/// <summary>
-	///   <para>Class for a default tile in the Tilemap.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	[Serializable]
 	public class Tile : TileBase
 	{
-		/// <summary>
-		///   <para>Sprite to be rendered at the Tile.</para>
-		/// </summary>
 		public Sprite sprite
 		{
 			get
@@ -25,9 +19,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>Color of the Tile.</para>
-		/// </summary>
 		public Color color
 		{
 			get
@@ -40,9 +31,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>Matrix4x4|Transform matrix of the Tile.</para>
-		/// </summary>
 		public Matrix4x4 transform
 		{
 			get
@@ -55,9 +43,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>GameObject of the Tile.</para>
-		/// </summary>
 		public GameObject gameObject
 		{
 			get
@@ -70,9 +55,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>TileFlags of the Tile.</para>
-		/// </summary>
 		public TileFlags flags
 		{
 			get
@@ -125,22 +107,10 @@ namespace UnityEngine.Tilemaps
 		[SerializeField]
 		private Tile.ColliderType m_ColliderType = Tile.ColliderType.Sprite;
 
-		/// <summary>
-		///   <para>Enum for determining what collider shape is generated for this Tile by the TilemapCollider2D.</para>
-		/// </summary>
 		public enum ColliderType
 		{
-			/// <summary>
-			///   <para>No collider shape is generated for the Tile by the TilemapCollider2D.</para>
-			/// </summary>
 			None,
-			/// <summary>
-			///   <para>The Sprite outline is used as the collider shape for the Tile by the TilemapCollider2D.</para>
-			/// </summary>
 			Sprite,
-			/// <summary>
-			///   <para>The grid layout boundary outline is used as the collider shape for the Tile by the TilemapCollider2D.</para>
-			/// </summary>
 			Grid
 		}
 	}

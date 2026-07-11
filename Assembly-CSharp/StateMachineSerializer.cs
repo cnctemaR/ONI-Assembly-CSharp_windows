@@ -63,8 +63,7 @@ public class StateMachineSerializer
 	private FastReader ReadEntryData(IReader reader)
 	{
 		int num = reader.ReadInt32();
-		byte[] array = reader.ReadBytes(num);
-		return new FastReader(array);
+		return new FastReader(reader.ReadBytes(num));
 	}
 
 	private void WriteDataSize(long data_start_pos, long data_size_pos, BinaryWriter writer)
@@ -166,7 +165,7 @@ public class StateMachineSerializer
 			int num2 = this.entryData.ReadInt32();
 			int position = this.entryData.Position;
 			string text = this.entryData.ReadKleiString();
-			text = text.Replace("Version=4.0.0.0", "Version=2.0.0.0");
+			text = text.Replace("Version=2.0.0.0", "Version=4.0.0.0");
 			string text2 = this.entryData.ReadKleiString();
 			foreach (StateMachine.Parameter.Context context in parameterContexts)
 			{

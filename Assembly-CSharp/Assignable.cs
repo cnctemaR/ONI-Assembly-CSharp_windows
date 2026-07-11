@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using KSerialization;
 
@@ -26,7 +25,6 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<IAssignableIdentity> OnAssign;
 
 	[OnDeserialized]
@@ -49,7 +47,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		{
 			return this.assignee_identityRef.Get().GetComponent<IAssignableIdentity>();
 		}
-		if (this.assignee_groupID != string.Empty)
+		if (this.assignee_groupID != "")
 		{
 			return Game.Instance.assignmentManager.assignment_groups[this.assignee_groupID];
 		}
@@ -85,11 +83,14 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		{
 			return false;
 		}
-		foreach (Func<MinionAssignablesProxy, bool> func in this.autoassignmentPreconditions)
+		using (List<Func<MinionAssignablesProxy, bool>>.Enumerator enumerator = this.autoassignmentPreconditions.GetEnumerator())
 		{
-			if (!func(minionAssignablesProxy))
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (!enumerator.Current(minionAssignablesProxy))
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -102,11 +103,14 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		{
 			return true;
 		}
-		foreach (Func<MinionAssignablesProxy, bool> func in this.assignmentPreconditions)
+		using (List<Func<MinionAssignablesProxy, bool>>.Enumerator enumerator = this.assignmentPreconditions.GetEnumerator())
 		{
-			if (!func(minionAssignablesProxy))
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (!enumerator.Current(minionAssignablesProxy))
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -119,14 +123,14 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	public bool IsAssignedTo(IAssignableIdentity identity)
 	{
-		global::Debug.Assert(identity != null, "IsAssignedTo identity is null");
+		Debug.Assert(identity != null, "IsAssignedTo identity is null");
 		Ownables soleOwner = identity.GetSoleOwner();
-		global::Debug.Assert(soleOwner != null, "IsAssignedTo identity sole owner is null");
+		Debug.Assert(soleOwner != null, "IsAssignedTo identity sole owner is null");
 		if (this.assignee != null)
 		{
 			foreach (Ownables ownables in this.assignee.GetOwners())
 			{
-				global::Debug.Assert(ownables, "Assignable owners list contained null");
+				Debug.Assert(ownables, "Assignable owners list contained null");
 				if (ownables.gameObject == soleOwner.gameObject)
 				{
 					return true;
@@ -150,7 +154,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 				return;
 			}
 			this.assignee_identityRef.Set((KMonoBehaviour)new_assignee);
-			this.assignee_groupID = string.Empty;
+			this.assignee_groupID = "";
 		}
 		else if (new_assignee is AssignmentGroup)
 		{
@@ -221,7 +225,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 			this.Assign(Game.Instance.assignmentManager.assignment_groups["public"]);
 		}
 		this.assignee_identityRef.Set(null);
-		this.assignee_groupID = string.Empty;
+		this.assignee_groupID = "";
 		if (this.OnAssign != null)
 		{
 			this.OnAssign(null);
@@ -249,17 +253,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		int num = -1;
 		int num2 = Grid.PosToCell(this);
 		IApproachable component = base.GetComponent<IApproachable>();
-		CellOffset[] array;
-		if (component != null)
-		{
-			array = component.GetOffsets();
-		}
-		else
-		{
-			(array = new CellOffset[1])[0] = default(CellOffset);
-		}
-		CellOffset[] array2 = array;
-		foreach (CellOffset cellOffset in array2)
+		foreach (CellOffset cellOffset in (component != null) ? component.GetOffsets() : new CellOffset[1])
 		{
 			int num3 = Grid.OffsetCell(num2, cellOffset);
 			int navigationCost = navigator.GetNavigationCost(num3);
@@ -281,7 +275,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	protected Ref<KMonoBehaviour> assignee_identityRef = new Ref<KMonoBehaviour>();
 
 	[Serialize]
-	private string assignee_groupID = string.Empty;
+	private string assignee_groupID = "";
 
 	public AssignableSlot[] subSlots;
 

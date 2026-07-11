@@ -10,7 +10,7 @@ namespace TMPro
 			TMP_CharacterInfo[] characterInfo = this.textComponent.textInfo.characterInfo;
 			for (int i = this.firstCharacterIndex; i < this.lastCharacterIndex + 1; i++)
 			{
-				text += characterInfo[i].character;
+				text += characterInfo[i].character.ToString();
 			}
 			return text;
 		}

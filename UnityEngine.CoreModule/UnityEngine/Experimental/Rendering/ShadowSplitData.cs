@@ -5,19 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Describes the culling information for a given shadow split (e.g. directional cascade).</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct ShadowSplitData
 	{
-		/// <summary>
-		///   <para>Gets a culling plane.</para>
-		/// </summary>
-		/// <param name="index">The culling plane index.</param>
-		/// <returns>
-		///   <para>The culling plane.</para>
-		/// </returns>
 		public unsafe Plane GetCullingPlane(int index)
 		{
 			if (index < 0 || index >= this.cullingPlaneCount || index >= 10)
@@ -30,11 +20,6 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Sets a culling plane.</para>
-		/// </summary>
-		/// <param name="index">The index of the culling plane to set.</param>
-		/// <param name="plane">The culling plane.</param>
 		public unsafe void SetCullingPlane(int index, Plane plane)
 		{
 			if (index < 0 || index >= this.cullingPlaneCount || index >= 10)
@@ -50,22 +35,17 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>The number of culling planes.</para>
-		/// </summary>
 		public int cullingPlaneCount;
 
-		private ShadowSplitData.<_cullingPlanes>__FixedBuffer7 _cullingPlanes;
+		[FixedBuffer(typeof(float), 40)]
+		internal ShadowSplitData.<_cullingPlanes>__FixedBuffer6 _cullingPlanes;
 
-		/// <summary>
-		///   <para>The culling sphere.  The first three components of the vector describe the sphere center, and the last component specifies the radius.</para>
-		/// </summary>
 		public Vector4 cullingSphere;
 
 		[UnsafeValueType]
 		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
-		public struct <_cullingPlanes>__FixedBuffer7
+		public struct <_cullingPlanes>__FixedBuffer6
 		{
 			public float FixedElementField;
 		}

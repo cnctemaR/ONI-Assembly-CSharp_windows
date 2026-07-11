@@ -6,7 +6,7 @@ namespace System.Data.SqlClient
 	public sealed class SqlRowUpdatedEventArgs : RowUpdatedEventArgs
 	{
 		public SqlRowUpdatedEventArgs(DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-			: base(null, null, StatementType.Select, null)
+			: base(row, command, statementType, tableMapping)
 		{
 		}
 
@@ -14,7 +14,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				throw null;
+				return (SqlCommand)base.Command;
 			}
 		}
 	}

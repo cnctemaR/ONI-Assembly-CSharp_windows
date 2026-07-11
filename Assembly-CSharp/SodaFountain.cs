@@ -67,27 +67,15 @@ public class SodaFountain : StateMachineComponent<SodaFountain.StatesInstance>, 
 		private Chore CreateChore(SodaFountain.StatesInstance smi)
 		{
 			Workable component = smi.master.GetComponent<SodaFountainWorkable>();
-			ChoreType relax = Db.Get().ChoreTypes.Relax;
-			Workable workable = component;
-			ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-			Chore chore = new WorkChore<SodaFountainWorkable>(relax, workable, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-			chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
-			return chore;
+			WorkChore<SodaFountainWorkable> workChore = new WorkChore<SodaFountainWorkable>(Db.Get().ChoreTypes.Relax, component, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
+			return workChore;
 		}
 
 		private bool IsReady(SodaFountain.StatesInstance smi)
 		{
 			PrimaryElement primaryElement = smi.GetComponent<Storage>().FindPrimaryElement(SimHashes.Water);
-			if (primaryElement == null)
-			{
-				return false;
-			}
-			if (primaryElement.Mass < smi.master.waterMassPerUse)
-			{
-				return false;
-			}
-			float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(smi.master.ingredientTag);
-			return amountAvailable >= smi.master.ingredientMassPerUse;
+			return !(primaryElement == null) && primaryElement.Mass >= smi.master.waterMassPerUse && smi.GetComponent<Storage>().GetAmountAvailable(smi.master.ingredientTag) >= smi.master.ingredientMassPerUse;
 		}
 
 		private GameStateMachine<SodaFountain.States, SodaFountain.StatesInstance, SodaFountain, object>.State unoperational;

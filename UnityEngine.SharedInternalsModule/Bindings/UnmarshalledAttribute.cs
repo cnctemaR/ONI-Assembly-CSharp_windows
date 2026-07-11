@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Parameter)]
+	[VisibleToOtherModules]
 	internal class UnmarshalledAttribute : Attribute, IBindingsAttribute
 	{
 	}

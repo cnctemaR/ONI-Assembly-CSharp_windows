@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
+	[StructLayout(LayoutKind.Sequential)]
 	internal class MonoArrayMethod : MethodInfo
 	{
 		internal MonoArrayMethod(Type arrayClass, string methodName, CallingConventions callingConvention, Type returnType, Type[] parameterTypes)
@@ -46,7 +48,18 @@ namespace System.Reflection
 		[MonoTODO("Not implemented.  Always returns an empty array")]
 		public override ParameterInfo[] GetParameters()
 		{
-			return new ParameterInfo[0];
+			return this.GetParametersInternal();
+		}
+
+		internal override ParameterInfo[] GetParametersInternal()
+		{
+			return EmptyArray<ParameterInfo>.Value;
+		}
+
+		[MonoTODO("Not implemented.  Always returns 0")]
+		internal override int GetParametersCount()
+		{
+			return 0;
 		}
 
 		[MonoTODO("Not implemented")]

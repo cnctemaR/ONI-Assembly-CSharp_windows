@@ -10,8 +10,7 @@ public abstract class StateEvent
 
 	public virtual StateEvent.Context Subscribe(StateMachine.Instance smi)
 	{
-		StateEvent.Context context = new StateEvent.Context(this);
-		return context;
+		return new StateEvent.Context(this);
 	}
 
 	public virtual void Unsubscribe(StateMachine.Instance smi, StateEvent.Context context)

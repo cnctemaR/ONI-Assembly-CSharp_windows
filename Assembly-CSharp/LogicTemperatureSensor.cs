@@ -22,8 +22,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		LogicTemperatureSensor component = gameObject.GetComponent<LogicTemperatureSensor>();
+		LogicTemperatureSensor component = ((GameObject)data).GetComponent<LogicTemperatureSensor>();
 		if (component != null)
 		{
 			this.Threshold = component.Threshold;
@@ -66,6 +65,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 			if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
 			{
 				this.Toggle();
+				return;
 			}
 		}
 		else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
@@ -87,7 +87,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 
 	private void UpdateLogicCircuit()
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -96,14 +96,14 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 		{
 			this.wasOn = this.switchedOn;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+			component.Play(this.switchedOn ? "on_pre" : "on_pst", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue(this.switchedOn ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
 	protected override void UpdateSwitchStatus()
 	{
-		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		StatusItem statusItem = (this.switchedOn ? Db.Get().BuildingStatusItems.LogicSensorStatusActive : Db.Get().BuildingStatusItems.LogicSensorStatusInactive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 
@@ -217,24 +217,17 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 	public LocString ThresholdValueUnits()
 	{
 		LocString locString = null;
-		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
-		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
+		switch (GameUtil.temperatureUnit)
 		{
-			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
-			{
-				if (temperatureUnit == GameUtil.TemperatureUnit.Kelvin)
-				{
-					locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
-				}
-			}
-			else
-			{
-				locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
-			}
-		}
-		else
-		{
+		case GameUtil.TemperatureUnit.Celsius:
 			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
+			break;
+		case GameUtil.TemperatureUnit.Fahrenheit:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
+			break;
+		case GameUtil.TemperatureUnit.Kelvin:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
+			break;
 		}
 		return locString;
 	}

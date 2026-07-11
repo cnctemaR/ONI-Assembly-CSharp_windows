@@ -81,20 +81,19 @@ namespace KMod
 			}
 			foreach (PublishedFileId_t publishedFileId_t3 in removed)
 			{
-				Global.Instance.modManager.Unsubscribe(new Label
-				{
-					id = publishedFileId_t3.m_PublishedFileId.ToString(),
-					distribution_platform = Label.DistributionPlatform.Steam
-				}, this);
+				Manager modManager = Global.Instance.modManager;
+				Label label = default(Label);
+				ulong publishedFileId = publishedFileId_t3.m_PublishedFileId;
+				label.id = publishedFileId.ToString();
+				label.distribution_platform = Label.DistributionPlatform.Steam;
+				modManager.Unsubscribe(label, this);
 			}
 			if (added.Count<PublishedFileId_t>() != 0)
 			{
 				Global.Instance.modManager.Sanitize(null);
+				return;
 			}
-			else
-			{
-				Global.Instance.modManager.Report(null);
-			}
+			Global.Instance.modManager.Report(null);
 		}
 	}
 }

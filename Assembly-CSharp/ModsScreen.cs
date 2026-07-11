@@ -23,7 +23,7 @@ public class ModsScreen : KModalScreen
 			if (mod.enabled)
 			{
 				this.mod_footprint.Add(mod.label);
-				if ((byte)(mod.loaded_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) == (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)))
+				if ((mod.loaded_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) == (mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)))
 				{
 					mod.Uncrash();
 				}
@@ -57,7 +57,7 @@ public class ModsScreen : KModalScreen
 
 	private void RebuildDisplay(object change_source)
 	{
-		if (!object.ReferenceEquals(change_source, this))
+		if (change_source != this)
 		{
 			this.BuildDisplay();
 		}
@@ -85,31 +85,29 @@ public class ModsScreen : KModalScreen
 					rect_transform = hierarchyReferences.gameObject.GetComponent<RectTransform>(),
 					mod_index = num
 				});
-				DragMe component = hierarchyReferences.GetComponent<DragMe>();
-				component.listener = modOrderingDragListener;
+				hierarchyReferences.GetComponent<DragMe>().listener = modOrderingDragListener;
 				LocText reference = hierarchyReferences.GetReference<LocText>("Title");
 				reference.text = mod.title;
-				ToolTip reference2 = hierarchyReferences.GetReference<ToolTip>("Description");
-				reference2.toolTip = mod.description;
+				hierarchyReferences.GetReference<ToolTip>("Description").toolTip = mod.description;
 				if (mod.crash_count != 0)
 				{
 					reference.color = Color.Lerp(Color.white, Color.red, (float)mod.crash_count / 3f);
 				}
-				KButton reference3 = hierarchyReferences.GetReference<KButton>("ManageButton");
-				reference3.isInteractable = mod.is_managed;
-				if (reference3.isInteractable)
+				KButton reference2 = hierarchyReferences.GetReference<KButton>("ManageButton");
+				reference2.isInteractable = mod.is_managed;
+				if (reference2.isInteractable)
 				{
-					reference3.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
-					reference3.onClick += mod.on_managed;
+					reference2.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
+					reference2.onClick += mod.on_managed;
 				}
 				MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
-				toggle.ChangeState((!mod.enabled) ? 0 : 1);
+				toggle.ChangeState(mod.enabled ? 1 : 0);
 				MultiToggle toggle2 = toggle;
 				toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
 				{
 					this.OnToggleClicked(toggle, mod.label);
 				}));
-				toggle.GetComponent<ToolTip>().OnToolTip = () => (!mod.enabled) ? UI.FRONTEND.MODS.TOOLTIPS.DISABLED : UI.FRONTEND.MODS.TOOLTIPS.ENABLED;
+				toggle.GetComponent<ToolTip>().OnToolTip = () => mod.enabled ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
 				hierarchyReferences.gameObject.SetActive(true);
 			}
 		}
@@ -117,9 +115,7 @@ public class ModsScreen : KModalScreen
 		{
 			displayedMod2.rect_transform.gameObject.SetActive(true);
 		}
-		if (this.displayedMods.Count == 0)
-		{
-		}
+		int count = this.displayedMods.Count;
 	}
 
 	private void OnToggleClicked(MultiToggle toggle, Label mod)
@@ -127,7 +123,7 @@ public class ModsScreen : KModalScreen
 		Manager modManager = Global.Instance.modManager;
 		bool flag = modManager.IsModEnabled(mod);
 		flag = !flag;
-		toggle.ChangeState((!flag) ? 0 : 1);
+		toggle.ChangeState(flag ? 1 : 0);
 		modManager.EnableMod(mod, flag, this);
 	}
 
@@ -177,7 +173,7 @@ public class ModsScreen : KModalScreen
 				return;
 			}
 			int dragIdx = this.GetDragIdx(pos);
-			int num = ((dragIdx < 0 || dragIdx == this.startDragIdx) ? Global.Instance.modManager.mods.Count : this.mods[dragIdx].mod_index);
+			int num = ((dragIdx >= 0 && dragIdx != this.startDragIdx) ? this.mods[dragIdx].mod_index : Global.Instance.modManager.mods.Count);
 			Global.Instance.modManager.Reinsert(this.mods[this.startDragIdx].mod_index, num, this);
 			this.screen.BuildDisplay();
 		}

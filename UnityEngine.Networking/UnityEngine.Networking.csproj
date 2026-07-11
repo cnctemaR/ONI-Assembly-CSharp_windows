@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF77}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935680}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.Networking</AssemblyName>
@@ -24,8 +24,10 @@
     <Compile Include="ClientScene.cs" />
     <Compile Include="CommandAttribute.cs" />
     <Compile Include="ConnectionArray.cs" />
+    <Compile Include="DefaultNetworkTransport.cs" />
     <Compile Include="DotNetCompatibility.cs" />
     <Compile Include="FloatConversion.cs" />
+    <Compile Include="INetworkTransport.cs" />
     <Compile Include="LocalClient.cs" />
     <Compile Include="LogFilter.cs" />
     <Compile Include="MessageBase.cs" />
@@ -111,22 +113,12 @@
     <Compile Include="Version.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF54}</Project>
-      <Name>System.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System\System.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF56}</Project>
-      <Name>System</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF6C}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935676}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="System.Core" />
+  </ItemGroup>
 </Project>

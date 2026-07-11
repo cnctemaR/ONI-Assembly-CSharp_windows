@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, IEffectDescriptor
@@ -56,8 +55,7 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, 
 			this.burning.EventTransition(GameHashes.LandRocket, this.burnComplete, null).PlayAnim("launch_pre").QueueAnim("launch_loop", true, null)
 				.Update(delegate(RocketEngine.StatesInstance smi, float dt)
 				{
-					Vector3 vector = smi.master.gameObject.transform.GetPosition() + smi.master.GetComponent<KBatchedAnimController>().Offset;
-					int num = Grid.PosToCell(vector);
+					int num = Grid.PosToCell(smi.master.gameObject.transform.GetPosition() + smi.master.GetComponent<KBatchedAnimController>().Offset);
 					if (Grid.IsValidCell(num))
 					{
 						SimMessages.EmitMass(num, (byte)ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, -1);

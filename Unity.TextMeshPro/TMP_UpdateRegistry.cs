@@ -7,11 +7,6 @@ namespace TMPro
 {
 	public class TMP_UpdateRegistry
 	{
-		protected TMP_UpdateRegistry()
-		{
-			Canvas.willRenderCanvases += this.PerformUpdateForCanvasRendererObjects;
-		}
-
 		public static TMP_UpdateRegistry instance
 		{
 			get
@@ -22,6 +17,11 @@ namespace TMPro
 				}
 				return TMP_UpdateRegistry.s_Instance;
 			}
+		}
+
+		protected TMP_UpdateRegistry()
+		{
+			Canvas.willRenderCanvases += this.PerformUpdateForCanvasRendererObjects;
 		}
 
 		public static void RegisterCanvasElementForLayoutRebuild(ICanvasElement element)
@@ -62,8 +62,7 @@ namespace TMPro
 		{
 			for (int i = 0; i < this.m_LayoutRebuildQueue.Count; i++)
 			{
-				ICanvasElement canvasElement = TMP_UpdateRegistry.instance.m_LayoutRebuildQueue[i];
-				canvasElement.Rebuild(CanvasUpdate.Prelayout);
+				TMP_UpdateRegistry.instance.m_LayoutRebuildQueue[i].Rebuild(CanvasUpdate.Prelayout);
 			}
 			if (this.m_LayoutRebuildQueue.Count > 0)
 			{
@@ -72,8 +71,7 @@ namespace TMPro
 			}
 			for (int j = 0; j < this.m_GraphicRebuildQueue.Count; j++)
 			{
-				ICanvasElement canvasElement2 = TMP_UpdateRegistry.instance.m_GraphicRebuildQueue[j];
-				canvasElement2.Rebuild(CanvasUpdate.PreRender);
+				TMP_UpdateRegistry.instance.m_GraphicRebuildQueue[j].Rebuild(CanvasUpdate.PreRender);
 			}
 			if (this.m_GraphicRebuildQueue.Count > 0)
 			{

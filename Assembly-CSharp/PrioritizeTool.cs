@@ -91,15 +91,9 @@ public class PrioritizeTool : FilteredDragTool
 					{
 						GameObject gameObject2 = objectLayerListItem.gameObject;
 						objectLayerListItem = objectLayerListItem.nextItem;
-						if (!(gameObject2 == null))
+						if (!(gameObject2 == null) && !(gameObject2.GetComponent<MinionIdentity>() != null) && this.TryPrioritizeGameObject(gameObject2, lastSelectedPriority))
 						{
-							if (!(gameObject2.GetComponent<MinionIdentity>() != null))
-							{
-								if (this.TryPrioritizeGameObject(gameObject2, lastSelectedPriority))
-								{
-									num++;
-								}
-							}
+							num++;
 						}
 					}
 				}

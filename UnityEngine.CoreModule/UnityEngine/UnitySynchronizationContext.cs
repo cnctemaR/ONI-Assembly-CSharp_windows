@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine.Scripting;
 
@@ -9,11 +10,11 @@ namespace UnityEngine
 	{
 		private UnitySynchronizationContext(int mainThreadID)
 		{
-			this.m_AsyncWorkQueue = new Queue<UnitySynchronizationContext.WorkRequest>(20);
+			this.m_AsyncWorkQueue = new List<UnitySynchronizationContext.WorkRequest>(20);
 			this.m_MainThreadID = mainThreadID;
 		}
 
-		private UnitySynchronizationContext(Queue<UnitySynchronizationContext.WorkRequest> queue, int mainThreadID)
+		private UnitySynchronizationContext(List<UnitySynchronizationContext.WorkRequest> queue, int mainThreadID)
 		{
 			this.m_AsyncWorkQueue = queue;
 			this.m_MainThreadID = mainThreadID;
@@ -32,11 +33,21 @@ namespace UnityEngine
 					object asyncWorkQueue = this.m_AsyncWorkQueue;
 					lock (asyncWorkQueue)
 					{
-						this.m_AsyncWorkQueue.Enqueue(new UnitySynchronizationContext.WorkRequest(callback, state, manualResetEvent));
+						this.m_AsyncWorkQueue.Add(new UnitySynchronizationContext.WorkRequest(callback, state, manualResetEvent));
 					}
 					manualResetEvent.WaitOne();
 				}
 			}
+		}
+
+		public override void OperationStarted()
+		{
+			Interlocked.Increment(ref this.m_TrackedCount);
+		}
+
+		public override void OperationCompleted()
+		{
+			Interlocked.Decrement(ref this.m_TrackedCount);
 		}
 
 		public override void Post(SendOrPostCallback callback, object state)
@@ -44,7 +55,7 @@ namespace UnityEngine
 			object asyncWorkQueue = this.m_AsyncWorkQueue;
 			lock (asyncWorkQueue)
 			{
-				this.m_AsyncWorkQueue.Enqueue(new UnitySynchronizationContext.WorkRequest(callback, state, null));
+				this.m_AsyncWorkQueue.Add(new UnitySynchronizationContext.WorkRequest(callback, state, null));
 			}
 		}
 
@@ -58,12 +69,19 @@ namespace UnityEngine
 			object asyncWorkQueue = this.m_AsyncWorkQueue;
 			lock (asyncWorkQueue)
 			{
-				int count = this.m_AsyncWorkQueue.Count;
-				for (int i = 0; i < count; i++)
-				{
-					this.m_AsyncWorkQueue.Dequeue().Invoke();
-				}
+				this.m_CurrentFrameWork.AddRange(this.m_AsyncWorkQueue);
+				this.m_AsyncWorkQueue.Clear();
 			}
+			foreach (UnitySynchronizationContext.WorkRequest workRequest in this.m_CurrentFrameWork)
+			{
+				workRequest.Invoke();
+			}
+			this.m_CurrentFrameWork.Clear();
+		}
+
+		private bool HasPendingTasks()
+		{
+			return this.m_AsyncWorkQueue.Count != 0 || this.m_TrackedCount != 0;
 		}
 
 		[RequiredByNativeCode]
@@ -85,11 +103,42 @@ namespace UnityEngine
 			}
 		}
 
+		[RequiredByNativeCode]
+		private static bool ExecutePendingTasks(long millisecondsTimeout)
+		{
+			UnitySynchronizationContext unitySynchronizationContext = SynchronizationContext.Current as UnitySynchronizationContext;
+			bool flag;
+			if (unitySynchronizationContext == null)
+			{
+				flag = true;
+			}
+			else
+			{
+				Stopwatch stopwatch = new Stopwatch();
+				stopwatch.Start();
+				while (unitySynchronizationContext.HasPendingTasks())
+				{
+					if (stopwatch.ElapsedMilliseconds > millisecondsTimeout)
+					{
+						break;
+					}
+					unitySynchronizationContext.Exec();
+					Thread.Sleep(1);
+				}
+				flag = !unitySynchronizationContext.HasPendingTasks();
+			}
+			return flag;
+		}
+
 		private const int kAwqInitialCapacity = 20;
 
-		private readonly Queue<UnitySynchronizationContext.WorkRequest> m_AsyncWorkQueue;
+		private readonly List<UnitySynchronizationContext.WorkRequest> m_AsyncWorkQueue;
+
+		private readonly List<UnitySynchronizationContext.WorkRequest> m_CurrentFrameWork = new List<UnitySynchronizationContext.WorkRequest>(20);
 
 		private readonly int m_MainThreadID;
+
+		private int m_TrackedCount = 0;
 
 		private struct WorkRequest
 		{
@@ -102,7 +151,14 @@ namespace UnityEngine
 
 			public void Invoke()
 			{
-				this.m_DelagateCallback(this.m_DelagateState);
+				try
+				{
+					this.m_DelagateCallback(this.m_DelagateState);
+				}
+				catch (Exception ex)
+				{
+					Debug.LogException(ex);
+				}
 				if (this.m_WaitHandle != null)
 				{
 					this.m_WaitHandle.Set();

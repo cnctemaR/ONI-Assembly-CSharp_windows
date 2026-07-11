@@ -15,15 +15,14 @@ public class DreckoPlasticConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -DreckoTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 150f, name, false, false, true));
-		Diet.Info[] array = new Diet.Info[]
+		Diet diet = new Diet(new Diet.Info[]
 		{
 			new Diet.Info(new HashSet<Tag>
 			{
 				"BasicSingleHarvestPlant".ToTag(),
 				"PrickleFlower".ToTag()
 			}, DreckoPlasticConfig.POOP_ELEMENT, DreckoPlasticConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoPlasticConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f, false, true)
-		};
-		Diet diet = new Diet(array);
+		});
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
 		def.minPoopSizeInCalories = DreckoPlasticConfig.MIN_POOP_SIZE_IN_CALORIES;
@@ -33,15 +32,13 @@ public class DreckoPlasticConfig : IEntityConfig
 		def2.itemDroppedOnShear = DreckoPlasticConfig.EMIT_ELEMENT;
 		def2.levelCount = 6;
 		def2.targetAtmosphere = SimHashes.Hydrogen;
-		SolidConsumerMonitor.Def def3 = gameObject.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def3.diet = diet;
+		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return gameObject;
 	}
 
 	public virtual GameObject CreatePrefab()
 	{
 		GameObject gameObject = DreckoPlasticConfig.CreateDrecko("DreckoPlastic", CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.NAME, CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.DESC, "drecko_kanim", false);
-		GameObject gameObject2 = gameObject;
 		string text = "DreckoPlasticEgg";
 		string text2 = CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.EGG_NAME;
 		string text3 = CREATURES.SPECIES.DRECKO.VARIANT_PLASTIC.DESC;
@@ -51,7 +48,7 @@ public class DreckoPlasticConfig : IEntityConfig
 		float num = 90f;
 		float num2 = 30f;
 		int egg_SORT_ORDER = DreckoPlasticConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_PLASTIC, egg_SORT_ORDER, true, false, true, 1f);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_PLASTIC, egg_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

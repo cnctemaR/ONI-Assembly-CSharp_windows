@@ -20,8 +20,7 @@ public class ConduitOverflow : KMonoBehaviour, ISecondaryOutput
 
 	protected override void OnCleanUp()
 	{
-		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
-		networkManager.RemoveFromNetworks(this.secondaryOutput.Cell, this.secondaryOutput, true);
+		Conduit.GetNetworkManager(this.portInfo.conduitType).RemoveFromNetworks(this.secondaryOutput.Cell, this.secondaryOutput, true);
 		Conduit.GetFlowManager(this.portInfo.conduitType).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
 		base.OnCleanUp();
 	}

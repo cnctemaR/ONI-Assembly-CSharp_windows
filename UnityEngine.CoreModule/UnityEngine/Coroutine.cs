@@ -6,11 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>MonoBehaviour.StartCoroutine returns a Coroutine. Instances of this class are only used to reference these coroutines, and do not hold any exposed properties or functions.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Mono/Coroutine.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Mono/Coroutine.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Coroutine : YieldInstruction
 	{

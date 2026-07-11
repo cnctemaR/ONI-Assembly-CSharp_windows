@@ -91,7 +91,7 @@ namespace NodeEditorFramework
 			NodeEditor.curEditorState.zoomPanAdjust = GUIScaleUtility.BeginScale(ref canvasRect, NodeEditor.curEditorState.zoomPos, NodeEditor.curEditorState.zoom, false);
 			if (NodeEditor.curEditorState.navigate)
 			{
-				Vector2 vector2 = ((!(NodeEditor.curEditorState.selectedNode != null)) ? NodeEditor.curEditorState.panOffset : NodeEditor.curEditorState.selectedNode.rect.center) + NodeEditor.curEditorState.zoomPanAdjust;
+				Vector2 vector2 = ((NodeEditor.curEditorState.selectedNode != null) ? NodeEditor.curEditorState.selectedNode.rect.center : NodeEditor.curEditorState.panOffset) + NodeEditor.curEditorState.zoomPanAdjust;
 				Vector2 mousePosition = Event.current.mousePosition;
 				RTEditorGUI.DrawLine(vector2, mousePosition, Color.green, null, 3f);
 				NodeEditor.RepaintClients();

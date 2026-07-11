@@ -66,8 +66,7 @@ public class TextureLerper
 		meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
 		meshRenderer.lightProbeUsage = LightProbeUsage.Off;
 		meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-		MeshFilter meshFilter = this.meshGO.AddComponent<MeshFilter>();
-		meshFilter.mesh = this.mesh;
+		this.meshGO.AddComponent<MeshFilter>().mesh = this.mesh;
 		meshRenderer.sharedMaterial = this.Material;
 		this.cameraGO.SetLayerRecursively(num);
 		TextureLerper.offsetCounter++;

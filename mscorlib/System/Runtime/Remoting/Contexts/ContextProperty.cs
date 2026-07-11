@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Runtime.Remoting.Contexts
 {
@@ -26,6 +27,11 @@ namespace System.Runtime.Remoting.Contexts
 			{
 				return this.prop;
 			}
+		}
+
+		internal ContextProperty()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		private string name;

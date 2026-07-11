@@ -4,7 +4,7 @@ namespace System.Runtime.InteropServices.ComTypes
 {
 	[Flags]
 	[Serializable]
-	public enum PARAMFLAG
+	public enum PARAMFLAG : short
 	{
 		PARAMFLAG_NONE = 0,
 		PARAMFLAG_FIN = 1,

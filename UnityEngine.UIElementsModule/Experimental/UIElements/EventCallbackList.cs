@@ -8,31 +8,54 @@ namespace UnityEngine.Experimental.UIElements
 		public EventCallbackList()
 		{
 			this.m_List = new List<EventCallbackFunctorBase>();
-			this.capturingCallbackCount = 0;
-			this.bubblingCallbackCount = 0;
+			this.trickleDownCallbackCount = 0;
+			this.bubbleUpCallbackCount = 0;
 		}
 
 		public EventCallbackList(EventCallbackList source)
 		{
 			this.m_List = new List<EventCallbackFunctorBase>(source.m_List);
-			this.capturingCallbackCount = 0;
-			this.bubblingCallbackCount = 0;
+			this.trickleDownCallbackCount = 0;
+			this.bubbleUpCallbackCount = 0;
 		}
 
-		public int capturingCallbackCount { get; private set; }
+		public int trickleDownCallbackCount { get; private set; }
 
-		public int bubblingCallbackCount { get; private set; }
+		public int bubbleUpCallbackCount { get; private set; }
+
+		[Obsolete("Use trickleDownCallbackCount instead of capturingCallbackCount.")]
+		public int capturingCallbackCount
+		{
+			get
+			{
+				return this.trickleDownCallbackCount;
+			}
+		}
+
+		[Obsolete("Use bubbleUpCallbackCount instead of bubblingCallbackCount.")]
+		public int bubblingCallbackCount
+		{
+			get
+			{
+				return this.bubbleUpCallbackCount;
+			}
+		}
 
 		public bool Contains(long eventTypeId, Delegate callback, CallbackPhase phase)
+		{
+			return this.Find(eventTypeId, callback, phase) != null;
+		}
+
+		public EventCallbackFunctorBase Find(long eventTypeId, Delegate callback, CallbackPhase phase)
 		{
 			for (int i = 0; i < this.m_List.Count; i++)
 			{
 				if (this.m_List[i].IsEquivalentTo(eventTypeId, callback, phase))
 				{
-					return true;
+					return this.m_List[i];
 				}
 			}
-			return false;
+			return null;
 		}
 
 		public bool Remove(long eventTypeId, Delegate callback, CallbackPhase phase)
@@ -42,13 +65,13 @@ namespace UnityEngine.Experimental.UIElements
 				if (this.m_List[i].IsEquivalentTo(eventTypeId, callback, phase))
 				{
 					this.m_List.RemoveAt(i);
-					if (phase == CallbackPhase.CaptureAndTarget)
+					if (phase == CallbackPhase.TrickleDownAndTarget)
 					{
-						this.capturingCallbackCount--;
+						this.trickleDownCallbackCount--;
 					}
 					else if (phase == CallbackPhase.TargetAndBubbleUp)
 					{
-						this.bubblingCallbackCount--;
+						this.bubbleUpCallbackCount--;
 					}
 					return true;
 				}
@@ -59,13 +82,13 @@ namespace UnityEngine.Experimental.UIElements
 		public void Add(EventCallbackFunctorBase item)
 		{
 			this.m_List.Add(item);
-			if (item.phase == CallbackPhase.CaptureAndTarget)
+			if (item.phase == CallbackPhase.TrickleDownAndTarget)
 			{
-				this.capturingCallbackCount++;
+				this.trickleDownCallbackCount++;
 			}
 			else if (item.phase == CallbackPhase.TargetAndBubbleUp)
 			{
-				this.bubblingCallbackCount++;
+				this.bubbleUpCallbackCount++;
 			}
 		}
 
@@ -74,13 +97,13 @@ namespace UnityEngine.Experimental.UIElements
 			this.m_List.AddRange(list.m_List);
 			foreach (EventCallbackFunctorBase eventCallbackFunctorBase in list.m_List)
 			{
-				if (eventCallbackFunctorBase.phase == CallbackPhase.CaptureAndTarget)
+				if (eventCallbackFunctorBase.phase == CallbackPhase.TrickleDownAndTarget)
 				{
-					this.capturingCallbackCount++;
+					this.trickleDownCallbackCount++;
 				}
 				else if (eventCallbackFunctorBase.phase == CallbackPhase.TargetAndBubbleUp)
 				{
-					this.bubblingCallbackCount++;
+					this.bubbleUpCallbackCount++;
 				}
 			}
 		}
@@ -108,8 +131,8 @@ namespace UnityEngine.Experimental.UIElements
 		public void Clear()
 		{
 			this.m_List.Clear();
-			this.capturingCallbackCount = 0;
-			this.bubblingCallbackCount = 0;
+			this.trickleDownCallbackCount = 0;
+			this.bubbleUpCallbackCount = 0;
 		}
 
 		private List<EventCallbackFunctorBase> m_List;

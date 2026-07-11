@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using STRINGS;
 
@@ -8,11 +9,14 @@ namespace Database
 	{
 		public override bool Success()
 		{
-			foreach (Tech tech in Db.Get().Techs.resources)
+			using (List<Tech>.Enumerator enumerator = Db.Get().Techs.resources.GetEnumerator())
 			{
-				if (!tech.IsComplete())
+				while (enumerator.MoveNext())
 				{
-					return false;
+					if (!enumerator.Current.IsComplete())
+					{
+						return false;
+					}
 				}
 			}
 			return true;
@@ -33,11 +37,14 @@ namespace Database
 				return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.TECH_RESEARCHED, Db.Get().Techs.resources.Count, Db.Get().Techs.resources.Count);
 			}
 			int num = 0;
-			foreach (Tech tech in Db.Get().Techs.resources)
+			using (List<Tech>.Enumerator enumerator = Db.Get().Techs.resources.GetEnumerator())
 			{
-				if (tech.IsComplete())
+				while (enumerator.MoveNext())
 				{
-					num++;
+					if (enumerator.Current.IsComplete())
+					{
+						num++;
+					}
 				}
 			}
 			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.TECH_RESEARCHED, num, Db.Get().Techs.resources.Count);

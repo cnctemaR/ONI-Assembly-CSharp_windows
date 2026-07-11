@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
 
@@ -121,6 +122,7 @@ namespace UnityEngine.UI
 			}
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Not used anymore.", true)]
 		public virtual void ParentMaskStateChanged()
 		{
@@ -176,6 +178,8 @@ namespace UnityEngine.UI
 
 		public virtual void RecalculateMasking()
 		{
+			StencilMaterial.Remove(this.m_MaskMaterial);
+			this.m_MaskMaterial = null;
 			this.m_ShouldRecalculateStencil = true;
 			this.SetMaterialDirty();
 		}
@@ -197,6 +201,7 @@ namespace UnityEngine.UI
 		[NonSerialized]
 		private bool m_Maskable = true;
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Not used anymore.", true)]
 		[NonSerialized]
 		protected bool m_IncludeForMasking = false;
@@ -204,6 +209,7 @@ namespace UnityEngine.UI
 		[SerializeField]
 		private MaskableGraphic.CullStateChangedEvent m_OnCullStateChanged = new MaskableGraphic.CullStateChangedEvent();
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Not used anymore", true)]
 		[NonSerialized]
 		protected bool m_ShouldRecalculate = true;

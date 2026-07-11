@@ -29,7 +29,11 @@ public class KCompactedVector<T> : KCompactedVectorBase, ICollection, IEnumerabl
 			}
 			this.data.RemoveAt(num);
 		}
-		return (!flag) ? handle : HandleVector<int>.InvalidHandle;
+		if (!flag)
+		{
+			return handle;
+		}
+		return HandleVector<int>.InvalidHandle;
 	}
 
 	public T GetData(HandleVector<int>.Handle handle)

@@ -133,12 +133,15 @@ public class MinionStartingStats : ITelepadDeliverable
 							{
 								break;
 							}
-							foreach (HashedString hashedString in traitVal.requiredNonPositiveAptitudes)
+							using (List<HashedString>.Enumerator enumerator3 = traitVal.requiredNonPositiveAptitudes.GetEnumerator())
 							{
-								if (hashedString == keyValuePair.Key.IdHash && keyValuePair.Value > 0f)
+								while (enumerator3.MoveNext())
 								{
-									flag2 = true;
-									break;
+									if (enumerator3.Current == keyValuePair.Key.IdHash && keyValuePair.Value > 0f)
+									{
+										flag2 = true;
+										break;
+									}
 								}
 							}
 						}
@@ -189,7 +192,7 @@ public class MinionStartingStats : ITelepadDeliverable
 			}
 			return false;
 		};
-		int num = ((!is_starter_minion) ? 3 : 1);
+		int num = (is_starter_minion ? 1 : 3);
 		bool flag = false;
 		while (!flag)
 		{
@@ -228,8 +231,7 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	private void GenerateAttributes(int pointsDelta, List<ChoreGroup> disabled_chore_groups)
 	{
-		float num = Util.GaussianRandom(0f, 1f) * ((float)DUPLICANTSTATS.MAX_STAT_POINTS - (float)DUPLICANTSTATS.MIN_STAT_POINTS) / 2f + (float)DUPLICANTSTATS.MIN_STAT_POINTS;
-		int num2 = Mathf.RoundToInt(num);
+		int num = Mathf.RoundToInt(Util.GaussianRandom(0f, 1f) * ((float)DUPLICANTSTATS.MAX_STAT_POINTS - (float)DUPLICANTSTATS.MIN_STAT_POINTS) / 2f + (float)DUPLICANTSTATS.MIN_STAT_POINTS);
 		List<string> list = new List<string>(DUPLICANTSTATS.ALL_ATTRIBUTES);
 		int[] randomDistribution = DUPLICANTSTATS.DISTRIBUTIONS.GetRandomDistribution();
 		for (int i = 0; i < list.Count; i++)
@@ -245,57 +247,57 @@ public class MinionStartingStats : ITelepadDeliverable
 			{
 				for (int j = 0; j < keyValuePair.Key.relevantAttributes.Count; j++)
 				{
-					Dictionary<string, int> dictionary;
-					string id;
-					(dictionary = this.StartingLevels)[id = keyValuePair.Key.relevantAttributes[j].Id] = dictionary[id] + DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[this.skillAptitudes.Count - 1];
+					Dictionary<string, int> dictionary = this.StartingLevels;
+					string text = keyValuePair.Key.relevantAttributes[j].Id;
+					dictionary[text] += DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[this.skillAptitudes.Count - 1];
 				}
 			}
 		}
 		list.Shuffle<string>();
 		for (int k = 0; k < list.Count; k++)
 		{
-			string text = list[k];
-			int num3 = randomDistribution[Mathf.Min(k, randomDistribution.Length - 1)];
-			int num4 = Mathf.Min(num2, num3);
-			if (!this.StartingLevels.ContainsKey(text))
+			string text2 = list[k];
+			int num2 = randomDistribution[Mathf.Min(k, randomDistribution.Length - 1)];
+			int num3 = Mathf.Min(num, num2);
+			if (!this.StartingLevels.ContainsKey(text2))
 			{
-				this.StartingLevels[text] = 0;
+				this.StartingLevels[text2] = 0;
 			}
-			Dictionary<string, int> dictionary;
-			string text2;
-			(dictionary = this.StartingLevels)[text2 = text] = dictionary[text2] + num4;
-			num2 -= num4;
+			Dictionary<string, int> dictionary = this.StartingLevels;
+			string text = text2;
+			dictionary[text] += num3;
+			num -= num3;
 		}
 		if (disabled_chore_groups.Count > 0)
 		{
+			int num4 = 0;
 			int num5 = 0;
-			int num6 = 0;
 			foreach (KeyValuePair<string, int> keyValuePair2 in this.StartingLevels)
 			{
-				if (keyValuePair2.Value > num5)
+				if (keyValuePair2.Value > num4)
 				{
-					num5 = keyValuePair2.Value;
+					num4 = keyValuePair2.Value;
 				}
 				if (keyValuePair2.Key == disabled_chore_groups[0].attribute.Id)
 				{
-					num6 = keyValuePair2.Value;
+					num5 = keyValuePair2.Value;
 				}
 			}
-			if (num5 == num6)
+			if (num4 == num5)
 			{
 				foreach (string text3 in list)
 				{
 					if (text3 != disabled_chore_groups[0].attribute.Id)
 					{
+						int num6 = 0;
+						this.StartingLevels.TryGetValue(text3, out num6);
 						int num7 = 0;
-						this.StartingLevels.TryGetValue(text3, out num7);
-						int num8 = 0;
-						if (num7 > 0)
+						if (num6 > 0)
 						{
-							num8 = 1;
+							num7 = 1;
 						}
-						this.StartingLevels[disabled_chore_groups[0].attribute.Id] = num7 - num8;
-						this.StartingLevels[text3] = num5 + num8;
+						this.StartingLevels[disabled_chore_groups[0].attribute.Id] = num6 - num7;
+						this.StartingLevels[text3] = num4 + num7;
 						break;
 					}
 				}
@@ -335,8 +337,7 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	public void ApplyRace(GameObject go)
 	{
-		MinionIdentity component = go.GetComponent<MinionIdentity>();
-		component.voiceIdx = this.voiceIdx;
+		go.GetComponent<MinionIdentity>().voiceIdx = this.voiceIdx;
 	}
 
 	public static KCompBuilder.BodyData CreateBodyData(Personality p)
@@ -389,8 +390,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		gameObject.transform.SetLocalPosition(location);
 		this.Apply(gameObject);
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
-		ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
-		new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
+		new EmoteChore(gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
 		return gameObject;
 	}
 

@@ -31,8 +31,7 @@ namespace Klei.AI
 			if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 15))
 			{
 				List<DUPLICANTSTATS.TraitVal> joytraits = DUPLICANTSTATS.JOYTRAITS;
-				MinionIdentity component = base.GetComponent<MinionIdentity>();
-				if (component)
+				if (base.GetComponent<MinionIdentity>())
 				{
 					bool flag = true;
 					foreach (DUPLICANTSTATS.TraitVal traitVal in joytraits)
@@ -77,12 +76,15 @@ namespace Klei.AI
 		public bool HasTrait(string trait_id)
 		{
 			bool flag = false;
-			foreach (Trait trait in this.TraitList)
+			using (List<Trait>.Enumerator enumerator = this.TraitList.GetEnumerator())
 			{
-				if (trait.Id == trait_id)
+				while (enumerator.MoveNext())
 				{
-					flag = true;
-					break;
+					if (enumerator.Current.Id == trait_id)
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
 			return flag;
@@ -90,11 +92,14 @@ namespace Klei.AI
 
 		public bool HasTrait(Trait trait)
 		{
-			foreach (Trait trait2 in this.TraitList)
+			using (List<Trait>.Enumerator enumerator = this.TraitList.GetEnumerator())
 			{
-				if (trait2 == trait)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current == trait)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -117,7 +122,7 @@ namespace Klei.AI
 					this.TraitList.RemoveAt(i);
 					this.TraitIds.Remove(trait.Id);
 					trait.RemoveFrom(this.GetAttributes());
-					break;
+					return;
 				}
 			}
 		}

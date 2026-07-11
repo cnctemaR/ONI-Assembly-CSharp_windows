@@ -23,10 +23,7 @@ public class MinMaxSlider : KMonoBehaviour
 		this.maxSlider.maxValue = this.maxLimit;
 		this.minSlider.minValue = this.minLimit;
 		this.maxSlider.minValue = this.minLimit;
-		Slider slider = this.minSlider;
-		Slider.Direction direction = this.direction;
-		this.maxSlider.direction = direction;
-		slider.direction = direction;
+		this.minSlider.direction = (this.maxSlider.direction = this.direction);
 		if (this.isOverPowered != null)
 		{
 			this.isOverPowered.enabled = false;
@@ -39,12 +36,7 @@ public class MinMaxSlider : KMonoBehaviour
 		if (this.extraSlider != null)
 		{
 			this.extraSlider.value = this.currentExtraValue;
-			Slider slider2 = this.extraSlider;
-			bool flag = this.wholeNumbers;
-			this.maxSlider.wholeNumbers = flag;
-			flag = flag;
-			this.minSlider.wholeNumbers = flag;
-			slider2.wholeNumbers = flag;
+			this.extraSlider.wholeNumbers = (this.minSlider.wholeNumbers = (this.maxSlider.wholeNumbers = this.wholeNumbers));
 			this.extraSlider.direction = this.direction;
 			this.extraSlider.interactable = this.interactable;
 			this.extraSlider.maxValue = this.maxLimit;
@@ -140,12 +132,10 @@ public class MinMaxSlider : KMonoBehaviour
 			this.minRect.anchorMax = new Vector2(this.minSlider.value / this.maxLimit, this.minRect.anchorMax.y);
 			this.maxRect.anchorMax = new Vector2(this.maxSlider.value / this.maxLimit, this.maxRect.anchorMax.y);
 			this.maxRect.anchorMin = new Vector2(this.minSlider.value / this.maxLimit, this.maxRect.anchorMin.y);
+			return;
 		}
-		else
-		{
-			this.minRect.anchorMax = new Vector2(this.minRect.anchorMin.x, this.minSlider.value / this.maxLimit);
-			this.maxRect.anchorMin = new Vector2(this.maxRect.anchorMin.x, this.minSlider.value / this.maxLimit);
-		}
+		this.minRect.anchorMax = new Vector2(this.minRect.anchorMin.x, this.minSlider.value / this.maxLimit);
+		this.maxRect.anchorMin = new Vector2(this.maxRect.anchorMin.x, this.minSlider.value / this.maxLimit);
 	}
 
 	public void OnMinValueChanged(float ignoreThis)

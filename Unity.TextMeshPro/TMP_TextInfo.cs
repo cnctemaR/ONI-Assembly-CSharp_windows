@@ -132,7 +132,7 @@ namespace TMPro
 
 		public static void Resize<T>(ref T[] array, int size)
 		{
-			int num = ((size <= 1024) ? Mathf.NextPowerOfTwo(size) : (size + 256));
+			int num = ((size > 1024) ? (size + 256) : Mathf.NextPowerOfTwo(size));
 			Array.Resize<T>(ref array, num);
 		}
 
@@ -140,7 +140,7 @@ namespace TMPro
 		{
 			if (isBlockAllocated)
 			{
-				size = ((size <= 1024) ? Mathf.NextPowerOfTwo(size) : (size + 256));
+				size = ((size > 1024) ? (size + 256) : Mathf.NextPowerOfTwo(size));
 			}
 			if (size == array.Length)
 			{

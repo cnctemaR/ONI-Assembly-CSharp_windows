@@ -26,18 +26,16 @@ public class SpriteSheetAnimator
 				size = size,
 				colour = colour
 			});
+			return;
 		}
-		else
+		this.rotatedAnims.Add(new SpriteSheetAnimator.AnimInfo
 		{
-			this.rotatedAnims.Add(new SpriteSheetAnimator.AnimInfo
-			{
-				elapsedTime = 0f,
-				pos = pos,
-				rotation = rotation,
-				size = size,
-				colour = colour
-			});
-		}
+			elapsedTime = 0f,
+			pos = pos,
+			rotation = rotation,
+			size = size,
+			colour = colour
+		});
 	}
 
 	private void GetUVs(int frame, out Vector2 uv_bl, out Vector2 uv_br, out Vector2 uv_tl, out Vector2 uv_tr)

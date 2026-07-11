@@ -1,46 +1,55 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Security.Permissions;
+using System.Threading.Tasks;
 
 namespace System.Xml
 {
 	public abstract class XmlResolver
 	{
-		public abstract ICredentials Credentials { set; }
+		public abstract object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn);
 
-		public abstract object GetEntity(Uri absoluteUri, string role, Type type);
-
-		[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 		public virtual Uri ResolveUri(Uri baseUri, string relativeUri)
 		{
-			if (baseUri == null)
+			if (baseUri == null || (!baseUri.IsAbsoluteUri && baseUri.OriginalString.Length == 0))
 			{
-				if (relativeUri == null)
+				Uri uri = new Uri(relativeUri, UriKind.RelativeOrAbsolute);
+				if (!uri.IsAbsoluteUri && uri.OriginalString.Length > 0)
 				{
-					throw new ArgumentNullException("Either baseUri or relativeUri are required.");
+					uri = new Uri(Path.GetFullPath(relativeUri));
 				}
-				if (relativeUri.StartsWith("http:") || relativeUri.StartsWith("https:") || relativeUri.StartsWith("ftp:") || relativeUri.StartsWith("file:"))
-				{
-					return new Uri(relativeUri);
-				}
-				return new Uri(Path.GetFullPath(relativeUri));
+				return uri;
 			}
-			else
+			if (relativeUri == null || relativeUri.Length == 0)
 			{
-				if (relativeUri == null)
-				{
-					return baseUri;
-				}
-				return new Uri(baseUri, this.EscapeRelativeUriBody(relativeUri));
+				return baseUri;
+			}
+			if (!baseUri.IsAbsoluteUri)
+			{
+				throw new NotSupportedException(Res.GetString("Relative URIs are not supported."));
+			}
+			return new Uri(baseUri, relativeUri);
+		}
+
+		public virtual ICredentials Credentials
+		{
+			set
+			{
 			}
 		}
 
-		private string EscapeRelativeUriBody(string src)
+		public virtual bool SupportsType(Uri absoluteUri, Type type)
 		{
-			return src.Replace("<", "%3C").Replace(">", "%3E").Replace("#", "%23")
-				.Replace("%", "%25")
-				.Replace("\"", "%22");
+			if (absoluteUri == null)
+			{
+				throw new ArgumentNullException("absoluteUri");
+			}
+			return type == null || type == typeof(Stream);
+		}
+
+		public virtual Task<object> GetEntityAsync(Uri absoluteUri, string role, Type ofObjectToReturn)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

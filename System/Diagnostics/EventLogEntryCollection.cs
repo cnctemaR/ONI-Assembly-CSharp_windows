@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Diagnostics
 {
@@ -8,28 +9,6 @@ namespace System.Diagnostics
 		internal EventLogEntryCollection(EventLogImpl impl)
 		{
 			this._impl = impl;
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this;
-			}
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			EventLogEntry[] entries = this._impl.GetEntries();
-			Array.Copy(entries, 0, array, index, entries.Length);
 		}
 
 		public int Count
@@ -48,15 +27,42 @@ namespace System.Diagnostics
 			}
 		}
 
-		public void CopyTo(EventLogEntry[] eventLogEntries, int index)
+		bool ICollection.IsSynchronized
 		{
-			EventLogEntry[] entries = this._impl.GetEntries();
-			Array.Copy(entries, 0, eventLogEntries, index, entries.Length);
+			get
+			{
+				return false;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return this;
+			}
+		}
+
+		public void CopyTo(EventLogEntry[] entries, int index)
+		{
+			EventLogEntry[] entries2 = this._impl.GetEntries();
+			Array.Copy(entries2, 0, entries, index, entries2.Length);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
 			return new EventLogEntryCollection.EventLogEntryEnumerator(this._impl);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			EventLogEntry[] entries = this._impl.GetEntries();
+			Array.Copy(entries, 0, array, index, entries.Length);
+		}
+
+		internal EventLogEntryCollection()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly EventLogImpl _impl;

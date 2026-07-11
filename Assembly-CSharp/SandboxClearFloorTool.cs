@@ -66,18 +66,15 @@ public class SandboxClearFloorTool : BrushTool
 			while (enumerator.MoveNext())
 			{
 				Pickupable pickup = enumerator.Current;
-				if (!(pickup.storage != null))
+				if (!(pickup.storage != null) && Grid.PosToCell(pickup) == cell && Components.LiveMinionIdentities.Items.Find((MinionIdentity match) => match.gameObject == pickup.gameObject) == null)
 				{
-					if (Grid.PosToCell(pickup) == cell && Components.LiveMinionIdentities.Items.Find((MinionIdentity match) => match.gameObject == pickup.gameObject) == null)
+					if (!flag)
 					{
-						if (!flag)
-						{
-							UISounds.PlaySound(UISounds.Sound.Negative);
-							PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.SANDBOXTOOLS.CLEARFLOOR.DELETED, pickup.transform, 1.5f, false);
-							flag = true;
-						}
-						Util.KDestroyGameObject(pickup.gameObject);
+						UISounds.PlaySound(UISounds.Sound.Negative);
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.SANDBOXTOOLS.CLEARFLOOR.DELETED, pickup.transform, 1.5f, false);
+						flag = true;
 					}
+					Util.KDestroyGameObject(pickup.gameObject);
 				}
 			}
 		}

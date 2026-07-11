@@ -3,15 +3,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Contact information for the wheel, reported by WheelCollider.</para>
-	/// </summary>
 	[NativeHeader("Runtime/Vehicles/WheelCollider.h")]
 	public struct WheelHit
 	{
-		/// <summary>
-		///   <para>The other Collider the wheel is hitting.</para>
-		/// </summary>
 		public Collider collider
 		{
 			get
@@ -24,9 +18,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The point of contact between the wheel and the ground.</para>
-		/// </summary>
 		public Vector3 point
 		{
 			get
@@ -39,9 +30,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The normal at the point of contact.</para>
-		/// </summary>
 		public Vector3 normal
 		{
 			get
@@ -54,9 +42,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The direction the wheel is pointing in.</para>
-		/// </summary>
 		public Vector3 forwardDir
 		{
 			get
@@ -69,9 +54,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The sideways direction of the wheel.</para>
-		/// </summary>
 		public Vector3 sidewaysDir
 		{
 			get
@@ -84,9 +66,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The magnitude of the force being applied for the contact.</para>
-		/// </summary>
 		public float force
 		{
 			get
@@ -99,9 +78,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Tire slip in the rolling direction. Acceleration slip is negative, braking slip is positive.</para>
-		/// </summary>
 		public float forwardSlip
 		{
 			get
@@ -114,9 +90,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Tire slip in the sideways direction.</para>
-		/// </summary>
 		public float sidewaysSlip
 		{
 			get

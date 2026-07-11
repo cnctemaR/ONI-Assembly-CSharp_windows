@@ -21,6 +21,14 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 			}
 		}
 
+		public bool HasCertificate
+		{
+			get
+			{
+				return this.clientCertificates.Count > 0;
+			}
+		}
+
 		protected override void ProcessAsSsl3()
 		{
 			this.ProcessAsTls1();
@@ -41,8 +49,9 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 			if (this.clientCertificates.Count > 0)
 			{
 				this.validateCertificates(this.clientCertificates);
+				return;
 			}
-			else if ((base.Context as ServerContext).ClientCertificateRequired)
+			if ((base.Context as ServerContext).ClientCertificateRequired)
 			{
 				throw new TlsException(AlertDescription.NoCertificate);
 			}
@@ -93,12 +102,7 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 				return extendedKeyUsageExtension.KeyPurpose.Contains("1.3.6.1.5.5.7.3.2");
 			}
 			x509Extension = cert.Extensions["2.16.840.1.113730.1.1"];
-			if (x509Extension != null)
-			{
-				NetscapeCertTypeExtension netscapeCertTypeExtension = new NetscapeCertTypeExtension(x509Extension);
-				return netscapeCertTypeExtension.Support(NetscapeCertTypeExtension.CertTypes.SslClient);
-			}
-			return false;
+			return x509Extension != null && new NetscapeCertTypeExtension(x509Extension).Support(NetscapeCertTypeExtension.CertTypes.SslClient);
 		}
 
 		private void validateCertificates(Mono.Security.X509.X509CertificateCollection certificates)
@@ -138,54 +142,49 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 				if (!flag)
 				{
 					Mono.Security.X509.X509ChainStatusFlags status = x509Chain.Status;
-					if (status != Mono.Security.X509.X509ChainStatusFlags.NotTimeValid)
+					if (status <= Mono.Security.X509.X509ChainStatusFlags.NotSignatureValid)
 					{
-						if (status != Mono.Security.X509.X509ChainStatusFlags.NotTimeNested)
+						if (status == Mono.Security.X509.X509ChainStatusFlags.NotTimeValid)
 						{
-							if (status != Mono.Security.X509.X509ChainStatusFlags.NotSignatureValid)
-							{
-								if (status != Mono.Security.X509.X509ChainStatusFlags.UntrustedRoot)
-								{
-									if (status != Mono.Security.X509.X509ChainStatusFlags.InvalidBasicConstraints)
-									{
-										if (status != Mono.Security.X509.X509ChainStatusFlags.PartialChain)
-										{
-											alertDescription = AlertDescription.CertificateUnknown;
-											arrayList.Add((int)x509Chain.Status);
-										}
-										else
-										{
-											alertDescription = AlertDescription.UnknownCA;
-											arrayList.Add(-2146762486);
-										}
-									}
-									else
-									{
-										arrayList.Add(-2146869223);
-									}
-								}
-								else
-								{
-									alertDescription = AlertDescription.UnknownCA;
-									arrayList.Add(-2146762487);
-								}
-							}
-							else
-							{
-								arrayList.Add(-2146869232);
-							}
+							alertDescription = AlertDescription.CertificateExpired;
+							arrayList.Add(-2146762495);
+							goto IL_016C;
 						}
-						else
+						if (status == Mono.Security.X509.X509ChainStatusFlags.NotTimeNested)
 						{
 							arrayList.Add(-2146762494);
+							goto IL_016C;
+						}
+						if (status == Mono.Security.X509.X509ChainStatusFlags.NotSignatureValid)
+						{
+							arrayList.Add(-2146869232);
+							goto IL_016C;
 						}
 					}
 					else
 					{
-						alertDescription = AlertDescription.CertificateExpired;
-						arrayList.Add(-2146762495);
+						if (status == Mono.Security.X509.X509ChainStatusFlags.UntrustedRoot)
+						{
+							alertDescription = AlertDescription.UnknownCA;
+							arrayList.Add(-2146762487);
+							goto IL_016C;
+						}
+						if (status == Mono.Security.X509.X509ChainStatusFlags.InvalidBasicConstraints)
+						{
+							arrayList.Add(-2146869223);
+							goto IL_016C;
+						}
+						if (status == Mono.Security.X509.X509ChainStatusFlags.PartialChain)
+						{
+							alertDescription = AlertDescription.UnknownCA;
+							arrayList.Add(-2146762486);
+							goto IL_016C;
+						}
 					}
+					alertDescription = AlertDescription.CertificateUnknown;
+					arrayList.Add((int)x509Chain.Status);
 				}
+				IL_016C:
 				x509Certificate = new global::System.Security.Cryptography.X509Certificates.X509Certificate(x509Certificate2.RawData);
 				array = (int[])arrayList.ToArray(typeof(int));
 			}

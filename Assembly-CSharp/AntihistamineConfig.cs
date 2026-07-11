@@ -19,8 +19,7 @@ public class AntihistamineConfig : IEntityConfig
 		{
 			new ComplexRecipe.RecipeElement("Antihistamine", 10f)
 		};
-		string text = ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2);
-		AntihistamineConfig.recipe = new ComplexRecipe(text, array, array2)
+		AntihistamineConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 100f,
 			description = ITEMS.PILLS.ANTIHISTAMINE.RECIPEDESC,

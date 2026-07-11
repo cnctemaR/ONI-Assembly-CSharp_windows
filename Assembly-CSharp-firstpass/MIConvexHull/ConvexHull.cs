@@ -18,11 +18,10 @@ namespace MIConvexHull
 
 		public static ConvexHull<DefaultVertex, DefaultConvexFace<DefaultVertex>> Create(IList<double[]> data, double PlaneDistanceTolerance = 1E-10)
 		{
-			List<DefaultVertex> list = data.Select<double[], DefaultVertex>((double[] p) => new DefaultVertex
+			return ConvexHull<DefaultVertex, DefaultConvexFace<DefaultVertex>>.Create(data.Select<double[], DefaultVertex>((double[] p) => new DefaultVertex
 			{
 				Position = p
-			}).ToList<DefaultVertex>();
-			return ConvexHull<DefaultVertex, DefaultConvexFace<DefaultVertex>>.Create(list, PlaneDistanceTolerance);
+			}).ToList<DefaultVertex>(), PlaneDistanceTolerance);
 		}
 	}
 }

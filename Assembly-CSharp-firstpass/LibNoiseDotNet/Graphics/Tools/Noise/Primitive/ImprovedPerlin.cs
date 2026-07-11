@@ -2,20 +2,8 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 {
-	public class ImprovedPerlin : PrimitiveModule, IModule3D, IModule2D, IModule1D, IModule
+	public class ImprovedPerlin : PrimitiveModule, IModule3D, IModule, IModule2D, IModule1D
 	{
-		public ImprovedPerlin()
-			: this(0, NoiseQuality.Standard)
-		{
-		}
-
-		public ImprovedPerlin(int seed, NoiseQuality quality)
-		{
-			this._seed = seed;
-			this._quality = quality;
-			this.Randomize(this._seed);
-		}
-
 		public override int Seed
 		{
 			get
@@ -30,6 +18,18 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 					this.Randomize(this._seed);
 				}
 			}
+		}
+
+		public ImprovedPerlin()
+			: this(0, NoiseQuality.Standard)
+		{
+		}
+
+		public ImprovedPerlin(int seed, NoiseQuality quality)
+		{
+			this._seed = seed;
+			this._quality = quality;
+			this.Randomize(this._seed);
 		}
 
 		protected void Randomize(int seed)
@@ -47,21 +47,19 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 					this._random[i] ^= (int)array[3];
 					this._random[i + 256] = this._random[i];
 				}
+				return;
 			}
-			else
+			for (int j = 0; j < 256; j++)
 			{
-				for (int j = 0; j < 256; j++)
-				{
-					this._random[j + 256] = (this._random[j] = ImprovedPerlin._source[j]);
-				}
+				this._random[j + 256] = (this._random[j] = ImprovedPerlin._source[j]);
 			}
 		}
 
 		public float GetValue(float x, float y, float z)
 		{
-			int num = (((double)x <= 0.0) ? ((int)x - 1) : ((int)x));
-			int num2 = (((double)y <= 0.0) ? ((int)y - 1) : ((int)y));
-			int num3 = (((double)z <= 0.0) ? ((int)z - 1) : ((int)z));
+			int num = (((double)x > 0.0) ? ((int)x) : ((int)x - 1));
+			int num2 = (((double)y > 0.0) ? ((int)y) : ((int)y - 1));
+			int num3 = (((double)z > 0.0) ? ((int)z) : ((int)z - 1));
 			int num4 = num & 255;
 			int num5 = num2 & 255;
 			int num6 = num3 & 255;
@@ -71,30 +69,23 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 			float num7 = 0f;
 			float num8 = 0f;
 			float num9 = 0f;
-			NoiseQuality quality = this._quality;
-			if (quality != NoiseQuality.Fast)
+			switch (this._quality)
 			{
-				if (quality != NoiseQuality.Standard)
-				{
-					if (quality == NoiseQuality.Best)
-					{
-						num7 = Libnoise.SCurve5(x);
-						num8 = Libnoise.SCurve5(y);
-						num9 = Libnoise.SCurve5(z);
-					}
-				}
-				else
-				{
-					num7 = Libnoise.SCurve3(x);
-					num8 = Libnoise.SCurve3(y);
-					num9 = Libnoise.SCurve3(z);
-				}
-			}
-			else
-			{
+			case NoiseQuality.Fast:
 				num7 = x;
 				num8 = y;
 				num9 = z;
+				break;
+			case NoiseQuality.Standard:
+				num7 = Libnoise.SCurve3(x);
+				num8 = Libnoise.SCurve3(y);
+				num9 = Libnoise.SCurve3(z);
+				break;
+			case NoiseQuality.Best:
+				num7 = Libnoise.SCurve5(x);
+				num8 = Libnoise.SCurve5(y);
+				num9 = Libnoise.SCurve5(z);
+				break;
 			}
 			int num10 = this._random[num4] + num5;
 			int num11 = this._random[num10] + num6;
@@ -108,42 +99,35 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 		protected float Grad(int hash, float x, float y, float z)
 		{
 			int num = hash & 15;
-			float num2 = ((num >= 8) ? y : x);
-			float num3 = ((num >= 4) ? ((num != 12 && num != 14) ? z : x) : y);
-			return (((num & 1) != 0) ? (-num2) : num2) + (((num & 2) != 0) ? (-num3) : num3);
+			float num2 = ((num < 8) ? x : y);
+			float num3 = ((num < 4) ? y : ((num == 12 || num == 14) ? x : z));
+			return (((num & 1) == 0) ? num2 : (-num2)) + (((num & 2) == 0) ? num3 : (-num3));
 		}
 
 		public float GetValue(float x, float y)
 		{
-			int num = (((double)x <= 0.0) ? ((int)x - 1) : ((int)x));
-			int num2 = (((double)y <= 0.0) ? ((int)y - 1) : ((int)y));
+			int num = (((double)x > 0.0) ? ((int)x) : ((int)x - 1));
+			int num2 = (((double)y > 0.0) ? ((int)y) : ((int)y - 1));
 			int num3 = num & 255;
 			int num4 = num2 & 255;
 			x -= (float)num;
 			x -= (float)num2;
 			float num5 = 0f;
 			float num6 = 0f;
-			NoiseQuality quality = this._quality;
-			if (quality != NoiseQuality.Fast)
+			switch (this._quality)
 			{
-				if (quality != NoiseQuality.Standard)
-				{
-					if (quality == NoiseQuality.Best)
-					{
-						num5 = Libnoise.SCurve5(x);
-						num6 = Libnoise.SCurve5(y);
-					}
-				}
-				else
-				{
-					num5 = Libnoise.SCurve3(x);
-					num6 = Libnoise.SCurve3(y);
-				}
-			}
-			else
-			{
+			case NoiseQuality.Fast:
 				num5 = x;
 				num6 = y;
+				break;
+			case NoiseQuality.Standard:
+				num5 = Libnoise.SCurve3(x);
+				num6 = Libnoise.SCurve3(y);
+				break;
+			case NoiseQuality.Best:
+				num5 = Libnoise.SCurve5(x);
+				num6 = Libnoise.SCurve5(y);
+				break;
 			}
 			int num7 = this._random[num3] + num4;
 			int num8 = this._random[num3 + 1] + num4;
@@ -153,42 +137,39 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Primitive
 		protected float Grad(int hash, float x, float y)
 		{
 			int num = hash & 3;
-			float num2 = (((num & 2) != 0) ? (-x) : x);
-			float num3 = (((num & 1) != 0) ? (-y) : y);
+			float num2 = (((num & 2) == 0) ? x : (-x));
+			float num3 = (((num & 1) == 0) ? y : (-y));
 			return num2 + num3;
 		}
 
 		public float GetValue(float x)
 		{
-			int num = (((double)x <= 0.0) ? ((int)x - 1) : ((int)x));
+			int num = (((double)x > 0.0) ? ((int)x) : ((int)x - 1));
 			int num2 = num & 255;
 			x -= (float)num;
 			float num3 = 0f;
-			NoiseQuality quality = this._quality;
-			if (quality != NoiseQuality.Fast)
+			switch (this._quality)
 			{
-				if (quality != NoiseQuality.Standard)
-				{
-					if (quality == NoiseQuality.Best)
-					{
-						num3 = Libnoise.SCurve5(x);
-					}
-				}
-				else
-				{
-					num3 = Libnoise.SCurve3(x);
-				}
-			}
-			else
-			{
+			case NoiseQuality.Fast:
 				num3 = x;
+				break;
+			case NoiseQuality.Standard:
+				num3 = Libnoise.SCurve3(x);
+				break;
+			case NoiseQuality.Best:
+				num3 = Libnoise.SCurve5(x);
+				break;
 			}
 			return Libnoise.Lerp(this.Grad(this._random[num2], x), this.Grad(this._random[num2 + 1], x - 1f), num3);
 		}
 
 		protected float Grad(int hash, float x)
 		{
-			return ((hash & 1) != 0) ? (-x) : x;
+			if ((hash & 1) != 0)
+			{
+				return -x;
+			}
+			return x;
 		}
 
 		protected const int RANDOM_SIZE = 256;

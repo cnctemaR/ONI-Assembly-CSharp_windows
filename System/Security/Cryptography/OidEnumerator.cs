@@ -5,53 +5,49 @@ namespace System.Security.Cryptography
 {
 	public sealed class OidEnumerator : IEnumerator
 	{
-		internal OidEnumerator(OidCollection collection)
+		private OidEnumerator()
 		{
-			this._collection = collection;
-			this._position = -1;
 		}
 
-		object IEnumerator.Current
+		internal OidEnumerator(OidCollection oids)
 		{
-			get
-			{
-				if (this._position < 0)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				return this._collection[this._position];
-			}
+			this.m_oids = oids;
+			this.m_current = -1;
 		}
 
 		public Oid Current
 		{
 			get
 			{
-				if (this._position < 0)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				return this._collection[this._position];
+				return this.m_oids[this.m_current];
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.m_oids[this.m_current];
 			}
 		}
 
 		public bool MoveNext()
 		{
-			if (++this._position < this._collection.Count)
+			if (this.m_current == this.m_oids.Count - 1)
 			{
-				return true;
+				return false;
 			}
-			this._position = this._collection.Count - 1;
-			return false;
+			this.m_current++;
+			return true;
 		}
 
 		public void Reset()
 		{
-			this._position = -1;
+			this.m_current = -1;
 		}
 
-		private OidCollection _collection;
+		private OidCollection m_oids;
 
-		private int _position;
+		private int m_current;
 	}
 }

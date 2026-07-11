@@ -239,19 +239,17 @@ namespace Mono.Posix
 		public static string GetHostName()
 		{
 			byte[] array = new byte[256];
-			int i = Syscall.syscall_gethostname(array, array.Length);
-			if (i == -1)
+			int num = Syscall.syscall_gethostname(array, array.Length);
+			if (num == -1)
 			{
 				return "localhost";
 			}
-			for (i = 0; i < array.Length; i++)
+			num = 0;
+			while (num < array.Length && array[num] != 0)
 			{
-				if (array[i] == 0)
-				{
-					break;
-				}
+				num++;
 			}
-			return Encoding.UTF8.GetString(array, 0, i);
+			return Encoding.UTF8.GetString(array, 0, num);
 		}
 
 		[CLSCompliant(false)]
@@ -265,8 +263,7 @@ namespace Mono.Posix
 
 		public static bool isatty(int desc)
 		{
-			int num = Syscall.syscall_isatty(desc);
-			return num == 1;
+			return Syscall.syscall_isatty(desc) == 1;
 		}
 
 		[DllImport("MonoPosixHelper")]

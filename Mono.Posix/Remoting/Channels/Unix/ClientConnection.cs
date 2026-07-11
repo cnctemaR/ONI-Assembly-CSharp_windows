@@ -40,10 +40,9 @@ namespace Mono.Remoting.Channels.Unix
 				while (!flag)
 				{
 					MessageStatus messageStatus = UnixMessageIO.ReceiveMessageStatus(this._stream, array);
-					MessageStatus messageStatus2 = messageStatus;
-					if (messageStatus2 != MessageStatus.MethodMessage)
+					if (messageStatus != MessageStatus.MethodMessage)
 					{
-						if (messageStatus2 == MessageStatus.CancelSignal || messageStatus2 == MessageStatus.Unknown)
+						if (messageStatus == MessageStatus.CancelSignal || messageStatus == MessageStatus.Unknown)
 						{
 							flag = true;
 						}
@@ -59,9 +58,15 @@ namespace Mono.Remoting.Channels.Unix
 			}
 			finally
 			{
-				this._stream.Close();
-				this._client.Close();
-				this._serverChannel.ReleaseConnection(Thread.CurrentThread);
+				try
+				{
+					this._serverChannel.ReleaseConnection(Thread.CurrentThread);
+					this._stream.Close();
+					this._client.Close();
+				}
+				catch
+				{
+				}
 			}
 		}
 

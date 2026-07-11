@@ -26,17 +26,17 @@ public class ManagementMenu : KIconToggleMenu
 		this.scheduleScreen = this.instantiator.GetComponentInChildren<ScheduleScreen>(true);
 		this.skillsScreen = component.GetInstantiatedObject<SkillsScreen>();
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
-		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
-		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
-		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, string.Empty);
+		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, "");
+		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, "");
+		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, "");
 		this.reportsInfo.prefabOverride = this.smallPrefab;
-		this.researchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, string.Empty);
-		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePriorities, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
-		this.skillsInfo = new KIconToggleMenu.ToggleInfo(UI.SKILLS, "OverviewUI_jobs_icon", null, global::Action.ManageSkills, UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, string.Empty);
-		this.starmapInfo = new KIconToggleMenu.ToggleInfo(UI.STARMAP.MANAGEMENT_BUTTON, "OverviewUI_starmap_icon", null, global::Action.ManageStarmap, UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, string.Empty);
-		this.codexInfo = new KIconToggleMenu.ToggleInfo(UI.CODEX.MANAGEMENT_BUTTON, "OverviewUI_database_icon", null, global::Action.ManageDatabase, UI.TOOLTIPS.MANAGEMENTMENU_CODEX, string.Empty);
+		this.researchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, "");
+		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePriorities, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, "");
+		this.skillsInfo = new KIconToggleMenu.ToggleInfo(UI.SKILLS, "OverviewUI_jobs_icon", null, global::Action.ManageSkills, UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, "");
+		this.starmapInfo = new KIconToggleMenu.ToggleInfo(UI.STARMAP.MANAGEMENT_BUTTON, "OverviewUI_starmap_icon", null, global::Action.ManageStarmap, UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, "");
+		this.codexInfo = new KIconToggleMenu.ToggleInfo(UI.CODEX.MANAGEMENT_BUTTON, "OverviewUI_database_icon", null, global::Action.ManageDatabase, UI.TOOLTIPS.MANAGEMENTMENU_CODEX, "");
 		this.codexInfo.prefabOverride = this.smallPrefab;
-		this.scheduleInfo = new KIconToggleMenu.ToggleInfo(UI.SCHEDULE, "OverviewUI_schedule2_icon", null, global::Action.ManageSchedule, UI.TOOLTIPS.MANAGEMENTMENU_SCHEDULE, string.Empty);
+		this.scheduleInfo = new KIconToggleMenu.ToggleInfo(UI.SCHEDULE, "OverviewUI_schedule2_icon", null, global::Action.ManageSchedule, UI.TOOLTIPS.MANAGEMENTMENU_SCHEDULE, "");
 		this.ScreenInfoMatch.Add(this.consumablesInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.consumablesScreen,
@@ -151,7 +151,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		bool flag = Components.ResearchCenters.Count <= 0 && !DebugHandler.InstantBuildMode;
 		bool flag2 = !flag && this.activeScreen != null && this.activeScreen.toggleInfo == this.researchInfo;
-		string text = ((!flag) ? this.researchTooltip : this.researchTooltipDisabled);
+		string text = (flag ? this.researchTooltipDisabled : this.researchTooltip);
 		this.ConfigureToggle(this.researchInfo.toggle, flag, flag2, text, this.ToggleToolTipTextStyleSetting);
 	}
 
@@ -163,7 +163,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		bool flag = Components.RoleStations.Count <= 0 && !DebugHandler.InstantBuildMode;
 		bool flag2 = this.activeScreen != null && this.activeScreen.toggleInfo == this.skillsInfo;
-		string text = ((!flag) ? this.skillsTooltip : this.skillsTooltipDisabled);
+		string text = (flag ? this.skillsTooltipDisabled : this.skillsTooltip);
 		this.ConfigureToggle(this.skillsInfo.toggle, flag, flag2, text, this.ToggleToolTipTextStyleSetting);
 	}
 
@@ -175,7 +175,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		bool flag = Components.Telescopes.Count <= 0 && !DebugHandler.InstantBuildMode;
 		bool flag2 = this.activeScreen != null && this.activeScreen.toggleInfo == this.starmapInfo;
-		string text = ((!flag) ? this.starmapTooltip : this.starmapTooltipDisabled);
+		string text = (flag ? this.starmapTooltipDisabled : this.starmapTooltip);
 		this.ConfigureToggle(this.starmapInfo.toggle, flag, flag2, text, this.ToggleToolTipTextStyleSetting);
 	}
 
@@ -301,16 +301,14 @@ public class ManagementMenu : KIconToggleMenu
 			this.CloseActive();
 			this.activeScreen = screenData;
 			this.activeScreen.screen.Show(true);
+			return;
 		}
-		else
-		{
-			this.activeScreen.screen.Show(false);
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, STOP_MODE.ALLOWFADEOUT);
-			this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
-			this.activeScreen = null;
-			screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
-		}
+		this.activeScreen.screen.Show(false);
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, STOP_MODE.ALLOWFADEOUT);
+		this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
+		this.activeScreen = null;
+		screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
 	}
 
 	public void OnButtonClick(KIconToggleMenu.ToggleInfo toggle_info)

@@ -22,8 +22,7 @@ public class VictoryScreen : KModalScreen
 
 	private void Retire()
 	{
-		bool flag = RetireColonyUtility.SaveColonySummaryData();
-		if (flag)
+		if (RetireColonyUtility.SaveColonySummaryData())
 		{
 			base.Show(false);
 		}
@@ -36,7 +35,7 @@ public class VictoryScreen : KModalScreen
 
 	public void SetAchievements(string[] achievementIDs)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < achievementIDs.Length; i++)
 		{
 			if (i > 0)

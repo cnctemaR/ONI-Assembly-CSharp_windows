@@ -8,23 +8,22 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 	{
 		public PreProcessingPhaseObjectGraphVisitorSkeleton(IEnumerable<IYamlTypeConverter> typeConverters)
 		{
-			this.typeConverters = ((typeConverters == null) ? Enumerable.Empty<IYamlTypeConverter>() : typeConverters.ToList<IYamlTypeConverter>());
+			IEnumerable<IYamlTypeConverter> enumerable;
+			if (typeConverters == null)
+			{
+				enumerable = Enumerable.Empty<IYamlTypeConverter>();
+			}
+			else
+			{
+				IEnumerable<IYamlTypeConverter> enumerable2 = typeConverters.ToList<IYamlTypeConverter>();
+				enumerable = enumerable2;
+			}
+			this.typeConverters = enumerable;
 		}
 
 		bool IObjectGraphVisitor<Nothing>.Enter(IObjectDescriptor value, Nothing context)
 		{
-			IYamlTypeConverter yamlTypeConverter = this.typeConverters.FirstOrDefault<IYamlTypeConverter>((IYamlTypeConverter t) => t.Accepts(value.Type));
-			if (yamlTypeConverter != null)
-			{
-				return false;
-			}
-			IYamlConvertible yamlConvertible = value.Value as IYamlConvertible;
-			if (yamlConvertible != null)
-			{
-				return false;
-			}
-			IYamlSerializable yamlSerializable = value.Value as IYamlSerializable;
-			return yamlSerializable == null && this.Enter(value);
+			return this.typeConverters.FirstOrDefault<IYamlTypeConverter>((IYamlTypeConverter t) => t.Accepts(value.Type)) == null && !(value.Value is IYamlConvertible) && !(value.Value is IYamlSerializable) && this.Enter(value);
 		}
 
 		bool IObjectGraphVisitor<Nothing>.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, Nothing context)

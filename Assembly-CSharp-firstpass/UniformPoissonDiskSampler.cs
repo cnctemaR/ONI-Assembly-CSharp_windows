@@ -39,7 +39,7 @@ public class UniformPoissonDiskSampler
 			Center = (topLeft + lowerRight) / 2f,
 			CellSize = minimumDistance / UniformPoissonDiskSampler.SquareRootTwo,
 			MinimumDistance = minimumDistance,
-			RejectionSqDistance = ((rejectionDistance != null) ? ((rejectionDistance == null) ? null : new float?(rejectionDistance.GetValueOrDefault() * rejectionDistance.GetValueOrDefault())) : null)
+			RejectionSqDistance = ((rejectionDistance == null) ? null : (rejectionDistance * rejectionDistance))
 		};
 		settings.GridWidth = (int)(settings.Dimensions.x / settings.CellSize) + 1;
 		settings.GridHeight = (int)(settings.Dimensions.y / settings.CellSize) + 1;
@@ -77,11 +77,11 @@ public class UniformPoissonDiskSampler
 			num = this.myRandom.RandomValue();
 			float num3 = settings.TopLeft.y + settings.Dimensions.y * num;
 			Vector2 vector = new Vector2(num2, num3);
-			float? rejectionSqDistance = settings.RejectionSqDistance;
-			if (rejectionSqDistance != null)
+			if (settings.RejectionSqDistance != null)
 			{
-				float? rejectionSqDistance2 = settings.RejectionSqDistance;
-				if (Vector2.SqrMagnitude(settings.Center - vector) > rejectionSqDistance2)
+				float num4 = Vector2.SqrMagnitude(settings.Center - vector);
+				float? rejectionSqDistance = settings.RejectionSqDistance;
+				if ((num4 > rejectionSqDistance.GetValueOrDefault()) & (rejectionSqDistance != null))
 				{
 					continue;
 				}
@@ -100,30 +100,30 @@ public class UniformPoissonDiskSampler
 		Vector2 vector = this.GenerateRandomAround(point, settings.MinimumDistance);
 		if (vector.x >= settings.TopLeft.x && vector.x < settings.LowerRight.x && vector.y > settings.TopLeft.y && vector.y < settings.LowerRight.y)
 		{
-			float? rejectionSqDistance = settings.RejectionSqDistance;
-			if (rejectionSqDistance != null)
+			if (settings.RejectionSqDistance != null)
 			{
-				float? rejectionSqDistance2 = settings.RejectionSqDistance;
-				if (!(Vector2.SqrMagnitude(settings.Center - vector) <= rejectionSqDistance2))
+				float num = Vector2.SqrMagnitude(settings.Center - vector);
+				float? rejectionSqDistance = settings.RejectionSqDistance;
+				if (!((num <= rejectionSqDistance.GetValueOrDefault()) & (rejectionSqDistance != null)))
 				{
 					return flag;
 				}
 			}
 			Vector2 vector2 = UniformPoissonDiskSampler.Denormalize(vector, settings.TopLeft, (double)settings.CellSize);
 			bool flag2 = false;
-			int num = (int)Math.Max(0f, vector2.x - 2f);
-			while ((float)num < Math.Min((float)settings.GridWidth, vector2.x + 3f) && !flag2)
+			int num2 = (int)Math.Max(0f, vector2.x - 2f);
+			while ((float)num2 < Math.Min((float)settings.GridWidth, vector2.x + 3f) && !flag2)
 			{
-				int num2 = (int)Math.Max(0f, vector2.y - 2f);
-				while ((float)num2 < Math.Min((float)settings.GridHeight, vector2.y + 3f) && !flag2)
+				int num3 = (int)Math.Max(0f, vector2.y - 2f);
+				while ((float)num3 < Math.Min((float)settings.GridHeight, vector2.y + 3f) && !flag2)
 				{
-					if (state.Grid[num, num2] != null && Vector2.Distance(state.Grid[num, num2].Value, vector) < settings.MinimumDistance)
+					if (state.Grid[num2, num3] != null && Vector2.Distance(state.Grid[num2, num3].Value, vector) < settings.MinimumDistance)
 					{
 						flag2 = true;
 					}
-					num2++;
+					num3++;
 				}
-				num++;
+				num2++;
 			}
 			if (!flag2)
 			{

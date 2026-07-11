@@ -6,8 +6,9 @@ public abstract class BaseBatteryConfig : IBuildingConfig
 {
 	public BuildingDef CreateBuildingDef(string id, int width, int height, int hitpoints, string anim, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, float exhaust_temperature_active, float self_heat_kilowatts_active, EffectorValues decor, EffectorValues noise)
 	{
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, width, height, anim, hitpoints, construction_time, construction_mass, construction_materials, melting_point, BuildLocationRule.OnFloor, decor, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, width, height, anim, hitpoints, construction_time, construction_mass, construction_materials, melting_point, buildLocationRule, decor, tier, 0.2f);
 		buildingDef.ExhaustKilowattsWhenActive = exhaust_temperature_active;
 		buildingDef.SelfHeatKilowattsWhenActive = self_heat_kilowatts_active;
 		buildingDef.Entombable = false;
@@ -25,8 +26,7 @@ public abstract class BaseBatteryConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Battery battery = go.AddOrGet<Battery>();
-		battery.powerSortOrder = 1000;
+		go.AddOrGet<Battery>().powerSortOrder = 1000;
 		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 }

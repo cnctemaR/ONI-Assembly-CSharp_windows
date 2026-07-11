@@ -47,7 +47,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				return false;
 			}
 			int navigationCost = context.consumerState.navigator.GetNavigationCost(Grid.PosToCell(gameObject.transform.GetPosition()));
-			if (navigationCost != -1)
+			if (-1 != navigationCost)
 			{
 				context.cost += navigationCost;
 				return true;

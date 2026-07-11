@@ -15,12 +15,19 @@ public class ElementLoader
 		ListPool<FileHandle, ElementLoader>.PooledList pooledList = ListPool<FileHandle, ElementLoader>.Allocate();
 		FileSystem.GetFiles(FileSystem.Normalize(ElementLoader.path), "*.yaml", pooledList);
 		ListPool<YamlIO.Error, ElementLoader>.PooledList errors = ListPool<YamlIO.Error, ElementLoader>.Allocate();
+		YamlIO.ErrorHandler <>9__0;
 		foreach (FileHandle fileHandle in pooledList)
 		{
-			ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(fileHandle.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
+			string full_path = fileHandle.full_path;
+			YamlIO.ErrorHandler errorHandler;
+			if ((errorHandler = <>9__0) == null)
 			{
-				errors.Add(error);
-			}, null);
+				errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+				{
+					errors.Add(error);
+				});
+			}
+			ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(full_path, errorHandler, null);
 			if (elementEntryCollection != null)
 			{
 				list.AddRange(elementEntryCollection.elements);
@@ -39,8 +46,7 @@ public class ElementLoader
 	{
 		ElementLoader.elements = new List<Element>();
 		ElementLoader.elementTable = new Dictionary<int, Element>();
-		List<ElementLoader.ElementEntry> list = ElementLoader.CollectElementsFromYAML();
-		foreach (ElementLoader.ElementEntry elementEntry in list)
+		foreach (ElementLoader.ElementEntry elementEntry in ElementLoader.CollectElementsFromYAML())
 		{
 			int num = Hash.SDBMLower(elementEntry.elementId);
 			if (!ElementLoader.elementTable.ContainsKey(num))
@@ -69,7 +75,7 @@ public class ElementLoader
 
 	private static void CopyEntryToElement(ElementLoader.ElementEntry entry, Element elem)
 	{
-		int num = Hash.SDBMLower(entry.elementId);
+		Hash.SDBMLower(entry.elementId);
 		elem.tag = TagManager.Create(entry.elementId.ToString());
 		elem.specificHeatCapacity = entry.specificHeatCapacity;
 		elem.thermalConductivity = entry.thermalConductivity;
@@ -109,26 +115,19 @@ public class ElementLoader
 		physicsData.temperature = entry.defaultTemperature;
 		physicsData.mass = entry.defaultMass;
 		physicsData.pressure = entry.defaultPressure;
-		Element.State state = entry.state;
-		if (state != Element.State.Solid)
+		switch (entry.state)
 		{
-			if (state != Element.State.Liquid)
-			{
-				if (state == Element.State.Gas)
-				{
-					GameTags.GasElements.Add(elem.tag);
-					physicsData.mass = 1f;
-					elem.maxMass = 1.8f;
-				}
-			}
-			else
-			{
-				GameTags.LiquidElements.Add(elem.tag);
-			}
-		}
-		else
-		{
+		case Element.State.Gas:
+			GameTags.GasElements.Add(elem.tag);
+			physicsData.mass = 1f;
+			elem.maxMass = 1.8f;
+			break;
+		case Element.State.Liquid:
+			GameTags.LiquidElements.Add(elem.tag);
+			break;
+		case Element.State.Solid:
 			GameTags.SolidElements.Add(elem.tag);
+			break;
 		}
 		elem.defaultValues = physicsData;
 	}
@@ -167,7 +166,7 @@ public class ElementLoader
 		}
 		else
 		{
-			elem.substance.nameTag = ((text == null) ? Tag.Invalid : TagManager.Create(text));
+			elem.substance.nameTag = ((text != null) ? TagManager.Create(text) : Tag.Invalid);
 		}
 		elem.substance.audioConfig = ElementsAudio.Instance.GetConfigForElement(elem.id);
 		substanceList.Add(elem.id, elem.substance);
@@ -262,7 +261,7 @@ public class ElementLoader
 			return defaultValue;
 		}
 		string text = grid[column, row];
-		if (text == null || text == string.Empty)
+		if (text == null || text == "")
 		{
 			return defaultValue;
 		}
@@ -293,7 +292,7 @@ public class ElementLoader
 			return SpawnFXHashes.None;
 		}
 		string text = grid[column, row];
-		if (text == null || text == string.Empty)
+		if (text == null || text == "")
 		{
 			return SpawnFXHashes.None;
 		}
@@ -365,49 +364,46 @@ public class ElementLoader
 				global::Debug.Assert(element.substance.nameTag.IsValid);
 				if (element.thermalConductivity == 0f)
 				{
-					Element element2 = element;
-					element2.state |= Element.State.TemperatureInsulated;
+					element.state |= Element.State.TemperatureInsulated;
 				}
 				if (element.strength == 0f)
 				{
-					Element element3 = element;
-					element3.state |= Element.State.Unbreakable;
+					element.state |= Element.State.Unbreakable;
 				}
 				if (element.IsSolid)
 				{
-					Element element4 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
-					if (element4 != null)
+					Element element2 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
+					if (element2 != null)
 					{
-						element.highTempTransition = element4;
+						element.highTempTransition = element2;
 					}
 				}
 				else if (element.IsLiquid)
 				{
-					Element element5 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
-					if (element5 != null)
+					Element element3 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
+					if (element3 != null)
 					{
-						element.highTempTransition = element5;
+						element.highTempTransition = element3;
 					}
-					Element element6 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
-					if (element6 != null)
+					Element element4 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
+					if (element4 != null)
 					{
-						element.lowTempTransition = element6;
+						element.lowTempTransition = element4;
 					}
 				}
 				else if (element.IsGas)
 				{
-					Element element7 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
-					if (element7 != null)
+					Element element5 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
+					if (element5 != null)
 					{
-						element.lowTempTransition = element7;
+						element.lowTempTransition = element5;
 					}
 				}
 			}
 		}
-		IOrderedEnumerable<Element> orderedEnumerable = from e in ElementLoader.elements
+		ElementLoader.elements = (from e in ElementLoader.elements
 			orderby (int)(e.state & Element.State.Solid) descending, e.id
-			select e;
-		ElementLoader.elements = orderedEnumerable.ToList<Element>();
+			select e).ToList<Element>();
 		for (int i = 0; i < ElementLoader.elements.Count; i++)
 		{
 			if (ElementLoader.elements[i].substance != null)

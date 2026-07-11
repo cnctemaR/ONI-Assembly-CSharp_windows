@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[NativeHeader("Modules/Video/Public/Base/VideoMediaPlayback.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Video/Public/Base/VideoMediaPlayback.h")]
 	internal class VideoPlaybackMgr : IDisposable
 	{
 		public VideoPlaybackMgr()
@@ -35,6 +35,12 @@ namespace UnityEngineInternal.Video
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ReleaseVideoPlayback(VideoPlayback playback);
+
+		public extern ulong videoPlaybackCount
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Update();

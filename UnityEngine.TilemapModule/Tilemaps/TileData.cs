@@ -4,16 +4,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
-	/// <summary>
-	///   <para>A Struct for the required data for rendering a Tile.</para>
-	/// </summary>
 	[RequiredByNativeCode]
 	[NativeType(Header = "Modules/Tilemap/TilemapScripting.h")]
 	public struct TileData
 	{
-		/// <summary>
-		///   <para>Sprite to be rendered at the Tile.</para>
-		/// </summary>
 		public Sprite sprite
 		{
 			get
@@ -26,9 +20,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>Color of the Tile.</para>
-		/// </summary>
 		public Color color
 		{
 			get
@@ -41,9 +32,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>Matrix4x4|Transform matrix of the Tile.</para>
-		/// </summary>
 		public Matrix4x4 transform
 		{
 			get
@@ -56,9 +44,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>GameObject of the Tile.</para>
-		/// </summary>
 		public GameObject gameObject
 		{
 			get
@@ -71,9 +56,6 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		/// <summary>
-		///   <para>TileFlags of the Tile.</para>
-		/// </summary>
 		public TileFlags flags
 		{
 			get

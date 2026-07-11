@@ -99,11 +99,14 @@ namespace Klei
 		public static bool FileExists(string path)
 		{
 			FileSystem.Initialize();
-			foreach (IFileDirectory fileDirectory in FileSystem.file_sources)
+			using (List<IFileDirectory>.Enumerator enumerator = FileSystem.file_sources.GetEnumerator())
 			{
-				if (fileDirectory.FileExists(path))
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current.FileExists(path))
+					{
+						return true;
+					}
 				}
 			}
 			return false;

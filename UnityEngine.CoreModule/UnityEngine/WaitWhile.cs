@@ -2,9 +2,6 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Suspends the coroutine execution until the supplied delegate evaluates to false.</para>
-	/// </summary>
 	public sealed class WaitWhile : CustomYieldInstruction
 	{
 		public WaitWhile(Func<bool> predicate)

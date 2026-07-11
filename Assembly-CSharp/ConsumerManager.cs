@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using KSerialization;
 using TUNING;
 
@@ -12,7 +11,6 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 		ConsumerManager.instance = null;
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Tag> OnDiscover;
 
 	public List<Tag> DefaultForbiddenTagsList

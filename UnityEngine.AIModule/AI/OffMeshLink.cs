@@ -5,15 +5,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>Link allowing movement outside the planar navigation mesh.</para>
-	/// </summary>
 	[MovedFrom("UnityEngine")]
 	public sealed class OffMeshLink : Behaviour
 	{
-		/// <summary>
-		///   <para>Is link active.</para>
-		/// </summary>
 		public extern bool activated
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -24,9 +18,6 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>Is link occupied. (Read Only)</para>
-		/// </summary>
 		public extern bool occupied
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -34,9 +25,6 @@ namespace UnityEngine.AI
 			get;
 		}
 
-		/// <summary>
-		///   <para>Modify pathfinding cost for the link.</para>
-		/// </summary>
 		public extern float costOverride
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -47,9 +35,6 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>Can link be traversed in both directions.</para>
-		/// </summary>
 		public extern bool biDirectional
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -60,16 +45,10 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>Explicitly update the link endpoints.</para>
-		/// </summary>
 		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void UpdatePositions();
 
-		/// <summary>
-		///   <para>NavMeshLayer for this OffMeshLink component.</para>
-		/// </summary>
 		[Obsolete("Use area instead.")]
 		public extern int navMeshLayer
 		{
@@ -81,9 +60,6 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>NavMesh area index for this OffMeshLink component.</para>
-		/// </summary>
 		public extern int area
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -94,9 +70,6 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>Automatically update endpoints.</para>
-		/// </summary>
 		public extern bool autoUpdatePositions
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -107,9 +80,6 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>The transform representing link start position.</para>
-		/// </summary>
 		public extern Transform startTransform
 		{
 			[GeneratedByOldBindingsGenerator]
@@ -120,9 +90,6 @@ namespace UnityEngine.AI
 			set;
 		}
 
-		/// <summary>
-		///   <para>The transform representing link end position.</para>
-		/// </summary>
 		public extern Transform endTransform
 		{
 			[GeneratedByOldBindingsGenerator]

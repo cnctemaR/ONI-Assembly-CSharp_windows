@@ -44,7 +44,11 @@ public class Assignables : KMonoBehaviour
 	public Assignable GetAssignable(AssignableSlot slot)
 	{
 		AssignableSlotInstance slot2 = this.GetSlot(slot);
-		return (slot2 == null) ? null : slot2.assignable;
+		if (slot2 == null)
+		{
+			return null;
+		}
+		return slot2.assignable;
 	}
 
 	public AssignableSlotInstance GetSlot(AssignableSlot slot)
@@ -71,34 +75,24 @@ public class Assignables : KMonoBehaviour
 		{
 			return assignable;
 		}
-		MinionAssignablesProxy component = base.GetComponent<MinionAssignablesProxy>();
-		GameObject targetGameObject = component.GetTargetGameObject();
+		GameObject targetGameObject = base.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
 		if (targetGameObject == null)
 		{
 			global::Debug.LogWarning("AutoAssignSlot failed, proxy game object was null.");
 			return null;
 		}
-		Navigator component2 = targetGameObject.GetComponent<Navigator>();
+		Navigator component = targetGameObject.GetComponent<Navigator>();
 		IAssignableIdentity assignableIdentity = this.GetAssignableIdentity();
 		int num = int.MaxValue;
 		foreach (Assignable assignable2 in Game.Instance.assignmentManager)
 		{
-			if (!(assignable2 == null))
+			if (!(assignable2 == null) && !assignable2.IsAssigned() && assignable2.slot == slot && assignable2.CanAutoAssignTo(assignableIdentity))
 			{
-				if (!assignable2.IsAssigned())
+				int navigationCost = assignable2.GetNavigationCost(component);
+				if (navigationCost != -1 && navigationCost < num)
 				{
-					if (assignable2.slot == slot)
-					{
-						if (assignable2.CanAutoAssignTo(assignableIdentity))
-						{
-							int navigationCost = assignable2.GetNavigationCost(component2);
-							if (navigationCost != -1 && navigationCost < num)
-							{
-								num = navigationCost;
-								assignable = assignable2;
-							}
-						}
-					}
+					num = navigationCost;
+					assignable = assignable2;
 				}
 			}
 		}

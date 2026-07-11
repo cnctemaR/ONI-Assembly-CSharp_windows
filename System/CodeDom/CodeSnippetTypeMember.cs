@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeSnippetTypeMember : CodeTypeMember
 	{
@@ -14,30 +11,21 @@ namespace System.CodeDom
 
 		public CodeSnippetTypeMember(string text)
 		{
-			this.text = text;
+			this.Text = text;
 		}
 
 		public string Text
 		{
 			get
 			{
-				if (this.text == null)
-				{
-					return string.Empty;
-				}
-				return this.text;
+				return this._text ?? string.Empty;
 			}
 			set
 			{
-				this.text = value;
+				this._text = value;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private string text;
+		private string _text;
 	}
 }

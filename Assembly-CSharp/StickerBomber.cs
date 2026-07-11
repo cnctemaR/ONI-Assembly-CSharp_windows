@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using TUNING;
 using UnityEngine;
@@ -85,14 +84,12 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 				if (this.placementCell == 0)
 				{
 					base.End();
+					return;
 				}
-				else
-				{
-					this.kbac = this.reactor.GetComponent<KBatchedAnimController>();
-					this.kbac.AddAnimOverrides(this.animset, 0f);
-					this.kbac.Play(this.pre_anim, KAnim.PlayMode.Once, 1f, 0f);
-					this.kbac.Queue(this.loop_anim, KAnim.PlayMode.Loop, 1f, 0f);
-				}
+				this.kbac = this.reactor.GetComponent<KBatchedAnimController>();
+				this.kbac.AddAnimOverrides(this.animset, 0f);
+				this.kbac.Play(this.pre_anim, KAnim.PlayMode.Once, 1f, 0f);
+				this.kbac.Queue(this.loop_anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 
 			public override void Update(float dt)
@@ -153,8 +150,7 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 				{
 					i--;
 					Vector3 vector2 = vector + new Vector3(global::UnityEngine.Random.Range(-this.tile_random_range, this.tile_random_range), global::UnityEngine.Random.Range(-this.tile_random_range, this.tile_random_range), -2.5f);
-					List<int> list = StickerBomb.BuildCellOffsets(vector2);
-					if (StickerBomb.CanPlaceSticker(list))
+					if (StickerBomb.CanPlaceSticker(StickerBomb.BuildCellOffsets(vector2)))
 					{
 						GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("StickerBomb".ToTag()), vector2, Quaternion.Euler(0f, 0f, global::UnityEngine.Random.Range(-this.tile_random_rotation, this.tile_random_rotation)), null, null, true, 0);
 						StickerBomb component = gameObject.GetComponent<StickerBomb>();

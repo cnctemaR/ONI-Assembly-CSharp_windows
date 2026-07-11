@@ -34,11 +34,6 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 
 	public class StatesInstance : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.GameInstance
 	{
-		public StatesInstance(GameFlowManager smi)
-			: base(smi)
-		{
-		}
-
 		public bool IsIncapacitated(GameObject go)
 		{
 			return false;
@@ -77,6 +72,11 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 			}
 		}
 
+		public StatesInstance(GameFlowManager smi)
+			: base(smi)
+		{
+		}
+
 		public Notification colonyLostNotification = new Notification(MISC.NOTIFICATIONS.COLONYLOST.NAME, NotificationType.Bad, HashedString.Invalid, null, null, false, 0f, null, null, null);
 	}
 
@@ -103,11 +103,9 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 				if (GenericGameSettings.instance.demoMode)
 				{
 					DemoTimer.Instance.EndDemo();
+					return;
 				}
-				else
-				{
-					GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameOverScreen, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<KScreen>().Show(true);
-				}
+				GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameOverScreen, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<KScreen>().Show(true);
 			});
 		}
 

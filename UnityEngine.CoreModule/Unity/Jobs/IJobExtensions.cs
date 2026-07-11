@@ -4,9 +4,6 @@ using Unity.Jobs.LowLevel.Unsafe;
 
 namespace Unity.Jobs
 {
-	/// <summary>
-	///   <para>Extension methods for Jobs using the IJob interface.</para>
-	/// </summary>
 	public static class IJobExtensions
 	{
 		public static JobHandle Schedule<T>(this T jobData, JobHandle dependsOn = default(JobHandle)) where T : struct, IJob

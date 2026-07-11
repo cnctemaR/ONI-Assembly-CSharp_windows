@@ -18,24 +18,22 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	{
 		base.OnSpawn();
 		this.isPhysical = base.GetComponent<BuildingComplete>() != null;
-		bool flag = !this.isPhysical && base.GetComponent<BuildingUnderConstruction>() == null;
-		if (flag)
+		if (!this.isPhysical && base.GetComponent<BuildingUnderConstruction>() == null)
 		{
 			OverlayScreen instance = OverlayScreen.Instance;
 			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Combine(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 			this.OnOverlayChanged(OverlayScreen.Instance.mode);
 			this.CreateVisualizers();
 			SimAndRenderScheduler.instance.Add(this, false);
+			return;
 		}
-		else if (this.isPhysical)
+		if (this.isPhysical)
 		{
 			this.UpdateMissingWireIcon();
 			this.CreatePhysicalPorts();
+			return;
 		}
-		else
-		{
-			this.CreateVisualizers();
-		}
+		this.CreateVisualizers();
 	}
 
 	protected override void OnCleanUp()
@@ -152,8 +150,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 			{
 				for (int j = 0; j < this.outputPorts.Count; j++)
 				{
-					LogicEventSender logicEventSender2 = this.outputPorts[j] as LogicEventSender;
-					logicEventSender2.SetValue(this.serializedOutputValues[j]);
+					(this.outputPorts[j] as LogicEventSender).SetValue(this.serializedOutputValues[j]);
 				}
 			}
 		}
@@ -221,8 +218,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 
 	private void UpdateMissingWireIcon()
 	{
-		bool flag = this.ShowMissingWireIcon();
-		LogicCircuitManager.ToggleNoWireConnected(flag, base.gameObject);
+		LogicCircuitManager.ToggleNoWireConnected(this.ShowMissingWireIcon(), base.gameObject);
 	}
 
 	private void DestroyPhysicalPorts()
@@ -267,16 +263,14 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		{
 			offset = component.GetRotatedCellOffset(offset);
 		}
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		return Grid.OffsetCell(num, offset);
+		return Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), offset);
 	}
 
 	public bool TryGetPortAtCell(int cell, out LogicPorts.Port port, out bool isInput)
 	{
 		foreach (LogicPorts.Port port2 in this.inputPortInfo)
 		{
-			int actualCell = this.GetActualCell(port2.cellOffset);
-			if (actualCell == cell)
+			if (this.GetActualCell(port2.cellOffset) == cell)
 			{
 				port = port2;
 				isInput = true;
@@ -285,8 +279,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		}
 		foreach (LogicPorts.Port port3 in this.outputPortInfo)
 		{
-			int actualCell2 = this.GetActualCell(port3.cellOffset);
-			if (actualCell2 == cell)
+			if (this.GetActualCell(port3.cellOffset) == cell)
 			{
 				port = port3;
 				isInput = false;
@@ -372,9 +365,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	public bool IsPortConnected(HashedString port_id)
 	{
 		int portCell = this.GetPortCell(port_id);
-		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-		LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(portCell);
-		return networkForCell != null;
+		return Game.Instance.logicCircuitManager.GetNetworkForCell(portCell) != null;
 	}
 
 	private void OnOverlayChanged(HashedString mode)
@@ -383,12 +374,10 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		{
 			base.enabled = true;
 			this.CreateVisualizers();
+			return;
 		}
-		else
-		{
-			base.enabled = false;
-			this.DestroyVisualizers();
-		}
+		base.enabled = false;
+		this.DestroyVisualizers();
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -397,7 +386,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		LogicPorts component = def.BuildingComplete.GetComponent<LogicPorts>();
 		if (component != null)
 		{
-			if (component.inputPortInfo != null && component.inputPortInfo.Length > 0)
+			if (component.inputPortInfo != null && component.inputPortInfo.Length != 0)
 			{
 				Descriptor descriptor = new Descriptor(UI.LOGIC_PORTS.INPUT_PORTS, UI.LOGIC_PORTS.INPUT_PORTS_TOOLTIP, Descriptor.DescriptorType.Effect, false);
 				list.Add(descriptor);
@@ -409,7 +398,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 					list.Add(descriptor);
 				}
 			}
-			if (component.outputPortInfo != null && component.outputPortInfo.Length > 0)
+			if (component.outputPortInfo != null && component.outputPortInfo.Length != 0)
 			{
 				Descriptor descriptor2 = new Descriptor(UI.LOGIC_PORTS.OUTPUT_PORTS, UI.LOGIC_PORTS.INPUT_PORTS_TOOLTIP, Descriptor.DescriptorType.Effect, false);
 				list.Add(descriptor2);

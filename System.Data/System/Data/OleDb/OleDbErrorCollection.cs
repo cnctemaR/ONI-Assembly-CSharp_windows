@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.ComponentModel;
+using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	[ListBindable(false)]
-	[Serializable]
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbErrorCollection : ICollection, IEnumerable
 	{
 		internal OleDbErrorCollection()
@@ -16,15 +15,30 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			throw ADP.OleDb();
+		}
+
+		public void CopyTo(OleDbError[] array, int index)
+		{
+			throw ADP.OleDb();
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			throw ADP.OleDb();
 		}
 
 		public OleDbError this[int index]
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -32,7 +46,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 		}
 
@@ -40,21 +54,8 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-		}
-
-		public void CopyTo(OleDbError[] array, int index)
-		{
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			throw null;
 		}
 	}
 }

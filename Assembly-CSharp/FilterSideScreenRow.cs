@@ -35,19 +35,19 @@ public class FilterSideScreenRow : KMonoBehaviour
 	public void SetElement(Element elem)
 	{
 		this.element = elem;
-		this.SetText((elem.id != SimHashes.Void) ? elem.name : UI.UISIDESCREENS.FILTERSIDESCREEN.NO_SELECTION.text);
+		this.SetText((elem.id == SimHashes.Void) ? UI.UISIDESCREENS.FILTERSIDESCREEN.NO_SELECTION.text : elem.name);
 	}
 
 	private void SetText(string assignmentStr)
 	{
-		this.labelText.text = (string.IsNullOrEmpty(assignmentStr) ? "-" : assignmentStr);
+		this.labelText.text = ((!string.IsNullOrEmpty(assignmentStr)) ? assignmentStr : "-");
 	}
 
 	public void SetSelected(bool selected)
 	{
 		this.isSelected = selected;
-		this.outline.color = ((!selected) ? this.outlineDefaultColor : this.outlineHighLightColor);
-		this.BG.color = ((!selected) ? Color.white : this.BGHighLightColor);
+		this.outline.color = (selected ? this.outlineHighLightColor : this.outlineDefaultColor);
+		this.BG.color = (selected ? this.BGHighLightColor : Color.white);
 	}
 
 	[SerializeField]

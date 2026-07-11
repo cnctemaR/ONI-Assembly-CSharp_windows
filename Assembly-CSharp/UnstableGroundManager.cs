@@ -127,9 +127,8 @@ public class UnstableGroundManager : KMonoBehaviour
 		List<int> list = new List<int>();
 		for (int i = 0; i < this.fallingObjects.Count; i++)
 		{
-			GameObject gameObject = this.fallingObjects[i];
 			Vector2I vector2I;
-			Grid.PosToXY(gameObject.transform.GetPosition(), out vector2I);
+			Grid.PosToXY(this.fallingObjects[i].transform.GetPosition(), out vector2I);
 			if (vector2I.x == cellXY.x || vector2I.y >= cellXY.y)
 			{
 				int num = Grid.PosToCell(vector2I);
@@ -185,8 +184,7 @@ public class UnstableGroundManager : KMonoBehaviour
 					{
 						if (scenePartitionerEntry.obj is KCollider2D)
 						{
-							GameObject gameObject2 = (scenePartitionerEntry.obj as KCollider2D).gameObject;
-							gameObject2.Trigger(-975551167, null);
+							(scenePartitionerEntry.obj as KCollider2D).gameObject.Trigger(-975551167, null);
 						}
 					}
 					pooledList.Recycle();
@@ -195,8 +193,7 @@ public class UnstableGroundManager : KMonoBehaviour
 					{
 						SoundEvent.PlayOneShot(element.substance.fallingStopSound, position, 1f);
 					}
-					GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position + this.landEffectOffset, Grid.SceneLayer.Front, null, 0);
-					gameObject3.SetActive(true);
+					GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position + this.landEffectOffset, Grid.SceneLayer.Front, null, 0).SetActive(true);
 					this.fallingObjects[i] = this.fallingObjects[this.fallingObjects.Count - 1];
 					this.fallingObjects.RemoveAt(this.fallingObjects.Count - 1);
 					this.ReleaseGO(gameObject);
@@ -220,7 +217,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		{
 			UnstableGround component = gameObject.GetComponent<UnstableGround>();
 			byte diseaseIdx = component.diseaseIdx;
-			int num = ((diseaseIdx == byte.MaxValue) ? 0 : Db.Get().Diseases[(int)diseaseIdx].id.HashValue);
+			int num = ((diseaseIdx != byte.MaxValue) ? Db.Get().Diseases[(int)diseaseIdx].id.HashValue : 0);
 			this.serializedInfo.Add(new UnstableGroundManager.SerializedInfo
 			{
 				position = gameObject.transform.GetPosition(),

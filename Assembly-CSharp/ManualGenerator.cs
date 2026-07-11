@@ -8,11 +8,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 {
-	private ManualGenerator()
-	{
-		this.showProgressBar = false;
-	}
-
 	public string SliderTitleKey
 	{
 		get
@@ -72,6 +67,11 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		}
 	}
 
+	private ManualGenerator()
+	{
+		this.showProgressBar = false;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -114,8 +114,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	{
 		if (this.operational.IsActive)
 		{
-			KSelectable component = base.GetComponent<KSelectable>();
-			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.ManualGeneratorChargingUp, null);
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.ManualGeneratorChargingUp, null);
 		}
 	}
 
@@ -126,50 +125,48 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		{
 			this.generator.GenerateJoules(this.generator.WattageRating * dt, false);
 			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this.generator);
+			return;
 		}
-		else
+		this.generator.ResetJoules();
+		component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.GeneratorOffline, null);
+		if (this.operational.IsOperational)
 		{
-			this.generator.ResetJoules();
-			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.GeneratorOffline, null);
-			if (this.operational.IsOperational)
+			CircuitManager circuitManager = Game.Instance.circuitManager;
+			if (circuitManager == null)
 			{
-				CircuitManager circuitManager = Game.Instance.circuitManager;
-				if (circuitManager == null)
-				{
-					return;
-				}
-				ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
-				bool flag = circuitManager.HasBatteries(circuitID);
-				bool flag2 = false;
-				if (!flag && circuitManager.HasConsumers(circuitID))
+				return;
+			}
+			ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
+			bool flag = circuitManager.HasBatteries(circuitID);
+			bool flag2 = false;
+			if (!flag && circuitManager.HasConsumers(circuitID))
+			{
+				flag2 = true;
+			}
+			else if (flag)
+			{
+				if (this.batteryRefillPercent <= 0f && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) <= 0f)
 				{
 					flag2 = true;
 				}
-				else if (flag)
+				else if (circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent)
 				{
-					if (this.batteryRefillPercent <= 0f && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) <= 0f)
-					{
-						flag2 = true;
-					}
-					else if (circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent)
-					{
-						flag2 = true;
-					}
+					flag2 = true;
 				}
-				if (flag2)
-				{
-					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
-					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-					}
-				}
-				else if (this.chore != null)
-				{
-					this.chore.Cancel("No refill needed");
-					this.chore = null;
-				}
-				component.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 			}
+			if (flag2)
+			{
+				if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
+				{
+					this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+				}
+			}
+			else if (this.chore != null)
+			{
+				this.chore.Cancel("No refill needed");
+				this.chore = null;
+			}
+			component.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 		}
 	}
 

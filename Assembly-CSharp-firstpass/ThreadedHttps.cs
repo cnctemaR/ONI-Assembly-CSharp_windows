@@ -23,7 +23,7 @@ public class ThreadedHttps<T> where T : class, new()
 			return false;
 		}
 		this.certFail = true;
-		string text = string.Empty;
+		string text = "";
 		if (sslPolicyErrors == SslPolicyErrors.None)
 		{
 			this.certFail = false;
@@ -33,10 +33,9 @@ public class ThreadedHttps<T> where T : class, new()
 			this.certFail = false;
 			for (int i = 0; i < chain.ChainStatus.Length; i++)
 			{
-				string text2 = text;
 				text = string.Concat(new object[]
 				{
-					text2,
+					text,
 					"[",
 					i,
 					"] ",
@@ -114,7 +113,7 @@ public class ThreadedHttps<T> where T : class, new()
 	protected string Send(byte[] byteArray, bool isForce = false)
 	{
 		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Combine(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));
-		string text = string.Empty;
+		string text = "";
 		int num = 0;
 		for (;;)
 		{
@@ -177,14 +176,12 @@ public class ThreadedHttps<T> where T : class, new()
 					{
 						using (Stream responseStream = response.GetResponseStream())
 						{
-							StreamReader streamReader = new StreamReader(responseStream);
-							text = streamReader.ReadToEnd();
+							text = new StreamReader(responseStream).ReadToEnd();
+							goto IL_0170;
 						}
 					}
-					else
-					{
-						text = " -- we.Response is NULL";
-					}
+					text = " -- we.Response is NULL";
+					IL_0170:
 					text = string.Concat(new string[]
 					{
 						DateTime.Now.ToLongTimeString(),
@@ -201,26 +198,17 @@ public class ThreadedHttps<T> where T : class, new()
 				if (text != "OK")
 				{
 					stream = webResponse.GetResponseStream();
-					StreamReader streamReader2 = new StreamReader(stream);
-					string text3 = streamReader2.ReadToEnd();
-					streamReader2.Close();
+					StreamReader streamReader = new StreamReader(stream);
+					string text3 = streamReader.ReadToEnd();
+					streamReader.Close();
 					stream.Close();
-					text = string.Concat(new string[]
-					{
-						string.Empty,
-						this.serviceName,
-						": Server Responded with Status: [",
-						text,
-						"] Response: ",
-						text3
-					});
+					text = string.Concat(new string[] { this.serviceName, ": Server Responded with Status: [", text, "] Response: ", text3 });
 				}
 				else
 				{
 					this.OnReplyRecieved(webResponse);
 				}
 				webResponse.Close();
-				break;
 			}
 			catch (Exception ex4)
 			{
@@ -287,7 +275,9 @@ public class ThreadedHttps<T> where T : class, new()
 					}
 					Thread.Sleep(timeSpan);
 				}
+				continue;
 			}
+			break;
 		}
 		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Remove(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));
 		return text;
@@ -326,8 +316,8 @@ public class ThreadedHttps<T> where T : class, new()
 	protected byte[] GetPacket()
 	{
 		byte[] array = null;
-		object obj = this.packets;
-		lock (obj)
+		List<byte[]> list = this.packets;
+		lock (list)
 		{
 			if (this.packets.Count > 0)
 			{
@@ -340,8 +330,8 @@ public class ThreadedHttps<T> where T : class, new()
 
 	protected void PutPacket(byte[] packet, bool infront = false)
 	{
-		object obj = this.packets;
-		lock (obj)
+		List<byte[]> list = this.packets;
+		lock (list)
 		{
 			if (infront)
 			{

@@ -37,8 +37,7 @@ public class SaunaConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
-		Storage storage = go.AddOrGet<Storage>();
-		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
+		go.AddOrGet<Storage>().SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Steam).tag;
@@ -48,8 +47,7 @@ public class SaunaConfig : IBuildingConfig
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
-		SaunaWorkable saunaWorkable = go.AddOrGet<SaunaWorkable>();
-		saunaWorkable.basePriority = RELAXATION.PRIORITY.TIER3;
+		go.AddOrGet<SaunaWorkable>().basePriority = RELAXATION.PRIORITY.TIER3;
 		Sauna sauna = go.AddOrGet<Sauna>();
 		sauna.steamPerUseKG = 25f;
 		sauna.waterOutputTemp = 353.15f;

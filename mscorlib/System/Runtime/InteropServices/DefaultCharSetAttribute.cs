@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Module, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Module, Inherited = false)]
 	public sealed class DefaultCharSetAttribute : Attribute
 	{
 		public DefaultCharSetAttribute(CharSet charSet)
 		{
-			this._set = charSet;
+			this._CharSet = charSet;
 		}
 
 		public CharSet CharSet
 		{
 			get
 			{
-				return this._set;
+				return this._CharSet;
 			}
 		}
 
-		private CharSet _set;
+		internal CharSet _CharSet;
 	}
 }

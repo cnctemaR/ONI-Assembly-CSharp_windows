@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -36,7 +35,11 @@ public class AudioEventManager : KMonoBehaviour
 
 	public static float LoudnessToDB(float loudness)
 	{
-		return (loudness <= 0f) ? 0f : (10f * Mathf.Log10(loudness));
+		if (loudness <= 0f)
+		{
+			return 0f;
+		}
+		return 10f * Mathf.Log10(loudness);
 	}
 
 	public static float DBToLoudness(float src_db)
@@ -46,9 +49,7 @@ public class AudioEventManager : KMonoBehaviour
 
 	public float GetDecibelsAtCell(int cell)
 	{
-		float num = Grid.Loudness[cell];
-		float num2 = AudioEventManager.LoudnessToDB(num);
-		return Mathf.Round(num2 * 2f) / 2f;
+		return Mathf.Round(AudioEventManager.LoudnessToDB(Grid.Loudness[cell]) * 2f) / 2f;
 	}
 
 	public static string GetLoudestNoisePolluterAtCell(int cell)
@@ -58,26 +59,12 @@ public class AudioEventManager : KMonoBehaviour
 		AudioEventManager audioEventManager = AudioEventManager.Get();
 		Vector2I vector2I = Grid.CellToXY(cell);
 		Vector2 vector = new Vector2((float)vector2I.x, (float)vector2I.y);
-		IEnumerator enumerator = audioEventManager.spatialSplats.GetAllIntersecting(vector).GetEnumerator();
-		try
+		foreach (object obj in audioEventManager.spatialSplats.GetAllIntersecting(vector))
 		{
-			while (enumerator.MoveNext())
+			NoiseSplat noiseSplat = (NoiseSplat)obj;
+			if (noiseSplat.GetLoudness(cell) > negativeInfinity)
 			{
-				object obj = enumerator.Current;
-				NoiseSplat noiseSplat = (NoiseSplat)obj;
-				float loudness = noiseSplat.GetLoudness(cell);
-				if (loudness > negativeInfinity)
-				{
-					text = noiseSplat.GetProvider().GetName();
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				text = noiseSplat.GetProvider().GetName();
 			}
 		}
 		return text;
@@ -112,30 +99,17 @@ public class AudioEventManager : KMonoBehaviour
 		this.polluters.Clear();
 		Vector2I vector2I = Grid.CellToXY(cell);
 		Vector2 vector = new Vector2((float)vector2I.x, (float)vector2I.y);
-		IEnumerator enumerator = this.spatialSplats.GetAllIntersecting(vector).GetEnumerator();
-		try
+		foreach (object obj in this.spatialSplats.GetAllIntersecting(vector))
 		{
-			while (enumerator.MoveNext())
+			NoiseSplat noiseSplat = (NoiseSplat)obj;
+			float loudness = noiseSplat.GetLoudness(cell);
+			if (loudness > 0f)
 			{
-				object obj = enumerator.Current;
-				NoiseSplat noiseSplat = (NoiseSplat)obj;
-				float loudness = noiseSplat.GetLoudness(cell);
-				if (loudness > 0f)
-				{
-					AudioEventManager.PolluterDisplay polluterDisplay = default(AudioEventManager.PolluterDisplay);
-					polluterDisplay.name = noiseSplat.GetName();
-					polluterDisplay.value = AudioEventManager.LoudnessToDB(loudness);
-					polluterDisplay.provider = noiseSplat.GetProvider();
-					this.polluters.Add(polluterDisplay);
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				AudioEventManager.PolluterDisplay polluterDisplay = default(AudioEventManager.PolluterDisplay);
+				polluterDisplay.name = noiseSplat.GetName();
+				polluterDisplay.value = AudioEventManager.LoudnessToDB(loudness);
+				polluterDisplay.provider = noiseSplat.GetProvider();
+				this.polluters.Add(polluterDisplay);
 			}
 		}
 		return this.polluters;
@@ -148,23 +122,21 @@ public class AudioEventManager : KMonoBehaviour
 			this.removeTime.Sort((Pair<float, NoiseSplat> a, Pair<float, NoiseSplat> b) => a.first.CompareTo(b.first));
 		}
 		int num = -1;
-		for (int i = 0; i < this.removeTime.Count; i++)
+		int num2 = 0;
+		while (num2 < this.removeTime.Count && this.removeTime[num2].first <= Time.time)
 		{
-			if (this.removeTime[i].first > Time.time)
-			{
-				break;
-			}
-			NoiseSplat second = this.removeTime[i].second;
+			NoiseSplat second = this.removeTime[num2].second;
 			if (second != null)
 			{
 				IPolluter provider = second.GetProvider();
 				this.FreePolluter(provider as Polluter);
 			}
-			num = i;
+			num = num2;
+			num2++;
 		}
-		for (int j = num; j >= 0; j--)
+		for (int i = num; i >= 0; i--)
 		{
-			this.removeTime.RemoveAt(j);
+			this.removeTime.RemoveAt(i);
 		}
 	}
 

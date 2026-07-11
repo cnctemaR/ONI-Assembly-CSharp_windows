@@ -41,8 +41,8 @@ namespace Mono.Security.Protocol.Tls
 		{
 			for (int i = index; i < length; i += 16)
 			{
-				int num = ((length - i < 16) ? (length - i) : 16);
-				string text = string.Empty;
+				int num = ((length - i >= 16) ? 16 : (length - i));
+				string text = "";
 				for (int j = 0; j < num; j++)
 				{
 					text = text + buffer[i + j].ToString("x2") + " ";

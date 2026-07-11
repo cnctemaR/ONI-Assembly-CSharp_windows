@@ -7,6 +7,7 @@ namespace System.Net.Configuration
 	{
 		static ProxyElement()
 		{
+			ProxyElement.properties.Add(ProxyElement.autoDetectProp);
 			ProxyElement.properties.Add(ProxyElement.bypassOnLocalProp);
 			ProxyElement.properties.Add(ProxyElement.proxyAddressProp);
 			ProxyElement.properties.Add(ProxyElement.scriptLocationProp);
@@ -18,7 +19,7 @@ namespace System.Net.Configuration
 		{
 			get
 			{
-				return (ProxyElement.AutoDetectValues)((int)base[ProxyElement.autoDetectProp]);
+				return (ProxyElement.AutoDetectValues)base[ProxyElement.autoDetectProp];
 			}
 			set
 			{
@@ -31,7 +32,7 @@ namespace System.Net.Configuration
 		{
 			get
 			{
-				return (ProxyElement.BypassOnLocalValues)((int)base[ProxyElement.bypassOnLocalProp]);
+				return (ProxyElement.BypassOnLocalValues)base[ProxyElement.bypassOnLocalProp];
 			}
 			set
 			{
@@ -40,11 +41,11 @@ namespace System.Net.Configuration
 		}
 
 		[ConfigurationProperty("proxyaddress")]
-		public global::System.Uri ProxyAddress
+		public Uri ProxyAddress
 		{
 			get
 			{
-				return (global::System.Uri)base[ProxyElement.proxyAddressProp];
+				return (Uri)base[ProxyElement.proxyAddressProp];
 			}
 			set
 			{
@@ -53,11 +54,11 @@ namespace System.Net.Configuration
 		}
 
 		[ConfigurationProperty("scriptLocation")]
-		public global::System.Uri ScriptLocation
+		public Uri ScriptLocation
 		{
 			get
 			{
-				return (global::System.Uri)base[ProxyElement.scriptLocationProp];
+				return (Uri)base[ProxyElement.scriptLocationProp];
 			}
 			set
 			{
@@ -70,7 +71,7 @@ namespace System.Net.Configuration
 		{
 			get
 			{
-				return (ProxyElement.UseSystemDefaultValues)((int)base[ProxyElement.useSystemDefaultProp]);
+				return (ProxyElement.UseSystemDefaultValues)base[ProxyElement.useSystemDefaultProp];
 			}
 			set
 			{
@@ -92,11 +93,11 @@ namespace System.Net.Configuration
 
 		private static ConfigurationProperty bypassOnLocalProp = new ConfigurationProperty("bypassonlocal", typeof(ProxyElement.BypassOnLocalValues), ProxyElement.BypassOnLocalValues.Unspecified);
 
-		private static ConfigurationProperty proxyAddressProp = new ConfigurationProperty("proxyaddress", typeof(global::System.Uri), null);
+		private static ConfigurationProperty proxyAddressProp = new ConfigurationProperty("proxyaddress", typeof(Uri), null);
 
-		private static ConfigurationProperty scriptLocationProp = new ConfigurationProperty("scriptLocation", typeof(global::System.Uri), null);
+		private static ConfigurationProperty scriptLocationProp = new ConfigurationProperty("scriptLocation", typeof(Uri), null);
 
-		private static ConfigurationProperty useSystemDefaultProp = new ConfigurationProperty("UseSystemDefault", typeof(ProxyElement.UseSystemDefaultValues), ProxyElement.UseSystemDefaultValues.Unspecified);
+		private static ConfigurationProperty useSystemDefaultProp = new ConfigurationProperty("usesystemdefault", typeof(ProxyElement.UseSystemDefaultValues), ProxyElement.UseSystemDefaultValues.Unspecified);
 
 		public enum BypassOnLocalValues
 		{

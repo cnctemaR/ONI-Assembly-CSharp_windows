@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Assembly)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Assembly)]
 	internal class UnityEngineModuleAssembly : Attribute
 	{
 	}

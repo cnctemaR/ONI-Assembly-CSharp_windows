@@ -6,6 +6,13 @@ namespace Database
 {
 	public class ScheduleGroups : ResourceSet<ScheduleGroup>
 	{
+		public ScheduleGroup Add(string id, int defaultSegments, string name, string description, string notificationTooltip, List<ScheduleBlockType> allowedTypes, bool alarm = false)
+		{
+			ScheduleGroup scheduleGroup = new ScheduleGroup(id, this, defaultSegments, name, description, notificationTooltip, allowedTypes, alarm);
+			this.allGroups.Add(scheduleGroup);
+			return scheduleGroup;
+		}
+
 		public ScheduleGroups(ResourceSet parent)
 			: base("ScheduleGroups", parent)
 		{
@@ -30,13 +37,6 @@ namespace Database
 				num += scheduleGroup.defaultSegments;
 			}
 			Debug.Assert(num == 24, "Default schedule groups must add up to exactly 1 cycle!");
-		}
-
-		public ScheduleGroup Add(string id, int defaultSegments, string name, string description, string notificationTooltip, List<ScheduleBlockType> allowedTypes, bool alarm = false)
-		{
-			ScheduleGroup scheduleGroup = new ScheduleGroup(id, this, defaultSegments, name, description, notificationTooltip, allowedTypes, alarm);
-			this.allGroups.Add(scheduleGroup);
-			return scheduleGroup;
 		}
 
 		public ScheduleGroup FindGroupForScheduleTypes(List<ScheduleBlockType> types)

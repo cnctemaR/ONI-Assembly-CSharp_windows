@@ -26,7 +26,7 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 
 	public class Def : StateMachine.BaseDef
 	{
-		public CellOffset[] lurePoints = new CellOffset[] { default(CellOffset) };
+		public CellOffset[] lurePoints = new CellOffset[1];
 
 		public int radius = 50;
 
@@ -55,11 +55,9 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 			if (lures == null || lures.Length == 0)
 			{
 				this.GoTo(base.sm.off);
+				return;
 			}
-			else
-			{
-				this.GoTo(base.sm.on);
-			}
+			this.GoTo(base.sm.on);
 		}
 
 		public bool IsActive()

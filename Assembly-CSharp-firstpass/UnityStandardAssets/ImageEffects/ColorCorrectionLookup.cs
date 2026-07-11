@@ -78,17 +78,12 @@ namespace UnityStandardAssets.ImageEffects
 			target = new Texture3D(num, num, num, TextureFormat.ARGB32, false);
 			target.SetPixels(array);
 			target.Apply();
-			this.basedOnTempTex = string.Empty;
+			this.basedOnTempTex = "";
 		}
 
 		public bool ValidDimensions(Texture2D tex2d)
 		{
-			if (!tex2d)
-			{
-				return false;
-			}
-			int height = tex2d.height;
-			return height == Mathf.FloorToInt(Mathf.Sqrt((float)tex2d.width));
+			return tex2d && tex2d.height == Mathf.FloorToInt(Mathf.Sqrt((float)tex2d.width));
 		}
 
 		public void Convert(Texture2D temp2DTex, string path)
@@ -103,42 +98,40 @@ namespace UnityStandardAssets.ImageEffects
 
 		private void Convert(Texture2D temp2DTex, string path, ref Texture3D target)
 		{
-			if (temp2DTex)
-			{
-				int num = temp2DTex.width * temp2DTex.height;
-				num = temp2DTex.height;
-				if (!this.ValidDimensions(temp2DTex))
-				{
-					global::Debug.LogWarning("The given 2D texture " + temp2DTex.name + " cannot be used as a 3D LUT.");
-					this.basedOnTempTex = string.Empty;
-					return;
-				}
-				Color[] pixels = temp2DTex.GetPixels();
-				Color[] array = new Color[pixels.Length];
-				for (int i = 0; i < num; i++)
-				{
-					for (int j = 0; j < num; j++)
-					{
-						for (int k = 0; k < num; k++)
-						{
-							int num2 = num - j - 1;
-							array[i + j * num + k * num * num] = pixels[k * num + i + num2 * num * num];
-						}
-					}
-				}
-				if (target)
-				{
-					global::UnityEngine.Object.DestroyImmediate(target);
-				}
-				target = new Texture3D(num, num, num, TextureFormat.ARGB32, false);
-				target.SetPixels(array);
-				target.Apply();
-				this.basedOnTempTex = path;
-			}
-			else
+			if (!temp2DTex)
 			{
 				global::Debug.LogError("Couldn't color correct with 3D LUT texture. Image Effect will be disabled.");
+				return;
 			}
+			int num = temp2DTex.width * temp2DTex.height;
+			num = temp2DTex.height;
+			if (!this.ValidDimensions(temp2DTex))
+			{
+				global::Debug.LogWarning("The given 2D texture " + temp2DTex.name + " cannot be used as a 3D LUT.");
+				this.basedOnTempTex = "";
+				return;
+			}
+			Color[] pixels = temp2DTex.GetPixels();
+			Color[] array = new Color[pixels.Length];
+			for (int i = 0; i < num; i++)
+			{
+				for (int j = 0; j < num; j++)
+				{
+					for (int k = 0; k < num; k++)
+					{
+						int num2 = num - j - 1;
+						array[i + j * num + k * num * num] = pixels[k * num + i + num2 * num * num];
+					}
+				}
+			}
+			if (target)
+			{
+				global::UnityEngine.Object.DestroyImmediate(target);
+			}
+			target = new Texture3D(num, num, num, TextureFormat.ARGB32, false);
+			target.SetPixels(array);
+			target.Apply();
+			this.basedOnTempTex = path;
 		}
 
 		private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -162,7 +155,7 @@ namespace UnityStandardAssets.ImageEffects
 			this.material.SetFloat("_Offset", 1f / (2f * (float)width));
 			this.material.SetTexture("_ClutTex", this.converted3DLut);
 			this.material.SetTexture("_ClutTex2", this.converted3DLut2);
-			Graphics.Blit(source, destination, this.material, (QualitySettings.activeColorSpace != ColorSpace.Linear) ? 0 : 1);
+			Graphics.Blit(source, destination, this.material, (QualitySettings.activeColorSpace == ColorSpace.Linear) ? 1 : 0);
 		}
 
 		public Shader shader;
@@ -173,7 +166,7 @@ namespace UnityStandardAssets.ImageEffects
 
 		public Texture3D converted3DLut2;
 
-		public string basedOnTempTex = string.Empty;
+		public string basedOnTempTex = "";
 
 		private bool supports3dTextures;
 	}

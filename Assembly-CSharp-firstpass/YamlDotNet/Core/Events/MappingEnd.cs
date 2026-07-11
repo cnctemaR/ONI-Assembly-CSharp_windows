@@ -4,16 +4,6 @@ namespace YamlDotNet.Core.Events
 {
 	public class MappingEnd : ParsingEvent
 	{
-		public MappingEnd(Mark start, Mark end)
-			: base(start, end)
-		{
-		}
-
-		public MappingEnd()
-			: this(Mark.Empty, Mark.Empty)
-		{
-		}
-
 		public override int NestingIncrease
 		{
 			get
@@ -28,6 +18,16 @@ namespace YamlDotNet.Core.Events
 			{
 				return EventType.MappingEnd;
 			}
+		}
+
+		public MappingEnd(Mark start, Mark end)
+			: base(start, end)
+		{
+		}
+
+		public MappingEnd()
+			: this(Mark.Empty, Mark.Empty)
+		{
 		}
 
 		public override string ToString()

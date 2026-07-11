@@ -1,83 +1,177 @@
 ﻿using System;
-using System.IO;
+using System.IO.Ports;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.AccessControl;
+using System.Security.Permissions;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Threading
 {
 	[ComVisible(false)]
+	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public sealed class Semaphore : WaitHandle
 	{
-		private Semaphore(IntPtr handle)
-		{
-			this.Handle = handle;
-		}
-
+		[SecuritySafeCritical]
 		public Semaphore(int initialCount, int maximumCount)
 			: this(initialCount, maximumCount, null)
 		{
 		}
 
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public Semaphore(int initialCount, int maximumCount, string name)
 		{
 			if (initialCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialCount", "< 0");
+				throw new ArgumentOutOfRangeException("initialCount", global::SR.GetString("Non-negative number required."));
 			}
 			if (maximumCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("maximumCount", "< 1");
+				throw new ArgumentOutOfRangeException("maximumCount", global::SR.GetString("Positive number required."));
 			}
 			if (initialCount > maximumCount)
 			{
-				throw new ArgumentException("initialCount > maximumCount");
+				throw new ArgumentException(global::SR.GetString("The initial count for the semaphore must be greater than or equal to zero and less than the maximum count."));
 			}
-			bool flag;
-			this.Handle = Semaphore.CreateSemaphore_internal(initialCount, maximumCount, name, out flag);
+			if (name != null && 260 < name.Length)
+			{
+				throw new ArgumentException(global::SR.GetString("The name can be no more than 260 characters in length."));
+			}
+			int num;
+			SafeWaitHandle safeWaitHandle = new SafeWaitHandle(Semaphore.CreateSemaphore_internal(initialCount, maximumCount, name, out num), true);
+			if (safeWaitHandle.IsInvalid)
+			{
+				if (name != null && name.Length != 0 && 6 == num)
+				{
+					throw new WaitHandleCannotBeOpenedException(global::SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
+				}
+				InternalResources.WinIOError(num, "");
+			}
+			base.SafeWaitHandle = safeWaitHandle;
 		}
 
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public Semaphore(int initialCount, int maximumCount, string name, out bool createdNew)
 			: this(initialCount, maximumCount, name, out createdNew, null)
 		{
 		}
 
-		[global::System.MonoTODO("Does not support access control, semaphoreSecurity is ignored")]
-		public Semaphore(int initialCount, int maximumCount, string name, out bool createdNew, global::System.Security.AccessControl.SemaphoreSecurity semaphoreSecurity)
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public Semaphore(int initialCount, int maximumCount, string name, out bool createdNew, SemaphoreSecurity semaphoreSecurity)
 		{
 			if (initialCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialCount", "< 0");
+				throw new ArgumentOutOfRangeException("initialCount", global::SR.GetString("Non-negative number required."));
 			}
 			if (maximumCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("maximumCount", "< 1");
+				throw new ArgumentOutOfRangeException("maximumCount", global::SR.GetString("Non-negative number required."));
 			}
 			if (initialCount > maximumCount)
 			{
-				throw new ArgumentException("initialCount > maximumCount");
+				throw new ArgumentException(global::SR.GetString("The initial count for the semaphore must be greater than or equal to zero and less than the maximum count."));
 			}
-			this.Handle = Semaphore.CreateSemaphore_internal(initialCount, maximumCount, name, out createdNew);
+			if (name != null && 260 < name.Length)
+			{
+				throw new ArgumentException(global::SR.GetString("The name can be no more than 260 characters in length."));
+			}
+			int num;
+			SafeWaitHandle safeWaitHandle = new SafeWaitHandle(Semaphore.CreateSemaphore_internal(initialCount, maximumCount, name, out num), true);
+			if (safeWaitHandle.IsInvalid)
+			{
+				if (name != null && name.Length != 0 && 6 == num)
+				{
+					throw new WaitHandleCannotBeOpenedException(global::SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
+				}
+				InternalResources.WinIOError(num, "");
+			}
+			createdNew = num != 183;
+			base.SafeWaitHandle = safeWaitHandle;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreateSemaphore_internal(int initialCount, int maximumCount, string name, out bool createdNew);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int ReleaseSemaphore_internal(IntPtr handle, int releaseCount, out bool fail);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr OpenSemaphore_internal(string name, global::System.Security.AccessControl.SemaphoreRights rights, out global::System.IO.MonoIOError error);
-
-		[global::System.MonoTODO]
-		public global::System.Security.AccessControl.SemaphoreSecurity GetAccessControl()
+		private Semaphore(SafeWaitHandle handle)
 		{
-			throw new NotImplementedException();
+			base.SafeWaitHandle = handle;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static Semaphore OpenExisting(string name)
+		{
+			return Semaphore.OpenExisting(name, SemaphoreRights.Modify | SemaphoreRights.Synchronize);
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static Semaphore OpenExisting(string name, SemaphoreRights rights)
+		{
+			Semaphore semaphore;
+			switch (Semaphore.OpenExistingWorker(name, rights, out semaphore))
+			{
+			case Semaphore.OpenExistingResult.NameNotFound:
+				throw new WaitHandleCannotBeOpenedException();
+			case Semaphore.OpenExistingResult.PathNotFound:
+				InternalResources.WinIOError(3, string.Empty);
+				return semaphore;
+			case Semaphore.OpenExistingResult.NameInvalid:
+				throw new WaitHandleCannotBeOpenedException(global::SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
+			default:
+				return semaphore;
+			}
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static bool TryOpenExisting(string name, out Semaphore result)
+		{
+			return Semaphore.OpenExistingWorker(name, SemaphoreRights.Modify | SemaphoreRights.Synchronize, out result) == Semaphore.OpenExistingResult.Success;
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static bool TryOpenExisting(string name, SemaphoreRights rights, out Semaphore result)
+		{
+			return Semaphore.OpenExistingWorker(name, rights, out result) == Semaphore.OpenExistingResult.Success;
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		private static Semaphore.OpenExistingResult OpenExistingWorker(string name, SemaphoreRights rights, out Semaphore result)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (name.Length == 0)
+			{
+				throw new ArgumentException(global::SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "name" }), "name");
+			}
+			if (name != null && 260 < name.Length)
+			{
+				throw new ArgumentException(global::SR.GetString("The name can be no more than 260 characters in length."));
+			}
+			result = null;
+			int num;
+			SafeWaitHandle safeWaitHandle = new SafeWaitHandle(Semaphore.OpenSemaphore_internal(name, rights, out num), true);
+			if (safeWaitHandle.IsInvalid)
+			{
+				if (2 == num || 123 == num)
+				{
+					return Semaphore.OpenExistingResult.NameNotFound;
+				}
+				if (3 == num)
+				{
+					return Semaphore.OpenExistingResult.PathNotFound;
+				}
+				if (name != null && name.Length != 0 && 6 == num)
+				{
+					return Semaphore.OpenExistingResult.NameInvalid;
+				}
+				InternalResources.WinIOError(num, "");
+			}
+			result = new Semaphore(safeWaitHandle);
+			return Semaphore.OpenExistingResult.Success;
+		}
+
 		[PrePrepareMethod]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public int Release()
 		{
 			return this.Release(1);
@@ -88,57 +182,47 @@ namespace System.Threading
 		{
 			if (releaseCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("releaseCount");
+				throw new ArgumentOutOfRangeException("releaseCount", global::SR.GetString("Non-negative number required."));
 			}
-			bool flag;
-			int num = Semaphore.ReleaseSemaphore_internal(this.Handle, releaseCount, out flag);
-			if (flag)
+			int num;
+			if (!Semaphore.ReleaseSemaphore_internal(base.SafeWaitHandle.DangerousGetHandle(), releaseCount, out num))
 			{
 				throw new SemaphoreFullException();
 			}
 			return num;
 		}
 
-		[global::System.MonoTODO]
-		public void SetAccessControl(global::System.Security.AccessControl.SemaphoreSecurity semaphoreSecurity)
+		public SemaphoreSecurity GetAccessControl()
+		{
+			return new SemaphoreSecurity(base.SafeWaitHandle, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+		}
+
+		public void SetAccessControl(SemaphoreSecurity semaphoreSecurity)
 		{
 			if (semaphoreSecurity == null)
 			{
 				throw new ArgumentNullException("semaphoreSecurity");
 			}
-			throw new NotImplementedException();
+			semaphoreSecurity.Persist(base.SafeWaitHandle);
 		}
 
-		public static Semaphore OpenExisting(string name)
-		{
-			return Semaphore.OpenExisting(name, global::System.Security.AccessControl.SemaphoreRights.Modify | global::System.Security.AccessControl.SemaphoreRights.Synchronize);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern IntPtr CreateSemaphore_internal(int initialCount, int maximumCount, string name, out int errorCode);
 
-		public static Semaphore OpenExisting(string name, global::System.Security.AccessControl.SemaphoreRights rights)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool ReleaseSemaphore_internal(IntPtr handle, int releaseCount, out int previousCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr OpenSemaphore_internal(string name, SemaphoreRights rights, out int errorCode);
+
+		private const int MAX_PATH = 260;
+
+		private new enum OpenExistingResult
 		{
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			if (name.Length == 0 || name.Length > 260)
-			{
-				throw new ArgumentException("name", global::Locale.GetText("Invalid length [1-260]."));
-			}
-			global::System.IO.MonoIOError monoIOError;
-			IntPtr intPtr = Semaphore.OpenSemaphore_internal(name, rights, out monoIOError);
-			if (!(intPtr == (IntPtr)null))
-			{
-				return new Semaphore(intPtr);
-			}
-			if (monoIOError == global::System.IO.MonoIOError.ERROR_FILE_NOT_FOUND)
-			{
-				throw new WaitHandleCannotBeOpenedException(global::Locale.GetText("Named Semaphore handle does not exist: ") + name);
-			}
-			if (monoIOError == global::System.IO.MonoIOError.ERROR_ACCESS_DENIED)
-			{
-				throw new UnauthorizedAccessException();
-			}
-			throw new IOException(global::Locale.GetText("Win32 IO error: ") + monoIOError.ToString());
+			Success,
+			NameNotFound,
+			PathNotFound,
+			NameInvalid
 		}
 	}
 }

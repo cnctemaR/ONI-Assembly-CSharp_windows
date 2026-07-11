@@ -6,15 +6,31 @@ namespace Satsuma.IO.GraphML
 {
 	public sealed class NodeGraphics
 	{
+		public double X { get; set; }
+
+		public double Y { get; set; }
+
+		public double Width { get; set; }
+
+		public double Height { get; set; }
+
+		public NodeShape Shape { get; set; }
+
 		public NodeGraphics()
 		{
-			double num = 0.0;
-			this.Y = num;
-			this.X = num;
-			num = 10.0;
-			this.Height = num;
-			this.Width = num;
+			this.X = (this.Y = 0.0);
+			this.Width = (this.Height = 10.0);
 			this.Shape = NodeShape.Rectangle;
+		}
+
+		private NodeShape ParseShape(string s)
+		{
+			return (NodeShape)Math.Max(0, Array.IndexOf<string>(this.nodeShapeToString, s));
+		}
+
+		private string ShapeToGraphML(NodeShape shape)
+		{
+			return this.nodeShapeToString[(int)shape];
 		}
 
 		public NodeGraphics(XElement xData)
@@ -32,26 +48,6 @@ namespace Satsuma.IO.GraphML
 			{
 				this.Shape = this.ParseShape(xelement2.Attribute("type").Value);
 			}
-		}
-
-		public double X { get; set; }
-
-		public double Y { get; set; }
-
-		public double Width { get; set; }
-
-		public double Height { get; set; }
-
-		public NodeShape Shape { get; set; }
-
-		private NodeShape ParseShape(string s)
-		{
-			return (NodeShape)Math.Max(0, Array.IndexOf<string>(this.nodeShapeToString, s));
-		}
-
-		private string ShapeToGraphML(NodeShape shape)
-		{
-			return this.nodeShapeToString[(int)shape];
 		}
 
 		public XElement ToXml()

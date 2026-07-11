@@ -29,7 +29,7 @@ public abstract class ConduitSensor : Switch
 
 	private void UpdateLogicCircuit()
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, this.switchedOn ? 1 : 0);
 	}
 
 	protected virtual void UpdateVisualState(bool force = false)
@@ -40,11 +40,9 @@ public abstract class ConduitSensor : Switch
 			if (this.switchedOn)
 			{
 				this.animController.Play(ConduitSensor.ON_ANIMS, KAnim.PlayMode.Loop);
+				return;
 			}
-			else
-			{
-				this.animController.Play(ConduitSensor.OFF_ANIMS, KAnim.PlayMode.Once);
-			}
+			this.animController.Play(ConduitSensor.OFF_ANIMS, KAnim.PlayMode.Once);
 		}
 	}
 

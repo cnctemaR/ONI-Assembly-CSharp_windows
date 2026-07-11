@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C1915AFD-CE7D-4863-9A49-68A445F3DF8D}</ProjectGuid>
+    <ProjectGuid>{601F6F34-A81D-4BFC-98BA-FB9BDC935696}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UI</AssemblyName>
@@ -53,6 +53,7 @@
     <Compile Include="EventSystems\StandaloneInputModule.cs" />
     <Compile Include="EventSystems\TouchInputModule.cs" />
     <Compile Include="EventSystems\UIBehaviour.cs" />
+    <Compile Include="Experimental\UI\VertexHelperExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\AnimationTriggers.cs" />
     <Compile Include="UI\AspectRatioFitter.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="UI\MaskableGraphic.cs" />
     <Compile Include="UI\MaskUtilities.cs" />
     <Compile Include="UI\Misc.cs" />
+    <Compile Include="UI\MultipleDisplayUtilities.cs" />
     <Compile Include="UI\Navigation.cs" />
     <Compile Include="UI\ObjectPool.cs" />
     <Compile Include="UI\Outline.cs" />
@@ -129,22 +131,12 @@
     <Compile Include="UI\VerticalLayoutGroup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF51}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF54}</Project>
-      <Name>System.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System\System.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF56}</Project>
-      <Name>System</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{C1915AFD-CE7D-4863-9A49-68A445F3DF6C}</Project>
+      <Project>{601F6F34-A81D-4BFC-98BA-FB9BDC935676}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="System.Core" />
+  </ItemGroup>
 </Project>

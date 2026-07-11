@@ -18,6 +18,7 @@ namespace Mono.Unix.Native
 		F_GETOWN,
 		F_SETSIG,
 		F_GETSIG,
+		F_NOCACHE = 48,
 		F_SETLEASE = 1024,
 		F_GETLEASE,
 		F_NOTIFY

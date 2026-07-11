@@ -7,11 +7,6 @@ namespace Klei.AI
 {
 	public class Attributes
 	{
-		public Attributes(GameObject game_object)
-		{
-			this.gameObject = game_object;
-		}
-
 		public IEnumerator<AttributeInstance> GetEnumerator()
 		{
 			return this.AttributeTable.GetEnumerator();
@@ -23,6 +18,11 @@ namespace Klei.AI
 			{
 				return this.AttributeTable.Count;
 			}
+		}
+
+		public Attributes(GameObject game_object)
+		{
+			this.gameObject = game_object;
 		}
 
 		public AttributeInstance Add(Attribute attribute)
@@ -130,9 +130,9 @@ namespace Klei.AI
 			AttributeInstance profession = this.GetProfession();
 			if ((int)profession.GetTotalValue() == 0)
 			{
-				return string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, 0, DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_NAME);
+				return string.Format(longform ? UI.ATTRIBUTELEVEL : UI.ATTRIBUTELEVEL_SHORT, 0, DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_NAME);
 			}
-			return string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, (int)profession.GetTotalValue(), profession.modifier.ProfessionName);
+			return string.Format(longform ? UI.ATTRIBUTELEVEL : UI.ATTRIBUTELEVEL_SHORT, (int)profession.GetTotalValue(), profession.modifier.ProfessionName);
 		}
 
 		public string GetProfessionDescriptionString()

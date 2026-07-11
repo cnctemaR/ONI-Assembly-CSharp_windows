@@ -18,8 +18,7 @@ namespace System.Runtime.Remoting
 			{
 				marshalByRefObject.ObjectIdentity = this;
 			}
-			IMessageSink messageSink = this._context.CreateServerObjectSinkChain(marshalByRefObject, false);
-			IMessage message = messageSink.SyncProcessMessage(msg);
+			IMessage message = this._context.CreateServerObjectSinkChain(marshalByRefObject, false).SyncProcessMessage(msg);
 			if (marshalByRefObject is IDisposable)
 			{
 				((IDisposable)marshalByRefObject).Dispose();

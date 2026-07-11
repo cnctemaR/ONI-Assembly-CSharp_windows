@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 
 public class EggProtector : GameStateMachine<EggProtector, EggProtector.Instance, IStateMachineTarget, EggProtector.Def>
@@ -57,19 +56,18 @@ public class EggProtector : GameStateMachine<EggProtector, EggProtector.Instance
 		public Instance(Chore<EggProtector.Instance> chore, EggProtector.Def def)
 			: base(chore, def)
 		{
-			EntityThreatMonitor.Instance smi = base.gameObject.GetSMI<EntityThreatMonitor.Instance>();
-			smi.allyTag = def.protectorTag;
+			base.gameObject.GetSMI<EntityThreatMonitor.Instance>().allyTag = def.protectorTag;
 		}
 
 		public void CheckDistanceToEgg()
 		{
-			Navigator component = base.smi.GetComponent<Navigator>();
-			int navigationCost = component.GetNavigationCost(Grid.PosToCell(this.eggToGuard));
+			int navigationCost = base.smi.GetComponent<Navigator>().GetNavigationCost(Grid.PosToCell(this.eggToGuard));
 			if (navigationCost > 20)
 			{
 				base.sm.needsToMoveCloser.Set(true, base.smi);
+				return;
 			}
-			else if (navigationCost < 0)
+			if (navigationCost < 0)
 			{
 				base.sm.needsToMoveCloser.Set(false, base.smi);
 			}
@@ -107,33 +105,17 @@ public class EggProtector : GameStateMachine<EggProtector, EggProtector.Instance
 			GameObject gameObject = null;
 			int num = 100;
 			Navigator component = base.smi.GetComponent<Navigator>();
-			IEnumerator enumerator = Components.Pickupables.GetEnumerator();
-			try
+			foreach (object obj in Components.Pickupables)
 			{
-				while (enumerator.MoveNext())
+				Pickupable pickupable = (Pickupable)obj;
+				if (pickupable.HasTag("CrabEgg".ToTag()) && Vector2.Distance(base.smi.transform.position, pickupable.transform.position) <= 25f)
 				{
-					object obj = enumerator.Current;
-					Pickupable pickupable = (Pickupable)obj;
-					if (pickupable.HasTag("CrabEgg".ToTag()))
+					int navigationCost = component.GetNavigationCost(Grid.PosToCell(pickupable));
+					if (navigationCost != -1 && navigationCost < num)
 					{
-						if (Vector2.Distance(base.smi.transform.position, pickupable.transform.position) <= 25f)
-						{
-							int navigationCost = component.GetNavigationCost(Grid.PosToCell(pickupable));
-							if (navigationCost != -1 && navigationCost < num)
-							{
-								gameObject = pickupable.gameObject;
-								num = navigationCost;
-							}
-						}
+						gameObject = pickupable.gameObject;
+						num = navigationCost;
 					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
 				}
 			}
 			this.SetEggToGuard(gameObject);
@@ -142,8 +124,7 @@ public class EggProtector : GameStateMachine<EggProtector, EggProtector.Instance
 		public void SetEggToGuard(GameObject egg)
 		{
 			this.eggToGuard = egg;
-			EntityThreatMonitor.Instance smi = base.gameObject.GetSMI<EntityThreatMonitor.Instance>();
-			smi.entityToProtect = egg;
+			base.gameObject.GetSMI<EntityThreatMonitor.Instance>().entityToProtect = egg;
 			base.sm.hasEggToGuard.Set(egg != null, base.smi);
 		}
 

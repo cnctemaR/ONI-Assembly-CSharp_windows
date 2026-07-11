@@ -54,13 +54,14 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 	{
 		if (this.orbitingObjects != null)
 		{
-			foreach (GameObject gameObject in this.orbitingObjects)
+			GameObject[] array = this.orbitingObjects;
+			for (int i = 0; i < array.Length; i++)
 			{
-				Util.KDestroyGameObject(gameObject);
+				Util.KDestroyGameObject(array[i]);
 			}
 			this.orbitingObjects = null;
 		}
-		if (this.orbitData != null && this.orbitData.Length > 0)
+		if (this.orbitData != null && this.orbitData.Length != 0)
 		{
 			float time = GameClock.Instance.GetTime();
 			this.orbitingObjects = new GameObject[this.orbitData.Length];
@@ -70,9 +71,9 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 				GameObject prefab = Assets.GetPrefab(orbitData.prefabTag);
 				bool flag;
 				Vector3 vector = this.CalculatePos(ref orbitData, time, out flag);
-				GameObject gameObject2 = Util.KInstantiate(prefab, vector);
-				gameObject2.SetActive(true);
-				this.orbitingObjects[j] = gameObject2;
+				GameObject gameObject = Util.KInstantiate(prefab, vector);
+				gameObject.SetActive(true);
+				this.orbitingObjects[j] = gameObject;
 			}
 		}
 	}
@@ -80,15 +81,13 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 	private Vector3 CalculatePos(ref OrbitalMechanics.OrbitData data, float time, out bool behind)
 	{
 		float num = data.periodInCycles * 600f;
-		float num2 = ((!this.applyOverrides) ? (time / num - (float)((int)(time / num))) : (this.overridePercent / 100f));
-		float num3 = num2 * 2f * 3.1415927f;
-		float num4 = 0.5f * data.radiusScale;
+		float num2 = (this.applyOverrides ? (this.overridePercent / 100f) : (time / num - (float)((int)(time / num)))) * 2f * 3.1415927f;
+		float num3 = 0.5f * data.radiusScale;
 		float yGridPercent = data.yGridPercent;
 		Vector3 vector = new Vector3(0.5f, yGridPercent, 0f);
-		Vector3 vector2 = new Vector3(Mathf.Cos(num3), 0f, Mathf.Sin(num3));
+		Vector3 vector2 = new Vector3(Mathf.Cos(num2), 0f, Mathf.Sin(num2));
 		behind = vector2.z > data.behindZ;
-		Quaternion quaternion = Quaternion.Euler(data.angle, 0f, 0f);
-		Vector3 vector3 = quaternion * (vector2 * num4);
+		Vector3 vector3 = Quaternion.Euler(data.angle, 0f, 0f) * (vector2 * num3);
 		Vector3 vector4 = vector + vector3;
 		vector4.z = data.renderZ;
 		return vector4;

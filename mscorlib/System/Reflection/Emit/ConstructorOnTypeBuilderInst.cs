@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
+	[StructLayout(LayoutKind.Sequential)]
 	internal class ConstructorOnTypeBuilderInst : ConstructorInfo
 	{
-		public ConstructorOnTypeBuilderInst(MonoGenericClass instantiation, ConstructorBuilder cb)
+		public ConstructorOnTypeBuilderInst(TypeBuilderInstantiation instantiation, ConstructorInfo cb)
 		{
 			this.instantiation = instantiation;
 			this.cb = cb;
@@ -35,6 +37,14 @@ namespace System.Reflection.Emit
 			}
 		}
 
+		public override Module Module
+		{
+			get
+			{
+				return this.cb.Module;
+			}
+		}
+
 		public override bool IsDefined(Type attributeType, bool inherit)
 		{
 			return this.cb.IsDefined(attributeType, inherit);
@@ -57,34 +67,70 @@ namespace System.Reflection.Emit
 
 		public override ParameterInfo[] GetParameters()
 		{
-			if (!((ModuleBuilder)this.cb.Module).assemblyb.IsCompilerContext && !this.instantiation.generic_type.is_created)
+			if (!this.instantiation.IsCreated)
 			{
 				throw new NotSupportedException();
 			}
-			ParameterInfo[] array = new ParameterInfo[this.cb.parameters.Length];
-			for (int i = 0; i < this.cb.parameters.Length; i++)
+			return this.GetParametersInternal();
+		}
+
+		internal override ParameterInfo[] GetParametersInternal()
+		{
+			ParameterInfo[] array;
+			if (this.cb is ConstructorBuilder)
 			{
-				Type type = this.instantiation.InflateType(this.cb.parameters[i]);
-				array[i] = new ParameterInfo((this.cb.pinfo != null) ? this.cb.pinfo[i] : null, type, this, i + 1);
+				ConstructorBuilder constructorBuilder = (ConstructorBuilder)this.cb;
+				array = new ParameterInfo[constructorBuilder.parameters.Length];
+				for (int i = 0; i < constructorBuilder.parameters.Length; i++)
+				{
+					Type type = this.instantiation.InflateType(constructorBuilder.parameters[i]);
+					array[i] = ParameterInfo.New((constructorBuilder.pinfo == null) ? null : constructorBuilder.pinfo[i], type, this, i + 1);
+				}
+			}
+			else
+			{
+				ParameterInfo[] parameters = this.cb.GetParameters();
+				array = new ParameterInfo[parameters.Length];
+				for (int j = 0; j < parameters.Length; j++)
+				{
+					Type type2 = this.instantiation.InflateType(parameters[j].ParameterType);
+					array[j] = ParameterInfo.New(parameters[j], type2, this, j + 1);
+				}
 			}
 			return array;
+		}
+
+		internal override Type[] GetParameterTypes()
+		{
+			if (this.cb is ConstructorBuilder)
+			{
+				return (this.cb as ConstructorBuilder).parameters;
+			}
+			ParameterInfo[] parameters = this.cb.GetParameters();
+			Type[] array = new Type[parameters.Length];
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				array[i] = parameters[i].ParameterType;
+			}
+			return array;
+		}
+
+		internal ConstructorInfo RuntimeResolve()
+		{
+			return this.instantiation.InternalResolve().GetConstructor(this.cb);
 		}
 
 		public override int MetadataToken
 		{
 			get
 			{
-				if (!((ModuleBuilder)this.cb.Module).assemblyb.IsCompilerContext)
-				{
-					return base.MetadataToken;
-				}
-				return this.cb.MetadataToken;
+				return base.MetadataToken;
 			}
 		}
 
-		internal override int GetParameterCount()
+		internal override int GetParametersCount()
 		{
-			return this.cb.GetParameterCount();
+			return this.cb.GetParametersCount();
 		}
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
@@ -150,8 +196,8 @@ namespace System.Reflection.Emit
 			throw new InvalidOperationException();
 		}
 
-		private MonoGenericClass instantiation;
+		internal TypeBuilderInstantiation instantiation;
 
-		private ConstructorBuilder cb;
+		internal ConstructorInfo cb;
 	}
 }

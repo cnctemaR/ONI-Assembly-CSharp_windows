@@ -1,26 +1,59 @@
 ﻿using System;
-using System.Text;
 
 namespace System.Xml.Serialization
 {
 	public class XmlReflectionMember
 	{
-		public XmlReflectionMember()
+		public Type MemberType
 		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
+			}
 		}
 
-		internal XmlReflectionMember(string name, Type type, XmlAttributes attributes)
+		public XmlAttributes XmlAttributes
 		{
-			this.memberName = name;
-			this.memberType = type;
-			this.xmlAttributes = attributes;
+			get
+			{
+				return this.xmlAttributes;
+			}
+			set
+			{
+				this.xmlAttributes = value;
+			}
 		}
 
-		internal XmlReflectionMember(string name, Type type, SoapAttributes attributes)
+		public SoapAttributes SoapAttributes
 		{
-			this.memberName = name;
-			this.memberType = type;
-			this.soapAttributes = attributes;
+			get
+			{
+				return this.soapAttributes;
+			}
+			set
+			{
+				this.soapAttributes = value;
+			}
+		}
+
+		public string MemberName
+		{
+			get
+			{
+				if (this.memberName != null)
+				{
+					return this.memberName;
+				}
+				return string.Empty;
+			}
+			set
+			{
+				this.memberName = value;
+			}
 		}
 
 		public bool IsReturnValue
@@ -32,30 +65,6 @@ namespace System.Xml.Serialization
 			set
 			{
 				this.isReturnValue = value;
-			}
-		}
-
-		public string MemberName
-		{
-			get
-			{
-				return this.memberName;
-			}
-			set
-			{
-				this.memberName = value;
-			}
-		}
-
-		public Type MemberType
-		{
-			get
-			{
-				return this.memberType;
-			}
-			set
-			{
-				this.memberType = value;
 			}
 		}
 
@@ -71,80 +80,16 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public SoapAttributes SoapAttributes
-		{
-			get
-			{
-				if (this.soapAttributes == null)
-				{
-					this.soapAttributes = new SoapAttributes();
-				}
-				return this.soapAttributes;
-			}
-			set
-			{
-				this.soapAttributes = value;
-			}
-		}
+		private string memberName;
 
-		public XmlAttributes XmlAttributes
-		{
-			get
-			{
-				if (this.xmlAttributes == null)
-				{
-					this.xmlAttributes = new XmlAttributes();
-				}
-				return this.xmlAttributes;
-			}
-			set
-			{
-				this.xmlAttributes = value;
-			}
-		}
+		private Type type;
 
-		internal Type DeclaringType
-		{
-			get
-			{
-				return this.declaringType;
-			}
-			set
-			{
-				this.declaringType = value;
-			}
-		}
+		private XmlAttributes xmlAttributes = new XmlAttributes();
 
-		internal void AddKeyHash(StringBuilder sb)
-		{
-			sb.Append("XRM ");
-			KeyHelper.AddField(sb, 1, this.isReturnValue);
-			KeyHelper.AddField(sb, 1, this.memberName);
-			KeyHelper.AddField(sb, 1, this.memberType);
-			KeyHelper.AddField(sb, 1, this.overrideIsNullable);
-			if (this.soapAttributes != null)
-			{
-				this.soapAttributes.AddKeyHash(sb);
-			}
-			if (this.xmlAttributes != null)
-			{
-				this.xmlAttributes.AddKeyHash(sb);
-			}
-			sb.Append('|');
-		}
+		private SoapAttributes soapAttributes = new SoapAttributes();
 
 		private bool isReturnValue;
 
-		private string memberName;
-
-		private Type memberType;
-
 		private bool overrideIsNullable;
-
-		private SoapAttributes soapAttributes;
-
-		private XmlAttributes xmlAttributes;
-
-		private Type declaringType;
 	}
 }

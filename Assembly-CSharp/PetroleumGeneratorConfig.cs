@@ -13,8 +13,12 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		int num3 = 100;
 		float num4 = 480f;
 		string[] array = new string[] { "Metal" };
+		float[] array2 = new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0] };
+		string[] array3 = array;
+		float num5 = 2400f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0] }, array, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier, 0.2f);
 		buildingDef.GeneratorWattageRating = 2000f;
 		buildingDef.GeneratorBaseCapacity = 2000f;
 		buildingDef.ExhaustKilowattsWhenActive = 4f;

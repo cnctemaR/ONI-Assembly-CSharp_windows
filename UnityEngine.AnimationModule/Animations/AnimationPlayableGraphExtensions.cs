@@ -5,11 +5,11 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Animations
 {
-	[StaticAccessor("AnimationPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableGraphExtensions.bindings.h")]
+	[StaticAccessor("AnimationPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Animation/Animator.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableGraphExtensions.bindings.h")]
 	internal static class AnimationPlayableGraphExtensions
 	{
 		internal static void SyncUpdateAndTimeMode(this PlayableGraph graph, Animator animator)
@@ -22,18 +22,23 @@ namespace UnityEngine.Animations
 			AnimationPlayableGraphExtensions.InternalDestroyOutput(ref graph, ref handle);
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool InternalCreateAnimationOutput(ref PlayableGraph graph, string name, out PlayableOutputHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void InternalSyncUpdateAndTimeMode(ref PlayableGraph graph, Animator animator);
+		internal static extern void InternalSyncUpdateAndTimeMode(ref PlayableGraph graph, [NotNull] Animator animator);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroyOutput(ref PlayableGraph graph, ref PlayableOutputHandle handle);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int InternalAnimationOutputCount(ref PlayableGraph graph);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool InternalGetAnimationOutput(ref PlayableGraph graph, int index, out PlayableOutputHandle handle);
 	}

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -99,8 +98,7 @@ public class BuildingHP : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		AttributeInstance attributeInstance = Db.Get().Attributes.Machinery.Lookup(worker);
-		int num = (int)attributeInstance.GetTotalValue();
+		int num = (int)Db.Get().Attributes.Machinery.Lookup(worker).GetTotalValue();
 		int num2 = 10 + Math.Max(0, num * 10);
 		this.Repair(num2);
 	}
@@ -122,9 +120,8 @@ public class BuildingHP : Workable
 		if (info.takeDamageEffect != SpawnFXHashes.None)
 		{
 			BuildingDef def = base.GetComponent<BuildingComplete>().Def;
-			int num = Grid.PosToCell(this);
-			int num2 = Grid.OffsetCell(num, 0, def.HeightInCells - 1);
-			Game.Instance.SpawnFX(info.takeDamageEffect, num2, 0f);
+			int num = Grid.OffsetCell(Grid.PosToCell(this), 0, def.HeightInCells - 1);
+			Game.Instance.SpawnFX(info.takeDamageEffect, num, 0f);
 		}
 	}
 
@@ -222,8 +219,9 @@ public class BuildingHP : Workable
 			if (show && Grid.IsValidCell(Grid.PosToCell(base.gameObject)) && Grid.IsVisible(Grid.PosToCell(base.gameObject)))
 			{
 				this.CreateProgressBar();
+				return;
 			}
-			else if (this.progressBar != null)
+			if (this.progressBar != null)
 			{
 				this.progressBar.gameObject.DeleteObject();
 				this.progressBar = null;
@@ -281,7 +279,7 @@ public class BuildingHP : Workable
 
 		private static string ToolTipResolver(List<Notification> notificationList, object data)
 		{
-			string text = string.Empty;
+			string text = "";
 			for (int i = 0; i < notificationList.Count; i++)
 			{
 				Notification notification = notificationList[i];
@@ -299,9 +297,8 @@ public class BuildingHP : Workable
 			if (base.master.damageSourceInfo.takeDamageEffect != SpawnFXHashes.None)
 			{
 				BuildingDef def = base.master.GetComponent<BuildingComplete>().Def;
-				int num = Grid.PosToCell(base.master);
-				int num2 = Grid.OffsetCell(num, 0, def.HeightInCells - 1);
-				Game.Instance.SpawnFX(base.master.damageSourceInfo.takeDamageEffect, num2, 0f);
+				int num = Grid.OffsetCell(Grid.PosToCell(base.master), 0, def.HeightInCells - 1);
+				Game.Instance.SpawnFX(base.master.damageSourceInfo.takeDamageEffect, num, 0f);
 			}
 		}
 
@@ -336,9 +333,7 @@ public class BuildingHP : Workable
 			base.master.GetComponentsInChildren<Meter>(BuildingHP.kbacQueryList);
 			for (int i = 0; i < BuildingHP.kbacQueryList.Count; i++)
 			{
-				Meter meter = BuildingHP.kbacQueryList[i];
-				KBatchedAnimController component2 = meter.GetComponent<KBatchedAnimController>();
-				component2.SetBlendValue(value);
+				BuildingHP.kbacQueryList[i].GetComponent<KBatchedAnimController>().SetBlendValue(value);
 			}
 		}
 
@@ -360,7 +355,14 @@ public class BuildingHP : Workable
 				{
 					smi.UpdateMeter();
 				})
-				.ToggleStatusItem((BuildingHP.SMInstance smi) => (smi.master.damageSourceInfo.statusItemID == null) ? null : Db.Get().BuildingStatusItems.Get(smi.master.damageSourceInfo.statusItemID), null)
+				.ToggleStatusItem(delegate(BuildingHP.SMInstance smi)
+				{
+					if (smi.master.damageSourceInfo.statusItemID == null)
+					{
+						return null;
+					}
+					return Db.Get().BuildingStatusItems.Get(smi.master.damageSourceInfo.statusItemID);
+				}, null)
 				.Exit(delegate(BuildingHP.SMInstance smi)
 				{
 					smi.ShowProgressBar(false);

@@ -1,25 +1,26 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data.Common;
 
 namespace System.Data.OleDb
 {
+	[MonoTODO("OleDb is not implemented.")]
 	public sealed class OleDbCommandBuilder : DbCommandBuilder
 	{
 		public OleDbCommandBuilder()
 		{
+			throw ADP.OleDb();
 		}
 
 		public OleDbCommandBuilder(OleDbDataAdapter adapter)
 		{
+			throw ADP.OleDb();
 		}
 
-		[DefaultValue(null)]
 		public new OleDbDataAdapter DataAdapter
 		{
 			get
 			{
-				throw null;
+				throw ADP.OleDb();
 			}
 			set
 			{
@@ -28,91 +29,82 @@ namespace System.Data.OleDb
 
 		protected override void ApplyParameterInfo(DbParameter parameter, DataRow datarow, StatementType statementType, bool whereClause)
 		{
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public static void DeriveParameters(OleDbCommand command)
 		{
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public new OleDbCommand GetDeleteCommand()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public new OleDbCommand GetDeleteCommand(bool useColumnsForParameterNames)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public new OleDbCommand GetInsertCommand()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public new OleDbCommand GetInsertCommand(bool useColumnsForParameterNames)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		protected override string GetParameterName(int parameterOrdinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		protected override string GetParameterName(string parameterName)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
 		protected override string GetParameterPlaceholder(int parameterOrdinal)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public new OleDbCommand GetUpdateCommand()
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public new OleDbCommand GetUpdateCommand(bool useColumnsForParameterNames)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public override string QuoteIdentifier(string unquotedIdentifier)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public string QuoteIdentifier(string unquotedIdentifier, OleDbConnection connection)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		protected override void SetRowUpdatingHandler(DbDataAdapter adapter)
 		{
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public override string UnquoteIdentifier(string quotedIdentifier)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 
-		[MonoTODO]
 		public string UnquoteIdentifier(string quotedIdentifier, OleDbConnection connection)
 		{
-			throw null;
+			throw ADP.OleDb();
 		}
 	}
 }

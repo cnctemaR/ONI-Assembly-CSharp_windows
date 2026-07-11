@@ -121,11 +121,9 @@ public class HelmetController : KMonoBehaviour
 		if (this.is_shown && this.is_flying)
 		{
 			this.EnableJets();
+			return;
 		}
-		else
-		{
-			this.DisableJets();
-		}
+		this.DisableJets();
 	}
 
 	private void EnableJets()
@@ -165,18 +163,15 @@ public class HelmetController : KMonoBehaviour
 		GameObject gameObject = new GameObject(text);
 		gameObject.SetActive(false);
 		gameObject.transform.parent = assigneeController.transform;
-		KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
-		kprefabID.PrefabTag = new Tag(text);
+		gameObject.AddComponent<KPrefabID>().PrefabTag = new Tag(text);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { tracked_anim_file };
 		kbatchedAnimController.initialAnim = anim_clip;
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.sceneLayer = layer;
-		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
-		kbatchedAnimTracker.symbol = symbol_name;
+		gameObject.AddComponent<KBatchedAnimTracker>().symbol = symbol_name;
 		bool flag;
-		Vector4 column = assigneeController.GetSymbolTransform(symbol_name, out flag).GetColumn(3);
-		Vector3 vector = column;
+		Vector3 vector = assigneeController.GetSymbolTransform(symbol_name, out flag).GetColumn(3);
 		vector.z = Grid.GetLayerZ(layer);
 		gameObject.transform.SetPosition(vector);
 		gameObject.SetActive(true);

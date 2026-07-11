@@ -45,8 +45,7 @@ public class PowerTransformerSmallConfig : IBuildingConfig
 		battery.powerSortOrder = 1000;
 		battery.capacity = def.GeneratorWattageRating;
 		battery.chargeWattage = def.GeneratorWattageRating;
-		PowerTransformer powerTransformer = go.AddComponent<PowerTransformer>();
-		powerTransformer.powerDistributionOrder = 9;
+		go.AddComponent<PowerTransformer>().powerDistributionOrder = 9;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

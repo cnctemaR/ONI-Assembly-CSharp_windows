@@ -4,16 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 {
 	public abstract class CombinerModule : IModule
 	{
-		public CombinerModule()
-		{
-		}
-
-		public CombinerModule(IModule left, IModule right)
-		{
-			this._leftModule = left;
-			this._rightModule = right;
-		}
-
 		public IModule LeftModule
 		{
 			get
@@ -36,6 +26,16 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise
 			{
 				this._rightModule = value;
 			}
+		}
+
+		public CombinerModule()
+		{
+		}
+
+		public CombinerModule(IModule left, IModule right)
+		{
+			this._leftModule = left;
+			this._rightModule = right;
 		}
 
 		protected IModule _rightModule;

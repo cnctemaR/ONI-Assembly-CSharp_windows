@@ -48,7 +48,7 @@ namespace UnityEngine.Experimental.UIElements
 				base.editorEngine.MoveCursorToPosition_Internal(evt.localMousePosition, evt.button == 0 && evt.shiftKey);
 				if (evt.button == 0)
 				{
-					base.textInputField.TakeMouseCapture();
+					base.textInputField.CaptureMouse();
 				}
 				evt.StopPropagation();
 			}
@@ -73,7 +73,7 @@ namespace UnityEngine.Experimental.UIElements
 					base.editorEngine.MoveCursorToPosition_Internal(evt.localMousePosition, evt.shiftKey);
 					this.m_SelectAllOnMouseUp = false;
 				}
-				base.textInputField.TakeMouseCapture();
+				base.textInputField.CaptureMouse();
 				evt.StopPropagation();
 			}
 			else if (evt.button == 1)
@@ -109,7 +109,7 @@ namespace UnityEngine.Experimental.UIElements
 						this.m_SelectAllOnMouseUp = false;
 					}
 					base.editorEngine.MouseDragSelectsWholeWords(false);
-					base.textInputField.ReleaseMouseCapture();
+					base.textInputField.ReleaseMouse();
 					this.m_DragToPosition = true;
 					this.m_Dragged = false;
 					this.m_PostponeMove = false;

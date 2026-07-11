@@ -6,22 +6,12 @@ namespace System.Data
 	{
 		public MergeFailedEventArgs(DataTable table, string conflict)
 		{
+			this.Table = table;
+			this.Conflict = conflict;
 		}
 
-		public string Conflict
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public DataTable Table { get; }
 
-		public DataTable Table
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		public string Conflict { get; }
 	}
 }

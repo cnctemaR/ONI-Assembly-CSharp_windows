@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public abstract class CodexWidget<SubClass> : ICodexWidget
 {
+	public int preferredWidth { get; set; }
+
+	public int preferredHeight { get; set; }
+
 	protected CodexWidget()
 	{
 		this.preferredWidth = -1;
@@ -16,10 +20,6 @@ public abstract class CodexWidget<SubClass> : ICodexWidget
 		this.preferredWidth = preferredWidth;
 		this.preferredHeight = preferredHeight;
 	}
-
-	public int preferredWidth { get; set; }
-
-	public int preferredHeight { get; set; }
 
 	public abstract void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles);
 

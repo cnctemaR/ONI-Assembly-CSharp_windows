@@ -2,27 +2,14 @@
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>A ray in 2D space.</para>
-	/// </summary>
 	public struct Ray2D
 	{
-		/// <summary>
-		///   <para>Creates a 2D ray starting at origin along direction.</para>
-		/// </summary>
-		/// <param name="Vector2">Origin.</param>
-		/// <param name="Vector2">Direction.</param>
-		/// <param name="origin"></param>
-		/// <param name="direction"></param>
 		public Ray2D(Vector2 origin, Vector2 direction)
 		{
 			this.m_Origin = origin;
 			this.m_Direction = direction.normalized;
 		}
 
-		/// <summary>
-		///   <para>The starting point of the ray in world space.</para>
-		/// </summary>
 		public Vector2 origin
 		{
 			get
@@ -35,9 +22,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The direction of the ray in world space.</para>
-		/// </summary>
 		public Vector2 direction
 		{
 			get
@@ -50,10 +34,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Get a point that lies a given distance along a ray.</para>
-		/// </summary>
-		/// <param name="distance">Distance of the desired point along the path of the ray.</param>
 		public Vector2 GetPoint(float distance)
 		{
 			return this.m_Origin + this.m_Direction * distance;

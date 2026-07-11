@@ -5,12 +5,12 @@ namespace YamlDotNet.Core
 	[Serializable]
 	internal class StringLookAheadBuffer : ILookAheadBuffer
 	{
+		public int Position { get; private set; }
+
 		public StringLookAheadBuffer(string value)
 		{
 			this.value = value;
 		}
-
-		public int Position { get; private set; }
 
 		public int Length
 		{
@@ -31,7 +31,11 @@ namespace YamlDotNet.Core
 		public char Peek(int offset)
 		{
 			int num = this.Position + offset;
-			return (!this.IsOutside(num)) ? this.value[num] : '\0';
+			if (!this.IsOutside(num))
+			{
+				return this.value[num];
+			}
+			return '\0';
 		}
 
 		private bool IsOutside(int index)

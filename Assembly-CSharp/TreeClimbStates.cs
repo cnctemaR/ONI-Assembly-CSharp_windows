@@ -7,18 +7,15 @@ public class TreeClimbStates : GameStateMachine<TreeClimbStates, TreeClimbStates
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.moving;
-		GameStateMachine<TreeClimbStates, TreeClimbStates.Instance, IStateMachineTarget, TreeClimbStates.Def>.State state = this.root.Enter(new StateMachine<TreeClimbStates, TreeClimbStates.Instance, IStateMachineTarget, TreeClimbStates.Def>.State.Callback(TreeClimbStates.SetTarget)).Enter(delegate(TreeClimbStates.Instance smi)
+		this.root.Enter(new StateMachine<TreeClimbStates, TreeClimbStates.Instance, IStateMachineTarget, TreeClimbStates.Def>.State.Callback(TreeClimbStates.SetTarget)).Enter(delegate(TreeClimbStates.Instance smi)
 		{
 			if (!TreeClimbStates.ReserveClimbable(smi))
 			{
 				smi.GoTo(this.behaviourcomplete);
 			}
-		}).Exit(new StateMachine<TreeClimbStates, TreeClimbStates.Instance, IStateMachineTarget, TreeClimbStates.Def>.State.Callback(TreeClimbStates.UnreserveClimbable));
-		string text = CREATURES.STATUSITEMS.RUMMAGINGSEED.NAME;
-		string text2 = CREATURES.STATUSITEMS.RUMMAGINGSEED.TOOLTIP;
-		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main);
-		this.moving.MoveTo(new Func<TreeClimbStates.Instance, int>(TreeClimbStates.GetClimbableCell), this.climbing, null, false);
+		}).Exit(new StateMachine<TreeClimbStates, TreeClimbStates.Instance, IStateMachineTarget, TreeClimbStates.Def>.State.Callback(TreeClimbStates.UnreserveClimbable))
+			.ToggleStatusItem(CREATURES.STATUSITEMS.RUMMAGINGSEED.NAME, CREATURES.STATUSITEMS.RUMMAGINGSEED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		this.moving.MoveTo(new Func<TreeClimbStates.Instance, int>(TreeClimbStates.GetClimbableCell), this.climbing, this.behaviourcomplete, false);
 		this.climbing.DefaultState(this.climbing.pre);
 		this.climbing.pre.PlayAnim("rummage_pre").OnAnimQueueComplete(this.climbing.loop);
 		this.climbing.loop.QueueAnim("rummage_loop", true, null).ScheduleGoTo(3.5f, this.climbing.pst).Update(new Action<TreeClimbStates.Instance, float>(TreeClimbStates.Rummage), UpdateRate.SIM_1000ms, false);
@@ -60,19 +57,17 @@ public class TreeClimbStates : GameStateMachine<TreeClimbStates, TreeClimbStates
 			if (component)
 			{
 				component.ExtractExtraSeed();
+				return;
 			}
-			else
+			Storage component2 = gameObject.GetComponent<Storage>();
+			if (component2 && component2.items.Count > 0)
 			{
-				Storage component2 = gameObject.GetComponent<Storage>();
-				if (component2 && component2.items.Count > 0)
+				int num = global::UnityEngine.Random.Range(0, component2.items.Count - 1);
+				GameObject gameObject2 = component2.items[num];
+				Pickupable pickupable = (gameObject2 ? gameObject2.GetComponent<Pickupable>() : null);
+				if (pickupable && pickupable.UnreservedAmount > 0.01f)
 				{
-					int num = global::UnityEngine.Random.Range(0, component2.items.Count - 1);
-					GameObject gameObject2 = component2.items[num];
-					Pickupable pickupable = ((!gameObject2) ? null : gameObject2.GetComponent<Pickupable>());
-					if (pickupable && pickupable.UnreservedAmount > 0.01f)
-					{
-						smi.Toss(pickupable);
-					}
+					smi.Toss(pickupable);
 				}
 			}
 		}

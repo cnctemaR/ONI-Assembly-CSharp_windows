@@ -5,78 +5,6 @@ using UnityEngine;
 
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
-	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0)
-		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 5, false, true, priority_mod, false, ReportManager.ReportType.WorkTime)
-	{
-		if (choreType == null)
-		{
-			global::Debug.LogError("You must specify a chore type for fetching!");
-		}
-		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
-		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("Chore {0} is requesting {1} {2} to {3}", new object[]
-			{
-				choreType.Id,
-				tags[0],
-				amount,
-				(!(destination != null)) ? "to nowhere" : destination.name
-			}) });
-		}
-		base.SetPrioritizable((!(destination.prioritizable != null)) ? destination.GetComponent<Prioritizable>() : destination.prioritizable);
-		base.smi = new FetchChore.StatesInstance(this);
-		base.smi.sm.requestedamount.Set(amount, base.smi);
-		base.smi.sm.destination.Set(destination, base.smi);
-		this.tags = tags;
-		this.tagBits = new TagBits(tags);
-		this.requiredTagBits = new TagBits(required_tags);
-		this.forbiddenTagBits = new TagBits(forbidden_tags);
-		this.tagBitsHash = this.tagBits.GetHashCode();
-		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), "Fetch chore fetching invalid tags.");
-		if (destination.GetOnlyFetchMarkedItems())
-		{
-			this.requiredTagBits.SetTag(GameTags.Garbage);
-		}
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
-		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
-		Deconstructable component = base.target.GetComponent<Deconstructable>();
-		if (component != null)
-		{
-			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component);
-		}
-		BuildingEnabledButton component2 = base.target.GetComponent<BuildingEnabledButton>();
-		if (component2 != null)
-		{
-			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component2);
-		}
-		if (operational_requirement != FetchOrder2.OperationalRequirement.None && destination.gameObject.GetComponent<Operational>())
-		{
-			if (operational_requirement == FetchOrder2.OperationalRequirement.Operational)
-			{
-				Operational component3 = destination.GetComponent<Operational>();
-				if (component3 != null)
-				{
-					base.AddPrecondition(ChorePreconditions.instance.IsOperational, component3);
-				}
-			}
-			if (operational_requirement == FetchOrder2.OperationalRequirement.Functional)
-			{
-				Operational component4 = destination.GetComponent<Operational>();
-				if (component4 != null)
-				{
-					base.AddPrecondition(ChorePreconditions.instance.IsFunctional, component4);
-				}
-			}
-		}
-		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
-		destination.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
-		this.automatable = destination.GetComponent<Automatable>();
-		if (this.automatable)
-		{
-			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, this.automatable);
-		}
-	}
-
 	public float originalAmount
 	{
 		get
@@ -147,12 +75,10 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			this.fetcher = driver.gameObject;
 			base.Succeed("FetchAreaEnd");
 			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogFetchChore(this.fetcher, base.choreType);
+			return;
 		}
-		else
-		{
-			base.SetOverrideTarget(null);
-			this.Fail("FetchAreaFail");
-		}
+		base.SetOverrideTarget(null);
+		this.Fail("FetchAreaFail");
 	}
 
 	public Pickupable FindFetchTarget(ChoreConsumerState consumer_state)
@@ -162,8 +88,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		{
 			if (consumer_state.hasSolidTransferArm)
 			{
-				SolidTransferArm solidTransferArm = consumer_state.solidTransferArm;
-				solidTransferArm.FindFetchTarget(this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
+				consumer_state.solidTransferArm.FindFetchTarget(this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
 			}
 			else
 			{
@@ -217,16 +142,86 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		return this.amount;
 	}
 
+	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0)
+		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 5, false, true, priority_mod, false, ReportManager.ReportType.WorkTime)
+	{
+		if (choreType == null)
+		{
+			global::Debug.LogError("You must specify a chore type for fetching!");
+		}
+		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+		{
+			DebugUtil.LogWarningArgs(new object[] { string.Format("Chore {0} is requesting {1} {2} to {3}", new object[]
+			{
+				choreType.Id,
+				tags[0],
+				amount,
+				(destination != null) ? destination.name : "to nowhere"
+			}) });
+		}
+		base.SetPrioritizable((destination.prioritizable != null) ? destination.prioritizable : destination.GetComponent<Prioritizable>());
+		base.smi = new FetchChore.StatesInstance(this);
+		base.smi.sm.requestedamount.Set(amount, base.smi);
+		base.smi.sm.destination.Set(destination, base.smi);
+		this.tags = tags;
+		this.tagBits = new TagBits(tags);
+		this.requiredTagBits = new TagBits(required_tags);
+		this.forbiddenTagBits = new TagBits(forbidden_tags);
+		this.tagBitsHash = this.tagBits.GetHashCode();
+		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), "Fetch chore fetching invalid tags.");
+		if (destination.GetOnlyFetchMarkedItems())
+		{
+			this.requiredTagBits.SetTag(GameTags.Garbage);
+		}
+		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
+		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
+		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
+		Deconstructable component = base.target.GetComponent<Deconstructable>();
+		if (component != null)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component);
+		}
+		BuildingEnabledButton component2 = base.target.GetComponent<BuildingEnabledButton>();
+		if (component2 != null)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component2);
+		}
+		if (operational_requirement != FetchOrder2.OperationalRequirement.None && destination.gameObject.GetComponent<Operational>())
+		{
+			if (operational_requirement == FetchOrder2.OperationalRequirement.Operational)
+			{
+				Operational component3 = destination.GetComponent<Operational>();
+				if (component3 != null)
+				{
+					base.AddPrecondition(ChorePreconditions.instance.IsOperational, component3);
+				}
+			}
+			if (operational_requirement == FetchOrder2.OperationalRequirement.Functional)
+			{
+				Operational component4 = destination.GetComponent<Operational>();
+				if (component4 != null)
+				{
+					base.AddPrecondition(ChorePreconditions.instance.IsFunctional, component4);
+				}
+			}
+		}
+		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
+		destination.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+		this.automatable = destination.GetComponent<Automatable>();
+		if (this.automatable)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, this.automatable);
+		}
+	}
+
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
 	{
 		if (base.smi.sm.destination.Get<Storage>(base.smi).GetOnlyFetchMarkedItems())
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);
+			return;
 		}
-		else
-		{
-			this.requiredTagBits.Clear(GameTags.Garbage);
-		}
+		this.requiredTagBits.Clear(GameTags.Garbage);
 	}
 
 	private void OnMasterPriorityChanged(PriorityScreen.PriorityClass priorityClass, int priority_value)

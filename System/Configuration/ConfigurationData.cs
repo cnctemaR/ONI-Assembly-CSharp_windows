@@ -8,17 +8,6 @@ namespace System.Configuration
 {
 	internal class ConfigurationData
 	{
-		public ConfigurationData()
-			: this(null)
-		{
-		}
-
-		public ConfigurationData(ConfigurationData parent)
-		{
-			this.parent = ((parent != this) ? parent : null);
-			this.factories = new Hashtable();
-		}
-
 		private Hashtable FileCache
 		{
 			get
@@ -32,7 +21,18 @@ namespace System.Configuration
 			}
 		}
 
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n</PermissionSet>\n")]
+		public ConfigurationData()
+			: this(null)
+		{
+		}
+
+		public ConfigurationData(ConfigurationData parent)
+		{
+			this.parent = ((parent == this) ? null : parent);
+			this.factories = new Hashtable();
+		}
+
+		[FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
 		public bool Load(string fileName)
 		{
 			this.fileName = fileName;
@@ -43,8 +43,7 @@ namespace System.Configuration
 			XmlTextReader xmlTextReader = null;
 			try
 			{
-				FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-				xmlTextReader = new XmlTextReader(fileStream);
+				xmlTextReader = new XmlTextReader(new FileStream(fileName, FileMode.Open, FileAccess.Read));
 				if (this.InitRead(xmlTextReader))
 				{
 					this.ReadConfigFile(xmlTextReader);
@@ -77,8 +76,7 @@ namespace System.Configuration
 			XmlTextReader xmlTextReader = null;
 			try
 			{
-				TextReader textReader = new StringReader(data);
-				xmlTextReader = new XmlTextReader(textReader);
+				xmlTextReader = new XmlTextReader(new StringReader(data));
 				if (this.InitRead(xmlTextReader))
 				{
 					this.ReadConfigFile(xmlTextReader);
@@ -184,8 +182,7 @@ namespace System.Configuration
 			{
 				return configXmlDocument;
 			}
-			StringReader stringReader = new StringReader(text);
-			XmlTextReader xmlTextReader = new XmlTextReader(stringReader);
+			XmlTextReader xmlTextReader = new XmlTextReader(new StringReader(text));
 			xmlTextReader.MoveToContent();
 			configXmlDocument.LoadSingleElement(this.fileName, xmlTextReader);
 			return this.GetInnerDoc(configXmlDocument, 0, array);
@@ -214,8 +211,9 @@ namespace System.Configuration
 
 		public object GetConfig(string sectionName)
 		{
+			ConfigurationData configurationData = this;
 			object obj;
-			lock (this)
+			lock (configurationData)
 			{
 				obj = this.FileCache[sectionName];
 			}
@@ -227,10 +225,11 @@ namespace System.Configuration
 			{
 				return obj;
 			}
-			lock (this)
+			configurationData = this;
+			lock (configurationData)
 			{
 				obj = this.GetConfigInternal(sectionName);
-				this.FileCache[sectionName] = ((obj != null) ? obj : ConfigurationData.emptyMark);
+				this.FileCache[sectionName] = ((obj == null) ? ConfigurationData.emptyMark : obj);
 			}
 			return obj;
 		}
@@ -327,45 +326,50 @@ namespace System.Configuration
 							this.ThrowException("Invalid attribute value", reader);
 						}
 					}
-					else if (name == "allowDefinition")
-					{
-						if (text4 != null)
-						{
-							this.ThrowException("Duplicated allowDefinition attribute.", reader);
-						}
-						text4 = reader.Value;
-						try
-						{
-							allowDefinition = (AllowDefinition)((int)Enum.Parse(typeof(AllowDefinition), text4));
-						}
-						catch
-						{
-							this.ThrowException("Invalid attribute value", reader);
-						}
-					}
-					else if (name == "type")
-					{
-						if (text2 != null)
-						{
-							this.ThrowException("Duplicated type attribute.", reader);
-						}
-						text2 = reader.Value;
-					}
-					else if (name == "name")
-					{
-						if (text != null)
-						{
-							this.ThrowException("Duplicated name attribute.", reader);
-						}
-						text = reader.Value;
-						if (text == "location")
-						{
-							this.ThrowException("location is a reserved section name", reader);
-						}
-					}
 					else
 					{
-						this.ThrowException("Unrecognized attribute.", reader);
+						if (name == "allowDefinition")
+						{
+							if (text4 != null)
+							{
+								this.ThrowException("Duplicated allowDefinition attribute.", reader);
+							}
+							text4 = reader.Value;
+							try
+							{
+								allowDefinition = (AllowDefinition)Enum.Parse(typeof(AllowDefinition), text4);
+								continue;
+							}
+							catch
+							{
+								this.ThrowException("Invalid attribute value", reader);
+								continue;
+							}
+						}
+						if (name == "type")
+						{
+							if (text2 != null)
+							{
+								this.ThrowException("Duplicated type attribute.", reader);
+							}
+							text2 = reader.Value;
+						}
+						else if (name == "name")
+						{
+							if (text != null)
+							{
+								this.ThrowException("Duplicated name attribute.", reader);
+							}
+							text = reader.Value;
+							if (text == "location")
+							{
+								this.ThrowException("location is a reserved section name", reader);
+							}
+						}
+						else
+						{
+							this.ThrowException("Unrecognized attribute.", reader);
+						}
 					}
 				}
 			}
@@ -375,7 +379,7 @@ namespace System.Configuration
 			}
 			if (sectionName != null)
 			{
-				text = sectionName + '/' + text;
+				text = sectionName + "/" + text;
 			}
 			reader.MoveToElement();
 			object obj = this.LookForFactory(text);
@@ -417,7 +421,7 @@ namespace System.Configuration
 			reader.MoveToElement();
 			if (sectionName != null)
 			{
-				text = sectionName + '/' + text;
+				text = sectionName + "/" + text;
 			}
 			object obj = this.LookForFactory(text);
 			if (obj != null && obj == ConfigurationData.removedMark)
@@ -461,7 +465,7 @@ namespace System.Configuration
 			}
 			if (configSection != null)
 			{
-				text = configSection + '/' + text;
+				text = configSection + "/" + text;
 			}
 			object obj = this.LookForFactory(text);
 			if (obj != null && obj != ConfigurationData.removedMark && obj != ConfigurationData.groupMark)
@@ -473,18 +477,16 @@ namespace System.Configuration
 			{
 				reader.Skip();
 				reader.MoveToContent();
+				return;
 			}
-			else
+			reader.Read();
+			reader.MoveToContent();
+			if (reader.NodeType != XmlNodeType.EndElement)
 			{
-				reader.Read();
-				reader.MoveToContent();
-				if (reader.NodeType != XmlNodeType.EndElement)
-				{
-					this.ReadSections(reader, text);
-				}
-				reader.ReadEndElement();
-				reader.MoveToContent();
+				this.ReadSections(reader, text);
 			}
+			reader.ReadEndElement();
+			reader.MoveToContent();
 		}
 
 		private void ReadSections(XmlTextReader reader, string configSection)
@@ -559,7 +561,7 @@ namespace System.Configuration
 						reader.ReadEndElement();
 					}
 				}
-				else if (name != null && name != string.Empty)
+				else if (name != null && name != "")
 				{
 					this.StorePending(name, reader);
 					this.MoveToNextElement(reader);

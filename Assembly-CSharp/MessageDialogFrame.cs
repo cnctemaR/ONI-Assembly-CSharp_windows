@@ -15,7 +15,7 @@ public class MessageDialogFrame : KScreen
 		MultiToggle multiToggle = this.dontShowAgainButton;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnClickDontShowAgain));
 		bool flag = KPlayerPrefs.GetInt("HideTutorial_CheckState", 0) == 1;
-		this.dontShowAgainButton.ChangeState((!flag) ? 1 : 0);
+		this.dontShowAgainButton.ChangeState(flag ? 0 : 1);
 		base.Subscribe(Messenger.Instance.gameObject, -599791736, new Action<object>(this.OnMessagesChanged));
 		this.OnMessagesChanged(null);
 	}
@@ -42,7 +42,7 @@ public class MessageDialogFrame : KScreen
 	{
 		this.dontShowAgainButton.NextState();
 		bool flag = this.dontShowAgainButton.CurrentState == 0;
-		KPlayerPrefs.SetInt("HideTutorial_CheckState", (!flag) ? 0 : 1);
+		KPlayerPrefs.SetInt("HideTutorial_CheckState", flag ? 1 : 0);
 	}
 
 	private void OnMessagesChanged(object data)
@@ -64,12 +64,10 @@ public class MessageDialogFrame : KScreen
 		{
 			this.dontShowAgainElement.SetActive(true);
 			this.dontShowAgainDelegate = new global::System.Action(dialog.OnDontShowAgain);
+			return;
 		}
-		else
-		{
-			this.dontShowAgainElement.SetActive(false);
-			this.dontShowAgainDelegate = null;
-		}
+		this.dontShowAgainElement.SetActive(false);
+		this.dontShowAgainDelegate = null;
 	}
 
 	private void TryDontShowAgain()

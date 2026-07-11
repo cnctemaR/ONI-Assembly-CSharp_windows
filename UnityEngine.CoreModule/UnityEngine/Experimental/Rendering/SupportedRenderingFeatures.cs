@@ -3,14 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	/// <summary>
-	///   <para>Describes the rendering features supported by a given render pipeline.</para>
-	/// </summary>
 	public class SupportedRenderingFeatures
 	{
-		/// <summary>
-		///   <para>Get / Set a SupportedRenderingFeatures.</para>
-		/// </summary>
 		public static SupportedRenderingFeatures active
 		{
 			get
@@ -27,50 +21,31 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Flags for supported reflection probes.</para>
-		/// </summary>
 		public SupportedRenderingFeatures.ReflectionProbeSupportFlags reflectionProbeSupportFlags { get; set; } = SupportedRenderingFeatures.ReflectionProbeSupportFlags.None;
 
-		/// <summary>
-		///   <para>This is the fallback mode if the mode the user had previously selected is no longer available. See SupportedRenderingFeatures.supportedMixedLightingModes.</para>
-		/// </summary>
 		public SupportedRenderingFeatures.LightmapMixedBakeMode defaultMixedLightingMode { get; set; } = SupportedRenderingFeatures.LightmapMixedBakeMode.None;
 
-		/// <summary>
-		///   <para>Specifies what LightmapMixedBakeMode that are supported. Please define a SupportedRenderingFeatures.defaultMixedLightingMode in case multiple modes are supported.</para>
-		/// </summary>
 		public SupportedRenderingFeatures.LightmapMixedBakeMode supportedMixedLightingModes { get; set; } = SupportedRenderingFeatures.LightmapMixedBakeMode.IndirectOnly | SupportedRenderingFeatures.LightmapMixedBakeMode.Subtractive | SupportedRenderingFeatures.LightmapMixedBakeMode.Shadowmask;
 
-		/// <summary>
-		///   <para>What baking types are supported. The unsupported ones will be hidden from the UI. See LightmapBakeType.</para>
-		/// </summary>
 		public LightmapBakeType supportedLightmapBakeTypes { get; set; } = LightmapBakeType.Realtime | LightmapBakeType.Baked | LightmapBakeType.Mixed;
 
-		/// <summary>
-		///   <para>Specifies what modes are supported. Has to be at least one. See LightmapsMode.</para>
-		/// </summary>
 		public LightmapsMode supportedLightmapsModes { get; set; } = LightmapsMode.CombinedDirectional;
 
-		/// <summary>
-		///   <para>Are light probe proxy volumes supported?</para>
-		/// </summary>
 		public bool rendererSupportsLightProbeProxyVolumes { get; set; } = true;
 
-		/// <summary>
-		///   <para>Are motion vectors supported?</para>
-		/// </summary>
 		public bool rendererSupportsMotionVectors { get; set; } = true;
 
-		/// <summary>
-		///   <para>Can renderers support receiving shadows?</para>
-		/// </summary>
 		public bool rendererSupportsReceiveShadows { get; set; } = true;
 
-		/// <summary>
-		///   <para>Are reflection probes supported?</para>
-		/// </summary>
 		public bool rendererSupportsReflectionProbes { get; set; } = true;
+
+		public bool rendererSupportsRendererPriority { get; set; } = false;
+
+		public bool rendererOverridesEnvironmentLighting { get; set; } = false;
+
+		public bool rendererOverridesFog { get; set; } = false;
+
+		public bool rendererOverridesOtherLightingSettings { get; set; } = false;
 
 		internal unsafe static MixedLightingMode FallbackMixedLightingMode()
 		{
@@ -176,43 +151,19 @@ namespace UnityEngine.Experimental.Rendering
 
 		private static SupportedRenderingFeatures s_Active = new SupportedRenderingFeatures();
 
-		/// <summary>
-		///   <para>Supported modes for ReflectionProbes.</para>
-		/// </summary>
 		[Flags]
 		public enum ReflectionProbeSupportFlags
 		{
-			/// <summary>
-			///   <para>Default reflection probe support.</para>
-			/// </summary>
 			None = 0,
-			/// <summary>
-			///   <para>Rotated reflection probes are supported.</para>
-			/// </summary>
 			Rotation = 1
 		}
 
-		/// <summary>
-		///   <para>Same as MixedLightingMode for baking, but is used to determine what is supported by the pipeline.</para>
-		/// </summary>
 		[Flags]
 		public enum LightmapMixedBakeMode
 		{
-			/// <summary>
-			///   <para>No mode is supported.</para>
-			/// </summary>
 			None = 0,
-			/// <summary>
-			///   <para>Same as MixedLightingMode.IndirectOnly but determines if it is supported by the pipeline.</para>
-			/// </summary>
 			IndirectOnly = 1,
-			/// <summary>
-			///   <para>Same as MixedLightingMode.Subtractive but determines if it is supported by the pipeline.</para>
-			/// </summary>
 			Subtractive = 2,
-			/// <summary>
-			///   <para>Same as MixedLightingMode.Shadowmask but determines if it is supported by the pipeline.</para>
-			/// </summary>
 			Shadowmask = 4
 		}
 	}

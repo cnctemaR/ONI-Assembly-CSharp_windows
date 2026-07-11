@@ -23,8 +23,7 @@ public class KTabMenuHeader : KMonoBehaviour
 			componentInChildren.text = name.ToUpper();
 		}
 		this.ActivateTabArtwork(id);
-		KButton component2 = gameObject.GetComponent<KButton>();
-		component2.onClick += delegate
+		gameObject.GetComponent<KButton>().onClick += delegate
 		{
 			onClick(id);
 		};
@@ -36,7 +35,7 @@ public class KTabMenuHeader : KMonoBehaviour
 		RectTransform component = gameObject.GetComponent<RectTransform>();
 		component.transform.SetParent(base.transform, false);
 		component.name = name;
-		if (tooltip == string.Empty)
+		if (tooltip == "")
 		{
 			component.GetComponent<ToolTip>().toolTip = name;
 		}
@@ -75,13 +74,9 @@ public class KTabMenuHeader : KMonoBehaviour
 			if (child.gameObject.activeSelf)
 			{
 				KButton componentInChildren = child.GetComponentInChildren<KButton>();
-				if (componentInChildren != null)
+				if (componentInChildren != null && componentInChildren.GetComponentInChildren<Text>() != null && i == itemIdx)
 				{
-					Text componentInChildren2 = componentInChildren.GetComponentInChildren<Text>();
-					if (componentInChildren2 != null && i == itemIdx)
-					{
-						this.ActivateTabArtwork(itemIdx);
-					}
+					this.ActivateTabArtwork(itemIdx);
 				}
 				KToggle component = child.GetComponent<KToggle>();
 				if (component != null)

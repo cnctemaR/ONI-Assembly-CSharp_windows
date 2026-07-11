@@ -35,8 +35,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.Reshuffle(true);
 		};
 		List<IListableOption> list = new List<IListableOption>();
-		List<SkillGroup> list2 = new List<SkillGroup>(Db.Get().SkillGroups.resources);
-		foreach (SkillGroup skillGroup in list2)
+		foreach (SkillGroup skillGroup in new List<SkillGroup>(Db.Get().SkillGroups.resources))
 		{
 			list.Add(skillGroup);
 		}
@@ -153,7 +152,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
 		this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
 		Transform transform = this.animController.transform.parent.gameObject.transform.Find("BG");
-		KBatchedAnimController kbatchedAnimController = ((!(transform != null)) ? null : transform.gameObject.GetComponent<KBatchedAnimController>());
+		KBatchedAnimController kbatchedAnimController = ((transform != null) ? transform.gameObject.GetComponent<KBatchedAnimController>() : null);
 		if (kbatchedAnimController != null)
 		{
 			kbatchedAnimController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
@@ -171,7 +170,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			ScreenResize instance = ScreenResize.Instance;
 			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
 			Transform transform = this.animController.transform.parent.gameObject.transform.Find("BG");
-			KBatchedAnimController kbatchedAnimController = ((!(transform != null)) ? null : transform.gameObject.GetComponent<KBatchedAnimController>());
+			KBatchedAnimController kbatchedAnimController = ((transform != null) ? transform.gameObject.GetComponent<KBatchedAnimController>() : null);
 			if (kbatchedAnimController != null)
 			{
 				kbatchedAnimController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
@@ -187,8 +186,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		{
 			this.animController.AddAnimOverrides(this.idle_anim, 0f);
 		}
-		HashedString hashedString2 = new HashedString("crewSelect_fx_kanim");
-		KAnimFile anim = Assets.GetAnim(hashedString2);
+		KAnimFile anim = Assets.GetAnim(new HashedString("crewSelect_fx_kanim"));
 		if (anim != null)
 		{
 			this.animController.AddAnimOverrides(anim, 0f);
@@ -207,28 +205,25 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		for (int i = 1; i < this.stats.Traits.Count; i++)
 		{
 			Trait trait = this.stats.Traits[i];
-			LocText locText = ((!trait.PositiveTrait) ? this.badTrait : this.goodTrait);
+			LocText locText = (trait.PositiveTrait ? this.goodTrait : this.badTrait);
 			LocText locText2 = Util.KInstantiateUI<LocText>(locText.gameObject, locText.transform.parent.gameObject, false);
 			locText2.gameObject.SetActive(true);
 			locText2.text = this.stats.Traits[i].Name;
-			locText2.color = ((!trait.PositiveTrait) ? Constants.NEGATIVE_COLOR : Constants.POSITIVE_COLOR);
+			locText2.color = (trait.PositiveTrait ? Constants.POSITIVE_COLOR : Constants.NEGATIVE_COLOR);
 			locText2.GetComponent<ToolTip>().SetSimpleTooltip(trait.description);
 			for (int j = 0; j < trait.SelfModifiers.Count; j++)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.attributeLabelTrait.gameObject, locText.transform.parent.gameObject, false);
 				gameObject.SetActive(true);
 				LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
-				string text = ((trait.SelfModifiers[j].Value <= 0f) ? UI.CHARACTERCONTAINER_ATTRIBUTEMODIFIER_DECREASED : UI.CHARACTERCONTAINER_ATTRIBUTEMODIFIER_INCREASED);
+				string text = ((trait.SelfModifiers[j].Value > 0f) ? UI.CHARACTERCONTAINER_ATTRIBUTEMODIFIER_INCREASED : UI.CHARACTERCONTAINER_ATTRIBUTEMODIFIER_DECREASED);
 				componentInChildren.text = string.Format(text, Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + trait.SelfModifiers[j].AttributeId.ToUpper() + ".NAME"));
-				if (trait.SelfModifiers[j].AttributeId == "GermResistance")
-				{
-				}
+				trait.SelfModifiers[j].AttributeId == "GermResistance";
 				Klei.AI.Attribute attribute = Db.Get().Attributes.Get(trait.SelfModifiers[j].AttributeId);
 				string text2 = attribute.Description;
-				string text3 = text2;
 				text2 = string.Concat(new string[]
 				{
-					text3,
+					text2,
 					"\n\n",
 					Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + trait.SelfModifiers[j].AttributeId.ToUpper() + ".NAME"),
 					": ",
@@ -237,10 +232,10 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				List<AttributeConverter> convertersForAttribute = Db.Get().AttributeConverters.GetConvertersForAttribute(attribute);
 				for (int k = 0; k < convertersForAttribute.Count; k++)
 				{
-					string text4 = convertersForAttribute[k].DescriptionFromAttribute(convertersForAttribute[k].multiplier * trait.SelfModifiers[j].Value, null);
-					if (text4 != string.Empty)
+					string text3 = convertersForAttribute[k].DescriptionFromAttribute(convertersForAttribute[k].multiplier * trait.SelfModifiers[j].Value, null);
+					if (text3 != "")
 					{
-						text2 = text2 + "\n    • " + text4;
+						text2 = text2 + "\n    • " + text3;
 					}
 				}
 				componentInChildren.GetComponent<ToolTip>().SetSimpleTooltip(text2);
@@ -252,40 +247,40 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				gameObject2.SetActive(true);
 				LocText componentInChildren2 = gameObject2.GetComponentInChildren<LocText>();
 				componentInChildren2.text = trait.GetDisabledChoresString(false);
-				string text5 = string.Empty;
-				string text6 = string.Empty;
+				string text4 = "";
+				string text5 = "";
 				for (int l = 0; l < trait.disabledChoreGroups.Length; l++)
 				{
 					if (l > 0)
 					{
-						text5 += ", ";
-						text6 += "\n";
+						text4 += ", ";
+						text5 += "\n";
 					}
-					text5 += trait.disabledChoreGroups[l].Name;
-					text6 += trait.disabledChoreGroups[l].description;
+					text4 += trait.disabledChoreGroups[l].Name;
+					text5 += trait.disabledChoreGroups[l].description;
 				}
-				componentInChildren2.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(DUPLICANTS.TRAITS.CANNOT_DO_TASK_TOOLTIP, text5, text6));
+				componentInChildren2.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(DUPLICANTS.TRAITS.CANNOT_DO_TASK_TOOLTIP, text4, text5));
 				this.traitEntries.Add(gameObject2);
 			}
-			if (trait.ignoredEffects != null && trait.ignoredEffects.Length > 0)
+			if (trait.ignoredEffects != null && trait.ignoredEffects.Length != 0)
 			{
 				GameObject gameObject3 = Util.KInstantiateUI(this.attributeLabelTrait.gameObject, locText.transform.parent.gameObject, false);
 				gameObject3.SetActive(true);
 				LocText componentInChildren3 = gameObject3.GetComponentInChildren<LocText>();
 				componentInChildren3.text = trait.GetIgnoredEffectsString(false);
-				string text7 = string.Empty;
-				string text8 = string.Empty;
+				string text6 = "";
+				string text7 = "";
 				for (int m = 0; m < trait.ignoredEffects.Length; m++)
 				{
 					if (m > 0)
 					{
-						text7 += ", ";
-						text8 += "\n";
+						text6 += ", ";
+						text7 += "\n";
 					}
-					text7 += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".NAME");
-					text8 += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".CAUSE");
+					text6 += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".NAME");
+					text7 += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + trait.ignoredEffects[m].ToUpper() + ".CAUSE");
 				}
-				componentInChildren3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(DUPLICANTS.TRAITS.IGNORED_EFFECTS_TOOLTIP, text7, text8));
+				componentInChildren3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(DUPLICANTS.TRAITS.IGNORED_EFFECTS_TOOLTIP, text6, text7));
 				this.traitEntries.Add(gameObject3);
 			}
 			StringEntry stringEntry;
@@ -325,17 +320,17 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 					LocText locText3 = Util.KInstantiateUI<LocText>(this.aptitudeLabel.gameObject, gameObject5, false);
 					locText3.gameObject.SetActive(true);
 					locText3.text = skillGroup.Name;
-					string text9 = string.Empty;
-					if (skillGroup.choreGroupID != string.Empty)
+					string text8;
+					if (skillGroup.choreGroupID != "")
 					{
 						ChoreGroup choreGroup = Db.Get().ChoreGroups.Get(skillGroup.choreGroupID);
-						text9 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION_CHOREGROUP, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS, choreGroup.description);
+						text8 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION_CHOREGROUP, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS, choreGroup.description);
 					}
 					else
 					{
-						text9 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS);
+						text8 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS);
 					}
-					locText3.GetComponent<ToolTip>().SetSimpleTooltip(text9);
+					locText3.GetComponent<ToolTip>().SetSimpleTooltip(text8);
 					float num = (float)DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[this.stats.skillAptitudes.Count - 1];
 					LocText locText4 = Util.KInstantiateUI<LocText>(this.attributeLabelAptitude.gameObject, gameObject5, false);
 					locText4.gameObject.SetActive(true);
@@ -346,11 +341,10 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 						" ",
 						keyValuePair.Key.relevantAttributes[0].Name
 					});
-					string text10 = keyValuePair.Key.relevantAttributes[0].Description;
-					string text3 = text10;
-					text10 = string.Concat(new object[]
+					string text9 = keyValuePair.Key.relevantAttributes[0].Description;
+					text9 = string.Concat(new object[]
 					{
-						text3,
+						text9,
 						"\n\n",
 						keyValuePair.Key.relevantAttributes[0].Name,
 						": +",
@@ -359,9 +353,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 					List<AttributeConverter> convertersForAttribute2 = Db.Get().AttributeConverters.GetConvertersForAttribute(keyValuePair.Key.relevantAttributes[0]);
 					for (int n = 0; n < convertersForAttribute2.Count; n++)
 					{
-						text10 = text10 + "\n    • " + convertersForAttribute2[n].DescriptionFromAttribute(convertersForAttribute2[n].multiplier * num, null);
+						text9 = text9 + "\n    • " + convertersForAttribute2[n].DescriptionFromAttribute(convertersForAttribute2[n].multiplier * num, null);
 					}
-					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text10);
+					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text9);
 					gameObject5.gameObject.SetActive(true);
 					this.aptitudeEntries.Add(gameObject5);
 				}
@@ -402,16 +396,15 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			global::UnityEngine.Object.Destroy(icg);
 		});
 		this.iconGroups.Clear();
-		Klei.AI.Attributes attr = this.animController.gameObject.GetAttributes();
-		List<AttributeInstance> attributes = new List<AttributeInstance>(attr.AttributeTable);
-		attributes.RemoveAll((AttributeInstance at) => at.Attribute.ShowInUI != Klei.AI.Attribute.Display.Skill);
-		attributes = attributes.OrderBy<AttributeInstance, string>((AttributeInstance at) => at.Name).ToList<AttributeInstance>();
-		for (int i = 0; i < attributes.Count; i++)
+		List<AttributeInstance> list = new List<AttributeInstance>(this.animController.gameObject.GetAttributes().AttributeTable);
+		list.RemoveAll((AttributeInstance at) => at.Attribute.ShowInUI != Klei.AI.Attribute.Display.Skill);
+		list = list.OrderBy<AttributeInstance, string>((AttributeInstance at) => at.Name).ToList<AttributeInstance>();
+		for (int i = 0; i < list.Count; i++)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.iconGroup.gameObject, this.iconGroup.transform.parent.gameObject, false);
 			LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
 			gameObject.SetActive(true);
-			float totalValue = attributes[i].GetTotalValue();
+			float totalValue = list[i].GetTotalValue();
 			if (totalValue > 0f)
 			{
 				componentInChildren.color = Constants.POSITIVE_COLOR;
@@ -424,8 +417,8 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			{
 				componentInChildren.color = Constants.NEGATIVE_COLOR;
 			}
-			componentInChildren.text = string.Format(UI.CHARACTERCONTAINER_SKILL_VALUE, GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f), attributes[i].Name);
-			AttributeInstance attributeInstance = attributes[i];
+			componentInChildren.text = string.Format(UI.CHARACTERCONTAINER_SKILL_VALUE, GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f), list[i].Name);
+			AttributeInstance attributeInstance = list[i];
 			string text = attributeInstance.Description;
 			if (attributeInstance.Attribute.converters.Count > 0)
 			{
@@ -509,11 +502,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		if (this.controller.AllowsReplacing)
 		{
 			this.selectButton.onClick += this.ReplaceCharacterSelection;
+			return;
 		}
-		else
-		{
-			this.selectButton.onClick += this.CantSelectCharacter;
-		}
+		this.selectButton.onClick += this.CantSelectCharacter;
 	}
 
 	private void CantSelectCharacter()
@@ -594,7 +585,11 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	public string GetValueColor(bool isPositive)
 	{
-		return (!isPositive) ? "<color=#ff2222ff>" : "<color=green>";
+		if (!isPositive)
+		{
+			return "<color=#ff2222ff>";
+		}
+		return "<color=green>";
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -636,13 +631,11 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.guaranteedAptitudeID = skillGroup.Id;
 			this.selectedArchetypeIcon.sprite = Assets.GetSprite(skillGroup.archetypeIcon);
 			this.Reshuffle(true);
+			return;
 		}
-		else
-		{
-			this.guaranteedAptitudeID = null;
-			this.selectedArchetypeIcon.sprite = this.dropdownArrowIcon;
-			this.Reshuffle(true);
-		}
+		this.guaranteedAptitudeID = null;
+		this.selectedArchetypeIcon.sprite = this.dropdownArrowIcon;
+		this.Reshuffle(true);
 	}
 
 	private int archetypeDropDownSort(IListableOption a, IListableOption b, object targetData)

@@ -82,21 +82,11 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 		KIconButtonMenu.ButtonInfo buttonInfo;
 		if ((isEnabled && !flag) || (!isEnabled && flag))
 		{
-			string text = "action_building_disabled";
-			string text2 = UI.USERMENUACTIONS.ENABLEBUILDING.NAME;
-			global::System.Action action = new global::System.Action(this.OnMenuToggle);
-			global::Action action2 = global::Action.ToggleEnabled;
-			string text3 = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP, true);
 		}
 		else
 		{
-			string text3 = "action_building_disabled";
-			string text2 = UI.USERMENUACTIONS.ENABLEBUILDING.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.OnMenuToggle);
-			global::Action action2 = global::Action.ToggleEnabled;
-			string text = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP_OFF;
-			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME_OFF, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP_OFF, true);
 		}
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}

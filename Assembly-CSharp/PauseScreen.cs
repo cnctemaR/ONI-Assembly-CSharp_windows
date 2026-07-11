@@ -83,16 +83,14 @@ public class PauseScreen : KModalButtonMenu
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().ESCPauseSnapshot);
 			MusicManager.instance.OnEscapeMenu(true);
 			MusicManager.instance.PlaySong("Music_ESC_Menu", false);
+			return;
 		}
-		else
+		ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.OnEscapeMenu(false);
+		if (MusicManager.instance.SongIsPlaying("Music_ESC_Menu"))
 		{
-			ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
-			MusicManager.instance.OnEscapeMenu(false);
-			if (MusicManager.instance.SongIsPlaying("Music_ESC_Menu"))
-			{
-				MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
-			}
+			MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -112,17 +110,14 @@ public class PauseScreen : KModalButtonMenu
 		if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
 		{
 			base.gameObject.SetActive(false);
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, Path.GetFileNameWithoutExtension(filename)), delegate
+			((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, Path.GetFileNameWithoutExtension(filename)), delegate
 			{
 				this.DoSave(filename);
 				this.gameObject.SetActive(true);
 			}, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
+			return;
 		}
-		else
-		{
-			this.OnSaveAs();
-		}
+		this.OnSaveAs();
 	}
 
 	private void DoSave(string filename)
@@ -136,14 +131,12 @@ public class PauseScreen : KModalButtonMenu
 		{
 			IOException ex2 = ex;
 			IOException e = ex2;
-			PauseScreen $this = this;
-			ConfirmDialogScreen component = global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
+			global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
 			{
-				$this.Deactivate();
+				this.Deactivate();
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
-				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, string.Empty);
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, "");
 			}, null, null, null, null, true);
 		}
 	}
@@ -151,8 +144,7 @@ public class PauseScreen : KModalButtonMenu
 	private void ConfirmDecision(string text, global::System.Action onConfirm)
 	{
 		base.gameObject.SetActive(false);
-		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
+		((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
 	}
 
 	private void OnLoad()
@@ -215,11 +207,9 @@ public class PauseScreen : KModalButtonMenu
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			base.Show(false);
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public static void TriggerQuitGame()

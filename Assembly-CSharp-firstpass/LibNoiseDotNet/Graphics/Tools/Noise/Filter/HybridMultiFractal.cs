@@ -2,7 +2,7 @@
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Filter
 {
-	public class HybridMultiFractal : FilterModule, IModule3D, IModule2D, IModule
+	public class HybridMultiFractal : FilterModule, IModule3D, IModule, IModule2D
 	{
 		public HybridMultiFractal()
 		{

@@ -42,8 +42,7 @@ public class GridVisibility : KMonoBehaviour
 				if (num3 >= 0f && (float)(Grid.HeightInCells - 1) >= num3 && num4 >= 0f && (float)(Grid.WidthInCells - 1) >= num4)
 				{
 					int num5 = (int)(num3 * (float)Grid.WidthInCells + num4);
-					byte b = Grid.Visible[num5];
-					if (b < 255)
+					if (Grid.Visible[num5] < 255)
 					{
 						Vector2 vector = new Vector2(num2, num);
 						float num6 = Mathf.Lerp(1f, 0f, (vector.magnitude - innerRadius) / (radius - innerRadius));

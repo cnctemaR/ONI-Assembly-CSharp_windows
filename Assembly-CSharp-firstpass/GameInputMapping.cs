@@ -109,8 +109,9 @@ public class GameInputMapping
 		{
 			string text = JsonConvert.SerializeObject(list);
 			File.WriteAllText(GameInputMapping.BindingsFilename, text);
+			return;
 		}
-		else if (File.Exists(GameInputMapping.BindingsFilename))
+		if (File.Exists(GameInputMapping.BindingsFilename))
 		{
 			File.Delete(GameInputMapping.BindingsFilename);
 		}
@@ -124,7 +125,7 @@ public class GameInputMapping
 			return;
 		}
 		string text = File.ReadAllText(GameInputMapping.BindingsFilename);
-		if (text == null || text == string.Empty)
+		if (text == null || text == "")
 		{
 			return;
 		}

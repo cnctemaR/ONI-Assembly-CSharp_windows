@@ -4,16 +4,20 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Simple class that contains a pointer to a tree prototype.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TreePrototype
 	{
-		/// <summary>
-		///   <para>Retrieves the actual GameObject used by the tree.</para>
-		/// </summary>
+		public TreePrototype()
+		{
+		}
+
+		public TreePrototype(TreePrototype other)
+		{
+			this.prefab = other.prefab;
+			this.bendFactor = other.bendFactor;
+		}
+
 		public GameObject prefab
 		{
 			get
@@ -26,9 +30,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Bend factor of the tree prototype.</para>
-		/// </summary>
 		public float bendFactor
 		{
 			get
@@ -39,6 +40,39 @@ namespace UnityEngine
 			{
 				this.m_BendFactor = value;
 			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return this.Equals(obj as TreePrototype);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		private bool Equals(TreePrototype other)
+		{
+			bool flag;
+			if (object.ReferenceEquals(other, null))
+			{
+				flag = false;
+			}
+			else if (object.ReferenceEquals(other, this))
+			{
+				flag = true;
+			}
+			else if (base.GetType() != other.GetType())
+			{
+				flag = false;
+			}
+			else
+			{
+				bool flag2 = this.prefab == other.prefab && this.bendFactor == other.bendFactor;
+				flag = flag2;
+			}
+			return flag;
 		}
 
 		internal GameObject m_Prefab;

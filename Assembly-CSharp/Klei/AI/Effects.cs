@@ -127,7 +127,8 @@ namespace Klei.AI
 
 		public void Remove(string effect_id)
 		{
-			for (int i = 0; i < this.effectsThatExpire.Count; i++)
+			int i = 0;
+			while (i < this.effectsThatExpire.Count)
 			{
 				if (this.effectsThatExpire[i].effect.Id == effect_id)
 				{
@@ -137,8 +138,13 @@ namespace Klei.AI
 					if (this.effectsThatExpire.Count == 0)
 					{
 						SimAndRenderScheduler.instance.Remove(this);
+						break;
 					}
 					break;
+				}
+				else
+				{
+					i++;
 				}
 			}
 			for (int j = 0; j < this.effects.Count; j++)
@@ -154,18 +160,21 @@ namespace Klei.AI
 					this.effects[j] = this.effects[num2];
 					this.effects.RemoveAt(num2);
 					base.Trigger(-1157678353, effect);
-					break;
+					return;
 				}
 			}
 		}
 
 		public bool HasEffect(string effect_id)
 		{
-			foreach (EffectInstance effectInstance in this.effects)
+			using (List<EffectInstance>.Enumerator enumerator = this.effects.GetEnumerator())
 			{
-				if (effectInstance.effect.Id == effect_id)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current.effect.Id == effect_id)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -173,11 +182,14 @@ namespace Klei.AI
 
 		public bool HasEffect(Effect effect)
 		{
-			foreach (EffectInstance effectInstance in this.effects)
+			using (List<EffectInstance>.Enumerator enumerator = this.effects.GetEnumerator())
 			{
-				if (effectInstance.effect == effect)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (enumerator.Current.effect == effect)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

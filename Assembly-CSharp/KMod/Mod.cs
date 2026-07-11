@@ -14,25 +14,6 @@ namespace KMod
 	[DebuggerDisplay("{title}")]
 	public class Mod
 	{
-		[JsonConstructor]
-		public Mod()
-		{
-		}
-
-		public Mod(Label label, string description, IFileSource file_source, LocString manage_tooltip, global::System.Action on_managed)
-		{
-			this.enabled = false;
-			this.label = label;
-			this.status = Mod.Status.NotInstalled;
-			this.description = description;
-			this.file_source = file_source;
-			this.manage_tooltip = manage_tooltip;
-			this.on_managed = on_managed;
-			this.loaded_content = (Content)0;
-			this.available_content = (Content)0;
-			this.ScanContent();
-		}
-
 		public Content available_content { get; private set; }
 
 		public LocString manage_tooltip { get; private set; }
@@ -59,6 +40,11 @@ namespace KMod
 
 		public Content loaded_content { get; private set; }
 
+		[JsonConstructor]
+		public Mod()
+		{
+		}
+
 		public void CopyPersistentDataTo(Mod other_mod)
 		{
 			other_mod.status = this.status;
@@ -66,6 +52,20 @@ namespace KMod
 			other_mod.crash_count = this.crash_count;
 			other_mod.loaded_content = this.loaded_content;
 			other_mod.reinstall_path = this.reinstall_path;
+		}
+
+		public Mod(Label label, string description, IFileSource file_source, LocString manage_tooltip, global::System.Action on_managed)
+		{
+			this.enabled = false;
+			this.label = label;
+			this.status = Mod.Status.NotInstalled;
+			this.description = description;
+			this.file_source = file_source;
+			this.manage_tooltip = manage_tooltip;
+			this.on_managed = on_managed;
+			this.loaded_content = (Content)0;
+			this.available_content = (Content)0;
+			this.ScanContent();
 		}
 
 		public void ScanContent()
@@ -102,48 +102,36 @@ namespace KMod
 		private void AddDirectory(string directory)
 		{
 			string text = directory.TrimEnd(new char[] { '/' });
-			if (text != null)
+			if (text == "strings")
 			{
-				if (!(text == "strings"))
-				{
-					if (!(text == "codex"))
-					{
-						if (!(text == "elements"))
-						{
-							if (!(text == "templates"))
-							{
-								if (!(text == "worldgen"))
-								{
-									if (text == "anim")
-									{
-										this.available_content |= Content.Animation;
-									}
-								}
-								else
-								{
-									this.available_content |= Content.LayerableFiles;
-								}
-							}
-							else
-							{
-								this.available_content |= Content.LayerableFiles;
-							}
-						}
-						else
-						{
-							this.available_content |= Content.LayerableFiles;
-						}
-					}
-					else
-					{
-						this.available_content |= Content.LayerableFiles;
-					}
-				}
-				else
-				{
-					this.available_content |= Content.Strings;
-				}
+				this.available_content |= Content.Strings;
+				return;
 			}
+			if (text == "codex")
+			{
+				this.available_content |= Content.LayerableFiles;
+				return;
+			}
+			if (text == "elements")
+			{
+				this.available_content |= Content.LayerableFiles;
+				return;
+			}
+			if (text == "templates")
+			{
+				this.available_content |= Content.LayerableFiles;
+				return;
+			}
+			if (text == "worldgen")
+			{
+				this.available_content |= Content.LayerableFiles;
+				return;
+			}
+			if (!(text == "anim"))
+			{
+				return;
+			}
+			this.available_content |= Content.Animation;
 		}
 
 		private void AddFile(string file)
@@ -160,11 +148,11 @@ namespace KMod
 
 		private static void AccumulateExtensions(Content content, List<string> extensions)
 		{
-			if ((byte)(content & Content.DLL) != 0)
+			if ((content & Content.DLL) != (Content)0)
 			{
 				extensions.Add(".dll");
 			}
-			if ((byte)(content & (Content.Strings | Content.Translation)) != 0)
+			if ((content & (Content.Strings | Content.Translation)) != (Content)0)
 			{
 				extensions.Add(".po");
 			}
@@ -176,11 +164,9 @@ namespace KMod
 			if (string.IsNullOrEmpty(this.title))
 			{
 				DebugUtil.Assert(condition, string.Format("{2}\n\t{0}\n\t{1}", this.title, this.label.ToString(), failure_message));
+				return;
 			}
-			else
-			{
-				DebugUtil.Assert(condition, string.Format("{1}\n\t{0}", this.label.ToString(), failure_message));
-			}
+			DebugUtil.Assert(condition, string.Format("{1}\n\t{0}", this.label.ToString(), failure_message));
 		}
 
 		public void Install()
@@ -235,14 +221,12 @@ namespace KMod
 				return false;
 			}
 			int num = 0;
-			DirectoryInfo directoryInfo = new DirectoryInfo(text);
-			foreach (FileInfo fileInfo in directoryInfo.GetFiles())
+			foreach (FileInfo fileInfo in new DirectoryInfo(text).GetFiles())
 			{
 				if (!(fileInfo.Extension.ToLower() != ".po"))
 				{
 					num++;
-					Dictionary<string, string> dictionary = Localization.LoadStringsFile(fileInfo.FullName, false);
-					Localization.OverloadStrings(dictionary);
+					Localization.OverloadStrings(Localization.LoadStringsFile(fileInfo.FullName, false));
 				}
 			}
 			return true;
@@ -263,8 +247,7 @@ namespace KMod
 				{
 					string[] array = File.ReadAllLines(fileInfo.FullName, Encoding.UTF8);
 					pooledHashSet.Add(Localization.GetLocale(array));
-					Dictionary<string, string> dictionary = Localization.ExtractTranslatedStrings(array, false);
-					Localization.OverloadStrings(dictionary);
+					Localization.OverloadStrings(Localization.ExtractTranslatedStrings(array, false));
 				}
 			}
 			if (pooledHashSet.Count == 0)
@@ -291,13 +274,13 @@ namespace KMod
 				return false;
 			}
 			int num = 0;
-			DirectoryInfo directoryInfo = new DirectoryInfo(text);
-			foreach (DirectoryInfo directoryInfo2 in directoryInfo.GetDirectories())
+			DirectoryInfo[] directories = new DirectoryInfo(text).GetDirectories();
+			for (int i = 0; i < directories.Length; i++)
 			{
-				foreach (DirectoryInfo directoryInfo3 in directoryInfo2.GetDirectories())
+				foreach (DirectoryInfo directoryInfo in directories[i].GetDirectories())
 				{
 					KAnimFile.Mod mod = new KAnimFile.Mod();
-					foreach (FileInfo fileInfo in directoryInfo3.GetFiles())
+					foreach (FileInfo fileInfo in directoryInfo.GetFiles())
 					{
 						if (fileInfo.Extension == ".png")
 						{
@@ -328,7 +311,7 @@ namespace KMod
 							DebugUtil.LogWarningArgs(new object[] { string.Format("Unhandled asset ({0})...ignoring", fileInfo.FullName) });
 						}
 					}
-					string text2 = directoryInfo3.Name + "_kanim";
+					string text2 = directoryInfo.Name + "_kanim";
 					if (mod.IsValid() && ModUtil.AddKAnimMod(text2, mod))
 					{
 						num++;
@@ -351,24 +334,24 @@ namespace KMod
 					this.available_content.ToString()
 				}));
 			}
-			if ((byte)(content & Content.Strings) != 0 && this.LoadStrings())
+			if ((content & Content.Strings) != (Content)0 && this.LoadStrings())
 			{
 				this.loaded_content |= Content.Strings;
 			}
-			if ((byte)(content & Content.Translation) != 0 && this.LoadTranslations())
+			if ((content & Content.Translation) != (Content)0 && this.LoadTranslations())
 			{
 				this.loaded_content |= Content.Translation;
 			}
-			if ((byte)(content & Content.DLL) != 0 && DLLLoader.LoadDLLs(this.label.install_path))
+			if ((content & Content.DLL) != (Content)0 && DLLLoader.LoadDLLs(this.label.install_path))
 			{
 				this.loaded_content |= Content.DLL;
 			}
-			if ((byte)(content & Content.LayerableFiles) != 0)
+			if ((content & Content.LayerableFiles) != (Content)0)
 			{
 				FileSystem.file_sources.Insert(0, this.file_source.GetFileSystem());
 				this.loaded_content |= Content.LayerableFiles;
 			}
-			if ((byte)(content & Content.Animation) != 0 && this.LoadAnimation())
+			if ((content & Content.Animation) != (Content)0 && this.LoadAnimation())
 			{
 				this.loaded_content |= Content.Animation;
 			}
@@ -377,7 +360,7 @@ namespace KMod
 		public void Unload(Content content)
 		{
 			content &= this.loaded_content;
-			if ((byte)(content & Content.LayerableFiles) != 0)
+			if ((content & Content.LayerableFiles) != (Content)0)
 			{
 				FileSystem.file_sources.Remove(this.file_source.GetFileSystem());
 				this.loaded_content &= ~Content.LayerableFiles;
@@ -400,12 +383,12 @@ namespace KMod
 
 		public void Uncrash()
 		{
-			this.SetCrashCount((this.label.distribution_platform != Label.DistributionPlatform.Dev) ? 0 : (this.crash_count - 1));
+			this.SetCrashCount((this.label.distribution_platform == Label.DistributionPlatform.Dev) ? (this.crash_count - 1) : 0);
 		}
 
 		public bool IsActive()
 		{
-			return this.loaded_content != (Content)0;
+			return this.loaded_content > (Content)0;
 		}
 
 		public bool AllActive(Content content)
@@ -420,17 +403,17 @@ namespace KMod
 
 		public bool AnyActive(Content content)
 		{
-			return (byte)(this.loaded_content & content) != 0;
+			return (this.loaded_content & content) > (Content)0;
 		}
 
 		public bool HasContent()
 		{
-			return this.available_content != (Content)0;
+			return this.available_content > (Content)0;
 		}
 
 		public bool HasAnyContent(Content content)
 		{
-			return (byte)(this.available_content & content) != 0;
+			return (this.available_content & content) > (Content)0;
 		}
 
 		[JsonProperty]

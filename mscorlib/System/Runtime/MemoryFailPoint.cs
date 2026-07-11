@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.ConstrainedExecution;
+using System.Security;
 
 namespace System.Runtime
 {
@@ -15,6 +16,7 @@ namespace System.Runtime
 		{
 		}
 
+		[SecuritySafeCritical]
 		[MonoTODO]
 		public void Dispose()
 		{

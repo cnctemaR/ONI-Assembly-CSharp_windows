@@ -6,52 +6,52 @@ namespace System.Data.Common
 {
 	public abstract class DbProviderFactory
 	{
+		public virtual CodeAccessPermission CreatePermission(PermissionState state)
+		{
+			return null;
+		}
+
 		public virtual bool CanCreateDataSourceEnumerator
 		{
 			get
 			{
-				throw null;
+				return false;
 			}
 		}
 
 		public virtual DbCommand CreateCommand()
 		{
-			throw null;
+			return null;
 		}
 
 		public virtual DbCommandBuilder CreateCommandBuilder()
 		{
-			throw null;
+			return null;
 		}
 
 		public virtual DbConnection CreateConnection()
 		{
-			throw null;
+			return null;
 		}
 
 		public virtual DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			throw null;
+			return null;
 		}
 
 		public virtual DbDataAdapter CreateDataAdapter()
 		{
-			throw null;
-		}
-
-		public virtual DbDataSourceEnumerator CreateDataSourceEnumerator()
-		{
-			throw null;
+			return null;
 		}
 
 		public virtual DbParameter CreateParameter()
 		{
-			throw null;
+			return null;
 		}
 
-		public virtual CodeAccessPermission CreatePermission(PermissionState state)
+		public virtual DbDataSourceEnumerator CreateDataSourceEnumerator()
 		{
-			throw null;
+			return null;
 		}
 	}
 }

@@ -19,8 +19,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 			}
 			catch (Exception ex)
 			{
-				string text = string.Format("Failed to create an instance of type '{0}'.", type);
-				throw new InvalidOperationException(text, ex);
+				throw new InvalidOperationException(string.Format("Failed to create an instance of type '{0}'.", type), ex);
 			}
 			return obj;
 		}

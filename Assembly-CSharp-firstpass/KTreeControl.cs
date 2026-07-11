@@ -41,12 +41,15 @@ public class KTreeControl : MonoBehaviour
 		if (item.parent != null)
 		{
 			bool flag = true;
-			foreach (KTreeItem ktreeItem in item.parent.children)
+			using (IEnumerator<KTreeItem> enumerator = item.parent.children.GetEnumerator())
 			{
-				if (!ktreeItem.checkboxChecked)
+				while (enumerator.MoveNext())
 				{
-					flag = false;
-					break;
+					if (!enumerator.Current.checkboxChecked)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			item.parent.checkboxChecked = flag;
@@ -54,10 +57,10 @@ public class KTreeControl : MonoBehaviour
 		}
 		if (item.children != null)
 		{
-			foreach (KTreeItem ktreeItem2 in item.children)
+			foreach (KTreeItem ktreeItem in item.children)
 			{
-				ktreeItem2.checkboxChecked = isChecked;
-				this.OnCheckChanged(ktreeItem2, isChecked);
+				ktreeItem.checkboxChecked = isChecked;
+				this.OnCheckChanged(ktreeItem, isChecked);
 			}
 		}
 	}
@@ -67,12 +70,15 @@ public class KTreeControl : MonoBehaviour
 		if (item.parent != null)
 		{
 			bool flag = true;
-			foreach (KTreeItem ktreeItem in item.parent.children)
+			using (IEnumerator<KTreeItem> enumerator = item.parent.children.GetEnumerator())
 			{
-				if (!ktreeItem.checkboxChecked)
+				while (enumerator.MoveNext())
 				{
-					flag = false;
-					break;
+					if (!enumerator.Current.checkboxChecked)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			item.parent.checkboxChecked = flag;

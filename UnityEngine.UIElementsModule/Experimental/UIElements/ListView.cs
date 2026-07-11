@@ -9,9 +9,6 @@ using UnityEngine.Experimental.UIElements.StyleSheets;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>A vertically scrollable area that only creates visual elements for visible items while allowing the binding of many more items. As the user scrolls, visual elements are recycled and re-bound to new data items.</para>
-	/// </summary>
 	public class ListView : VisualElement
 	{
 		public ListView()
@@ -20,17 +17,13 @@ namespace UnityEngine.Experimental.UIElements
 			this.m_ScrollOffset = 0f;
 			this.m_ScrollView = new ScrollView();
 			this.m_ScrollView.StretchToParentSize();
+			this.m_ScrollView.stretchContentWidth = true;
 			this.m_ScrollView.verticalScroller.valueChanged += this.OnScroll;
 			base.shadow.Add(this.m_ScrollView);
-			base.RegisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnSizeChanged), Capture.NoCapture);
-			this.m_ScrollView.contentContainer.RegisterCallback<MouseDownEvent>(new EventCallback<MouseDownEvent>(this.OnClick), Capture.NoCapture);
-			this.m_ScrollView.contentContainer.RegisterCallback<KeyDownEvent>(new EventCallback<KeyDownEvent>(this.OnKeyDown), Capture.NoCapture);
+			base.RegisterCallback<GeometryChangedEvent>(new EventCallback<GeometryChangedEvent>(this.OnSizeChanged), TrickleDown.NoTrickleDown);
+			this.m_ScrollView.contentContainer.RegisterCallback<MouseDownEvent>(new EventCallback<MouseDownEvent>(this.OnClick), TrickleDown.NoTrickleDown);
+			this.m_ScrollView.contentContainer.RegisterCallback<KeyDownEvent>(new EventCallback<KeyDownEvent>(this.OnKeyDown), TrickleDown.NoTrickleDown);
 			this.m_ScrollView.contentContainer.focusIndex = 0;
-			base.schedule.Execute(delegate
-			{
-				base.Dirty(ChangeType.Layout);
-				this.m_ScrollView.Focus();
-			}).StartingIn(1L);
 		}
 
 		public ListView(IList itemsSource, int itemHeight, Func<VisualElement> makeItem, Action<VisualElement, int> bindItem)
@@ -48,9 +41,6 @@ namespace UnityEngine.Experimental.UIElements
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<List<object>> onSelectionChanged;
 
-		/// <summary>
-		///   <para>The items data source. This property must be set for the list view to function.</para>
-		/// </summary>
 		public IList itemsSource
 		{
 			get
@@ -64,9 +54,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Callback for constructing the VisualElement that will serve as the template for each recycled and re-bound element in the list. This property must be set for the list view to function.</para>
-		/// </summary>
 		public Func<VisualElement> makeItem
 		{
 			get
@@ -75,14 +62,14 @@ namespace UnityEngine.Experimental.UIElements
 			}
 			set
 			{
-				this.m_MakeItem = value;
-				this.Refresh();
+				if (!(this.m_MakeItem == value))
+				{
+					this.m_MakeItem = value;
+					this.Refresh();
+				}
 			}
 		}
 
-		/// <summary>
-		///   <para>Callback for binding a data item to the visual element.</para>
-		/// </summary>
 		public Action<VisualElement, int> bindItem
 		{
 			get
@@ -96,9 +83,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>ListView requires all visual elements to have the same height so that it can calculate a sensible scroller size. This property must be set for the list view to function.</para>
-		/// </summary>
 		public int itemHeight
 		{
 			get
@@ -112,9 +96,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Currently selected item index in the items source. If multiple items are selected, this will return the first selected item's index.</para>
-		/// </summary>
 		public int selectedIndex
 		{
 			get
@@ -127,9 +108,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>The currently selected item from the items source. If multiple items are selected, this will return the first selected item.</para>
-		/// </summary>
 		public object selectedItem
 		{
 			get
@@ -146,9 +124,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Controls the selection state, whether: selections are disabled, there is only one selectable item, or if there are multiple selectable items.</para>
-		/// </summary>
 		public SelectionType selectionType { get; set; }
 
 		public void OnKeyDown(KeyDownEvent evt)
@@ -176,20 +151,16 @@ namespace UnityEngine.Experimental.UIElements
 					this.selectedIndex = this.itemsSource.Count - 1;
 					break;
 				case KeyCode.PageUp:
-					this.selectedIndex = Math.Max(0, this.selectedIndex - (int)(this.m_LastSize.height / (float)this.itemHeight));
+					this.selectedIndex = Math.Max(0, this.selectedIndex - (int)(this.m_LastHeight / (float)this.itemHeight));
 					break;
 				case KeyCode.PageDown:
-					this.selectedIndex = Math.Min(this.itemsSource.Count - 1, this.selectedIndex + (int)(this.m_LastSize.height / (float)this.itemHeight));
+					this.selectedIndex = Math.Min(this.itemsSource.Count - 1, this.selectedIndex + (int)(this.m_LastHeight / (float)this.itemHeight));
 					break;
 				}
 				this.ScrollToItem(this.selectedIndex);
 			}
 		}
 
-		/// <summary>
-		///   <para>Scroll so that a specific item index from the items source is visible.</para>
-		/// </summary>
-		/// <param name="index">Item index to scroll to.</param>
 		public void ScrollToItem(int index)
 		{
 			if (!this.HasValidDataAndBindings())
@@ -204,10 +175,16 @@ namespace UnityEngine.Experimental.UIElements
 				}
 				else
 				{
-					int num = (int)(this.m_LastSize.height / (float)this.itemHeight);
+					int num = (int)(this.m_LastHeight / (float)this.itemHeight);
 					if (index >= this.m_FirstVisibleIndex + num)
 					{
-						this.m_ScrollView.scrollOffset = Vector2.up * (float)this.itemHeight * (float)(index - num);
+						bool flag = (int)this.m_LastHeight % this.itemHeight != 0;
+						int num2 = index - num;
+						if (flag)
+						{
+							num2++;
+						}
+						this.m_ScrollView.scrollOffset = Vector2.up * (float)this.itemHeight * (float)num2;
 					}
 				}
 			}
@@ -220,33 +197,36 @@ namespace UnityEngine.Experimental.UIElements
 				if (evt.button == 0)
 				{
 					int num = (int)(evt.localMousePosition.y / (float)this.itemHeight);
-					int clickCount = evt.clickCount;
-					if (clickCount != 1)
+					if (num <= this.itemsSource.Count - 1)
 					{
-						if (clickCount == 2)
+						int clickCount = evt.clickCount;
+						if (clickCount != 1)
 						{
-							if (this.onItemChosen != null)
+							if (clickCount == 2)
 							{
-								this.onItemChosen(this.itemsSource[num]);
+								if (this.onItemChosen != null)
+								{
+									this.onItemChosen(this.itemsSource[num]);
+								}
 							}
 						}
-					}
-					else if (this.selectionType != SelectionType.None)
-					{
-						if (this.selectionType == SelectionType.Multiple && evt.ctrlKey)
+						else if (this.selectionType != SelectionType.None)
 						{
-							if (this.m_SelectedIndices.Contains(num))
+							if (this.selectionType == SelectionType.Multiple && evt.actionKey)
 							{
-								this.RemoveFromSelection(num);
+								if (this.m_SelectedIndices.Contains(num))
+								{
+									this.RemoveFromSelection(num);
+								}
+								else
+								{
+									this.AddToSelection(num);
+								}
 							}
 							else
 							{
-								this.AddToSelection(num);
+								this.SetSelection(num);
 							}
-						}
-						else
-						{
-							this.SetSelection(num);
 						}
 					}
 				}
@@ -340,10 +320,6 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Scroll to a specific visual element.</para>
-		/// </summary>
-		/// <param name="visualElement">Element to scroll to.</param>
 		public void ScrollTo(VisualElement visualElement)
 		{
 			this.m_ScrollView.ScrollTo(visualElement);
@@ -377,30 +353,44 @@ namespace UnityEngine.Experimental.UIElements
 			return this.itemsSource != null && this.makeItem != null && this.bindItem != null;
 		}
 
-		/// <summary>
-		///   <para>Clear, recreate all visible visual elements, and rebind all items. This should be called whenever the items source changes.</para>
-		/// </summary>
 		public void Refresh()
 		{
 			this.m_Pool.Clear();
 			this.m_ScrollView.Clear();
-			this.m_ScrollView.contentContainer.style.width = this.m_ScrollView.contentViewport.layout.width;
-			this.m_ScrollView.contentContainer.style.flex = 0f;
+			this.m_VisibleItemCount = 0;
 			if (this.HasValidDataAndBindings())
 			{
-				this.m_ScrollView.contentContainer.style.height = (float)(this.itemsSource.Count * this.itemHeight);
-				this.m_ScrollView.verticalScroller.highValue = Mathf.Max(this.m_ScrollOffset, this.m_ScrollView.verticalScroller.highValue);
-				this.m_ScrollView.verticalScroller.value = this.m_ScrollOffset;
-				if (this.m_LastSize != this.m_ScrollView.layout)
+				this.m_LastHeight = this.m_ScrollView.layout.height;
+				if (!float.IsNaN(this.m_LastHeight))
 				{
-					this.m_LastSize = this.m_ScrollView.layout;
+					this.ResizeHeight(this.m_LastHeight);
 				}
-				if (!float.IsNaN(this.m_LastSize.height))
+			}
+		}
+
+		private void ResizeHeight(float height)
+		{
+			this.m_ScrollView.contentContainer.style.height = (float)(this.itemsSource.Count * this.itemHeight);
+			this.m_ScrollView.verticalScroller.highValue = Mathf.Max(this.m_ScrollOffset, this.m_ScrollView.verticalScroller.highValue);
+			this.m_ScrollView.verticalScroller.value = this.m_ScrollOffset;
+			int num = Math.Min((int)(height / (float)this.itemHeight) + 2, this.itemsSource.Count);
+			if (this.m_VisibleItemCount != num)
+			{
+				if (this.m_VisibleItemCount > num)
 				{
-					this.m_ScrollView.contentContainer.style.height = (float)(this.itemsSource.Count * this.itemHeight);
-					this.m_VisibleItemCount = (int)(this.m_LastSize.height / (float)this.itemHeight) + 2;
-					for (int i = this.m_FirstVisibleIndex; i < this.m_VisibleItemCount + this.m_FirstVisibleIndex; i++)
+					int num2 = this.m_VisibleItemCount - num;
+					for (int i = 0; i < num2; i++)
 					{
+						this.m_Pool.RemoveAt(this.m_Pool.Count - 1);
+						this.m_ScrollView.RemoveAt(this.m_ScrollView.childCount - 1);
+					}
+				}
+				else
+				{
+					int num3 = num - this.m_VisibleItemCount;
+					for (int j = 0; j < num3; j++)
+					{
+						int num4 = j + this.m_FirstVisibleIndex + this.m_VisibleItemCount;
 						VisualElement visualElement = this.makeItem();
 						ListView.RecycledItem recycledItem = new ListView.RecycledItem(visualElement);
 						this.m_Pool.Add(recycledItem);
@@ -410,10 +400,9 @@ namespace UnityEngine.Experimental.UIElements
 						visualElement.style.positionLeft = 0f;
 						visualElement.style.positionRight = 0f;
 						visualElement.style.height = (float)this.itemHeight;
-						if (i < this.itemsSource.Count)
+						if (num4 < this.itemsSource.Count)
 						{
-							visualElement.style.visibility = Visibility.Visible;
-							this.Setup(recycledItem, i);
+							this.Setup(recycledItem, num4);
 						}
 						else
 						{
@@ -421,17 +410,16 @@ namespace UnityEngine.Experimental.UIElements
 						}
 						this.m_ScrollView.Add(visualElement);
 					}
-					base.schedule.Execute(delegate
-					{
-						base.Dirty(ChangeType.Layout);
-					});
 				}
+				this.m_VisibleItemCount = num;
 			}
+			this.m_LastHeight = height;
 		}
 
 		private void Setup(ListView.RecycledItem recycledItem, int newIndex)
 		{
 			Assert.IsTrue(newIndex < this.itemsSource.Count);
+			recycledItem.element.style.visibility = Visibility.Visible;
 			recycledItem.index = newIndex;
 			recycledItem.element.style.positionTop = (float)(recycledItem.index * this.itemHeight);
 			recycledItem.element.style.positionBottom = (float)((this.itemsSource.Count - recycledItem.index - 1) * this.itemHeight);
@@ -443,10 +431,9 @@ namespace UnityEngine.Experimental.UIElements
 		{
 			if (this.HasValidDataAndBindings())
 			{
-				this.m_ScrollView.contentContainer.style.height = (float)(this.itemsSource.Count * this.itemHeight);
-				if (!(this.m_LastSize == this.m_ScrollView.layout))
+				if (evt.newRect.height != evt.oldRect.height)
 				{
-					this.Refresh();
+					this.ResizeHeight(evt.newRect.height);
 				}
 			}
 		}
@@ -478,7 +465,7 @@ namespace UnityEngine.Experimental.UIElements
 
 		private int m_FirstVisibleIndex;
 
-		private Rect m_LastSize;
+		private float m_LastHeight;
 
 		private List<ListView.RecycledItem> m_Pool = new List<ListView.RecycledItem>();
 
@@ -488,49 +475,12 @@ namespace UnityEngine.Experimental.UIElements
 
 		private int m_VisibleItemCount;
 
-		/// <summary>
-		///   <para>Instantiates a ListView using the data read from a UXML file.</para>
-		/// </summary>
-		public class ListViewFactory : UxmlFactory<ListView, ListView.ListViewUxmlTraits>
+		public new class UxmlFactory : UxmlFactory<ListView, ListView.UxmlTraits>
 		{
 		}
 
-		/// <summary>
-		///   <para>UxmlTraits for the ListView.</para>
-		/// </summary>
-		public class ListViewUxmlTraits : VisualElement.VisualElementUxmlTraits
+		public new class UxmlTraits : VisualElement.UxmlTraits
 		{
-			/// <summary>
-			///   <para>Constructor.</para>
-			/// </summary>
-			public ListViewUxmlTraits()
-			{
-				this.m_ItemHeight = new UxmlIntAttributeDescription
-				{
-					name = "itemHeight",
-					defaultValue = 30
-				};
-			}
-
-			/// <summary>
-			///   <para>Returns an enumerable containing attribute descriptions for ListView properties that should be available in UXML.</para>
-			/// </summary>
-			public override IEnumerable<UxmlAttributeDescription> uxmlAttributesDescription
-			{
-				get
-				{
-					foreach (UxmlAttributeDescription attr in this.<get_uxmlAttributesDescription>__BaseCallProxy0())
-					{
-						yield return attr;
-					}
-					yield return this.m_ItemHeight;
-					yield break;
-				}
-			}
-
-			/// <summary>
-			///   <para>Returns an empty enumerable, as list views generally do not have children.</para>
-			/// </summary>
 			public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
 			{
 				get
@@ -539,19 +489,18 @@ namespace UnityEngine.Experimental.UIElements
 				}
 			}
 
-			/// <summary>
-			///   <para>Initialize ListView properties using values from the attribute bag.</para>
-			/// </summary>
-			/// <param name="ve">The object to initialize.</param>
-			/// <param name="bag">The attribute bag.</param>
-			/// <param name="cc">The creation context; unused.</param>
 			public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
 			{
 				base.Init(ve, bag, cc);
-				((ListView)ve).itemHeight = this.m_ItemHeight.GetValueFromBag(bag);
+				((ListView)ve).itemHeight = this.m_ItemHeight.GetValueFromBag(bag, cc);
 			}
 
-			private UxmlIntAttributeDescription m_ItemHeight;
+			private UxmlIntAttributeDescription m_ItemHeight = new UxmlIntAttributeDescription
+			{
+				name = "item-height",
+				obsoleteNames = new string[] { "itemHeight" },
+				defaultValue = 30
+			};
 		}
 
 		private class RecycledItem

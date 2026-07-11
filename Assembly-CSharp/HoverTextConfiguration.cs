@@ -59,12 +59,12 @@ public class HoverTextConfiguration : KMonoBehaviour
 
 	public TextStyleSetting[] HoverTextStyleSettings;
 
-	public string ToolNameStringKey = string.Empty;
+	public string ToolNameStringKey = "";
 
-	public string ActionStringKey = string.Empty;
+	public string ActionStringKey = "";
 
 	[HideInInspector]
-	public string ActionName = string.Empty;
+	public string ActionName = "";
 
 	[HideInInspector]
 	public string ToolName;

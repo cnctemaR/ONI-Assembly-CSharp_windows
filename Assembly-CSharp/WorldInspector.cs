@@ -45,7 +45,7 @@ public class WorldInspector : MonoBehaviour
 		int state = this.GetState(cellObject);
 		this.SetStateColorScheme(state);
 		this.Tooltip_CurrentTemperature.toolTip = this.SetCurrentTemperatureTooltip(cellObject.element, state);
-		if ((byte)(cellObject.state & Element.State.TemperatureInsulated) == 16)
+		if ((cellObject.state & Element.State.TemperatureInsulated) == Element.State.TemperatureInsulated)
 		{
 			this.TemperatureNotch.SetActive(false);
 		}
@@ -59,13 +59,12 @@ public class WorldInspector : MonoBehaviour
 	private void UpdateAsElementChunk(ElementChunk _chunkObject)
 	{
 		PrimaryElement component = _chunkObject.GetComponent<PrimaryElement>();
-		string text = string.Empty;
 		this.PropertyLeftText.text = string.Format("{0:0.00}", component.Mass) + " kg";
 		this.PropertyIcon_Left.sprite = this.propertySprites.Mass;
 		this.PropertyRightText.text = ElementLoader.FindElementByHash(component.ElementID).GetMaterialCategoryTag().ProperName();
 		this.PropertyIcon_Right.sprite = this.propertySprites.Resource;
 		this.TemperatureTextDisplay.text = GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(component.Temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
-		text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(component.Temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
+		string text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(component.Temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 		this.SetStateColorScheme(0);
 		text += this.SetCurrentTemperatureTooltip(ElementLoader.FindElementByHash(component.ElementID), 0);
 		text = text + "\nMelts at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(ElementLoader.FindElementByHash(component.ElementID).highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
@@ -76,14 +75,13 @@ public class WorldInspector : MonoBehaviour
 
 	private void UpdateAsEdible(Edible edibleObject)
 	{
-		string text = string.Empty;
 		this.PropertyLeftText.text = edibleObject.Units.ToString() + " Rations";
 		this.PropertyIcon_Left.sprite = this.propertySprites.Rations;
 		this.PropertyRightText.text = edibleObject.GetQuality().ToString();
 		this.PropertyIcon_Right.sprite = this.propertySprites.Quality;
 		float num = Grid.Temperature[Grid.PosToCell(edibleObject)];
 		this.TemperatureTextDisplay.text = GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(num), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
-		text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(num), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
+		string text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(num), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 		this.SetStateColorScheme(0);
 		text = text + "\nRots at temperatures above: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(edibleObject.FoodInfo.RotTemperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
 		this.Tooltip_CurrentTemperature.toolTip = text;
@@ -111,36 +109,9 @@ public class WorldInspector : MonoBehaviour
 
 	private void SetStateColorScheme(int state)
 	{
-		if (state != 0)
+		switch (state)
 		{
-			if (state != 1)
-			{
-				if (state == 2)
-				{
-					this.TemperatureBarImage.sprite = this.GasState.TemperatureBarBG;
-					this.TemperatureNotchSymbol.sprite = this.GasState.StateIcon;
-					this.TemperatureNotchBG.color = this.GasState.StateColor;
-					this.TemperatureTextDisplay.color = this.GasState.StateColor;
-					this.TransitionStateIcon_Low.sprite = this.LiquidState.StateIcon;
-					this.TransitionStateIcon_Low.color = this.LiquidState.StateColor;
-					this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
-					this.TransitionStateIcon_High.color = this.GasState.StateColor;
-				}
-			}
-			else
-			{
-				this.TemperatureBarImage.sprite = this.LiquidState.TemperatureBarBG;
-				this.TemperatureNotchSymbol.sprite = this.LiquidState.StateIcon;
-				this.TemperatureNotchBG.color = this.LiquidState.StateColor;
-				this.TemperatureTextDisplay.color = this.LiquidState.StateColor;
-				this.TransitionStateIcon_Low.sprite = this.SolidState.StateIcon;
-				this.TransitionStateIcon_Low.color = this.SolidState.StateColor;
-				this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
-				this.TransitionStateIcon_High.color = this.GasState.StateColor;
-			}
-		}
-		else
-		{
+		case 0:
 			this.TemperatureBarImage.sprite = this.SolidState.TemperatureBarBG;
 			this.TemperatureNotchSymbol.sprite = this.SolidState.StateIcon;
 			this.TemperatureNotchBG.color = this.SolidState.StateColor;
@@ -149,30 +120,47 @@ public class WorldInspector : MonoBehaviour
 			this.TransitionStateIcon_Low.color = this.SolidState.StateColor;
 			this.TransitionStateIcon_High.sprite = this.LiquidState.StateIcon;
 			this.TransitionStateIcon_High.color = this.LiquidState.StateColor;
+			return;
+		case 1:
+			this.TemperatureBarImage.sprite = this.LiquidState.TemperatureBarBG;
+			this.TemperatureNotchSymbol.sprite = this.LiquidState.StateIcon;
+			this.TemperatureNotchBG.color = this.LiquidState.StateColor;
+			this.TemperatureTextDisplay.color = this.LiquidState.StateColor;
+			this.TransitionStateIcon_Low.sprite = this.SolidState.StateIcon;
+			this.TransitionStateIcon_Low.color = this.SolidState.StateColor;
+			this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
+			this.TransitionStateIcon_High.color = this.GasState.StateColor;
+			return;
+		case 2:
+			this.TemperatureBarImage.sprite = this.GasState.TemperatureBarBG;
+			this.TemperatureNotchSymbol.sprite = this.GasState.StateIcon;
+			this.TemperatureNotchBG.color = this.GasState.StateColor;
+			this.TemperatureTextDisplay.color = this.GasState.StateColor;
+			this.TransitionStateIcon_Low.sprite = this.LiquidState.StateIcon;
+			this.TransitionStateIcon_Low.color = this.LiquidState.StateColor;
+			this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
+			this.TransitionStateIcon_High.color = this.GasState.StateColor;
+			return;
+		default:
+			return;
 		}
 	}
 
 	private string SetCurrentTemperatureTooltip(Element element, int state)
 	{
-		string text = string.Empty;
-		if (state != 0)
+		string text = "";
+		switch (state)
 		{
-			if (state != 1)
-			{
-				if (state == 2)
-				{
-					text = text + "\nCondenses at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
-				}
-			}
-			else
-			{
-				text = text + "\nFreezes at: <color=cyan>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
-				text = text + "\nEvaporates at: <color=red>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
-			}
-		}
-		else
-		{
+		case 0:
 			text = text + "\nMelts at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
+			break;
+		case 1:
+			text = text + "\nFreezes at: <color=cyan>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
+			text = text + "\nEvaporates at: <color=red>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
+			break;
+		case 2:
+			text = text + "\nCondenses at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false) + "</color>";
+			break;
 		}
 		return text;
 	}
@@ -181,26 +169,19 @@ public class WorldInspector : MonoBehaviour
 	{
 		float num = 1f;
 		float num2 = 2000f;
-		int state = this.GetState(cellObject);
-		if (state != 0)
+		switch (this.GetState(cellObject))
 		{
-			if (state != 1)
-			{
-				if (state == 2)
-				{
-					num = cellObject.element.lowTemp;
-					num2 = num + 300f;
-				}
-			}
-			else
-			{
-				num = cellObject.element.lowTemp;
-				num2 = cellObject.element.highTemp;
-			}
-		}
-		else
-		{
+		case 0:
 			num2 = cellObject.element.highTemp;
+			break;
+		case 1:
+			num = cellObject.element.lowTemp;
+			num2 = cellObject.element.highTemp;
+			break;
+		case 2:
+			num = cellObject.element.lowTemp;
+			num2 = num + 300f;
+			break;
 		}
 		float num3 = num2 - num;
 		float num4 = this.temperaturePositionWidgetX_Min;
@@ -212,8 +193,7 @@ public class WorldInspector : MonoBehaviour
 	private float GetTemperaturePosition(PrimaryElement chunkObject)
 	{
 		float num = 1f;
-		float highTemp = ElementLoader.FindElementByHash(chunkObject.ElementID).highTemp;
-		float num2 = highTemp - num;
+		float num2 = ElementLoader.FindElementByHash(chunkObject.ElementID).highTemp - num;
 		float num3 = this.temperaturePositionWidgetX_Min;
 		float num4 = this.temperaturePositionWidgetX_Max;
 		float num5 = num4 - num3;
@@ -223,8 +203,7 @@ public class WorldInspector : MonoBehaviour
 	private float GetTemperaturePosition(Edible edibleObject)
 	{
 		float num = 1f;
-		float rotTemperature = edibleObject.FoodInfo.RotTemperature;
-		float num2 = rotTemperature - num;
+		float num2 = edibleObject.FoodInfo.RotTemperature - num;
 		float num3 = this.temperaturePositionWidgetX_Min;
 		float num4 = this.temperaturePositionWidgetX_Max;
 		float num5 = num4 - num3;
@@ -255,14 +234,14 @@ public class WorldInspector : MonoBehaviour
 		if (element.id == SimHashes.Vacuum)
 		{
 			WorldInspector.massStrings[0] = "N/A";
-			WorldInspector.massStrings[1] = string.Empty;
-			WorldInspector.massStrings[2] = string.Empty;
+			WorldInspector.massStrings[1] = "";
+			WorldInspector.massStrings[2] = "";
 		}
 		else if (element.id == SimHashes.Unobtanium)
 		{
 			WorldInspector.massStrings[0] = UI.NEUTRONIUMMASS;
-			WorldInspector.massStrings[1] = string.Empty;
-			WorldInspector.massStrings[2] = string.Empty;
+			WorldInspector.massStrings[1] = "";
+			WorldInspector.massStrings[2] = "";
 		}
 		else
 		{
@@ -329,13 +308,7 @@ public class WorldInspector : MonoBehaviour
 
 	private static readonly string[] massStrings = new string[4];
 
-	private static readonly string[] invalidCellMassStrings = new string[]
-	{
-		string.Empty,
-		string.Empty,
-		string.Empty,
-		string.Empty
-	};
+	private static readonly string[] invalidCellMassStrings = new string[] { "", "", "", "" };
 
 	private static float cachedMass = -1f;
 

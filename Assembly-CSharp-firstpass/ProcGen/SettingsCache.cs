@@ -111,47 +111,47 @@ namespace ProcGen
 
 		private static void LoadBiome(string longName, List<YamlIO.Error> errors)
 		{
-			string empty = string.Empty;
-			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out empty))
+			string text = "";
+			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out text))
 			{
 				return;
 			}
-			if (SettingsCache.biomeSettingsCache.ContainsKey(empty))
+			if (SettingsCache.biomeSettingsCache.ContainsKey(text))
 			{
 				return;
 			}
-			BiomeSettings biomeSettings = SettingsCache.MergeLoad<BiomeSettings>(SettingsCache.GetPath() + empty + ".yaml", errors);
+			BiomeSettings biomeSettings = SettingsCache.MergeLoad<BiomeSettings>(SettingsCache.GetPath() + text + ".yaml", errors);
 			if (biomeSettings == null)
 			{
-				global::Debug.LogWarning("WorldGen: Attempting to load biome: " + empty + " failed");
+				global::Debug.LogWarning("WorldGen: Attempting to load biome: " + text + " failed");
 				return;
 			}
 			global::Debug.Assert(biomeSettings.TerrainBiomeLookupTable.Count > 0, longName);
-			SettingsCache.biomeSettingsCache.Add(empty, biomeSettings);
+			SettingsCache.biomeSettingsCache.Add(text, biomeSettings);
 			foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair in biomeSettings.TerrainBiomeLookupTable)
 			{
-				string text = empty + "/" + keyValuePair.Key;
-				if (!SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(text))
+				string text2 = text + "/" + keyValuePair.Key;
+				if (!SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(text2))
 				{
-					SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.Add(text, keyValuePair.Value);
+					SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.Add(text2, keyValuePair.Value);
 				}
 			}
 		}
 
 		private static string LoadFeature(string longName, List<YamlIO.Error> errors)
 		{
-			string empty = string.Empty;
-			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out empty))
+			string text = "";
+			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out text))
 			{
-				global::Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + empty + " failed");
+				global::Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + text + " failed");
 				return longName;
 			}
-			if (!SettingsCache.featuresettings.ContainsKey(empty))
+			if (!SettingsCache.featuresettings.ContainsKey(text))
 			{
-				FeatureSettings featureSettings = YamlIO.LoadFile<FeatureSettings>(SettingsCache.GetPath() + empty + ".yaml", null, null);
+				FeatureSettings featureSettings = YamlIO.LoadFile<FeatureSettings>(SettingsCache.GetPath() + text + ".yaml", null, null);
 				if (featureSettings != null)
 				{
-					SettingsCache.featuresettings.Add(empty, featureSettings);
+					SettingsCache.featuresettings.Add(text, featureSettings);
 					if (featureSettings.forceBiome != null)
 					{
 						SettingsCache.LoadBiome(featureSettings.forceBiome, errors);
@@ -160,10 +160,10 @@ namespace ProcGen
 				}
 				else
 				{
-					global::Debug.LogWarning("WorldGen: Attempting to load feature: " + empty + " failed");
+					global::Debug.LogWarning("WorldGen: Attempting to load feature: " + text + " failed");
 				}
 			}
-			return empty;
+			return text;
 		}
 
 		public static void LoadFeatures(Dictionary<string, int> features, List<YamlIO.Error> errors)
@@ -235,7 +235,7 @@ namespace ProcGen
 				errors.Add(error);
 			}, null);
 			int num = SettingsCache.FirstUncommonCharacter(SettingsCache.path, file.full_path);
-			string text = ((num <= -1) ? file.full_path : file.full_path.Substring(num));
+			string text = ((num > -1) ? file.full_path.Substring(num) : file.full_path);
 			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
 			text = text.Replace('\\', '/');
 			if (worldTrait == null)
@@ -294,12 +294,18 @@ namespace ProcGen
 			pooledList.Reverse();
 			ListPool<T, WorldGenSettings>.PooledList pooledList2 = ListPool<T, WorldGenSettings>.Allocate();
 			pooledList2.Add(new T());
+			YamlIO.ErrorHandler <>9__0;
 			foreach (FileHandle fileHandle in pooledList)
 			{
-				T t = YamlIO.LoadFile<T>(fileHandle, delegate(YamlIO.Error error, bool force_log_as_warning)
+				YamlIO.ErrorHandler errorHandler;
+				if ((errorHandler = <>9__0) == null)
 				{
-					errors.Add(error);
-				}, null);
+					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					{
+						errors.Add(error);
+					});
+				}
+				T t = YamlIO.LoadFile<T>(fileHandle, errorHandler, null);
 				if (t != null)
 				{
 					pooledList2.Add(t);

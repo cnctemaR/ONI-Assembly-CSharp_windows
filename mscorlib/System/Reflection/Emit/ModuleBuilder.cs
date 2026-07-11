@@ -1,19 +1,28 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_ModuleBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_ModuleBuilder))]
+	[StructLayout(LayoutKind.Sequential)]
 	public class ModuleBuilder : Module, _ModuleBuilder
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void basic_init(ModuleBuilder ab);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_wrappers_type(ModuleBuilder mb, Type ab);
+
 		internal ModuleBuilder(AssemblyBuilder assb, string name, string fullyqname, bool emitSymbolInfo, bool transient)
 		{
 			this.scopename = name;
@@ -24,28 +33,39 @@ namespace System.Reflection.Emit
 			this.transient = transient;
 			this.guid = Guid.FastNewGuidArray();
 			this.table_idx = this.get_next_table_index(this, 0, true);
-			this.name_cache = new Hashtable();
+			this.name_cache = new Dictionary<TypeName, TypeBuilder>();
+			this.us_string_cache = new Dictionary<string, int>(512);
 			ModuleBuilder.basic_init(this);
 			this.CreateGlobalType();
 			if (assb.IsRun)
 			{
-				TypeBuilder typeBuilder = new TypeBuilder(this, TypeAttributes.Abstract, 16777215);
-				Type type = typeBuilder.CreateType();
+				Type type = new TypeBuilder(this, TypeAttributes.Abstract, 16777215).CreateType();
 				ModuleBuilder.set_wrappers_type(this, type);
 			}
 			if (emitSymbolInfo)
 			{
 				Assembly assembly = Assembly.LoadWithPartialName("Mono.CompilerServices.SymbolWriter");
-				if (assembly == null)
+				Type type2 = null;
+				if (assembly != null)
 				{
-					throw new ExecutionEngineException("The assembly for default symbol writer cannot be loaded");
+					type2 = assembly.GetType("Mono.CompilerServices.SymbolWriter.SymbolWriterImpl");
 				}
-				Type type2 = assembly.GetType("Mono.CompilerServices.SymbolWriter.SymbolWriterImpl");
 				if (type2 == null)
 				{
-					throw new ExecutionEngineException("The type that implements the default symbol writer interface cannot be found");
+					ModuleBuilder.WarnAboutSymbolWriter("Failed to load the default Mono.CompilerServices.SymbolWriter assembly");
 				}
-				this.symbolWriter = (ISymbolWriter)Activator.CreateInstance(type2, new object[] { this });
+				else
+				{
+					try
+					{
+						this.symbolWriter = (ISymbolWriter)Activator.CreateInstance(type2, new object[] { this });
+					}
+					catch (MissingMethodException)
+					{
+						ModuleBuilder.WarnAboutSymbolWriter("The default Mono.CompilerServices.SymbolWriter is not available on this platform");
+						return;
+					}
+				}
 				string text = this.fqname;
 				if (this.assemblyb.AssemblyDir != null)
 				{
@@ -55,31 +75,15 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		void _ModuleBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		private static void WarnAboutSymbolWriter(string message)
 		{
-			throw new NotImplementedException();
+			if (ModuleBuilder.has_warned_about_symbolWriter)
+			{
+				return;
+			}
+			ModuleBuilder.has_warned_about_symbolWriter = true;
+			Console.Error.WriteLine("WARNING: {0}", message);
 		}
-
-		void _ModuleBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ModuleBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ModuleBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void basic_init(ModuleBuilder ab);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_wrappers_type(ModuleBuilder mb, Type ab);
 
 		public override string FullyQualifiedName
 		{
@@ -112,24 +116,34 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentNullException("data");
 			}
-			FieldBuilder fieldBuilder = this.DefineUninitializedData(name, data.Length, attributes | FieldAttributes.HasFieldRVA);
+			FieldAttributes fieldAttributes = attributes & ~FieldAttributes.ReservedMask;
+			FieldBuilder fieldBuilder = this.DefineDataImpl(name, data.Length, fieldAttributes | FieldAttributes.HasFieldRVA);
 			fieldBuilder.SetRVAData(data);
 			return fieldBuilder;
 		}
 
 		public FieldBuilder DefineUninitializedData(string name, int size, FieldAttributes attributes)
 		{
+			return this.DefineDataImpl(name, size, attributes & ~FieldAttributes.ReservedMask);
+		}
+
+		private FieldBuilder DefineDataImpl(string name, int size, FieldAttributes attributes)
+		{
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
+			}
+			if (name == string.Empty)
+			{
+				throw new ArgumentException("name cannot be empty", "name");
 			}
 			if (this.global_type_created != null)
 			{
 				throw new InvalidOperationException("global fields already created");
 			}
-			if (size <= 0 || size > 4128768)
+			if (size <= 0 || size >= 4128768)
 			{
-				throw new ArgumentException("size", "Data size must be > 0 and < 0x3f0000");
+				throw new ArgumentException("Data size must be > 0 and < 0x3f0000", null);
 			}
 			this.CreateGlobalType();
 			string text = "$ArrayType$" + size;
@@ -164,12 +178,10 @@ namespace System.Reflection.Emit
 				Array.Copy(this.global_methods, array, this.global_methods.Length);
 				array[this.global_methods.Length] = mb;
 				this.global_methods = array;
+				return;
 			}
-			else
-			{
-				this.global_methods = new MethodBuilder[1];
-				this.global_methods[0] = mb;
-			}
+			this.global_methods = new MethodBuilder[1];
+			this.global_methods[0] = mb;
 		}
 
 		public MethodBuilder DefineGlobalMethod(string name, MethodAttributes attributes, Type returnType, Type[] parameterTypes)
@@ -267,24 +279,31 @@ namespace System.Reflection.Emit
 
 		private TypeBuilder DefineType(string name, TypeAttributes attr, Type parent, Type[] interfaces, PackingSize packingSize, int typesize)
 		{
-			if (this.name_cache.ContainsKey(name))
+			if (name == null)
+			{
+				throw new ArgumentNullException("fullname");
+			}
+			TypeIdentifier typeIdentifier = TypeIdentifiers.FromInternal(name);
+			if (this.name_cache.ContainsKey(typeIdentifier))
 			{
 				throw new ArgumentException("Duplicate type name within an assembly.");
 			}
 			TypeBuilder typeBuilder = new TypeBuilder(this, name, attr, parent, interfaces, packingSize, typesize, null);
 			this.AddType(typeBuilder);
-			this.name_cache.Add(name, typeBuilder);
+			this.name_cache.Add(typeIdentifier, typeBuilder);
 			return typeBuilder;
 		}
 
-		internal void RegisterTypeName(TypeBuilder tb, string name)
+		internal void RegisterTypeName(TypeBuilder tb, TypeName name)
 		{
 			this.name_cache.Add(name, tb);
 		}
 
-		internal TypeBuilder GetRegisteredType(string name)
+		internal TypeBuilder GetRegisteredType(TypeName name)
 		{
-			return (TypeBuilder)this.name_cache[name];
+			TypeBuilder typeBuilder = null;
+			this.name_cache.TryGetValue(name, out typeBuilder);
+			return typeBuilder;
 		}
 
 		[ComVisible(true)]
@@ -295,7 +314,7 @@ namespace System.Reflection.Emit
 
 		public TypeBuilder DefineType(string name, TypeAttributes attr, Type parent, int typesize)
 		{
-			return this.DefineType(name, attr, parent, null, PackingSize.Unspecified, 0);
+			return this.DefineType(name, attr, parent, null, PackingSize.Unspecified, typesize);
 		}
 
 		public TypeBuilder DefineType(string name, TypeAttributes attr, Type parent, PackingSize packsize)
@@ -315,14 +334,15 @@ namespace System.Reflection.Emit
 
 		public EnumBuilder DefineEnum(string name, TypeAttributes visibility, Type underlyingType)
 		{
-			if (this.name_cache.Contains(name))
+			TypeIdentifier typeIdentifier = TypeIdentifiers.FromInternal(name);
+			if (this.name_cache.ContainsKey(typeIdentifier))
 			{
 				throw new ArgumentException("Duplicate type name within an assembly.");
 			}
 			EnumBuilder enumBuilder = new EnumBuilder(this, name, visibility, underlyingType);
 			TypeBuilder typeBuilder = enumBuilder.GetTypeBuilder();
 			this.AddType(typeBuilder);
-			this.name_cache.Add(name, typeBuilder);
+			this.name_cache.Add(typeIdentifier, typeBuilder);
 			return enumBuilder;
 		}
 
@@ -338,11 +358,11 @@ namespace System.Reflection.Emit
 			return this.GetType(className, false, ignoreCase);
 		}
 
-		private TypeBuilder search_in_array(TypeBuilder[] arr, int validElementsInArray, string className)
+		private TypeBuilder search_in_array(TypeBuilder[] arr, int validElementsInArray, TypeName className)
 		{
 			for (int i = 0; i < validElementsInArray; i++)
 			{
-				if (string.Compare(className, arr[i].FullName, true, CultureInfo.InvariantCulture) == 0)
+				if (string.Compare(className.DisplayName, arr[i].FullName, true, CultureInfo.InvariantCulture) == 0)
 				{
 					return arr[i];
 				}
@@ -350,11 +370,11 @@ namespace System.Reflection.Emit
 			return null;
 		}
 
-		private TypeBuilder search_nested_in_array(TypeBuilder[] arr, int validElementsInArray, string className)
+		private TypeBuilder search_nested_in_array(TypeBuilder[] arr, int validElementsInArray, TypeName className)
 		{
 			for (int i = 0; i < validElementsInArray; i++)
 			{
-				if (string.Compare(className, arr[i].Name, true, CultureInfo.InvariantCulture) == 0)
+				if (string.Compare(className.DisplayName, arr[i].Name, true, CultureInfo.InvariantCulture) == 0)
 				{
 					return arr[i];
 				}
@@ -362,31 +382,22 @@ namespace System.Reflection.Emit
 			return null;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Type create_modified_type(TypeBuilder tb, string modifiers);
-
-		private TypeBuilder GetMaybeNested(TypeBuilder t, string className)
+		private TypeBuilder GetMaybeNested(TypeBuilder t, IEnumerable<TypeName> nested)
 		{
-			int num = className.IndexOf('+');
-			if (num >= 0)
+			TypeBuilder typeBuilder = t;
+			foreach (TypeName typeName in nested)
 			{
-				if (t.subtypes != null)
+				if (typeBuilder.subtypes == null)
 				{
-					string text = className.Substring(0, num);
-					string text2 = className.Substring(num + 1);
-					TypeBuilder typeBuilder = this.search_nested_in_array(t.subtypes, t.subtypes.Length, text);
-					if (typeBuilder != null)
-					{
-						return this.GetMaybeNested(typeBuilder, text2);
-					}
+					return null;
 				}
-				return null;
+				typeBuilder = this.search_nested_in_array(typeBuilder.subtypes, typeBuilder.subtypes.Length, typeName);
+				if (typeBuilder == null)
+				{
+					return null;
+				}
 			}
-			if (t.subtypes != null)
-			{
-				return this.search_nested_in_array(t.subtypes, t.subtypes.Length, className);
-			}
-			return null;
+			return typeBuilder;
 		}
 
 		[ComVisible(true)]
@@ -400,61 +411,77 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("className");
 			}
-			string text = className;
 			TypeBuilder typeBuilder = null;
 			if (this.types == null && throwOnError)
 			{
 				throw new TypeLoadException(className);
 			}
-			int num = className.IndexOfAny(ModuleBuilder.type_modifiers);
-			string text2;
-			if (num >= 0)
-			{
-				text2 = className.Substring(num);
-				className = className.Substring(0, num);
-			}
-			else
-			{
-				text2 = null;
-			}
+			TypeSpec typeSpec = TypeSpec.Parse(className);
 			if (!ignoreCase)
 			{
-				typeBuilder = this.name_cache[className] as TypeBuilder;
+				TypeName typeName = typeSpec.TypeNameWithoutModifiers();
+				this.name_cache.TryGetValue(typeName, out typeBuilder);
 			}
 			else
 			{
-				num = className.IndexOf('+');
-				if (num < 0)
+				if (this.types != null)
 				{
-					if (this.types != null)
-					{
-						typeBuilder = this.search_in_array(this.types, this.num_types, className);
-					}
+					typeBuilder = this.search_in_array(this.types, this.num_types, typeSpec.Name);
 				}
-				else
+				if (!typeSpec.IsNested && typeBuilder != null)
 				{
-					string text3 = className.Substring(0, num);
-					string text4 = className.Substring(num + 1);
-					typeBuilder = this.search_in_array(this.types, this.num_types, text3);
-					if (typeBuilder != null)
-					{
-						typeBuilder = this.GetMaybeNested(typeBuilder, text4);
-					}
+					typeBuilder = this.GetMaybeNested(typeBuilder, typeSpec.Nested);
 				}
 			}
 			if (typeBuilder == null && throwOnError)
 			{
-				throw new TypeLoadException(text);
+				throw new TypeLoadException(className);
 			}
-			if (typeBuilder != null && text2 != null)
+			if (typeBuilder != null && (typeSpec.HasModifiers || typeSpec.IsByRef))
 			{
-				Type type = ModuleBuilder.create_modified_type(typeBuilder, text2);
+				Type type = typeBuilder;
+				if (typeBuilder != null)
+				{
+					TypeBuilder typeBuilder2 = typeBuilder;
+					if (typeBuilder2.is_created)
+					{
+						type = typeBuilder2.CreateType();
+					}
+				}
+				foreach (ModifierSpec modifierSpec in typeSpec.Modifiers)
+				{
+					if (modifierSpec is PointerSpec)
+					{
+						type = type.MakePointerType();
+					}
+					else if (modifierSpec is ArraySpec)
+					{
+						ArraySpec arraySpec = modifierSpec as ArraySpec;
+						if (arraySpec.IsBound)
+						{
+							return null;
+						}
+						if (arraySpec.Rank == 1)
+						{
+							type = type.MakeArrayType();
+						}
+						else
+						{
+							type = type.MakeArrayType(arraySpec.Rank);
+						}
+					}
+				}
+				if (typeSpec.IsByRef)
+				{
+					type = type.MakeByRefType();
+				}
 				typeBuilder = type as TypeBuilder;
 				if (typeBuilder == null)
 				{
 					return type;
 				}
 			}
+			IL_0186:
 			if (typeBuilder != null && typeBuilder.is_created)
 			{
 				return typeBuilder.CreateType();
@@ -475,7 +502,10 @@ namespace System.Reflection.Emit
 			}
 			if (inc)
 			{
-				return this.table_indexes[table]++;
+				int[] array = this.table_indexes;
+				int num = array[table];
+				array[table] = num + 1;
+				return num;
 			}
 			return this.table_indexes[table];
 		}
@@ -488,12 +518,10 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
+				return;
 			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
-			}
+			this.cattrs = new CustomAttributeBuilder[1];
+			this.cattrs[0] = customBuilder;
 		}
 
 		[ComVisible(true)]
@@ -603,7 +631,7 @@ namespace System.Reflection.Emit
 			}
 			if (!File.Exists(resourceFileName) || Directory.Exists(resourceFileName))
 			{
-				throw new FileNotFoundException("File '" + resourceFileName + "' does not exists or is a directory.");
+				throw new FileNotFoundException("File '" + resourceFileName + "' does not exist or is a directory.");
 			}
 			throw new NotImplementedException();
 		}
@@ -672,11 +700,16 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentNullException("method");
 			}
-			if (method.DeclaringType.Module != this)
-			{
-				throw new InvalidOperationException("The method is not in this module");
-			}
 			return new MethodToken(this.GetToken(method));
+		}
+
+		public MethodToken GetMethodToken(MethodInfo method, IEnumerable<Type> optionalParameterTypes)
+		{
+			if (method == null)
+			{
+				throw new ArgumentNullException("method");
+			}
+			return new MethodToken(this.GetToken(method, optionalParameterTypes));
 		}
 
 		public MethodToken GetArrayMethodToken(Type arrayClass, string methodName, CallingConventions callingConvention, Type returnType, Type[] parameterTypes)
@@ -694,15 +727,20 @@ namespace System.Reflection.Emit
 			return new MethodToken(this.GetToken(con));
 		}
 
+		public MethodToken GetConstructorToken(ConstructorInfo constructor, IEnumerable<Type> optionalParameterTypes)
+		{
+			if (constructor == null)
+			{
+				throw new ArgumentNullException("constructor");
+			}
+			return new MethodToken(this.GetToken(constructor, optionalParameterTypes));
+		}
+
 		public FieldToken GetFieldToken(FieldInfo field)
 		{
 			if (field == null)
 			{
 				throw new ArgumentNullException("field");
-			}
-			if (field.DeclaringType.Module != this)
-			{
-				throw new InvalidOperationException("The method is not in this module");
 			}
 			return new FieldToken(this.GetToken(field));
 		}
@@ -757,39 +795,173 @@ namespace System.Reflection.Emit
 		private static extern int getUSIndex(ModuleBuilder mb, string str);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int getToken(ModuleBuilder mb, object obj);
+		private static extern int getToken(ModuleBuilder mb, object obj, bool create_open_instance);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int getMethodToken(ModuleBuilder mb, MethodInfo method, Type[] opt_param_types);
+		private static extern int getMethodToken(ModuleBuilder mb, MethodBase method, Type[] opt_param_types);
 
 		internal int GetToken(string str)
 		{
-			if (this.us_string_cache.Contains(str))
+			int usindex;
+			if (!this.us_string_cache.TryGetValue(str, out usindex))
 			{
-				return (int)this.us_string_cache[str];
+				usindex = ModuleBuilder.getUSIndex(this, str);
+				this.us_string_cache[str] = usindex;
 			}
-			int usindex = ModuleBuilder.getUSIndex(this, str);
-			this.us_string_cache[str] = usindex;
 			return usindex;
+		}
+
+		private int GetPseudoToken(MemberInfo member, bool create_open_instance)
+		{
+			Dictionary<MemberInfo, int> dictionary = (create_open_instance ? this.inst_tokens_open : this.inst_tokens);
+			int num;
+			if (dictionary == null)
+			{
+				dictionary = new Dictionary<MemberInfo, int>(ReferenceEqualityComparer<MemberInfo>.Instance);
+				if (create_open_instance)
+				{
+					this.inst_tokens_open = dictionary;
+				}
+				else
+				{
+					this.inst_tokens = dictionary;
+				}
+			}
+			else if (dictionary.TryGetValue(member, out num))
+			{
+				return num;
+			}
+			if (member is TypeBuilderInstantiation || member is SymbolType)
+			{
+				num = ModuleBuilder.typespec_tokengen--;
+			}
+			else if (member is FieldOnTypeBuilderInst)
+			{
+				num = ModuleBuilder.memberref_tokengen--;
+			}
+			else if (member is ConstructorOnTypeBuilderInst)
+			{
+				num = ModuleBuilder.memberref_tokengen--;
+			}
+			else if (member is MethodOnTypeBuilderInst)
+			{
+				num = ModuleBuilder.memberref_tokengen--;
+			}
+			else if (member is FieldBuilder)
+			{
+				num = ModuleBuilder.memberref_tokengen--;
+			}
+			else if (member is TypeBuilder)
+			{
+				if (create_open_instance && (member as TypeBuilder).ContainsGenericParameters)
+				{
+					num = ModuleBuilder.typespec_tokengen--;
+				}
+				else if (member.Module == this)
+				{
+					num = ModuleBuilder.typedef_tokengen--;
+				}
+				else
+				{
+					num = ModuleBuilder.typeref_tokengen--;
+				}
+			}
+			else
+			{
+				if (member is EnumBuilder)
+				{
+					num = this.GetPseudoToken((member as EnumBuilder).GetTypeBuilder(), create_open_instance);
+					dictionary[member] = num;
+					return num;
+				}
+				if (member is ConstructorBuilder)
+				{
+					if (member.Module == this && !(member as ConstructorBuilder).TypeBuilder.ContainsGenericParameters)
+					{
+						num = ModuleBuilder.methoddef_tokengen--;
+					}
+					else
+					{
+						num = ModuleBuilder.memberref_tokengen--;
+					}
+				}
+				else if (member is MethodBuilder)
+				{
+					MethodBuilder methodBuilder = member as MethodBuilder;
+					if (member.Module == this && !methodBuilder.TypeBuilder.ContainsGenericParameters && !methodBuilder.IsGenericMethodDefinition)
+					{
+						num = ModuleBuilder.methoddef_tokengen--;
+					}
+					else
+					{
+						num = ModuleBuilder.memberref_tokengen--;
+					}
+				}
+				else
+				{
+					if (!(member is GenericTypeParameterBuilder))
+					{
+						throw new NotImplementedException();
+					}
+					num = ModuleBuilder.typespec_tokengen--;
+				}
+			}
+			dictionary[member] = num;
+			this.RegisterToken(member, num);
+			return num;
 		}
 
 		internal int GetToken(MemberInfo member)
 		{
-			return ModuleBuilder.getToken(this, member);
+			if (member is ConstructorBuilder || member is MethodBuilder)
+			{
+				return this.GetPseudoToken(member, false);
+			}
+			return ModuleBuilder.getToken(this, member, true);
 		}
 
-		internal int GetToken(MethodInfo method, Type[] opt_param_types)
+		internal int GetToken(MemberInfo member, bool create_open_instance)
 		{
+			if (member is TypeBuilderInstantiation || member is FieldOnTypeBuilderInst || member is ConstructorOnTypeBuilderInst || member is MethodOnTypeBuilderInst || member is SymbolType || member is FieldBuilder || member is TypeBuilder || member is ConstructorBuilder || member is MethodBuilder || member is GenericTypeParameterBuilder || member is EnumBuilder)
+			{
+				return this.GetPseudoToken(member, create_open_instance);
+			}
+			return ModuleBuilder.getToken(this, member, create_open_instance);
+		}
+
+		internal int GetToken(MethodBase method, IEnumerable<Type> opt_param_types)
+		{
+			if (method is ConstructorBuilder || method is MethodBuilder)
+			{
+				return this.GetPseudoToken(method, false);
+			}
+			if (opt_param_types == null)
+			{
+				return ModuleBuilder.getToken(this, method, true);
+			}
+			List<Type> list = new List<Type>(opt_param_types);
+			return ModuleBuilder.getMethodToken(this, method, list.ToArray());
+		}
+
+		internal int GetToken(MethodBase method, Type[] opt_param_types)
+		{
+			if (method is ConstructorBuilder || method is MethodBuilder)
+			{
+				return this.GetPseudoToken(method, false);
+			}
 			return ModuleBuilder.getMethodToken(this, method, opt_param_types);
 		}
 
 		internal int GetToken(SignatureHelper helper)
 		{
-			return ModuleBuilder.getToken(this, helper);
+			return ModuleBuilder.getToken(this, helper, true);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void RegisterToken(object obj, int token);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern object GetRegisteredToken(int token);
 
 		internal TokenGenerator GetTokenGenerator()
 		{
@@ -800,11 +972,127 @@ namespace System.Reflection.Emit
 			return this.token_gen;
 		}
 
+		internal static object RuntimeResolve(object obj)
+		{
+			if (obj is MethodBuilder)
+			{
+				return (obj as MethodBuilder).RuntimeResolve();
+			}
+			if (obj is ConstructorBuilder)
+			{
+				return (obj as ConstructorBuilder).RuntimeResolve();
+			}
+			if (obj is FieldBuilder)
+			{
+				return (obj as FieldBuilder).RuntimeResolve();
+			}
+			if (obj is GenericTypeParameterBuilder)
+			{
+				return (obj as GenericTypeParameterBuilder).RuntimeResolve();
+			}
+			if (obj is FieldOnTypeBuilderInst)
+			{
+				return (obj as FieldOnTypeBuilderInst).RuntimeResolve();
+			}
+			if (obj is MethodOnTypeBuilderInst)
+			{
+				return (obj as MethodOnTypeBuilderInst).RuntimeResolve();
+			}
+			if (obj is ConstructorOnTypeBuilderInst)
+			{
+				return (obj as ConstructorOnTypeBuilderInst).RuntimeResolve();
+			}
+			if (obj is Type)
+			{
+				return (obj as Type).RuntimeResolve();
+			}
+			throw new NotImplementedException(obj.GetType().FullName);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void build_metadata(ModuleBuilder mb);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void WriteToFile(IntPtr handle);
+
+		private void FixupTokens(Dictionary<int, int> token_map, Dictionary<int, MemberInfo> member_map, Dictionary<MemberInfo, int> inst_tokens, bool open)
+		{
+			foreach (KeyValuePair<MemberInfo, int> keyValuePair in inst_tokens)
+			{
+				MemberInfo key = keyValuePair.Key;
+				int value = keyValuePair.Value;
+				MemberInfo memberInfo;
+				if (key is TypeBuilderInstantiation || key is SymbolType)
+				{
+					memberInfo = (key as Type).RuntimeResolve();
+				}
+				else if (key is FieldOnTypeBuilderInst)
+				{
+					memberInfo = (key as FieldOnTypeBuilderInst).RuntimeResolve();
+				}
+				else if (key is ConstructorOnTypeBuilderInst)
+				{
+					memberInfo = (key as ConstructorOnTypeBuilderInst).RuntimeResolve();
+				}
+				else if (key is MethodOnTypeBuilderInst)
+				{
+					memberInfo = (key as MethodOnTypeBuilderInst).RuntimeResolve();
+				}
+				else if (key is FieldBuilder)
+				{
+					memberInfo = (key as FieldBuilder).RuntimeResolve();
+				}
+				else if (key is TypeBuilder)
+				{
+					memberInfo = (key as TypeBuilder).RuntimeResolve();
+				}
+				else if (key is EnumBuilder)
+				{
+					memberInfo = (key as EnumBuilder).RuntimeResolve();
+				}
+				else if (key is ConstructorBuilder)
+				{
+					memberInfo = (key as ConstructorBuilder).RuntimeResolve();
+				}
+				else if (key is MethodBuilder)
+				{
+					memberInfo = (key as MethodBuilder).RuntimeResolve();
+				}
+				else
+				{
+					if (!(key is GenericTypeParameterBuilder))
+					{
+						throw new NotImplementedException();
+					}
+					memberInfo = (key as GenericTypeParameterBuilder).RuntimeResolve();
+				}
+				int token = this.GetToken(memberInfo, open);
+				token_map[value] = token;
+				member_map[value] = memberInfo;
+				this.RegisterToken(memberInfo, value);
+			}
+		}
+
+		private void FixupTokens()
+		{
+			Dictionary<int, int> dictionary = new Dictionary<int, int>();
+			Dictionary<int, MemberInfo> dictionary2 = new Dictionary<int, MemberInfo>();
+			if (this.inst_tokens != null)
+			{
+				this.FixupTokens(dictionary, dictionary2, this.inst_tokens, false);
+			}
+			if (this.inst_tokens_open != null)
+			{
+				this.FixupTokens(dictionary, dictionary2, this.inst_tokens_open, true);
+			}
+			if (this.types != null)
+			{
+				for (int i = 0; i < this.num_types; i++)
+				{
+					this.types[i].FixupTokens(dictionary, dictionary2);
+				}
+			}
+		}
 
 		internal void Save()
 		{
@@ -822,6 +1110,7 @@ namespace System.Reflection.Emit
 					}
 				}
 			}
+			this.FixupTokens();
 			if (this.global_type != null && this.global_type_created == null)
 			{
 				this.global_type_created = this.global_type.CreateType();
@@ -835,7 +1124,7 @@ namespace System.Reflection.Emit
 					{
 						ResourceWriter resourceWriter2 = (ResourceWriter)resourceWriter;
 						resourceWriter2.Generate();
-						MemoryStream memoryStream = (MemoryStream)resourceWriter2.Stream;
+						MemoryStream memoryStream = (MemoryStream)resourceWriter2._output;
 						this.resources[j].data = new byte[memoryStream.Length];
 						memoryStream.Seek(0L, SeekOrigin.Begin);
 						memoryStream.Read(this.resources[j].data, 0, (int)memoryStream.Length);
@@ -921,6 +1210,244 @@ namespace System.Reflection.Emit
 			return mb.GetModuleVersionId();
 		}
 
+		void _ModuleBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ModuleBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ModuleBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ModuleBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override Assembly Assembly
+		{
+			get
+			{
+				return this.assemblyb;
+			}
+		}
+
+		public override string Name
+		{
+			get
+			{
+				return this.name;
+			}
+		}
+
+		public override string ScopeName
+		{
+			get
+			{
+				return this.name;
+			}
+		}
+
+		public override Guid ModuleVersionId
+		{
+			get
+			{
+				return this.GetModuleVersionId();
+			}
+		}
+
+		public override bool IsResource()
+		{
+			return false;
+		}
+
+		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
+		{
+			if (this.global_type_created == null)
+			{
+				return null;
+			}
+			if (types == null)
+			{
+				return this.global_type_created.GetMethod(name);
+			}
+			return this.global_type_created.GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
+		}
+
+		public override FieldInfo ResolveField(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
+		{
+			ResolveTokenError resolveTokenError;
+			IntPtr intPtr = Module.ResolveFieldToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
+			if (intPtr == IntPtr.Zero)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "Field");
+			}
+			return FieldInfo.GetFieldFromHandle(new RuntimeFieldHandle(intPtr));
+		}
+
+		public override MemberInfo ResolveMember(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
+		{
+			ResolveTokenError resolveTokenError;
+			MemberInfo memberInfo = Module.ResolveMemberToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
+			if (memberInfo == null)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "MemberInfo");
+			}
+			return memberInfo;
+		}
+
+		internal MemberInfo ResolveOrGetRegisteredToken(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
+		{
+			ResolveTokenError resolveTokenError;
+			MemberInfo memberInfo = Module.ResolveMemberToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
+			if (memberInfo != null)
+			{
+				return memberInfo;
+			}
+			memberInfo = this.GetRegisteredToken(metadataToken) as MemberInfo;
+			if (memberInfo == null)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "MemberInfo");
+			}
+			return memberInfo;
+		}
+
+		public override MethodBase ResolveMethod(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
+		{
+			ResolveTokenError resolveTokenError;
+			IntPtr intPtr = Module.ResolveMethodToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
+			if (intPtr == IntPtr.Zero)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "MethodBase");
+			}
+			return MethodBase.GetMethodFromHandleNoGenericCheck(new RuntimeMethodHandle(intPtr));
+		}
+
+		public override string ResolveString(int metadataToken)
+		{
+			ResolveTokenError resolveTokenError;
+			string text = Module.ResolveStringToken(this._impl, metadataToken, out resolveTokenError);
+			if (text == null)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "string");
+			}
+			return text;
+		}
+
+		public override byte[] ResolveSignature(int metadataToken)
+		{
+			ResolveTokenError resolveTokenError;
+			byte[] array = Module.ResolveSignature(this._impl, metadataToken, out resolveTokenError);
+			if (array == null)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "signature");
+			}
+			return array;
+		}
+
+		public override Type ResolveType(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
+		{
+			ResolveTokenError resolveTokenError;
+			IntPtr intPtr = Module.ResolveTypeToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
+			if (intPtr == IntPtr.Zero)
+			{
+				throw base.resolve_token_exception(metadataToken, resolveTokenError, "Type");
+			}
+			return Type.GetTypeFromHandle(new RuntimeTypeHandle(intPtr));
+		}
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public override bool IsDefined(Type attributeType, bool inherit)
+		{
+			return base.IsDefined(attributeType, inherit);
+		}
+
+		public override object[] GetCustomAttributes(bool inherit)
+		{
+			return this.GetCustomAttributes(null, inherit);
+		}
+
+		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
+		{
+			if (this.cattrs == null || this.cattrs.Length == 0)
+			{
+				return Array.Empty<object>();
+			}
+			if (attributeType is TypeBuilder)
+			{
+				throw new InvalidOperationException("First argument to GetCustomAttributes can't be a TypeBuilder");
+			}
+			List<object> list = new List<object>();
+			for (int i = 0; i < this.cattrs.Length; i++)
+			{
+				Type type = this.cattrs[i].Ctor.GetType();
+				if (type is TypeBuilder)
+				{
+					throw new InvalidOperationException("Can't construct custom attribute for TypeBuilder type");
+				}
+				if (attributeType == null || attributeType.IsAssignableFrom(type))
+				{
+					list.Add(this.cattrs[i].Invoke());
+				}
+			}
+			return list.ToArray();
+		}
+
+		public override FieldInfo GetField(string name, BindingFlags bindingAttr)
+		{
+			if (this.global_type_created == null)
+			{
+				throw new InvalidOperationException("Module-level fields cannot be retrieved until after the CreateGlobalFunctions method has been called for the module.");
+			}
+			return this.global_type_created.GetField(name, bindingAttr);
+		}
+
+		public override FieldInfo[] GetFields(BindingFlags bindingFlags)
+		{
+			if (this.global_type_created == null)
+			{
+				throw new InvalidOperationException("Module-level fields cannot be retrieved until after the CreateGlobalFunctions method has been called for the module.");
+			}
+			return this.global_type_created.GetFields(bindingFlags);
+		}
+
+		public override MethodInfo[] GetMethods(BindingFlags bindingFlags)
+		{
+			if (this.global_type_created == null)
+			{
+				throw new InvalidOperationException("Module-level methods cannot be retrieved until after the CreateGlobalFunctions method has been called for the module.");
+			}
+			return this.global_type_created.GetMethods(bindingFlags);
+		}
+
+		public override int MetadataToken
+		{
+			get
+			{
+				return Module.get_MetadataToken(this);
+			}
+		}
+
+		internal ModuleBuilder()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
 		private UIntPtr dynamic_image;
 
 		private int num_types;
@@ -943,13 +1470,15 @@ namespace System.Reflection.Emit
 
 		private MonoResource[] resources;
 
+		private IntPtr unparented_classes;
+
 		private TypeBuilder global_type;
 
 		private Type global_type_created;
 
-		private Hashtable name_cache;
+		private Dictionary<TypeName, TypeBuilder> name_cache;
 
-		private Hashtable us_string_cache = new Hashtable();
+		private Dictionary<string, int> us_string_cache;
 
 		private int[] table_indexes;
 
@@ -961,6 +1490,20 @@ namespace System.Reflection.Emit
 
 		private ISymbolWriter symbolWriter;
 
-		private static readonly char[] type_modifiers = new char[] { '&', '[', '*' };
+		private static bool has_warned_about_symbolWriter;
+
+		private static int typeref_tokengen = 33554431;
+
+		private static int typedef_tokengen = 50331647;
+
+		private static int typespec_tokengen = 469762047;
+
+		private static int memberref_tokengen = 184549375;
+
+		private static int methoddef_tokengen = 117440511;
+
+		private Dictionary<MemberInfo, int> inst_tokens;
+
+		private Dictionary<MemberInfo, int> inst_tokens_open;
 	}
 }

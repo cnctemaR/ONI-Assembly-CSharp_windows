@@ -5,40 +5,45 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.All)]
 	public sealed class ReadOnlyAttribute : Attribute
 	{
-		public ReadOnlyAttribute(bool read_only)
+		public ReadOnlyAttribute(bool isReadOnly)
 		{
-			this.read_only = read_only;
+			this.isReadOnly = isReadOnly;
 		}
 
 		public bool IsReadOnly
 		{
 			get
 			{
-				return this.read_only;
+				return this.isReadOnly;
 			}
+		}
+
+		public override bool Equals(object value)
+		{
+			if (this == value)
+			{
+				return true;
+			}
+			ReadOnlyAttribute readOnlyAttribute = value as ReadOnlyAttribute;
+			return readOnlyAttribute != null && readOnlyAttribute.IsReadOnly == this.IsReadOnly;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.read_only.GetHashCode();
-		}
-
-		public override bool Equals(object o)
-		{
-			return o is ReadOnlyAttribute && ((ReadOnlyAttribute)o).IsReadOnly.Equals(this.read_only);
+			return base.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(ReadOnlyAttribute.Default);
+			return this.IsReadOnly == ReadOnlyAttribute.Default.IsReadOnly;
 		}
 
-		private bool read_only;
-
-		public static readonly ReadOnlyAttribute No = new ReadOnlyAttribute(false);
+		private bool isReadOnly;
 
 		public static readonly ReadOnlyAttribute Yes = new ReadOnlyAttribute(true);
 
-		public static readonly ReadOnlyAttribute Default = new ReadOnlyAttribute(false);
+		public static readonly ReadOnlyAttribute No = new ReadOnlyAttribute(false);
+
+		public static readonly ReadOnlyAttribute Default = ReadOnlyAttribute.No;
 	}
 }

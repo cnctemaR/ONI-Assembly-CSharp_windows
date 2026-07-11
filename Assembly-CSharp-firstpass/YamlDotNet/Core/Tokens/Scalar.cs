@@ -5,6 +5,22 @@ namespace YamlDotNet.Core.Tokens
 	[Serializable]
 	public class Scalar : Token
 	{
+		public string Value
+		{
+			get
+			{
+				return this.value;
+			}
+		}
+
+		public ScalarStyle Style
+		{
+			get
+			{
+				return this.style;
+			}
+		}
+
 		public Scalar(string value)
 			: this(value, ScalarStyle.Any)
 		{
@@ -20,22 +36,6 @@ namespace YamlDotNet.Core.Tokens
 		{
 			this.value = value;
 			this.style = style;
-		}
-
-		public string Value
-		{
-			get
-			{
-				return this.value;
-			}
-		}
-
-		public ScalarStyle Style
-		{
-			get
-			{
-				return this.style;
-			}
 		}
 
 		private readonly string value;

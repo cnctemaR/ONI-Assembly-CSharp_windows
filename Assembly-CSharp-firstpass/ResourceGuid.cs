@@ -9,11 +9,9 @@ public class ResourceGuid : IEquatable<ResourceGuid>, ISaveLoadable
 		if (parent != null)
 		{
 			this.Guid = parent.Guid.Guid + "." + id;
+			return;
 		}
-		else
-		{
-			this.Guid = id;
-		}
+		this.Guid = id;
 	}
 
 	public override int GetHashCode()

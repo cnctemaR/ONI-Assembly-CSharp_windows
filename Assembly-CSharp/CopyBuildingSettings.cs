@@ -12,14 +12,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "action_mirror";
-		string text2 = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME;
-		global::System.Action action = new global::System.Action(this.ActivateCopyTool);
-		global::Action action2 = global::Action.BuildingUtility1;
-		string text3 = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_mirror", UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME, new global::System.Action(this.ActivateCopyTool), global::Action.BuildingUtility1, null, null, null, UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.TOOLTIP, true), 1f);
 	}
 
 	private void ActivateCopyTool()

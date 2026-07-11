@@ -4,6 +4,8 @@ using System.Diagnostics;
 [DebuggerDisplay("{IdHash}")]
 public class Resource
 {
+	public ResourceGuid Guid { get; private set; }
+
 	public Resource()
 	{
 	}
@@ -21,11 +23,9 @@ public class Resource
 		if (name != null)
 		{
 			this.Name = name;
+			return;
 		}
-		else
-		{
-			this.Name = id;
-		}
+		this.Name = id;
 	}
 
 	public Resource(string id, string name)
@@ -36,8 +36,6 @@ public class Resource
 		this.IdHash = new HashedString(this.Id);
 		this.Name = name;
 	}
-
-	public ResourceGuid Guid { get; private set; }
 
 	public virtual void Initialize()
 	{

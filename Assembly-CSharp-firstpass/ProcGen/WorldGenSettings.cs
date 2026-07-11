@@ -5,6 +5,14 @@ namespace ProcGen
 {
 	public class WorldGenSettings
 	{
+		public World world
+		{
+			get
+			{
+				return this.mutatedWorldData.world;
+			}
+		}
+
 		public WorldGenSettings(string worldName, List<string> traits, bool assertMissingTraits)
 		{
 			if (!SettingsCache.worlds.HasWorld(worldName))
@@ -22,29 +30,24 @@ namespace ProcGen
 					"Generating a world with the traits:",
 					string.Join(", ", traits.ToArray())
 				});
-				foreach (string text in traits)
+				using (List<string>.Enumerator enumerator = traits.GetEnumerator())
 				{
-					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, assertMissingTraits);
-					if (cachedTrait != null)
+					while (enumerator.MoveNext())
 					{
-						list.Add(cachedTrait);
+						string text = enumerator.Current;
+						WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, assertMissingTraits);
+						if (cachedTrait != null)
+						{
+							list.Add(cachedTrait);
+						}
 					}
+					goto IL_00D3;
 				}
 			}
-			else
-			{
-				Debug.Log("Generating a world without traits. Either this world has traits disabled or none were specified.");
-			}
+			Debug.Log("Generating a world without traits. Either this world has traits disabled or none were specified.");
+			IL_00D3:
 			this.mutatedWorldData = new MutatedWorldData(worldData, list);
 			Debug.Log("Set world to [" + worldName + "] " + SettingsCache.GetPath());
-		}
-
-		public World world
-		{
-			get
-			{
-				return this.mutatedWorldData.world;
-			}
 		}
 
 		public BaseLocation GetBaseLocation()

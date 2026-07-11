@@ -9,6 +9,8 @@ namespace YamlDotNet.RepresentationModel
 	[Serializable]
 	public class YamlDocument
 	{
+		public YamlNode RootNode { get; private set; }
+
 		public YamlDocument(YamlNode rootNode)
 		{
 			this.RootNode = rootNode;
@@ -36,12 +38,9 @@ namespace YamlDotNet.RepresentationModel
 			parser.Expect<DocumentEnd>();
 		}
 
-		public YamlNode RootNode { get; private set; }
-
 		private void AssignAnchors()
 		{
-			YamlDocument.AnchorAssigningVisitor anchorAssigningVisitor = new YamlDocument.AnchorAssigningVisitor();
-			anchorAssigningVisitor.AssignAnchors(this);
+			new YamlDocument.AnchorAssigningVisitor().AssignAnchors(this);
 		}
 
 		internal void Save(IEmitter emitter, bool assignAnchors = true)

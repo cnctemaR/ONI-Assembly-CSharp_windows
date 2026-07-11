@@ -101,8 +101,8 @@ public class CommandModuleSideScreen : SideScreenContent
 			}
 			bool flag2 = rocketLaunchCondition.EvaluateLaunchCondition() != RocketLaunchCondition.LaunchStatus.Failure;
 			component.GetReference<LocText>("Label").text = rocketLaunchCondition.GetLaunchStatusMessage(flag2);
-			component.GetReference<LocText>("Label").color = ((!flag2) ? Color.red : Color.black);
-			component.GetReference<Image>("Box").color = ((!flag2) ? Color.red : Color.black);
+			component.GetReference<LocText>("Label").color = (flag2 ? Color.black : Color.red);
+			component.GetReference<Image>("Box").color = (flag2 ? Color.black : Color.red);
 			component.GetReference<Image>("Check").gameObject.SetActive(flag2);
 			gameObject.GetComponent<ToolTip>().SetSimpleTooltip(rocketLaunchCondition.GetLaunchStatusTooltip(flag2));
 		}

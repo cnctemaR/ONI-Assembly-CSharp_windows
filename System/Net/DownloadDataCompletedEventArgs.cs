@@ -1,24 +1,31 @@
 ﻿using System;
 using System.ComponentModel;
+using Unity;
 
 namespace System.Net
 {
-	public class DownloadDataCompletedEventArgs : global::System.ComponentModel.AsyncCompletedEventArgs
+	public class DownloadDataCompletedEventArgs : AsyncCompletedEventArgs
 	{
-		internal DownloadDataCompletedEventArgs(byte[] result, Exception error, bool cancelled, object userState)
-			: base(error, cancelled, userState)
+		internal DownloadDataCompletedEventArgs(byte[] result, Exception exception, bool cancelled, object userToken)
+			: base(exception, cancelled, userToken)
 		{
-			this.result = result;
+			this.m_Result = result;
 		}
 
 		public byte[] Result
 		{
 			get
 			{
-				return this.result;
+				base.RaiseExceptionIfNecessary();
+				return this.m_Result;
 			}
 		}
 
-		private byte[] result;
+		internal DownloadDataCompletedEventArgs()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
+
+		private byte[] m_Result;
 	}
 }

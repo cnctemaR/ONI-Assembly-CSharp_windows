@@ -2,14 +2,8 @@
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Describes a XML bool attribute.</para>
-	/// </summary>
 	public class UxmlBoolAttributeDescription : UxmlAttributeDescription
 	{
-		/// <summary>
-		///   <para>Constructor.</para>
-		/// </summary>
 		public UxmlBoolAttributeDescription()
 		{
 			base.type = "boolean";
@@ -17,14 +11,8 @@ namespace UnityEngine.Experimental.UIElements
 			this.defaultValue = false;
 		}
 
-		/// <summary>
-		///   <para>The default value for the attribute.</para>
-		/// </summary>
 		public bool defaultValue { get; set; }
 
-		/// <summary>
-		///   <para>The default value for the attribute, as a string.</para>
-		/// </summary>
 		public override string defaultValueAsString
 		{
 			get
@@ -33,16 +21,30 @@ namespace UnityEngine.Experimental.UIElements
 			}
 		}
 
-		/// <summary>
-		///   <para>Retrieves the value of this attribute from the attribute bag. Returns it if it is found, otherwise return defaultValue.</para>
-		/// </summary>
-		/// <param name="bag">The bag of attributes.</param>
-		/// <returns>
-		///   <para>The value of the attribute.</para>
-		/// </returns>
+		[Obsolete("Pass a creation context to the method.")]
 		public bool GetValueFromBag(IUxmlAttributes bag)
 		{
-			return bag.GetPropertyBool(base.name, this.defaultValue);
+			return this.GetValueFromBag(bag, default(CreationContext));
+		}
+
+		public bool GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
+		{
+			return base.GetValueFromBag<bool>(bag, cc, new Func<string, bool, bool>(UxmlBoolAttributeDescription.ConvertValueToBool), this.defaultValue);
+		}
+
+		private static bool ConvertValueToBool(string v, bool defaultValue)
+		{
+			bool flag;
+			bool flag2;
+			if (v == null || !bool.TryParse(v, out flag))
+			{
+				flag2 = defaultValue;
+			}
+			else
+			{
+				flag2 = flag;
+			}
+			return flag2;
 		}
 	}
 }

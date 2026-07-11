@@ -4,17 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
 	public class Blend : SelectorModule, IModule3D, IModule
 	{
-		public Blend()
-		{
-		}
-
-		public Blend(IModule controlModule, IModule rightModule, IModule leftModule)
-		{
-			this._controlModule = controlModule;
-			this._leftModule = leftModule;
-			this._rightModule = rightModule;
-		}
-
 		public IModule LeftModule
 		{
 			get
@@ -49,6 +38,17 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 			{
 				this._controlModule = value;
 			}
+		}
+
+		public Blend()
+		{
+		}
+
+		public Blend(IModule controlModule, IModule rightModule, IModule leftModule)
+		{
+			this._controlModule = controlModule;
+			this._leftModule = leftModule;
+			this._rightModule = rightModule;
 		}
 
 		public float GetValue(float x, float y, float z)

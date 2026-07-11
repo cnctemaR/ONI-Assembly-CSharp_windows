@@ -9,18 +9,20 @@ namespace System.Reflection
 	public class TargetException : ApplicationException
 	{
 		public TargetException()
-			: base(Locale.GetText("Unable to invoke an invalid target."))
 		{
+			base.SetErrorCode(-2146232829);
 		}
 
 		public TargetException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146232829);
 		}
 
 		public TargetException(string message, Exception inner)
 			: base(message, inner)
 		{
+			base.SetErrorCode(-2146232829);
 		}
 
 		protected TargetException(SerializationInfo info, StreamingContext context)

@@ -12,13 +12,11 @@ public class SaveConfigurationScreen
 			this.disabledContentPanel.SetActive(true);
 			this.disabledContentWarning.SetActive(false);
 			this.perSaveWarning.SetActive(true);
+			return;
 		}
-		else
-		{
-			this.disabledContentPanel.SetActive(false);
-			this.disabledContentWarning.SetActive(true);
-			this.perSaveWarning.SetActive(false);
-		}
+		this.disabledContentPanel.SetActive(false);
+		this.disabledContentWarning.SetActive(true);
+		this.perSaveWarning.SetActive(false);
 	}
 
 	public void Init()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 public class RoleStation : Workable, IEffectDescriptor
@@ -32,32 +31,16 @@ public class RoleStation : Workable, IEffectDescriptor
 
 	private void UpdateSkillPointAvailableStatusItem(object data = null)
 	{
-		IEnumerator enumerator = Components.MinionResumes.GetEnumerator();
-		try
+		foreach (object obj in Components.MinionResumes)
 		{
-			while (enumerator.MoveNext())
+			MinionResume minionResume = (MinionResume)obj;
+			if (!minionResume.HasTag(GameTags.Dead) && minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
 			{
-				object obj = enumerator.Current;
-				MinionResume minionResume = (MinionResume)obj;
-				if (!minionResume.HasTag(GameTags.Dead))
+				if (this.skillPointAvailableStatusItem == Guid.Empty)
 				{
-					if (minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
-					{
-						if (this.skillPointAvailableStatusItem == Guid.Empty)
-						{
-							this.skillPointAvailableStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SkillPointsAvailable, null);
-						}
-						return;
-					}
+					this.skillPointAvailableStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SkillPointsAvailable, null);
 				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				return;
 			}
 		}
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SkillPointsAvailable, false);
@@ -66,9 +49,7 @@ public class RoleStation : Workable, IEffectDescriptor
 
 	private Chore CreateWorkChore()
 	{
-		ChoreType learnSkill = Db.Get().ChoreTypes.LearnSkill;
-		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		return new WorkChore<RoleStation>(learnSkill, this, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
+		return new WorkChore<RoleStation>(Db.Get().ChoreTypes.LearnSkill, this, null, true, null, null, null, false, null, false, true, Assets.GetAnim("anim_hat_kanim"), false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

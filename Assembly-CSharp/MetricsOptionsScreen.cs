@@ -16,8 +16,7 @@ public class MetricsOptionsScreen : KModalScreen
 		{
 			this.OnClickToggle();
 		};
-		LocText reference = this.enableButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Text");
-		reference.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.ENABLE_BUTTON);
+		this.enableButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Text").SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.ENABLE_BUTTON);
 		this.dismissButton.onClick += delegate
 		{
 			this.Deactivate();
@@ -36,7 +35,7 @@ public class MetricsOptionsScreen : KModalScreen
 	{
 		KPrivacyPrefs.instance.disableDataCollection = !KPrivacyPrefs.instance.disableDataCollection;
 		KPrivacyPrefs.Save();
-		KPlayerPrefs.SetString("DisableDataCollection", (!KPrivacyPrefs.instance.disableDataCollection) ? "no" : "yes");
+		KPlayerPrefs.SetString("DisableDataCollection", KPrivacyPrefs.instance.disableDataCollection ? "yes" : "no");
 		KPlayerPrefs.Save();
 		ThreadedHttps<KleiMetrics>.Instance.SetEnabled(!KPrivacyPrefs.instance.disableDataCollection);
 		this.enableButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);

@@ -77,7 +77,7 @@ public class UICurvePath : KMonoBehaviour
 		for (int i = 1; i <= num2; i++)
 		{
 			float num3 = (float)i * num;
-			Vector3 vector = this.DeCasteljausAlgorithm(num3);
+			this.DeCasteljausAlgorithm(num3);
 		}
 		Gizmos.color = Color.green;
 	}

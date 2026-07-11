@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Experimental.UIElements
 {
-	/// <summary>
-	///   <para>Implementation of a linear focus ring. Elements are sorted according to their focusIndex.</para>
-	/// </summary>
 	public class VisualElementFocusRing : IFocusRing
 	{
 		public VisualElementFocusRing(VisualElement root, VisualElementFocusRing.DefaultFocusOrder dfo = VisualElementFocusRing.DefaultFocusOrder.ChildOrder)
@@ -15,9 +12,6 @@ namespace UnityEngine.Experimental.UIElements
 			this.m_FocusRing = new List<VisualElementFocusRing.FocusRingRecord>();
 		}
 
-		/// <summary>
-		///   <para>The focus order for elements having 0 has a focusIndex.</para>
-		/// </summary>
 		public VisualElementFocusRing.DefaultFocusOrder defaultFocusOrder { get; set; }
 
 		private int FocusRingAutoIndexSort(VisualElementFocusRing.FocusRingRecord a, VisualElementFocusRing.FocusRingRecord b)
@@ -162,11 +156,6 @@ namespace UnityEngine.Experimental.UIElements
 			return -1;
 		}
 
-		/// <summary>
-		///   <para>Get the direction of the focus change for the given event. For example, when the Tab key is pressed, focus should be given to the element to the right in the focus ring.</para>
-		/// </summary>
-		/// <param name="currentFocusable"></param>
-		/// <param name="e"></param>
 		public FocusChangeDirection GetFocusChangeDirection(Focusable currentFocusable, EventBase e)
 		{
 			FocusChangeDirection focusChangeDirection;
@@ -198,11 +187,6 @@ namespace UnityEngine.Experimental.UIElements
 			return focusChangeDirection;
 		}
 
-		/// <summary>
-		///   <para>Get the next element in the given direction.</para>
-		/// </summary>
-		/// <param name="currentFocusable"></param>
-		/// <param name="direction"></param>
 		public Focusable GetNextFocusable(Focusable currentFocusable, FocusChangeDirection direction)
 		{
 			Focusable focusable;
@@ -246,22 +230,10 @@ namespace UnityEngine.Experimental.UIElements
 
 		private List<VisualElementFocusRing.FocusRingRecord> m_FocusRing;
 
-		/// <summary>
-		///   <para>Ordering of elements in the focus ring.</para>
-		/// </summary>
 		public enum DefaultFocusOrder
 		{
-			/// <summary>
-			///   <para>Order elements using a depth-first pre-order traversal of the element tree.</para>
-			/// </summary>
 			ChildOrder,
-			/// <summary>
-			///   <para>Order elements according to their position, first by X, then by Y.</para>
-			/// </summary>
 			PositionXY,
-			/// <summary>
-			///   <para>Order elements according to their position, first by Y, then by X.</para>
-			/// </summary>
 			PositionYX
 		}
 

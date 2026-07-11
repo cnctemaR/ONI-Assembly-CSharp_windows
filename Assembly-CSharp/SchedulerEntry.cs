@@ -3,13 +3,13 @@ using UnityEngine;
 
 public struct SchedulerEntry
 {
+	public SchedulerEntry.Details details { get; private set; }
+
 	public SchedulerEntry(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
 	{
 		this.time = time;
 		this.details = new SchedulerEntry.Details(name, callback, callback_data, time_interval, profiler_obj);
 	}
-
-	public SchedulerEntry.Details details { get; private set; }
 
 	public void FreeResources()
 	{

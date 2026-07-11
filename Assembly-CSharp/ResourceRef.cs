@@ -30,11 +30,9 @@ public class ResourceRef<ResourceType> : ISaveLoadable where ResourceType : Reso
 		if (this.resource == null)
 		{
 			this.guid = null;
+			return;
 		}
-		else
-		{
-			this.guid = this.resource.Guid;
-		}
+		this.guid = this.resource.Guid;
 	}
 
 	[OnDeserialized]

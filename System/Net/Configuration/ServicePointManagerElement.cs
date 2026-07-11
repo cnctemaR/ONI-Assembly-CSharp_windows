@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Configuration;
+using System.Net.Security;
+using Unity;
 
 namespace System.Net.Configuration
 {
@@ -101,9 +103,22 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected override void PostDeserialize()
 		{
+		}
+
+		public EncryptionPolicy EncryptionPolicy
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return EncryptionPolicy.RequireEncryption;
+			}
+			set
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+			}
 		}
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();

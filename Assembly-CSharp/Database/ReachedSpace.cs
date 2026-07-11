@@ -47,12 +47,12 @@ namespace Database
 					}
 				}
 			}
-			return false;
+			return SpacecraftManager.instance.hasVisitedWormHole;
 		}
 
 		public override void Serialize(BinaryWriter writer)
 		{
-			writer.Write((this.destinationType != null) ? 0 : 1);
+			writer.Write((this.destinationType == null) ? 1 : 0);
 			if (this.destinationType != null)
 			{
 				writer.WriteKleiString(this.destinationType.Id);
@@ -61,7 +61,7 @@ namespace Database
 
 		public override void Deserialize(IReader reader)
 		{
-			if (reader.ReadByte() == 0)
+			if (reader.ReadByte() <= 0)
 			{
 				string text = reader.ReadKleiString();
 				this.destinationType = Db.Get().SpaceDestinationTypes.Get(text);

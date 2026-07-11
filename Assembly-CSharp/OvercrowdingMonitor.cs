@@ -28,17 +28,12 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		{
 			return false;
 		}
-		if (smi.cavity == null)
+		if (smi.cavity != null)
 		{
-			return false;
+			int num = smi.cavity.creatures.Count + smi.cavity.eggs.Count;
+			return num != 0 && smi.cavity.eggs.Count != 0 && smi.cavity.numCells / num < smi.def.spaceRequiredPerCreature;
 		}
-		int num = smi.cavity.creatures.Count + smi.cavity.eggs.Count;
-		if (num == 0 || smi.cavity.eggs.Count == 0)
-		{
-			return false;
-		}
-		int num2 = smi.cavity.numCells / num;
-		return num2 < smi.def.spaceRequiredPerCreature;
+		return false;
 	}
 
 	private static bool IsOvercrowded(OvercrowdingMonitor.Instance smi)
@@ -51,23 +46,9 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		if (smi2 != null)
 		{
 			int fishCount = smi2.fishCount;
-			if (fishCount > 0)
-			{
-				int cellCount = smi2.cellCount;
-				int num = cellCount / fishCount;
-				return num < smi.def.spaceRequiredPerCreature;
-			}
-			return false;
+			return fishCount > 0 && smi2.cellCount / fishCount < smi.def.spaceRequiredPerCreature;
 		}
-		else
-		{
-			if (smi.cavity != null && smi.cavity.creatures.Count > 1)
-			{
-				int num2 = smi.cavity.numCells / smi.cavity.creatures.Count;
-				return num2 < smi.def.spaceRequiredPerCreature;
-			}
-			return false;
-		}
+		return smi.cavity != null && smi.cavity.creatures.Count > 1 && smi.cavity.numCells / smi.cavity.creatures.Count < smi.def.spaceRequiredPerCreature;
 	}
 
 	private static void UpdateState(OvercrowdingMonitor.Instance smi, float dt)
@@ -91,11 +72,9 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		if (set)
 		{
 			component.Add(effect, false);
+			return;
 		}
-		else
-		{
-			component.Remove(effect);
-		}
+		component.Remove(effect);
 	}
 
 	private static List<KPrefabID> GetCreatureCollection(OvercrowdingMonitor.Instance smi, CavityInfo cavity_info)

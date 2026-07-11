@@ -9,18 +9,21 @@ namespace System
 	public sealed class InvalidProgramException : SystemException
 	{
 		public InvalidProgramException()
-			: base(Locale.GetText("Metadata is invalid."))
+			: base(Environment.GetResourceString("Common Language Runtime detected an invalid program."))
 		{
+			base.SetErrorCode(-2146233030);
 		}
 
 		public InvalidProgramException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146233030);
 		}
 
 		public InvalidProgramException(string message, Exception inner)
 			: base(message, inner)
 		{
+			base.SetErrorCode(-2146233030);
 		}
 
 		internal InvalidProgramException(SerializationInfo info, StreamingContext context)

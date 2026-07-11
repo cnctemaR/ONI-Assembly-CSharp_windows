@@ -10,20 +10,19 @@ public class PrebuildToolHoverTextCard : HoverTextConfiguration
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
 		hoverTextDrawer.BeginShadowBar(false);
 		PlanScreen.RequirementsState requirementsState = this.currentReqState;
-		if (requirementsState != PlanScreen.RequirementsState.Complete && requirementsState != PlanScreen.RequirementsState.Materials)
+		if (requirementsState != PlanScreen.RequirementsState.Tech)
 		{
-			if (requirementsState == PlanScreen.RequirementsState.Tech)
+			if (requirementsState - PlanScreen.RequirementsState.Materials <= 1)
 			{
-				TechItem techItem = Db.Get().TechItems.Get(this.currentDef.PrefabID);
-				Tech parentTech = techItem.parentTech;
-				hoverTextDrawer.DrawText(string.Format(UI.PRODUCTINFO_RESEARCHREQUIRED, parentTech.Name).ToUpper(), this.HoverTextStyleSettings[0]);
+				hoverTextDrawer.DrawText(UI.TOOLTIPS.NOMATERIAL.text.ToUpper(), this.HoverTextStyleSettings[0]);
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawText(UI.TOOLTIPS.SELECTAMATERIAL, this.HoverTextStyleSettings[1]);
 			}
 		}
 		else
 		{
-			hoverTextDrawer.DrawText(UI.TOOLTIPS.NOMATERIAL.text.ToUpper(), this.HoverTextStyleSettings[0]);
-			hoverTextDrawer.NewLine(26);
-			hoverTextDrawer.DrawText(UI.TOOLTIPS.SELECTAMATERIAL, this.HoverTextStyleSettings[1]);
+			Tech parentTech = Db.Get().TechItems.Get(this.currentDef.PrefabID).parentTech;
+			hoverTextDrawer.DrawText(string.Format(UI.PRODUCTINFO_RESEARCHREQUIRED, parentTech.Name).ToUpper(), this.HoverTextStyleSettings[0]);
 		}
 		hoverTextDrawer.NewLine(26);
 		hoverTextDrawer.DrawIcon(instance.GetSprite("icon_mouse_right"), 18);

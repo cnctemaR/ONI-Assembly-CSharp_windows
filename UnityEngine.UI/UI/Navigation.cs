@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -82,23 +81,18 @@ namespace UnityEngine.UI
 			return this.mode == other.mode && this.selectOnUp == other.selectOnUp && this.selectOnDown == other.selectOnDown && this.selectOnLeft == other.selectOnLeft && this.selectOnRight == other.selectOnRight;
 		}
 
-		[FormerlySerializedAs("mode")]
 		[SerializeField]
 		private Navigation.Mode m_Mode;
 
-		[FormerlySerializedAs("selectOnUp")]
 		[SerializeField]
 		private Selectable m_SelectOnUp;
 
-		[FormerlySerializedAs("selectOnDown")]
 		[SerializeField]
 		private Selectable m_SelectOnDown;
 
-		[FormerlySerializedAs("selectOnLeft")]
 		[SerializeField]
 		private Selectable m_SelectOnLeft;
 
-		[FormerlySerializedAs("selectOnRight")]
 		[SerializeField]
 		private Selectable m_SelectOnRight;
 

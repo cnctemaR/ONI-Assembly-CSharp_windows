@@ -2,59 +2,57 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class ComplexBindingPropertiesAttribute : Attribute
 	{
-		public ComplexBindingPropertiesAttribute(string dataSource, string dataMember)
+		public ComplexBindingPropertiesAttribute()
 		{
-			this.data_source = dataSource;
-			this.data_member = dataMember;
+			this.dataSource = null;
+			this.dataMember = null;
 		}
 
 		public ComplexBindingPropertiesAttribute(string dataSource)
 		{
-			this.data_source = dataSource;
+			this.dataSource = dataSource;
+			this.dataMember = null;
 		}
 
-		public ComplexBindingPropertiesAttribute()
+		public ComplexBindingPropertiesAttribute(string dataSource, string dataMember)
 		{
-		}
-
-		public string DataMember
-		{
-			get
-			{
-				return this.data_member;
-			}
+			this.dataSource = dataSource;
+			this.dataMember = dataMember;
 		}
 
 		public string DataSource
 		{
 			get
 			{
-				return this.data_source;
+				return this.dataSource;
+			}
+		}
+
+		public string DataMember
+		{
+			get
+			{
+				return this.dataMember;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
 			ComplexBindingPropertiesAttribute complexBindingPropertiesAttribute = obj as ComplexBindingPropertiesAttribute;
-			return complexBindingPropertiesAttribute != null && complexBindingPropertiesAttribute.DataMember == this.data_member && complexBindingPropertiesAttribute.DataSource == this.data_source;
+			return complexBindingPropertiesAttribute != null && complexBindingPropertiesAttribute.DataSource == this.dataSource && complexBindingPropertiesAttribute.DataMember == this.dataMember;
 		}
 
 		public override int GetHashCode()
 		{
-			int hashCode = (this.data_source + this.data_member).GetHashCode();
-			if (hashCode == 0)
-			{
-				return base.GetHashCode();
-			}
-			return hashCode;
+			return base.GetHashCode();
 		}
 
-		private string data_source;
+		private readonly string dataSource;
 
-		private string data_member;
+		private readonly string dataMember;
 
 		public static readonly ComplexBindingPropertiesAttribute Default = new ComplexBindingPropertiesAttribute();
 	}

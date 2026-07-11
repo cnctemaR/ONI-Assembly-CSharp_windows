@@ -75,7 +75,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 			{
 				return Db.Get().CreatureStatusItems.Crop_Too_Dark.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_DARK.NAME, this);
 			}
-			return string.Empty;
+			return "";
 		}
 	}
 
@@ -131,7 +131,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 				int num = Grid.PosToCell(smi.master.gameObject);
 				if (!smi.master.IsCellSafe(num))
 				{
-					GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.State state = ((!smi.master.prefersDarkness) ? this.too_dark : this.too_bright);
+					GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.State state = (smi.master.prefersDarkness ? this.too_bright : this.too_dark);
 					smi.GoTo(state);
 				}
 			}, UpdateRate.SIM_1000ms, false).Enter(delegate(IlluminationVulnerable.StatesInstance smi)

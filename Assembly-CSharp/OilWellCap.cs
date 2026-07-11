@@ -6,7 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISliderControl
+public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IElementEmitter
 {
 	public SimHashes Element
 	{
@@ -83,8 +83,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 	private void OnCopySettings(object data)
 	{
-		GameObject gameObject = (GameObject)data;
-		OilWellCap component = gameObject.GetComponent<OilWellCap>();
+		OilWellCap component = ((GameObject)data).GetComponent<OilWellCap>();
 		if (component != null)
 		{
 			this.depressurizePercent = component.depressurizePercent;
@@ -145,8 +144,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 	private void UpdatePressurePercent()
 	{
-		float massAvailable = this.storage.GetMassAvailable(this.gasElement);
-		float num = massAvailable / this.maxGasPressure;
+		float num = this.storage.GetMassAvailable(this.gasElement) / this.maxGasPressure;
 		num = Mathf.Clamp01(num);
 		this.smi.sm.pressurePercent.Set(num, this.smi);
 		this.pressureMeter.SetPositionPercent(num);
@@ -226,8 +224,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		description = DUPLICANTS.CHORES.PRECONDITIONS.ALLOWED_TO_DEPRESSURIZE,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			OilWellCap oilWellCap = (OilWellCap)data;
-			return oilWellCap.NeedsDepressurizing();
+			return ((OilWellCap)data).NeedsDepressurizing();
 		}
 	};
 

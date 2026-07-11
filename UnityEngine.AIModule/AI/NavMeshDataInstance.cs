@@ -2,14 +2,8 @@
 
 namespace UnityEngine.AI
 {
-	/// <summary>
-	///   <para>The instance is returned when adding NavMesh data.</para>
-	/// </summary>
 	public struct NavMeshDataInstance
 	{
-		/// <summary>
-		///   <para>True if the NavMesh data is added to the navigation system - otherwise false (Read Only).</para>
-		/// </summary>
 		public bool valid
 		{
 			get
@@ -30,17 +24,11 @@ namespace UnityEngine.AI
 			}
 		}
 
-		/// <summary>
-		///   <para>Removes this instance from the NavMesh system.</para>
-		/// </summary>
 		public void Remove()
 		{
 			NavMesh.RemoveNavMeshDataInternal(this.id);
 		}
 
-		/// <summary>
-		///   <para>Get or set the owning Object.</para>
-		/// </summary>
 		public Object owner
 		{
 			get

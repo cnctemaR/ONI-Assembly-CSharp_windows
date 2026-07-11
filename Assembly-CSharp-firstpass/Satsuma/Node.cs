@@ -4,13 +4,13 @@ namespace Satsuma
 {
 	public struct Node : IEquatable<Node>
 	{
+		public long Id { get; private set; }
+
 		public Node(long id)
 		{
 			this = default(Node);
 			this.Id = id;
 		}
-
-		public long Id { get; private set; }
 
 		public static Node Invalid
 		{

@@ -51,8 +51,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 		{
 			for (int i = this.screenStack.Count - 1; i >= 0; i--)
 			{
-				KScreen kscreen = this.screenStack[i];
-				kscreen.Deactivate();
+				this.screenStack[i].Deactivate();
 			}
 		}
 	}
@@ -60,21 +59,18 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 	public GameObject ActivateScreen(GameObject screen, GameObject parent)
 	{
 		KScreenManager.AddExistingChild(parent, screen);
-		KScreen component = screen.GetComponent<KScreen>();
-		component.Activate();
+		screen.GetComponent<KScreen>().Activate();
 		return screen;
 	}
 
 	public KScreen InstantiateScreen(GameObject screenPrefab, GameObject parent)
 	{
-		GameObject gameObject = KScreenManager.AddChild(parent, screenPrefab);
-		return gameObject.GetComponent<KScreen>();
+		return KScreenManager.AddChild(parent, screenPrefab).GetComponent<KScreen>();
 	}
 
 	public KScreen StartScreen(GameObject screenPrefab, GameObject parent)
 	{
-		GameObject gameObject = KScreenManager.AddChild(parent, screenPrefab);
-		KScreen component = gameObject.GetComponent<KScreen>();
+		KScreen component = KScreenManager.AddChild(parent, screenPrefab).GetComponent<KScreen>();
 		component.Activate();
 		return component;
 	}
@@ -118,7 +114,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 
 	public string DebugScreenStack()
 	{
-		string text = string.Empty;
+		string text = "";
 		foreach (KScreen kscreen in this.screenStack)
 		{
 			text = text + kscreen.name + "\n";
@@ -159,7 +155,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 				{
 					this.lastConsumedEvent = e;
 					this.lastConsumedEventScreen = kscreen;
-					break;
+					return;
 				}
 			}
 		}
@@ -181,7 +177,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 				{
 					this.lastConsumedEvent = e;
 					this.lastConsumedEventScreen = kscreen;
-					break;
+					return;
 				}
 			}
 		}

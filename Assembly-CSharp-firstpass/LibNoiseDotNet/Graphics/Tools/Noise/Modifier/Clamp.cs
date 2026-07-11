@@ -4,22 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
 	public class Clamp : ModifierModule, IModule3D, IModule
 	{
-		public Clamp()
-		{
-		}
-
-		public Clamp(IModule source)
-			: base(source)
-		{
-		}
-
-		public Clamp(IModule source, float lower, float upper)
-			: base(source)
-		{
-			this._lowerBound = lower;
-			this._upperBound = upper;
-		}
-
 		public float LowerBound
 		{
 			get
@@ -42,6 +26,22 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 			{
 				this._upperBound = value;
 			}
+		}
+
+		public Clamp()
+		{
+		}
+
+		public Clamp(IModule source)
+			: base(source)
+		{
+		}
+
+		public Clamp(IModule source, float lower, float upper)
+			: base(source)
+		{
+			this._lowerBound = lower;
+			this._upperBound = upper;
 		}
 
 		public float GetValue(float x, float y, float z)

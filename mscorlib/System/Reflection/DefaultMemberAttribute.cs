@@ -3,24 +3,24 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class DefaultMemberAttribute : Attribute
 	{
 		public DefaultMemberAttribute(string memberName)
 		{
-			this.member_name = memberName;
+			this.m_memberName = memberName;
 		}
 
 		public string MemberName
 		{
 			get
 			{
-				return this.member_name;
+				return this.m_memberName;
 			}
 		}
 
-		private string member_name;
+		private string m_memberName;
 	}
 }

@@ -8,35 +8,52 @@ namespace System.Net
 {
 	internal class WebConnectionStream : Stream
 	{
-		public WebConnectionStream(WebConnection cnc)
+		public WebConnectionStream(WebConnection cnc, WebConnectionData data)
 		{
+			if (data == null)
+			{
+				throw new InvalidOperationException("data was not initialized");
+			}
+			if (data.Headers == null)
+			{
+				throw new InvalidOperationException("data.Headers was not initialized");
+			}
+			if (data.request == null)
+			{
+				throw new InvalidOperationException("data.request was not initialized");
+			}
 			this.isRead = true;
+			this.cb_wrapper = new AsyncCallback(this.ReadCallbackWrapper);
 			this.pending = new ManualResetEvent(true);
-			this.request = cnc.Data.request;
+			this.request = data.request;
 			this.read_timeout = this.request.ReadWriteTimeout;
 			this.write_timeout = this.read_timeout;
 			this.cnc = cnc;
-			string text = cnc.Data.Headers["Transfer-Encoding"];
-			bool flag = text != null && text.ToLower().IndexOf("chunked") != -1;
-			string text2 = cnc.Data.Headers["Content-Length"];
-			if (!flag && text2 != null && text2 != string.Empty)
+			string text = data.Headers["Transfer-Encoding"];
+			bool flag = text != null && text.IndexOf("chunked", StringComparison.OrdinalIgnoreCase) != -1;
+			string text2 = data.Headers["Content-Length"];
+			if (!flag && text2 != null && text2 != "")
 			{
 				try
 				{
-					this.contentLength = int.Parse(text2);
-					if (this.contentLength == 0 && !this.IsNtlmAuth())
+					this.contentLength = (long)int.Parse(text2);
+					if (this.contentLength == 0L && !this.IsNtlmAuth())
 					{
 						this.ReadAll();
 					}
+					goto IL_012C;
 				}
 				catch
 				{
-					this.contentLength = int.MaxValue;
+					this.contentLength = long.MaxValue;
+					goto IL_012C;
 				}
 			}
-			else
+			this.contentLength = long.MaxValue;
+			IL_012C:
+			if (!int.TryParse(text2, out this.stream_length))
 			{
-				this.contentLength = int.MaxValue;
+				this.stream_length = -1;
 			}
 		}
 
@@ -45,6 +62,7 @@ namespace System.Net
 			this.read_timeout = request.ReadWriteTimeout;
 			this.write_timeout = this.read_timeout;
 			this.isRead = false;
+			this.cb_wrapper = new AsyncCallback(this.WriteCallbackWrapper);
 			this.cnc = cnc;
 			this.request = request;
 			this.allowBuffering = request.InternalAllowBuffering;
@@ -52,24 +70,28 @@ namespace System.Net
 			if (this.sendChunked)
 			{
 				this.pending = new ManualResetEvent(true);
+				return;
 			}
-			else if (this.allowBuffering)
+			if (this.allowBuffering)
 			{
 				this.writeBuffer = new MemoryStream();
 			}
 		}
 
+		private bool CheckAuthHeader(string headerName)
+		{
+			string text = this.cnc.Data.Headers[headerName];
+			return text != null && text.IndexOf("NTLM", StringComparison.Ordinal) != -1;
+		}
+
 		private bool IsNtlmAuth()
 		{
-			bool flag = this.request.Proxy != null && !this.request.Proxy.IsBypassed(this.request.Address);
-			string text = ((!flag) ? "WWW-Authenticate" : "Proxy-Authenticate");
-			string text2 = this.cnc.Data.Headers[text];
-			return text2 != null && text2.IndexOf("NTLM") != -1;
+			return (this.request.Proxy != null && !this.request.Proxy.IsBypassed(this.request.Address) && this.CheckAuthHeader("Proxy-Authenticate")) || this.CheckAuthHeader("WWW-Authenticate");
 		}
 
 		internal void CheckResponseInBuffer()
 		{
-			if (this.contentLength > 0 && this.readBufferSize - this.readBufferOffset >= this.contentLength && !this.IsNtlmAuth())
+			if (this.contentLength > 0L && (long)(this.readBufferSize - this.readBufferOffset) >= this.contentLength && !this.IsNtlmAuth())
 			{
 				this.ReadAll();
 			}
@@ -183,7 +205,11 @@ namespace System.Net
 		{
 			get
 			{
-				return (this.writeBuffer == null) ? (-1) : ((int)this.writeBuffer.Length);
+				if (this.writeBuffer == null)
+				{
+					return -1;
+				}
+				return (int)this.writeBuffer.Length;
 			}
 		}
 
@@ -191,9 +217,9 @@ namespace System.Net
 		{
 			if (!this.nextReadCalled)
 			{
-				if (this.contentLength == 2147483647)
+				if (this.contentLength == 9223372036854775807L)
 				{
-					this.contentLength = 0;
+					this.contentLength = 0L;
 				}
 				this.nextReadCalled = true;
 				this.cnc.NextRead();
@@ -202,7 +228,7 @@ namespace System.Net
 
 		internal void CheckComplete()
 		{
-			if (!this.nextReadCalled && this.readBufferSize - this.readBufferOffset == this.contentLength)
+			if (!this.nextReadCalled && (long)(this.readBufferSize - this.readBufferOffset) == this.contentLength)
 			{
 				this.nextReadCalled = true;
 				this.cnc.NextRead();
@@ -220,7 +246,10 @@ namespace System.Net
 				}
 				return;
 			}
-			this.pending.WaitOne();
+			if (!this.pending.WaitOne(this.ReadTimeout))
+			{
+				throw new WebException("The operation has timed out.", WebExceptionStatus.Timeout);
+			}
 			object obj = this.locker;
 			lock (obj)
 			{
@@ -231,7 +260,7 @@ namespace System.Net
 				int num = this.readBufferSize - this.readBufferOffset;
 				byte[] array2;
 				int num3;
-				if (this.contentLength == 2147483647)
+				if (this.contentLength == 9223372036854775807L)
 				{
 					MemoryStream memoryStream = new MemoryStream();
 					byte[] array = null;
@@ -254,11 +283,11 @@ namespace System.Net
 					}
 					array2 = memoryStream.GetBuffer();
 					num3 = (int)memoryStream.Length;
-					this.contentLength = num3;
+					this.contentLength = (long)num3;
 				}
 				else
 				{
-					num3 = this.contentLength - this.totalRead;
+					num3 = (int)(this.contentLength - this.totalRead);
 					array2 = new byte[num3];
 					if (this.readBuffer != null && num > 0)
 					{
@@ -280,7 +309,7 @@ namespace System.Net
 				this.readBuffer = array2;
 				this.readBufferOffset = 0;
 				this.readBufferSize = num3;
-				this.totalRead = 0;
+				this.totalRead = 0L;
 				this.nextReadCalled = true;
 			}
 			this.cnc.NextRead();
@@ -298,10 +327,14 @@ namespace System.Net
 				webAsyncResult = (WebAsyncResult)r.AsyncState;
 				webAsyncResult.InnerAsyncResult = r;
 				webAsyncResult.DoCallback();
+				return;
 			}
-			else
+			try
 			{
 				this.EndWrite(r);
+			}
+			catch
+			{
 			}
 		}
 
@@ -312,16 +345,20 @@ namespace System.Net
 				WebAsyncResult webAsyncResult = (WebAsyncResult)r.AsyncState;
 				webAsyncResult.InnerAsyncResult = r;
 				webAsyncResult.DoCallback();
+				return;
 			}
-			else
+			try
 			{
 				this.EndRead(r);
+			}
+			catch
+			{
 			}
 		}
 
 		public override int Read(byte[] buffer, int offset, int size)
 		{
-			AsyncCallback asyncCallback = new AsyncCallback(this.ReadCallbackWrapper);
+			AsyncCallback asyncCallback = this.cb_wrapper;
 			WebAsyncResult webAsyncResult = (WebAsyncResult)this.BeginRead(buffer, offset, size, asyncCallback, null);
 			if (!webAsyncResult.IsCompleted && !webAsyncResult.WaitUntilComplete(this.ReadTimeout, false))
 			{
@@ -367,12 +404,12 @@ namespace System.Net
 			int num2 = this.readBufferSize - this.readBufferOffset;
 			if (num2 > 0)
 			{
-				int num3 = ((num2 <= size) ? num2 : size);
+				int num3 = ((num2 > size) ? size : num2);
 				Buffer.BlockCopy(this.readBuffer, this.readBufferOffset, buffer, offset, num3);
 				this.readBufferOffset += num3;
 				offset += num3;
 				size -= num3;
-				this.totalRead += num3;
+				this.totalRead += (long)num3;
 				if (size == 0 || this.totalRead >= this.contentLength)
 				{
 					webAsyncResult.SetCompleted(true, num3);
@@ -383,11 +420,11 @@ namespace System.Net
 			}
 			if (cb != null)
 			{
-				cb = new AsyncCallback(this.ReadCallbackWrapper);
+				cb = this.cb_wrapper;
 			}
-			if (this.contentLength != 2147483647 && this.contentLength - this.totalRead < size)
+			if (this.contentLength != 9223372036854775807L && this.contentLength - this.totalRead < (long)size)
 			{
-				size = this.contentLength - this.totalRead;
+				size = (int)(this.contentLength - this.totalRead);
 			}
 			if (!this.read_eof)
 			{
@@ -407,74 +444,87 @@ namespace System.Net
 			if (webAsyncResult.EndCalled)
 			{
 				int nbytes = webAsyncResult.NBytes;
-				return (nbytes < 0) ? 0 : nbytes;
-			}
-			webAsyncResult.EndCalled = true;
-			if (!webAsyncResult.IsCompleted)
-			{
-				int num = -1;
-				try
+				if (nbytes < 0)
 				{
-					num = this.cnc.EndRead(this.request, webAsyncResult);
+					return 0;
 				}
-				catch (Exception ex)
+				return nbytes;
+			}
+			else
+			{
+				webAsyncResult.EndCalled = true;
+				object obj;
+				if (!webAsyncResult.IsCompleted)
 				{
-					object obj = this.locker;
-					lock (obj)
+					int num = -1;
+					try
 					{
-						this.pendingReads--;
-						if (this.pendingReads == 0)
-						{
-							this.pending.Set();
-						}
+						num = this.cnc.EndRead(this.request, webAsyncResult);
 					}
-					this.nextReadCalled = true;
-					this.cnc.Close(true);
-					webAsyncResult.SetCompleted(false, ex);
+					catch (Exception ex)
+					{
+						obj = this.locker;
+						lock (obj)
+						{
+							this.pendingReads--;
+							if (this.pendingReads == 0)
+							{
+								this.pending.Set();
+							}
+						}
+						this.nextReadCalled = true;
+						this.cnc.Close(true);
+						webAsyncResult.SetCompleted(false, ex);
+						webAsyncResult.DoCallback();
+						throw;
+					}
+					if (num < 0)
+					{
+						num = 0;
+						this.read_eof = true;
+					}
+					this.totalRead += (long)num;
+					webAsyncResult.SetCompleted(false, num + webAsyncResult.NBytes);
 					webAsyncResult.DoCallback();
-					throw;
+					if (num == 0)
+					{
+						this.contentLength = this.totalRead;
+					}
 				}
-				if (num < 0)
+				obj = this.locker;
+				lock (obj)
 				{
-					num = 0;
-					this.read_eof = true;
+					this.pendingReads--;
+					if (this.pendingReads == 0)
+					{
+						this.pending.Set();
+					}
 				}
-				this.totalRead += num;
-				webAsyncResult.SetCompleted(false, num + webAsyncResult.NBytes);
-				webAsyncResult.DoCallback();
-				if (num == 0)
+				if (this.totalRead >= this.contentLength && !this.nextReadCalled)
 				{
-					this.contentLength = this.totalRead;
+					this.ReadAll();
 				}
-			}
-			object obj2 = this.locker;
-			lock (obj2)
-			{
-				this.pendingReads--;
-				if (this.pendingReads == 0)
+				int nbytes2 = webAsyncResult.NBytes;
+				if (nbytes2 < 0)
 				{
-					this.pending.Set();
+					return 0;
 				}
+				return nbytes2;
 			}
-			if (this.totalRead >= this.contentLength && !this.nextReadCalled)
-			{
-				this.ReadAll();
-			}
-			int nbytes2 = webAsyncResult.NBytes;
-			return (nbytes2 < 0) ? 0 : nbytes2;
 		}
 
-		private void WriteRequestAsyncCB(IAsyncResult r)
+		private void WriteAsyncCB(IAsyncResult r)
 		{
 			WebAsyncResult webAsyncResult = (WebAsyncResult)r.AsyncState;
+			webAsyncResult.InnerAsyncResult = null;
 			try
 			{
-				this.cnc.EndWrite2(this.request, r);
+				this.cnc.EndWrite(this.request, true, r);
 				webAsyncResult.SetCompleted(false, 0);
 				if (!this.initRead)
 				{
 					this.initRead = true;
-					WebConnection.InitRead(this.cnc);
+					this.cnc.InitRead();
 				}
 			}
 			catch (Exception ex)
@@ -482,13 +532,16 @@ namespace System.Net
 				this.KillBuffer();
 				this.nextReadCalled = true;
 				this.cnc.Close(true);
-				if (ex is global::System.Net.Sockets.SocketException)
+				if (ex is SocketException)
 				{
 					ex = new IOException("Error writing request", ex);
 				}
 				webAsyncResult.SetCompleted(false, ex);
 			}
-			this.complete_request_written = true;
+			if (this.allowBuffering && !this.sendChunked && this.request.ContentLength > 0L && this.totalWritten == this.request.ContentLength)
+			{
+				this.complete_request_written = true;
+			}
 			webAsyncResult.DoCallback();
 		}
 
@@ -496,7 +549,7 @@ namespace System.Net
 		{
 			if (this.request.Aborted)
 			{
-				throw new WebException("The request was canceled.", null, WebExceptionStatus.RequestCanceled);
+				throw new WebException("The request was canceled.", WebExceptionStatus.RequestCanceled);
 			}
 			if (this.isRead)
 			{
@@ -525,54 +578,10 @@ namespace System.Net
 				}
 			}
 			WebAsyncResult webAsyncResult = new WebAsyncResult(cb, state);
-			if (!this.sendChunked)
-			{
-				this.CheckWriteOverflow(this.request.ContentLength, this.totalWritten, (long)size);
-			}
-			if (this.allowBuffering && !this.sendChunked)
-			{
-				if (this.writeBuffer == null)
-				{
-					this.writeBuffer = new MemoryStream();
-				}
-				this.writeBuffer.Write(buffer, offset, size);
-				this.totalWritten += (long)size;
-				if (this.request.ContentLength > 0L && this.totalWritten == this.request.ContentLength)
-				{
-					try
-					{
-						webAsyncResult.AsyncWriteAll = true;
-						webAsyncResult.InnerAsyncResult = this.WriteRequestAsync(new AsyncCallback(this.WriteRequestAsyncCB), webAsyncResult);
-						if (webAsyncResult.InnerAsyncResult == null)
-						{
-							if (!webAsyncResult.IsCompleted)
-							{
-								webAsyncResult.SetCompleted(true, 0);
-							}
-							webAsyncResult.DoCallback();
-						}
-					}
-					catch (Exception ex)
-					{
-						webAsyncResult.SetCompleted(true, ex);
-						webAsyncResult.DoCallback();
-					}
-				}
-				else
-				{
-					webAsyncResult.SetCompleted(true, 0);
-					webAsyncResult.DoCallback();
-				}
-				return webAsyncResult;
-			}
-			AsyncCallback asyncCallback = null;
-			if (cb != null)
-			{
-				asyncCallback = new AsyncCallback(this.WriteCallbackWrapper);
-			}
+			AsyncCallback asyncCallback = new AsyncCallback(this.WriteAsyncCB);
 			if (this.sendChunked)
 			{
-				this.WriteRequest();
+				this.requestWritten = true;
 				string text = string.Format("{0:X}\r\n", size);
 				byte[] bytes = Encoding.ASCII.GetBytes(text);
 				int num2 = 2 + size + bytes.Length;
@@ -580,11 +589,64 @@ namespace System.Net
 				Buffer.BlockCopy(bytes, 0, array, 0, bytes.Length);
 				Buffer.BlockCopy(buffer, offset, array, bytes.Length, size);
 				Buffer.BlockCopy(WebConnectionStream.crlf, 0, array, bytes.Length + size, WebConnectionStream.crlf.Length);
+				if (this.allowBuffering)
+				{
+					if (this.writeBuffer == null)
+					{
+						this.writeBuffer = new MemoryStream();
+					}
+					this.writeBuffer.Write(buffer, offset, size);
+					this.totalWritten += (long)size;
+				}
 				buffer = array;
 				offset = 0;
 				size = num2;
 			}
-			webAsyncResult.InnerAsyncResult = this.cnc.BeginWrite(this.request, buffer, offset, size, asyncCallback, webAsyncResult);
+			else
+			{
+				this.CheckWriteOverflow(this.request.ContentLength, this.totalWritten, (long)size);
+				if (this.allowBuffering)
+				{
+					if (this.writeBuffer == null)
+					{
+						this.writeBuffer = new MemoryStream();
+					}
+					this.writeBuffer.Write(buffer, offset, size);
+					this.totalWritten += (long)size;
+					if (this.request.ContentLength <= 0L || this.totalWritten < this.request.ContentLength)
+					{
+						webAsyncResult.SetCompleted(true, 0);
+						webAsyncResult.DoCallback();
+						return webAsyncResult;
+					}
+					webAsyncResult.AsyncWriteAll = true;
+					this.requestWritten = true;
+					buffer = this.writeBuffer.GetBuffer();
+					offset = 0;
+					size = (int)this.totalWritten;
+				}
+			}
+			try
+			{
+				webAsyncResult.InnerAsyncResult = this.cnc.BeginWrite(this.request, buffer, offset, size, asyncCallback, webAsyncResult);
+				if (webAsyncResult.InnerAsyncResult == null)
+				{
+					if (!webAsyncResult.IsCompleted)
+					{
+						webAsyncResult.SetCompleted(true, 0);
+					}
+					webAsyncResult.DoCallback();
+				}
+			}
+			catch (Exception)
+			{
+				if (!this.IgnoreIOErrors)
+				{
+					throw;
+				}
+				webAsyncResult.SetCompleted(true, 0);
+				webAsyncResult.DoCallback();
+			}
 			this.totalWritten += (long)size;
 			return webAsyncResult;
 		}
@@ -620,6 +682,18 @@ namespace System.Net
 			{
 				return;
 			}
+			if (this.sendChunked)
+			{
+				object obj = this.locker;
+				lock (obj)
+				{
+					this.pendingWrites--;
+					if (this.pendingWrites <= 0)
+					{
+						this.pending.Set();
+					}
+				}
+			}
 			webAsyncResult.EndCalled = true;
 			if (webAsyncResult.AsyncWriteAll)
 			{
@@ -640,40 +714,13 @@ namespace System.Net
 				{
 					throw webAsyncResult.Exception;
 				}
-				try
-				{
-					this.cnc.EndWrite2(this.request, webAsyncResult.InnerAsyncResult);
-					webAsyncResult.SetCompleted(false, 0);
-					webAsyncResult.DoCallback();
-				}
-				catch (Exception ex)
-				{
-					webAsyncResult.SetCompleted(false, ex);
-					webAsyncResult.DoCallback();
-					throw;
-				}
-				finally
-				{
-					if (this.sendChunked)
-					{
-						object obj = this.locker;
-						lock (obj)
-						{
-							this.pendingWrites--;
-							if (this.pendingWrites == 0)
-							{
-								this.pending.Set();
-							}
-						}
-					}
-				}
 				return;
 			}
 		}
 
 		public override void Write(byte[] buffer, int offset, int size)
 		{
-			AsyncCallback asyncCallback = new AsyncCallback(this.WriteCallbackWrapper);
+			AsyncCallback asyncCallback = this.cb_wrapper;
 			WebAsyncResult webAsyncResult = (WebAsyncResult)this.BeginWrite(buffer, offset, size, asyncCallback, null);
 			if (!webAsyncResult.IsCompleted && !webAsyncResult.WaitUntilComplete(this.WriteTimeout, false))
 			{
@@ -689,29 +736,57 @@ namespace System.Net
 		{
 		}
 
-		internal void SetHeaders(byte[] buffer)
+		internal void SetHeadersAsync(bool setInternalLength, SimpleAsyncCallback callback)
+		{
+			SimpleAsyncResult.Run((SimpleAsyncResult r) => this.SetHeadersAsync(r, setInternalLength), callback);
+		}
+
+		private bool SetHeadersAsync(SimpleAsyncResult result, bool setInternalLength)
 		{
 			if (this.headersSent)
 			{
-				return;
+				return false;
 			}
-			this.headers = buffer;
-			long num = this.request.ContentLength;
 			string method = this.request.Method;
-			bool flag = method == "GET" || method == "CONNECT" || method == "HEAD" || method == "TRACE" || method == "DELETE";
-			if (this.sendChunked || num > -1L || flag)
+			bool flag = method == "GET" || method == "CONNECT" || method == "HEAD" || method == "TRACE";
+			bool flag2 = method == "PROPFIND" || method == "PROPPATCH" || method == "MKCOL" || method == "COPY" || method == "MOVE" || method == "LOCK" || method == "UNLOCK";
+			if (setInternalLength && !flag && this.writeBuffer != null)
 			{
-				this.WriteHeaders();
-				if (!this.initRead)
-				{
-					this.initRead = true;
-					WebConnection.InitRead(this.cnc);
-				}
-				if (!this.sendChunked && num == 0L)
-				{
-					this.requestWritten = true;
-				}
+				this.request.InternalContentLength = this.writeBuffer.Length;
 			}
+			bool flag3 = !flag && (this.writeBuffer == null || this.request.ContentLength > -1L);
+			if (!this.sendChunked && !flag3 && !flag && !flag2)
+			{
+				return false;
+			}
+			this.headersSent = true;
+			this.headers = this.request.GetRequestHeaders();
+			return this.cnc.BeginWrite(this.request, this.headers, 0, this.headers.Length, delegate(IAsyncResult r)
+			{
+				try
+				{
+					this.cnc.EndWrite(this.request, true, r);
+					if (!this.initRead)
+					{
+						this.initRead = true;
+						this.cnc.InitRead();
+					}
+					long num = this.request.ContentLength;
+					if (!this.sendChunked && num == 0L)
+					{
+						this.requestWritten = true;
+					}
+					result.SetCompleted(false);
+				}
+				catch (WebException ex)
+				{
+					result.SetCompleted(false, ex);
+				}
+				catch (Exception ex2)
+				{
+					result.SetCompleted(false, new WebException("Error writing headers", WebExceptionStatus.SendFailure, WebExceptionInternalStatus.RequestFatal, ex2));
+				}
+			}, null) != null;
 		}
 
 		internal bool RequestWritten
@@ -722,93 +797,90 @@ namespace System.Net
 			}
 		}
 
-		private IAsyncResult WriteRequestAsync(AsyncCallback cb, object state)
+		internal SimpleAsyncResult WriteRequestAsync(SimpleAsyncCallback callback)
 		{
-			this.requestWritten = true;
-			byte[] buffer = this.writeBuffer.GetBuffer();
-			int num = (int)this.writeBuffer.Length;
-			IAsyncResult asyncResult2;
-			if (num > 0)
+			SimpleAsyncResult simpleAsyncResult = this.WriteRequestAsync(callback);
+			try
 			{
-				IAsyncResult asyncResult = this.cnc.BeginWrite(this.request, buffer, 0, num, cb, state);
-				asyncResult2 = asyncResult;
+				if (!this.WriteRequestAsync(simpleAsyncResult))
+				{
+					simpleAsyncResult.SetCompleted(true);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				asyncResult2 = null;
+				simpleAsyncResult.SetCompleted(true, ex);
 			}
-			return asyncResult2;
+			return simpleAsyncResult;
 		}
 
-		private void WriteHeaders()
-		{
-			if (this.headersSent)
-			{
-				return;
-			}
-			this.headersSent = true;
-			string text = null;
-			if (!this.cnc.Write(this.request, this.headers, 0, this.headers.Length, ref text))
-			{
-				throw new WebException("Error writing request: " + text, null, WebExceptionStatus.SendFailure, null);
-			}
-		}
-
-		internal void WriteRequest()
+		internal bool WriteRequestAsync(SimpleAsyncResult result)
 		{
 			if (this.requestWritten)
 			{
-				return;
+				return false;
 			}
 			this.requestWritten = true;
-			if (this.sendChunked)
+			if (this.sendChunked || !this.allowBuffering || this.writeBuffer == null)
 			{
-				return;
+				return false;
 			}
-			if (!this.allowBuffering || this.writeBuffer == null)
-			{
-				return;
-			}
-			byte[] buffer = this.writeBuffer.GetBuffer();
-			int num = (int)this.writeBuffer.Length;
-			if (this.request.ContentLength != -1L && this.request.ContentLength < (long)num)
+			byte[] bytes = this.writeBuffer.GetBuffer();
+			int length = (int)this.writeBuffer.Length;
+			if (this.request.ContentLength != -1L && this.request.ContentLength < (long)length)
 			{
 				this.nextReadCalled = true;
 				this.cnc.Close(true);
 				throw new WebException("Specified Content-Length is less than the number of bytes to write", null, WebExceptionStatus.ServerProtocolViolation, null);
 			}
-			if (!this.headersSent)
+			AsyncCallback <>9__1;
+			this.SetHeadersAsync(true, delegate(SimpleAsyncResult inner)
 			{
-				string method = this.request.Method;
-				if (!(method == "GET") && !(method == "CONNECT") && !(method == "HEAD") && !(method == "TRACE") && !(method == "DELETE"))
+				if (inner.GotException)
 				{
-					this.request.InternalContentLength = (long)num;
+					result.SetCompleted(inner.CompletedSynchronouslyPeek, inner.Exception);
+					return;
 				}
-				this.request.SendRequestHeaders(true);
-			}
-			this.WriteHeaders();
-			if (this.cnc.Data.StatusCode != 0 && this.cnc.Data.StatusCode != 100)
-			{
-				return;
-			}
-			IAsyncResult asyncResult = null;
-			if (num > 0)
-			{
-				asyncResult = this.cnc.BeginWrite(this.request, buffer, 0, num, null, null);
-			}
-			if (!this.initRead)
-			{
-				this.initRead = true;
-				WebConnection.InitRead(this.cnc);
-			}
-			if (num > 0)
-			{
-				this.complete_request_written = this.cnc.EndWrite(this.request, asyncResult);
-			}
-			else
-			{
-				this.complete_request_written = true;
-			}
+				if (this.cnc.Data.StatusCode != 0 && this.cnc.Data.StatusCode != 100)
+				{
+					result.SetCompleted(inner.CompletedSynchronouslyPeek);
+					return;
+				}
+				if (!this.initRead)
+				{
+					this.initRead = true;
+					this.cnc.InitRead();
+				}
+				if (length == 0)
+				{
+					this.complete_request_written = true;
+					result.SetCompleted(inner.CompletedSynchronouslyPeek);
+					return;
+				}
+				WebConnection webConnection = this.cnc;
+				HttpWebRequest httpWebRequest = this.request;
+				byte[] bytes2 = bytes;
+				int num = 0;
+				int length2 = length;
+				AsyncCallback asyncCallback;
+				if ((asyncCallback = <>9__1) == null)
+				{
+					asyncCallback = (<>9__1 = delegate(IAsyncResult r)
+					{
+						try
+						{
+							this.complete_request_written = this.cnc.EndWrite(this.request, false, r);
+							result.SetCompleted(false);
+						}
+						catch (Exception ex)
+						{
+							result.SetCompleted(false, ex);
+						}
+					});
+				}
+				webConnection.BeginWrite(httpWebRequest, bytes2, num, length2, asyncCallback, null);
+			});
+			return true;
 		}
 
 		internal void InternalClose()
@@ -816,16 +888,33 @@ namespace System.Net
 			this.disposed = true;
 		}
 
+		internal bool GetResponseOnClose { get; set; }
+
 		public override void Close()
 		{
-			if (this.sendChunked)
+			if (this.GetResponseOnClose)
 			{
 				if (this.disposed)
 				{
 					return;
 				}
 				this.disposed = true;
-				this.pending.WaitOne();
+				HttpWebResponse httpWebResponse = (HttpWebResponse)this.request.GetResponse();
+				httpWebResponse.ReadAll();
+				httpWebResponse.Close();
+				return;
+			}
+			else if (this.sendChunked)
+			{
+				if (this.disposed)
+				{
+					return;
+				}
+				this.disposed = true;
+				if (!this.pending.WaitOne(this.WriteTimeout))
+				{
+					throw new WebException("The operation has timed out.", WebExceptionStatus.Timeout);
+				}
 				byte[] bytes = Encoding.ASCII.GetBytes("0\r\n\r\n");
 				string text = null;
 				this.cnc.Write(this.request, bytes, 0, bytes.Length, ref text);
@@ -852,7 +941,7 @@ namespace System.Net
 					if (!this.initRead)
 					{
 						this.initRead = true;
-						WebConnection.InitRead(this.cnc);
+						this.cnc.InitRead();
 					}
 					return;
 				}
@@ -866,9 +955,8 @@ namespace System.Net
 					IOException ex = new IOException("Cannot close the stream until all bytes are written");
 					this.nextReadCalled = true;
 					this.cnc.Close(true);
-					throw new WebException("Request was cancelled.", ex, WebExceptionStatus.RequestCanceled);
+					throw new WebException("Request was cancelled.", WebExceptionStatus.RequestCanceled, WebExceptionInternalStatus.RequestFatal, ex);
 				}
-				this.WriteRequest();
 				this.disposed = true;
 				return;
 			}
@@ -917,7 +1005,11 @@ namespace System.Net
 		{
 			get
 			{
-				throw new NotSupportedException();
+				if (!this.isRead)
+				{
+					throw new NotSupportedException();
+				}
+				return (long)this.stream_length;
 			}
 		}
 
@@ -947,11 +1039,13 @@ namespace System.Net
 
 		private int readBufferSize;
 
-		private int contentLength;
+		private int stream_length;
 
-		private int totalRead;
+		private long contentLength;
 
-		private long totalWritten;
+		private long totalRead;
+
+		internal long totalWritten;
 
 		private bool nextReadCalled;
 
@@ -986,5 +1080,9 @@ namespace System.Net
 		private int read_timeout;
 
 		private int write_timeout;
+
+		private AsyncCallback cb_wrapper;
+
+		internal bool IgnoreIOErrors;
 	}
 }

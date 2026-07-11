@@ -17,11 +17,9 @@ public class TubeTransitionLayer : TransitionDriver.OverrideLayer
 		{
 			int num = Grid.PosToCell(navigator);
 			this.entrance = this.GetEntrance(num);
+			return;
 		}
-		else
-		{
-			this.entrance = null;
-		}
+		this.entrance = null;
 	}
 
 	public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)

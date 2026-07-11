@@ -60,6 +60,8 @@ namespace Satsuma
 					yield return node;
 				}
 			}
+			IEnumerator<Node> enumerator = null;
+			yield break;
 			yield break;
 		}
 
@@ -70,18 +72,20 @@ namespace Satsuma
 
 		public IEnumerable<Arc> Arcs(Node u, ArcFilter filter = ArcFilter.All)
 		{
-			DisjointSetSet<Node> x = this.nodeGroups.WhereIs(u);
-			foreach (Node node in this.nodeGroups.Elements(x))
+			DisjointSetSet<Node> disjointSetSet = this.nodeGroups.WhereIs(u);
+			foreach (Node node in this.nodeGroups.Elements(disjointSetSet))
 			{
 				foreach (Arc arc in this.graph.Arcs(node, filter))
 				{
-					bool loop = this.U(arc) == this.V(arc);
-					if (!loop || (filter != ArcFilter.All && !this.IsEdge(arc)) || this.graph.U(arc) == node)
+					if (!(this.U(arc) == this.V(arc)) || (filter != ArcFilter.All && !this.IsEdge(arc)) || this.graph.U(arc) == node)
 					{
 						yield return arc;
 					}
 				}
+				IEnumerator<Arc> enumerator2 = null;
 			}
+			IEnumerator<Node> enumerator = null;
+			yield break;
 			yield break;
 		}
 
@@ -94,6 +98,8 @@ namespace Satsuma
 					yield return arc;
 				}
 			}
+			IEnumerator<Arc> enumerator = null;
+			yield break;
 			yield break;
 		}
 

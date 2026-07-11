@@ -6,13 +6,24 @@ namespace System.Data.SqlClient
 	{
 		public SqlNotificationEventArgs(SqlNotificationType type, SqlNotificationInfo info, SqlNotificationSource source)
 		{
+			this._info = info;
+			this._source = source;
+			this._type = type;
+		}
+
+		public SqlNotificationType Type
+		{
+			get
+			{
+				return this._type;
+			}
 		}
 
 		public SqlNotificationInfo Info
 		{
 			get
 			{
-				throw null;
+				return this._info;
 			}
 		}
 
@@ -20,16 +31,16 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				throw null;
+				return this._source;
 			}
 		}
 
-		public SqlNotificationType Type
-		{
-			get
-			{
-				throw null;
-			}
-		}
+		private SqlNotificationType _type;
+
+		private SqlNotificationInfo _info;
+
+		private SqlNotificationSource _source;
+
+		internal static SqlNotificationEventArgs s_notifyError = new SqlNotificationEventArgs(SqlNotificationType.Subscribe, SqlNotificationInfo.Error, SqlNotificationSource.Object);
 	}
 }

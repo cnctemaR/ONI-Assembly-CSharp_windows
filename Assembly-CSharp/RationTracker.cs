@@ -49,8 +49,8 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 						{
 							unitCountByFoodType[component.FoodID] = 0f;
 						}
-						string foodID;
-						unitCountByFoodType[foodID = component.FoodID] = unitCountByFoodType[foodID] + component.Units;
+						string foodID = component.FoodID;
+						unitCountByFoodType[foodID] += component.Units;
 					}
 				}
 			}
@@ -90,13 +90,11 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 		if (!this.caloriesConsumedByFood.ContainsKey(edible.FoodInfo.Id))
 		{
 			this.caloriesConsumedByFood.Add(edible.FoodInfo.Id, edible.caloriesConsumed);
+			return;
 		}
-		else
-		{
-			Dictionary<string, float> dictionary;
-			string id;
-			(dictionary = this.caloriesConsumedByFood)[id = edible.FoodInfo.Id] = dictionary[id] + edible.caloriesConsumed;
-		}
+		Dictionary<string, float> dictionary = this.caloriesConsumedByFood;
+		string id = edible.FoodInfo.Id;
+		dictionary[id] += edible.caloriesConsumed;
 	}
 
 	public float GetCaloiresConsumedByFood(List<string> foodTypes)
@@ -125,10 +123,10 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 	private static RationTracker instance;
 
 	[Serialize]
-	public RationTracker.Frame currentFrame = default(RationTracker.Frame);
+	public RationTracker.Frame currentFrame;
 
 	[Serialize]
-	public RationTracker.Frame previousFrame = default(RationTracker.Frame);
+	public RationTracker.Frame previousFrame;
 
 	[Serialize]
 	public Dictionary<string, float> caloriesConsumedByFood = new Dictionary<string, float>();

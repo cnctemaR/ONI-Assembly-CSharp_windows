@@ -10,7 +10,7 @@ public class IncubatorSideScreen : ReceptacleSideScreen
 
 	protected override void SetResultDescriptions(GameObject go)
 	{
-		string text = string.Empty;
+		string text = "";
 		InfoDescription component = go.GetComponent<InfoDescription>();
 		if (component)
 		{
@@ -26,19 +26,18 @@ public class IncubatorSideScreen : ReceptacleSideScreen
 
 	protected override Sprite GetEntityIcon(Tag prefabTag)
 	{
-		GameObject prefab = Assets.GetPrefab(prefabTag);
-		return Def.GetUISprite(prefab, "ui", false).first;
+		return Def.GetUISprite(Assets.GetPrefab(prefabTag), "ui", false).first;
 	}
 
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);
 		EggIncubator incubator = target.GetComponent<EggIncubator>();
-		this.continuousToggle.ChangeState((!incubator.autoReplaceEntity) ? 1 : 0);
+		this.continuousToggle.ChangeState(incubator.autoReplaceEntity ? 0 : 1);
 		this.continuousToggle.onClick = delegate
 		{
 			incubator.autoReplaceEntity = !incubator.autoReplaceEntity;
-			this.continuousToggle.ChangeState((!incubator.autoReplaceEntity) ? 1 : 0);
+			this.continuousToggle.ChangeState(incubator.autoReplaceEntity ? 0 : 1);
 		};
 	}
 

@@ -2,55 +2,56 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.All)]
 	public sealed class ListBindableAttribute : Attribute
 	{
 		public ListBindableAttribute(bool listBindable)
 		{
-			this.bindable = listBindable;
+			this.listBindable = listBindable;
 		}
 
 		public ListBindableAttribute(BindableSupport flags)
 		{
-			if (flags == BindableSupport.No)
-			{
-				this.bindable = false;
-			}
-			else
-			{
-				this.bindable = true;
-			}
-		}
-
-		public override bool Equals(object obj)
-		{
-			return obj is ListBindableAttribute && ((ListBindableAttribute)obj).ListBindable.Equals(this.bindable);
-		}
-
-		public override int GetHashCode()
-		{
-			return this.bindable.GetHashCode();
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.Equals(ListBindableAttribute.Default);
+			this.listBindable = flags > BindableSupport.No;
+			this.isDefault = flags == BindableSupport.Default;
 		}
 
 		public bool ListBindable
 		{
 			get
 			{
-				return this.bindable;
+				return this.listBindable;
 			}
 		}
 
-		public static readonly ListBindableAttribute Default = new ListBindableAttribute(true);
+		public override bool Equals(object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			ListBindableAttribute listBindableAttribute = obj as ListBindableAttribute;
+			return listBindableAttribute != null && listBindableAttribute.ListBindable == this.listBindable;
+		}
 
-		public static readonly ListBindableAttribute No = new ListBindableAttribute(false);
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public override bool IsDefaultAttribute()
+		{
+			return this.Equals(ListBindableAttribute.Default) || this.isDefault;
+		}
 
 		public static readonly ListBindableAttribute Yes = new ListBindableAttribute(true);
 
-		private bool bindable;
+		public static readonly ListBindableAttribute No = new ListBindableAttribute(false);
+
+		public static readonly ListBindableAttribute Default = ListBindableAttribute.Yes;
+
+		private bool listBindable;
+
+		private bool isDefault;
 	}
 }

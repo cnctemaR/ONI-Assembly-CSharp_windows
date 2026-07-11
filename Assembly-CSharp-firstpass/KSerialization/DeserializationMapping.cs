@@ -85,6 +85,7 @@ namespace KSerialization
 							object value = deserializationInfo.field.GetValue(obj);
 							object obj2 = this.ReadValue(deserializationInfo.typeInfo, reader, value);
 							deserializationInfo.field.SetValue(obj, obj2);
+							continue;
 						}
 						catch (Exception ex)
 						{
@@ -100,17 +101,14 @@ namespace KSerialization
 							throw new Exception(text, ex);
 						}
 					}
-					else
+					if (deserializationInfo.property != null)
 					{
-						if (deserializationInfo.property == null)
-						{
-							throw new Exception("????");
-						}
 						try
 						{
 							object value2 = deserializationInfo.property.GetValue(obj, null);
 							object obj3 = this.ReadValue(deserializationInfo.typeInfo, reader, value2);
 							deserializationInfo.property.SetValue(obj, obj3, null);
+							continue;
 						}
 						catch (Exception ex2)
 						{
@@ -126,10 +124,11 @@ namespace KSerialization
 							throw new Exception(text2, ex2);
 						}
 					}
+					throw new Exception("????");
 				}
-				else
+				SerializationTypeInfo serializationTypeInfo = deserializationInfo.typeInfo.info & SerializationTypeInfo.VALUE_MASK;
+				if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
 				{
-					SerializationTypeInfo serializationTypeInfo = deserializationInfo.typeInfo.info & SerializationTypeInfo.VALUE_MASK;
 					switch (serializationTypeInfo)
 					{
 					case SerializationTypeInfo.Array:
@@ -143,24 +142,21 @@ namespace KSerialization
 						if (num > 0)
 						{
 							reader.SkipBytes(num);
+							continue;
 						}
 						continue;
 					}
 					case SerializationTypeInfo.Pair:
 						break;
 					default:
-						if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
-						{
-							this.SkipValue(serializationTypeInfo, reader);
-							continue;
-						}
-						break;
+						this.SkipValue(serializationTypeInfo, reader);
+						continue;
 					}
-					int num2 = reader.ReadInt32();
-					if (num2 > 0)
-					{
-						reader.SkipBytes(num2);
-					}
+				}
+				int num2 = reader.ReadInt32();
+				if (num2 > 0)
+				{
+					reader.SkipBytes(num2);
 				}
 			}
 			if (this.template.onDeserialized != null)
@@ -178,15 +174,12 @@ namespace KSerialization
 			switch (serializationTypeInfo)
 			{
 			case SerializationTypeInfo.UserDefined:
-			{
-				int num = reader.ReadInt32();
-				if (num >= 0)
+				if (reader.ReadInt32() >= 0)
 				{
 					Type type2 = type_info.type;
 					if (base_value == null)
 					{
-						ConstructorInfo constructor = type2.GetConstructor(Type.EmptyTypes);
-						if (constructor != null)
+						if (type2.GetConstructor(Type.EmptyTypes) != null)
 						{
 							obj = Activator.CreateInstance(type2);
 						}
@@ -199,11 +192,9 @@ namespace KSerialization
 					{
 						obj = base_value;
 					}
-					DeserializationMapping deserializationMapping = Manager.GetDeserializationMapping(type2);
-					deserializationMapping.Deserialize(obj, reader);
+					Manager.GetDeserializationMapping(type2).Deserialize(obj, reader);
 				}
 				break;
-			}
 			case SerializationTypeInfo.SByte:
 				obj = reader.ReadSByte();
 				break;
@@ -242,8 +233,8 @@ namespace KSerialization
 				break;
 			case SerializationTypeInfo.Enumeration:
 			{
-				int num2 = reader.ReadInt32();
-				obj = Enum.ToObject(type_info.type, num2);
+				int num = reader.ReadInt32();
+				obj = Enum.ToObject(type_info.type, num);
 				break;
 			}
 			case SerializationTypeInfo.Vector2I:
@@ -258,10 +249,10 @@ namespace KSerialization
 			case SerializationTypeInfo.Array:
 			{
 				reader.ReadInt32();
-				int num3 = reader.ReadInt32();
-				if (num3 >= 0)
+				int num2 = reader.ReadInt32();
+				if (num2 >= 0)
 				{
-					obj = Activator.CreateInstance(type, new object[] { num3 });
+					obj = Activator.CreateInstance(type, new object[] { num2 });
 					Array array = obj as Array;
 					TypeInfo typeInfo = type_info.subTypes[0];
 					if (Helper.IsPOD(typeInfo.info))
@@ -270,17 +261,17 @@ namespace KSerialization
 					}
 					else if (Helper.IsValueType(typeInfo.info))
 					{
-						DeserializationMapping deserializationMapping2 = Manager.GetDeserializationMapping(typeInfo.type);
+						DeserializationMapping deserializationMapping = Manager.GetDeserializationMapping(typeInfo.type);
 						object obj2 = Activator.CreateInstance(typeInfo.type);
-						for (int i = 0; i < num3; i++)
+						for (int i = 0; i < num2; i++)
 						{
-							deserializationMapping2.Deserialize(obj2, reader);
+							deserializationMapping.Deserialize(obj2, reader);
 							array.SetValue(obj2, i);
 						}
 					}
 					else
 					{
-						for (int j = 0; j < num3; j++)
+						for (int j = 0; j < num2; j++)
 						{
 							object obj3 = this.ReadValue(typeInfo, reader, null);
 							array.SetValue(obj3, j);
@@ -290,9 +281,7 @@ namespace KSerialization
 				break;
 			}
 			case SerializationTypeInfo.Pair:
-			{
-				int num4 = reader.ReadInt32();
-				if (num4 >= 0)
+				if (reader.ReadInt32() >= 0)
 				{
 					TypeInfo typeInfo2 = type_info.subTypes[0];
 					TypeInfo typeInfo3 = type_info.subTypes[1];
@@ -301,30 +290,29 @@ namespace KSerialization
 					obj = Activator.CreateInstance(type_info.genericInstantiationType, new object[] { obj4, obj5 });
 				}
 				break;
-			}
 			case SerializationTypeInfo.Dictionary:
 			{
 				reader.ReadInt32();
-				int num5 = reader.ReadInt32();
-				if (num5 >= 0)
+				int num3 = reader.ReadInt32();
+				if (num3 >= 0)
 				{
 					obj = Activator.CreateInstance(type_info.genericInstantiationType);
 					IDictionary dictionary = obj as IDictionary;
 					TypeInfo typeInfo4 = type_info.subTypes[1];
-					Array array2 = Array.CreateInstance(typeInfo4.type, num5);
-					for (int k = 0; k < num5; k++)
+					Array array2 = Array.CreateInstance(typeInfo4.type, num3);
+					for (int k = 0; k < num3; k++)
 					{
 						object obj6 = this.ReadValue(typeInfo4, reader, null);
 						array2.SetValue(obj6, k);
 					}
 					TypeInfo typeInfo5 = type_info.subTypes[0];
-					Array array3 = Array.CreateInstance(typeInfo5.type, num5);
-					for (int l = 0; l < num5; l++)
+					Array array3 = Array.CreateInstance(typeInfo5.type, num3);
+					for (int l = 0; l < num3; l++)
 					{
 						object obj7 = this.ReadValue(typeInfo5, reader, null);
 						array3.SetValue(obj7, l);
 					}
-					for (int m = 0; m < num5; m++)
+					for (int m = 0; m < num3; m++)
 					{
 						dictionary.Add(array3.GetValue(m), array2.GetValue(m));
 					}
@@ -334,31 +322,31 @@ namespace KSerialization
 			case SerializationTypeInfo.List:
 			{
 				reader.ReadInt32();
-				int num6 = reader.ReadInt32();
-				if (num6 >= 0)
+				int num4 = reader.ReadInt32();
+				if (num4 >= 0)
 				{
 					TypeInfo typeInfo6 = type_info.subTypes[0];
-					Array array4 = Array.CreateInstance(typeInfo6.type, num6);
+					Array array4 = Array.CreateInstance(typeInfo6.type, num4);
 					if (Helper.IsPOD(typeInfo6.info))
 					{
 						this.ReadArrayFast(array4, typeInfo6, reader);
 					}
 					else if (Helper.IsValueType(typeInfo6.info))
 					{
-						DeserializationMapping deserializationMapping3 = Manager.GetDeserializationMapping(typeInfo6.type);
+						DeserializationMapping deserializationMapping2 = Manager.GetDeserializationMapping(typeInfo6.type);
 						object obj8 = Activator.CreateInstance(typeInfo6.type);
-						for (int n = 0; n < num6; n++)
+						for (int n = 0; n < num4; n++)
 						{
-							deserializationMapping3.Deserialize(obj8, reader);
+							deserializationMapping2.Deserialize(obj8, reader);
 							array4.SetValue(obj8, n);
 						}
 					}
 					else
 					{
-						for (int num7 = 0; num7 < num6; num7++)
+						for (int num5 = 0; num5 < num4; num5++)
 						{
 							object obj9 = this.ReadValue(typeInfo6, reader, null);
-							array4.SetValue(obj9, num7);
+							array4.SetValue(obj9, num5);
 						}
 					}
 					obj = Activator.CreateInstance(type_info.genericInstantiationType, new object[] { array4 });
@@ -368,28 +356,27 @@ namespace KSerialization
 			case SerializationTypeInfo.HashSet:
 			{
 				reader.ReadInt32();
-				int num8 = reader.ReadInt32();
-				if (num8 >= 0)
+				int num6 = reader.ReadInt32();
+				if (num6 >= 0)
 				{
 					TypeInfo typeInfo7 = type_info.subTypes[0];
-					Type type3 = typeInfo7.type;
-					Array array5 = Array.CreateInstance(type3, num8);
+					Array array5 = Array.CreateInstance(typeInfo7.type, num6);
 					if (Helper.IsValueType(typeInfo7.info))
 					{
-						DeserializationMapping deserializationMapping4 = Manager.GetDeserializationMapping(typeInfo7.type);
+						DeserializationMapping deserializationMapping3 = Manager.GetDeserializationMapping(typeInfo7.type);
 						object obj10 = Activator.CreateInstance(typeInfo7.type);
-						for (int num9 = 0; num9 < num8; num9++)
+						for (int num7 = 0; num7 < num6; num7++)
 						{
-							deserializationMapping4.Deserialize(obj10, reader);
-							array5.SetValue(obj10, num9);
+							deserializationMapping3.Deserialize(obj10, reader);
+							array5.SetValue(obj10, num7);
 						}
 					}
 					else
 					{
-						for (int num10 = 0; num10 < num8; num10++)
+						for (int num8 = 0; num8 < num6; num8++)
 						{
 							object obj11 = this.ReadValue(typeInfo7, reader, null);
-							array5.SetValue(obj11, num10);
+							array5.SetValue(obj11, num8);
 						}
 					}
 					obj = Activator.CreateInstance(type_info.genericInstantiationType, new object[] { array5 });
@@ -399,31 +386,31 @@ namespace KSerialization
 			case SerializationTypeInfo.Queue:
 			{
 				reader.ReadInt32();
-				int num11 = reader.ReadInt32();
-				if (num11 >= 0)
+				int num9 = reader.ReadInt32();
+				if (num9 >= 0)
 				{
 					TypeInfo typeInfo8 = type_info.subTypes[0];
-					Array array6 = Array.CreateInstance(typeInfo8.type, num11);
+					Array array6 = Array.CreateInstance(typeInfo8.type, num9);
 					if (Helper.IsPOD(typeInfo8.info))
 					{
 						this.ReadArrayFast(array6, typeInfo8, reader);
 					}
 					else if (Helper.IsValueType(typeInfo8.info))
 					{
-						DeserializationMapping deserializationMapping5 = Manager.GetDeserializationMapping(typeInfo8.type);
+						DeserializationMapping deserializationMapping4 = Manager.GetDeserializationMapping(typeInfo8.type);
 						object obj12 = Activator.CreateInstance(typeInfo8.type);
-						for (int num12 = 0; num12 < num11; num12++)
+						for (int num10 = 0; num10 < num9; num10++)
 						{
-							deserializationMapping5.Deserialize(obj12, reader);
-							array6.SetValue(obj12, num12);
+							deserializationMapping4.Deserialize(obj12, reader);
+							array6.SetValue(obj12, num10);
 						}
 					}
 					else
 					{
-						for (int num13 = 0; num13 < num11; num13++)
+						for (int num11 = 0; num11 < num9; num11++)
 						{
 							object obj13 = this.ReadValue(typeInfo8, reader, null);
-							array6.SetValue(obj13, num13);
+							array6.SetValue(obj13, num11);
 						}
 					}
 					obj = Activator.CreateInstance(type_info.genericInstantiationType, new object[] { array6 });
@@ -450,24 +437,24 @@ namespace KSerialization
 			case SerializationTypeInfo.SByte:
 			case SerializationTypeInfo.Byte:
 				num = length;
-				goto IL_0084;
+				goto IL_0075;
 			case SerializationTypeInfo.Int16:
 			case SerializationTypeInfo.UInt16:
 				num = length * 2;
-				goto IL_0084;
+				goto IL_0075;
 			case SerializationTypeInfo.Int32:
 			case SerializationTypeInfo.UInt32:
 			case SerializationTypeInfo.Single:
 				num = length * 4;
-				goto IL_0084;
+				goto IL_0075;
 			case SerializationTypeInfo.Int64:
 			case SerializationTypeInfo.UInt64:
 			case SerializationTypeInfo.Double:
 				num = length * 8;
-				goto IL_0084;
+				goto IL_0075;
 			}
 			throw new Exception("unknown pod type");
-			IL_0084:
+			IL_0075:
 			Buffer.BlockCopy(array, position, dest_array, 0, num);
 			reader.SkipBytes(num);
 		}
@@ -504,6 +491,7 @@ namespace KSerialization
 				if (num > 0)
 				{
 					reader.SkipBytes(num);
+					return;
 				}
 				return;
 			}

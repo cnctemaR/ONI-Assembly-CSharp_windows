@@ -22,25 +22,12 @@ public static class ThrivingSequence
 		MusicManager.instance.PlaySong("Music_Victory_02_NIS", false);
 		Vector3 cameraBiasUp = Vector3.up * 5f;
 		GameObject cameraTaget = null;
-		IEnumerator enumerator = Components.Telepads.GetEnumerator();
-		try
+		foreach (object obj in Components.Telepads)
 		{
-			while (enumerator.MoveNext())
+			Telepad telepad = (Telepad)obj;
+			if (telepad != null)
 			{
-				object obj = enumerator.Current;
-				Telepad telepad = (Telepad)obj;
-				if (telepad != null)
-				{
-					cameraTaget = telepad.gameObject;
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				cameraTaget = telepad.gameObject;
 			}
 		}
 		CameraController.Instance.FadeOut(1f, 2f);
@@ -56,189 +43,101 @@ public static class ThrivingSequence
 		CameraController.Instance.SetOverrideZoomSpeed(0.05f);
 		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 20f, false);
 		CameraController.Instance.FadeIn(0f, 2f);
-		IEnumerator enumerator2 = Components.LiveMinionIdentities.GetEnumerator();
-		try
+		foreach (object obj2 in Components.LiveMinionIdentities)
 		{
-			while (enumerator2.MoveNext())
+			MinionIdentity minionIdentity = (MinionIdentity)obj2;
+			if (minionIdentity != null)
 			{
-				object obj2 = enumerator2.Current;
-				MinionIdentity minionIdentity = (MinionIdentity)obj2;
-				if (minionIdentity != null)
-				{
-					minionIdentity.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
-					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable2;
-			if ((disposable2 = enumerator2 as IDisposable) != null)
-			{
-				disposable2.Dispose();
+				minionIdentity.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
+				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
 			}
 		}
 		yield return new WaitForSecondsRealtime(0.5f);
 		yield return new WaitForSecondsRealtime(3f);
-		GameObject cameraTaget2 = null;
-		IEnumerator enumerator3 = Components.ComplexFabricators.GetEnumerator();
-		try
+		cameraTaget = null;
+		cameraTaget = null;
+		foreach (object obj3 in Components.ComplexFabricators)
 		{
-			while (enumerator3.MoveNext())
+			ComplexFabricator complexFabricator = (ComplexFabricator)obj3;
+			if (complexFabricator != null)
 			{
-				object obj3 = enumerator3.Current;
-				ComplexFabricator complexFabricator = (ComplexFabricator)obj3;
-				if (complexFabricator != null)
+				cameraTaget = complexFabricator.gameObject;
+			}
+		}
+		if (cameraTaget == null)
+		{
+			foreach (object obj4 in Components.Generators)
+			{
+				Generator generator = (Generator)obj4;
+				if (generator != null)
 				{
-					cameraTaget2 = complexFabricator.gameObject;
+					cameraTaget = generator.gameObject;
 				}
 			}
 		}
-		finally
+		if (cameraTaget == null)
 		{
-			IDisposable disposable3;
-			if ((disposable3 = enumerator3 as IDisposable) != null)
+			foreach (object obj5 in Components.Fabricators)
 			{
-				disposable3.Dispose();
-			}
-		}
-		if (cameraTaget2 == null)
-		{
-			IEnumerator enumerator4 = Components.Generators.GetEnumerator();
-			try
-			{
-				while (enumerator4.MoveNext())
+				Fabricator fabricator = (Fabricator)obj5;
+				if (fabricator != null)
 				{
-					object obj4 = enumerator4.Current;
-					Generator generator = (Generator)obj4;
-					if (generator != null)
-					{
-						cameraTaget2 = generator.gameObject;
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable4;
-				if ((disposable4 = enumerator4 as IDisposable) != null)
-				{
-					disposable4.Dispose();
+					cameraTaget = fabricator.gameObject;
 				}
 			}
 		}
-		if (cameraTaget2 == null)
-		{
-			IEnumerator enumerator5 = Components.Fabricators.GetEnumerator();
-			try
-			{
-				while (enumerator5.MoveNext())
-				{
-					object obj5 = enumerator5.Current;
-					Fabricator fabricator = (Fabricator)obj5;
-					if (fabricator != null)
-					{
-						cameraTaget2 = fabricator.gameObject;
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable5;
-				if ((disposable5 = enumerator5 as IDisposable) != null)
-				{
-					disposable5.Dispose();
-				}
-			}
-		}
-		if (cameraTaget2 != null)
+		if (cameraTaget != null)
 		{
 			CameraController.Instance.FadeOut(1f, 2f);
 			yield return new WaitForSecondsRealtime(1f);
-			CameraController.Instance.SetTargetPos(cameraTaget2.transform.position + cameraBiasUp, 10f, false);
+			CameraController.Instance.SetTargetPos(cameraTaget.transform.position + cameraBiasUp, 10f, false);
 			CameraController.Instance.SetOverrideZoomSpeed(10f);
 			yield return new WaitForSecondsRealtime(0.4f);
 			CameraController.Instance.SetOverrideZoomSpeed(0.1f);
-			CameraController.Instance.SetTargetPos(cameraTaget2.transform.position + cameraBiasUp, 20f, false);
+			CameraController.Instance.SetTargetPos(cameraTaget.transform.position + cameraBiasUp, 20f, false);
 			CameraController.Instance.FadeIn(0f, 2f);
-			IEnumerator enumerator6 = Components.LiveMinionIdentities.GetEnumerator();
-			try
+			foreach (object obj6 in Components.LiveMinionIdentities)
 			{
-				while (enumerator6.MoveNext())
+				MinionIdentity minionIdentity2 = (MinionIdentity)obj6;
+				if (minionIdentity2 != null)
 				{
-					object obj6 = enumerator6.Current;
-					MinionIdentity minionIdentity2 = (MinionIdentity)obj6;
-					if (minionIdentity2 != null)
-					{
-						minionIdentity2.GetComponent<Facing>().Face(cameraTaget2.transform.position.x);
-						new EmoteChore(minionIdentity2.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable6;
-				if ((disposable6 = enumerator6 as IDisposable) != null)
-				{
-					disposable6.Dispose();
+					minionIdentity2.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
+					new EmoteChore(minionIdentity2.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
 				}
 			}
 			yield return new WaitForSecondsRealtime(0.5f);
 			yield return new WaitForSecondsRealtime(3f);
 		}
-		GameObject cameraTaget3 = null;
-		IEnumerator enumerator7 = Components.MonumentParts.GetEnumerator();
-		try
+		cameraTaget = null;
+		cameraTaget = null;
+		foreach (object obj7 in Components.MonumentParts)
 		{
-			while (enumerator7.MoveNext())
+			MonumentPart monumentPart = (MonumentPart)obj7;
+			if (monumentPart.IsMonumentCompleted())
 			{
-				object obj7 = enumerator7.Current;
-				MonumentPart monumentPart = (MonumentPart)obj7;
-				if (monumentPart.IsMonumentCompleted())
-				{
-					cameraTaget3 = monumentPart.gameObject;
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable7;
-			if ((disposable7 = enumerator7 as IDisposable) != null)
-			{
-				disposable7.Dispose();
+				cameraTaget = monumentPart.gameObject;
 			}
 		}
 		CameraController.Instance.FadeOut(1f, 2f);
 		yield return new WaitForSecondsRealtime(1f);
-		CameraController.Instance.SetTargetPos(cameraTaget3.transform.position, 15f, false);
+		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 15f, false);
 		CameraController.Instance.SetOverrideZoomSpeed(10f);
 		yield return new WaitForSecondsRealtime(0.4f);
 		CameraController.Instance.FadeIn(0f, 2f);
-		IEnumerator enumerator8 = Components.LiveMinionIdentities.GetEnumerator();
-		try
+		foreach (object obj8 in Components.LiveMinionIdentities)
 		{
-			while (enumerator8.MoveNext())
+			MinionIdentity minionIdentity3 = (MinionIdentity)obj8;
+			if (minionIdentity3 != null)
 			{
-				object obj8 = enumerator8.Current;
-				MinionIdentity minionIdentity3 = (MinionIdentity)obj8;
-				if (minionIdentity3 != null)
-				{
-					minionIdentity3.GetComponent<Facing>().Face(cameraTaget3.transform.position.x);
-					new EmoteChore(minionIdentity3.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable8;
-			if ((disposable8 = enumerator8 as IDisposable) != null)
-			{
-				disposable8.Dispose();
+				minionIdentity3.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
+				new EmoteChore(minionIdentity3.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
 			}
 		}
 		yield return new WaitForSecondsRealtime(0.5f);
 		CameraController.Instance.SetOverrideZoomSpeed(0.075f);
-		CameraController.Instance.SetTargetPos(cameraTaget3.transform.position, 25f, false);
+		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 25f, false);
 		yield return new WaitForSecondsRealtime(5f);
+		cameraTaget = null;
 		CameraController.Instance.FadeOut(1f, 1f);
 		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.Thriving.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
@@ -251,8 +150,7 @@ public static class ThrivingSequence
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
 		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.Thriving.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);
 		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.Thriving.messageBody, Db.Get().ColonyAchievements.Thriving.Id, Db.Get().ColonyAchievements.Thriving.loopVideoName);
-		VideoScreen videoScreen = component;
-		videoScreen.OnStop = (global::System.Action)Delegate.Combine(videoScreen.OnStop, new global::System.Action(delegate
+		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);
 			CameraController.Instance.FadeIn(0f, 1f);

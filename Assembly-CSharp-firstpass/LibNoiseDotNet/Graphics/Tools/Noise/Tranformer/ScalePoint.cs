@@ -4,23 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 {
 	public class ScalePoint : TransformerModule, IModule3D, IModule
 	{
-		public ScalePoint()
-		{
-		}
-
-		public ScalePoint(IModule source)
-		{
-			this._sourceModule = source;
-		}
-
-		public ScalePoint(IModule source, float x, float y, float z)
-			: this(source)
-		{
-			this._xScale = x;
-			this._yScale = y;
-			this._zScale = z;
-		}
-
 		public IModule SourceModule
 		{
 			get
@@ -67,6 +50,23 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Tranformer
 			{
 				this._zScale = value;
 			}
+		}
+
+		public ScalePoint()
+		{
+		}
+
+		public ScalePoint(IModule source)
+		{
+			this._sourceModule = source;
+		}
+
+		public ScalePoint(IModule source, float x, float y, float z)
+			: this(source)
+		{
+			this._xScale = x;
+			this._yScale = y;
+			this._zScale = z;
 		}
 
 		public float GetValue(float x, float y, float z)

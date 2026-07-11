@@ -5,12 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Animations
 {
-	/// <summary>
-	///   <para>The stream of animation data passed from one Playable to another.</para>
-	/// </summary>
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/Director/AnimationStream.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	public struct AnimationStream
 	{
 		internal uint animatorBindingsVersion
@@ -21,9 +18,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the stream is valid; false otherwise. (Read Only)</para>
-		/// </summary>
 		public bool isValid
 		{
 			get
@@ -40,9 +34,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the delta time for the evaluated frame. (Read Only)</para>
-		/// </summary>
 		public float deltaTime
 		{
 			get
@@ -52,9 +43,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets or sets the avatar velocity for the evaluated frame.</para>
-		/// </summary>
 		public Vector3 velocity
 		{
 			get
@@ -69,9 +57,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets or sets the avatar angular velocity for the evaluated frame.</para>
-		/// </summary>
 		public Vector3 angularVelocity
 		{
 			get
@@ -86,9 +71,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the root motion position for the evaluated frame. (Read Only)</para>
-		/// </summary>
 		public Vector3 rootMotionPosition
 		{
 			get
@@ -98,9 +80,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the root motion rotation for the evaluated frame. (Read Only)</para>
-		/// </summary>
 		public Quaternion rootMotionRotation
 		{
 			get
@@ -110,9 +89,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Returns true if the stream is from a humanoid avatar; false otherwise. (Read Only)</para>
-		/// </summary>
 		public bool isHumanStream
 		{
 			get
@@ -122,12 +98,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the same stream, but as an AnimationHumanStream.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Returns the same stream, but as an AnimationHumanStream.</para>
-		/// </returns>
 		public AnimationHumanStream AsHuman()
 		{
 			this.CheckIsValid();
@@ -138,9 +108,6 @@ namespace UnityEngine.Experimental.Animations
 			return this.GetHumanStream();
 		}
 
-		/// <summary>
-		///   <para>Gets the number of input streams. (Read Only)</para>
-		/// </summary>
 		public int inputStreamCount
 		{
 			get
@@ -150,13 +117,6 @@ namespace UnityEngine.Experimental.Animations
 			}
 		}
 
-		/// <summary>
-		///   <para>Gets the AnimationStream of the playable input at index.</para>
-		/// </summary>
-		/// <param name="index">The input index.</param>
-		/// <returns>
-		///   <para>Returns the AnimationStream of the playable input at index. Returns an invalid stream if the input is not an animation Playable.</para>
-		/// </returns>
 		public AnimationStream GetInputStream(int index)
 		{
 			this.CheckIsValid();

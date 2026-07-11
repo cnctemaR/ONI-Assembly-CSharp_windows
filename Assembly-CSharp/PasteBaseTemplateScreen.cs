@@ -22,7 +22,7 @@ public class PasteBaseTemplateScreen : KScreen
 		this.template_buttons.Clear();
 		this.base_template_assets = TemplateCache.CollectBaseTemplateNames("bases");
 		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames("poi"));
-		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames(string.Empty));
+		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames(""));
 		foreach (string text in this.base_template_assets)
 		{
 			GameObject gameObject2 = Util.KInstantiateUI(this.prefab_paste_button, this.button_list_container, true);
@@ -32,8 +32,7 @@ public class PasteBaseTemplateScreen : KScreen
 			{
 				this.OnClickPasteButton(template_name);
 			};
-			LocText componentInChildren = gameObject2.GetComponentInChildren<LocText>();
-			componentInChildren.text = template_name;
+			gameObject2.GetComponentInChildren<LocText>().text = template_name;
 			this.template_buttons.Add(gameObject2);
 		}
 	}

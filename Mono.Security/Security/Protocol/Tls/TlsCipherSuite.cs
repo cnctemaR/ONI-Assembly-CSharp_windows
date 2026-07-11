@@ -20,12 +20,12 @@ namespace Mono.Security.Protocol.Tls
 				{
 					this.header = new byte[13];
 				}
-				ulong num = ((!(base.Context is ClientContext)) ? base.Context.WriteSequenceNumber : base.Context.ReadSequenceNumber);
+				ulong num = ((base.Context is ClientContext) ? base.Context.ReadSequenceNumber : base.Context.WriteSequenceNumber);
 				base.Write(this.header, 0, num);
 				this.header[8] = (byte)contentType;
 				base.Write(this.header, 9, base.Context.Protocol);
 				base.Write(this.header, 11, (short)fragment.Length);
-				HashAlgorithm serverHMAC = base.ServerHMAC;
+				KeyedHashAlgorithm serverHMAC = base.ServerHMAC;
 				serverHMAC.TransformBlock(this.header, 0, this.header.Length, this.header, 0);
 				serverHMAC.TransformBlock(fragment, 0, fragment.Length, fragment, 0);
 				serverHMAC.TransformFinalBlock(CipherSuite.EmptyArray, 0, 0);
@@ -44,12 +44,12 @@ namespace Mono.Security.Protocol.Tls
 				{
 					this.header = new byte[13];
 				}
-				ulong num = ((!(base.Context is ClientContext)) ? base.Context.ReadSequenceNumber : base.Context.WriteSequenceNumber);
+				ulong num = ((base.Context is ClientContext) ? base.Context.WriteSequenceNumber : base.Context.ReadSequenceNumber);
 				base.Write(this.header, 0, num);
 				this.header[8] = (byte)contentType;
 				base.Write(this.header, 9, base.Context.Protocol);
 				base.Write(this.header, 11, (short)fragment.Length);
-				HashAlgorithm clientHMAC = base.ClientHMAC;
+				KeyedHashAlgorithm clientHMAC = base.ClientHMAC;
 				clientHMAC.TransformBlock(this.header, 0, this.header.Length, this.header, 0);
 				clientHMAC.TransformBlock(fragment, 0, fragment.Length, fragment, 0);
 				clientHMAC.TransformFinalBlock(CipherSuite.EmptyArray, 0, 0);
@@ -71,38 +71,15 @@ namespace Mono.Security.Protocol.Tls
 			base.Context.Negotiating.ServerWriteMAC = tlsStream.ReadBytes(base.HashSize);
 			base.Context.ClientWriteKey = tlsStream.ReadBytes((int)base.KeyMaterialSize);
 			base.Context.ServerWriteKey = tlsStream.ReadBytes((int)base.KeyMaterialSize);
-			if (!base.IsExportable)
+			if (base.IvSize != 0)
 			{
-				if (base.IvSize != 0)
-				{
-					base.Context.ClientWriteIV = tlsStream.ReadBytes((int)base.IvSize);
-					base.Context.ServerWriteIV = tlsStream.ReadBytes((int)base.IvSize);
-				}
-				else
-				{
-					base.Context.ClientWriteIV = CipherSuite.EmptyArray;
-					base.Context.ServerWriteIV = CipherSuite.EmptyArray;
-				}
+				base.Context.ClientWriteIV = tlsStream.ReadBytes((int)base.IvSize);
+				base.Context.ServerWriteIV = tlsStream.ReadBytes((int)base.IvSize);
 			}
 			else
 			{
-				byte[] array = base.PRF(base.Context.ClientWriteKey, "client write key", base.Context.RandomCS, (int)base.ExpandedKeyMaterialSize);
-				byte[] array2 = base.PRF(base.Context.ServerWriteKey, "server write key", base.Context.RandomCS, (int)base.ExpandedKeyMaterialSize);
-				base.Context.ClientWriteKey = array;
-				base.Context.ServerWriteKey = array2;
-				if (base.IvSize > 0)
-				{
-					byte[] array3 = base.PRF(CipherSuite.EmptyArray, "IV block", base.Context.RandomCS, (int)(base.IvSize * 2));
-					base.Context.ClientWriteIV = new byte[(int)base.IvSize];
-					Buffer.BlockCopy(array3, 0, base.Context.ClientWriteIV, 0, base.Context.ClientWriteIV.Length);
-					base.Context.ServerWriteIV = new byte[(int)base.IvSize];
-					Buffer.BlockCopy(array3, (int)base.IvSize, base.Context.ServerWriteIV, 0, base.Context.ServerWriteIV.Length);
-				}
-				else
-				{
-					base.Context.ClientWriteIV = CipherSuite.EmptyArray;
-					base.Context.ServerWriteIV = CipherSuite.EmptyArray;
-				}
+				base.Context.ClientWriteIV = CipherSuite.EmptyArray;
+				base.Context.ServerWriteIV = CipherSuite.EmptyArray;
 			}
 			ClientSessionCache.SetContextInCache(base.Context);
 			tlsStream.Reset();

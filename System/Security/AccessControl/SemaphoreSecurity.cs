@@ -8,12 +8,17 @@ namespace System.Security.AccessControl
 	public sealed class SemaphoreSecurity : NativeObjectSecurity
 	{
 		public SemaphoreSecurity()
-			: base(false, ResourceType.Unknown)
+			: base(false, ResourceType.KernelObject)
 		{
 		}
 
-		public SemaphoreSecurity(string name, AccessControlSections includesections)
-			: base(false, ResourceType.Unknown, name, includesections)
+		public SemaphoreSecurity(string name, AccessControlSections includeSections)
+			: base(false, ResourceType.KernelObject, name, includeSections)
+		{
+		}
+
+		internal SemaphoreSecurity(SafeHandle handle, AccessControlSections includeSections)
+			: base(false, ResourceType.KernelObject, handle, includeSections)
 		{
 		}
 
@@ -21,7 +26,7 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return typeof(SemaphoreRights);
 			}
 		}
 
@@ -29,7 +34,7 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return typeof(SemaphoreAccessRule);
 			}
 		}
 
@@ -37,73 +42,86 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return typeof(SemaphoreAuditRule);
 			}
 		}
 
 		public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
 		{
-			throw new NotImplementedException();
+			return new SemaphoreAccessRule(identityReference, (SemaphoreRights)accessMask, type);
 		}
 
 		public void AddAccessRule(SemaphoreAccessRule rule)
 		{
-			throw new NotImplementedException();
-		}
-
-		public void AddAuditRule(SemaphoreAuditRule rule)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
-		{
-			throw new NotImplementedException();
+			base.AddAccessRule(rule);
 		}
 
 		public bool RemoveAccessRule(SemaphoreAccessRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAccessRule(rule);
 		}
 
 		public void RemoveAccessRuleAll(SemaphoreAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleAll(rule);
 		}
 
 		public void RemoveAccessRuleSpecific(SemaphoreAccessRule rule)
 		{
-			throw new NotImplementedException();
-		}
-
-		public bool RemoveAuditRule(SemaphoreAuditRule rule)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void RemoveAuditRuleAll(SemaphoreAuditRule rule)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void RemoveAuditRuleSpecific(SemaphoreAuditRule rule)
-		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleSpecific(rule);
 		}
 
 		public void ResetAccessRule(SemaphoreAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.ResetAccessRule(rule);
 		}
 
 		public void SetAccessRule(SemaphoreAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAccessRule(rule);
+		}
+
+		public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
+		{
+			return new SemaphoreAuditRule(identityReference, (SemaphoreRights)accessMask, flags);
+		}
+
+		public void AddAuditRule(SemaphoreAuditRule rule)
+		{
+			base.AddAuditRule(rule);
+		}
+
+		public bool RemoveAuditRule(SemaphoreAuditRule rule)
+		{
+			return base.RemoveAuditRule(rule);
+		}
+
+		public void RemoveAuditRuleAll(SemaphoreAuditRule rule)
+		{
+			base.RemoveAuditRuleAll(rule);
+		}
+
+		public void RemoveAuditRuleSpecific(SemaphoreAuditRule rule)
+		{
+			base.RemoveAuditRuleSpecific(rule);
 		}
 
 		public void SetAuditRule(SemaphoreAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAuditRule(rule);
+		}
+
+		internal void Persist(SafeHandle handle)
+		{
+			base.WriteLock();
+			try
+			{
+				base.Persist(handle, (base.AccessRulesModified ? AccessControlSections.Access : AccessControlSections.None) | (base.AuditRulesModified ? AccessControlSections.Audit : AccessControlSections.None) | (base.OwnerModified ? AccessControlSections.Owner : AccessControlSections.None) | (base.GroupModified ? AccessControlSections.Group : AccessControlSections.None), null);
+			}
+			finally
+			{
+				base.WriteUnlock();
+			}
 		}
 	}
 }

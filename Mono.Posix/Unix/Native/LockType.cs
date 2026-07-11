@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[CLSCompliant(false)]
 	[Map]
+	[CLSCompliant(false)]
 	public enum LockType : short
 	{
 		F_RDLCK,

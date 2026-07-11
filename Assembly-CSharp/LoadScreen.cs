@@ -4,6 +4,7 @@ using System.IO;
 using ProcGen;
 using ProcGenGame;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -62,10 +63,9 @@ public class LoadScreen : KModalScreen
 		{
 			for (int i = 0; i < allFiles.Count; i++)
 			{
-				bool flag = this.IsFileValid(allFiles[i]);
-				if (flag)
+				if (this.IsFileValid(allFiles[i]))
 				{
-					Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = this.GetFileInfo(allFiles[i]);
+					global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = this.GetFileInfo(allFiles[i]);
 					SaveGame.Header first = fileInfo.first;
 					SaveGame.GameInfo second = fileInfo.second;
 					global::System.DateTime lastWriteTime = File.GetLastWriteTime(allFiles[i]);
@@ -101,7 +101,7 @@ public class LoadScreen : KModalScreen
 		return flag;
 	}
 
-	private Tuple<SaveGame.Header, SaveGame.GameInfo> GetFileInfo(string filename)
+	private global::Tuple<SaveGame.Header, SaveGame.GameInfo> GetFileInfo(string filename)
 	{
 		try
 		{
@@ -109,7 +109,7 @@ public class LoadScreen : KModalScreen
 			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 			if (gameInfo.saveMajorVersion >= 7)
 			{
-				return new Tuple<SaveGame.Header, SaveGame.GameInfo>(header, gameInfo);
+				return new global::Tuple<SaveGame.Header, SaveGame.GameInfo>(header, gameInfo);
 			}
 		}
 		catch (Exception ex)
@@ -138,7 +138,7 @@ public class LoadScreen : KModalScreen
 				this.AddExistingSaveFile(keyValuePair.Key, keyValuePair.Value);
 			}
 		}
-		this.InfoText.text = string.Empty;
+		this.InfoText.text = "";
 		this.CyclesSurvivedValue.text = "-";
 		this.DuplicantsAliveValue.text = "-";
 		this.WorldValue.text = "-";
@@ -195,7 +195,7 @@ public class LoadScreen : KModalScreen
 		LocText component = savenameRow.GetReference<RectTransform>("SaveTitle").GetComponent<LocText>();
 		LocText headerDate = savenameRow.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>();
 		RectTransform saveDetailsRow = savenameRow.GetReference<RectTransform>("SaveDetailsRow");
-		LocText component2 = savenameRow.GetReference<RectTransform>("SaveDetailsBaseName").GetComponent<LocText>();
+		TMP_Text component2 = savenameRow.GetReference<RectTransform>("SaveDetailsBaseName").GetComponent<LocText>();
 		RectTransform savefileRowTemplate = savenameRow.GetReference<RectTransform>("SavefileRowTemplate");
 		this.defaultDateColor = headerDate.color;
 		fileDetailsList.Sort((LoadScreen.SaveGameFileDetails x, LoadScreen.SaveGameFileDetails y) => y.FileDate.CompareTo(x.FileDate));
@@ -291,7 +291,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 383949U;
+		return header.buildVersion > 393231U;
 	}
 
 	private void SetSelectedGame(string filename, string savename)
@@ -303,8 +303,8 @@ public class LoadScreen : KModalScreen
 			return;
 		}
 		this.deleteButton.isInteractable = true;
-		LoadScreen.FileButton fileButton = ((this.selectedFileName == null) ? null : this.fileButtonMap[this.selectedFileName]);
-		KButton kbutton = ((fileButton == null) ? null : fileButton.button);
+		LoadScreen.FileButton fileButton = ((this.selectedFileName != null) ? this.fileButtonMap[this.selectedFileName] : null);
+		KButton kbutton = ((fileButton != null) ? fileButton.button : null);
 		if (kbutton != null)
 		{
 			kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
@@ -327,15 +327,15 @@ public class LoadScreen : KModalScreen
 				text = text + "\n" + UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
 			}
 			string worldID = gameInfo.worldID;
-			global::ProcGen.World world = ((worldID == null) ? null : SettingsCache.worlds.GetWorldData(worldID));
-			string text2 = ((world == null) ? " - " : Strings.Get(world.name));
+			global::ProcGen.World world = ((worldID != null) ? SettingsCache.worlds.GetWorldData(worldID) : null);
+			string text2 = ((world != null) ? Strings.Get(world.name) : " - ");
 			this.CyclesSurvivedValue.text = gameInfo.numberOfCycles.ToString();
 			this.DuplicantsAliveValue.text = gameInfo.numberOfDuplicants.ToString();
 			this.WorldValue.text = text2;
-			this.InfoText.text = string.Empty;
+			this.InfoText.text = "";
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 383949U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 393231U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -350,7 +350,7 @@ public class LoadScreen : KModalScreen
 				this.loadButton.isInteractable = true;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 			}
-			if (this.InfoText.text == string.Empty && gameInfo.isAutoSave)
+			if (this.InfoText.text == "" && gameInfo.isAutoSave)
 			{
 				this.InfoText.text = UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
 			}
@@ -371,7 +371,7 @@ public class LoadScreen : KModalScreen
 			Sprite sprite = RetireColonyUtility.LoadColonyPreview(this.selectedFileName, savename);
 			Image component = this.previewImageRoot.GetComponent<Image>();
 			component.sprite = sprite;
-			component.color = ((!sprite) ? Color.black : Color.white);
+			component.color = (sprite ? Color.white : Color.black);
 		}
 		catch (Exception ex2)
 		{
@@ -398,10 +398,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 383949U)
+		if (header.buildVersion > 393231U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 383949U.ToString();
+			text2 = 393231U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -410,9 +410,8 @@ public class LoadScreen : KModalScreen
 		}
 		if (!flag)
 		{
-			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
-			ConfirmDialogScreen component = global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.LOADFAILED, "Version Mismatch", text, text2), null, null, null, null, null, null, null, null, true);
+			GameObject gameObject = ((FrontEndManager.Instance == null) ? GameScreenManager.Instance.ssOverlayCanvas : FrontEndManager.Instance.gameObject);
+			global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(string.Format(UI.CRASHSCREEN.LOADFAILED, "Version Mismatch", text, text2), null, null, null, null, null, null, null, null, true);
 			return;
 		}
 		if (Game.Instance != null)

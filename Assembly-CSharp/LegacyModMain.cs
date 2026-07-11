@@ -10,9 +10,10 @@ public class LegacyModMain
 	public static void Load()
 	{
 		List<Type> list = new List<Type>();
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+		for (int i = 0; i < assemblies.Length; i++)
 		{
-			Type[] types = assembly.GetTypes();
+			Type[] types = assemblies[i].GetTypes();
 			if (types != null)
 			{
 				list.AddRange(types);
@@ -31,9 +32,10 @@ public class LegacyModMain
 	private static void Test()
 	{
 		Dictionary<Type, int> dictionary = new Dictionary<Type, int>();
-		foreach (Component component in Resources.FindObjectsOfTypeAll(typeof(Component)))
+		global::UnityEngine.Object[] array = Resources.FindObjectsOfTypeAll(typeof(Component));
+		for (int i = 0; i < array.Length; i++)
 		{
-			Type type = component.GetType();
+			Type type = ((Component)array[i]).GetType();
 			int num = 0;
 			dictionary.TryGetValue(type, out num);
 			dictionary[type] = num + 1;
@@ -51,13 +53,12 @@ public class LegacyModMain
 			}
 		}
 		list.Sort((LegacyModMain.Entry x, LegacyModMain.Entry y) => y.count.CompareTo(x.count));
-		string text = string.Empty;
+		string text = "";
 		foreach (LegacyModMain.Entry entry in list)
 		{
-			string text2 = text;
 			text = string.Concat(new object[]
 			{
-				text2,
+				text,
 				entry.type.Name,
 				": ",
 				entry.count,
@@ -70,15 +71,18 @@ public class LegacyModMain
 	private static void ListUnusedTypes()
 	{
 		HashSet<Type> hashSet = new HashSet<Type>();
-		foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
+		global::UnityEngine.Object[] array = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+		for (int i = 0; i < array.Length; i++)
 		{
-			foreach (Component component in gameObject.GetComponents<Component>())
+			foreach (Component component in ((GameObject)array[i]).GetComponents<Component>())
 			{
 				if (!(component == null))
 				{
-					for (Type type = component.GetType(); type != typeof(Component); type = type.BaseType)
+					Type type = component.GetType();
+					while (type != typeof(Component))
 					{
 						hashSet.Add(type);
+						type = type.BaseType;
 					}
 				}
 			}
@@ -107,9 +111,8 @@ public class LegacyModMain
 
 	private static void DebugSelected(GameObject go)
 	{
-		Constructable component = go.GetComponent<Constructable>();
-		int num = 0;
-		num++;
+		object component = go.GetComponent<Constructable>();
+		int num = 0 + 1;
 		global::Debug.Log(component);
 	}
 
@@ -141,7 +144,7 @@ public class LegacyModMain
 
 	private static void ConfigElements()
 	{
-		LegacyModMain.ElementInfo[] array = new LegacyModMain.ElementInfo[]
+		foreach (LegacyModMain.ElementInfo elementInfo in new LegacyModMain.ElementInfo[]
 		{
 			new LegacyModMain.ElementInfo
 			{
@@ -245,8 +248,7 @@ public class LegacyModMain
 				id = SimHashes.TempConductorSolid,
 				overheatMod = 900f
 			}
-		};
-		foreach (LegacyModMain.ElementInfo elementInfo in array)
+		})
 		{
 			Element element = ElementLoader.FindElementByHash(elementInfo.id);
 			if (elementInfo.decor != 0f)

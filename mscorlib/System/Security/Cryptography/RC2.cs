@@ -10,21 +10,9 @@ namespace System.Security.Cryptography
 		{
 			this.KeySizeValue = 128;
 			this.BlockSizeValue = 64;
-			this.FeedbackSizeValue = 8;
-			this.LegalKeySizesValue = new KeySizes[1];
-			this.LegalKeySizesValue[0] = new KeySizes(40, 128, 8);
-			this.LegalBlockSizesValue = new KeySizes[1];
-			this.LegalBlockSizesValue[0] = new KeySizes(64, 64, 0);
-		}
-
-		public new static RC2 Create()
-		{
-			return RC2.Create("System.Security.Cryptography.RC2");
-		}
-
-		public new static RC2 Create(string AlgName)
-		{
-			return (RC2)CryptoConfig.CreateFromName(AlgName);
+			this.FeedbackSizeValue = this.BlockSizeValue;
+			this.LegalBlockSizesValue = RC2.s_legalBlockSizes;
+			this.LegalKeySizesValue = RC2.s_legalKeySizes;
 		}
 
 		public virtual int EffectiveKeySize
@@ -39,7 +27,25 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				this.EffectiveKeySizeValue = value;
+				if (value > this.KeySizeValue)
+				{
+					throw new CryptographicException(Environment.GetResourceString("EffectiveKeySize value must be at least as large as the KeySize value."));
+				}
+				if (value == 0)
+				{
+					this.EffectiveKeySizeValue = value;
+					return;
+				}
+				if (value < 40)
+				{
+					throw new CryptographicException(Environment.GetResourceString("EffectiveKeySize value must be at least 40 bits."));
+				}
+				if (base.ValidKeySize(value))
+				{
+					this.EffectiveKeySizeValue = value;
+					return;
+				}
+				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
 			}
 		}
 
@@ -47,15 +53,38 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return base.KeySize;
+				return this.KeySizeValue;
 			}
 			set
 			{
+				if (value < this.EffectiveKeySizeValue)
+				{
+					throw new CryptographicException(Environment.GetResourceString("EffectiveKeySize value must be at least as large as the KeySize value."));
+				}
 				base.KeySize = value;
-				this.EffectiveKeySizeValue = value;
 			}
 		}
 
+		public new static RC2 Create()
+		{
+			return RC2.Create("System.Security.Cryptography.RC2");
+		}
+
+		public new static RC2 Create(string AlgName)
+		{
+			return (RC2)CryptoConfig.CreateFromName(AlgName);
+		}
+
 		protected int EffectiveKeySizeValue;
+
+		private static KeySizes[] s_legalBlockSizes = new KeySizes[]
+		{
+			new KeySizes(64, 64, 0)
+		};
+
+		private static KeySizes[] s_legalKeySizes = new KeySizes[]
+		{
+			new KeySizes(40, 1024, 8)
+		};
 	}
 }

@@ -10,11 +10,8 @@ public static class BasePacuConfig
 	public static GameObject CreatePrefab(string id, string base_trait_id, string name, string description, string anim_file, bool is_baby, string symbol_prefix, float warnLowTemp, float warnHighTemp)
 	{
 		float num = 200f;
-		KAnimFile anim = Assets.GetAnim(anim_file);
-		string text = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		float num2 = (warnLowTemp + warnHighTemp) / 2f;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, (warnLowTemp + warnHighTemp) / 2f);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.SwimmingCreature, false);
 		component.AddTag(GameTags.Creatures.Swimmer, false);
@@ -34,10 +31,13 @@ public static class BasePacuConfig
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
 			.Add(new TrappedStates.Def(), true)
 			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true);
-		FallStates.Def def = new FallStates.Def();
-		def.getLandAnim = new Func<FallStates.Instance, string>(BasePacuConfig.GetLandAnim);
-		ChoreTable.Builder builder2 = builder.Add(def, true).Add(new DebugGoToStates.Def(), true).Add(new FlopStates.Def(), true)
+			.Add(new BaggedStates.Def(), true)
+			.Add(new FallStates.Def
+			{
+				getLandAnim = new Func<FallStates.Instance, string>(BasePacuConfig.GetLandAnim)
+			}, true)
+			.Add(new DebugGoToStates.Def(), true)
+			.Add(new FlopStates.Def(), true)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true)
 			.Add(new LayEggStates.Def(), true)
@@ -46,25 +46,21 @@ public static class BasePacuConfig
 			.Add(new MoveToLureStates.Def(), true)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true);
-		CreatureFallMonitor.Def def2 = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def2.canSwim = true;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
-		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
-		Diet.Info[] array = new Diet.Info[]
+		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
+		Diet diet = new Diet(new Diet.Info[]
 		{
 			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false)
-		};
-		Diet diet = new Diet(array);
-		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def3.diet = diet;
-		def3.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
-		SolidConsumerMonitor.Def def4 = gameObject.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def4.diet = diet;
-		LureableMonitor.Def def5 = gameObject.AddOrGetDef<LureableMonitor.Def>();
-		def5.lures = new Tag[] { GameTags.Creatures.FishTrapLure };
+		});
+		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def.diet = diet;
+		def.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
+		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_prefix, null, 0);

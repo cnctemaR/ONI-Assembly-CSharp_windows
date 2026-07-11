@@ -46,8 +46,7 @@ public class LogicPowerRelayConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 		GeneratedBuildings.RegisterLogicPorts(go, LogicPowerRelayConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		OperationalControlledSwitch operationalControlledSwitch = go.AddOrGet<OperationalControlledSwitch>();
-		operationalControlledSwitch.objectLayer = ObjectLayer.Wire;
+		go.AddOrGet<OperationalControlledSwitch>().objectLayer = ObjectLayer.Wire;
 	}
 
 	public static string ID = "LogicPowerRelay";

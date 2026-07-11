@@ -6,17 +6,18 @@ namespace System.Diagnostics
 	{
 		public TraceImplSettings()
 		{
-			this.Listeners.Add(new DefaultTraceListener(), this);
+			this.Listeners.Add(new DefaultTraceListener
+			{
+				IndentSize = this.IndentSize
+			});
 		}
 
 		public const string Key = ".__TraceInfoSettingsKey__.";
 
 		public bool AutoFlush;
 
-		public int IndentLevel;
-
 		public int IndentSize = 4;
 
-		public TraceListenerCollection Listeners = new TraceListenerCollection(false);
+		public TraceListenerCollection Listeners = new TraceListenerCollection();
 	}
 }

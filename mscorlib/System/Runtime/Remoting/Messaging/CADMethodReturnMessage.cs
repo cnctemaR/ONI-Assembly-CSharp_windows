@@ -7,12 +7,24 @@ namespace System.Runtime.Remoting.Messaging
 {
 	internal class CADMethodReturnMessage : CADMessageBase
 	{
+		internal static CADMethodReturnMessage Create(IMessage callMsg)
+		{
+			IMethodReturnMessage methodReturnMessage = callMsg as IMethodReturnMessage;
+			if (methodReturnMessage == null)
+			{
+				return null;
+			}
+			return new CADMethodReturnMessage(methodReturnMessage);
+		}
+
 		internal CADMethodReturnMessage(IMethodReturnMessage retMsg)
+			: base(retMsg)
 		{
 			ArrayList arrayList = null;
 			this._propertyCount = CADMessageBase.MarshalProperties(retMsg.Properties, ref arrayList);
 			this._returnValue = base.MarshalArgument(retMsg.ReturnValue, ref arrayList);
 			this._args = base.MarshalArguments(retMsg.Args, ref arrayList);
+			this._sig = CADMessageBase.GetSignature(base.GetMethod(), true);
 			if (retMsg.Exception != null)
 			{
 				if (arrayList == null)
@@ -30,23 +42,12 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
-		internal static CADMethodReturnMessage Create(IMessage callMsg)
-		{
-			IMethodReturnMessage methodReturnMessage = callMsg as IMethodReturnMessage;
-			if (methodReturnMessage == null)
-			{
-				return null;
-			}
-			return new CADMethodReturnMessage(methodReturnMessage);
-		}
-
 		internal ArrayList GetArguments()
 		{
 			ArrayList arrayList = null;
 			if (this._serializedArgs != null)
 			{
-				object[] array = (object[])CADSerializer.DeserializeObject(new MemoryStream(this._serializedArgs));
-				arrayList = new ArrayList(array);
+				arrayList = new ArrayList((object[])CADSerializer.DeserializeObject(new MemoryStream(this._serializedArgs)));
 				this._serializedArgs = null;
 			}
 			return arrayList;
@@ -82,5 +83,7 @@ namespace System.Runtime.Remoting.Messaging
 		private object _returnValue;
 
 		private CADArgHolder _exception;
+
+		private Type[] _sig;
 	}
 }

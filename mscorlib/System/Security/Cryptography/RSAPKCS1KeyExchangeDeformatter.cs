@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -13,7 +12,23 @@ namespace System.Security.Cryptography
 
 		public RSAPKCS1KeyExchangeDeformatter(AsymmetricAlgorithm key)
 		{
-			this.SetKey(key);
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			this._rsaKey = (RSA)key;
+		}
+
+		public RandomNumberGenerator RNG
+		{
+			get
+			{
+				return this.RngValue;
+			}
+			set
+			{
+				this.RngValue = value;
+			}
 		}
 
 		public override string Parameters
@@ -27,39 +42,66 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		public RandomNumberGenerator RNG
-		{
-			get
-			{
-				return this.random;
-			}
-			set
-			{
-				this.random = value;
-			}
-		}
-
 		public override byte[] DecryptKeyExchange(byte[] rgbIn)
 		{
-			if (this.rsa == null)
+			if (this._rsaKey == null)
 			{
-				throw new CryptographicUnexpectedOperationException(Locale.GetText("No key pair available."));
+				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
 			}
-			byte[] array = PKCS1.Decrypt_v15(this.rsa, rgbIn);
-			if (array != null)
+			byte[] array;
+			if (this.OverridesDecrypt)
 			{
-				return array;
+				array = this._rsaKey.Decrypt(rgbIn, RSAEncryptionPadding.Pkcs1);
 			}
-			throw new CryptographicException(Locale.GetText("PKCS1 decoding error."));
+			else
+			{
+				byte[] array2 = this._rsaKey.DecryptValue(rgbIn);
+				int num = 2;
+				while (num < array2.Length && array2[num] != 0)
+				{
+					num++;
+				}
+				if (num >= array2.Length)
+				{
+					throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("Error occurred while decoding PKCS1 padding."));
+				}
+				num++;
+				array = new byte[array2.Length - num];
+				Buffer.InternalBlockCopy(array2, num, array, 0, array.Length);
+			}
+			return array;
 		}
 
 		public override void SetKey(AsymmetricAlgorithm key)
 		{
-			this.rsa = (RSA)key;
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			this._rsaKey = (RSA)key;
+			this._rsaOverridesDecrypt = null;
 		}
 
-		private RSA rsa;
+		private bool OverridesDecrypt
+		{
+			get
+			{
+				if (this._rsaOverridesDecrypt == null)
+				{
+					this._rsaOverridesDecrypt = new bool?(Utils.DoesRsaKeyOverride(this._rsaKey, "Decrypt", new Type[]
+					{
+						typeof(byte[]),
+						typeof(RSAEncryptionPadding)
+					}));
+				}
+				return this._rsaOverridesDecrypt.Value;
+			}
+		}
 
-		private RandomNumberGenerator random;
+		private RSA _rsaKey;
+
+		private bool? _rsaOverridesDecrypt;
+
+		private RandomNumberGenerator RngValue;
 	}
 }

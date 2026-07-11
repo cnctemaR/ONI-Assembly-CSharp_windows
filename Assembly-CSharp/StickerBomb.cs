@@ -71,11 +71,14 @@ public class StickerBomb : StateMachineComponent<StickerBomb.StatesInstance>
 
 	public static bool CanPlaceSticker(List<int> offsets)
 	{
-		foreach (int num in offsets)
+		using (List<int>.Enumerator enumerator = offsets.GetEnumerator())
 		{
-			if (Grid.IsCellOpenToSpace(num))
+			while (enumerator.MoveNext())
 			{
-				return false;
+				if (Grid.IsCellOpenToSpace(enumerator.Current))
+				{
+					return false;
+				}
 			}
 		}
 		return true;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
-using UnityEngine;
 
 public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 {
@@ -25,8 +24,9 @@ public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 		if (workable_event == Workable.WorkableEvent.WorkStarted)
 		{
 			this.AddEffects();
+			return;
 		}
-		else if (workable_event == Workable.WorkableEvent.WorkStopped)
+		if (workable_event == Workable.WorkableEvent.WorkStopped)
 		{
 			this.RemoveEffects();
 		}
@@ -85,7 +85,7 @@ public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 		{
 			foreach (string text in this.effects)
 			{
-				if (text != null && text != string.Empty)
+				if (text != null && text != "")
 				{
 					Effect.AddModifierDescriptions(base.gameObject, list, text, false);
 				}
@@ -103,11 +103,6 @@ public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 			Sleepable sleepable = this.sleepable;
 			sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
 		}
-	}
-
-	Transform IBasicBuilding.get_transform()
-	{
-		return base.transform;
 	}
 
 	[MyCmpReq]

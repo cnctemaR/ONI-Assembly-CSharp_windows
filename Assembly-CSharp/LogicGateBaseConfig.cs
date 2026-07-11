@@ -44,25 +44,21 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		MoveableLogicGateVisualizer moveableLogicGateVisualizer = go.AddComponent<MoveableLogicGateVisualizer>();
-		moveableLogicGateVisualizer.op = this.GetLogicOp();
+		go.AddComponent<MoveableLogicGateVisualizer>().op = this.GetLogicOp();
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		LogicGateVisualizer logicGateVisualizer = go.AddComponent<LogicGateVisualizer>();
-		logicGateVisualizer.op = this.GetLogicOp();
+		go.AddComponent<LogicGateVisualizer>().op = this.GetLogicOp();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		LogicGate logicGate = go.AddComponent<LogicGate>();
-		logicGate.op = this.GetLogicOp();
+		go.AddComponent<LogicGate>().op = this.GetLogicOp();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
-			LogicGate component = game_object.GetComponent<LogicGate>();
-			component.SetPortDescriptions(this.GetDescriptions());
+			game_object.GetComponent<LogicGate>().SetPortDescriptions(this.GetDescriptions());
 		};
 	}
 }

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Satsuma
 {
-	public class Supergraph : IBuildableGraph, IDestroyableGraph, IGraph, IClearable, IArcLookup
+	public class Supergraph : IBuildableGraph, IClearable, IDestroyableGraph, IGraph, IArcLookup
 	{
 		public Supergraph(IGraph graph)
 		{
@@ -161,7 +161,11 @@ namespace Satsuma
 
 		private HashSet<Arc> ArcsInternal(ArcFilter filter)
 		{
-			return (filter != ArcFilter.All) ? this.edges : this.arcs;
+			if (filter != ArcFilter.All)
+			{
+				return this.edges;
+			}
+			return this.arcs;
 		}
 
 		private List<Arc> ArcsInternal(Node v, ArcFilter filter)
@@ -187,12 +191,20 @@ namespace Satsuma
 
 		public IEnumerable<Node> Nodes()
 		{
-			return (this.graph != null) ? this.nodes.Concat<Node>(this.graph.Nodes()) : this.nodes;
+			if (this.graph != null)
+			{
+				return this.nodes.Concat<Node>(this.graph.Nodes());
+			}
+			return this.nodes;
 		}
 
 		public IEnumerable<Arc> Arcs(ArcFilter filter = ArcFilter.All)
 		{
-			return (this.graph != null) ? this.ArcsInternal(filter).Concat<Arc>(this.graph.Arcs(filter)) : this.ArcsInternal(filter);
+			if (this.graph != null)
+			{
+				return this.ArcsInternal(filter).Concat<Arc>(this.graph.Arcs(filter));
+			}
+			return this.ArcsInternal(filter);
 		}
 
 		public IEnumerable<Arc> Arcs(Node u, ArcFilter filter = ArcFilter.All)
@@ -213,29 +225,32 @@ namespace Satsuma
 					yield return arc;
 				}
 			}
+			List<Arc>.Enumerator enumerator = default(List<Arc>.Enumerator);
 			if (this.graph != null && !this.nodes.Contains(u) && !this.nodes.Contains(v))
 			{
 				foreach (Arc arc2 in this.graph.Arcs(u, v, filter))
 				{
 					yield return arc2;
 				}
+				IEnumerator<Arc> enumerator2 = null;
 			}
+			yield break;
 			yield break;
 		}
 
 		public int NodeCount()
 		{
-			return this.nodes.Count + ((this.graph != null) ? this.graph.NodeCount() : 0);
+			return this.nodes.Count + ((this.graph == null) ? 0 : this.graph.NodeCount());
 		}
 
 		public int ArcCount(ArcFilter filter = ArcFilter.All)
 		{
-			return this.ArcsInternal(filter).Count + ((this.graph != null) ? this.graph.ArcCount(filter) : 0);
+			return this.ArcsInternal(filter).Count + ((this.graph == null) ? 0 : this.graph.ArcCount(filter));
 		}
 
 		public int ArcCount(Node u, ArcFilter filter = ArcFilter.All)
 		{
-			return this.ArcsInternal(u, filter).Count + ((this.graph != null && !this.nodes.Contains(u)) ? this.graph.ArcCount(u, filter) : 0);
+			return this.ArcsInternal(u, filter).Count + ((this.graph == null || this.nodes.Contains(u)) ? 0 : this.graph.ArcCount(u, filter));
 		}
 
 		public int ArcCount(Node u, Node v, ArcFilter filter = ArcFilter.All)
@@ -248,7 +263,7 @@ namespace Satsuma
 					num++;
 				}
 			}
-			return num + ((this.graph != null && !this.nodes.Contains(u) && !this.nodes.Contains(v)) ? this.graph.ArcCount(u, v, filter) : 0);
+			return num + ((this.graph == null || this.nodes.Contains(u) || this.nodes.Contains(v)) ? 0 : this.graph.ArcCount(u, v, filter));
 		}
 
 		public bool HasNode(Node node)
@@ -307,18 +322,18 @@ namespace Satsuma
 
 		private class ArcProperties
 		{
+			public Node U { get; private set; }
+
+			public Node V { get; private set; }
+
+			public bool IsEdge { get; private set; }
+
 			public ArcProperties(Node u, Node v, bool isEdge)
 			{
 				this.U = u;
 				this.V = v;
 				this.IsEdge = isEdge;
 			}
-
-			public Node U { get; private set; }
-
-			public Node V { get; private set; }
-
-			public bool IsEdge { get; private set; }
 		}
 	}
 }

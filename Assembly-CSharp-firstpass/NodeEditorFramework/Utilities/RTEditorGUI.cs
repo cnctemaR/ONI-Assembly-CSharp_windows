@@ -21,8 +21,7 @@ namespace NodeEditorFramework.Utilities
 			{
 				return totalPos;
 			}
-			Rect rect = new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, Mathf.Min(RTEditorGUI.getLabelWidth() - RTEditorGUI.indent, totalPos.width / 2f), totalPos.height);
-			GUI.Label(rect, label, style);
+			GUI.Label(new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, Mathf.Min(RTEditorGUI.getLabelWidth() - RTEditorGUI.indent, totalPos.width / 2f), totalPos.height), label, style);
 			return new Rect(totalPos.x + RTEditorGUI.getLabelWidth(), totalPos.y, totalPos.width - RTEditorGUI.getLabelWidth(), totalPos.height);
 		}
 
@@ -32,8 +31,7 @@ namespace NodeEditorFramework.Utilities
 			{
 				return totalPos;
 			}
-			Rect rect = new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, totalPos.width * percentage, totalPos.height);
-			GUI.Label(rect, label, style);
+			GUI.Label(new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, totalPos.width * percentage, totalPos.height), label, style);
 			return new Rect(totalPos.x + totalPos.width * percentage, totalPos.y, totalPos.width * (1f - percentage), totalPos.height);
 		}
 
@@ -196,9 +194,7 @@ namespace NodeEditorFramework.Utilities
 			{
 				style = GUI.skin.textField;
 			}
-			Rect fieldRect = RTEditorGUI.GetFieldRect(label, style, options);
-			Rect rect = RTEditorGUI.PrefixLabel(fieldRect, 0.5f, label, style);
-			text = GUI.TextField(rect, text);
+			text = GUI.TextField(RTEditorGUI.PrefixLabel(RTEditorGUI.GetFieldRect(label, style, options), 0.5f, label, style), text);
 			return text;
 		}
 
@@ -213,8 +209,7 @@ namespace NodeEditorFramework.Utilities
 			{
 				style = GUI.skin.textField;
 			}
-			Rect sliderRect = RTEditorGUI.GetSliderRect(label, style, options);
-			Rect rect = RTEditorGUI.PrefixLabel(sliderRect, 0.5f, label, style);
+			Rect rect = RTEditorGUI.PrefixLabel(RTEditorGUI.GetSliderRect(label, style, options), 0.5f, label, style);
 			selected = Mathf.RoundToInt(GUI.HorizontalSlider(RTEditorGUI.GetSliderRect(rect), (float)selected, 0f, (float)(selectableOptions.Length - 1)));
 			GUI.Label(RTEditorGUI.GetSliderFieldRect(rect), selectableOptions[selected]);
 			return selected;
@@ -229,8 +224,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static int MathPowerSliderRaw(GUIContent label, int baseValue, int power, int minPow, int maxPow, params GUILayoutOption[] options)
 		{
-			Rect sliderRect = RTEditorGUI.GetSliderRect(label, GUI.skin.label, options);
-			Rect rect = RTEditorGUI.PrefixLabel(sliderRect, 0.5f, label, GUI.skin.label);
+			Rect rect = RTEditorGUI.PrefixLabel(RTEditorGUI.GetSliderRect(label, GUI.skin.label, options), 0.5f, label, GUI.skin.label);
 			power = Mathf.RoundToInt(GUI.HorizontalSlider(RTEditorGUI.GetSliderRect(rect), (float)power, (float)minPow, (float)maxPow));
 			GUI.Label(RTEditorGUI.GetSliderFieldRect(rect), Mathf.Pow((float)baseValue, (float)power).ToString());
 			return power;
@@ -278,8 +272,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static float Slider(GUIContent label, float value, float minValue, float maxValue, params GUILayoutOption[] options)
 		{
-			Rect sliderRect = RTEditorGUI.GetSliderRect(label, GUI.skin.label, options);
-			Rect rect = RTEditorGUI.PrefixLabel(sliderRect, 0.5f, label, GUI.skin.label);
+			Rect rect = RTEditorGUI.PrefixLabel(RTEditorGUI.GetSliderRect(label, GUI.skin.label, options), 0.5f, label, GUI.skin.label);
 			value = GUI.HorizontalSlider(RTEditorGUI.GetSliderRect(rect), value, minValue, maxValue);
 			value = Mathf.Min(maxValue, Mathf.Max(minValue, RTEditorGUI.FloatField(RTEditorGUI.GetSliderFieldRect(rect), value, new GUILayoutOption[] { GUILayout.Width(60f) })));
 			return value;
@@ -292,15 +285,12 @@ namespace NodeEditorFramework.Utilities
 
 		public static float FloatField(GUIContent label, float value, params GUILayoutOption[] options)
 		{
-			Rect fieldRect = RTEditorGUI.GetFieldRect(label, GUI.skin.label, options);
-			Rect rect = RTEditorGUI.PrefixLabel(fieldRect, 0.5f, label, GUI.skin.label);
-			return RTEditorGUI.FloatField(rect, value, options);
+			return RTEditorGUI.FloatField(RTEditorGUI.PrefixLabel(RTEditorGUI.GetFieldRect(label, GUI.skin.label, options), 0.5f, label, GUI.skin.label), value, options);
 		}
 
 		public static float FloatField(float value, params GUILayoutOption[] options)
 		{
-			Rect fieldRect = RTEditorGUI.GetFieldRect(GUIContent.none, null, options);
-			return RTEditorGUI.FloatField(fieldRect, value, options);
+			return RTEditorGUI.FloatField(RTEditorGUI.GetFieldRect(GUIContent.none, null, options), value, options);
 		}
 
 		public static float FloatField(Rect pos, float value, params GUILayoutOption[] options)
@@ -317,14 +307,14 @@ namespace NodeEditorFramework.Utilities
 				RTEditorGUI.activeFloatFieldLastValue = value;
 				RTEditorGUI.activeFloatFieldString = value.ToString();
 			}
-			string text = ((!flag) ? value.ToString() : RTEditorGUI.activeFloatFieldString);
+			string text = (flag ? RTEditorGUI.activeFloatFieldString : value.ToString());
 			string text2 = GUI.TextField(pos, text);
 			if (flag)
 			{
 				RTEditorGUI.activeFloatFieldString = text2;
 			}
 			bool flag3 = true;
-			if (text2 == string.Empty)
+			if (text2 == "")
 			{
 				value = (RTEditorGUI.activeFloatFieldLastValue = 0f);
 			}
@@ -365,8 +355,7 @@ namespace NodeEditorFramework.Utilities
 			List<char> list = new List<char>(str);
 			for (int i = 0; i < list.Count; i++)
 			{
-				UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(str[i]);
-				if (unicodeCategory != UnicodeCategory.DecimalDigitNumber)
+				if (CharUnicodeInfo.GetUnicodeCategory(str[i]) != UnicodeCategory.DecimalDigitNumber)
 				{
 					list.RemoveRange(i, list.Count - i);
 					break;
@@ -395,22 +384,21 @@ namespace NodeEditorFramework.Utilities
 
 		public static T ObjectField<T>(T obj, bool allowSceneObjects) where T : global::UnityEngine.Object
 		{
-			return RTEditorGUI.ObjectField<T>(GUIContent.none, obj, allowSceneObjects, new GUILayoutOption[0]);
+			return RTEditorGUI.ObjectField<T>(GUIContent.none, obj, allowSceneObjects, Array.Empty<GUILayoutOption>());
 		}
 
 		public static T ObjectField<T>(string label, T obj, bool allowSceneObjects) where T : global::UnityEngine.Object
 		{
-			return RTEditorGUI.ObjectField<T>(new GUIContent(label), obj, allowSceneObjects, new GUILayoutOption[0]);
+			return RTEditorGUI.ObjectField<T>(new GUIContent(label), obj, allowSceneObjects, Array.Empty<GUILayoutOption>());
 		}
 
 		public static T ObjectField<T>(GUIContent label, T obj, bool allowSceneObjects, params GUILayoutOption[] options) where T : global::UnityEngine.Object
 		{
-			bool flag;
 			if (obj.GetType() == typeof(Texture2D))
 			{
-				GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-				GUILayout.Label(label, new GUILayoutOption[0]);
-				flag = GUILayout.Button(obj as Texture2D, new GUILayoutOption[]
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+				GUILayout.Label(label, Array.Empty<GUILayoutOption>());
+				bool flag = GUILayout.Button(obj as Texture2D, new GUILayoutOption[]
 				{
 					GUILayout.MaxWidth(64f),
 					GUILayout.MaxHeight(64f)
@@ -420,10 +408,7 @@ namespace NodeEditorFramework.Utilities
 			else
 			{
 				GUIStyle guistyle = new GUIStyle(GUI.skin.box);
-				flag = GUILayout.Button(label, guistyle, new GUILayoutOption[0]);
-			}
-			if (flag)
-			{
+				bool flag = GUILayout.Button(label, guistyle, Array.Empty<GUILayoutOption>());
 			}
 			return obj;
 		}
@@ -441,28 +426,28 @@ namespace NodeEditorFramework.Utilities
 		public static Enum EnumPopup(GUIContent label, Enum selected)
 		{
 			label.text = label.text + ": " + selected.ToString();
-			GUILayout.Label(label, new GUILayoutOption[0]);
+			GUILayout.Label(label, Array.Empty<GUILayoutOption>());
 			return selected;
 		}
 
 		public static int Popup(GUIContent label, int selected, string[] displayedOptions)
 		{
-			GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 			label.text = label.text + ": " + selected.ToString();
-			GUILayout.Label(label, new GUILayoutOption[0]);
+			GUILayout.Label(label, Array.Empty<GUILayoutOption>());
 			GUILayout.EndHorizontal();
 			return selected;
 		}
 
 		public static int Popup(string label, int selected, string[] displayedOptions)
 		{
-			GUILayout.Label(label + ": " + selected.ToString(), new GUILayoutOption[0]);
+			GUILayout.Label(label + ": " + selected.ToString(), Array.Empty<GUILayoutOption>());
 			return selected;
 		}
 
 		public static int Popup(int selected, string[] displayedOptions)
 		{
-			return RTEditorGUI.Popup(string.Empty, selected, displayedOptions);
+			return RTEditorGUI.Popup("", selected, displayedOptions);
 		}
 
 		public static void DrawTexture(Texture texture, int texSize, GUIStyle style, params GUILayoutOption[] options)
@@ -484,7 +469,7 @@ namespace NodeEditorFramework.Utilities
 			{
 				options = new GUILayoutOption[] { GUILayout.ExpandWidth(false) };
 			}
-			Rect rect = ((style != null) ? GUILayoutUtility.GetRect((float)texSize, (float)texSize, style, options) : GUILayoutUtility.GetRect((float)texSize, (float)texSize, options));
+			Rect rect = ((style == null) ? GUILayoutUtility.GetRect((float)texSize, (float)texSize, options) : GUILayoutUtility.GetRect((float)texSize, (float)texSize, style, options));
 			if (Event.current.type == EventType.Repaint)
 			{
 				Graphics.DrawTexture(rect, texture, RTEditorGUI.texVizMat);
@@ -499,7 +484,7 @@ namespace NodeEditorFramework.Utilities
 			}
 			if (tex == null)
 			{
-				tex = ((!(RTEditorGUI.lineTexture != null)) ? (RTEditorGUI.lineTexture = ResourceManager.LoadTexture("Textures/AALine.png")) : RTEditorGUI.lineTexture);
+				tex = ((RTEditorGUI.lineTexture != null) ? RTEditorGUI.lineTexture : (RTEditorGUI.lineTexture = ResourceManager.LoadTexture("Textures/AALine.png")));
 			}
 			RTEditorGUI.lineMaterial.SetTexture("_LineTexture", tex);
 			RTEditorGUI.lineMaterial.SetColor("_LineColor", col);
@@ -566,9 +551,7 @@ namespace NodeEditorFramework.Utilities
 			RTEditorGUI.SetupLineMat(tex, col);
 			GL.Begin(5);
 			GL.Color(Color.white);
-			float num = 0f;
-			clippingRect.y = num;
-			clippingRect.x = num;
+			clippingRect.x = (clippingRect.y = 0f);
 			Vector2 vector = points[0];
 			for (int i = 1; i < points.Length; i++)
 			{
@@ -621,8 +604,7 @@ namespace NodeEditorFramework.Utilities
 
 		private static Vector2 CalculateLinePerpendicular(Vector2 startPos, Vector2 endPos)
 		{
-			Vector2 vector = new Vector2(endPos.y - startPos.y, startPos.x - endPos.x);
-			return vector.normalized;
+			return new Vector2(endPos.y - startPos.y, startPos.x - endPos.x).normalized;
 		}
 
 		private static Vector2 CalculatePointPerpendicular(Vector2 prevPos, Vector2 pointPos, Vector2 nextPos)
@@ -659,9 +641,7 @@ namespace NodeEditorFramework.Utilities
 			RTEditorGUI.SetupLineMat(tex, col);
 			GL.Begin(5);
 			GL.Color(Color.white);
-			float num = 0f;
-			clippingRect.y = num;
-			clippingRect.x = num;
+			clippingRect.x = (clippingRect.y = 0f);
 			if (RTEditorGUI.SegmentRectIntersection(clippingRect, ref startPos, ref endPos))
 			{
 				Vector2 vector = RTEditorGUI.CalculateLinePerpendicular(startPos, endPos) * width / 2f;
@@ -818,7 +798,7 @@ namespace NodeEditorFramework.Utilities
 
 		private static float activeFloatFieldLastValue = 0f;
 
-		private static string activeFloatFieldString = string.Empty;
+		private static string activeFloatFieldString = "";
 
 		private static Material texVizMat;
 

@@ -4,15 +4,6 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
 	public class Cache : ModifierModule, IModule3D, IModule
 	{
-		public Cache()
-		{
-		}
-
-		public Cache(IModule source)
-			: base(source)
-		{
-		}
-
 		public new IModule SourceModule
 		{
 			get
@@ -24,6 +15,15 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 				this._isCached = false;
 				this._sourceModule = value;
 			}
+		}
+
+		public Cache()
+		{
+		}
+
+		public Cache(IModule source)
+			: base(source)
+		{
 		}
 
 		public float GetValue(float x, float y, float z)

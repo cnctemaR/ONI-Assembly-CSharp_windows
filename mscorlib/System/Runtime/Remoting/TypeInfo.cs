@@ -12,30 +12,28 @@ namespace System.Runtime.Remoting
 				this.serverType = typeof(MarshalByRefObject).AssemblyQualifiedName;
 				this.serverHierarchy = new string[0];
 				this.interfacesImplemented = new string[] { type.AssemblyQualifiedName };
+				return;
 			}
-			else
+			this.serverType = type.AssemblyQualifiedName;
+			int num = 0;
+			Type type2 = type.BaseType;
+			while (type2 != typeof(MarshalByRefObject) && type2 != null)
 			{
-				this.serverType = type.AssemblyQualifiedName;
-				int num = 0;
-				Type type2 = type.BaseType;
-				while (type2 != typeof(MarshalByRefObject) && type2 != typeof(object))
-				{
-					type2 = type2.BaseType;
-					num++;
-				}
-				this.serverHierarchy = new string[num];
-				type2 = type.BaseType;
-				for (int i = 0; i < num; i++)
-				{
-					this.serverHierarchy[i] = type2.AssemblyQualifiedName;
-					type2 = type2.BaseType;
-				}
-				Type[] interfaces = type.GetInterfaces();
-				this.interfacesImplemented = new string[interfaces.Length];
-				for (int j = 0; j < interfaces.Length; j++)
-				{
-					this.interfacesImplemented[j] = interfaces[j].AssemblyQualifiedName;
-				}
+				type2 = type2.BaseType;
+				num++;
+			}
+			this.serverHierarchy = new string[num];
+			type2 = type.BaseType;
+			for (int i = 0; i < num; i++)
+			{
+				this.serverHierarchy[i] = type2.AssemblyQualifiedName;
+				type2 = type2.BaseType;
+			}
+			Type[] interfaces = type.GetInterfaces();
+			this.interfacesImplemented = new string[interfaces.Length];
+			for (int j = 0; j < interfaces.Length; j++)
+			{
+				this.interfacesImplemented[j] = interfaces[j].AssemblyQualifiedName;
 			}
 		}
 
@@ -81,9 +79,10 @@ namespace System.Runtime.Remoting
 			}
 			if (this.serverHierarchy != null)
 			{
-				foreach (string text2 in this.serverHierarchy)
+				string[] array = this.serverHierarchy;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if ((text2 + ",").StartsWith(text))
+					if ((array[i] + ",").StartsWith(text))
 					{
 						return true;
 					}
@@ -91,9 +90,10 @@ namespace System.Runtime.Remoting
 			}
 			if (this.interfacesImplemented != null)
 			{
-				foreach (string text3 in this.interfacesImplemented)
+				string[] array = this.interfacesImplemented;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if ((text3 + ",").StartsWith(text))
+					if ((array[i] + ",").StartsWith(text))
 					{
 						return true;
 					}

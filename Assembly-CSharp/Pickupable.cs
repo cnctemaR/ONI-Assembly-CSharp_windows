@@ -7,13 +7,6 @@ using UnityEngine;
 
 public class Pickupable : Workable, IHasSortOrder
 {
-	private Pickupable()
-	{
-		this.showProgressBar = false;
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-		this.shouldTransferDiseaseWithWorker = false;
-	}
-
 	public PrimaryElement PrimaryElement
 	{
 		get
@@ -46,7 +39,11 @@ public class Pickupable : Workable, IHasSortOrder
 	{
 		get
 		{
-			return (!(this.storage != null)) ? this.cachedCell : Grid.PosToCell(this.storage);
+			if (!(this.storage != null))
+			{
+				return this.cachedCell;
+			}
+			return Grid.PosToCell(this.storage);
 		}
 	}
 
@@ -122,13 +119,9 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			DebugUtil.Assert(this.primaryElement != null);
 			this.primaryElement.Units = value;
-			if (value < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+			if (value < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && !base.GetComponent<PrimaryElement>().KeepZeroMassObject)
 			{
-				PrimaryElement component = base.GetComponent<PrimaryElement>();
-				if (!component.KeepZeroMassObject)
-				{
-					base.gameObject.DeleteObject();
-				}
+				base.gameObject.DeleteObject();
 			}
 			this.NotifyChanged(Grid.PosToCell(this));
 		}
@@ -165,20 +158,23 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public int Reserve(string context, GameObject reserver, float amount)
 	{
-		int num = this.nextTicketNumber++;
-		Pickupable.Reservation reservation = new Pickupable.Reservation(reserver, amount, num);
+		int num = this.nextTicketNumber;
+		this.nextTicketNumber = num + 1;
+		int num2 = num;
+		Pickupable.Reservation reservation = new Pickupable.Reservation(reserver, amount, num2);
 		this.reservations.Add(reservation);
 		this.RefreshReservedAmount();
 		if (this.OnReservationsChanged != null)
 		{
 			this.OnReservationsChanged();
 		}
-		return num;
+		return num2;
 	}
 
 	public void Unreserve(string context, int ticket)
 	{
-		for (int i = 0; i < this.reservations.Count; i++)
+		int i = 0;
+		while (i < this.reservations.Count)
 		{
 			if (this.reservations[i].ticket == ticket)
 			{
@@ -187,10 +183,22 @@ public class Pickupable : Workable, IHasSortOrder
 				if (this.OnReservationsChanged != null)
 				{
 					this.OnReservationsChanged();
+					return;
 				}
 				break;
 			}
+			else
+			{
+				i++;
+			}
 		}
+	}
+
+	private Pickupable()
+	{
+		this.showProgressBar = false;
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.shouldTransferDiseaseWithWorker = false;
 	}
 
 	protected override void OnPrefabInit()
@@ -230,10 +238,8 @@ public class Pickupable : Workable, IHasSortOrder
 			return;
 		}
 		this.UpdateCachedCell(num);
-		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
-		instance.StartSM();
-		FetchableMonitor.Instance instance2 = new FetchableMonitor.Instance(this);
-		instance2.StartSM();
+		new ReachabilityMonitor.Instance(this).StartSM();
+		new FetchableMonitor.Instance(this).StartSM();
 		base.SetWorkTime(1.5f);
 		this.faceTargetWhenWorking = true;
 		KSelectable component = base.GetComponent<KSelectable>();
@@ -299,8 +305,7 @@ public class Pickupable : Workable, IHasSortOrder
 			return;
 		}
 		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
-		bool flag = smi == null || smi.IsDead();
-		if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Properties[num] != 0))
+		if ((smi == null || smi.IsDead()) && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Properties[num] != 0))
 		{
 			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
 			{
@@ -331,8 +336,7 @@ public class Pickupable : Workable, IHasSortOrder
 		if (Grid.IsValidCell(cell) && Grid.Solid[cell])
 		{
 			DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
-			bool flag3 = smi == null || smi.IsDead();
-			if (flag3)
+			if (smi == null || smi.IsDead())
 			{
 				this.Clearable.CancelClearing();
 				flag2 = true;
@@ -341,8 +345,7 @@ public class Pickupable : Workable, IHasSortOrder
 		if (flag2 != flag && !this.KPrefabID.HasTag(GameTags.Stored))
 		{
 			this.IsEntombed = flag2;
-			KSelectable component = base.GetComponent<KSelectable>();
-			component.IsSelectable = !this.IsEntombed;
+			base.GetComponent<KSelectable>().IsSelectable = !this.IsEntombed;
 		}
 		this.UpdateEntombedVisualizer();
 		return this.IsEntombed;
@@ -359,6 +362,7 @@ public class Pickupable : Workable, IHasSortOrder
 			if (position.x < vector.x || vector.y < position.x || position.y < vector2.x || vector2.y < position.y)
 			{
 				this.DeleteObject();
+				return;
 			}
 		}
 		else
@@ -413,12 +417,10 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			this.RegisterListeners();
 			this.AddFaller(Vector2.zero);
+			return;
 		}
-		else
-		{
-			this.UnregisterListeners();
-			this.RemoveFaller();
-		}
+		this.UnregisterListeners();
+		this.RemoveFaller();
 	}
 
 	private void NotifyChanged(int new_cell)
@@ -457,8 +459,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			Vector3 position = base.transform.GetPosition();
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
-			GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position, Quaternion.identity, null, null, true, 0);
-			gameObject.SetActive(true);
+			global::Util.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position, Quaternion.identity, null, null, true, 0).SetActive(true);
 		}
 		return true;
 	}
@@ -533,25 +534,19 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void RefreshStorageTags(object data = null)
 	{
-		bool flag = data is Storage || (data != null && (bool)data);
-		if (flag)
-		{
-			this.KPrefabID.AddTag(GameTags.Stored, false);
-			bool flag2 = this.storage == null || !this.storage.allowItemRemoval;
-			if (flag2)
-			{
-				this.KPrefabID.AddTag(GameTags.StoredPrivate, false);
-			}
-			else
-			{
-				this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
-			}
-		}
-		else
+		if (!(data is Storage) && (data == null || !(bool)data))
 		{
 			this.KPrefabID.RemoveTag(GameTags.Stored);
 			this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
+			return;
 		}
+		this.KPrefabID.AddTag(GameTags.Stored, false);
+		if (this.storage == null || !this.storage.allowItemRemoval)
+		{
+			this.KPrefabID.AddTag(GameTags.StoredPrivate, false);
+			return;
+		}
+		this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
 	}
 
 	public void OnStore(object data)
@@ -589,6 +584,7 @@ public class Pickupable : Workable, IHasSortOrder
 			if (component != null)
 			{
 				component.SetRegistered(false);
+				return;
 			}
 		}
 		else
@@ -636,24 +632,20 @@ public class Pickupable : Workable, IHasSortOrder
 		Storage component = worker.GetComponent<Storage>();
 		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
 		float amount = pickupableStartWorkInfo.amount;
-		if (this != null)
-		{
-			Pickupable pickupable = this.Take(amount);
-			if (pickupable != null)
-			{
-				component.Store(pickupable.gameObject, false, false, true, false);
-				worker.workCompleteData = pickupable;
-				pickupableStartWorkInfo.setResultCb(pickupable.gameObject);
-			}
-			else
-			{
-				pickupableStartWorkInfo.setResultCb(null);
-			}
-		}
-		else
+		if (!(this != null))
 		{
 			pickupableStartWorkInfo.setResultCb(null);
+			return;
 		}
+		Pickupable pickupable = this.Take(amount);
+		if (pickupable != null)
+		{
+			component.Store(pickupable.gameObject, false, false, true, false);
+			worker.workCompleteData = pickupable;
+			pickupableStartWorkInfo.setResultCb(pickupable.gameObject);
+			return;
+		}
+		pickupableStartWorkInfo.setResultCb(null);
 	}
 
 	public override bool InstantlyFinish(Worker worker)
@@ -678,11 +670,9 @@ public class Pickupable : Workable, IHasSortOrder
 		if (this.isReachable)
 		{
 			component.RemoveStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, false);
+			return;
 		}
-		else
-		{
-			component.AddStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, this);
-		}
+		component.AddStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, this);
 	}
 
 	private void AddFaller(Vector2 initial_velocity)
@@ -738,8 +728,7 @@ public class Pickupable : Workable, IHasSortOrder
 			return;
 		}
 		Vector2 vector = (Vector2)data;
-		float sqrMagnitude = vector.sqrMagnitude;
-		if (sqrMagnitude <= 0.2f || SpeedControlScreen.Instance.IsPaused)
+		if (vector.sqrMagnitude <= 0.2f || SpeedControlScreen.Instance.IsPaused)
 		{
 			return;
 		}
@@ -771,7 +760,7 @@ public class Pickupable : Workable, IHasSortOrder
 				text = "Ore_bump_" + text;
 			}
 			string text2 = GlobalAssets.GetSound(text, true);
-			text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
+			text2 = ((text2 != null) ? text2 : GlobalAssets.GetSound("Ore_bump_rock", false));
 			if (CameraController.Instance.IsAudibleSound(base.transform.GetPosition(), text2))
 			{
 				int num = Grid.PosToCell(position);
@@ -808,6 +797,7 @@ public class Pickupable : Workable, IHasSortOrder
 						this.entombedCell = num;
 						component.enabled = false;
 						this.RemoveFaller();
+						return;
 					}
 				}
 			}
@@ -824,8 +814,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			Game.Instance.GetComponent<EntombedItemVisualizer>().RemoveItem(this.entombedCell);
 			this.entombedCell = -1;
-			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.enabled = true;
+			base.GetComponent<KBatchedAnimController>().enabled = true;
 			if (add_faller_if_necessary)
 			{
 				this.AddFaller(Vector2.zero);
@@ -960,6 +949,12 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public class PickupableStartWorkInfo : Worker.StartWorkInfo
 	{
+		public float amount { get; private set; }
+
+		public Pickupable originalPickupable { get; private set; }
+
+		public Action<GameObject> setResultCb { get; private set; }
+
 		public PickupableStartWorkInfo(Pickupable pickupable, float amount, Action<GameObject> set_result_cb)
 			: base(pickupable.targetWorkable)
 		{
@@ -967,11 +962,5 @@ public class Pickupable : Workable, IHasSortOrder
 			this.amount = amount;
 			this.setResultCb = set_result_cb;
 		}
-
-		public float amount { get; private set; }
-
-		public Pickupable originalPickupable { get; private set; }
-
-		public Action<GameObject> setResultCb { get; private set; }
 	}
 }

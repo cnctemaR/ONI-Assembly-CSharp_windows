@@ -14,7 +14,11 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
 		private static object GetDefault(Type type)
 		{
-			return (!type.IsValueType()) ? null : Activator.CreateInstance(type);
+			if (!type.IsValueType())
+			{
+				return null;
+			}
+			return Activator.CreateInstance(type);
 		}
 
 		public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
@@ -25,7 +29,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 		public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
 		{
 			DefaultValueAttribute customAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
-			object obj = ((customAttribute == null) ? DefaultExclusiveObjectGraphVisitor.GetDefault(key.Type) : customAttribute.Value);
+			object obj = ((customAttribute != null) ? customAttribute.Value : DefaultExclusiveObjectGraphVisitor.GetDefault(key.Type));
 			return !DefaultExclusiveObjectGraphVisitor._objectComparer.Equals(value.Value, obj) && base.EnterMapping(key, value, context);
 		}
 

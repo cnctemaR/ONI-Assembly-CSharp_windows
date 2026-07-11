@@ -29,32 +29,39 @@ public class GermExposureTracker : KMonoBehaviour
 		float num2 = num + amount;
 		if (num2 > 1f)
 		{
-			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+			using (List<MinionIdentity>.Enumerator enumerator = Components.LiveMinionIdentities.Items.GetEnumerator())
 			{
-				GermExposureMonitor.Instance smi = minionIdentity.GetSMI<GermExposureMonitor.Instance>();
-				if (smi.GetExposureState(exposure_type.germ_id) == GermExposureMonitor.ExposureState.Exposed)
+				while (enumerator.MoveNext())
 				{
-					GermExposureMonitor.Instance smi2 = minionIdentity.GetSMI<GermExposureMonitor.Instance>();
-					float exposureWeight = smi2.GetExposureWeight(exposure_type.germ_id);
-					if (exposureWeight > 0f)
+					MinionIdentity minionIdentity = enumerator.Current;
+					GermExposureMonitor.Instance smi = minionIdentity.GetSMI<GermExposureMonitor.Instance>();
+					if (smi.GetExposureState(exposure_type.germ_id) == GermExposureMonitor.ExposureState.Exposed)
 					{
-						this.exposure_candidates.Add(new GermExposureTracker.WeightedExposure
+						float exposureWeight = minionIdentity.GetSMI<GermExposureMonitor.Instance>().GetExposureWeight(exposure_type.germ_id);
+						if (exposureWeight > 0f)
 						{
-							weight = exposureWeight,
-							monitor = smi
-						});
+							this.exposure_candidates.Add(new GermExposureTracker.WeightedExposure
+							{
+								weight = exposureWeight,
+								monitor = smi
+							});
+						}
 					}
 				}
+				goto IL_00F8;
 			}
-			while (num2 > 1f)
+			IL_00AF:
+			num2 -= 1f;
+			if (this.exposure_candidates.Count > 0)
 			{
-				num2 -= 1f;
-				if (this.exposure_candidates.Count > 0)
-				{
-					GermExposureTracker.WeightedExposure weightedExposure = WeightedRandom.Choose<GermExposureTracker.WeightedExposure>(this.exposure_candidates, this.rng);
-					this.exposure_candidates.Remove(weightedExposure);
-					weightedExposure.monitor.ContractGerms(exposure_type.germ_id);
-				}
+				GermExposureTracker.WeightedExposure weightedExposure = WeightedRandom.Choose<GermExposureTracker.WeightedExposure>(this.exposure_candidates, this.rng);
+				this.exposure_candidates.Remove(weightedExposure);
+				weightedExposure.monitor.ContractGerms(exposure_type.germ_id);
+			}
+			IL_00F8:
+			if (num2 > 1f)
+			{
+				goto IL_00AF;
 			}
 		}
 		this.accumulation[exposure_type.germ_id] = num2;

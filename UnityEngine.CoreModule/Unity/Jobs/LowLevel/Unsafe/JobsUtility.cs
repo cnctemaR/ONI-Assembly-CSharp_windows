@@ -5,9 +5,6 @@ using UnityEngine.Bindings;
 
 namespace Unity.Jobs.LowLevel.Unsafe
 {
-	/// <summary>
-	///   <para>Static class containing functionality to create, run and debug jobs.</para>
-	/// </summary>
 	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
 	public static class JobsUtility
 	{
@@ -54,8 +51,8 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[NativeMethod(IsThreadSafe = true, IsFreeFunction = true)]
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		[NativeMethod(IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void PatchBufferMinMaxRanges(IntPtr bufferRangePatchData, void* jobdata, int startIndex, int rangeSize);
 
@@ -73,9 +70,6 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return JobsUtility.CreateJobReflectionData(wrapperJobType, userJobType, jobType, managedJobFunction0, null, null);
 		}
 
-		/// <summary>
-		///   <para>Enables and disables the job debugger at runtime. Note that currently the job debugger is only supported in the Editor. Thus this only has effect in the editor.</para>
-		/// </summary>
 		public static extern bool JobDebuggerEnabled
 		{
 			[FreeFunction]
@@ -86,9 +80,6 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			set;
 		}
 
-		/// <summary>
-		///   <para>When disabled, forces jobs that have already been compiled with burst to run in mono instead. For example if you want to debug the C# jobs or just want to compare behaviour or performance.</para>
-		/// </summary>
 		public static extern bool JobCompilerEnabled
 		{
 			[FreeFunction]
@@ -111,28 +102,12 @@ namespace Unity.Jobs.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ScheduleParallelForTransform_Injected(ref JobsUtility.JobScheduleParameters parameters, IntPtr transfromAccesssArray, out JobHandle ret);
 
-		/// <summary>
-		///   <para>Maximum job thread count.</para>
-		/// </summary>
 		public const int MaxJobThreadCount = 128;
 
-		/// <summary>
-		///   <para>Size of a cache line.</para>
-		/// </summary>
 		public const int CacheLineSize = 64;
 
-		/// <summary>
-		///   <para>Struct containing job parameters for scheduling.</para>
-		/// </summary>
 		public struct JobScheduleParameters
 		{
-			/// <summary>
-			///   <para>Constructor.</para>
-			/// </summary>
-			/// <param name="i_jobData"></param>
-			/// <param name="i_reflectionData"></param>
-			/// <param name="i_dependency"></param>
-			/// <param name="i_scheduleMode"></param>
 			public unsafe JobScheduleParameters(void* i_jobData, IntPtr i_reflectionData, JobHandle i_dependency, ScheduleMode i_scheduleMode)
 			{
 				this.Dependency = i_dependency;
@@ -141,24 +116,12 @@ namespace Unity.Jobs.LowLevel.Unsafe
 				this.ScheduleMode = (int)i_scheduleMode;
 			}
 
-			/// <summary>
-			///   <para>A JobHandle to any dependency this job would have.</para>
-			/// </summary>
 			public JobHandle Dependency;
 
-			/// <summary>
-			///   <para>ScheduleMode option.</para>
-			/// </summary>
 			public int ScheduleMode;
 
-			/// <summary>
-			///   <para>Pointer to the reflection data.</para>
-			/// </summary>
 			public IntPtr ReflectionData;
 
-			/// <summary>
-			///   <para>Pointer to the job data.</para>
-			/// </summary>
 			public IntPtr JobDataPtr;
 		}
 	}

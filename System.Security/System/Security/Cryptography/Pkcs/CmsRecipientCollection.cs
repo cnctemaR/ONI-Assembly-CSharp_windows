@@ -4,7 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography.Pkcs
 {
-	public sealed class CmsRecipientCollection : IEnumerable, ICollection
+	public sealed class CmsRecipientCollection : ICollection, IEnumerable
 	{
 		public CmsRecipientCollection()
 		{
@@ -23,11 +23,6 @@ namespace System.Security.Cryptography.Pkcs
 				CmsRecipient cmsRecipient = new CmsRecipient(recipientIdentifierType, x509Certificate);
 				this._list.Add(cmsRecipient);
 			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new CmsRecipientEnumerator(this._list);
 		}
 
 		public int Count
@@ -78,6 +73,11 @@ namespace System.Security.Cryptography.Pkcs
 		}
 
 		public CmsRecipientEnumerator GetEnumerator()
+		{
+			return new CmsRecipientEnumerator(this._list);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new CmsRecipientEnumerator(this._list);
 		}

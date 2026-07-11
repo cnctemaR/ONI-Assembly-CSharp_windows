@@ -22,8 +22,7 @@ namespace Database
 			int num = 0;
 			foreach (IBasicBuilding basicBuilding in Components.BasicBuildings.Items)
 			{
-				KPrefabID component = basicBuilding.transform.GetComponent<KPrefabID>();
-				Tag prefabTag = component.PrefabTag;
+				Tag prefabTag = basicBuilding.transform.GetComponent<KPrefabID>().PrefabTag;
 				if (this.validBuildingTypes.Contains(prefabTag))
 				{
 					num++;
@@ -80,7 +79,7 @@ namespace Database
 					num++;
 				}
 			}
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILING_BEDS, (!complete) ? num : Components.LiveMinionIdentities.Items.Count, Components.LiveMinionIdentities.Items.Count);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILING_BEDS, complete ? Components.LiveMinionIdentities.Items.Count : num, Components.LiveMinionIdentities.Items.Count);
 		}
 
 		private List<Tag> validBuildingTypes = new List<Tag>();

@@ -90,8 +90,9 @@ public class ToolTipScreen : KScreen
 				this.anchorRoot.anchoredPosition = new Vector2(this.anchorRoot.anchoredPosition.x / num, this.anchorRoot.anchoredPosition.y / num);
 				component.pivot = this.tooltipSetting.tooltipPivot;
 				RectTransform rectTransform2 = component;
+				RectTransform rectTransform3 = component;
 				Vector2 vector = new Vector2(0f, 0f);
-				component.anchorMax = vector;
+				rectTransform3.anchorMax = vector;
 				rectTransform2.anchorMin = vector;
 				component.anchoredPosition = this.tooltipSetting.tooltipPositionOffset * num;
 				if (!this.tooltipSetting.worldSpace)
@@ -141,8 +142,7 @@ public class ToolTipScreen : KScreen
 		this.clearMultiStringTooltip();
 		for (int i = 0; i < multiStringCount; i++)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.labelPrefab, null, true);
-			gameObject.transform.SetParent(this.multiTooltipContainer.transform);
+			Util.KInstantiateUI(this.labelPrefab, null, true).transform.SetParent(this.multiTooltipContainer.transform);
 		}
 		for (int j = 0; j < this.tooltipSetting.multiStringCount; j++)
 		{
@@ -150,23 +150,13 @@ public class ToolTipScreen : KScreen
 			LayoutElement component = child.GetComponent<LayoutElement>();
 			TextMeshProUGUI component2 = child.GetComponent<TextMeshProUGUI>();
 			component2.text = this.tooltipSetting.GetMultiString(j);
-			SetTextStyleSetting component3 = child.GetComponent<SetTextStyleSetting>();
-			component3.SetStyle((TextStyleSetting)this.tooltipSetting.GetStyleSetting(j));
+			child.GetComponent<SetTextStyleSetting>().SetStyle((TextStyleSetting)this.tooltipSetting.GetStyleSetting(j));
 			if (setting.SizingSetting == ToolTip.ToolTipSizeSetting.MaxWidthWrapContent)
 			{
-				LayoutElement layoutElement = component;
-				float num = setting.WrapWidth;
-				component.preferredWidth = num;
-				layoutElement.minWidth = num;
+				component.minWidth = (component.preferredWidth = setting.WrapWidth);
 				component.rectTransform().sizeDelta = new Vector2(setting.WrapWidth, 1000f);
-				LayoutElement layoutElement2 = component;
-				num = component2.preferredHeight;
-				component.preferredHeight = num;
-				layoutElement2.minHeight = num;
-				LayoutElement layoutElement3 = component;
-				num = component2.preferredHeight;
-				component.preferredHeight = num;
-				layoutElement3.minHeight = num;
+				component.minHeight = (component.preferredHeight = component2.preferredHeight);
+				component.minHeight = (component.preferredHeight = component2.preferredHeight);
 				component.rectTransform().sizeDelta = new Vector2(setting.WrapWidth, component.minHeight);
 				base.GetComponentInChildren<ContentSizeFitter>(true).horizontalFit = ContentSizeFitter.FitMode.MinSize;
 				this.multiTooltipContainer.GetComponent<LayoutElement>().minWidth = setting.WrapWidth;
@@ -175,16 +165,8 @@ public class ToolTipScreen : KScreen
 			{
 				base.GetComponentInChildren<ContentSizeFitter>(true).horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 				Vector2 preferredValues = component2.GetPreferredValues();
-				LayoutElement component4 = this.multiTooltipContainer.GetComponent<LayoutElement>();
-				float num = preferredValues.x;
-				component.preferredWidth = num;
-				num = num;
-				component.minWidth = num;
-				component4.minWidth = num;
-				LayoutElement layoutElement4 = component;
-				num = preferredValues.y;
-				component.preferredHeight = num;
-				layoutElement4.minHeight = num;
+				this.multiTooltipContainer.GetComponent<LayoutElement>().minWidth = (component.minWidth = (component.preferredWidth = preferredValues.x));
+				component.minHeight = (component.preferredHeight = preferredValues.y);
 				base.GetComponentInChildren<ContentSizeFitter>(true).SetLayoutHorizontal();
 				base.GetComponentInChildren<ContentSizeFitter>(true).SetLayoutVertical();
 				this.multiTooltipContainer.rectTransform().sizeDelta = new Vector2(component.minWidth, component.minHeight);
@@ -214,8 +196,7 @@ public class ToolTipScreen : KScreen
 		if (this.tooltipIncubating)
 		{
 			this.tooltipIncubating = false;
-			Image componentInChildren = this.anchorRoot.GetComponentInChildren<Image>();
-			if (componentInChildren != null)
+			if (this.anchorRoot.GetComponentInChildren<Image>() != null)
 			{
 				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
 			}
@@ -229,17 +210,17 @@ public class ToolTipScreen : KScreen
 				}
 				LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
 				TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
-				this.toolTipIsBlank = component2.text == string.Empty && this.toolTipIsBlank;
+				this.toolTipIsBlank = component2.text == "" && this.toolTipIsBlank;
 				if (component.minHeight != component2.preferredHeight)
 				{
 					component.minHeight = component2.preferredHeight;
 				}
 			}
+			return;
 		}
-		else if (this.multiTooltipContainer.transform.localScale != Vector3.one && !this.toolTipIsBlank)
+		if (this.multiTooltipContainer.transform.localScale != Vector3.one && !this.toolTipIsBlank)
 		{
-			Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
-			if (componentInChildren2 != null)
+			if (this.anchorRoot.GetComponentInChildren<Image>() != null)
 			{
 				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
 			}
@@ -251,9 +232,7 @@ public class ToolTipScreen : KScreen
 	{
 		if (this.multiTooltipContainer.transform.childCount > lineIndex)
 		{
-			Transform child = this.multiTooltipContainer.transform.GetChild(lineIndex);
-			TextMeshProUGUI component = child.GetComponent<TextMeshProUGUI>();
-			component.text = newString;
+			this.multiTooltipContainer.transform.GetChild(lineIndex).GetComponent<TextMeshProUGUI>().text = newString;
 		}
 	}
 

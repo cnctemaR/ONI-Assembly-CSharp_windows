@@ -50,7 +50,7 @@ public class SimpleInfoScreen : TargetScreen
 		this.RefreshStorage();
 		base.Subscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
 		this.RefreshBreedingChance();
-		this.vitalsPanel.SetTitle((!(target.GetComponent<WiltCondition>() == null)) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
+		this.vitalsPanel.SetTitle((target.GetComponent<WiltCondition>() == null) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
 		{
@@ -143,14 +143,13 @@ public class SimpleInfoScreen : TargetScreen
 		{
 			color = this.statusItemTextColor_regular;
 		}
-		TextStyleSetting textStyleSetting = ((category != Db.Get().StatusItemCategories.Main) ? this.StatusItemStyle_Other : this.StatusItemStyle_Main);
+		TextStyleSetting textStyleSetting = ((category == Db.Get().StatusItemCategories.Main) ? this.StatusItemStyle_Main : this.StatusItemStyle_Other);
 		SimpleInfoScreen.StatusItemEntry statusItemEntry = new SimpleInfoScreen.StatusItemEntry(status_item, category, this.StatusItemPrefab, gameObject.transform, this.ToolTipStyle_Property, color, textStyleSetting, show_immediate, new Action<SimpleInfoScreen.StatusItemEntry>(this.OnStatusItemDestroy));
 		statusItemEntry.SetSprite(status_item.item.sprite);
 		if (category != null)
 		{
 			int num = -1;
-			List<SimpleInfoScreen.StatusItemEntry> list = this.oldStatusItems.FindAll((SimpleInfoScreen.StatusItemEntry e) => e.category == category);
-			foreach (SimpleInfoScreen.StatusItemEntry statusItemEntry2 in list)
+			foreach (SimpleInfoScreen.StatusItemEntry statusItemEntry2 in this.oldStatusItems.FindAll((SimpleInfoScreen.StatusItemEntry e) => e.category == category))
 			{
 				num = statusItemEntry2.GetIndex();
 				statusItemEntry2.Destroy(true);
@@ -183,7 +182,7 @@ public class SimpleInfoScreen : TargetScreen
 				this.statusItems.RemoveAt(i);
 				this.oldStatusItems.Add(statusItemEntry);
 				statusItemEntry.Destroy(destroy_immediate);
-				break;
+				return;
 			}
 		}
 	}
@@ -244,8 +243,8 @@ public class SimpleInfoScreen : TargetScreen
 		});
 		this.attributeLabels.Clear();
 		this.vitalsPanel.gameObject.SetActive(amounts != null);
-		string text = string.Empty;
-		string text2 = string.Empty;
+		string text = "";
+		string text2 = "";
 		if (amounts != null)
 		{
 			this.vitalsContainer.selectedEntity = this.selectedTarget;
@@ -254,15 +253,14 @@ public class SimpleInfoScreen : TargetScreen
 			{
 				this.vitalsPanel.gameObject.SetActive(component8.GetPlanterStorage != null);
 			}
-			WiltCondition component9 = this.selectedTarget.gameObject.GetComponent<WiltCondition>();
-			if (component9 != null)
+			if (this.selectedTarget.gameObject.GetComponent<WiltCondition>() != null)
 			{
 				this.vitalsPanel.gameObject.SetActive(true);
 			}
 		}
 		if (component)
 		{
-			text = string.Empty;
+			text = "";
 		}
 		else if (component6)
 		{
@@ -290,7 +288,7 @@ public class SimpleInfoScreen : TargetScreen
 		else if (component2 != null)
 		{
 			Element element = ElementLoader.FindElementByHash(component2.ElementID);
-			text = ((element == null) ? string.Empty : element.FullDescription(false));
+			text = ((element != null) ? element.FullDescription(false) : "");
 		}
 		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(target, true);
 		bool flag = gameObjectEffects.Count > 0;
@@ -304,7 +302,7 @@ public class SimpleInfoScreen : TargetScreen
 		this.descriptionContainer.flavour.text = text2;
 		this.infoPanel.gameObject.SetActive(component == null);
 		this.descriptionContainer.gameObject.SetActive(this.infoPanel.activeSelf);
-		this.descriptionContainer.flavour.gameObject.SetActive(text2 != string.Empty && text2 != "\n");
+		this.descriptionContainer.flavour.gameObject.SetActive(text2 != "" && text2 != "\n");
 		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)
 		{
 			this.vitalsPanel.gameObject.SetActive(false);
@@ -330,7 +328,7 @@ public class SimpleInfoScreen : TargetScreen
 			List<FertilityModifier> forTag = Db.Get().FertilityModifiers.GetForTag(breedingChance.egg);
 			if (forTag.Count > 0)
 			{
-				string text = string.Empty;
+				string text = "";
 				foreach (FertilityModifier fertilityModifier in forTag)
 				{
 					text += string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_MOD_FORMAT, fertilityModifier.GetTooltip());
@@ -365,7 +363,7 @@ public class SimpleInfoScreen : TargetScreen
 			return;
 		}
 		this.storagePanel.gameObject.SetActive(true);
-		string text = ((!(this.selectedTarget.GetComponent<MinionIdentity>() != null)) ? UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS);
+		string text = ((this.selectedTarget.GetComponent<MinionIdentity>() != null) ? UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS);
 		this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
 		{
@@ -429,8 +427,7 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		if (num == 0)
 		{
-			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty");
-			gameObject3.GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
+			this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty").GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
 		}
 	}
 
@@ -440,8 +437,7 @@ public class SimpleInfoScreen : TargetScreen
 		if (labels.ContainsKey(id))
 		{
 			gameObject = labels[id];
-			KButton component = gameObject.GetComponent<KButton>();
-			component.ClearOnClick();
+			gameObject.GetComponent<KButton>().ClearOnClick();
 			Transform transform = gameObject.transform.Find("removeAttributeButton");
 			if (transform != null)
 			{
@@ -463,7 +459,7 @@ public class SimpleInfoScreen : TargetScreen
 
 	private void RefreshStress()
 	{
-		MinionIdentity identity = ((!(this.selectedTarget != null)) ? null : this.selectedTarget.GetComponent<MinionIdentity>());
+		MinionIdentity identity = ((this.selectedTarget != null) ? this.selectedTarget.GetComponent<MinionIdentity>() : null);
 		if (identity == null)
 		{
 			this.stressPanel.SetActive(false);
@@ -477,7 +473,7 @@ public class SimpleInfoScreen : TargetScreen
 		float num = 0f;
 		stressNotes.Clear();
 		int num2 = reportEntry.contextEntries.FindIndex((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
-		ReportManager.ReportEntry reportEntry2 = ((num2 == -1) ? null : reportEntry.contextEntries[num2]);
+		ReportManager.ReportEntry reportEntry2 = ((num2 != -1) ? reportEntry.contextEntries[num2] : null);
 		if (reportEntry2 != null)
 		{
 			reportEntry2.IterateNotes(delegate(ReportManager.ReportEntry.Note note)
@@ -489,17 +485,17 @@ public class SimpleInfoScreen : TargetScreen
 			{
 				this.stressDrawer.NewLabel(string.Concat(new string[]
 				{
-					(stressNotes[i].value <= 0f) ? string.Empty : UIConstants.ColorPrefixRed,
+					(stressNotes[i].value > 0f) ? UIConstants.ColorPrefixRed : "",
 					stressNotes[i].note,
 					": ",
 					Util.FormatTwoDecimalPlace(stressNotes[i].value),
 					"%",
-					(stressNotes[i].value <= 0f) ? string.Empty : UIConstants.ColorSuffix
+					(stressNotes[i].value > 0f) ? UIConstants.ColorSuffix : ""
 				}));
 				num += stressNotes[i].value;
 			}
 		}
-		this.stressDrawer.NewLabel(((num <= 0f) ? string.Empty : UIConstants.ColorPrefixRed) + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, Util.FormatTwoDecimalPlace(num)) + ((num <= 0f) ? string.Empty : UIConstants.ColorSuffix));
+		this.stressDrawer.NewLabel(((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, Util.FormatTwoDecimalPlace(num)) + ((num > 0f) ? UIConstants.ColorSuffix : ""));
 		this.stressDrawer.EndDrawing();
 	}
 
@@ -531,10 +527,7 @@ public class SimpleInfoScreen : TargetScreen
 		{
 			global::UnityEngine.Object.Destroy(this.stampContainer.transform.GetChild(i).gameObject);
 		}
-		BuildingComplete component = target.GetComponent<BuildingComplete>();
-		if (component != null)
-		{
-		}
+		target.GetComponent<BuildingComplete>() != null;
 	}
 
 	public GameObject attributesLabelTemplate;
@@ -617,6 +610,14 @@ public class SimpleInfoScreen : TargetScreen
 	[DebuggerDisplay("{item.item.Name}")]
 	public class StatusItemEntry : IRenderEveryTick
 	{
+		public Image GetImage
+		{
+			get
+			{
+				return this.image;
+			}
+		}
+
 		public StatusItemEntry(StatusItemGroup.Entry item, StatusItemCategory category, GameObject status_item_prefab, Transform parent, TextStyleSetting tooltip_style, Color color, TextStyleSetting style, bool skip_fade, Action<SimpleInfoScreen.StatusItemEntry> onDestroy)
 		{
 			this.item = item;
@@ -642,18 +643,10 @@ public class SimpleInfoScreen : TargetScreen
 			{
 				this.button.enabled = false;
 			}
-			this.fadeStage = ((!skip_fade) ? SimpleInfoScreen.StatusItemEntry.FadeStage.IN : SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT);
+			this.fadeStage = (skip_fade ? SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT : SimpleInfoScreen.StatusItemEntry.FadeStage.IN);
 			SimAndRenderScheduler.instance.Add(this, false);
 			this.Refresh();
 			this.SetColor(1f);
-		}
-
-		public Image GetImage
-		{
-			get
-			{
-				return this.image;
-			}
 		}
 
 		internal void SetSprite(TintedSprite sprite)
@@ -676,39 +669,42 @@ public class SimpleInfoScreen : TargetScreen
 
 		public void RenderEveryTick(float dt)
 		{
-			SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage = this.fadeStage;
-			if (fadeStage != SimpleInfoScreen.StatusItemEntry.FadeStage.IN)
+			switch (this.fadeStage)
 			{
-				if (fadeStage != SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT)
-				{
-					if (fadeStage == SimpleInfoScreen.StatusItemEntry.FadeStage.OUT)
-					{
-						float num = this.fade;
-						this.SetColor(num);
-						this.fade = Mathf.Max(this.fade - Time.deltaTime / this.fadeOutTime, 0f);
-						if (this.fade <= 0f)
-						{
-							this.Destroy(true);
-						}
-					}
-				}
-			}
-			else
+			case SimpleInfoScreen.StatusItemEntry.FadeStage.IN:
 			{
 				this.fade = Mathf.Min(this.fade + Time.deltaTime / this.fadeInTime, 1f);
-				float num2 = this.fade;
-				this.SetColor(num2);
+				float num = this.fade;
+				this.SetColor(num);
 				if (this.fade >= 1f)
 				{
 					this.fadeStage = SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT;
+					return;
 				}
+				break;
+			}
+			case SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT:
+				break;
+			case SimpleInfoScreen.StatusItemEntry.FadeStage.OUT:
+			{
+				float num2 = this.fade;
+				this.SetColor(num2);
+				this.fade = Mathf.Max(this.fade - Time.deltaTime / this.fadeOutTime, 0f);
+				if (this.fade <= 0f)
+				{
+					this.Destroy(true);
+				}
+				break;
+			}
+			default:
+				return;
 			}
 		}
 
 		private string OnToolTip()
 		{
 			this.item.ShowToolTip(this.toolTip, this.tooltipStyle);
-			return string.Empty;
+			return "";
 		}
 
 		private void OnClick()
@@ -744,12 +740,10 @@ public class SimpleInfoScreen : TargetScreen
 				SimAndRenderScheduler.instance.Remove(this);
 				this.toolTip.OnToolTip = null;
 				global::UnityEngine.Object.Destroy(this.widget);
+				return;
 			}
-			else
-			{
-				this.fade = 0.5f;
-				this.fadeStage = SimpleInfoScreen.StatusItemEntry.FadeStage.OUT;
-			}
+			this.fade = 0.5f;
+			this.fadeStage = SimpleInfoScreen.StatusItemEntry.FadeStage.OUT;
 		}
 
 		public StatusItemGroup.Entry item;

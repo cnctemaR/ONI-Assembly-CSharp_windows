@@ -11,7 +11,7 @@ namespace HUSL
 		{
 			List<double[]> list = new List<double[]>();
 			double num = Math.Pow(L + 16.0, 3.0) / 1560896.0;
-			double num2 = ((num <= ColorConverter.Epsilon) ? (L / ColorConverter.Kappa) : num);
+			double num2 = ((num > ColorConverter.Epsilon) ? num : (L / ColorConverter.Kappa));
 			for (int i = 0; i < 3; i++)
 			{
 				double num3 = ColorConverter.M[i][0];
@@ -56,11 +56,10 @@ namespace HUSL
 			{
 				double num2 = bounds[i][0];
 				double num3 = bounds[i][1];
-				double[] array = new double[] { num2, num3 };
-				IList<double> list = array;
-				double[] array2 = new double[2];
-				array2[0] = -1.0 / num2;
-				double num4 = ColorConverter.IntersectLineLine(list, array2);
+				IList<double> list = new double[] { num2, num3 };
+				double[] array = new double[2];
+				array[0] = -1.0 / num2;
+				double num4 = ColorConverter.IntersectLineLine(list, array);
 				double num5 = ColorConverter.DistanceFromPole(new double[]
 				{
 					num4,
@@ -74,7 +73,7 @@ namespace HUSL
 		protected static double MaxChromaForLH(double L, double H)
 		{
 			double num = H / 360.0 * 3.141592653589793 * 2.0;
-			IList<double[]> bounds = ColorConverter.GetBounds(L);
+			IEnumerable<double[]> bounds = ColorConverter.GetBounds(L);
 			double num2 = double.MaxValue;
 			foreach (double[] array in bounds)
 			{
@@ -227,24 +226,22 @@ namespace HUSL
 			double num2 = tuple[1];
 			double num3 = tuple[2];
 			double num4 = Math.Pow(Math.Pow(num2, 2.0) + Math.Pow(num3, 2.0), 0.5);
-			double num5 = Math.Atan2(num3, num2);
-			double num6 = num5 * 180.0 / 3.141592653589793;
-			if (num6 < 0.0)
+			double num5 = Math.Atan2(num3, num2) * 180.0 / 3.141592653589793;
+			if (num5 < 0.0)
 			{
-				num6 = 360.0 + num6;
+				num5 = 360.0 + num5;
 			}
-			return new double[] { num, num4, num6 };
+			return new double[] { num, num4, num5 };
 		}
 
 		public static IList<double> LCHToLUV(IList<double> tuple)
 		{
 			double num = tuple[0];
 			double num2 = tuple[1];
-			double num3 = tuple[2];
-			double num4 = num3 / 360.0 * 2.0 * 3.141592653589793;
-			double num5 = Math.Cos(num4) * num2;
-			double num6 = Math.Sin(num4) * num2;
-			return new double[] { num, num5, num6 };
+			double num3 = tuple[2] / 360.0 * 2.0 * 3.141592653589793;
+			double num4 = Math.Cos(num3) * num2;
+			double num5 = Math.Sin(num3) * num2;
+			return new double[] { num, num4, num5 };
 		}
 
 		public static IList<double> HUSLToLCH(IList<double> tuple)
@@ -260,9 +257,8 @@ namespace HUSL
 			{
 				return new double[] { 0.0, 0.0, num };
 			}
-			double num4 = ColorConverter.MaxChromaForLH(num3, num);
-			double num5 = num4 / 100.0 * num2;
-			return new double[] { num3, num5, num };
+			double num4 = ColorConverter.MaxChromaForLH(num3, num) / 100.0 * num2;
+			return new double[] { num3, num4, num };
 		}
 
 		public static IList<double> LCHToHUSL(IList<double> tuple)
@@ -298,9 +294,8 @@ namespace HUSL
 			{
 				return new double[] { 0.0, 0.0, num };
 			}
-			double num4 = ColorConverter.MaxSafeChromaForL(num3);
-			double num5 = num4 / 100.0 * num2;
-			return new double[] { num3, num5, num };
+			double num4 = ColorConverter.MaxSafeChromaForL(num3) / 100.0 * num2;
+			return new double[] { num3, num4, num };
 		}
 
 		public static IList<double> LCHToHUSLP(IList<double> tuple)
@@ -391,25 +386,23 @@ namespace HUSL
 
 		public static Color HUSLToColor(float h, float s, float l)
 		{
-			double[] array = new double[]
+			IList<double> list = ColorConverter.HUSLToRGB(new List<double>(new double[]
 			{
 				(double)h,
 				(double)s,
 				(double)l
-			};
-			IList<double> list = ColorConverter.HUSLToRGB(new List<double>(array));
+			}));
 			return new Color((float)list[0], (float)list[1], (float)list[2]);
 		}
 
 		public static Color HUSLPToColor(float h, float s, float l)
 		{
-			double[] array = new double[]
+			IList<double> list = ColorConverter.HUSLPToRGB(new List<double>(new double[]
 			{
 				(double)h,
 				(double)s,
 				(double)l
-			};
-			IList<double> list = ColorConverter.HUSLPToRGB(new List<double>(array));
+			}));
 			return new Color((float)list[0], (float)list[1], (float)list[2]);
 		}
 

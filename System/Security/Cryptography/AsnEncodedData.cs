@@ -53,11 +53,9 @@ namespace System.Security.Cryptography
 				if (value == null)
 				{
 					this._oid = null;
+					return;
 				}
-				else
-				{
-					this._oid = new Oid(value);
-				}
+				this._oid = new Oid(value);
 			}
 		}
 
@@ -110,22 +108,31 @@ namespace System.Security.Cryptography
 		internal virtual string ToString(bool multiLine)
 		{
 			string value = this._oid.Value;
-			switch (value)
+			if (value == "2.5.29.19")
 			{
-			case "2.5.29.19":
 				return this.BasicConstraintsExtension(multiLine);
-			case "2.5.29.37":
-				return this.EnhancedKeyUsageExtension(multiLine);
-			case "2.5.29.15":
-				return this.KeyUsageExtension(multiLine);
-			case "2.5.29.14":
-				return this.SubjectKeyIdentifierExtension(multiLine);
-			case "2.5.29.17":
-				return this.SubjectAltName(multiLine);
-			case "2.16.840.1.113730.1.1":
-				return this.NetscapeCertType(multiLine);
 			}
-			return this.Default(multiLine);
+			if (value == "2.5.29.37")
+			{
+				return this.EnhancedKeyUsageExtension(multiLine);
+			}
+			if (value == "2.5.29.15")
+			{
+				return this.KeyUsageExtension(multiLine);
+			}
+			if (value == "2.5.29.14")
+			{
+				return this.SubjectKeyIdentifierExtension(multiLine);
+			}
+			if (value == "2.5.29.17")
+			{
+				return this.SubjectAltName(multiLine);
+			}
+			if (!(value == "2.16.840.1.113730.1.1"))
+			{
+				return this.Default(multiLine);
+			}
+			return this.NetscapeCertType(multiLine);
 		}
 
 		internal string Default(bool multiLine)
@@ -147,8 +154,7 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				global::System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension x509BasicConstraintsExtension = new global::System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension(this, false);
-				text = x509BasicConstraintsExtension.ToString(multiLine);
+				text = new X509BasicConstraintsExtension(this, false).ToString(multiLine);
 			}
 			catch
 			{
@@ -162,8 +168,7 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				global::System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension x509EnhancedKeyUsageExtension = new global::System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension(this, false);
-				text = x509EnhancedKeyUsageExtension.ToString(multiLine);
+				text = new X509EnhancedKeyUsageExtension(this, false).ToString(multiLine);
 			}
 			catch
 			{
@@ -177,8 +182,7 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				global::System.Security.Cryptography.X509Certificates.X509KeyUsageExtension x509KeyUsageExtension = new global::System.Security.Cryptography.X509Certificates.X509KeyUsageExtension(this, false);
-				text = x509KeyUsageExtension.ToString(multiLine);
+				text = new X509KeyUsageExtension(this, false).ToString(multiLine);
 			}
 			catch
 			{
@@ -192,8 +196,7 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				global::System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension x509SubjectKeyIdentifierExtension = new global::System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension(this, false);
-				text = x509SubjectKeyIdentifierExtension.ToString(multiLine);
+				text = new X509SubjectKeyIdentifierExtension(this, false).ToString(multiLine);
 			}
 			catch
 			{
@@ -211,11 +214,11 @@ namespace System.Security.Cryptography
 			string text3;
 			try
 			{
-				ASN1 asn = new ASN1(this._raw);
+				Mono.Security.ASN1 asn = new Mono.Security.ASN1(this._raw);
 				StringBuilder stringBuilder = new StringBuilder();
 				for (int i = 0; i < asn.Count; i++)
 				{
-					ASN1 asn2 = asn[i];
+					Mono.Security.ASN1 asn2 = asn[i];
 					byte tag = asn2.Tag;
 					string text;
 					string text2;
@@ -224,7 +227,7 @@ namespace System.Security.Cryptography
 						if (tag != 130)
 						{
 							text = string.Format("Unknown ({0})=", asn2.Tag);
-							text2 = CryptoConvert.ToHex(asn2.Value);
+							text2 = Mono.Security.Cryptography.CryptoConvert.ToHex(asn2.Value);
 						}
 						else
 						{

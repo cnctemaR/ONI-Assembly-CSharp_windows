@@ -27,11 +27,9 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		if (this.info.sublimatedElement == SimHashes.Oxygen)
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingOxygenAvg, this);
+			return;
 		}
-		else
-		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingGasAvg, this);
-		}
+		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingGasAvg, this);
 	}
 
 	protected override void OnCleanUp()
@@ -117,6 +115,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
 						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
 						this.UpdateStorage();
+						return;
 					}
 				}
 			}
@@ -129,6 +128,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num10);
 					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num10);
 					this.UpdateStorage();
+					return;
 				}
 			}
 			else if (!this.primaryElement.KeepZeroMassObject)

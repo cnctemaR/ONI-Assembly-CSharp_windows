@@ -6,14 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	/// <summary>
-	///   <para>An implementation of IPlayable that allows mixing two textures.</para>
-	/// </summary>
-	[NativeHeader("Runtime/Export/Director/TextureMixerPlayable.bindings.h")]
 	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
+	[NativeHeader("Runtime/Export/Director/TextureMixerPlayable.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[StaticAccessor("TextureMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
+	[StaticAccessor("TextureMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct TextureMixerPlayable : IPlayable, IEquatable<TextureMixerPlayable>
 	{
 		internal TextureMixerPlayable(PlayableHandle handle)
@@ -28,13 +25,6 @@ namespace UnityEngine.Experimental.Playables
 			this.m_Handle = handle;
 		}
 
-		/// <summary>
-		///   <para>Creates a TextureMixerPlayable in the PlayableGraph.</para>
-		/// </summary>
-		/// <param name="graph">The PlayableGraph object that will own the TextureMixerPlayable.</param>
-		/// <returns>
-		///   <para>A TextureMixerPlayable linked to the PlayableGraph.</para>
-		/// </returns>
 		public static TextureMixerPlayable Create(PlayableGraph graph)
 		{
 			PlayableHandle playableHandle = TextureMixerPlayable.CreateHandle(graph);
@@ -76,6 +66,7 @@ namespace UnityEngine.Experimental.Playables
 			return this.GetHandle() == other.GetHandle();
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CreateTextureMixerPlayableInternal(ref PlayableGraph graph, ref PlayableHandle handle);
 

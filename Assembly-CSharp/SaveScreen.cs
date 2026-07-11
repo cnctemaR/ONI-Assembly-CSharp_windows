@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 
 public class SaveScreen : KModalScreen
@@ -16,8 +16,7 @@ public class SaveScreen : KModalScreen
 
 	protected override void OnCmpEnable()
 	{
-		List<string> allFiles = SaveLoader.GetAllFiles();
-		foreach (string text in allFiles)
+		foreach (string text in SaveLoader.GetAllFiles())
 		{
 			this.AddExistingSaveFile(text);
 		}
@@ -35,7 +34,7 @@ public class SaveScreen : KModalScreen
 		KButton kbutton = Util.KInstantiateUI<KButton>(this.oldSaveButtonPrefab.gameObject, this.oldSavesRoot.gameObject, true);
 		HierarchyReferences component = kbutton.GetComponent<HierarchyReferences>();
 		LocText component2 = component.GetReference<RectTransform>("Title").GetComponent<LocText>();
-		LocText component3 = component.GetReference<RectTransform>("Date").GetComponent<LocText>();
+		TMP_Text component3 = component.GetReference<RectTransform>("Date").GetComponent<LocText>();
 		global::System.DateTime lastWriteTime = File.GetLastWriteTime(filename);
 		component2.text = string.Format("{0}", Path.GetFileNameWithoutExtension(filename));
 		component3.text = string.Format("{0:H:mm:ss}" + Localization.GetFileDateFormat(0), lastWriteTime);
@@ -48,8 +47,7 @@ public class SaveScreen : KModalScreen
 	public static string GetValidSaveFilename(string filename)
 	{
 		string text = ".sav";
-		string text2 = Path.GetExtension(filename).ToLower();
-		if (text2 != text)
+		if (Path.GetExtension(filename).ToLower() != text)
 		{
 			filename += text;
 		}
@@ -65,11 +63,9 @@ public class SaveScreen : KModalScreen
 			{
 				this.DoSave(filename);
 			}, base.transform.parent);
+			return;
 		}
-		else
-		{
-			this.DoSave(filename);
-		}
+		this.DoSave(filename);
 	}
 
 	private void DoSave(string filename)
@@ -84,22 +80,19 @@ public class SaveScreen : KModalScreen
 		{
 			IOException ex2 = ex;
 			IOException e = ex2;
-			SaveScreen $this = this;
-			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
+			Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
 			{
-				$this.Deactivate();
+				this.Deactivate();
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
-				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, string.Empty);
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, null, "");
 			}, null, null, null, null, true);
 		}
 	}
 
 	public void OnClickNewSave()
 	{
-		FileNameDialog fileNameDialog = (FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, base.transform.parent.gameObject);
-		fileNameDialog.onConfirm = delegate(string filename)
+		((FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, base.transform.parent.gameObject)).onConfirm = delegate(string filename)
 		{
 			filename = Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), filename);
 			this.Save(filename);

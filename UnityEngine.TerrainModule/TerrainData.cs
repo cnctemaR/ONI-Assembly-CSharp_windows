@@ -5,9 +5,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>The TerrainData class stores heightmaps, detail mesh positions, tree instances, and terrain texture alpha maps.</para>
-	/// </summary>
+	[UsedByNativeCode]
 	[NativeHeader("Modules/Terrain/Public/TerrainDataScriptingInterface.h")]
 	[NativeHeader("TerrainScriptingClasses.h")]
 	public sealed class TerrainData : Object
@@ -17,8 +15,8 @@ namespace UnityEngine
 			TerrainData.Internal_Create(this);
 		}
 
-		[ThreadSafe]
 		[StaticAccessor("TerrainDataScriptingInterface", StaticAccessorType.DoubleColon)]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetBoundaryValue(TerrainData.BoundaryValueType type);
 
@@ -27,17 +25,8 @@ namespace UnityEngine
 		private static extern void Internal_Create([Writable] TerrainData terrainData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern bool HasUser(GameObject user);
+		public extern void UpdateDirtyRegion(int x, int y, int width, int height, bool syncHeightmapTextureImmediately);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void AddUser(GameObject user);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void RemoveUser(GameObject user);
-
-		/// <summary>
-		///   <para>Width of the terrain in samples (Read Only).</para>
-		/// </summary>
 		public extern int heightmapWidth
 		{
 			[NativeName("GetHeightmap().GetWidth")]
@@ -45,9 +34,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Height of the terrain in samples (Read Only).</para>
-		/// </summary>
 		public extern int heightmapHeight
 		{
 			[NativeName("GetHeightmap().GetHeight")]
@@ -55,9 +41,13 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Resolution of the heightmap.</para>
-		/// </summary>
+		public extern RenderTexture heightmapTexture
+		{
+			[NativeName("GetHeightmap().GetHeightmapTexture")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public int heightmapResolution
 		{
 			get
@@ -86,9 +76,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>The size of each heightmap sample.</para>
-		/// </summary>
 		public Vector3 heightmapScale
 		{
 			[NativeName("GetHeightmap().GetScale")]
@@ -100,9 +87,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The total size in world units of the terrain.</para>
-		/// </summary>
 		public Vector3 size
 		{
 			[NativeName("GetHeightmap().GetSize")]
@@ -119,9 +103,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The local bounding box of the TerrainData object.</para>
-		/// </summary>
 		public Bounds bounds
 		{
 			[NativeName("GetHeightmap().CalculateBounds")]
@@ -133,9 +114,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>The thickness of the terrain used for collision detection.</para>
-		/// </summary>
 		public extern float thickness
 		{
 			[NativeName("GetHeightmap().GetThickness")]
@@ -146,31 +124,14 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Gets the height at a certain point x,y.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
 		[NativeName("GetHeightmap().GetHeight")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetHeight(int x, int y);
 
-		/// <summary>
-		///   <para>Gets an interpolated height at a point x,y.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
 		[NativeName("GetHeightmap().GetInterpolatedHeight")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetInterpolatedHeight(float x, float y);
 
-		/// <summary>
-		///   <para>Get an array of heightmap samples.</para>
-		/// </summary>
-		/// <param name="xBase">First x index of heightmap samples to retrieve.</param>
-		/// <param name="yBase">First y index of heightmap samples to retrieve.</param>
-		/// <param name="width">Number of samples to retrieve along the heightmap's x axis.</param>
-		/// <param name="height">Number of samples to retrieve along the heightmap's y axis.</param>
 		public float[,] GetHeights(int xBase, int yBase, int width, int height)
 		{
 			if (xBase < 0 || yBase < 0 || xBase + width < 0 || yBase + height < 0 || xBase + width > this.heightmapWidth || yBase + height > this.heightmapHeight)
@@ -207,38 +168,18 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetHeights(int xBase, int yBase, int width, int height, float[,] heights);
 
-		/// <summary>
-		///   <para>Returns an array of min max height values for all the renderable patches in a terrain.  The returned array can be modified and then passed to OverrideMinMaxPatchHeights.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Minimum and maximum height values for each patch.</para>
-		/// </returns>
 		[FreeFunction("TerrainDataScriptingInterface::GetPatchMinMaxHeights", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern PatchExtents[] GetPatchMinMaxHeights();
 
-		/// <summary>
-		///   <para>Override the minimum and maximum patch heights for every renderable terrain patch.  Note that the overriden values get reset when the terrain resolution is changed and stays unchanged when the terrain heightmap is painted or changed via script.</para>
-		/// </summary>
-		/// <param name="minMaxHeights">Array of minimum and maximum terrain patch height values.</param>
 		[FreeFunction("TerrainDataScriptingInterface::OverrideMinMaxPatchHeights", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void OverrideMinMaxPatchHeights(PatchExtents[] minMaxHeights);
 
-		/// <summary>
-		///   <para>Returns an array of tesselation maximum height error values per renderable terrain patch.  The returned array can be modified and passed to OverrideMaximumHeightError.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>Float array of maximum height error values.</para>
-		/// </returns>
 		[FreeFunction("TerrainDataScriptingInterface::GetMaximumHeightError", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float[] GetMaximumHeightError();
 
-		/// <summary>
-		///   <para>Override the maximum tessellation height error with user provided values.  Note that the overriden values get reset when the terrain resolution is changed and stays unchanged when the terrain heightmap is painted or changed via script.</para>
-		/// </summary>
-		/// <param name="maxError">Provided maximum height error values.</param>
 		[FreeFunction("TerrainDataScriptingInterface::OverrideMaximumHeightError", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void OverrideMaximumHeightError(float[] maxError);
@@ -276,20 +217,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetHeightsDelayLOD(int xBase, int yBase, int width, int height, float[,] heights);
 
-		/// <summary>
-		///   <para>Gets the gradient of the terrain at point (x,y).</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
 		[NativeName("GetHeightmap().GetSteepness")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetSteepness(float x, float y);
 
-		/// <summary>
-		///   <para>Get an interpolated normal at a given location.</para>
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
 		[NativeName("GetHeightmap().GetInterpolatedNormal")]
 		public Vector3 GetInterpolatedNormal(float x, float y)
 		{
@@ -302,9 +233,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int GetAdjustedSize(int size);
 
-		/// <summary>
-		///   <para>Strength of the waving grass in the terrain.</para>
-		/// </summary>
 		public extern float wavingGrassStrength
 		{
 			[NativeName("GetDetailDatabase().GetWavingGrassStrength")]
@@ -315,9 +243,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Amount of waving grass in the terrain.</para>
-		/// </summary>
 		public extern float wavingGrassAmount
 		{
 			[NativeName("GetDetailDatabase().GetWavingGrassAmount")]
@@ -328,9 +253,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Speed of the waving grass.</para>
-		/// </summary>
 		public extern float wavingGrassSpeed
 		{
 			[NativeName("GetDetailDatabase().GetWavingGrassSpeed")]
@@ -341,9 +263,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Color of the waving grass that the terrain has.</para>
-		/// </summary>
 		public Color wavingGrassTint
 		{
 			[NativeName("GetDetailDatabase().GetWavingGrassTint")]
@@ -360,9 +279,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Detail width of the TerrainData.</para>
-		/// </summary>
 		public extern int detailWidth
 		{
 			[NativeName("GetDetailDatabase().GetWidth")]
@@ -370,9 +286,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Detail height of the TerrainData.</para>
-		/// </summary>
 		public extern int detailHeight
 		{
 			[NativeName("GetDetailDatabase().GetHeight")]
@@ -380,11 +293,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>Set the resolution of the detail map.</para>
-		/// </summary>
-		/// <param name="detailResolution">Specifies the number of pixels in the detail resolution map. A larger detailResolution, leads to more accurate detail object painting.</param>
-		/// <param name="resolutionPerPatch">Specifies the size in pixels of each individually rendered detail patch. A larger number reduces draw calls, but might increase triangle count since detail patches are culled on a per batch basis. A recommended value is 16. If you use a very large detail object distance and your grass is very sparse, it makes sense to increase the value.</param>
 		public void SetDetailResolution(int detailResolution, int resolutionPerPatch)
 		{
 			if (detailResolution < 0)
@@ -417,9 +325,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetDetailResolution(int patchCount, int resolutionPerPatch);
 
-		/// <summary>
-		///   <para>Detail Resolution of the TerrainData.</para>
-		/// </summary>
+		public extern int detailPatchCount
+		{
+			[NativeName("GetDetailDatabase().GetPatchCount")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public extern int detailResolution
 		{
 			[NativeName("GetDetailDatabase().GetResolution")]
@@ -427,7 +339,7 @@ namespace UnityEngine
 			get;
 		}
 
-		internal extern int detailResolutionPerPatch
+		public extern int detailResolutionPerPatch
 		{
 			[NativeName("GetDetailDatabase().GetResolutionPerPatch")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -438,16 +350,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void ResetDirtyDetails();
 
-		/// <summary>
-		///   <para>Reloads all the values of the available prototypes (ie, detail mesh assets) in the TerrainData Object.</para>
-		/// </summary>
 		[FreeFunction("TerrainDataScriptingInterface::RefreshPrototypes", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RefreshPrototypes();
 
-		/// <summary>
-		///   <para>Contains the detail texture/meshes that the terrain has.</para>
-		/// </summary>
 		public extern DetailPrototype[] detailPrototypes
 		{
 			[FreeFunction("TerrainDataScriptingInterface::GetDetailPrototypes", HasExplicitThis = true)]
@@ -458,25 +364,10 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Returns an array of all supported detail layer indices in the area.</para>
-		/// </summary>
-		/// <param name="xBase"></param>
-		/// <param name="yBase"></param>
-		/// <param name="totalWidth"></param>
-		/// <param name="totalHeight"></param>
 		[FreeFunction("TerrainDataScriptingInterface::GetSupportedLayers", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int[] GetSupportedLayers(int xBase, int yBase, int totalWidth, int totalHeight);
 
-		/// <summary>
-		///   <para>Returns a 2D array of the detail object density in the specific location.</para>
-		/// </summary>
-		/// <param name="xBase"></param>
-		/// <param name="yBase"></param>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <param name="layer"></param>
 		[FreeFunction("TerrainDataScriptingInterface::GetDetailLayer", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int[,] GetDetailLayer(int xBase, int yBase, int width, int height, int layer);
@@ -490,9 +381,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetDetailLayer(int xBase, int yBase, int totalWidth, int totalHeight, int detailIndex, int[,] data);
 
-		/// <summary>
-		///   <para>Contains the current trees placed in the terrain.</para>
-		/// </summary>
 		public TreeInstance[] treeInstances
 		{
 			get
@@ -513,10 +401,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetTreeInstances([NotNull] TreeInstance[] instances);
 
-		/// <summary>
-		///   <para>Get the tree instance at the specified index. It is used as a faster version of treeInstances[index] as this function doesn't create the entire tree instances array.</para>
-		/// </summary>
-		/// <param name="index">The index of the tree instance.</param>
 		public TreeInstance GetTreeInstance(int index)
 		{
 			if (index < 0 || index >= this.treeInstanceCount)
@@ -534,21 +418,13 @@ namespace UnityEngine
 			return treeInstance;
 		}
 
-		/// <summary>
-		///   <para>Set the tree instance with new parameters at the specified index. However, TreeInstance.prototypeIndex and TreeInstance.position can not be changed otherwise an ArgumentException will be thrown.</para>
-		/// </summary>
-		/// <param name="index">The index of the tree instance.</param>
-		/// <param name="instance">The new TreeInstance value.</param>
-		[FreeFunction("TerrainDataScriptingInterface::SetTreeInstance", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("TerrainDataScriptingInterface::SetTreeInstance", HasExplicitThis = true)]
 		public void SetTreeInstance(int index, TreeInstance instance)
 		{
 			this.SetTreeInstance_Injected(index, ref instance);
 		}
 
-		/// <summary>
-		///   <para>Returns the number of tree instances.</para>
-		/// </summary>
 		public extern int treeInstanceCount
 		{
 			[NativeName("GetTreeDatabase().GetInstances().size")]
@@ -556,9 +432,6 @@ namespace UnityEngine
 			get;
 		}
 
-		/// <summary>
-		///   <para>The list of tree prototypes this are the ones available in the inspector.</para>
-		/// </summary>
 		public extern TreePrototype[] treePrototypes
 		{
 			[FreeFunction("TerrainDataScriptingInterface::GetTreePrototypes", HasExplicitThis = true)]
@@ -589,26 +462,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void UpgradeScaledTreePrototype();
 
-		/// <summary>
-		///   <para>Number of alpha map layers.</para>
-		/// </summary>
 		public extern int alphamapLayers
 		{
-			[NativeName("GetSplatDatabase().GetDepth")]
+			[NativeName("GetSplatDatabase().GetSplatCount")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Returns the alpha map at a position x, y given a width and height.</para>
-		/// </summary>
-		/// <param name="x">The x offset to read from.</param>
-		/// <param name="y">The y offset to read from.</param>
-		/// <param name="width">The width of the alpha map area to read.</param>
-		/// <param name="height">The height of the alpha map area to read.</param>
-		/// <returns>
-		///   <para>A 3D array of floats, where the 3rd dimension represents the mixing weight of each splatmap at each x,y coordinate.</para>
-		/// </returns>
 		public float[,,] GetAlphamaps(int x, int y, int width, int height)
 		{
 			if (x < 0 || y < 0 || width < 0 || height < 0)
@@ -622,9 +482,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern float[,,] Internal_GetAlphamaps(int x, int y, int width, int height);
 
-		/// <summary>
-		///   <para>Resolution of the alpha map.</para>
-		/// </summary>
 		public int alphamapResolution
 		{
 			get
@@ -650,8 +507,8 @@ namespace UnityEngine
 			}
 		}
 
-		[RequiredByNativeCode]
 		[NativeName("GetSplatDatabase().GetAlphamapResolution")]
+		[RequiredByNativeCode]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern float GetAlphamapResolutionInternal();
 
@@ -665,9 +522,6 @@ namespace UnityEngine
 			set;
 		}
 
-		/// <summary>
-		///   <para>Width of the alpha map.</para>
-		/// </summary>
 		public int alphamapWidth
 		{
 			get
@@ -676,9 +530,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Height of the alpha map.</para>
-		/// </summary>
 		public int alphamapHeight
 		{
 			get
@@ -687,9 +538,6 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Resolution of the base map used for rendering far patches on the terrain.</para>
-		/// </summary>
 		public int baseMapResolution
 		{
 			get
@@ -738,28 +586,21 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetAlphamaps(int x, int y, int width, int height, float[,,] map);
 
-		[NativeName("GetSplatDatabase().RecalculateBasemapIfDirty")]
+		[NativeName("GetSplatDatabase().SetBaseMapsDirty")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void RecalculateBasemapIfDirty();
-
-		[NativeName("GetSplatDatabase().SetBasemapDirty")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetBasemapDirty(bool dirty);
+		public extern void SetBaseMapDirty();
 
 		[NativeName("GetSplatDatabase().GetAlphaTexture")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Texture2D GetAlphamapTexture(int index);
+		public extern Texture2D GetAlphamapTexture(int index);
 
-		private extern int alphamapTextureCount
+		public extern int alphamapTextureCount
 		{
 			[NativeName("GetSplatDatabase().GetAlphaTextureCount")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Alpha map textures used by the Terrain. Used by Terrain Inspector for undo.</para>
-		/// </summary>
 		public Texture2D[] alphamapTextures
 		{
 			get
@@ -773,15 +614,23 @@ namespace UnityEngine
 			}
 		}
 
-		/// <summary>
-		///   <para>Splat texture used by the terrain.</para>
-		/// </summary>
+		[Obsolete("Please use the terrainLayers API instead.", false)]
 		public extern SplatPrototype[] splatPrototypes
 		{
 			[FreeFunction("TerrainDataScriptingInterface::GetSplatPrototypes", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[FreeFunction("TerrainDataScriptingInterface::SetSplatPrototypes", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern TerrainLayer[] terrainLayers
+		{
+			[FreeFunction("TerrainDataScriptingInterface::GetTerrainLayers", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[FreeFunction("TerrainDataScriptingInterface::SetTerrainLayers", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

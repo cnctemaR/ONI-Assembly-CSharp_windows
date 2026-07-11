@@ -17,8 +17,9 @@ public static class DiscreteShadowCaster
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints);
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_SW, 1.0, 0.0, visiblePoints);
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.W_NW, 1.0, 0.0, visiblePoints);
+			return;
 		}
-		else if (shape == LightShape.Cone)
+		if (shape == LightShape.Cone)
 		{
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SE, 1.0, 0.0, visiblePoints);
 			DiscreteShadowCaster.ScanOctant(vector2I, range, 1, DiscreteShadowCaster.Octant.S_SW, 1.0, 0.0, visiblePoints);

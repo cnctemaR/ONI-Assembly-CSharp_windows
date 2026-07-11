@@ -41,8 +41,7 @@ public class GasVentConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.ignoreMinMassCheck = true;
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.showInUI = true;
+		BuildingTemplates.CreateDefaultStorage(go, false).showInUI = true;
 		go.AddOrGet<SimpleVent>();
 	}
 

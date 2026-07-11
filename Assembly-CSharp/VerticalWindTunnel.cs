@@ -37,8 +37,7 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 		this.chores = new Chore[this.choreOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
-			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
+			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]), Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("VerticalWindTunnelWorkable", vector);
 			KSelectable kselectable = gameObject.AddOrGet<KSelectable>();
 			kselectable.SetName(this.GetProperName());
@@ -78,11 +77,15 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 	{
 		Workable workable = this.workables[i];
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
-		Workable workable2 = workable;
+		IStateMachineTarget stateMachineTarget = workable;
+		ChoreProvider choreProvider = null;
+		bool flag = true;
+		Action<Chore> action = null;
+		Action<Chore> action2 = null;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<VerticalWindTunnelWorkable>(relax, workable2, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
-		return chore;
+		WorkChore<VerticalWindTunnelWorkable> workChore = new WorkChore<VerticalWindTunnelWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
+		return workChore;
 	}
 
 	private void OnSocialChoreEnd(Chore chore)
@@ -139,15 +142,13 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 	{
 		Building component = base.GetComponent<Building>();
 		Vector3 position = base.transform.GetPosition();
-		CellOffset cellOffset = ((!isTop) ? new CellOffset(0, 0) : new CellOffset(0, component.Def.HeightInCells + 1));
-		int num = Grid.OffsetCell(Grid.XYToCell((int)position.x, (int)position.y), cellOffset);
-		SimMessages.AddRemoveSubstance(num, (int)info.removedElemIdx, CellEventLogger.Instance.ElementEmitted, info.mass, info.temperature, info.diseaseIdx, info.diseaseCount, true, -1);
+		CellOffset cellOffset = (isTop ? new CellOffset(0, component.Def.HeightInCells + 1) : new CellOffset(0, 0));
+		SimMessages.AddRemoveSubstance(Grid.OffsetCell(Grid.XYToCell((int)position.x, (int)position.y), cellOffset), (int)info.removedElemIdx, CellEventLogger.Instance.ElementEmitted, info.mass, info.temperature, info.diseaseIdx, info.diseaseCount, true, -1);
 	}
 
 	public void OnWorkableEvent(int player, Workable.WorkableEvent ev)
 	{
-		bool flag = ev == Workable.WorkableEvent.WorkStarted;
-		if (flag)
+		if (ev == Workable.WorkableEvent.WorkStarted)
 		{
 			this.players.Add(player);
 		}

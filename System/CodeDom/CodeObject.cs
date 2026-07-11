@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeObject
 	{
@@ -14,19 +11,15 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.userData == null)
+				IDictionary dictionary;
+				if ((dictionary = this._userData) == null)
 				{
-					this.userData = new global::System.Collections.Specialized.ListDictionary();
+					dictionary = (this._userData = new ListDictionary());
 				}
-				return this.userData;
+				return dictionary;
 			}
 		}
 
-		internal virtual void Accept(ICodeDomVisitor visitor)
-		{
-			throw new NotImplementedException();
-		}
-
-		private IDictionary userData;
+		private IDictionary _userData;
 	}
 }

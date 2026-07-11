@@ -6,16 +6,18 @@ namespace System.Data.SqlClient
 	{
 		public SqlRowsCopiedEventArgs(long rowsCopied)
 		{
+			this._rowsCopied = rowsCopied;
 		}
 
 		public bool Abort
 		{
 			get
 			{
-				throw null;
+				return this._abort;
 			}
 			set
 			{
+				this._abort = value;
 			}
 		}
 
@@ -23,8 +25,12 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				throw null;
+				return this._rowsCopied;
 			}
 		}
+
+		private bool _abort;
+
+		private long _rowsCopied;
 	}
 }

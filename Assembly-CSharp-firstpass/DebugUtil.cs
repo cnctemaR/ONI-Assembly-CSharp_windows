@@ -39,14 +39,14 @@ public static class DebugUtil
 
 	public static string BuildString(object[] objs)
 	{
-		string text = string.Empty;
-		if (objs.Length > 0)
+		string text = "";
+		if (objs.Length != 0)
 		{
-			text = ((objs[0] == null) ? "null" : objs[0].ToString());
+			text = ((objs[0] != null) ? objs[0].ToString() : "null");
 			for (int i = 1; i < objs.Length; i++)
 			{
 				object obj = objs[i];
-				text = text + " " + ((obj == null) ? "null" : obj.ToString());
+				text = text + " " + ((obj != null) ? obj.ToString() : "null");
 			}
 		}
 		return text;
@@ -73,19 +73,18 @@ public static class DebugUtil
 		if (!test)
 		{
 			StackTrace stackTrace = new StackTrace(1, true);
-			string text = string.Format("{0}\n{1}", DebugUtil.BuildString(objs), stackTrace);
-			global::Debug.LogWarning(text);
+			global::Debug.LogWarning(string.Format("{0}\n{1}", DebugUtil.BuildString(objs), stackTrace));
 		}
 	}
 
 	public static void DevLogError(global::UnityEngine.Object context, string msg)
 	{
-		global::Debug.LogWarningFormat(context, msg, new object[0]);
+		global::Debug.LogWarningFormat(context, msg, Array.Empty<object>());
 	}
 
 	public static void DevLogError(string msg)
 	{
-		global::Debug.LogWarningFormat(msg, new object[0]);
+		global::Debug.LogWarningFormat(msg, Array.Empty<object>());
 	}
 
 	public static void DevLogErrorFormat(global::UnityEngine.Object context, string format, params object[] args)
@@ -100,38 +99,32 @@ public static class DebugUtil
 
 	public static void LogArgs(params object[] objs)
 	{
-		string text = DebugUtil.BuildString(objs);
-		global::Debug.Log(text);
+		global::Debug.Log(DebugUtil.BuildString(objs));
 	}
 
 	public static void LogArgs(global::UnityEngine.Object context, params object[] objs)
 	{
-		string text = DebugUtil.BuildString(objs);
-		global::Debug.Log(text, context);
+		global::Debug.Log(DebugUtil.BuildString(objs), context);
 	}
 
 	public static void LogWarningArgs(params object[] objs)
 	{
-		string text = DebugUtil.BuildString(objs);
-		global::Debug.LogWarning(text);
+		global::Debug.LogWarning(DebugUtil.BuildString(objs));
 	}
 
 	public static void LogWarningArgs(global::UnityEngine.Object context, params object[] objs)
 	{
-		string text = DebugUtil.BuildString(objs);
-		global::Debug.LogWarning(text, context);
+		global::Debug.LogWarning(DebugUtil.BuildString(objs), context);
 	}
 
 	public static void LogErrorArgs(params object[] objs)
 	{
-		string text = DebugUtil.BuildString(objs);
-		global::Debug.LogError(text);
+		global::Debug.LogError(DebugUtil.BuildString(objs));
 	}
 
 	public static void LogErrorArgs(global::UnityEngine.Object context, params object[] objs)
 	{
-		string text = DebugUtil.BuildString(objs);
-		global::Debug.LogError(text, context);
+		global::Debug.LogError(DebugUtil.BuildString(objs), context);
 	}
 
 	private static void RecursiveBuildFullName(GameObject obj)

@@ -10,7 +10,7 @@ namespace Satsuma
 			{
 				return "Arc.Invalid";
 			}
-			return graph.U(arc) + ((!graph.IsEdge(arc)) ? "--->" : "<-->") + graph.V(arc);
+			return graph.U(arc) + (graph.IsEdge(arc) ? "<-->" : "--->") + graph.V(arc);
 		}
 
 		public static Node Other(this IArcLookup graph, Arc arc, Node node)

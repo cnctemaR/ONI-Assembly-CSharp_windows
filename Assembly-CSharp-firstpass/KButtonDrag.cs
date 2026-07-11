@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine.EventSystems;
 
-public class KButtonDrag : KButton, IBeginDragHandler, IDragHandler, IEndDragHandler, IEventSystemHandler
+public class KButtonDrag : KButton, IBeginDragHandler, IEventSystemHandler, IDragHandler, IEndDragHandler
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onBeginDrag;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDrag;
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onEndDrag;
 
 	public void ClearOnDragEvents()

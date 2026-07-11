@@ -15,7 +15,7 @@ namespace Steamworks
 
 		public void SetGameDir(string dir)
 		{
-			this.m_szGameDir = Encoding.UTF8.GetBytes(dir + '\0');
+			this.m_szGameDir = Encoding.UTF8.GetBytes(dir + "\0");
 		}
 
 		public string GetMap()
@@ -25,7 +25,7 @@ namespace Steamworks
 
 		public void SetMap(string map)
 		{
-			this.m_szMap = Encoding.UTF8.GetBytes(map + '\0');
+			this.m_szMap = Encoding.UTF8.GetBytes(map + "\0");
 		}
 
 		public string GetGameDescription()
@@ -35,7 +35,7 @@ namespace Steamworks
 
 		public void SetGameDescription(string desc)
 		{
-			this.m_szGameDescription = Encoding.UTF8.GetBytes(desc + '\0');
+			this.m_szGameDescription = Encoding.UTF8.GetBytes(desc + "\0");
 		}
 
 		public string GetServerName()
@@ -49,7 +49,7 @@ namespace Steamworks
 
 		public void SetServerName(string name)
 		{
-			this.m_szServerName = Encoding.UTF8.GetBytes(name + '\0');
+			this.m_szServerName = Encoding.UTF8.GetBytes(name + "\0");
 		}
 
 		public string GetGameTags()
@@ -59,7 +59,7 @@ namespace Steamworks
 
 		public void SetGameTags(string tags)
 		{
-			this.m_szGameTags = Encoding.UTF8.GetBytes(tags + '\0');
+			this.m_szGameTags = Encoding.UTF8.GetBytes(tags + "\0");
 		}
 
 		public servernetadr_t m_NetAdr;

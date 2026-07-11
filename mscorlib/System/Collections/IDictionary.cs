@@ -4,23 +4,23 @@ using System.Runtime.InteropServices;
 namespace System.Collections
 {
 	[ComVisible(true)]
-	public interface IDictionary : IEnumerable, ICollection
+	public interface IDictionary : ICollection, IEnumerable
 	{
-		bool IsFixedSize { get; }
-
-		bool IsReadOnly { get; }
-
 		object this[object key] { get; set; }
 
 		ICollection Keys { get; }
 
 		ICollection Values { get; }
 
+		bool Contains(object key);
+
 		void Add(object key, object value);
 
 		void Clear();
 
-		bool Contains(object key);
+		bool IsReadOnly { get; }
+
+		bool IsFixedSize { get; }
 
 		IDictionaryEnumerator GetEnumerator();
 

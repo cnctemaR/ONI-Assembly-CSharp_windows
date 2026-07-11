@@ -54,7 +54,7 @@ public class TagFilterScreen : SideScreenContent
 	private KTreeControl.UserItem BuildDisplay(TagFilterScreen.TagEntry root)
 	{
 		KTreeControl.UserItem userItem = null;
-		if (root.name != null && root.name != string.Empty)
+		if (root.name != null && root.name != "")
 		{
 			userItem = new KTreeControl.UserItem
 			{
@@ -114,12 +114,15 @@ public class TagFilterScreen : SideScreenContent
 		if (!root.checkboxChecked && root.children.Count > 0)
 		{
 			bool flag = true;
-			foreach (KTreeItem ktreeItem2 in root.children)
+			using (IEnumerator<KTreeItem> enumerator = root.children.GetEnumerator())
 			{
-				if (!ktreeItem2.checkboxChecked)
+				while (enumerator.MoveNext())
 				{
-					flag = false;
-					break;
+					if (!enumerator.Current.checkboxChecked)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			root.checkboxChecked = flag;

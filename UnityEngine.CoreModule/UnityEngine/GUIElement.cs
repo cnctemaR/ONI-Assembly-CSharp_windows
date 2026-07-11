@@ -4,37 +4,20 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	/// <summary>
-	///   <para>Base class for images &amp; text strings displayed in a GUI.</para>
-	/// </summary>
 	[RequireComponent(typeof(Transform))]
 	public class GUIElement : Behaviour
 	{
-		/// <summary>
-		///   <para>Is a point on screen inside the element?</para>
-		/// </summary>
-		/// <param name="screenPosition"></param>
-		/// <param name="camera"></param>
 		[ExcludeFromDocs]
 		public bool HitTest(Vector3 screenPosition)
 		{
 			return this.HitTest(new Vector2(screenPosition.x, screenPosition.y), null);
 		}
 
-		/// <summary>
-		///   <para>Is a point on screen inside the element?</para>
-		/// </summary>
-		/// <param name="screenPosition"></param>
-		/// <param name="camera"></param>
 		public bool HitTest(Vector3 screenPosition, [DefaultValue("null")] Camera camera)
 		{
 			return this.HitTest(new Vector2(screenPosition.x, screenPosition.y), GUIElement.GetCameraOrWindowRect(camera));
 		}
 
-		/// <summary>
-		///   <para>Returns bounding rectangle of GUIElement in screen coordinates.</para>
-		/// </summary>
-		/// <param name="camera"></param>
 		public Rect GetScreenRect([DefaultValue("null")] Camera camera)
 		{
 			return this.GetScreenRect(GUIElement.GetCameraOrWindowRect(camera));

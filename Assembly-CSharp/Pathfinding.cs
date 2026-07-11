@@ -55,23 +55,25 @@ public class Pathfinding : KMonoBehaviour
 		update_all = true;
 		if (update_all)
 		{
-			foreach (NavGrid navGrid in this.NavGrids)
+			using (List<NavGrid>.Enumerator enumerator = this.NavGrids.GetEnumerator())
 			{
-				navGrid.UpdateGraph();
-			}
-		}
-		else
-		{
-			foreach (NavGrid navGrid2 in this.NavGrids)
-			{
-				if (navGrid2.updateEveryFrame)
+				while (enumerator.MoveNext())
 				{
-					navGrid2.UpdateGraph();
+					NavGrid navGrid = enumerator.Current;
+					navGrid.UpdateGraph();
 				}
+				return;
 			}
-			this.NavGrids[this.UpdateIdx].UpdateGraph();
-			this.UpdateIdx = (this.UpdateIdx + 1) % this.NavGrids.Count;
 		}
+		foreach (NavGrid navGrid2 in this.NavGrids)
+		{
+			if (navGrid2.updateEveryFrame)
+			{
+				navGrid2.UpdateGraph();
+			}
+		}
+		this.NavGrids[this.UpdateIdx].UpdateGraph();
+		this.UpdateIdx = (this.UpdateIdx + 1) % this.NavGrids.Count;
 	}
 
 	public void RenderEveryTick()

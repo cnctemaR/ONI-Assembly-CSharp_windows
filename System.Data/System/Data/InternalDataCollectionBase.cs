@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace System.Data
 {
@@ -11,8 +12,18 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this.List.Count;
 			}
+		}
+
+		public virtual void CopyTo(Array ar, int index)
+		{
+			this.List.CopyTo(ar, index);
+		}
+
+		public virtual IEnumerator GetEnumerator()
+		{
+			return this.List.GetEnumerator();
 		}
 
 		[Browsable(false)]
@@ -20,7 +31,7 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return false;
 			}
 		}
 
@@ -29,15 +40,31 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return false;
 			}
 		}
 
-		protected virtual ArrayList List
+		internal int NamesEqual(string s1, string s2, bool fCaseSensitive, CultureInfo locale)
 		{
-			get
+			if (fCaseSensitive)
 			{
-				throw null;
+				if (string.Compare(s1, s2, false, locale) != 0)
+				{
+					return 0;
+				}
+				return 1;
+			}
+			else
+			{
+				if (locale.CompareInfo.Compare(s1, s2, CompareOptions.IgnoreCase | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth) != 0)
+				{
+					return 0;
+				}
+				if (string.Compare(s1, s2, false, locale) != 0)
+				{
+					return -1;
+				}
+				return 1;
 			}
 		}
 
@@ -46,17 +73,18 @@ namespace System.Data
 		{
 			get
 			{
-				throw null;
+				return this;
 			}
 		}
 
-		public virtual void CopyTo(Array ar, int index)
+		protected virtual ArrayList List
 		{
+			get
+			{
+				return null;
+			}
 		}
 
-		public virtual IEnumerator GetEnumerator()
-		{
-			throw null;
-		}
+		internal static readonly CollectionChangeEventArgs s_refreshEventArgs = new CollectionChangeEventArgs(CollectionChangeAction.Refresh, null);
 	}
 }

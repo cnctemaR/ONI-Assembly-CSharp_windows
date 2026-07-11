@@ -72,8 +72,9 @@ public class DetailsScreen : KTabMenu
 		if (component != null)
 		{
 			component.SetName(newName);
+			return;
 		}
-		else if (component2 != null)
+		if (component2 != null)
 		{
 			component2.SetName(newName);
 		}
@@ -110,11 +111,9 @@ public class DetailsScreen : KTabMenu
 		if (this.isEditing)
 		{
 			e.Consumed = true;
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
@@ -162,8 +161,8 @@ public class DetailsScreen : KTabMenu
 	private void UpdateCodexButton()
 	{
 		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
-		this.CodexEntryButton.isInteractable = selectedObjectCodexID != string.Empty;
-		this.CodexEntryButton.GetComponent<ToolTip>().SetSimpleTooltip((!this.CodexEntryButton.isInteractable) ? UI.TOOLTIPS.NO_CODEX_ENTRY : UI.TOOLTIPS.OPEN_CODEX_ENTRY);
+		this.CodexEntryButton.isInteractable = selectedObjectCodexID != "";
+		this.CodexEntryButton.GetComponent<ToolTip>().SetSimpleTooltip(this.CodexEntryButton.isInteractable ? UI.TOOLTIPS.OPEN_CODEX_ENTRY : UI.TOOLTIPS.NO_CODEX_ENTRY);
 	}
 
 	public void OnRefreshData(object obj)
@@ -332,16 +331,14 @@ public class DetailsScreen : KTabMenu
 		if (hide)
 		{
 			this.sideScreen.transform.localScale = Vector3.zero;
+			return;
 		}
-		else
-		{
-			this.sideScreen.transform.localScale = Vector3.one;
-		}
+		this.sideScreen.transform.localScale = Vector3.one;
 	}
 
 	private string GetSelectedObjectCodexID()
 	{
-		string text = string.Empty;
+		string text = "";
 		CellSelectionObject component = SelectTool.Instance.selected.GetComponent<CellSelectionObject>();
 		BuildingUnderConstruction component2 = SelectTool.Instance.selected.GetComponent<BuildingUnderConstruction>();
 		CreatureBrain component3 = SelectTool.Instance.selected.GetComponent<CreatureBrain>();
@@ -358,12 +355,12 @@ public class DetailsScreen : KTabMenu
 		else if (component3 != null)
 		{
 			text = CodexCache.FormatLinkID(SelectTool.Instance.selected.PrefabID().ToString());
-			text = text.Replace("BABY", string.Empty);
+			text = text.Replace("BABY", "");
 		}
 		else if (component4 != null)
 		{
 			text = CodexCache.FormatLinkID(SelectTool.Instance.selected.PrefabID().ToString());
-			text = text.Replace("SEED", string.Empty);
+			text = text.Replace("SEED", "");
 		}
 		else if (component5 != null)
 		{
@@ -384,13 +381,13 @@ public class DetailsScreen : KTabMenu
 		{
 			return text;
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public void OpenCodexEntry()
 	{
 		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
-		if (selectedObjectCodexID != string.Empty)
+		if (selectedObjectCodexID != "")
 		{
 			ManagementMenu.Instance.OpenCodexToEntry(selectedObjectCodexID);
 		}
@@ -432,31 +429,29 @@ public class DetailsScreen : KTabMenu
 				return;
 			}
 		}
-		MinionIdentity component3 = target.GetComponent<MinionIdentity>();
-		if (component3)
+		if (target.GetComponent<MinionIdentity>())
 		{
 			this.TabTitle.SetPortrait(component.gameObject);
 			return;
 		}
-		Edible component4 = target.GetComponent<Edible>();
-		if (component4 != null)
+		Edible component3 = target.GetComponent<Edible>();
+		if (component3 != null)
 		{
-			KBatchedAnimController component5 = component4.GetComponent<KBatchedAnimController>();
-			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui", false, string.Empty);
+			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component3.GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, "");
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim);
 			return;
 		}
-		PrimaryElement component6 = target.GetComponent<PrimaryElement>();
-		if (component6 != null)
+		PrimaryElement component4 = target.GetComponent<PrimaryElement>();
+		if (component4 != null)
 		{
-			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui", false, string.Empty));
+			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component4.ElementID).substance.anim, "ui", false, ""));
 			return;
 		}
-		CellSelectionObject component7 = target.GetComponent<CellSelectionObject>();
-		if (component7 != null)
+		CellSelectionObject component5 = target.GetComponent<CellSelectionObject>();
+		if (component5 != null)
 		{
-			string text = ((!component7.element.IsSolid) ? component7.element.substance.name : "ui");
-			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text, false, string.Empty);
+			string text = (component5.element.IsSolid ? "ui" : component5.element.substance.name);
+			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component5.element.substance.anim, text, false, "");
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim2);
 			return;
 		}
@@ -482,19 +477,18 @@ public class DetailsScreen : KTabMenu
 			}
 			if (minionIdentity != null)
 			{
-				this.TabTitle.SetSubText(minionIdentity.GetComponent<MinionResume>().GetSkillsSubtitle(), string.Empty);
+				this.TabTitle.SetSubText(minionIdentity.GetComponent<MinionResume>().GetSkillsSubtitle(), "");
 				this.TabTitle.SetUserEditable(true);
+				return;
 			}
-			else if (storageLocker != null)
+			if (storageLocker != null)
 			{
-				this.TabTitle.SetSubText(string.Empty, string.Empty);
+				this.TabTitle.SetSubText("", "");
 				this.TabTitle.SetUserEditable(true);
+				return;
 			}
-			else
-			{
-				this.TabTitle.SetSubText(string.Empty, string.Empty);
-				this.TabTitle.SetUserEditable(false);
-			}
+			this.TabTitle.SetSubText("", "");
+			this.TabTitle.SetUserEditable(false);
 		}
 	}
 

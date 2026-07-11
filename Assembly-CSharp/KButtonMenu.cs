@@ -41,7 +41,7 @@ public class KButtonMenu : KScreen
 			KButtonMenu.ButtonInfo binfo = this.buttons[j];
 			GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.buttonPrefab, Vector3.zero, Quaternion.identity);
 			this.buttonObjects[j] = gameObject;
-			Transform transform = ((!(this.buttonParent != null)) ? base.transform : this.buttonParent);
+			Transform transform = ((this.buttonParent != null) ? this.buttonParent : base.transform);
 			gameObject.transform.SetParent(transform, false);
 			gameObject.SetActive(true);
 			gameObject.name = binfo.text + "Button";
@@ -50,12 +50,12 @@ public class KButtonMenu : KScreen
 			{
 				foreach (LocText locText in componentsInChildren)
 				{
-					locText.text = ((!(locText.name == "Hotkey")) ? binfo.text : GameUtil.GetActionString(binfo.shortcutKey));
-					locText.color = ((!binfo.isEnabled) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1f, 1f, 1f));
+					locText.text = ((locText.name == "Hotkey") ? GameUtil.GetActionString(binfo.shortcutKey) : binfo.text);
+					locText.color = (binfo.isEnabled ? new Color(1f, 1f, 1f) : new Color(0.5f, 0.5f, 0.5f));
 				}
 			}
 			ToolTip componentInChildren = gameObject.GetComponentInChildren<ToolTip>();
-			if (binfo.toolTip != null && binfo.toolTip != string.Empty && componentInChildren != null)
+			if (binfo.toolTip != null && binfo.toolTip != "" && componentInChildren != null)
 			{
 				componentInChildren.toolTip = binfo.toolTip;
 			}
@@ -83,38 +83,32 @@ public class KButtonMenu : KScreen
 				};
 			}
 			binfo.uibutton = button;
-			if (binfo.onHover != null)
-			{
-			}
+			KButtonMenu.ButtonInfo.HoverCallback onHover = binfo.onHover;
 		}
 		this.Update();
 	}
 
 	protected Button.ButtonClickedEvent SetupPopupMenu(KButtonMenu.ButtonInfo binfo, KButton button)
 	{
-		KButtonMenu.<SetupPopupMenu>c__AnonStorey2 <SetupPopupMenu>c__AnonStorey = new KButtonMenu.<SetupPopupMenu>c__AnonStorey2();
-		<SetupPopupMenu>c__AnonStorey.binfo = binfo;
-		<SetupPopupMenu>c__AnonStorey.button = button;
-		<SetupPopupMenu>c__AnonStorey.$this = this;
 		Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
 		UnityAction unityAction = delegate
 		{
 			List<KButtonMenu.ButtonInfo> list = new List<KButtonMenu.ButtonInfo>();
-			if (<SetupPopupMenu>c__AnonStorey.binfo.onPopulatePopup != null)
+			if (binfo.onPopulatePopup != null)
 			{
-				<SetupPopupMenu>c__AnonStorey.binfo.popupOptions = <SetupPopupMenu>c__AnonStorey.binfo.onPopulatePopup();
+				binfo.popupOptions = binfo.onPopulatePopup();
 			}
-			string[] popupOptions = <SetupPopupMenu>c__AnonStorey.binfo.popupOptions;
+			string[] popupOptions = binfo.popupOptions;
 			for (int i = 0; i < popupOptions.Length; i++)
 			{
 				string text = popupOptions[i];
 				string delegate_str = text;
 				list.Add(new KButtonMenu.ButtonInfo(delegate_str, delegate
 				{
-					<SetupPopupMenu>c__AnonStorey.binfo.onPopupClick(delegate_str);
-					if (!<SetupPopupMenu>c__AnonStorey.keepMenuOpen)
+					binfo.onPopupClick(delegate_str);
+					if (!this.keepMenuOpen)
 					{
-						<SetupPopupMenu>c__AnonStorey.Deactivate();
+						this.Deactivate();
 					}
 				}, global::Action.NumActions, null, null, null, true, null, null, null));
 			}
@@ -123,17 +117,17 @@ public class KButtonMenu : KScreen
 			RootMenu.Instance.AddSubMenu(component);
 			Game.Instance.LocalPlayer.ScreenManager.ActivateScreen(component.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 			Vector3 vector = default(Vector3);
-			if (Util.IsOnLeftSideOfScreen(<SetupPopupMenu>c__AnonStorey.button.transform.GetPosition()))
+			if (Util.IsOnLeftSideOfScreen(button.transform.GetPosition()))
 			{
-				vector.x = <SetupPopupMenu>c__AnonStorey.button.GetComponent<RectTransform>().rect.width * 0.25f;
+				vector.x = button.GetComponent<RectTransform>().rect.width * 0.25f;
 			}
 			else
 			{
-				vector.x = -<SetupPopupMenu>c__AnonStorey.button.GetComponent<RectTransform>().rect.width * 0.25f;
+				vector.x = -button.GetComponent<RectTransform>().rect.width * 0.25f;
 			}
-			component.transform.SetPosition(<SetupPopupMenu>c__AnonStorey.button.transform.GetPosition() + vector);
+			component.transform.SetPosition(button.transform.GetPosition() + vector);
 		};
-		<SetupPopupMenu>c__AnonStorey.binfo.onClick = unityAction;
+		binfo.onClick = unityAction;
 		buttonClickedEvent.AddListener(unityAction);
 		return buttonClickedEvent;
 	}

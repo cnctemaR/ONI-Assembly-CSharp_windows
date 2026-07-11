@@ -16,8 +16,7 @@ public class ElementDropper : KMonoBehaviour
 		{
 			return;
 		}
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		if (component.Mass >= this.emitMass)
+		if (gameObject.GetComponent<PrimaryElement>().Mass >= this.emitMass)
 		{
 			Pickupable pickupable = gameObject.GetComponent<Pickupable>();
 			if (pickupable != null)

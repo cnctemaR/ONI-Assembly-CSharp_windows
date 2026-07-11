@@ -95,11 +95,9 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		if (this.queuedTech.Count > 0)
 		{
 			this.SetActiveResearch(this.queuedTech[this.queuedTech.Count - 1].tech, false);
+			return;
 		}
-		else
-		{
-			this.SetActiveResearch(null, false);
-		}
+		this.SetActiveResearch(null, false);
 	}
 
 	private void AddTechToQueue(Tech tech)
@@ -117,26 +115,28 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public void CancelResearch(Tech tech, bool clickedEntry = true)
 	{
-		Research.<CancelResearch>c__AnonStorey1 <CancelResearch>c__AnonStorey = new Research.<CancelResearch>c__AnonStorey1();
-		<CancelResearch>c__AnonStorey.tech = tech;
-		<CancelResearch>c__AnonStorey.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStorey.tech);
-		if (<CancelResearch>c__AnonStorey.ti == null)
+		Research.<>c__DisplayClass25_0 CS$<>8__locals1 = new Research.<>c__DisplayClass25_0();
+		CS$<>8__locals1.tech = tech;
+		CS$<>8__locals1.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == CS$<>8__locals1.tech);
+		if (CS$<>8__locals1.ti == null)
 		{
 			return;
 		}
-		if (<CancelResearch>c__AnonStorey.ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
+		if (CS$<>8__locals1.ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
 		{
 			this.SetActiveResearch(null, false);
 		}
 		int i;
-		for (i = <CancelResearch>c__AnonStorey.ti.tech.unlockedTech.Count - 1; i >= 0; i--)
+		int j;
+		for (i = CS$<>8__locals1.ti.tech.unlockedTech.Count - 1; i >= 0; i = j - 1)
 		{
-			if (this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStorey.ti.tech.unlockedTech[i]) != null)
+			if (this.queuedTech.Find((TechInstance qt) => qt.tech == CS$<>8__locals1.ti.tech.unlockedTech[i]) != null)
 			{
-				this.CancelResearch(<CancelResearch>c__AnonStorey.ti.tech.unlockedTech[i], false);
+				this.CancelResearch(CS$<>8__locals1.ti.tech.unlockedTech[i], false);
 			}
+			j = i;
 		}
-		this.queuedTech.Remove(<CancelResearch>c__AnonStorey.ti);
+		this.queuedTech.Remove(CS$<>8__locals1.ti);
 		if (clickedEntry)
 		{
 			base.Trigger(-1914338957, this.queuedTech);
@@ -176,24 +176,23 @@ public class Research : KMonoBehaviour, ISaveLoadable
 				if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id))
 				{
 					this.notifier.Remove(this.NoResearcherRole);
-					this.notifier.Add(this.NoResearcherRole, string.Empty);
+					this.notifier.Add(this.NoResearcherRole, "");
 				}
 			}
 			else
 			{
 				this.notifier.Remove(this.NoResearcherRole);
 			}
-			if (this.activeResearch.tech.costsByResearchTypeID.Count > 2)
-			{
-				if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowInterstellarResearch.Id))
-				{
-					this.notifier.Remove(this.NoResearcherRole);
-					this.notifier.Add(this.NoResearcherRole, string.Empty);
-				}
-			}
-			else
+			if (this.activeResearch.tech.costsByResearchTypeID.Count <= 2)
 			{
 				this.notifier.Remove(this.NoResearcherRole);
+				return;
+			}
+			if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowInterstellarResearch.Id))
+			{
+				this.notifier.Remove(this.NoResearcherRole);
+				this.notifier.Add(this.NoResearcherRole, "");
+				return;
 			}
 		}
 		else
@@ -209,8 +208,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			Debug.LogWarning("No active research to add research points to. Global research inventory is disabled.");
 			return;
 		}
-		ResearchPointInventory researchPointInventory = ((!this.UseGlobalPointInventory) ? this.activeResearch.progressInventory : this.globalPointInventory);
-		researchPointInventory.AddResearchPoints(researchTypeID, points);
+		(this.UseGlobalPointInventory ? this.globalPointInventory : this.activeResearch.progressInventory).AddResearchPoints(researchTypeID, points);
 		this.CheckBuyResearch();
 		base.Trigger(-125623018, null);
 	}
@@ -219,9 +217,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	{
 		if (this.activeResearch != null)
 		{
-			ResearchPointInventory researchPointInventory = ((!this.UseGlobalPointInventory) ? this.activeResearch.progressInventory : this.globalPointInventory);
-			bool flag = this.activeResearch.tech.CanAfford(researchPointInventory);
-			if (flag)
+			ResearchPointInventory researchPointInventory = (this.UseGlobalPointInventory ? this.globalPointInventory : this.activeResearch.progressInventory);
+			if (this.activeResearch.tech.CanAfford(researchPointInventory))
 			{
 				foreach (KeyValuePair<string, float> keyValuePair in this.activeResearch.tech.costsByResearchTypeID)
 				{
@@ -267,7 +264,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 		else
 		{
-			this.saveData.activeResearchId = string.Empty;
+			this.saveData.activeResearchId = "";
 		}
 		if (this.queuedTech != null && this.queuedTech.Count > 0)
 		{
@@ -275,7 +272,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 		else
 		{
-			this.saveData.targetResearchId = string.Empty;
+			this.saveData.targetResearchId = "";
 		}
 		this.saveData.techs = new TechInstance.SaveData[this.techs.Count];
 		for (int i = 0; i < this.techs.Count; i++)
@@ -294,8 +291,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 				Tech tech = Db.Get().Techs.TryGet(saveData.techId);
 				if (tech != null)
 				{
-					TechInstance orAdd = this.GetOrAdd(tech);
-					orAdd.Load(saveData);
+					this.GetOrAdd(tech).Load(saveData);
 				}
 			}
 		}
@@ -311,21 +307,17 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private void OnRolesUpdated(object data)
 	{
-		if (this.activeResearch != null && this.activeResearch.tech.costsByResearchTypeID.Count > 1)
-		{
-			if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id))
-			{
-				this.notifier.Add(this.NoResearcherRole, string.Empty);
-			}
-			else
-			{
-				this.notifier.Remove(this.NoResearcherRole);
-			}
-		}
-		else
+		if (this.activeResearch == null || this.activeResearch.tech.costsByResearchTypeID.Count <= 1)
 		{
 			this.notifier.Remove(this.NoResearcherRole);
+			return;
 		}
+		if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id))
+		{
+			this.notifier.Add(this.NoResearcherRole, "");
+			return;
+		}
+		this.notifier.Remove(this.NoResearcherRole);
 	}
 
 	public string GetMissingResearchBuildingName()
@@ -336,22 +328,25 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			if (keyValuePair.Value > 0f)
 			{
 				flag = false;
-				foreach (ResearchCenter researchCenter in Components.ResearchCenters.Items)
+				using (List<ResearchCenter>.Enumerator enumerator2 = Components.ResearchCenters.Items.GetEnumerator())
 				{
-					if (researchCenter.research_point_type_id == keyValuePair.Key)
+					while (enumerator2.MoveNext())
 					{
-						flag = true;
-						break;
+						if (enumerator2.Current.research_point_type_id == keyValuePair.Key)
+						{
+							flag = true;
+							break;
+						}
 					}
 				}
 			}
 			if (!flag)
 			{
-				foreach (ResearchCenter researchCenter2 in this.researchCenterPrefabs)
+				foreach (ResearchCenter researchCenter in this.researchCenterPrefabs)
 				{
-					if (researchCenter2.research_point_type_id == keyValuePair.Key)
+					if (researchCenter.research_point_type_id == keyValuePair.Key)
 					{
-						return researchCenter2.GetProperName();
+						return researchCenter.GetProperName();
 					}
 				}
 				return null;
@@ -367,15 +362,12 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			this.notifier.Remove(this.MissingResearchStation);
 			return;
 		}
-		string missingResearchBuildingName = this.GetMissingResearchBuildingName();
-		if (string.IsNullOrEmpty(missingResearchBuildingName))
+		if (string.IsNullOrEmpty(this.GetMissingResearchBuildingName()))
 		{
 			this.notifier.Remove(this.MissingResearchStation);
+			return;
 		}
-		else
-		{
-			this.notifier.Add(this.MissingResearchStation, string.Empty);
-		}
+		this.notifier.Add(this.MissingResearchStation, "");
 	}
 
 	public static Research Instance;
@@ -403,7 +395,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	public ResearchPointInventory globalPointInventory;
 
 	[Serialize]
-	private Research.SaveData saveData = default(Research.SaveData);
+	private Research.SaveData saveData;
 
 	private static readonly EventSystem.IntraObjectHandler<Research> OnRolesUpdatedDelegate = new EventSystem.IntraObjectHandler<Research>(delegate(Research component, object data)
 	{

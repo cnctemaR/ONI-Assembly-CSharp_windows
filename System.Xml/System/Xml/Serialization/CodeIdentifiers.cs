@@ -13,53 +13,41 @@ namespace System.Xml.Serialization
 
 		public CodeIdentifiers(bool caseSensitive)
 		{
-			StringComparer stringComparer = ((!caseSensitive) ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
-			this.table = new Hashtable(stringComparer);
-			this.reserved = new Hashtable(stringComparer);
+			if (caseSensitive)
+			{
+				this.identifiers = new Hashtable();
+				this.reservedIdentifiers = new Hashtable();
+			}
+			else
+			{
+				IEqualityComparer equalityComparer = new CaseInsensitiveKeyComparer();
+				this.identifiers = new Hashtable(equalityComparer);
+				this.reservedIdentifiers = new Hashtable(equalityComparer);
+			}
+			this.list = new ArrayList();
+		}
+
+		public void Clear()
+		{
+			this.identifiers.Clear();
+			this.list.Clear();
 		}
 
 		public bool UseCamelCasing
 		{
 			get
 			{
-				return this.useCamelCasing;
+				return this.camelCase;
 			}
 			set
 			{
-				this.useCamelCasing = value;
+				this.camelCase = value;
 			}
-		}
-
-		public void Add(string identifier, object value)
-		{
-			this.table.Add(identifier, value);
-		}
-
-		public void AddReserved(string identifier)
-		{
-			this.reserved.Add(identifier, identifier);
-		}
-
-		public string AddUnique(string identifier, object value)
-		{
-			string text = this.MakeUnique(identifier);
-			this.Add(text, value);
-			return text;
-		}
-
-		public void Clear()
-		{
-			this.table.Clear();
-		}
-
-		public bool IsInUse(string identifier)
-		{
-			return this.table.ContainsKey(identifier) || this.reserved.ContainsKey(identifier);
 		}
 
 		public string MakeRightCase(string identifier)
 		{
-			if (this.UseCamelCasing)
+			if (this.camelCase)
 			{
 				return CodeIdentifier.MakeCamel(identifier);
 			}
@@ -68,37 +56,86 @@ namespace System.Xml.Serialization
 
 		public string MakeUnique(string identifier)
 		{
-			string text = identifier;
-			int num = 1;
-			while (this.IsInUse(text))
+			if (this.IsInUse(identifier))
 			{
-				text = string.Format(CultureInfo.InvariantCulture, "{0}{1}", new object[] { identifier, num });
-				num++;
+				int num = 1;
+				string text;
+				for (;;)
+				{
+					text = identifier + num.ToString(CultureInfo.InvariantCulture);
+					if (!this.IsInUse(text))
+					{
+						break;
+					}
+					num++;
+				}
+				identifier = text;
 			}
-			return text;
+			if (identifier.Length > 511)
+			{
+				return this.MakeUnique("Item");
+			}
+			return identifier;
 		}
 
-		public void Remove(string identifier)
+		public void AddReserved(string identifier)
 		{
-			this.table.Remove(identifier);
+			this.reservedIdentifiers.Add(identifier, identifier);
 		}
 
 		public void RemoveReserved(string identifier)
 		{
-			this.reserved.Remove(identifier);
+			this.reservedIdentifiers.Remove(identifier);
+		}
+
+		public string AddUnique(string identifier, object value)
+		{
+			identifier = this.MakeUnique(identifier);
+			this.Add(identifier, value);
+			return identifier;
+		}
+
+		public bool IsInUse(string identifier)
+		{
+			return this.identifiers.Contains(identifier) || this.reservedIdentifiers.Contains(identifier);
+		}
+
+		public void Add(string identifier, object value)
+		{
+			this.identifiers.Add(identifier, value);
+			this.list.Add(value);
+		}
+
+		public void Remove(string identifier)
+		{
+			this.list.Remove(this.identifiers[identifier]);
+			this.identifiers.Remove(identifier);
 		}
 
 		public object ToArray(Type type)
 		{
-			Array array = Array.CreateInstance(type, this.table.Count);
-			this.table.CopyTo(array, 0);
+			Array array = Array.CreateInstance(type, this.list.Count);
+			this.list.CopyTo(array, 0);
 			return array;
 		}
 
-		private bool useCamelCasing;
+		internal CodeIdentifiers Clone()
+		{
+			return new CodeIdentifiers
+			{
+				identifiers = (Hashtable)this.identifiers.Clone(),
+				reservedIdentifiers = (Hashtable)this.reservedIdentifiers.Clone(),
+				list = (ArrayList)this.list.Clone(),
+				camelCase = this.camelCase
+			};
+		}
 
-		private Hashtable table;
+		private Hashtable identifiers;
 
-		private Hashtable reserved;
+		private Hashtable reservedIdentifiers;
+
+		private ArrayList list;
+
+		private bool camelCase;
 	}
 }

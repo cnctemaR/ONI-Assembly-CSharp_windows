@@ -11,14 +11,18 @@ namespace System.Net
 			this.state = state;
 		}
 
-		internal void Complete(string error)
+		internal void Complete(Exception exc)
 		{
 			if (this.forward != null)
 			{
-				this.forward.Complete(error);
+				this.forward.Complete(exc);
 				return;
 			}
-			this.exception = new HttpListenerException(0, error);
+			this.exception = exc;
+			if (this.InGet && exc is ObjectDisposedException)
+			{
+				this.exception = new HttpListenerException(500, "Listener closed");
+			}
 			object obj = this.locker;
 			lock (obj)
 			{
@@ -29,7 +33,7 @@ namespace System.Net
 				}
 				if (this.cb != null)
 				{
-					ThreadPool.QueueUserWorkItem(new WaitCallback(ListenerAsyncResult.InvokeCallback), this);
+					ThreadPool.UnsafeQueueUserWorkItem(ListenerAsyncResult.InvokeCB, this);
 				}
 			}
 		}
@@ -39,10 +43,16 @@ namespace System.Net
 			ListenerAsyncResult listenerAsyncResult = (ListenerAsyncResult)o;
 			if (listenerAsyncResult.forward != null)
 			{
-				listenerAsyncResult.forward.cb(listenerAsyncResult);
+				ListenerAsyncResult.InvokeCallback(listenerAsyncResult.forward);
 				return;
 			}
-			listenerAsyncResult.cb(listenerAsyncResult);
+			try
+			{
+				listenerAsyncResult.cb(listenerAsyncResult);
+			}
+			catch
+			{
+			}
 		}
 
 		internal void Complete(HttpListenerContext context)
@@ -90,7 +100,7 @@ namespace System.Net
 					{
 						if (num > 20)
 						{
-							this.Complete("Too many authentication errors");
+							this.Complete(new HttpListenerException(400, "Too many authentication errors"));
 						}
 						listenerAsyncResult = listenerAsyncResult.forward;
 						num++;
@@ -99,13 +109,14 @@ namespace System.Net
 				else
 				{
 					this.completed = true;
+					this.synch = false;
 					if (this.handle != null)
 					{
 						this.handle.Set();
 					}
 					if (this.cb != null)
 					{
-						ThreadPool.QueueUserWorkItem(new WaitCallback(ListenerAsyncResult.InvokeCallback), this);
+						ThreadPool.UnsafeQueueUserWorkItem(ListenerAsyncResult.InvokeCB, this);
 					}
 				}
 			}
@@ -177,12 +188,12 @@ namespace System.Net
 					return this.forward.IsCompleted;
 				}
 				object obj = this.locker;
-				bool flag;
+				bool flag2;
 				lock (obj)
 				{
-					flag = this.completed;
+					flag2 = this.completed;
 				}
-				return flag;
+				return flag2;
 			}
 		}
 
@@ -203,5 +214,11 @@ namespace System.Net
 		private object locker = new object();
 
 		private ListenerAsyncResult forward;
+
+		internal bool EndCalled;
+
+		internal bool InGet;
+
+		private static WaitCallback InvokeCB = new WaitCallback(ListenerAsyncResult.InvokeCallback);
 	}
 }

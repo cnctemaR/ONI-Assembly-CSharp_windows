@@ -5,23 +5,16 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	/// <summary>
-	///   <para>A collection of Rendering.ShaderKeyword that represents a specific shader variant.</para>
-	/// </summary>
 	[UsedByNativeCode]
 	public struct ShaderKeywordSet
 	{
 		private void ComputeSliceAndMask(ShaderKeyword keyword, out uint slice, out uint mask)
 		{
-			int index = keyword.GetIndex();
-			slice = (uint)(index / 32);
-			mask = 1U << index % 32;
+			int keywordIndex = keyword.GetKeywordIndex();
+			slice = (uint)(keywordIndex / 32);
+			mask = 1U << keywordIndex % 32;
 		}
 
-		/// <summary>
-		///   <para>Check whether a specific shader keyword is enabled.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		public unsafe bool IsEnabled(ShaderKeyword keyword)
 		{
 			bool flag;
@@ -42,10 +35,6 @@ namespace UnityEngine.Rendering
 			return flag;
 		}
 
-		/// <summary>
-		///   <para>Enable a specific shader keyword.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		public unsafe void Enable(ShaderKeyword keyword)
 		{
 			if (keyword.IsValid())
@@ -60,10 +49,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Disable a specific shader keyword.</para>
-		/// </summary>
-		/// <param name="keyword"></param>
 		public unsafe void Disable(ShaderKeyword keyword)
 		{
 			if (keyword.IsValid())
@@ -78,9 +63,6 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		/// <summary>
-		///   <para>Return an array with all the enabled keywords in the ShaderKeywordSet.</para>
-		/// </summary>
 		public ShaderKeyword[] GetShaderKeywords()
 		{
 			ShaderKeyword[] array = new ShaderKeyword[256];
@@ -101,12 +83,12 @@ namespace UnityEngine.Rendering
 		private const int k_SizeInBits = 32;
 
 		[FixedBuffer(typeof(uint), 8)]
-		internal ShaderKeywordSet.<m_Bits>__FixedBuffer1 m_Bits;
+		internal ShaderKeywordSet.<m_Bits>__FixedBuffer0 m_Bits;
 
 		[UnsafeValueType]
 		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 32)]
-		public struct <m_Bits>__FixedBuffer1
+		public struct <m_Bits>__FixedBuffer0
 		{
 			public uint FixedElementField;
 		}

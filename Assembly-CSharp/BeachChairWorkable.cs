@@ -35,8 +35,7 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		int num = Grid.PosToCell(base.gameObject);
-		int num2 = Grid.LightIntensity[num];
-		bool flag = (float)num2 >= 9999f;
+		bool flag = (float)Grid.LightIntensity[num] >= 9999f;
 		this.beachChair.SetLit(flag);
 		if (flag)
 		{
@@ -53,8 +52,7 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
-		float num = this.timeLit / this.workTime;
-		if (num >= 0.75f)
+		if (this.timeLit / this.workTime >= 0.75f)
 		{
 			component.Add(this.beachChair.specificEffectLit, true);
 			component.Remove(this.beachChair.specificEffectUnlit);

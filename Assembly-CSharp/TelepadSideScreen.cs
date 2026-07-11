@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Database;
 using STRINGS;
@@ -45,11 +44,9 @@ public class TelepadSideScreen : SideScreenContent
 		if (this.targetTelepad != null)
 		{
 			base.gameObject.SetActive(false);
+			return;
 		}
-		else
-		{
-			base.gameObject.SetActive(true);
-		}
+		base.gameObject.SetActive(true);
 	}
 
 	private void Update()
@@ -146,29 +143,13 @@ public class TelepadSideScreen : SideScreenContent
 	private void UpdateSkills()
 	{
 		bool flag = false;
-		IEnumerator enumerator = Components.MinionResumes.GetEnumerator();
-		try
+		foreach (object obj in Components.MinionResumes)
 		{
-			while (enumerator.MoveNext())
+			MinionResume minionResume = (MinionResume)obj;
+			if (!minionResume.HasTag(GameTags.Dead) && minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
 			{
-				object obj = enumerator.Current;
-				MinionResume minionResume = (MinionResume)obj;
-				if (!minionResume.HasTag(GameTags.Dead))
-				{
-					if (minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
-					{
-						flag = true;
-						break;
-					}
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				flag = true;
+				break;
 			}
 		}
 		this.skillPointsAvailable.gameObject.SetActive(flag);

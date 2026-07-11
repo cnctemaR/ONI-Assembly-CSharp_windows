@@ -33,8 +33,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		Grid.Objects[Grid.PosToCell(base.gameObject), 8] = base.gameObject;
 		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		base.SetWorkTime(float.PositiveInfinity);
-		KSelectable component = base.GetComponent<KSelectable>();
-		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
 		base.Subscribe<Moppable>(493375141, Moppable.OnRefreshUserMenuDelegate);
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater_kanim") };
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Moppable.OnSpawn", base.gameObject, new Extents(Grid.PosToCell(this), new CellOffset[]
@@ -43,20 +42,13 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		}), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
 		this.Refresh();
 		base.Subscribe<Moppable>(-1432940121, Moppable.OnReachableChangedDelegate);
-		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
-		instance.StartSM();
+		new ReachabilityMonitor.Instance(this).StartSM();
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = Game.Instance.userMenu;
-		GameObject gameObject = base.gameObject;
-		string text = "icon_cancel";
-		string text2 = UI.USERMENUACTIONS.CANCELMOP.NAME;
-		global::System.Action action = new global::System.Action(this.OnCancel);
-		string text3 = UI.USERMENUACTIONS.CANCELMOP.TOOLTIP;
-		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELMOP.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELMOP.TOOLTIP, true), 1f);
 	}
 
 	private void OnCancel()
@@ -172,6 +164,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 				{
 					this.TryDestroy();
 				}, this, null);
+				return;
 			}
 		}
 		else if (this.destroyHandle.IsValid)
@@ -214,16 +207,14 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 			{
 				material.color = Game.Instance.uiColours.Dig.validLocation;
 				component.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
+				return;
 			}
-			else
+			component.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
+			GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
 			{
-				component.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
-				GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
-				{
-					Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion, true);
-				}, null, null);
-				material.color = Game.Instance.uiColours.Dig.unreachable;
-			}
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion, true);
+			}, null, null);
+			material.color = Game.Instance.uiColours.Dig.unreachable;
 		}
 	}
 

@@ -14,7 +14,7 @@ namespace System.Runtime
 			}
 		}
 
-		[MonoTODO("Always returns GCLatencyMode.Interactive and ignores set (.NET 2.0 SP1 member)")]
+		[MonoTODO("Always returns GCLatencyMode.Interactive and ignores set")]
 		public static GCLatencyMode LatencyMode
 		{
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -26,6 +26,14 @@ namespace System.Runtime
 			set
 			{
 			}
+		}
+
+		public static GCLargeObjectHeapCompactionMode LargeObjectHeapCompactionMode
+		{
+			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+			get;
+			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+			set;
 		}
 	}
 }

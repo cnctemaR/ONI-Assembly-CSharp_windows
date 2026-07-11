@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
+public class FetchListStatusItemUpdater : KMonoBehaviour, IRender200ms
 {
 	public static void DestroyInstance()
 	{
@@ -25,11 +25,13 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
 		this.fetchLists.Remove(fetch_list);
 	}
 
-	public void Render1000ms(float dt)
+	public void Render200ms(float dt)
 	{
 		DictionaryPool<int, ListPool<FetchList2, FetchListStatusItemUpdater>.PooledList, FetchListStatusItemUpdater>.PooledDictionary pooledDictionary = DictionaryPool<int, ListPool<FetchList2, FetchListStatusItemUpdater>.PooledList, FetchListStatusItemUpdater>.Allocate();
-		foreach (FetchList2 fetchList in this.fetchLists)
+		int num = Math.Min(this.maxIteratingCount, this.fetchLists.Count - this.currentIteratingIndex);
+		for (int i = this.currentIteratingIndex; i < num; i++)
 		{
+			FetchList2 fetchList = this.fetchLists[i];
 			if (!(fetchList.Destination == null))
 			{
 				ListPool<FetchList2, FetchListStatusItemUpdater>.PooledList pooledList = null;
@@ -41,6 +43,11 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
 				}
 				pooledList.Add(fetchList);
 			}
+		}
+		this.currentIteratingIndex += num;
+		if (this.currentIteratingIndex >= this.fetchLists.Count)
+		{
+			this.currentIteratingIndex = 0;
 		}
 		DictionaryPool<Tag, float, FetchListStatusItemUpdater>.PooledDictionary pooledDictionary2 = DictionaryPool<Tag, float, FetchListStatusItemUpdater>.Allocate();
 		DictionaryPool<Tag, float, FetchListStatusItemUpdater>.PooledDictionary pooledDictionary3 = DictionaryPool<Tag, float, FetchListStatusItemUpdater>.Allocate();
@@ -75,15 +82,15 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
 			DictionaryPool<Tag, float, FetchListStatusItemUpdater>.PooledDictionary pooledDictionary4 = DictionaryPool<Tag, float, FetchListStatusItemUpdater>.Allocate();
 			foreach (Tag tag in pooledList2)
 			{
-				float num = 0f;
+				float num2 = 0f;
 				foreach (Pickupable pickupable in pooledList3)
 				{
 					if (pickupable.KPrefabID.HasTag(tag))
 					{
-						num += pickupable.TotalAmount;
+						num2 += pickupable.TotalAmount;
 					}
 				}
-				pooledDictionary4[tag] = num;
+				pooledDictionary4[tag] = num2;
 			}
 			foreach (Tag tag2 in pooledList2)
 			{
@@ -106,21 +113,21 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
 				{
 					Tag key = keyValuePair3.Key;
 					float value = keyValuePair3.Value;
-					float num2 = pooledDictionary4[key];
-					float num3 = pooledDictionary2[key];
-					float num4 = pooledDictionary3[key];
-					float num5 = Mathf.Min(value, num3);
-					float num6 = num4 + num5;
+					float num3 = pooledDictionary4[key];
+					float num4 = pooledDictionary2[key];
+					float num5 = pooledDictionary3[key];
+					float num6 = Mathf.Min(value, num4);
+					float num7 = num5 + num6;
 					float minimumAmount = fetchList3.GetMinimumAmount(key);
-					if (num2 + num6 < minimumAmount)
+					if (num3 + num7 < minimumAmount)
 					{
 						flag = true;
 					}
-					if (num6 < value)
+					if (num7 < value)
 					{
 						flag2 = false;
 					}
-					if (num2 + num6 > value && value > num6)
+					if (num3 + num7 > value && value > num7)
 					{
 						flag3 = true;
 					}
@@ -142,4 +149,8 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
 	public static FetchListStatusItemUpdater instance;
 
 	private List<FetchList2> fetchLists = new List<FetchList2>();
+
+	private int currentIteratingIndex;
+
+	private int maxIteratingCount = 100;
 }

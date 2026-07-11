@@ -13,14 +13,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
-			{
-				if (buildingComplete.GetComponent<PrimaryElement>().Temperature <= (float)this.kelvinToCoolTo)
-				{
-					return true;
-				}
-			}
-			return false;
+			return BuildingComplete.MinKelvinSeen <= (float)this.kelvinToCoolTo;
 		}
 
 		public override void Deserialize(IReader reader)
@@ -35,12 +28,8 @@ namespace Database
 
 		public override string GetProgress(bool complete)
 		{
-			float num = float.MaxValue;
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
-			{
-				num = Math.Min(num, buildingComplete.GetComponent<PrimaryElement>().Temperature);
-			}
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.KELVIN_COOLING, num);
+			float minKelvinSeen = BuildingComplete.MinKelvinSeen;
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.KELVIN_COOLING, minKelvinSeen);
 		}
 
 		private int kelvinToCoolTo;

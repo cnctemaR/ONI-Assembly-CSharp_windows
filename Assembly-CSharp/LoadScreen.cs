@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ProcGen;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,7 +70,7 @@ public class LoadScreen : KModalScreen
 					SaveGame.GameInfo second = fileInfo.second;
 					global::System.DateTime lastWriteTime = File.GetLastWriteTime(allFiles[i]);
 					string text = ((!(second.originalSaveName != string.Empty)) ? allFiles[i] : second.originalSaveName);
-					text = Path.GetFileNameWithoutExtension(text);
+					text = global::System.IO.Path.GetFileNameWithoutExtension(text);
 					LoadScreen.SaveGameFileDetails saveGameFileDetails = default(LoadScreen.SaveGameFileDetails);
 					saveGameFileDetails.BaseName = second.baseName;
 					saveGameFileDetails.FileName = allFiles[i];
@@ -140,6 +142,7 @@ public class LoadScreen : KModalScreen
 		this.InfoText.text = string.Empty;
 		this.CyclesSurvivedValue.text = "-";
 		this.DuplicantsAliveValue.text = "-";
+		this.WorldValue.text = "-";
 		this.deleteButton.isInteractable = false;
 		this.loadButton.isInteractable = false;
 	}
@@ -221,7 +224,7 @@ public class LoadScreen : KModalScreen
 				reference.gameObject.SetActive(flag);
 				flag = false;
 				reference2.gameObject.SetActive(fileDetails.FileInfo.isAutoSave);
-				component6.text = Path.GetFileNameWithoutExtension(fileDetails.FileName);
+				component6.text = global::System.IO.Path.GetFileNameWithoutExtension(fileDetails.FileName);
 				component7.text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), fileDetails.FileDate);
 				component5.onClick += delegate
 				{
@@ -275,7 +278,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 366134U;
+		return header.buildVersion > 371502U;
 	}
 
 	private void SetSelectedGame(string filename, string savename)
@@ -293,30 +296,35 @@ public class LoadScreen : KModalScreen
 			kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 		}
 		this.selectedFileName = filename;
-		this.FileName.text = Path.GetFileName(this.selectedFileName);
+		this.FileName.text = global::System.IO.Path.GetFileName(this.selectedFileName);
 		kbutton = this.fileButtonMap[this.selectedFileName];
 		kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
 		try
 		{
 			SaveGame.Header header;
 			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
-			string text = Path.GetFileName(filename);
+			WorldGen.LoadSettings();
+			string text = global::System.IO.Path.GetFileName(filename);
 			if (gameInfo.isAutoSave)
 			{
 				text = text + "\n" + UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
 			}
+			string worldID = gameInfo.worldID;
+			global::ProcGen.World world = ((worldID == null) ? null : SettingsCache.worlds.GetWorldData(worldID));
+			string text2 = ((world == null) ? " - " : Strings.Get(world.name));
 			this.CyclesSurvivedValue.text = gameInfo.numberOfCycles.ToString();
 			this.DuplicantsAliveValue.text = gameInfo.numberOfDuplicants.ToString();
+			this.WorldValue.text = text2;
 			this.InfoText.text = string.Empty;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 366134U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 371502U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 11 });
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 12 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -373,20 +381,20 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 366134U)
+		if (header.buildVersion > 371502U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 366134U.ToString();
+			text2 = 371502U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 11);
+			text2 = string.Format("v{0}.{1}", 7, 12);
 		}
 		if (!flag)
 		{
 			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
-			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
+			ConfirmDialogScreen component = global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
 			component.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.LOADFAILED, "Version Mismatch", text, text2), null, null, null, null, null, null, null, null, true);
 			return;
 		}
@@ -411,7 +419,7 @@ public class LoadScreen : KModalScreen
 			global::Debug.LogError("The path provided is not valid and cannot be deleted.");
 			return;
 		}
-		this.ConfirmDoAction(string.Format(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, Path.GetFileName(this.selectedFileName)), delegate
+		this.ConfirmDoAction(string.Format(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, global::System.IO.Path.GetFileName(this.selectedFileName)), delegate
 		{
 			this.fileButtonMap[this.selectedFileName].GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 			this.fileButtonMap[this.selectedFileName].isInteractable = true;
@@ -425,7 +433,7 @@ public class LoadScreen : KModalScreen
 	{
 		if (this.confirmScreen == null)
 		{
-			this.confirmScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, false);
+			this.confirmScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, false);
 			this.confirmScreen.PopupConfirmDialog(message, action, delegate
 			{
 			}, null, null, null, null, null, null, true);
@@ -476,6 +484,8 @@ public class LoadScreen : KModalScreen
 	public LocText CyclesSurvivedValue;
 
 	public LocText DuplicantsAliveValue;
+
+	public LocText WorldValue;
 
 	public LocText InfoText;
 

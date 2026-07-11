@@ -329,6 +329,7 @@ namespace ProcGen
 					else
 					{
 						SettingsCache.traits[text] = worldTrait;
+						worldTrait.filePath = text;
 					}
 				}
 			}
@@ -388,12 +389,6 @@ namespace ProcGen
 				}
 				list.RemoveAt(num2);
 			}
-			DebugUtil.LogArgs(new object[]
-			{
-				"Getting traits for seed",
-				seed,
-				string.Join(", ", list2.ToArray())
-			});
 			return list2;
 		}
 

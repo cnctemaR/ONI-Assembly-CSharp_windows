@@ -113,7 +113,7 @@ public class SoundEvent : AnimEvent
 					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
 			}
-			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.noiseValues))
+			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.noiseValues, this.GetVolume(behaviour)))
 			{
 				DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 			}
@@ -141,9 +141,9 @@ public class SoundEvent : AnimEvent
 		return vector;
 	}
 
-	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos)
+	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos, float volume = 1f)
 	{
-		return KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos));
+		return KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos), volume);
 	}
 
 	public static bool EndOneShot(FMOD.Studio.EventInstance instance)
@@ -151,12 +151,12 @@ public class SoundEvent : AnimEvent
 		return KFMOD.EndOneShot(instance);
 	}
 
-	public static bool PlayOneShot(string sound, Vector3 pos)
+	public static bool PlayOneShot(string sound, Vector3 pos, float volume = 1f)
 	{
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
-			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, pos);
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, pos, volume);
 			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
@@ -165,13 +165,13 @@ public class SoundEvent : AnimEvent
 		return flag;
 	}
 
-	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues)
+	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, float volume = 1f)
 	{
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
 			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, volume);
 			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
@@ -207,6 +207,11 @@ public class SoundEvent : AnimEvent
 		{
 			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);
 		}
+	}
+
+	protected float GetVolume(AnimEventManager.EventPlayerData behaviour)
+	{
+		return 1f;
 	}
 
 	public static int IGNORE_INTERVAL = -1;

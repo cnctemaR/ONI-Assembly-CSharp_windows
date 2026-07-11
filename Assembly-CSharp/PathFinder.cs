@@ -184,7 +184,7 @@ public class PathFinder
 	}
 
 	[Conditional("ENABLE_PATH_DETAILS")]
-	private static void EndDetailSample()
+	private static void EndDetailSample(string region_name)
 	{
 	}
 
@@ -269,7 +269,6 @@ public class PathFinder
 			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link6.transitionId, num7);
 			if (potentialPath.flags != flags)
 			{
-				KProfiler.AddEvent("NavChange");
 			}
 			if (flag4)
 			{

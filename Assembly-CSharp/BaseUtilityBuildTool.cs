@@ -72,7 +72,7 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		this.placeSound = GlobalAssets.GetSound("Place_building_" + this.def.AudioSize, false);
 		Vector3 vector = Grid.CellToPos(cell);
-		EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f);
 		if (this.path.Count > 1 && cell == this.path[this.path.Count - 2].cell)
 		{
 			if (this.previousCellConnection != null)
@@ -292,7 +292,7 @@ public class BaseUtilityBuildTool : DragTool
 		{
 			this.buildingCount = this.buildingCount % 14 + 1;
 			Vector3 vector = Grid.CellToPos(num);
-			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f);
 			if (this.def.AudioSize == "small")
 			{
 				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);

@@ -28,6 +28,14 @@ namespace ProcGenGame
 			this.stats = new Dictionary<string, object>();
 		}
 
+		public WorldGen(string worldName, List<string> chosenTraits, Data data, Dictionary<string, object> stats)
+		{
+			WorldGen.LoadSettings();
+			this.Settings = new WorldGenSettings(worldName, chosenTraits);
+			this.data = data;
+			this.stats = stats;
+		}
+
 		public static string SIM_SAVE_FILENAME
 		{
 			get
@@ -1010,6 +1018,10 @@ namespace ProcGenGame
 
 		public void ApplyStartNode()
 		{
+			if (this.Settings.world.noStart)
+			{
+				return;
+			}
 			global::VoronoiTree.Node node3 = this.data.worldLayout.GetLeafNodesWithTag(WorldGenTags.StartLocation)[0];
 			global::VoronoiTree.Tree parent = node3.parent;
 			node3.parent.AddTagToChildren(WorldGenTags.IgnoreCaveOverride);
@@ -1072,11 +1084,6 @@ namespace ProcGenGame
 					}
 				}
 			}
-		}
-
-		public void ReplayGenerate(WorldGen.ResetFunction Reset)
-		{
-			Reset(this.data.gameSpawnData);
 		}
 
 		public void GetElementForBiomePoint(Chunk chunk, ElementBandConfiguration elementBands, Vector2I pos, out Element element, out Sim.PhysicsData pd, out Sim.DiseaseCell dc, float erode)
@@ -1381,12 +1388,13 @@ namespace ProcGenGame
 			int num = 0;
 			int num2 = 0;
 			updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 0f, WorldGenProgressStages.Stages.DrawWorldBorder);
-			int num3 = world.size.y - 32;
+			int num3 = world.size.y - 1;
 			if (!boolSetting)
 			{
 				num3 = Math.Max(0, num3 - intSetting - 2 * intSetting2);
 				num = -intSetting2;
 				num2 = -intSetting2;
+				num3 = world.size.y - 32;
 			}
 			for (int i = num3; i >= 0; i--)
 			{
@@ -1729,6 +1737,8 @@ namespace ProcGenGame
 				worldGenSave.version = new Vector2I(1, 1);
 				worldGenSave.stats = this.stats;
 				worldGenSave.data = this.data;
+				worldGenSave.worldID = this.Settings.world.filePath;
+				worldGenSave.traitIDs = new List<string>(this.Settings.GetTraitIDs());
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
 					using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
@@ -1757,14 +1767,36 @@ namespace ProcGenGame
 
 		public bool LoadWorldGen()
 		{
+			string text;
+			List<string> list;
+			Data data;
+			Dictionary<string, object> dictionary;
+			this.wasLoaded = WorldGen.LoadWorldGen(out text, out list, out data, out dictionary);
+			if (this.wasLoaded)
+			{
+				this.data = data;
+				this.stats = dictionary;
+			}
+			return this.wasLoaded;
+		}
+
+		public static bool LoadWorldGen(out string worldID, out List<string> traitIDs, out Data data, out Dictionary<string, object> stats)
+		{
+			bool flag = false;
+			data = null;
+			stats = null;
+			worldID = null;
+			traitIDs = new List<string>();
 			try
 			{
 				WorldGenSave worldGenSave = new WorldGenSave();
 				FastReader fastReader = new FastReader(File.ReadAllBytes(WorldGen.WORLDGEN_SAVE_FILENAME));
 				Manager.DeserializeDirectory(fastReader);
 				Deserializer.Deserialize(worldGenSave, fastReader);
-				this.stats = worldGenSave.stats;
-				this.data = worldGenSave.data;
+				stats = worldGenSave.stats;
+				data = worldGenSave.data;
+				worldID = worldGenSave.worldID;
+				traitIDs = worldGenSave.traitIDs;
 				if (worldGenSave.version.x != 1 || worldGenSave.version.y > 1)
 				{
 					global::Debug.LogError(string.Concat(new object[]
@@ -1779,24 +1811,23 @@ namespace ProcGenGame
 						worldGenSave.version.y,
 						"]"
 					}));
-					this.wasLoaded = false;
+					flag = false;
 				}
 				else
 				{
-					this.wasLoaded = true;
+					flag = true;
 				}
 			}
 			catch (Exception ex)
 			{
 				DebugUtil.LogErrorArgs(new object[] { "LoadWorldGenSim Error!\n", ex.Message, ex.StackTrace });
-				this.wasLoaded = false;
+				flag = false;
 			}
-			return this.wasLoaded;
+			return flag;
 		}
 
-		public SimSaveFileStructure LoadWorldGenSim()
+		public static SimSaveFileStructure LoadWorldGenSim()
 		{
-			this.LoadWorldGen();
 			SimSaveFileStructure simSaveFileStructure = new SimSaveFileStructure();
 			try
 			{
@@ -1807,16 +1838,7 @@ namespace ProcGenGame
 			catch (Exception ex)
 			{
 				DebugUtil.LogErrorArgs(new object[] { "LoadWorldGenSim Error!\n", ex.Message, ex.StackTrace });
-				this.wasLoaded = false;
 				return null;
-			}
-			if (simSaveFileStructure.worldDetail == null)
-			{
-				global::Debug.LogError("Detail is null");
-			}
-			else
-			{
-				SaveLoader.Instance.SetWorldDetail(simSaveFileStructure.worldDetail);
 			}
 			return simSaveFileStructure;
 		}
@@ -1881,8 +1903,6 @@ namespace ProcGenGame
 
 		[EnumFlags]
 		public WorldGen.DebugFlags drawOptions;
-
-		public delegate void ResetFunction(GameSpawnData gsd);
 
 		public delegate bool OfflineCallbackFunction(StringKey stringKeyRoot, float completePercent, WorldGenProgressStages.Stages stage);
 

@@ -356,7 +356,12 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	}
 
 	[Conditional("ENABLE_FETCH_PROFILING")]
-	private static void EndDetailedSample()
+	private static void EndDetailedSample(string region_name)
+	{
+	}
+
+	[Conditional("ENABLE_FETCH_PROFILING")]
+	private static void EndDetailedSample(string region_name, int count)
 	{
 	}
 

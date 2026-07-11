@@ -52,7 +52,7 @@ namespace STRINGS
 
 			public static LocString BUILDINGREQUIREMENTS = "Requirements";
 
-			public static LocString SUBENTRIES = "Entries";
+			public static LocString SUBENTRIES = "Entries ({0}/{1})";
 
 			public static LocString COMFORTRANGE = "Ideal Temperatures";
 
@@ -69,9 +69,9 @@ namespace STRINGS
 		{
 			public class TEMPERATURE
 			{
-				public static LocString COMFORT_RANGE = "Comfort range: {0}";
+				public static LocString COMFORT_RANGE = "Comfort range: <b>{0}</b> to <b>{1}</b>";
 
-				public static LocString NON_LETHAL_RANGE = "Livable range: {0}";
+				public static LocString NON_LETHAL_RANGE = "Livable range: <b>{0}</b> to <b>{1}</b>";
 			}
 		}
 
@@ -86,6 +86,10 @@ namespace STRINGS
 
 		public class DRECKO
 		{
+			public static LocString SPECIES_TITLE = "Dreckos";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Drecko";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
@@ -128,6 +132,10 @@ namespace STRINGS
 
 		public class HATCH
 		{
+			public static LocString SPECIES_TITLE = "Hatches";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Hatch";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
@@ -212,6 +220,10 @@ namespace STRINGS
 
 		public class PACU
 		{
+			public static LocString SPECIES_TITLE = "Pacus";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Pacu";
 
 			public static LocString SUBTITLE = "Aquatic Critter";
@@ -286,6 +298,10 @@ namespace STRINGS
 
 		public class PUFT
 		{
+			public static LocString SPECIES_TITLE = "Pufts";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Puft";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
@@ -340,6 +356,10 @@ namespace STRINGS
 
 		public class SHINEBUG
 		{
+			public static LocString SPECIES_TITLE = "Shine Bugs";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Shine Bug";
 
 			public static LocString SUBTITLE = "Domesticable Critter";
@@ -432,6 +452,10 @@ namespace STRINGS
 
 		public class SLICKSTER
 		{
+			public static LocString SPECIES_TITLE = "Slicksters";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
 			public static LocString TITLE = "Slickster";
 
 			public static LocString SUBTITLE = "Domesticable Critter";

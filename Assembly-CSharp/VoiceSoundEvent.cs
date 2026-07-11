@@ -63,7 +63,7 @@ public class VoiceSoundEvent : SoundEvent
 			}
 			else
 			{
-				eventInstance = SoundEvent.BeginOneShot(sound, position);
+				eventInstance = SoundEvent.BeginOneShot(sound, position, 1f);
 				if (sound.Contains("sleep_"))
 				{
 					Traits component4 = controller.GetComponent<Traits>();

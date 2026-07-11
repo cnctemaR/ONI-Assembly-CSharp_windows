@@ -15,7 +15,7 @@ public class CreatureChewSoundEvent : SoundEvent
 		if (SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic))
 		{
 			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, 1f);
 			if (behaviour.controller.gameObject.GetDef<BabyMonitor.Def>() != null)
 			{
 				eventInstance.setParameterValue("isBaby", 1f);

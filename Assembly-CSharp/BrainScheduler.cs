@@ -167,17 +167,12 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				num += num13 - this.probeSize;
 				this.probeSize = num13;
 			}
-			if (num < 0)
+			if (num >= 0)
 			{
-				KProfiler.AddEvent(this.decreaseLoadLabel);
-			}
-			else if (num > 0)
-			{
-				KProfiler.AddEvent(this.increaseLoadLabel);
-			}
-			else
-			{
-				Debug.LogWarning("AdjustLoad() failed");
+				if (num <= 0)
+				{
+					Debug.LogWarning("AdjustLoad() failed");
+				}
 			}
 			return num != 0;
 		}

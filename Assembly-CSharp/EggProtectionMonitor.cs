@@ -113,14 +113,14 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		{
 			ListPool<KPrefabID, EggProtectionMonitor>.PooledList pooledList = ListPool<KPrefabID, EggProtectionMonitor>.Allocate();
 			pooledList.Capacity = Mathf.Max(pooledList.Capacity, Components.Pickupables.Count);
-			IEnumerator enumerator = Components.Pickupables.GetEnumerator();
+			IEnumerator enumerator = Components.IncubationMonitors.GetEnumerator();
 			try
 			{
 				while (enumerator.MoveNext())
 				{
 					object obj = enumerator.Current;
-					Pickupable pickupable = (Pickupable)obj;
-					pooledList.Add(pickupable.gameObject.GetComponent<KPrefabID>());
+					IncubationMonitor.Instance instance = (IncubationMonitor.Instance)obj;
+					pooledList.Add(instance.gameObject.GetComponent<KPrefabID>());
 				}
 			}
 			finally

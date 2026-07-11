@@ -5,7 +5,9 @@ using System.Runtime.Serialization;
 using System.Text;
 using KSerialization;
 using Newtonsoft.Json;
+using ProcGen;
 using ProcGenGame;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(global::KSerialization.MemberSerialization.OptIn)]
@@ -79,18 +81,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public byte[] GetSaveHeader(bool isAutoSave, bool isCompressed, out SaveGame.Header header)
 	{
-		string text;
-		if (isAutoSave)
-		{
-			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath(), false));
-		}
-		else
-		{
-			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, false));
-		}
+		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 366134U;
+		header.buildVersion = 371502U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -143,6 +137,30 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SendProfileStats();
 		Game.Instance.Trigger(-1917495436, null);
+	}
+
+	public List<Tuple<string, ScriptableObject>> GetColonyToolTip()
+	{
+		List<Tuple<string, ScriptableObject>> list = new List<Tuple<string, ScriptableObject>>();
+		list.Add(new Tuple<string, ScriptableObject>(this.baseName, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+		if (GameClock.Instance != null)
+		{
+			list.Add(new Tuple<string, ScriptableObject>(" ", null));
+			list.Add(new Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, GameUtil.GetCurrentCycle()), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+			list.Add(new Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+		}
+		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(SaveLoader.Instance.GameInfo.worldID);
+		list.Add(new Tuple<string, ScriptableObject>(" ", null));
+		list.Add(new Tuple<string, ScriptableObject>(Strings.Get(worldData.name), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+		if (SaveLoader.Instance.GameInfo.worldTraits != null)
+		{
+			foreach (string text in SaveLoader.Instance.GameInfo.worldTraits)
+			{
+				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text);
+				list.Add(new Tuple<string, ScriptableObject>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+			}
+		}
+		return list;
 	}
 
 	[Serialize]
@@ -200,26 +218,18 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public struct GameInfo
 	{
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, bool sandboxEnabled = false)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string worldID, string[] worldTraits, bool sandboxEnabled = false)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
 			this.baseName = baseName;
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
+			this.worldID = worldID;
+			this.worldTraits = worldTraits;
+			this.sandboxEnabled = sandboxEnabled;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 11;
-		}
-
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool sandboxEnabled = false)
-		{
-			this.numberOfCycles = numberOfCycles;
-			this.numberOfDuplicants = numberOfDuplicants;
-			this.baseName = baseName;
-			this.isAutoSave = false;
-			this.originalSaveName = string.Empty;
-			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 11;
+			this.saveMinorVersion = 12;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)
@@ -245,5 +255,11 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		public int saveMajorVersion;
 
 		public int saveMinorVersion;
+
+		public string worldID;
+
+		public string[] worldTraits;
+
+		public bool sandboxEnabled;
 	}
 }

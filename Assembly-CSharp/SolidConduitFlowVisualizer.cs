@@ -248,7 +248,7 @@ public class SolidConduitFlowVisualizer
 			SolidConduitFlowVisualizer.AudioInfo audioInfo = list[j];
 			if (audioInfo.distance != float.PositiveInfinity)
 			{
-				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, audioInfo.position);
+				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, audioInfo.position, 1f);
 				eventInstance.setParameterValue("blobCount", (float)audioInfo.blobCount);
 				eventInstance.setParameterValue("networkCount", (float)num);
 				SoundEvent.EndOneShot(eventInstance);

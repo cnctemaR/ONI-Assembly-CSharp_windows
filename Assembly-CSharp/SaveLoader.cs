@@ -175,8 +175,6 @@ public class SaveLoader : KMonoBehaviour
 				saveFileRoot.active_mods.Add(mod.label);
 			}
 		}
-		string text = ((Game.worldID == null) ? CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id : Game.worldID);
-		saveFileRoot.worldID = text;
 		using (MemoryStream memoryStream2 = new MemoryStream())
 		{
 			using (BinaryWriter binaryWriter2 = new BinaryWriter(memoryStream2))
@@ -227,20 +225,35 @@ public class SaveLoader : KMonoBehaviour
 			DebugUtil.LogWarningArgs(new object[] { "Mod footprint of save file doesn't match current mod configuration" });
 		}
 		Global.Instance.modManager.SendMetricsEvent();
-		string text2 = saveFileRoot.worldID;
-		if (text2 == null)
+		WorldGen.LoadSettings();
+		CustomGameSettings.Instance.LoadWorlds();
+		if (this.GameInfo.worldID == null)
 		{
-			try
+			SaveGame.GameInfo gameInfo = this.GameInfo;
+			if (!string.IsNullOrEmpty(saveFileRoot.worldID))
 			{
-				text2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id;
+				gameInfo.worldID = saveFileRoot.worldID;
 			}
-			catch
+			else
 			{
-				text2 = "worlds/SandstoneDefault";
+				try
+				{
+					gameInfo.worldID = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id;
+				}
+				catch
+				{
+					gameInfo.worldID = "worlds/SandstoneDefault";
+				}
 			}
+			this.GameInfo = gameInfo;
 		}
-		Game.worldID = text2;
-		this.worldGen = new WorldGen(text2, null);
+		if (this.GameInfo.worldTraits == null)
+		{
+			SaveGame.GameInfo gameInfo2 = this.GameInfo;
+			gameInfo2.worldTraits = new string[0];
+			this.GameInfo = gameInfo2;
+		}
+		this.worldGen = new WorldGen(this.GameInfo.worldID, new List<string>(this.GameInfo.worldTraits));
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
 		Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
@@ -605,16 +618,16 @@ public class SaveLoader : KMonoBehaviour
 		DebugUtil.LogArgs(new object[] { "Attempting to start a new game with current world gen" });
 		WorldGen.LoadSettings();
 		string text;
-		try
-		{
-			text = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id;
-		}
-		catch
-		{
-			text = "worlds/SandstoneDefault";
-		}
-		this.worldGen = new WorldGen(text, null);
-		SimSaveFileStructure simSaveFileStructure = this.worldGen.LoadWorldGenSim();
+		List<string> list;
+		Data data;
+		Dictionary<string, object> dictionary;
+		WorldGen.LoadWorldGen(out text, out list, out data, out dictionary);
+		this.worldGen = new WorldGen(text, list, data, dictionary);
+		SaveGame.GameInfo gameInfo = this.GameInfo;
+		gameInfo.worldID = text;
+		gameInfo.worldTraits = list.ToArray();
+		this.GameInfo = gameInfo;
+		SimSaveFileStructure simSaveFileStructure = WorldGen.LoadWorldGenSim();
 		if (simSaveFileStructure == null)
 		{
 			global::Debug.LogError("Attempt failed");
@@ -625,6 +638,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			global::Debug.LogError("Detail is null");
 		}
+		SaveLoader.Instance.SetWorldDetail(this.worldDetailSave);
 		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
 		Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
@@ -649,7 +663,7 @@ public class SaveLoader : KMonoBehaviour
 		global::Debug.Log("Attempt success");
 		SceneInitializer.Instance.PostLoadPrefabs();
 		SceneInitializer.Instance.NewSaveGamePrefab();
-		this.worldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
+		this.cachedGSD = this.worldGen.SpawnData;
 		this.OnWorldGenComplete.Signal();
 		ThreadedHttps<KleiMetrics>.Instance.StartNewGame();
 		return true;
@@ -662,11 +676,6 @@ public class SaveLoader : KMonoBehaviour
 	public void SetWorldDetail(WorldDetailSave worldDetail)
 	{
 		this.worldDetailSave = worldDetail;
-	}
-
-	private void Reset(GameSpawnData gsd)
-	{
-		this.cachedGSD = gsd;
 	}
 
 	private void ReportSaveMetrics(bool is_auto_save)

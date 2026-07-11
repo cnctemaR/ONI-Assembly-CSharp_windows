@@ -28,11 +28,11 @@ public class IncrementorToggle : MultiToggle
 		{
 			if (this.states[this.state].on_click_override_sound_path == string.Empty)
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 			}
 			else
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
 			}
 		}
 	}

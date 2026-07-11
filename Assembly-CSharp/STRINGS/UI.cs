@@ -1470,9 +1470,20 @@ namespace STRINGS
 
 			public class PATCHNOTESSCREEN
 			{
-				public static LocString BODY = "<b>Welcome to the Launch Upgrade! ONI Has Launched!</b>\n\n<b>Update Features:</b>\n\n• New asteroid selections with 3 new biomes to explore and exploit\n• Pips, Pokeshells, Dasha Saltvines, Waterweed, and Nosh Sprouts to tend and grow\n• New buildings to process new resources and improve your colony\n• Colony Initiatives and Imperatives keep track of your colony's progress\n• The squashing of many long-standing bugs and issues!\n\nPlease view the full patch notes for further details!";
-
 				public static LocString OK_BUTTON = "OK";
+			}
+
+			public class MOTD
+			{
+				public static LocString IMAGE_HEADER = "LAUNCH TRAILER!";
+
+				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
+
+				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
+
+				public static LocString PATCH_NOTES_SUMMARY = "<b>Welcome to the Launch Upgrade! ONI Has Launched!</b>\n\n<b>Update Features:</b>\n\n• New asteroid selections with 3 new biomes to explore and exploit\n• Pips, Pokeshells, Dasha Saltvines, Waterweed, and Nosh Sprouts to tend and grow\n• New buildings to process new resources and improve your colony\n• Colony Initiatives and Imperatives keep track of your colony's progress\n• The squashing of many long-standing bugs and issues!\n\nPlease view the full patch notes for further details!";
+
+				public static LocString UPDATE_TEXT = "LAUNCHED!";
 			}
 
 			public class LOADSCREEN
@@ -1504,6 +1515,8 @@ namespace STRINGS
 				public static LocString CYCLES_SURVIVED = "Cycles Survived";
 
 				public static LocString DUPLICANTS_ALIVE = "Duplicants Alive";
+
+				public static LocString WORLD_NAME = "Asteroid Type";
 
 				public static LocString NO_FILE_SELECTED = "No file selected";
 			}
@@ -1683,9 +1696,9 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "MOD ERRORS";
 
-					public static LocString MESSAGE = "Errors occurred during start-up with mods active:\n{0}\nAll your mods have been disabled. The game will be restarted.";
+					public static LocString MESSAGE = "An error occurred during start-up with mods active.\nAll mods have been disabled to ensure a clean restart.\n{0}";
 
-					public static LocString DEV_MESSAGE = "Errors occurred during start-up with mods active:\n{0}\nDisable all mods and restart, or continue in an unstable state?";
+					public static LocString DEV_MESSAGE = "An error occurred during start-up with mods active.\n{0}\nDisable all mods and restart, or continue in an unstable state?";
 				}
 
 				public class MODS_SCREEN_CHANGES
@@ -1738,7 +1751,11 @@ namespace STRINGS
 
 				public static LocString DESKTOPQUIT = "Quit to Desktop";
 
-				public static LocString WORLD_SEED = "World Seed: {0}";
+				public static LocString WORLD_SEED = "Coordinates: {0}";
+
+				public static LocString WORLD_SEED_TOOLTIP = "Share the Coordinates with a friend and they can start a colony on this same asteroid!\n\n{0} - The asteroid\n\n{1} - The world seed\n\n{2} - Difficulty and Custom settings";
+
+				public static LocString WORLD_SEED_COPY_TOOLTIP = "Copy Coordinates to clipboard\n\nShare the Coordinates with a friend and they can start a colony on this same asteroid!";
 
 				public static LocString MANAGEMENT_BUTTON = "Pause Menu";
 			}
@@ -3698,6 +3715,10 @@ namespace STRINGS
 
 			public static LocString RECIPE_FABRICATOR_HEADER = "Produced by";
 
+			public static LocString BACK_BUTTON_TOOLTIP = "Click to go back:\n{0}";
+
+			public static LocString BACK_BUTTON_NO_HISTORY_TOOLTIP = "Click to go back:\nN/A";
+
 			public static LocString TITLE = "DATABASE";
 
 			public static LocString MANAGEMENT_BUTTON = "DATABASE";
@@ -3756,9 +3777,13 @@ namespace STRINGS
 
 				public static LocString TECH = UI.FormatAsLink("Research", "TECH");
 
-				public static LocString TIPS = UI.FormatAsLink("Tips and Information", "TIPS");
+				public static LocString TIPS = UI.FormatAsLink("Lessons", "LESSONS");
 
 				public static LocString EQUIPMENT = UI.FormatAsLink("Equipment", "EQUIPMENT");
+
+				public static LocString VIDEOS = UI.FormatAsLink("Videos", "VIDEOS");
+
+				public static LocString MISCELLANEOUSTIPS = UI.FormatAsLink("Miscellaneous Tips", "MISCELLANEOUSTIPS");
 
 				public static LocString ELEMENTS = UI.FormatAsLink("Elements", "ELEMENTS");
 
@@ -3796,17 +3821,11 @@ namespace STRINGS
 			{
 				public class MESSAGES
 				{
-					public static LocString HEADER = "JOIN THE DISCUSSION";
-
-					public static LocString BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
-
 					public static LocString FORUMBUTTON = "FORUMS";
 
 					public static LocString MAILINGLIST = "MAILING LIST";
 
 					public static LocString PATCHNOTES = "PATCH NOTES";
-
-					public static LocString ANIMATION_HEADER = "LAUNCH TRAILER!";
 				}
 
 				public class LOADING
@@ -3835,8 +3854,6 @@ namespace STRINGS
 				public static LocString FINAL_WEEK = "{0} days";
 
 				public static LocString BIGGER_TIMES = "{1} weeks {0} days";
-
-				public static LocString SPECIFIC_DATE = "LAUNCHED!";
 			}
 		}
 
@@ -5661,6 +5678,12 @@ namespace STRINGS
 				public static LocString RECIPE_WITH = "{1} ({0})";
 
 				public static LocString RECIPE_FROM_TO_WITH_NEWLINES = "{0}\nto\n{1}";
+
+				public static LocString RECIPE_SIMPLE_INCLUDE_AMOUNTS = "{0} {1}";
+
+				public static LocString RECIPE_FROM_TO_INCLUDE_AMOUNTS = "{2} {0} to {3} {1}";
+
+				public static LocString RECIPE_WITH_INCLUDE_AMOUNTS = "{3} {1} ({2} {0})";
 			}
 
 			public class SEALEDDOORSIDESCREEN
@@ -7911,6 +7934,10 @@ namespace STRINGS
 
 			public static LocString ENABLESDOMESTICGROWTH = "Enables " + UI.FormatAsLink("Plant Domestication", "PLANTS");
 
+			public static LocString TRANSFORMER_INPUT_WIRE = "Input " + UI.FormatAsLink("Power Wire", "WIRE");
+
+			public static LocString TRANSFORMER_OUTPUT_WIRE = "Output " + UI.FormatAsLink("Power Wire", "WIRE") + " (Limited to {0})";
+
 			public static LocString OPERATIONEFFECTS = "<b>Effects:</b>";
 
 			public static LocString BATTERYCAPACITY = UI.FormatAsLink("Power", "POWER") + " capacity: {0}";
@@ -7961,7 +7988,7 @@ namespace STRINGS
 
 			public static LocString PROCESSES = "Refines:";
 
-			public static LocString PROCESSEDITEM = "{1}";
+			public static LocString PROCESSEDITEM = "{1} {0}";
 
 			public static LocString PLANTERBOX_PENTALTY = "Planter box penalty";
 
@@ -8792,6 +8819,38 @@ namespace STRINGS
 				});
 
 				public static LocString ACCESS_CONTROL = "Settings to allow or restrict Duplicants from passing through the door.";
+
+				public static LocString TRANSFORMER_INPUT_WIRE = string.Concat(new string[]
+				{
+					"Connect a ",
+					UI.PRE_KEYWORD,
+					"Wire",
+					UI.PST_KEYWORD,
+					" to the large ",
+					UI.PRE_KEYWORD,
+					"Input",
+					UI.PST_KEYWORD,
+					" with any amount of ",
+					UI.PRE_KEYWORD,
+					"Watts",
+					UI.PST_KEYWORD,
+					"."
+				});
+
+				public static LocString TRANSFORMER_OUTPUT_WIRE = string.Concat(new string[]
+				{
+					"The ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" provided by the the small ",
+					UI.PRE_KEYWORD,
+					"Output",
+					UI.PST_KEYWORD,
+					" will be limited to {0}."
+				});
+
+				public static LocString FABRICATOR_INGREDIENTS = "Ingredients:\n{0}";
 			}
 		}
 
@@ -9455,7 +9514,13 @@ namespace STRINGS
 
 			public class UPTIME
 			{
-				public static LocString NAME = "Uptime: ({0}/ {1}/ {2}) {3}/ {4}/ {5}";
+				public static LocString NAME = "Uptime:\n{0}{1}: {2}\n{0}{3}: {4}\n{0}{5}: {6}";
+
+				public static LocString THIS_CYCLE = "This Cycle";
+
+				public static LocString LAST_CYCLE = "Last Cycle";
+
+				public static LocString LAST_X_CYCLES = "Last {0} Cycles";
 			}
 
 			public class PRIMARYELEMENT

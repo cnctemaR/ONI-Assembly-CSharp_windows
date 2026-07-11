@@ -172,6 +172,7 @@ public enum GameHashes
 	ExitedToxicArea = 369532135,
 	EnteredBreathableArea = 99949694,
 	ExitedBreathableArea = -1189351068,
+	AreaElementSafeChanged = -2023773544,
 	ColonyHasRationsChanged = -171255324,
 	AssignableReachabilityChanged = 334784980,
 	TimeOfDayChanged = 1791086652,

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Klei.CustomSettings;
 using ProcGen;
 using ProcGenGame;
 using UnityEngine;
@@ -43,7 +44,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 		this.dragStartPos = Input.mousePosition;
 		this.dragLastPos = this.dragStartPos;
 		this.isDragging = true;
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("DestinationSelect_Scroll_Start", false));
+		KFMOD.PlayUISound(GlobalAssets.GetSound("DestinationSelect_Scroll_Start", false));
 	}
 
 	private void Drag()
@@ -58,7 +59,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 		if (num2 != this.selectedIndex)
 		{
 			this.OnAsteroidClicked(this.asteroidData[this.worldNames[this.selectedIndex]]);
-			KFMOD.PlayOneShot(GlobalAssets.GetSound("DestinationSelect_Scroll", false));
+			KFMOD.PlayUISound(GlobalAssets.GetSound("DestinationSelect_Scroll", false));
 		}
 	}
 
@@ -66,7 +67,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 	{
 		this.Drag();
 		this.isDragging = false;
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("DestinationSelect_Scroll_Stop", false));
+		KFMOD.PlayUISound(GlobalAssets.GetSound("DestinationSelect_Scroll_Stop", false));
 	}
 
 	private void ClickLeft()
@@ -209,6 +210,56 @@ public class DestinationSelectPanel : KMonoBehaviour
 		this.OnAsteroidClicked(this.asteroidData[this.worldNames[num]]);
 	}
 
+	private void DebugCurrentSetting()
+	{
+		ColonyDestinationAsteroidData colonyDestinationAsteroidData = this.asteroidData[this.worldNames[this.selectedIndex]];
+		string text = "{world}: {seed} [{traits}] {{settings}}";
+		string properName = colonyDestinationAsteroidData.properName;
+		string text2 = colonyDestinationAsteroidData.seed.ToString();
+		text = text.Replace("{world}", properName);
+		text = text.Replace("{seed}", text2);
+		List<AsteroidDescriptor> traitDescriptors = colonyDestinationAsteroidData.GetTraitDescriptors();
+		string[] array = new string[traitDescriptors.Count];
+		for (int i = 0; i < traitDescriptors.Count; i++)
+		{
+			array[i] = traitDescriptors[i].text;
+		}
+		string text3 = string.Join(", ", array);
+		text = text.Replace("{traits}", text3);
+		CustomGameSettings.CustomGameMode customGameMode = CustomGameSettings.Instance.customGameMode;
+		if (customGameMode != CustomGameSettings.CustomGameMode.Survival)
+		{
+			if (customGameMode != CustomGameSettings.CustomGameMode.Nosweat)
+			{
+				if (customGameMode == CustomGameSettings.CustomGameMode.Custom)
+				{
+					List<string> list = new List<string>();
+					foreach (KeyValuePair<string, SettingConfig> keyValuePair in CustomGameSettings.Instance.QualitySettings)
+					{
+						if (keyValuePair.Value.coordinate_dimension >= 0 && keyValuePair.Value.coordinate_dimension_width >= 0)
+						{
+							SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(keyValuePair.Key);
+							if (currentQualitySetting.id != keyValuePair.Value.default_level_id)
+							{
+								list.Add(string.Format("{0}={1}", keyValuePair.Value.label, currentQualitySetting.label));
+							}
+						}
+					}
+					text = text.Replace("{settings}", string.Join(", ", list.ToArray()));
+				}
+			}
+			else
+			{
+				text = text.Replace("{settings}", "Nosweat");
+			}
+		}
+		else
+		{
+			text = text.Replace("{settings}", "Survival");
+		}
+		global::Debug.Log(text);
+	}
+
 	[SerializeField]
 	private GameObject asteroidPrefab;
 
@@ -253,4 +304,6 @@ public class DestinationSelectPanel : KMonoBehaviour
 	private Vector2 dragLastPos;
 
 	private bool isDragging;
+
+	private const string debugFmt = "{world}: {seed} [{traits}] {{settings}}";
 }

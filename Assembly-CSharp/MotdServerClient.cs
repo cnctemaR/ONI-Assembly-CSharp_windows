@@ -22,7 +22,15 @@ public class MotdServerClient
 		}
 	}
 
-	private static string GetLocalePathSuffix()
+	private static string MotdLocalImagePath
+	{
+		get
+		{
+			return "motd_local/" + MotdServerClient.GetLocalePathModifier() + "image";
+		}
+	}
+
+	private static string GetLocalePathModifier()
 	{
 		string text = string.Empty;
 		Localization.Locale locale = Localization.GetLocale();
@@ -34,7 +42,12 @@ public class MotdServerClient
 				text = locale.Code + "/";
 			}
 		}
-		return text + "motd.json";
+		return text;
+	}
+
+	private static string GetLocalePathSuffix()
+	{
+		return MotdServerClient.GetLocalePathModifier() + "motd.json";
 	}
 
 	public void GetMotd(Action<MotdServerClient.MotdResponse, string> cb)
@@ -59,7 +72,7 @@ public class MotdServerClient
 	{
 		TextAsset textAsset = Resources.Load<TextAsset>(filePath.Replace(".json", string.Empty));
 		MotdServerClient.MotdResponse motdResponse = JsonConvert.DeserializeObject<MotdServerClient.MotdResponse>(textAsset.ToString());
-		motdResponse.image_texture = Resources.Load<Texture2D>("motd_local/image.png");
+		motdResponse.image_texture = Resources.Load<Texture2D>(MotdServerClient.MotdLocalImagePath);
 		return motdResponse;
 	}
 
@@ -158,8 +171,6 @@ public class MotdServerClient
 		}
 	}
 
-	private const string MotdLocalImagePath = "motd_local/image.png";
-
 	private Action<MotdServerClient.MotdResponse, string> m_callback;
 
 	public class MotdResponse
@@ -188,6 +199,7 @@ public class MotdServerClient
 
 		public string update_text_override { get; set; }
 
+		[JsonIgnore]
 		public Texture2D image_texture { get; set; }
 	}
 }

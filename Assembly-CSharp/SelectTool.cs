@@ -114,11 +114,11 @@ public class SelectTool : InterfaceTool
 					{
 						if (recentNumberOfDisplayedSelectables == 1)
 						{
-							KFMOD.PlayOneShot(GlobalAssets.GetSound("Select_empty", false));
+							KFMOD.PlayUISound(GlobalAssets.GetSound("Select_empty", false));
 						}
 						else
 						{
-							EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Select_full", false), Vector3.zero);
+							EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Select_full", false), Vector3.zero, 1f);
 							eventInstance.setParameterValue("selection", (float)num);
 							SoundEvent.EndOneShot(eventInstance);
 						}

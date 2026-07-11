@@ -10,6 +10,10 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 {
 	public static void ResetHiddenTutorialMessages()
 	{
+		if (Tutorial.Instance != null)
+		{
+			Tutorial.Instance.tutorialMessagesRemaining.Clear();
+		}
 		IEnumerator enumerator = Enum.GetValues(typeof(Tutorial.TutorialMessages)).GetEnumerator();
 		try
 		{
@@ -21,6 +25,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 				KPlayerPrefs.SetInt(text, 0);
 				if (Tutorial.Instance != null)
 				{
+					Tutorial.Instance.tutorialMessagesRemaining.Add(tutorialMessages);
 					Tutorial.Instance.hiddenTutorialMessages[tutorialMessages] = false;
 				}
 			}
@@ -97,7 +102,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 20; i++)
+			for (int i = 0; i <= 18; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -243,9 +248,6 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		case Tutorial.TutorialMessages.TM_LotsOfGerms:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms, MISC.NOTIFICATIONS.LOTS_OF_GERMS.NAME, MISC.NOTIFICATIONS.LOTS_OF_GERMS.MESSAGEBODY, MISC.NOTIFICATIONS.LOTS_OF_GERMS.TOOLTIP, null, null, null, "overlay_disease");
 			break;
-		case Tutorial.TutorialMessages.TM_BeingInfected:
-			message = new TutorialMessage(Tutorial.TutorialMessages.TM_BeingInfected, MISC.NOTIFICATIONS.BEING_INFECTED.NAME, MISC.NOTIFICATIONS.BEING_INFECTED.MESSAGEBODY, MISC.NOTIFICATIONS.BEING_INFECTED.TOOLTIP, null, null, null, "overlay_disease");
-			break;
 		case Tutorial.TutorialMessages.TM_DiseaseCooking:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_DiseaseCooking, MISC.NOTIFICATIONS.DISEASE_COOKING.NAME, MISC.NOTIFICATIONS.DISEASE_COOKING.MESSAGEBODY, MISC.NOTIFICATIONS.DISEASE_COOKING.TOOLTIP, null, null, null, "icon_category_food");
 			break;
@@ -263,9 +265,6 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			break;
 		case Tutorial.TutorialMessages.TM_Power:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Power, MISC.NOTIFICATIONS.POWER.NAME, MISC.NOTIFICATIONS.POWER.MESSAGEBODY, MISC.NOTIFICATIONS.POWER.TOOLTIP, "tutorials\\Power", "Tute_Power", VIDEOS.POWER, "overlay_power");
-			break;
-		case Tutorial.TutorialMessages.TM_Insulation:
-			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, MISC.NOTIFICATIONS.INSULATION.NAME, MISC.NOTIFICATIONS.INSULATION.MESSAGEBODY, MISC.NOTIFICATIONS.INSULATION.TOOLTIP, null, null, null, string.Empty);
 			break;
 		case Tutorial.TutorialMessages.TM_Plumbing:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, MISC.NOTIFICATIONS.PLUMBING.NAME, MISC.NOTIFICATIONS.PLUMBING.MESSAGEBODY, MISC.NOTIFICATIONS.PLUMBING.TOOLTIP, "tutorials\\Piping", "Tute_Plumbing", VIDEOS.PLUMBING, "icon_category_plumbing");
@@ -609,14 +608,12 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		TM_ThermalComfort,
 		TM_OverheatingBuildings,
 		TM_LotsOfGerms,
-		TM_BeingInfected,
 		TM_DiseaseCooking,
 		TM_Suits,
 		TM_Morale,
 		TM_Schedule,
 		TM_Digging,
 		TM_Power,
-		TM_Insulation,
 		TM_Plumbing,
 		TM_COUNT
 	}

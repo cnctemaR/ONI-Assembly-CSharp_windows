@@ -26,14 +26,8 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 	private static void UpdateOldStatusItem(AgeMonitor.Instance smi, float dt)
 	{
 		KSelectable component = smi.GetComponent<KSelectable>();
-		if (smi.age.value > smi.age.GetMax() - 5f)
-		{
-			component.AddStatusItem(Db.Get().CreatureStatusItems.Old, smi);
-		}
-		else
-		{
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.Old, false);
-		}
+		bool flag = smi.age.value > smi.age.GetMax() - 5f;
+		smi.oldStatusGuid = component.ToggleStatusItem(Db.Get().CreatureStatusItems.Old, smi.oldStatusGuid, flag, smi);
 	}
 
 	private const float OLD_WARNING = 5f;
@@ -86,5 +80,7 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 		}
 
 		public AmountInstance age;
+
+		public Guid oldStatusGuid;
 	}
 }

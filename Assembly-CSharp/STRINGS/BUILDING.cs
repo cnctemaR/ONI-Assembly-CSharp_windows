@@ -1486,7 +1486,7 @@ namespace STRINGS
 
 			public class WIRECIRCUITSTATUS
 			{
-				public static LocString NAME = "Current Load: <color=#{Color}>{CurrentLoad}</color> / {MaxLoad}";
+				public static LocString NAME = "Current Load: {CurrentLoadAndColor} / {MaxLoad}";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -1500,7 +1500,7 @@ namespace STRINGS
 
 			public class WIREMAXWATTAGESTATUS
 			{
-				public static LocString NAME = "Potential Load: <color=#{Color}>{TotalPotentialLoad}</color> / {MaxLoad}";
+				public static LocString NAME = "Potential Load: {TotalPotentialLoadAndColor} / {MaxLoad}";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{

@@ -110,7 +110,6 @@ public class JobManager
 
 		public void Run()
 		{
-			KProfiler.BeginThreadProfiling("KJobManager", this.thread.Name);
 			for (;;)
 			{
 				this.semaphore.WaitOne();
@@ -134,7 +133,6 @@ public class JobManager
 				}
 				this.jobManager.DecrementActiveWorkerThreadCount();
 			}
-			KProfiler.EndThreadProfiling();
 		}
 
 		public void PrintExceptions()

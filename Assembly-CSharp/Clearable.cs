@@ -3,7 +3,7 @@ using KSerialization;
 using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Clearable : Workable, ISaveLoadable, IRender200ms
+public class Clearable : Workable, ISaveLoadable, IRender1000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -31,6 +31,7 @@ public class Clearable : Workable, ISaveLoadable, IRender200ms
 				this.MarkForClear(true);
 			}
 		}
+		this.RefreshClearableStatus(true);
 	}
 
 	private void OnStore(object data)
@@ -61,7 +62,7 @@ public class Clearable : Workable, ISaveLoadable, IRender200ms
 				GlobalChoreProvider.Instance.UnregisterClearable(this.clearHandle);
 				this.clearHandle.Clear();
 			}
-			this.RefreshClearableStatus();
+			this.RefreshClearableStatus(true);
 			SimAndRenderScheduler.instance.Remove(this);
 		}
 	}
@@ -78,7 +79,7 @@ public class Clearable : Workable, ISaveLoadable, IRender200ms
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage, false);
 			this.isMarkedForClear = true;
 			this.clearHandle = GlobalChoreProvider.Instance.RegisterClearable(this);
-			this.RefreshClearableStatus();
+			this.RefreshClearableStatus(true);
 			SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
 		}
 	}
@@ -148,23 +149,25 @@ public class Clearable : Workable, ISaveLoadable, IRender200ms
 		}
 	}
 
-	public void Render200ms(float dt)
+	public void Render1000ms(float dt)
 	{
-		this.RefreshClearableStatus();
+		this.RefreshClearableStatus(false);
 	}
 
-	public void RefreshClearableStatus()
+	public void RefreshClearableStatus(bool force_update)
 	{
-		if (this.isMarkedForClear)
+		if (force_update || this.isMarkedForClear)
 		{
-			bool flag = GlobalChoreProvider.Instance.ClearableHasDestination(this.pickupable);
-			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClear, flag, this);
-			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClearNoStorage, !flag, this);
-		}
-		else
-		{
-			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClear, false, this);
-			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClearNoStorage, false, this);
+			bool flag = false;
+			bool flag2 = false;
+			if (this.isMarkedForClear)
+			{
+				bool flag3 = GlobalChoreProvider.Instance.ClearableHasDestination(this.pickupable);
+				flag = flag3;
+				flag2 = !flag3;
+			}
+			this.pendingClearGuid = this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClear, this.pendingClearGuid, flag, this);
+			this.pendingClearNoStorageGuid = this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClearNoStorage, this.pendingClearNoStorageGuid, flag2, this);
 		}
 	}
 
@@ -180,6 +183,10 @@ public class Clearable : Workable, ISaveLoadable, IRender200ms
 	private HandleVector<int>.Handle clearHandle;
 
 	public bool isClearable = true;
+
+	private Guid pendingClearGuid;
+
+	private Guid pendingClearNoStorageGuid;
 
 	private static readonly EventSystem.IntraObjectHandler<Clearable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Clearable>(delegate(Clearable component, object data)
 	{

@@ -12,6 +12,7 @@ public class KAnimBatch
 		this.layer = layer;
 		this.batchGroup = group.batchID;
 		this.materialType = material_type;
+		this.matProperties = new MaterialPropertyBlock();
 		this.position = new Vector3(0f, 0f, z);
 		this.symbolInstanceSlots = new KAnimBatch.SymbolInstanceSlot[group.maxGroupSize];
 		this.symbolOverrideInfoSlots = new KAnimBatch.SymbolOverrideInfoSlot[group.maxGroupSize];
@@ -103,8 +104,7 @@ public class KAnimBatch
 		}
 		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolsPerBuild * this.group.maxGroupSize * 8));
 		this.symbolInstanceTex = this.group.CreateTexture("SymbolInstanceTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolInstanceTex, KAnimBatch.ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE);
-		int width = this.dataTex.width;
-		if (width == 0)
+		if (this.dataTex.width == 0)
 		{
 			global::Debug.LogWarning(string.Concat(new object[]
 			{
@@ -116,14 +116,10 @@ public class KAnimBatch
 			}));
 			return;
 		}
-		for (int i = 0; i < width * width; i++)
+		if (this.matProperties == null)
 		{
-			this.dataTex.floats[i * 4] = -1f;
-			this.dataTex.floats[i * 4 + 1] = 0f;
-			this.dataTex.floats[i * 4 + 2] = 0f;
-			this.dataTex.floats[i * 4 + 3] = 0f;
+			this.matProperties = new MaterialPropertyBlock();
 		}
-		this.matProperties = new MaterialPropertyBlock();
 		this.dataTex.SetTextureAndSize(this.matProperties);
 		this.symbolInstanceTex.SetTextureAndSize(this.matProperties);
 		this.group.GetDataTextures(this.matProperties, this.atlases);

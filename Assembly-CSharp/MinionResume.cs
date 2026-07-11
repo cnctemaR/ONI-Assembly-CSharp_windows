@@ -356,6 +356,10 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		this.UpdateExpectations();
 		this.UpdateMorale();
 		this.TriggerMasterSkillEvents();
+		GameScheduler.Instance.Schedule("Morale Tutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Morale, true);
+		}, null, null);
 		if (!this.ownedHats.ContainsKey(Db.Get().Skills.Get(skillId).hat))
 		{
 			this.ownedHats.Add(Db.Get().Skills.Get(skillId).hat, false);

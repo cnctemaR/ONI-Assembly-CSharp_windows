@@ -80,4 +80,6 @@ public static class Constants
 	public const float DefaultGroundTransferScale = 0.0625f;
 
 	public const float SPACE_DISTANCE_TO_KILOMETERS = 10000f;
+
+	public const float DEFAULT_SOUND_EVENT_VOLUME = 1f;
 }

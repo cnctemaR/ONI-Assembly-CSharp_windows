@@ -31,7 +31,7 @@ public class LadderSoundEvent : SoundEvent
 			string sound = GlobalAssets.GetSound(text, false);
 			if (sound != null)
 			{
-				SoundEvent.PlayOneShot(sound, position);
+				SoundEvent.PlayOneShot(sound, position, 1f);
 			}
 		}
 	}

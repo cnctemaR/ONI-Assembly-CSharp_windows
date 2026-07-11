@@ -38,6 +38,8 @@ namespace ProcGen
 
 		public List<WorldTrait.ElementBandModifier> elementBandModifiers { get; private set; }
 
+		public string filePath;
+
 		[Serializable]
 		public class ElementBandModifier
 		{

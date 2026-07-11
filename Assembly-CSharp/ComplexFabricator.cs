@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
@@ -926,13 +925,12 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		foreach (ComplexRecipe complexRecipe in recipes)
 		{
 			string text = string.Empty;
-			string text2 = string.Empty;
+			string uiname = complexRecipe.GetUIName(false);
 			foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
 			{
-				text = text + "• " + string.Format(UI.BUILDINGEFFECTS.PROCESSEDITEM, string.Empty, recipeElement.material.ProperName());
-				text2 += string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PROCESSEDITEM, string.Join(", ", complexRecipe.results.Select<ComplexRecipe.RecipeElement, string>((ComplexRecipe.RecipeElement r) => r.material.ProperName()).ToArray<string>()));
+				text = text + "• " + string.Format(UI.BUILDINGEFFECTS.PROCESSEDITEM, recipeElement.material.ProperName(), recipeElement.amount) + "\n";
 			}
-			Descriptor descriptor2 = new Descriptor(text, text2, Descriptor.DescriptorType.Effect, false);
+			Descriptor descriptor2 = new Descriptor(uiname, string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.FABRICATOR_INGREDIENTS, text), Descriptor.DescriptorType.Effect, false);
 			descriptor2.IncreaseIndent();
 			list.Add(descriptor2);
 		}

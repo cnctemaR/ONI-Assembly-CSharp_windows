@@ -50,7 +50,7 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 			kbatchedAnimController.Play(Flatulence.WorkLoopAnims, KAnim.PlayMode.Once);
 			kbatchedAnimController.destroyOnAnimComplete = true;
 		}
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.GetPosition());
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.GetPosition(), 1f);
 	}
 
 	private void OnDeath(object data)

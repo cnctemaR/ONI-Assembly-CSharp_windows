@@ -50,7 +50,6 @@ public class KCanvasScaler : KMonoBehaviour
 		}
 		if (camera != null)
 		{
-			DebugUtil.LogArgs(new object[] { "Camera pixels: dpi:", dpi, " pixelWidth: ", camera.pixelWidth, " scaledPixelWidth:", camera.scaledPixelWidth });
 		}
 		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y || (float)Screen.width / (float)Screen.height < 1.6777778f)
 		{

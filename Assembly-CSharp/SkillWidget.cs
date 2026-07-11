@@ -351,11 +351,11 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHan
 		bool flag = component.CanMasterSkill(skillMasteryConditions);
 		if (component != null && !component.HasMasteredSkill(this.skillID) && flag)
 		{
-			KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+			KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 		}
 		else
 		{
-			KFMOD.PlayOneShot(GlobalAssets.GetSound("Negative", false));
+			KFMOD.PlayUISound(GlobalAssets.GetSound("Negative", false));
 		}
 	}
 

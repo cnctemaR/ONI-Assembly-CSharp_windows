@@ -220,6 +220,10 @@ public class FetchList2 : IFetchList
 				if (component != null)
 				{
 					handle = component.AddStatusItem(status_item, this);
+					GameScheduler.Instance.Schedule("Digging Tutorial", 2f, delegate(object obj)
+					{
+						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Digging, true);
+					}, null, null);
 				}
 			}
 			else

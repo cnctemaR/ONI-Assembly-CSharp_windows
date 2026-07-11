@@ -110,7 +110,7 @@ public class KSlider : Slider
 		string text = this.currentSounds[0];
 		if (text != null && text.Length > 0)
 		{
-			KFMOD.PlayOneShot(text);
+			KFMOD.PlayUISound(text);
 		}
 	}
 
@@ -160,7 +160,7 @@ public class KSlider : Slider
 		{
 			this.lastMoveTime = Time.unscaledTime;
 			this.lastMoveValue = num2;
-			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero);
+			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
 			eventInstance.setParameterValue("sliderValue", num2);
 			eventInstance.setParameterValue("timeSinceLast", num);
 			KFMOD.EndOneShot(eventInstance);
@@ -180,7 +180,7 @@ public class KSlider : Slider
 		string text = this.currentSounds[2];
 		if (text != null && text.Length > 0)
 		{
-			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero);
+			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
 			eventInstance.setParameterValue("sliderValue", this.value);
 			KFMOD.EndOneShot(eventInstance);
 		}

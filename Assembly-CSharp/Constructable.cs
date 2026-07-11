@@ -76,12 +76,14 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
 		UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
+		bool flag2 = true;
 		if (this.IsReplacementTile)
 		{
 			int num3 = Grid.PosToCell(base.transform.GetLocalPosition());
 			GameObject replacementCandidate = this.building.Def.GetReplacementCandidate(num3);
 			if (replacementCandidate != null)
 			{
+				flag2 = false;
 				SimCellOccupier component3 = replacementCandidate.GetComponent<SimCellOccupier>();
 				if (component3 != null)
 				{
@@ -131,7 +133,7 @@ public class Constructable : Workable, ISaveLoadable
 				replacementCandidate.DeleteObject();
 			}
 		}
-		else
+		if (flag2)
 		{
 			this.FinishConstruction(connections);
 		}

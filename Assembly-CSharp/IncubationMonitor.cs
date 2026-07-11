@@ -13,6 +13,12 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		this.root.Enter(delegate(IncubationMonitor.Instance smi)
 		{
 			smi.OnOperationalChanged(null);
+		}).Enter(delegate(IncubationMonitor.Instance smi)
+		{
+			Components.IncubationMonitors.Add(smi);
+		}).Exit(delegate(IncubationMonitor.Instance smi)
+		{
+			Components.IncubationMonitors.Remove(smi);
 		});
 		this.incubating.PlayAnim("idle", KAnim.PlayMode.Loop).Transition(this.hatching_pre, new StateMachine<IncubationMonitor, IncubationMonitor.Instance, IStateMachineTarget, IncubationMonitor.Def>.Transition.ConditionCallback(IncubationMonitor.IsReadyToHatch), UpdateRate.SIM_1000ms).TagTransition(GameTags.Entombed, this.entombed, false)
 			.ParamTransition<bool>(this.isSuppressed, this.suppressed, GameStateMachine<IncubationMonitor, IncubationMonitor.Instance, IStateMachineTarget, IncubationMonitor.Def>.IsTrue)

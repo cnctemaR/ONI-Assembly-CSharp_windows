@@ -146,7 +146,7 @@ public class WorldDamage : KMonoBehaviour
 		}
 		if (CameraController.Instance.IsAudibleSound(fx.transform.GetPosition(), this.leakSoundMigrated))
 		{
-			SoundEvent.PlayOneShot(this.leakSoundMigrated, fx.transform.GetPosition());
+			SoundEvent.PlayOneShot(this.leakSoundMigrated, fx.transform.GetPosition(), 1f);
 		}
 		yield return null;
 		yield break;
@@ -239,7 +239,7 @@ public class WorldDamage : KMonoBehaviour
 		text = GlobalAssets.GetSound(text, false);
 		if (CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text))
 		{
-			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos));
+			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
 		}
 	}
 

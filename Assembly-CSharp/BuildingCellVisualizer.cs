@@ -83,7 +83,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		if (connectedReleaseSound != null)
 		{
 			Vector3 position = base.transform.GetPosition();
-			EventInstance eventInstance = SoundEvent.BeginOneShot(connectedReleaseSound, position);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(connectedReleaseSound, position, 1f);
 			eventInstance.setParameterValue("connectedCount", (float)connectionCount);
 			SoundEvent.EndOneShot(eventInstance);
 		}

@@ -24,7 +24,6 @@ public class HoverTextDrawer
 
 	public void BeginDrawing(Vector2 root_pos)
 	{
-		this.BeginSample("BeginDrawing");
 		this.rootPos = root_pos + this.skin.baseOffset;
 		if (this.skin.enableDebugOffset)
 		{
@@ -37,17 +36,14 @@ public class HoverTextDrawer
 		this.selectBorders.BeginDrawing();
 		this.firstShadowBar = true;
 		this.minLineHeight = 0;
-		this.EndSample();
 	}
 
 	public void EndDrawing()
 	{
-		this.BeginSample("EndDrawing");
 		this.shadowBars.EndDrawing();
 		this.iconWidgets.EndDrawing();
 		this.textWidgets.EndDrawing();
 		this.selectBorders.EndDrawing();
-		this.EndSample();
 	}
 
 	public void DrawText(string text, TextStyleSetting style, Color color, bool override_color = true)
@@ -56,7 +52,6 @@ public class HoverTextDrawer
 		{
 			return;
 		}
-		this.BeginSample("DrawText");
 		LocText widget = this.textWidgets.Draw(this.currentPos).widget;
 		Color color2 = Color.white;
 		if (widget.textStyleSetting != style)
@@ -81,7 +76,6 @@ public class HoverTextDrawer
 		this.currentPos.x = this.currentPos.x + widget.renderedWidth;
 		this.maxShadowX = Mathf.Max(this.currentPos.x, this.maxShadowX);
 		this.minLineHeight = (int)Mathf.Max((float)this.minLineHeight, widget.renderedHeight);
-		this.EndSample();
 	}
 
 	public void DrawText(string text, TextStyleSetting style)
@@ -120,7 +114,6 @@ public class HoverTextDrawer
 		{
 			return;
 		}
-		this.BeginSample("DrawIcon");
 		this.AddIndent(horizontal_spacing);
 		HoverTextDrawer.Pool<Image>.Entry entry = this.iconWidgets.Draw(this.currentPos + this.skin.shadowImageOffset);
 		entry.widget.sprite = icon;
@@ -133,7 +126,6 @@ public class HoverTextDrawer
 		this.AddIndent(horizontal_spacing);
 		this.currentPos.x = this.currentPos.x + (float)image_size;
 		this.maxShadowX = Mathf.Max(this.currentPos.x, this.maxShadowX);
-		this.EndSample();
 	}
 
 	public void BeginShadowBar(bool selected = false)
@@ -178,20 +170,6 @@ public class HoverTextDrawer
 		this.shadowBars.Cleanup();
 		this.textWidgets.Cleanup();
 		this.iconWidgets.Cleanup();
-	}
-
-	private void BeginSample(string section_name)
-	{
-		if (this.skin.enableProfiling)
-		{
-		}
-	}
-
-	private void EndSample()
-	{
-		if (this.skin.enableProfiling)
-		{
-		}
 	}
 
 	public HoverTextDrawer.Skin skin;

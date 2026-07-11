@@ -7,7 +7,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, ISim33ms
+public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IRenderEveryTick
 {
 	public List<string> achievementsToDisplay
 	{
@@ -38,7 +38,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IS
 		base.Subscribe<ColonyAchievementTracker>(631075836, ColonyAchievementTracker.OnNewDayDelegate);
 	}
 
-	public void Sim33ms(float dt)
+	public void RenderEveryTick(float dt)
 	{
 		if (this.updatingAchievement >= this.achievements.Count)
 		{
@@ -46,17 +46,16 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IS
 		}
 		KeyValuePair<string, ColonyAchievementStatus> keyValuePair = this.achievements.ElementAt<KeyValuePair<string, ColonyAchievementStatus>>(this.updatingAchievement);
 		this.updatingAchievement++;
-		if (keyValuePair.Value.success || keyValuePair.Value.failed)
+		if (!keyValuePair.Value.success && !keyValuePair.Value.failed)
 		{
-			return;
-		}
-		keyValuePair.Value.UpdateAchievement();
-		if (keyValuePair.Value.success && !keyValuePair.Value.failed)
-		{
-			ColonyAchievementTracker.UnlockPlatformAchievement(keyValuePair.Key);
-			this.completedAchievementsToDisplay.Add(keyValuePair.Key);
-			this.TriggerNewAchievementCompleted(null);
-			RetireColonyUtility.SaveColonySummaryData();
+			keyValuePair.Value.UpdateAchievement();
+			if (keyValuePair.Value.success && !keyValuePair.Value.failed)
+			{
+				ColonyAchievementTracker.UnlockPlatformAchievement(keyValuePair.Key);
+				this.completedAchievementsToDisplay.Add(keyValuePair.Key);
+				this.TriggerNewAchievementCompleted(null);
+				RetireColonyUtility.SaveColonySummaryData();
+			}
 		}
 	}
 

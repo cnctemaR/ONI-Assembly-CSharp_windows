@@ -93,16 +93,24 @@ namespace ProcGen
 			float floatSetting3 = this.worldGen.Settings.GetFloatSetting("OverworldAvoidRadius");
 			PointGenerator.SampleBehaviour enumSetting = this.worldGen.Settings.GetEnumSetting<PointGenerator.SampleBehaviour>("OverworldSampleBehaviour");
 			global::Debug.Log(string.Format("Generating overworld points using {0}, density {1}", enumSetting.ToString(), num));
-			string startSubworldName = this.worldGen.Settings.world.startSubworldName;
-			SubWorld subWorld = this.worldGen.Settings.GetSubWorld(startSubworldName);
-			Vector2 vector = new Vector2((float)this.mapWidth * this.worldGen.Settings.world.startingBasePositionHorizontal.GetRandomValueWithinRange(this.myRandom), (float)this.mapHeight * this.worldGen.Settings.world.startingBasePositionVertical.GetRandomValueWithinRange(this.myRandom));
-			global::Debug.Log("Start node position is " + vector);
-			ProcGen.Node node = this.overworldGraph.AddNode(startSubworldName);
-			node.SetPosition(vector);
-			global::VoronoiTree.Node node2 = this.voronoiTree.AddSite(new Diagram.Site((uint)node.node.Id, node.position, subWorld.pdWeight), global::VoronoiTree.Node.NodeType.Internal);
-			this.ApplySubworldToNode(node2, subWorld);
+			ProcGen.Node node = null;
+			if (!this.worldGen.Settings.world.noStart)
+			{
+				string startSubworldName = this.worldGen.Settings.world.startSubworldName;
+				SubWorld subWorld = this.worldGen.Settings.GetSubWorld(startSubworldName);
+				Vector2 vector = new Vector2((float)this.mapWidth * this.worldGen.Settings.world.startingBasePositionHorizontal.GetRandomValueWithinRange(this.myRandom), (float)this.mapHeight * this.worldGen.Settings.world.startingBasePositionVertical.GetRandomValueWithinRange(this.myRandom));
+				global::Debug.Log("Start node position is " + vector);
+				node = this.overworldGraph.AddNode(startSubworldName);
+				node.SetPosition(vector);
+				global::VoronoiTree.Node node2 = this.voronoiTree.AddSite(new Diagram.Site((uint)node.node.Id, node.position, subWorld.pdWeight), global::VoronoiTree.Node.NodeType.Internal);
+				node2.AddTag(WorldGenTags.AtStart);
+				this.ApplySubworldToNode(node2, subWorld);
+			}
 			List<Vector2> list = new List<Vector2>();
-			list.Add(node.position);
+			if (node != null)
+			{
+				list.Add(node.position);
+			}
 			List<Vector2> randomPoints = PointGenerator.GetRandomPoints(site.poly, num, floatSetting3, list, enumSetting, false, this.myRandom, false, true);
 			global::Debug.Log(string.Format(" -> Generated {0} points", randomPoints.Count));
 			int intSetting = this.worldGen.Settings.GetIntSetting("OverworldMaxNodes");
@@ -134,7 +142,6 @@ namespace ProcGen
 				this.voronoiTree.ComputeChildren(this.myRandom.seed + 1, false, false);
 			}
 			this.voronoiTree.AddTagToChildren(WorldGenTags.Overworld);
-			node2.AddTag(WorldGenTags.AtStart);
 			this.TagTopAndBottomSites(WorldGenTags.AtSurface, WorldGenTags.AtDepths);
 			this.TagEdgeSites(WorldGenTags.AtEdge, WorldGenTags.AtEdge);
 			for (int k = 0; k < this.voronoiTree.ChildCount(); k++)
@@ -676,7 +683,8 @@ namespace ProcGen
 		{
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
-			TagSet tagSet2 = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
+			List<string> defaultMoveTags = this.worldGen.Settings.GetDefaultMoveTags();
+			TagSet tagSet2 = ((defaultMoveTags == null) ? null : new TagSet(defaultMoveTags));
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
 			splitCommand.dontCopyTags = tagSet;
 			splitCommand.moveTags = tagSet2;
@@ -807,7 +815,8 @@ namespace ProcGen
 		public void GenerateChildren(SubWorld sw, Tree node, Graph graph, float worldHeight, int seed)
 		{
 			SeededRandom seededRandom = new SeededRandom(seed);
-			TagSet tagSet = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
+			List<string> defaultMoveTags = this.worldGen.Settings.GetDefaultMoveTags();
+			TagSet tagSet = ((defaultMoveTags == null) ? null : new TagSet(defaultMoveTags));
 			TagSet tagSet2 = new TagSet();
 			if (tagSet != null)
 			{
@@ -1171,7 +1180,8 @@ namespace ProcGen
 		{
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
-			TagSet tagSet2 = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
+			List<string> defaultMoveTags = this.worldGen.Settings.GetDefaultMoveTags();
+			TagSet tagSet2 = ((defaultMoveTags == null) ? null : new TagSet(defaultMoveTags));
 			List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 			this.voronoiTree.GetLeafNodes(list, new Tree.LeafNodeTest(this.StartAreaTooLarge));
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
@@ -1239,6 +1249,11 @@ namespace ProcGen
 
 		public Vector2I GetStartLocation()
 		{
+			if (this.worldGen.Settings.world.noStart)
+			{
+				global::Debug.Log("World is configured 'noStart'");
+				return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
+			}
 			ProcGen.Node node2 = this.FindFirstNodeWithTag(WorldGenTags.StartLocation);
 			if (node2 == null)
 			{

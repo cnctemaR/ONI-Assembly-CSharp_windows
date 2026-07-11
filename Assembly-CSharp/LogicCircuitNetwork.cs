@@ -151,7 +151,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 				if (list[num] != null)
 				{
 					Vector3 position = list[num].transform.GetPosition();
-					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Logic_Circuit_Toggle", false), position);
+					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Logic_Circuit_Toggle", false), position, 1f);
 					eventInstance.setParameterValue("wireCount", (float)(this.wires.Count % 24));
 					eventInstance.setParameterValue("enabled", (float)this.outputValue);
 					KFMOD.EndOneShot(eventInstance);

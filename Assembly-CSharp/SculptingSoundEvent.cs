@@ -113,7 +113,7 @@ public class SculptingSoundEvent : SoundEvent
 				}
 			}
 		}
-		EventInstance eventInstance = SoundEvent.BeginOneShot(text, position);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(text, position, 1f);
 		if (eventInstance.isValid())
 		{
 			if (num >= 0)

@@ -64,16 +64,44 @@ public class ComplexRecipe
 		return Color.white;
 	}
 
-	public string GetUIName()
+	public string GetUIName(bool includeAmounts)
 	{
 		switch (this.nameDisplay)
 		{
 		case ComplexRecipe.RecipeNameDisplay.Result:
+			if (includeAmounts)
+			{
+				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_SIMPLE_INCLUDE_AMOUNTS, this.results[0].material.ProperName(), this.results[0].amount);
+			}
 			return this.results[0].material.ProperName();
 		case ComplexRecipe.RecipeNameDisplay.IngredientToResult:
+			if (includeAmounts)
+			{
+				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_INCLUDE_AMOUNTS, new object[]
+				{
+					this.ingredients[0].material.ProperName(),
+					this.results[0].material.ProperName(),
+					this.ingredients[0].amount,
+					this.results[0].amount
+				});
+			}
 			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
 		case ComplexRecipe.RecipeNameDisplay.ResultWithIngredient:
+			if (includeAmounts)
+			{
+				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH_INCLUDE_AMOUNTS, new object[]
+				{
+					this.ingredients[0].material.ProperName(),
+					this.results[0].material.ProperName(),
+					this.ingredients[0].amount,
+					this.results[0].amount
+				});
+			}
 			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+		}
+		if (includeAmounts)
+		{
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_SIMPLE_INCLUDE_AMOUNTS, this.ingredients[0].material.ProperName(), this.ingredients[0].amount);
 		}
 		return this.ingredients[0].material.ProperName();
 	}

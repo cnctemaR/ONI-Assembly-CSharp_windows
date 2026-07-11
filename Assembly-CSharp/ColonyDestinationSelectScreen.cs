@@ -1,7 +1,9 @@
 ﻿using System;
 using Klei.CustomSettings;
+using ProcGen;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ColonyDestinationSelectScreen : NewGameFlowScreen
 {
@@ -12,6 +14,9 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.launchButton.onClick += this.LaunchClicked;
 		this.shuffleButton.onClick += this.ShuffleClicked;
 		this.destinationMapPanel.OnAsteroidClicked += this.OnAsteroidClicked;
+		TMP_InputField tmp_InputField = this.coordinate;
+		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(this.CoordinateEditStarted));
+		this.coordinate.onEndEdit.AddListener(new UnityAction<string>(this.CoordinateEditFinished));
 		this.random = new global::System.Random();
 	}
 
@@ -58,15 +63,53 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, num.ToString());
 	}
 
+	private void CoordinateChanged(string text)
+	{
+		string[] array = CustomGameSettings.Instance.ParseSettingCoordinate(text);
+		if (array.Length != 4)
+		{
+			return;
+		}
+		global::ProcGen.World world = null;
+		foreach (string text2 in SettingsCache.GetWorldNames())
+		{
+			global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(text2);
+			if (worldData.coordinatePrefix == array[1])
+			{
+				world = worldData;
+			}
+		}
+		if (world != null)
+		{
+			this.newGameSettings.SetSetting(CustomGameSettingConfigs.World, world.filePath);
+		}
+		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, array[2]);
+		this.newGameSettings.ConsumeSettingsCode(array[3]);
+	}
+
+	private void CoordinateEditStarted()
+	{
+		this.isEditingCoordinate = true;
+	}
+
+	private void CoordinateEditFinished(string text)
+	{
+		this.CoordinateChanged(text);
+		this.isEditingCoordinate = false;
+		this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
+	}
+
 	private void SettingChanged(SettingConfig config, SettingLevel level)
 	{
-		this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
+		if (!this.isEditingCoordinate)
+		{
+			this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
+		}
 		string setting = this.newGameSettings.GetSetting(CustomGameSettingConfigs.World);
 		string setting2 = this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed);
 		int num;
 		int.TryParse(setting2, out num);
 		ColonyDestinationAsteroidData colonyDestinationAsteroidData = this.destinationMapPanel.SelectAsteroid(setting, num);
-		DebugUtil.LogArgs(new object[] { "Selected asteroid", setting, num });
 		this.destinationProperties.SetDescriptors(colonyDestinationAsteroidData.GetParamDescriptors());
 		this.startLocationProperties.SetDescriptors(colonyDestinationAsteroidData.GetTraitDescriptors());
 	}
@@ -79,6 +122,10 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
+		if (this.isEditingCoordinate)
+		{
+			return;
+		}
 		if (!e.Consumed && e.TryConsume(global::Action.PanLeft))
 		{
 			this.destinationMapPanel.ScrollLeft();
@@ -128,4 +175,6 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	private DestinationSelectPanel destinationMapPanel;
 
 	private global::System.Random random;
+
+	private bool isEditingCoordinate;
 }

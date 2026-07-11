@@ -57,6 +57,8 @@ public class SubEntry
 
 	public string sortString { get; set; }
 
+	public bool showBeforeGeneratedCategoryLinks { get; set; }
+
 	public ContentContainer lockedContentContainer;
 
 	public Color iconColor = Color.white;

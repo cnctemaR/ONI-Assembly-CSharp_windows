@@ -22,7 +22,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 	}
 
 	[Conditional("DETAILED_SOLID_CONSUMER_MONITOR_PROFILE")]
-	private static void EndDetailedSample()
+	private static void EndDetailedSample(string region_name)
 	{
 	}
 

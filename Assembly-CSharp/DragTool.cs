@@ -239,7 +239,7 @@ public class DragTool : InterfaceTool
 					string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
 					if (sound != null)
 					{
-						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.GetPosition());
+						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.GetPosition(), 1f);
 						eventInstance.setParameterValue("tileCount", (float)num);
 						SoundEvent.EndOneShot(eventInstance);
 					}

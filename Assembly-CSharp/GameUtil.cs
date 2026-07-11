@@ -1364,23 +1364,22 @@ public static class GameUtil
 
 	public static string GetWireLoadColor(float load, float maxLoad)
 	{
-		Color color = new Color(1f, 1f, 1f);
-		Color color2 = new Color(0.9843137f, 0.6901961f, 0.23137255f);
-		Color color3 = new Color(1f, 0.19215687f, 0.19215687f);
-		Color color4;
+		Color color = new Color(0.9843137f, 0.6901961f, 0.23137255f);
+		Color color2 = new Color(1f, 0.19215687f, 0.19215687f);
+		Color color3;
 		if (load > maxLoad)
 		{
-			color4 = color3;
+			color3 = color2;
 		}
 		else if (load / maxLoad >= 0.75f)
 		{
-			color4 = color2;
+			color3 = color;
 		}
 		else
 		{
-			color4 = color;
+			color3 = Color.white;
 		}
-		return color4.ToHexString();
+		return color3.ToHexString();
 	}
 
 	public static string AppendHotkeyString(string template, global::Action action)

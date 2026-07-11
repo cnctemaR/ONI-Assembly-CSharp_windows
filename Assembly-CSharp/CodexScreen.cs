@@ -94,6 +94,7 @@ public class CodexScreen : KScreen
 		this.contentContainerPool = new UIGameObjectPool(this.prefabContentContainer);
 		this.contentContainerPool.disabledElementParent = this.widgetPool;
 		this.ContentPrefabs[typeof(CodexText)] = this.prefabTextWidget;
+		this.ContentPrefabs[typeof(CodexTextWithTooltip)] = this.prefabTextWithTooltipWidget;
 		this.ContentPrefabs[typeof(CodexImage)] = this.prefabImageWidget;
 		this.ContentPrefabs[typeof(CodexDividerLine)] = this.prefabDividerLineWidget;
 		this.ContentPrefabs[typeof(CodexSpacer)] = this.prefabSpacer;
@@ -102,11 +103,13 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexContentLockedIndicator)] = this.prefabContentLocked;
 		this.ContentPrefabs[typeof(CodexLargeSpacer)] = this.prefabLargeSpacer;
 		this.ContentPrefabs[typeof(CodexVideo)] = this.prefabVideoWidget;
+		this.ContentPrefabs[typeof(CodexIndentedLabelWithIcon)] = this.prefabIndentedLabelWithIcon;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
 	{
 		this.searchResults.Clear();
+		this.subEntrySearchResults.Clear();
 		input = input.ToLower();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
@@ -121,15 +124,12 @@ public class CodexScreen : KScreen
 			{
 				this.searchResults.Add(keyValuePair.Value);
 			}
-			else
+		}
+		foreach (KeyValuePair<string, SubEntry> keyValuePair2 in CodexCache.subEntries)
+		{
+			if (input == keyValuePair2.Value.name.ToLower() || input.Contains(keyValuePair2.Value.name.ToLower()) || keyValuePair2.Value.name.ToLower().Contains(input))
 			{
-				foreach (SubEntry subEntry in keyValuePair.Value.subEntries)
-				{
-					if (input == subEntry.name.ToLower() || input.Contains(subEntry.name.ToLower()) || subEntry.name.ToLower().Contains(input))
-					{
-						this.searchResults.Add(keyValuePair.Value);
-					}
-				}
+				this.subEntrySearchResults.Add(keyValuePair2.Value);
 			}
 		}
 		this.FilterEntries(input != string.Empty);
@@ -153,6 +153,10 @@ public class CodexScreen : KScreen
 		foreach (KeyValuePair<CodexEntry, GameObject> keyValuePair in this.entryButtons)
 		{
 			keyValuePair.Value.SetActive(this.searchResults.Contains(keyValuePair.Key) && this.HasUnlockedCategoryEntries(keyValuePair.Key.id));
+		}
+		foreach (KeyValuePair<SubEntry, GameObject> keyValuePair2 in this.subEntryButtons)
+		{
+			keyValuePair2.Value.SetActive(this.subEntrySearchResults.Contains(keyValuePair2.Key));
 		}
 		foreach (GameObject gameObject in this.categoryHeaders)
 		{
@@ -264,6 +268,22 @@ public class CodexScreen : KScreen
 			}
 			gameObject2.GetComponentInChildren<LocText>().text = tuple.second.name;
 			this.entryButtons.Add(tuple.second, gameObject2);
+			foreach (SubEntry subEntry in tuple.second.subEntries)
+			{
+				GameObject gameObject3 = Util.KInstantiateUI(this.prefabNavigatorEntry, dictionary[text], true);
+				string subEntryId = subEntry.id;
+				gameObject3.GetComponent<KButton>().onClick += delegate
+				{
+					this.ChangeArticle(subEntryId, false);
+				};
+				if (string.IsNullOrEmpty(subEntry.name))
+				{
+					subEntry.name = Strings.Get(subEntry.title);
+				}
+				gameObject3.GetComponentInChildren<LocText>().text = subEntry.name;
+				this.subEntryButtons.Add(subEntry, gameObject3);
+				CodexCache.subEntries.Add(subEntry.id, subEntry);
+			}
 		}
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
 		{
@@ -290,7 +310,7 @@ public class CodexScreen : KScreen
 		CodexScreen.SetupCategory(dictionary, "EMAILS");
 		CodexScreen.SetupCategory(dictionary, "INVESTIGATIONS");
 		CodexScreen.SetupCategory(dictionary, "MYLOG");
-		CodexScreen.SetupCategory(dictionary, "TIPS");
+		CodexScreen.SetupCategory(dictionary, "LESSONS");
 		CodexScreen.SetupCategory(dictionary, "Root");
 	}
 
@@ -488,31 +508,19 @@ public class CodexScreen : KScreen
 		}
 		if (Game.Instance.unlocks.IsUnlocked(container.lockID) || string.IsNullOrEmpty(container.lockID))
 		{
-			ContentContainer.ContentLayout contentLayout = container.contentLayout;
-			if (contentLayout != ContentContainer.ContentLayout.Horizontal)
+			switch (container.contentLayout)
 			{
-				if (contentLayout != ContentContainer.ContentLayout.Vertical)
-				{
-					if (contentLayout == ContentContainer.ContentLayout.Grid)
-					{
-						layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
-						(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-						(layoutGroup as GridLayoutGroup).constraintCount = 4;
-						(layoutGroup as GridLayoutGroup).cellSize = new Vector2(128f, 180f);
-						(layoutGroup as GridLayoutGroup).spacing = new Vector2(6f, 6f);
-					}
-				}
-				else
-				{
-					layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
-					HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = layoutGroup as HorizontalOrVerticalLayoutGroup;
-					bool flag = false;
-					(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
-					horizontalOrVerticalLayoutGroup.childForceExpandHeight = flag;
-					(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
-				}
+			case ContentContainer.ContentLayout.Vertical:
+			{
+				layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
+				HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = layoutGroup as HorizontalOrVerticalLayoutGroup;
+				bool flag = false;
+				(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
+				horizontalOrVerticalLayoutGroup.childForceExpandHeight = flag;
+				(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
+				break;
 			}
-			else
+			case ContentContainer.ContentLayout.Horizontal:
 			{
 				layoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
 				layoutGroup.childAlignment = TextAnchor.MiddleLeft;
@@ -521,6 +529,22 @@ public class CodexScreen : KScreen
 				(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
 				horizontalOrVerticalLayoutGroup2.childForceExpandHeight = flag;
 				(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
+				break;
+			}
+			case ContentContainer.ContentLayout.Grid:
+				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+				(layoutGroup as GridLayoutGroup).constraintCount = 4;
+				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(128f, 180f);
+				(layoutGroup as GridLayoutGroup).spacing = new Vector2(6f, 6f);
+				break;
+			case ContentContainer.ContentLayout.GridTwoColumn:
+				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+				(layoutGroup as GridLayoutGroup).constraintCount = 2;
+				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(256f, 32f);
+				(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
+				break;
 			}
 		}
 		else
@@ -543,6 +567,8 @@ public class CodexScreen : KScreen
 	private List<GameObject> categoryHeaders = new List<GameObject>();
 
 	private Dictionary<CodexEntry, GameObject> entryButtons = new Dictionary<CodexEntry, GameObject>();
+
+	private Dictionary<SubEntry, GameObject> subEntryButtons = new Dictionary<SubEntry, GameObject>();
 
 	private UIGameObjectPool contentContainerPool;
 
@@ -598,6 +624,9 @@ public class CodexScreen : KScreen
 	private GameObject prefabTextWidget;
 
 	[SerializeField]
+	private GameObject prefabTextWithTooltipWidget;
+
+	[SerializeField]
 	private GameObject prefabImageWidget;
 
 	[SerializeField]
@@ -621,6 +650,9 @@ public class CodexScreen : KScreen
 	[SerializeField]
 	private GameObject prefabVideoWidget;
 
+	[SerializeField]
+	private GameObject prefabIndentedLabelWithIcon;
+
 	[Header("Text Styles")]
 	[SerializeField]
 	private TextStyleSetting textStyleTitle;
@@ -637,6 +669,8 @@ public class CodexScreen : KScreen
 	private Dictionary<CodexTextStyle, TextStyleSetting> textStyles = new Dictionary<CodexTextStyle, TextStyleSetting>();
 
 	private List<CodexEntry> searchResults = new List<CodexEntry>();
+
+	private List<SubEntry> subEntrySearchResults = new List<SubEntry>();
 
 	private Coroutine scrollToTargetRoutine;
 

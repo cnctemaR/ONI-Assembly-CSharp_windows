@@ -28,6 +28,7 @@ public class ContentContainer
 	{
 		Vertical,
 		Horizontal,
-		Grid
+		Grid,
+		GridTwoColumn
 	}
 }

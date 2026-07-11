@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
@@ -446,24 +445,6 @@ public class ToolMenu : KScreen
 			}
 			this.SetToggleState(tc.toggle.GetComponent<KToggle>(), this.currentlySelectedCollection == tc);
 		}
-	}
-
-	private IEnumerator CloseCollection(ToolMenu.ToolCollection tc)
-	{
-		Animator anim = tc.UIMenuDisplay.GetComponent<Animator>();
-		float speedMultiplier = 1f;
-		float speedAdjustmentPerTool = 0.125f;
-		anim.speed = speedMultiplier;
-		anim.speed = 1f - speedAdjustmentPerTool * (float)(tc.tools.Count - 1);
-		anim.Play("Close");
-		float length = anim.GetCurrentAnimatorStateInfo(0).length + 0.05f;
-		for (float remaining = length; remaining >= 0f; remaining -= Time.unscaledDeltaTime)
-		{
-			yield return null;
-		}
-		this.SetToggleState(tc.toggle.GetComponent<KToggle>(), false);
-		tc.UIMenuDisplay.SetActive(false);
-		yield break;
 	}
 
 	private void SetToggleState(KToggle toggle, bool state)

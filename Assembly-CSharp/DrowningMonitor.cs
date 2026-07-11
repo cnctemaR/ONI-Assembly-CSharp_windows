@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
+public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 {
 	private OccupyArea occupyArea
 	{
@@ -45,6 +45,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		SlicedUpdaterSim1000ms<DrowningMonitor>.instance.RegisterUpdate1000ms(this);
 		this.OnMove();
 		this.CheckDrowning(null);
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "DrowningMonitor.OnSpawn");
@@ -68,6 +69,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	{
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		SlicedUpdaterSim1000ms<DrowningMonitor>.instance.UnregisterUpdate1000ms(this);
 		base.OnCleanUp();
 	}
 
@@ -105,11 +107,11 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		}
 		if (this.livesUnderWater)
 		{
-			this.selectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Saturated, this.drowning, this);
+			this.saturatedStatusGuid = this.selectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Saturated, this.saturatedStatusGuid, this.drowning, this);
 		}
 		else
 		{
-			this.selectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Drowning, this.drowning, this);
+			this.drowningStatusGuid = this.selectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Drowning, this.drowningStatusGuid, this.drowning, this);
 		}
 		if (this.effects != null)
 		{
@@ -190,7 +192,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		this.CheckDrowning(null);
 	}
 
-	public void Sim1000ms(float dt)
+	public void SlicedSim1000ms(float dt)
 	{
 		this.CheckDrowning(null);
 		if (this.drowning)
@@ -237,6 +239,10 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	public bool canDrownToDeath = true;
 
 	public bool livesUnderWater;
+
+	private Guid drowningStatusGuid;
+
+	private Guid saturatedStatusGuid;
 
 	private Extents extents;
 

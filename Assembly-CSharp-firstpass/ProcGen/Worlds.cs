@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Klei;
+using UnityEngine;
 
 namespace ProcGen
 {
@@ -9,7 +10,7 @@ namespace ProcGen
 	{
 		public bool HasWorld(string name)
 		{
-			return this.worldCache.ContainsKey(name);
+			return name != null && this.worldCache.ContainsKey(name);
 		}
 
 		public World GetWorldData(string name)
@@ -51,7 +52,7 @@ namespace ProcGen
 					{
 						DebugUtil.LogWarningArgs(new object[] { "Failed to load world: ", world_file.full_path });
 					}
-					else if (!world.skip)
+					else if (world.skip != World.Skip.Always && (world.skip != World.Skip.EditorOnly || Application.isEditor))
 					{
 						world.filePath = Worlds.GetWorldName(world_file.full_path);
 						this.worldCache[world.filePath] = world;

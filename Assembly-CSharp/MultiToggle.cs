@@ -180,11 +180,11 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		{
 			if (this.states[this.state].on_click_override_sound_path == string.Empty)
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 			}
 			else
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
 			}
 		}
 	}
@@ -195,7 +195,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		{
 			if (this.play_sound_on_release && this.states[this.state].on_release_override_sound_path != string.Empty)
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound(this.states[this.state].on_release_override_sound_path, false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_release_override_sound_path, false));
 			}
 			this.clickHeldDown = false;
 			if (this.onStopHold != null)

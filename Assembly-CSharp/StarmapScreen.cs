@@ -94,12 +94,12 @@ public class StarmapScreen : KModalScreen
 		{
 			if (this.currentLaunchConditionManager != null && this.selectedDestination != null)
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 				this.LaunchRocket(this.currentLaunchConditionManager);
 			}
 			else
 			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("Negative", false));
+				KFMOD.PlayUISound(GlobalAssets.GetSound("Negative", false));
 			}
 		}));
 		this.launchButton.ChangeState(1);
@@ -571,12 +571,12 @@ public class StarmapScreen : KModalScreen
 				{
 					if (launchConditionManager != null)
 					{
-						KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+						KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 						<FillRocketListPanel>c__AnonStorey.$this.LaunchRocket(launchConditionManager);
 					}
 					else
 					{
-						KFMOD.PlayOneShot(GlobalAssets.GetSound("Negative", false));
+						KFMOD.PlayUISound(GlobalAssets.GetSound("Negative", false));
 					}
 				}));
 				if ((DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive) && SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(launchConditionManager).state != Spacecraft.MissionState.Grounded)
@@ -589,7 +589,7 @@ public class StarmapScreen : KModalScreen
 					{
 						if (launchConditionManager != null)
 						{
-							KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+							KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 							SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(launchConditionManager).ForceComplete();
 							<FillRocketListPanel>c__AnonStorey.$this.ClearRocketListPanel();
 							<FillRocketListPanel>c__AnonStorey.$this.FillRocketListPanel();
@@ -598,7 +598,7 @@ public class StarmapScreen : KModalScreen
 						}
 						else
 						{
-							KFMOD.PlayOneShot(GlobalAssets.GetSound("Negative", false));
+							KFMOD.PlayUISound(GlobalAssets.GetSound("Negative", false));
 						}
 					}));
 				}

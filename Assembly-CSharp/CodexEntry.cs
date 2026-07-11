@@ -71,6 +71,8 @@ public class CodexEntry
 
 	public string sortString { get; set; }
 
+	public bool showBeforeGeneratedCategoryLinks { get; set; }
+
 	public List<SubEntry> subEntries = new List<SubEntry>();
 
 	public Color iconColor = Color.white;

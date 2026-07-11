@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class CodexLabelWithIcon : CodexWidget<CodexLabelWithIcon>
 {
+	public CodexLabelWithIcon()
+	{
+	}
+
 	public CodexLabelWithIcon(string text, CodexTextStyle style, Tuple<Sprite, Color> coloredSprite)
 	{
 		this.icon = new CodexImage(coloredSprite);

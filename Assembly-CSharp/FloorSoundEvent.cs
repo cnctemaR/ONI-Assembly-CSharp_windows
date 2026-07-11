@@ -52,7 +52,7 @@ public class FloorSoundEvent : SoundEvent
 			string sound = GlobalAssets.GetSound("Liquid_footstep", true);
 			if (sound != null)
 			{
-				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector);
+				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f);
 				if (num3 > 0f)
 				{
 					eventInstance.setParameterValue("liquidDepth", num3);
@@ -62,7 +62,7 @@ public class FloorSoundEvent : SoundEvent
 		}
 		if (text2 != null)
 		{
-			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector);
+			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector, 1f);
 			if (eventInstance2.isValid())
 			{
 				if (num3 > 0f)

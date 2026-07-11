@@ -32,7 +32,7 @@ public class WidgetSoundPlayer
 		{
 			return;
 		}
-		KFMOD.PlayOneShot(WidgetSoundPlayer.getSoundPath((!(widgetSoundEvent.OverrideAssetName == string.Empty)) ? widgetSoundEvent.OverrideAssetName : this.GetDefaultPath(widgetSoundEvent.idx)));
+		KFMOD.PlayUISound(WidgetSoundPlayer.getSoundPath((!(widgetSoundEvent.OverrideAssetName == string.Empty)) ? widgetSoundEvent.OverrideAssetName : this.GetDefaultPath(widgetSoundEvent.idx)));
 	}
 
 	public bool Enabled = true;

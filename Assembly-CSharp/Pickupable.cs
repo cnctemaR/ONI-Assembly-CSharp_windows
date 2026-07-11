@@ -776,7 +776,7 @@ public class Pickupable : Workable, IHasSortOrder
 				{
 					num2 = SoundUtil.GetLiquidDepth(num);
 				}
-				FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()));
+				FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()), 1f);
 				eventInstance.setParameterValue("velocity", vector.magnitude);
 				eventInstance.setParameterValue("liquidDepth", num2);
 				KFMOD.EndOneShot(eventInstance);

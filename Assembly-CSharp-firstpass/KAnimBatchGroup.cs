@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 
 public class KAnimBatchGroup
@@ -255,6 +256,8 @@ public class KAnimBatchGroup
 
 	public static int ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD = Shader.PropertyToID("SYMBOL_OVERRIDES_PER_BUILD");
 
+	private static Color ResetColor = new Color(0f, 0f, 0f, 0f);
+
 	private static KAnimBatchGroup.KAnimBatchTextureCache cache = new KAnimBatchGroup.KAnimBatchTextureCache();
 
 	public int batchCount;
@@ -275,15 +278,18 @@ public class KAnimBatchGroup
 	{
 		public KAnimBatchGroup.KAnimBatchTextureCache.Entry Get(int float4s_per_side, int texture_property_id, int texture_size_property_id)
 		{
-			if (!this.unused.ContainsKey(float4s_per_side))
+			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list = null;
+			if (!this.unused.TryGetValue(float4s_per_side, out list))
 			{
-				this.unused.Add(float4s_per_side, new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>());
+				list = new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>();
+				this.unused.Add(float4s_per_side, list);
 			}
 			KAnimBatchGroup.KAnimBatchTextureCache.Entry entry;
-			if (this.unused[float4s_per_side].Count > 0)
+			if (list.Count > 0)
 			{
-				entry = this.unused[float4s_per_side][0];
-				this.unused[float4s_per_side].RemoveAt(0);
+				int num = list.Count - 1;
+				entry = list[num];
+				list.RemoveAt(num);
 			}
 			else
 			{
@@ -291,24 +297,39 @@ public class KAnimBatchGroup
 			}
 			entry.texturePropertyId = texture_property_id;
 			entry.textureSizePropertyId = texture_size_property_id;
-			if (!this.inuse.ContainsKey(float4s_per_side))
+			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list2 = null;
+			if (!this.inuse.TryGetValue(float4s_per_side, out list2))
 			{
-				this.inuse.Add(float4s_per_side, new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>());
+				list2 = new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>();
+				this.inuse.Add(float4s_per_side, list2);
 			}
-			this.inuse[float4s_per_side].Add(entry);
+			list2.Add(entry);
+			entry.cacheIndex = list2.Count - 1;
 			return entry;
 		}
 
 		public void Free(KAnimBatchGroup.KAnimBatchTextureCache.Entry entry)
 		{
 			int width = entry.texture.width;
-			if (this.inuse.ContainsKey(width))
+			int cacheIndex = entry.cacheIndex;
+			entry.cacheIndex = -1;
+			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list = null;
+			if (this.inuse.TryGetValue(width, out list))
 			{
-				this.inuse[width].Remove(entry);
+				int num = list.Count - 1;
+				if (num != cacheIndex)
+				{
+					KAnimBatchGroup.KAnimBatchTextureCache.Entry entry2 = list[num];
+					entry2.cacheIndex = cacheIndex;
+					list[cacheIndex] = entry2;
+					list[num] = null;
+					list.RemoveAt(num);
+				}
 			}
-			if (this.unused.ContainsKey(width))
+			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list2 = null;
+			if (this.unused.TryGetValue(width, out list2))
 			{
-				this.unused[width].Add(entry);
+				list2.Add(entry);
 			}
 		}
 
@@ -348,6 +369,12 @@ public class KAnimBatchGroup
 				{
 					bytes = new byte[float4s_per_side * float4s_per_side * 4 * 4]
 				};
+				int num = float4s_per_side * float4s_per_side;
+				NativeArray<Color> rawTextureData = this.texture.GetRawTextureData<Color>();
+				for (int i = 0; i < num; i++)
+				{
+					rawTextureData[i] = KAnimBatchGroup.ResetColor;
+				}
 			}
 
 			public Texture2D texture { get; private set; }
@@ -425,6 +452,8 @@ public class KAnimBatchGroup
 			public int texturePropertyId;
 
 			public int textureSizePropertyId;
+
+			public int cacheIndex = -1;
 
 			[StructLayout(LayoutKind.Explicit)]
 			public struct ByteToFloatConverter

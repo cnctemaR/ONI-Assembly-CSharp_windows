@@ -77,9 +77,8 @@ public class PathProber : KMonoBehaviour
 		}
 		bool flag4 = this.Potentials.Count == 0;
 		this.PathGrid.EndUpdate(flag4);
-		if (flag4 && this.updateCount > 25)
+		if (!flag4 || this.updateCount > 25)
 		{
-			KProfiler.AddEvent("PathProberUpdateCountExceeded");
 		}
 	}
 

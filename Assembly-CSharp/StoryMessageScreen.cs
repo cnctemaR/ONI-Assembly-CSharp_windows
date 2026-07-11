@@ -119,7 +119,7 @@ public class StoryMessageScreen : KScreen
 		this.dialog.GetComponent<KScreen>().Show(false);
 		this.startFade = false;
 		CameraController.Instance.DisableUserCameraControl = true;
-		KFMOD.PlayOneShot(this.dialogSound);
+		KFMOD.PlayUISound(this.dialogSound);
 		this.dialog.GetComponent<KScreen>().Activate();
 		this.dialog.GetComponent<KScreen>().SetShouldFadeIn(true);
 		this.dialog.GetComponent<KScreen>().Show(true);

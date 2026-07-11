@@ -171,7 +171,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 
 	private void PlayTone(int pitch, bool forwards)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("WorkChime_tone", false), Vector3.zero);
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("WorkChime_tone", false), Vector3.zero, 1f);
 		eventInstance.setParameterValue("WorkChime_pitch", (float)pitch);
 		eventInstance.setParameterValue("WorkChime_start", (float)((!forwards) ? 0 : 1));
 		KFMOD.EndOneShot(eventInstance);

@@ -62,7 +62,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		Substance substance = element.substance;
 		if (substance != null && substance.fallingStartSound != null && CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
 		{
-			SoundEvent.PlayOneShot(substance.fallingStartSound, vector);
+			SoundEvent.PlayOneShot(substance.fallingStartSound, vector, 1f);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class UnstableGroundManager : KMonoBehaviour
 					Element element = ElementLoader.FindElementByHash(component.element);
 					if (element != null && element.substance != null && element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, element.substance.fallingStopSound))
 					{
-						SoundEvent.PlayOneShot(element.substance.fallingStopSound, position);
+						SoundEvent.PlayOneShot(element.substance.fallingStopSound, position, 1f);
 					}
 					GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position + this.landEffectOffset, Grid.SceneLayer.Front, null, 0);
 					gameObject3.SetActive(true);

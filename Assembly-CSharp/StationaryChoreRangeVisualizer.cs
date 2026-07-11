@@ -28,12 +28,12 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 		bool flag = (bool)data;
 		if (flag)
 		{
-			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_form", false), base.transform.position);
+			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_form", false), base.transform.position, 1f);
 			this.UpdateVisualizers();
 		}
 		else
 		{
-			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_disappear", false), base.transform.position);
+			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_disappear", false), base.transform.position, 1f);
 			this.ClearVisualizers();
 		}
 	}

@@ -234,16 +234,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"An ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" laid by a ",
-					UI.FormatAsLink("Hatch", "HATCH"),
-					"."
-				});
+				public static LocString RECIPEDESC = "An egg laid by a " + UI.FormatAsLink("Hatch", "HATCH") + ".";
 			}
 
 			public class DRECKOEGG
@@ -259,16 +250,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"An ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" laid by a ",
-					UI.FormatAsLink("Drecko", "DRECKO"),
-					"."
-				});
+				public static LocString RECIPEDESC = "An egg laid by a " + UI.FormatAsLink("Drecko", "DRECKO") + ".";
 			}
 
 			public class LIGHTBUGEGG
@@ -284,16 +266,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"An ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" laid by a ",
-					UI.FormatAsLink("Shine Bug", "LIGHTBUG"),
-					"."
-				});
+				public static LocString RECIPEDESC = "An egg laid by a " + UI.FormatAsLink("Shine Bug", "LIGHTBUG") + ".";
 			}
 
 			public class LETTUCE
@@ -318,16 +291,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"An ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" laid by a ",
-					UI.FormatAsLink("Slickster", "OILFLOATER"),
-					"."
-				});
+				public static LocString RECIPEDESC = "An egg laid by a " + UI.FormatAsLink("Slickster", "OILFLOATER") + ".";
 			}
 
 			public class PUFTEGG
@@ -343,16 +307,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"An ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" laid by a ",
-					UI.FormatAsLink("Puft", "PUFT"),
-					"."
-				});
+				public static LocString RECIPEDESC = "An egg laid by a " + CREATURES.SPECIES.PUFT.NAME + ".";
 			}
 
 			public class FISHMEAT
@@ -366,14 +321,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Meat", "MEAT");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Uncooked meat from a very dead ",
-					UI.PRE_KEYWORD,
-					"Critter",
-					UI.PST_KEYWORD,
-					". Yum!"
-				});
+				public static LocString DESC = "Uncooked meat from a very dead critter. Yum!";
 			}
 
 			public class MUSHROOM
@@ -392,9 +340,7 @@ namespace STRINGS
 					"The cooked ",
 					UI.FormatAsLink("Fillet", "FISHMEAT"),
 					" of a freshly caught ",
-					UI.PRE_KEYWORD,
-					"Pacu",
-					UI.PST_KEYWORD,
+					CREATURES.SPECIES.PACU.NAME,
 					".\n\nUnsurprisingly, it tastes a bit fishy."
 				});
 
@@ -403,9 +349,7 @@ namespace STRINGS
 					"The cooked ",
 					UI.FormatAsLink("Fillet", "FISHMEAT"),
 					" of a freshly caught ",
-					UI.PRE_KEYWORD,
-					"Pacu",
-					UI.PST_KEYWORD,
+					CREATURES.SPECIES.PACU.NAME,
 					"."
 				});
 			}
@@ -416,14 +360,7 @@ namespace STRINGS
 
 				public static LocString DESC = "The cooked meat of a defeated critter.\n\nIt has a delightful smoky aftertaste.";
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"The cooked meat of a defeated ",
-					UI.PRE_KEYWORD,
-					"Critter",
-					UI.PST_KEYWORD,
-					"."
-				});
+				public static LocString RECIPEDESC = "The cooked meat of a defeated critter.";
 			}
 
 			public class PICKLEDMEAL
@@ -448,27 +385,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Raw Egg", "RAWEGG");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A raw ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" that has been cracked open for use in ",
-					UI.FormatAsLink("Food", "FOOD"),
-					" preparation.\n\nIt will never hatch."
-				});
+				public static LocString DESC = "A raw Egg that has been cracked open for use in " + UI.FormatAsLink("Food", "FOOD") + " preparation.\n\nIt will never hatch.";
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"A raw ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" that has been cracked open for use in ",
-					UI.FormatAsLink("Food", "FOOD"),
-					" preparation."
-				});
+				public static LocString RECIPEDESC = "A raw egg that has been cracked open for use in " + UI.FormatAsLink("Food", "FOOD") + " preparation.";
 			}
 
 			public class COOKEDEGG
@@ -484,14 +403,7 @@ namespace STRINGS
 					" innards.\n\nIt turns out you do, in fact, have to break a few eggs to make it."
 				});
 
-				public static LocString RECIPEDESC = string.Concat(new string[]
-				{
-					"Fluffed and folded ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" innards."
-				});
+				public static LocString RECIPEDESC = "Fluffed and folded egg innards.";
 			}
 
 			public class FRIEDMUSHROOM

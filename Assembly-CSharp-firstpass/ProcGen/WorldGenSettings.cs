@@ -73,6 +73,20 @@ namespace ProcGen
 			return SettingsCache.defaults.defaultMoveTags;
 		}
 
+		public string[] GetTraitIDs()
+		{
+			if (this.mutatedWorldData.traits != null && this.mutatedWorldData.traits.Count > 0)
+			{
+				string[] array = new string[this.mutatedWorldData.traits.Count];
+				for (int i = 0; i < this.mutatedWorldData.traits.Count; i++)
+				{
+					array[i] = this.mutatedWorldData.traits[i].filePath;
+				}
+				return array;
+			}
+			return new string[0];
+		}
+
 		private bool GetSetting<T>(DefaultSettings set, string target, WorldGenSettings.ParserFn<T> parser, out T res)
 		{
 			if (set == null || set.data == null || !set.data.ContainsKey(target))

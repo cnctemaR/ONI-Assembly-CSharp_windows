@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsable, IEffectDescriptor
+public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsable, IEffectDescriptor, IBasicBuilding
 {
 	protected override void OnSpawn()
 	{
@@ -19,6 +19,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		this.fillMeter = new MeterController(component2, "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), new string[0]);
 		this.contaminationMeter = new MeterController(component2, "meter_target", "meter_dirty", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), new string[0]);
 		Components.Toilets.Add(this);
+		Components.BasicBuildings.Add(this);
 		base.smi.StartSM();
 		base.smi.ShowFillMeter();
 	}
@@ -27,6 +28,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 	{
 		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
 		liquidConduitFlow.onConduitsRebuilt -= this.OnConduitsRebuilt;
+		Components.BasicBuildings.Remove(this);
 		Components.Toilets.Remove(this);
 		base.OnCleanUp();
 	}
@@ -115,6 +117,11 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 	}
 
 	Transform IUsable.get_transform()
+	{
+		return base.transform;
+	}
+
+	Transform IBasicBuilding.get_transform()
 	{
 		return base.transform;
 	}

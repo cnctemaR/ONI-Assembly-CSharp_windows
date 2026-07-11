@@ -829,7 +829,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 366134U;
+		uint num = 371502U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1121,6 +1121,10 @@ public class Game : KMonoBehaviour
 
 	private IEnumerator DelayedSave(string filename, bool isAutoSave, bool updateSavePointer)
 	{
+		while (PlayerController.Instance.IsDragging())
+		{
+			yield return null;
+		}
 		for (int i = 0; i < 1; i++)
 		{
 			yield return null;
@@ -1479,8 +1483,6 @@ public class Game : KMonoBehaviour
 	}
 
 	private static readonly string NextUniqueIDKey = "NextUniqueID";
-
-	public static string worldID = null;
 
 	private PlayerController playerController;
 

@@ -39,7 +39,12 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 		{
 			int num = Grid.PosToCell(this);
 			ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-			return (float)flowManager.GetContents(num).diseaseCount;
+			ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+			if (contents.mass > 0f)
+			{
+				this.lastValue = (float)contents.diseaseCount;
+			}
+			return this.lastValue;
 		}
 	}
 
@@ -148,6 +153,9 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 	private const float rangeMin = 0f;
 
 	private const float rangeMax = 100000f;
+
+	[Serialize]
+	private float lastValue;
 
 	private static readonly HashedString TINT_SYMBOL = "germs";
 }

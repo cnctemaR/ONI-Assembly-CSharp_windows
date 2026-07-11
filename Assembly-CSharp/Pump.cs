@@ -36,7 +36,6 @@ public class Pump : KMonoBehaviour, ISim1000ms
 		}
 		else
 		{
-			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas, false);
 			this.operational.SetActive(false, false);
 		}
 	}
@@ -58,7 +57,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 		}
 		bool flag = this.IsPumpable(state, (int)this.consumer.consumptionRadius);
 		StatusItem statusItem = ((state != Element.State.Gas) ? Db.Get().BuildingStatusItems.NoLiquidElementToPump : Db.Get().BuildingStatusItems.NoGasElementToPump);
-		this.selectable.ToggleStatusItem(statusItem, !flag, null);
+		this.noElementStatusGuid = this.selectable.ToggleStatusItem(statusItem, this.noElementStatusGuid, !flag, null);
 		this.operational.SetFlag(Pump.PumpableFlag, !this.storage.IsFull() && flag);
 		return flag;
 	}
@@ -84,7 +83,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 	private void OnConduitUpdate(float dt)
 	{
 		bool flag = this.dispenser.ConduitContents.mass > 0f;
-		this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, flag, null);
+		this.conduitBlockedStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, this.conduitBlockedStatusGuid, flag, null);
 	}
 
 	public ConduitType conduitType
@@ -117,4 +116,8 @@ public class Pump : KMonoBehaviour, ISim1000ms
 	private float elapsedTime;
 
 	private bool pumpable;
+
+	private Guid conduitBlockedStatusGuid;
+
+	private Guid noElementStatusGuid;
 }

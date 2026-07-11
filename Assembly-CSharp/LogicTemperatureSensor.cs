@@ -37,12 +37,13 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 		this.structureTemperature = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		base.OnToggle += this.OnSwitchToggled;
 		this.UpdateVisualState(true);
+		this.UpdateLogicCircuit();
 		this.wasOn = this.switchedOn;
 	}
 
 	public void Sim200ms(float dt)
 	{
-		if (this.simUpdateCounter < 8)
+		if (this.simUpdateCounter < 8 && !this.dirty)
 		{
 			int num = Grid.PosToCell(this);
 			if (Grid.Mass[num] > 0f)
@@ -53,6 +54,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 			return;
 		}
 		this.simUpdateCounter = 0;
+		this.dirty = false;
 		this.averageTemp = 0f;
 		for (int i = 0; i < 8; i++)
 		{
@@ -80,6 +82,11 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 	private void OnSwitchToggled(bool toggled_on)
 	{
 		this.UpdateVisualState(false);
+		this.UpdateLogicCircuit();
+	}
+
+	private void UpdateLogicCircuit()
+	{
 		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
 	}
 
@@ -109,6 +116,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 		set
 		{
 			this.thresholdTemperature = value;
+			this.dirty = true;
 		}
 	}
 
@@ -121,6 +129,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 		set
 		{
 			this.activateOnWarmerThan = value;
+			this.dirty = true;
 		}
 	}
 
@@ -269,6 +278,9 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 
 	[Serialize]
 	public bool activateOnWarmerThan;
+
+	[Serialize]
+	private bool dirty = true;
 
 	public float minTemp;
 

@@ -60,27 +60,27 @@ public class MainMenu : KScreen
 				this.motdNewsBody.text = response.news_body_text;
 				this.patchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
 				this.nextUpdateTimer.UpdateReleaseTimes(response.last_update_time, response.next_update_time, response.update_text_override);
-				if (this.motdImage != null && response.image_texture != null)
+				if (response.image_texture != null)
 				{
 					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
-					if (this.motdImage.sprite.rect.height != 0f)
-					{
-						AspectRatioFitter component = this.motdImage.gameObject.GetComponent<AspectRatioFitter>();
-						if (component != null)
-						{
-							float num = this.motdImage.sprite.rect.width / this.motdImage.sprite.rect.height;
-							component.aspectRatio = num;
-						}
-						else
-						{
-							global::Debug.LogWarning("Missing AspectRatioFitter on MainMenu motd image.");
-						}
-					}
-					this.motdImageButton.onClick.AddListener(delegate
-					{
-						Application.OpenURL(response.image_link_url);
-					});
 				}
+				if (this.motdImage.sprite.rect.height != 0f)
+				{
+					AspectRatioFitter component = this.motdImage.gameObject.GetComponent<AspectRatioFitter>();
+					if (component != null)
+					{
+						float num = this.motdImage.sprite.rect.width / this.motdImage.sprite.rect.height;
+						component.aspectRatio = num;
+					}
+					else
+					{
+						global::Debug.LogWarning("Missing AspectRatioFitter on MainMenu motd image.");
+					}
+				}
+				this.motdImageButton.onClick.AddListener(delegate
+				{
+					Application.OpenURL(response.image_link_url);
+				});
 			}
 			else
 			{
@@ -301,7 +301,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 366134U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 371502U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

@@ -16,5 +16,9 @@ namespace Klei
 		public Dictionary<string, object> stats;
 
 		public Data data;
+
+		public string worldID;
+
+		public List<string> traitIDs;
 	}
 }

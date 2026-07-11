@@ -48,6 +48,11 @@ public class SerializedList<ItemType>
 		return this.items.Contains(item);
 	}
 
+	public void Clear()
+	{
+		this.items.Clear();
+	}
+
 	[OnSerializing]
 	private void OnSerializing()
 	{

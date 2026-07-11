@@ -69,7 +69,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 								string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
 								if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector3, text))
 								{
-									SoundEvent.PlayOneShot(text, vector3);
+									SoundEvent.PlayOneShot(text, vector3, 1f);
 								}
 							}
 						}

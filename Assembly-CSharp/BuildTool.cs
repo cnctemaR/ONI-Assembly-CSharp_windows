@@ -227,7 +227,7 @@ public class BuildTool : DragTool
 				Rotatable component = this.visualizer.GetComponent<Rotatable>();
 				if (component != null)
 				{
-					KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Rotate", false));
+					KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Rotate", false));
 					this.buildingOrientation = component.Rotate();
 					if (Grid.IsValidBuildingCell(this.lastCell))
 					{
@@ -335,7 +335,7 @@ public class BuildTool : DragTool
 				if (this.placeSound != null)
 				{
 					this.buildingCount = this.buildingCount % 14 + 1;
-					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f);
 					if (this.def.AudioSize == "small")
 					{
 						eventInstance.setParameterValue("tileCount", (float)this.buildingCount);

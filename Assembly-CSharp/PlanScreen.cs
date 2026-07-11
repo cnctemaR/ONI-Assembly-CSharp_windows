@@ -37,11 +37,28 @@ public class PlanScreen : KIconToggleMenu
 	public PlanScreen.RequirementsState BuildableState(BuildingDef def)
 	{
 		PlanScreen.RequirementsState requirementsState;
-		if (def == null || !this.buildableDefs.TryGetValue(def, out requirementsState))
+		if (def == null || !this._buildableStates.TryGetValue(def, out requirementsState))
 		{
 			requirementsState = PlanScreen.RequirementsState.Materials;
 		}
 		return requirementsState;
+	}
+
+	private bool IsDefResearched(BuildingDef def)
+	{
+		bool flag = false;
+		if (!this._researchedDefs.TryGetValue(def, out flag))
+		{
+			flag = this.UpdateDefResearched(def);
+		}
+		return flag;
+	}
+
+	private bool UpdateDefResearched(BuildingDef def)
+	{
+		bool flag = Db.Get().TechItems.IsTechItemComplete(def.PrefabID);
+		this._researchedDefs[def] = flag;
+		return flag;
 	}
 
 	protected override void OnPrefabInit()
@@ -324,7 +341,7 @@ public class PlanScreen : KIconToggleMenu
 					PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Complete;
 					if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive)
 					{
-						if (!Db.Get().TechItems.IsTechItemComplete(buildingDef.PrefabID))
+						if (!this.IsDefResearched(buildingDef))
 						{
 							requirementsState = PlanScreen.RequirementsState.Tech;
 						}
@@ -333,13 +350,13 @@ public class PlanScreen : KIconToggleMenu
 							requirementsState = PlanScreen.RequirementsState.Materials;
 						}
 					}
-					if (!this.buildableDefs.ContainsKey(buildingDef))
+					if (!this._buildableStates.ContainsKey(buildingDef))
 					{
-						this.buildableDefs.Add(buildingDef, requirementsState);
+						this._buildableStates.Add(buildingDef, requirementsState);
 					}
-					else if (this.buildableDefs[buildingDef] != requirementsState)
+					else if (this._buildableStates[buildingDef] != requirementsState)
 					{
-						this.buildableDefs[buildingDef] = requirementsState;
+						this._buildableStates[buildingDef] = requirementsState;
 						if (this.productInfoScreen.currentDef == buildingDef)
 						{
 							this.ignoreToolChangeMessages++;
@@ -355,12 +372,11 @@ public class PlanScreen : KIconToggleMenu
 								HashedString hashedString2 = (HashedString)toggleInfo.userData;
 								if (hashedString2 == hashedString)
 								{
-									string text = "NotificationPing";
-									Animator component = toggleInfo.toggle.GetComponent<Animator>();
-									if (!component.GetCurrentAnimatorStateInfo(0).IsTag(text) && !pooledList.Contains(hashedString))
+									Bouncer component = toggleInfo.toggle.GetComponent<Bouncer>();
+									if (component != null && !component.IsBouncing() && !pooledList.Contains(hashedString))
 									{
 										pooledList.Add(hashedString);
-										toggleInfo.toggle.gameObject.GetComponent<Animator>().Play(text);
+										component.Bounce();
 										if (KTime.Instance.UnscaledGameTime - this.initTime > 1.5f)
 										{
 											if (this.timeSinceNotificationPing >= this.specialNotificationEmbellishDelay)
@@ -368,14 +384,14 @@ public class PlanScreen : KIconToggleMenu
 												string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
 												if (sound != null)
 												{
-													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition());
+													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f);
 													SoundEvent.EndOneShot(eventInstance);
 												}
 											}
 											string sound2 = GlobalAssets.GetSound("NewBuildable", false);
 											if (sound2 != null)
 											{
-												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition());
+												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f);
 												eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
 												SoundEvent.EndOneShot(eventInstance2);
 											}
@@ -890,12 +906,14 @@ public class PlanScreen : KIconToggleMenu
 			BuildingDef buildingDef = Assets.GetBuildingDef(techItem.Id);
 			if (buildingDef != null)
 			{
+				this.UpdateDefResearched(buildingDef);
 				HashedString hashedString = this.tagCategoryMap[buildingDef.Tag];
 				PlanScreen.ToggleEntry toggleEntry;
 				if (this.GetToggleEntryForCategory(hashedString, out toggleEntry))
 				{
 					toggleEntry.pendingResearchAttentions.Add(buildingDef.Tag);
 					toggleEntry.toggleInfo.toggle.GetComponent<PlanCategoryNotifications>().ToggleAttention(true);
+					toggleEntry.Refresh();
 				}
 			}
 		}
@@ -1053,7 +1071,9 @@ public class PlanScreen : KIconToggleMenu
 
 	private int ignoreToolChangeMessages;
 
-	private Dictionary<Def, PlanScreen.RequirementsState> buildableDefs = new Dictionary<Def, PlanScreen.RequirementsState>();
+	private Dictionary<Def, PlanScreen.RequirementsState> _buildableStates = new Dictionary<Def, PlanScreen.RequirementsState>();
+
+	private Dictionary<Def, bool> _researchedDefs = new Dictionary<Def, bool>();
 
 	[SerializeField]
 	private TextStyleSetting[] CategoryLabelTextStyles;
@@ -1140,22 +1160,34 @@ public class PlanScreen : KIconToggleMenu
 					this.requiredTechItems.Add(techItem);
 				}
 			}
+			this._areAnyRequiredTechItemsAvailable = false;
+			this.Refresh();
 		}
 
 		public bool AreAnyRequiredTechItemsAvailable()
 		{
+			return this._areAnyRequiredTechItemsAvailable;
+		}
+
+		public void Refresh()
+		{
+			if (this._areAnyRequiredTechItemsAvailable)
+			{
+				return;
+			}
 			if (this.requiredTechItems.Count == 0)
 			{
-				return true;
+				this._areAnyRequiredTechItemsAvailable = true;
+				return;
 			}
 			foreach (TechItem techItem in this.requiredTechItems)
 			{
 				if (PlanScreen.TechRequirementsUpcoming(techItem))
 				{
-					return true;
+					this._areAnyRequiredTechItemsAvailable = true;
+					break;
 				}
 			}
-			return false;
 		}
 
 		public void CollectToggleImages()
@@ -1176,6 +1208,8 @@ public class PlanScreen : KIconToggleMenu
 		public ImageToggleState[] toggleImages;
 
 		public bool hideIfNotResearched;
+
+		private bool _areAnyRequiredTechItemsAvailable;
 	}
 
 	public enum RequirementsState

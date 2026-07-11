@@ -32,6 +32,7 @@ public class KAnimFile : ScriptableObject
 	{
 		this.animFile = anim;
 		this.buildFile = build;
+		this.textures.Clear();
 		this.textures.AddRange(textures);
 	}
 

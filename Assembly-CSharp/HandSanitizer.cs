@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IEffectDescriptor
+public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IEffectDescriptor, IBasicBuilding
 {
 	protected override void OnPrefabInit()
 	{
@@ -45,6 +45,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", this.dirtyMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_dirty_target" });
 		this.RefreshMeters();
 		Components.HandSanitizers.Add(this);
+		Components.BasicBuildings.Add(this);
 		base.Subscribe<HandSanitizer>(-1697596308, HandSanitizer.OnStorageChangeDelegate);
 		DirectionControl component = base.GetComponent<DirectionControl>();
 		component.onDirectionChanged = (Action<WorkableReactable.AllowedDirection>)Delegate.Combine(component.onDirectionChanged, new Action<WorkableReactable.AllowedDirection>(this.OnDirectionChanged));
@@ -53,6 +54,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 
 	protected override void OnCleanUp()
 	{
+		Components.BasicBuildings.Remove(this);
 		Components.HandSanitizers.Remove(this);
 		base.OnCleanUp();
 	}
@@ -99,6 +101,11 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 			base.smi.DumpOutput();
 		}
 		this.RefreshMeters();
+	}
+
+	Transform IBasicBuilding.get_transform()
+	{
+		return base.transform;
 	}
 
 	public float massConsumedPerUse = 1f;

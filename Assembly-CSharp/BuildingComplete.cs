@@ -52,6 +52,7 @@ public class BuildingComplete : Building
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.primaryElement = base.GetComponent<PrimaryElement>();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		Rotatable component2 = base.GetComponent<Rotatable>();
 		if (component != null && component2 == null)
@@ -75,10 +76,14 @@ public class BuildingComplete : Building
 		}
 		Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
 		base.transform.SetPosition(vector);
-		PrimaryElement component4 = base.GetComponent<PrimaryElement>();
-		if (component4 != null && component4.Mass == 0f)
+		if (this.primaryElement != null)
 		{
-			component4.Mass = this.Def.Mass[0];
+			if (this.primaryElement.Mass == 0f)
+			{
+				this.primaryElement.Mass = this.Def.Mass[0];
+			}
+			PrimaryElement primaryElement = this.primaryElement;
+			primaryElement.setTemperatureCallback = (PrimaryElement.SetTemperatureCallback)Delegate.Combine(primaryElement.setTemperatureCallback, new PrimaryElement.SetTemperatureCallback(this.OnSetTemperature));
 		}
 		this.Def.MarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
 		if (this.Def.IsTilePiece)
@@ -97,10 +102,10 @@ public class BuildingComplete : Building
 				Grid.PreventIdleTraversal[base.PlacementCells[j]] = true;
 			}
 		}
-		KSelectable component5 = base.GetComponent<KSelectable>();
-		if (component5 != null)
+		KSelectable component4 = base.GetComponent<KSelectable>();
+		if (component4 != null)
 		{
-			component5.SetStatusIndicatorOffset(this.Def.placementPivot);
+			component4.SetStatusIndicatorOffset(this.Def.placementPivot);
 		}
 		Components.BuildingCompletes.Add(this);
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
@@ -109,12 +114,12 @@ public class BuildingComplete : Building
 		Attributes attributes = this.GetAttributes();
 		if (attributes != null)
 		{
-			Deconstructable component6 = base.GetComponent<Deconstructable>();
-			if (component6 != null)
+			Deconstructable component5 = base.GetComponent<Deconstructable>();
+			if (component5 != null)
 			{
-				for (int k = 1; k < component6.constructionElements.Length; k++)
+				for (int k = 1; k < component5.constructionElements.Length; k++)
 				{
-					Tag tag = component6.constructionElements[k];
+					Tag tag = component5.constructionElements[k];
 					Element element = ElementLoader.GetElement(tag);
 					if (element != null)
 					{
@@ -128,10 +133,10 @@ public class BuildingComplete : Building
 						GameObject gameObject = Assets.TryGetPrefab(tag);
 						if (gameObject != null)
 						{
-							PrefabAttributeModifiers component7 = gameObject.GetComponent<PrefabAttributeModifiers>();
-							if (component7 != null)
+							PrefabAttributeModifiers component6 = gameObject.GetComponent<PrefabAttributeModifiers>();
+							if (component6 != null)
 							{
-								foreach (AttributeModifier attributeModifier2 in component7.descriptors)
+								foreach (AttributeModifier attributeModifier2 in component6.descriptors)
 								{
 									attributes.Add(attributeModifier2);
 								}
@@ -141,6 +146,11 @@ public class BuildingComplete : Building
 				}
 			}
 		}
+	}
+
+	private void OnSetTemperature(PrimaryElement primary_element, float temperature)
+	{
+		BuildingComplete.MinKelvinSeen = Mathf.Min(BuildingComplete.MinKelvinSeen, temperature);
 	}
 
 	public void SetCreationTime(float time)
@@ -208,6 +218,7 @@ public class BuildingComplete : Building
 			});
 		}
 		Components.BuildingCompletes.Remove(this);
+		Components.TemplateBuildings.Remove(this);
 		base.UnregisterBlockTileRenderer();
 		base.Trigger(-21016276, this);
 	}
@@ -225,6 +236,8 @@ public class BuildingComplete : Building
 
 	public bool isArtable;
 
+	public PrimaryElement primaryElement;
+
 	[Serialize]
 	public float creationTime = -1f;
 
@@ -240,4 +253,6 @@ public class BuildingComplete : Building
 	});
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
+
+	public static float MinKelvinSeen = float.MaxValue;
 }

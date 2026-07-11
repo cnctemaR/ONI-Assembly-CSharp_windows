@@ -141,7 +141,7 @@ public class WattsonMessage : KScreen
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("WelcomeDialog", 7.6f, delegate(object d)
 		{
 			SpeedControlScreen.Instance.Pause(false);
-			KFMOD.PlayOneShot(this.dialogSound);
+			KFMOD.PlayUISound(this.dialogSound);
 			this.dialog.GetComponent<KScreen>().Activate();
 			this.dialog.GetComponent<KScreen>().SetShouldFadeIn(true);
 			this.dialog.GetComponent<KScreen>().Show(true);
@@ -172,6 +172,10 @@ public class WattsonMessage : KScreen
 			GameScheduler.Instance.Schedule("WelcomeTutorial", 2f, delegate(object data)
 			{
 				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Welcome, true);
+			}, null, null);
+			GameScheduler.Instance.Schedule("DiggingTutorial", 420f, delegate(object data)
+			{
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Digging, true);
 			}, null, null);
 			foreach (KScreen kscreen in this.hideScreensWhileActive)
 			{

@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadable, IUsable, IEffectDescriptor, IGameObjectEffectDescriptor
+public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadable, IUsable, IEffectDescriptor, IGameObjectEffectDescriptor, IBasicBuilding
 {
 	public int FlushesUsed
 	{
@@ -24,6 +24,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	{
 		base.OnSpawn();
 		Components.Toilets.Add(this);
+		Components.BasicBuildings.Add(this);
 		base.smi.StartSM();
 		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
 		component.trackUses = true;
@@ -36,6 +37,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		Components.BasicBuildings.Remove(this);
 		Components.Toilets.Remove(this);
 	}
 
@@ -128,6 +130,11 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	}
 
 	Transform IUsable.get_transform()
+	{
+		return base.transform;
+	}
+
+	Transform IBasicBuilding.get_transform()
 	{
 		return base.transform;
 	}

@@ -121,7 +121,12 @@ public class OfflineWorldGen : KMonoBehaviour
 		}
 		this.startNodes = this.worldGen.WorldLayout.GetStartNodes();
 		this.startNodes.Shuffle<global::VoronoiTree.Node>();
-		if (this.startNodes.Count > 0)
+		if (this.startNodes.Count == 0)
+		{
+			this.DoRenderWorld();
+			this.RemoveLocationButtons();
+		}
+		else if (this.startNodes.Count > 0)
 		{
 			this.ChooseBaseLocation(this.startNodes[0]);
 		}
@@ -134,21 +139,21 @@ public class OfflineWorldGen : KMonoBehaviour
 				Tree tree = this.startNodes[i] as Tree;
 				if (tree != null)
 				{
-					goto IL_00C4;
+					goto IL_00E5;
 				}
 				tree = this.worldGen.GetOverworldForNode(this.startNodes[i] as Leaf);
 				if (tree != null)
 				{
-					goto IL_00C4;
+					goto IL_00E5;
 				}
-				IL_01F3:
+				IL_0214:
 				i++;
 				continue;
-				IL_00C4:
+				IL_00E5:
 				SubWorld subWorldForNode = this.worldGen.GetSubWorldForNode(tree);
 				if (subWorldForNode == null || list.Contains(subWorldForNode))
 				{
-					goto IL_01F3;
+					goto IL_0214;
 				}
 				list.Add(subWorldForNode);
 				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.locationButtonPrefab);
@@ -179,7 +184,7 @@ public class OfflineWorldGen : KMonoBehaviour
 				});
 				Button component2 = gameObject.GetComponent<Button>();
 				component2.onClick = buttonClickedEvent;
-				goto IL_01F3;
+				goto IL_0214;
 			}
 		}
 	}

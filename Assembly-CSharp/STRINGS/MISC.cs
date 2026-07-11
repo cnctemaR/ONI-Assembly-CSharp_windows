@@ -724,11 +724,9 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					"I can use the ",
-					UI.FormatAsLink("DIG TOOL", "TOOLS"),
-					" ",
-					UI.FormatAsHotkey("[G]"),
+					UI.FormatAsTool("Dig Tool", "[G]"),
 					" and the ",
-					UI.FormatAsLink("Build Menu", "MISC"),
+					UI.FormatAsBuildMenuTab("Build Menu"),
 					" in the lower left of the screen to begin planning my first construction tasks.\n\nOnce I've placed a few errands my Duplicants will automatically get to work, without me needing to direct them individually."
 				});
 
@@ -762,7 +760,7 @@ namespace STRINGS
 					"Duplicants always perform errands in order of highest to lowest priority. They will harvest ",
 					UI.FormatAsLink("Food", "FOOD"),
 					" before they build, for example, or always build new structures before they mine materials.\n\nI can open the ",
-					UI.FormatAsManagementMenu("PRIORITIES SCREEN", "L"),
+					UI.FormatAsManagementMenu("Priorities Screen", "[L]"),
 					" to set which Errand Types Duplicants may or may not perform, or to specialize skilled Duplicants for particular Errand Types."
 				});
 
@@ -783,7 +781,7 @@ namespace STRINGS
 					".\n\nDuplicants will also be ",
 					UI.FormatAsLink("Stressed", "STRESS"),
 					" by walking through Polluted Water, so I should have my Duplicants clean up spills by clicking and dragging the ",
-					UI.FormatAsTool("MOP TOOL", "[M]")
+					UI.FormatAsTool("Mop Tool", "[M]")
 				});
 
 				public static LocString TOOLTIP = "Notes on handling polluted materials";
@@ -791,9 +789,9 @@ namespace STRINGS
 
 			public class LOCOMOTIONMESSAGE
 			{
-				public static LocString NAME = "Tutorial: Duplicant Movement";
+				public static LocString NAME = "Video: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants can only climb two tiles high and cannot fit into spaces smaller than two tiles, which I should keep in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <b>SHOW NAVIGATION</b> to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants can only climb two tiles high and cannot fit into spaces smaller than two tiles, which I should keep in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <b>Show Navigation</b> to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Notes on my Duplicants' maneuverability";
 			}
@@ -805,15 +803,13 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					"Duplicants will choose where to work based on the priority of the errands that I give them. I can open the ",
-					UI.FormatAsManagementMenu("PRIORITIES SCREEN"),
-					" <color=#F44A47><b>[L]</b></color> to set their ",
+					UI.FormatAsManagementMenu("Priorities Screen", "[L]"),
+					" to set their ",
 					UI.PRE_KEYWORD,
 					"Duplicant Priorities",
 					UI.PST_KEYWORD,
 					", and the ",
-					UI.FormatAsLink("PRIORITY TOOL", "PRIORITIES"),
-					" ",
-					UI.FormatAsHotkey("[P]"),
+					UI.FormatAsTool("Priority Tool", "[P]"),
 					" to fine tune ",
 					UI.PRE_KEYWORD,
 					"Building Priority",
@@ -833,8 +829,8 @@ namespace STRINGS
 					"By building a ",
 					UI.FormatAsLink("Pitcher Pump", "LIQUIDPUMPINGSTATION"),
 					" from the ",
-					UI.FormatAsBuildMenuTab("PLUMBING TAB", "[5]"),
-					" <color=#F44A47><b>[5]</b></color> over a pool of liquid, my Duplicants will be able to bottle it up and manually deliver it wherever it needs to go."
+					UI.FormatAsBuildMenuTab("Plumbing Tab", "[5]"),
+					" over a pool of liquid, my Duplicants will be able to bottle it up and manually deliver it wherever it needs to go."
 				});
 
 				public static LocString TOOLTIP = "Notes on liquid resource gathering";
@@ -844,7 +840,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Tutorial: Scheduling";
 
-				public static LocString MESSAGEBODY = "My Duplicants will only eat, sleep, work, or bathe during the times I allot for such activities.\n\nTo make the best use of their time, I can open the SCHEDULE TAB <color=#F44A47><b>[U]</b></color> to adjust the colony's schedule and plan how they should utilize their day.";
+				public static LocString MESSAGEBODY = "My Duplicants will only eat, sleep, work, or bathe during the times I allot for such activities.\n\nTo make the best use of their time, I can open the " + UI.FormatAsManagementMenu("Schedule Tab", "[PERIOD KEY]") + " to adjust the colony's schedule and plan how they should utilize their day.";
 
 				public static LocString TOOLTIP = "Notes on scheduling my Duplicants' time";
 			}
@@ -863,7 +859,9 @@ namespace STRINGS
 					UI.FormatAsLink("Cold", "HEAT"),
 					" affect my Duplicants' internal body temperature and cause undue ",
 					UI.FormatAsLink("Stress", "STRESS"),
-					".\n\nOpening the TEMPERATURE OVERLAY <color=#F44A47><b>[F3]</b></color> and checking the \"Thermal Tolerance\" box allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
+					".\n\nOpening the ",
+					UI.FormatAsOverlay("Temperature Overlay", "[F3]"),
+					" and checking the <b>Thermal Tolerance</b> box allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
 				});
 			}
 
@@ -892,10 +890,10 @@ namespace STRINGS
 					" can cause ",
 					UI.FormatAsLink("Disease", "DISEASE"),
 					" in my Duplicants. I can use the ",
-					UI.FormatAsLink("GERM OVERLAY", "MISC"),
-					" <color=#F44A47><b>[F9]</b></color> to view all germ concentrations in my colony, and even detect the sources spawning them.\n\nBuilding Wash Basins from the ",
-					UI.FormatAsLink("MEDICINE TAB", "MISC"),
-					" <color=#F44A47><b>[8]</b></color> by colony toilets will tell my Duplicants they need to wash up."
+					UI.FormatAsOverlay("Germ Overlay", "[F9]"),
+					" to view all germ concentrations in my colony, and even detect the sources spawning them.\n\nBuilding Wash Basins from the ",
+					UI.FormatAsBuildMenuTab("Medicine Tab", "[8]"),
+					" by colony toilets will tell my Duplicants they need to wash up."
 				});
 			}
 
@@ -935,9 +933,7 @@ namespace STRINGS
 					BUILDINGS.PREFABS.WASHBASIN.NAME,
 					" or ",
 					BUILDINGS.PREFABS.SHOWER.NAME,
-					" will prevent the cooks from infecting the food by handling it.\n\nDangerously contaminated food can be sent to compost by clicking the ",
-					UI.FormatAsLink("Compost", "misc"),
-					" button on the selected item."
+					" will prevent the cooks from infecting the food by handling it.\n\nDangerously contaminated food can be sent to compost by clicking the <b>Compost</b> button on the selected item."
 				});
 			}
 
@@ -962,7 +958,7 @@ namespace STRINGS
 
 			public class MORALE
 			{
-				public static LocString NAME = "Tutorial: Morale";
+				public static LocString NAME = "Video: Duplicant Morale";
 
 				public static LocString TOOLTIP = "Notes on Duplicant expectations";
 
@@ -971,7 +967,7 @@ namespace STRINGS
 
 			public class POWER
 			{
-				public static LocString NAME = "Tutorial: Power Circuits";
+				public static LocString NAME = "Video: Power Circuits";
 
 				public static LocString TOOLTIP = "Notes on managing electricity";
 
@@ -980,7 +976,7 @@ namespace STRINGS
 
 			public class DIGGING
 			{
-				public static LocString NAME = "Tutorial: Digging for Resources";
+				public static LocString NAME = "Video: Digging for Resources";
 
 				public static LocString TOOLTIP = "Notes on buried riches";
 
@@ -989,7 +985,7 @@ namespace STRINGS
 
 			public class INSULATION
 			{
-				public static LocString NAME = "Tutorial: Insulation";
+				public static LocString NAME = "Video: Insulation";
 
 				public static LocString TOOLTIP = "Notes on effective temperature management";
 
@@ -998,7 +994,7 @@ namespace STRINGS
 
 			public class PLUMBING
 			{
-				public static LocString NAME = "Tutorial: Plumbing and Ventilation";
+				public static LocString NAME = "Video: Plumbing and Ventilation";
 
 				public static LocString TOOLTIP = "Notes on connecting buildings with pipes";
 
@@ -1136,7 +1132,7 @@ namespace STRINGS
 
 			public class NO_OXYGEN_GENERATOR
 			{
-				public static LocString NAME = "No " + UI.FormatAsLink("Oxygen Diffuser", "MINERALDEOXIDIZER") + " built";
+				public static LocString NAME = "No " + UI.FormatAsLink("Oxygen Generator", "OXYGEN") + " built";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{

@@ -187,12 +187,12 @@ public class LoopingSounds : KMonoBehaviour
 				{
 					if (Time.time - num > soundEvent.minInterval)
 					{
-						SoundEvent.PlayOneShot(soundEvent.sound, vector);
+						SoundEvent.PlayOneShot(soundEvent.sound, vector, 1f);
 					}
 				}
 				else
 				{
-					SoundEvent.PlayOneShot(soundEvent.sound, vector);
+					SoundEvent.PlayOneShot(soundEvent.sound, vector, 1f);
 				}
 				this.lastTimePlayed[soundEvent.soundHash] = Time.time;
 			}

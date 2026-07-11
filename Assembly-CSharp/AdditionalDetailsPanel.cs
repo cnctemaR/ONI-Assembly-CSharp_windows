@@ -107,21 +107,6 @@ public class AdditionalDetailsPanel : TargetScreen
 		EnergyConsumer component5 = this.selectedTarget.GetComponent<EnergyConsumer>();
 		Operational component6 = this.selectedTarget.GetComponent<Operational>();
 		Battery component7 = this.selectedTarget.GetComponent<Battery>();
-		float num5;
-		float num6;
-		float num7;
-		if (component6 != null && (component4 != null || component5 != null || component7 != null))
-		{
-			num5 = component6.GetUptimeForTimeSpan(10f);
-			num6 = component6.GetUptimeForTimeSpan(600f);
-			num7 = component6.GetUptimeForTimeSpan(6000f);
-		}
-		else
-		{
-			num5 = -1f;
-			num6 = -1f;
-			num7 = -1f;
-		}
 		this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name)).Tooltip(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name)).NewLabel(this.drawer.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")))
 			.Tooltip(this.drawer.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
 		if (num4 > 0f)
@@ -132,34 +117,51 @@ public class AdditionalDetailsPanel : TargetScreen
 		{
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.AGE.NAME, UI.ELEMENTAL.AGE.UNKNOWN)).Tooltip(UI.ELEMENTAL.AGE.UNKNOWN_TOOLTIP);
 		}
-		if (num5 >= 0f)
+		int num5 = 5;
+		float num6;
+		float num7;
+		float num8;
+		if (component6 != null && (component4 != null || component5 != null || component7 != null))
+		{
+			num6 = component6.GetCurrentCycleUptime();
+			num7 = component6.GetLastCycleUptime();
+			num8 = component6.GetUptimeOverCycles(num5);
+		}
+		else
+		{
+			num6 = -1f;
+			num7 = -1f;
+			num8 = -1f;
+		}
+		if (num6 >= 0f)
 		{
 			string text = UI.ELEMENTAL.UPTIME.NAME;
-			text = text.Replace("{0}", GameUtil.GetFormattedTime(10f));
-			text = text.Replace("{1}", GameUtil.GetFormattedTime(600f));
-			text = text.Replace("{2}", GameUtil.GetFormattedTime(6000f));
-			text = text.Replace("{3}", GameUtil.GetFormattedPercent(num5 * 100f, GameUtil.TimeSlice.None));
-			text = text.Replace("{4}", GameUtil.GetFormattedPercent(num6 * 100f, GameUtil.TimeSlice.None));
-			text = text.Replace("{5}", GameUtil.GetFormattedPercent(num7 * 100f, GameUtil.TimeSlice.None));
+			text = text.Replace("{0}", "    • ");
+			text = text.Replace("{1}", UI.ELEMENTAL.UPTIME.THIS_CYCLE);
+			text = text.Replace("{2}", GameUtil.GetFormattedPercent(num6 * 100f, GameUtil.TimeSlice.None));
+			text = text.Replace("{3}", UI.ELEMENTAL.UPTIME.LAST_CYCLE);
+			text = text.Replace("{4}", GameUtil.GetFormattedPercent(num7 * 100f, GameUtil.TimeSlice.None));
+			text = text.Replace("{5}", UI.ELEMENTAL.UPTIME.LAST_X_CYCLES.Replace("{0}", num5.ToString()));
+			text = text.Replace("{6}", GameUtil.GetFormattedPercent(num8 * 100f, GameUtil.TimeSlice.None));
 			this.drawer.NewLabel(text);
 		}
 		if (!flag)
 		{
 			bool flag2 = false;
-			float num8 = element.thermalConductivity;
+			float num9 = element.thermalConductivity;
 			Building component8 = this.selectedTarget.GetComponent<Building>();
 			if (component8 != null)
 			{
-				num8 *= component8.Def.ThermalConductivity;
+				num9 *= component8.Def.ThermalConductivity;
 				flag2 = component8.Def.ThermalConductivity < 1f;
 			}
 			string temperatureUnitSuffix = GameUtil.GetTemperatureUnitSuffix();
-			float num9 = specificHeatCapacity * 1f;
-			string text2 = string.Format(UI.ELEMENTAL.SHC.NAME, GameUtil.GetDisplaySHC(num9).ToString("0.000"));
+			float num10 = specificHeatCapacity * 1f;
+			string text2 = string.Format(UI.ELEMENTAL.SHC.NAME, GameUtil.GetDisplaySHC(num10).ToString("0.000"));
 			string text3 = UI.ELEMENTAL.SHC.TOOLTIP;
 			text3 = text3.Replace("{SPECIFIC_HEAT_CAPACITY}", text2 + GameUtil.GetSHCSuffix());
 			text3 = text3.Replace("{TEMPERATURE_UNIT}", temperatureUnitSuffix);
-			string text4 = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, GameUtil.GetDisplayThermalConductivity(num8).ToString("0.000"));
+			string text4 = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, GameUtil.GetDisplayThermalConductivity(num9).ToString("0.000"));
 			string text5 = UI.ELEMENTAL.THERMALCONDUCTIVITY.TOOLTIP;
 			text5 = text5.Replace("{THERMAL_CONDUCTIVITY}", text4 + GameUtil.GetThermalConductivitySuffix());
 			text5 = text5.Replace("{TEMPERATURE_UNIT}", temperatureUnitSuffix);

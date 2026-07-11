@@ -110,6 +110,10 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 					HashedString invalid = HashedString.Invalid;
 					Transform transform = this.targetOverloadedWire.transform;
 					this.overloadedNotification = new Notification(text, notificationType, invalid, null, null, true, 0f, null, null, transform);
+					GameScheduler.Instance.Schedule("Power Tutorial", 2f, delegate(object obj)
+					{
+						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Power, true);
+					}, null, null);
 					Notifier notifier = Game.Instance.FindOrAdd<Notifier>();
 					notifier.Add(this.overloadedNotification, string.Empty);
 				}

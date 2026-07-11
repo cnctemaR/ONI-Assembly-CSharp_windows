@@ -37,7 +37,7 @@ public class ImmigrantScreen : CharacterSelectionController
 	{
 		if (show)
 		{
-			KFMOD.PlayOneShot(GlobalAssets.GetSound("Dialog_Popup", false));
+			KFMOD.PlayUISound(GlobalAssets.GetSound("Dialog_Popup", false));
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot);
 			MusicManager.instance.PlaySong("Music_SelectDuplicant", false);
 			this.hasShown = true;

@@ -72,32 +72,10 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 		{
 			bool isConnected = this.energy.IsConnected;
 			bool isPowered = this.energy.IsPowered;
-			if (isConnected)
-			{
-				if (isConnected != this.wasConnected)
-				{
-					this.wireConnectedStatusItem = this.selectable.RemoveStatusItem(this.wireConnectedStatusItem, false);
-				}
-				if (this.visualizeRequirements)
-				{
-					bool flag3 = !isPowered && (this.button == null || this.button.IsEnabled);
-					this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NeedPower, flag3, this);
-				}
-				flag = flag && isPowered;
-			}
-			else
-			{
-				if (isConnected != this.wasConnected)
-				{
-					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.NeedPower, false);
-				}
-				if (this.wireConnectedStatusItem == Guid.Empty)
-				{
-					this.wireConnectedStatusItem = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
-				}
-				flag = flag && isConnected;
-			}
-			this.wasConnected = isConnected;
+			flag = flag && isPowered && isConnected;
+			bool flag3 = this.visualizeRequirements && isConnected && !isPowered && (this.button == null || this.button.IsEnabled);
+			this.needPowerStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NeedPower, this.needPowerStatusGuid, flag3, this);
+			this.noWireStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, this.noWireStatusGuid, !isConnected, this);
 			flag2 = flag != this.RequirementsMet && base.GetComponent<Light2D>() != null;
 		}
 		if (this.requireConduit && this.visualizeRequirements)
@@ -170,8 +148,6 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 	[SerializeField]
 	private bool requireConduit;
 
-	private bool wasConnected;
-
 	public bool requireConduitHasMass = true;
 
 	public bool visualizeRequirements = true;
@@ -180,7 +156,9 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 
 	private static readonly Operational.Flag pipesHaveMass = new Operational.Flag("pipesHaveMass", Operational.Flag.Type.Requirement);
 
-	private Guid wireConnectedStatusItem;
+	private Guid noWireStatusGuid;
+
+	private Guid needPowerStatusGuid;
 
 	private bool requirementsMet;
 

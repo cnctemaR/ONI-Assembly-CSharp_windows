@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using UnityEngine;
 
-public class Bed : Workable, IEffectDescriptor
+public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 {
 	protected override void OnPrefabInit()
 	{
@@ -13,6 +14,7 @@ public class Bed : Workable, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Components.BasicBuildings.Add(this);
 		this.sleepable = base.GetComponent<Sleepable>();
 		Sleepable sleepable = this.sleepable;
 		sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
@@ -95,11 +97,17 @@ public class Bed : Workable, IEffectDescriptor
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		Components.BasicBuildings.Remove(this);
 		if (this.sleepable != null)
 		{
 			Sleepable sleepable = this.sleepable;
 			sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
 		}
+	}
+
+	Transform IBasicBuilding.get_transform()
+	{
+		return base.transform;
 	}
 
 	[MyCmpReq]

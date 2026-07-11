@@ -46,7 +46,7 @@ public class ResourceCategoryScreen : KScreen
 		}
 		else
 		{
-			this.targetContentHideHeight = Mathf.Min(512f, this.CategoryContainer.rectTransform().rect.height);
+			this.targetContentHideHeight = Mathf.Min(((float)Screen.height - this.maxHeightPadding) / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetCanvasScale(), this.CategoryContainer.rectTransform().rect.height);
 		}
 	}
 
@@ -77,7 +77,7 @@ public class ResourceCategoryScreen : KScreen
 		}
 		if (this.HiderButton.CurrentState != 0)
 		{
-			this.targetContentHideHeight = Mathf.Min(512f, this.CategoryContainer.rectTransform().rect.height);
+			this.targetContentHideHeight = Mathf.Min(((float)Screen.height - this.maxHeightPadding) / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetCanvasScale(), this.CategoryContainer.rectTransform().rect.height);
 		}
 		if (MeterScreen.Instance != null && !MeterScreen.Instance.StartValuesSet)
 		{
@@ -117,6 +117,8 @@ public class ResourceCategoryScreen : KScreen
 	public KLayoutElement HideTarget;
 
 	private float HideSpeedFactor = 12f;
+
+	private float maxHeightPadding = 280f;
 
 	private float targetContentHideHeight;
 

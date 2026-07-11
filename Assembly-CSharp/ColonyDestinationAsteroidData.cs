@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ProcGen;
 using STRINGS;
+using UnityEngine;
 
 public class ColonyDestinationAsteroidData
 {
@@ -30,6 +31,14 @@ public class ColonyDestinationAsteroidData
 	public string sprite { get; private set; }
 
 	public int difficulty { get; private set; }
+
+	public string properName
+	{
+		get
+		{
+			return Strings.Get(this.world.name);
+		}
+	}
 
 	public void ReInitialize(int seed)
 	{
@@ -61,9 +70,10 @@ public class ColonyDestinationAsteroidData
 	private List<AsteroidDescriptor> GenerateParamDescriptors()
 	{
 		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
-		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, Strings.Get(this.world.name)), null, null));
+		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, this.properName), null, null));
 		list.Add(new AsteroidDescriptor(Strings.Get(this.world.description), null, null));
-		Tuple<string, string, string> tuple = ColonyDestinationAsteroidData.survivalOptions[this.difficulty];
+		int num = Mathf.Clamp(this.difficulty, 0, ColonyDestinationAsteroidData.survivalOptions.Count - 1);
+		Tuple<string, string, string> tuple = ColonyDestinationAsteroidData.survivalOptions[num];
 		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.TITLE, tuple.first, tuple.third), null, null));
 		return list;
 	}

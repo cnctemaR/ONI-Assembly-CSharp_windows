@@ -84,7 +84,7 @@ public class CountedSoundEvent : SoundEvent
 			GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
 		}
 		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position, 1f);
 		if (eventInstance.isValid())
 		{
 			if (num >= 0)

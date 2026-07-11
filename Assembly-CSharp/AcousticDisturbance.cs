@@ -37,7 +37,7 @@ public class AcousticDisturbance
 
 	private static void DrawVisualEffect(int center_cell, HashSet<int> cells)
 	{
-		SoundEvent.PlayOneShot(GlobalResources.Instance().AcousticDisturbanceSound, Grid.CellToPos(center_cell));
+		SoundEvent.PlayOneShot(GlobalResources.Instance().AcousticDisturbanceSound, Grid.CellToPos(center_cell), 1f);
 		foreach (int num in cells)
 		{
 			int gridDistance = AcousticDisturbance.GetGridDistance(num, center_cell);

@@ -15,10 +15,7 @@ public class Operational : KMonoBehaviour
 	[OnSerializing]
 	private void OnSerializing()
 	{
-		float num = ((!this.IsActive) ? this.inactiveStartTime : this.activeStartTime);
-		List<Operational.TimeEntry> list = ((!this.IsActive) ? this.inactiveTimes : this.activeTimes);
-		float time = GameClock.Instance.GetTime();
-		this.AddTimeEntry(list, num, time);
+		this.AddTimeData(this.IsActive);
 		this.activeStartTime = GameClock.Instance.GetTime();
 		this.inactiveStartTime = GameClock.Instance.GetTime();
 	}
@@ -28,6 +25,7 @@ public class Operational : KMonoBehaviour
 		this.UpdateFunctional();
 		this.UpdateOperational();
 		base.Subscribe<Operational>(-1661515756, Operational.OnNewBuildingDelegate);
+		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
 	}
 
 	public void OnNewBuilding(object data)
@@ -37,8 +35,6 @@ public class Operational : KMonoBehaviour
 		{
 			this.inactiveStartTime = component.creationTime;
 			this.activeStartTime = component.creationTime;
-			this.activeTimes.Clear();
-			this.inactiveTimes.Clear();
 		}
 	}
 
@@ -136,96 +132,82 @@ public class Operational : KMonoBehaviour
 	{
 		if (this.IsActive != value)
 		{
-			float num = ((!this.IsActive) ? this.inactiveStartTime : this.activeStartTime);
-			List<Operational.TimeEntry> list = ((!this.IsActive) ? this.inactiveTimes : this.activeTimes);
-			float time = GameClock.Instance.GetTime();
-			this.AddTimeEntry(list, num, time);
-			this.IsActive = value;
-			if (this.IsActive)
-			{
-				this.activeStartTime = time;
-			}
-			else
-			{
-				this.inactiveStartTime = time;
-			}
+			this.AddTimeData(value);
 			base.Trigger(824508782, this);
 			Game.Instance.Trigger(-809948329, base.gameObject);
 		}
 	}
 
-	private void AddTimeEntry(List<Operational.TimeEntry> timeEntries, float startingTime, float endingTime)
+	private void AddTimeData(bool value)
 	{
-		if (startingTime != endingTime)
-		{
-			timeEntries.Add(new Operational.TimeEntry(startingTime, endingTime));
-		}
-	}
-
-	private void ValidateTimeEntries(List<Operational.TimeEntry> timeEntries)
-	{
-		if (timeEntries.Count > 2)
-		{
-			for (int i = timeEntries.Count - 1; i > 0; i--)
-			{
-				Operational.TimeEntry timeEntry = timeEntries[i];
-				for (int j = i - 1; j >= 0; j--)
-				{
-					Operational.TimeEntry timeEntry2 = timeEntries[j];
-					if (timeEntry.startTime < timeEntry2.endTime || timeEntry.startTime == timeEntry2.startTime)
-					{
-						global::Debug.Assert(false, "ENTRY TIMES OVERLAP!");
-					}
-				}
-			}
-		}
-	}
-
-	public float GetUptimeForTimeSpan(float duration = 600f)
-	{
-		float num = this.SumTimesForTimeSpawn(this.activeTimes, duration);
-		float num2 = this.SumTimesForTimeSpawn(this.inactiveTimes, duration);
-		float num3 = GameClock.Instance.GetTime() - duration;
+		float num = ((!this.IsActive) ? this.inactiveStartTime : this.activeStartTime);
+		float time = GameClock.Instance.GetTime();
+		float num2 = time - num;
 		if (this.IsActive)
 		{
-			num += GameClock.Instance.GetTime() - Mathf.Max(this.activeStartTime, num3);
+			this.activeTime += num2;
 		}
 		else
 		{
-			num2 += GameClock.Instance.GetTime() - Mathf.Max(this.inactiveStartTime, num3);
+			this.inactiveTime += num2;
 		}
-		float num4 = num + num2;
-		global::Debug.Assert(num4 <= duration, "totalTime is greater than allowed duration!");
-		if (num == 0f || num4 == 0f)
+		this.IsActive = value;
+		if (this.IsActive)
 		{
-			return 0f;
+			this.activeStartTime = time;
 		}
-		if (num2 == 0f)
+		else
 		{
-			return 1f;
+			this.inactiveStartTime = time;
 		}
-		return num / num4;
 	}
 
-	private float SumTimesForTimeSpawn(List<Operational.TimeEntry> times, float duration)
+	public void OnNewDay(object data)
 	{
-		float num = GameClock.Instance.GetTime() - duration;
-		float num2 = 0f;
-		foreach (Operational.TimeEntry timeEntry in times)
+		this.AddTimeData(this.IsActive);
+		this.uptimeData.Add(this.activeTime / 600f);
+		while (this.uptimeData.Count > this.MAX_DATA_POINTS)
 		{
-			if (timeEntry.startTime >= num || timeEntry.endTime >= num)
-			{
-				if (timeEntry.startTime < num && timeEntry.endTime >= num)
-				{
-					num2 += timeEntry.endTime - num;
-				}
-				else
-				{
-					num2 += timeEntry.endTime - timeEntry.startTime;
-				}
-			}
+			this.uptimeData.RemoveAt(0);
 		}
-		return num2;
+		this.activeTime = 0f;
+		this.inactiveTime = 0f;
+	}
+
+	public float GetCurrentCycleUptime()
+	{
+		if (this.IsActive)
+		{
+			float num = ((!this.IsActive) ? this.inactiveStartTime : this.activeStartTime);
+			float time = GameClock.Instance.GetTime();
+			float num2 = time - num;
+			return (this.activeTime + num2) / GameClock.Instance.GetTimeSinceStartOfCycle();
+		}
+		return this.activeTime / GameClock.Instance.GetTimeSinceStartOfCycle();
+	}
+
+	public float GetLastCycleUptime()
+	{
+		if (this.uptimeData.Count > 0)
+		{
+			return this.uptimeData[this.uptimeData.Count - 1];
+		}
+		return 0f;
+	}
+
+	public float GetUptimeOverCycles(int num_cycles)
+	{
+		if (this.uptimeData.Count > 0)
+		{
+			int num = Mathf.Min(this.uptimeData.Count, num_cycles);
+			float num2 = 0f;
+			for (int i = num - 1; i >= 0; i--)
+			{
+				num2 += this.uptimeData[i];
+			}
+			return num2 / (float)num;
+		}
+		return 0f;
 	}
 
 	[Serialize]
@@ -235,10 +217,15 @@ public class Operational : KMonoBehaviour
 	public float activeStartTime;
 
 	[Serialize]
-	private List<Operational.TimeEntry> activeTimes = new List<Operational.TimeEntry>();
+	private List<float> uptimeData = new List<float>();
 
 	[Serialize]
-	private List<Operational.TimeEntry> inactiveTimes = new List<Operational.TimeEntry>();
+	private float activeTime;
+
+	[Serialize]
+	private float inactiveTime;
+
+	private int MAX_DATA_POINTS = 5;
 
 	public Dictionary<Operational.Flag, bool> Flags = new Dictionary<Operational.Flag, bool>();
 
@@ -264,18 +251,5 @@ public class Operational : KMonoBehaviour
 			Requirement,
 			Functional
 		}
-	}
-
-	public struct TimeEntry
-	{
-		public TimeEntry(float start, float end)
-		{
-			this.startTime = start;
-			this.endTime = end;
-		}
-
-		public float startTime;
-
-		public float endTime;
 	}
 }

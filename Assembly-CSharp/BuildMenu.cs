@@ -307,14 +307,14 @@ public class BuildMenu : KScreen
 				string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
 				if (sound != null)
 				{
-					EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition());
+					EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f);
 					SoundEvent.EndOneShot(eventInstance);
 				}
 			}
 			string sound2 = GlobalAssets.GetSound("NewBuildable", false);
 			if (sound2 != null)
 			{
-				EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition());
+				EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f);
 				eventInstance2.setParameterValue("playCount", (float)BuildMenu.Instance.notificationPingCount);
 				SoundEvent.EndOneShot(eventInstance2);
 			}

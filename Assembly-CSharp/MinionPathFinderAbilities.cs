@@ -107,7 +107,7 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	}
 
 	[Conditional("ENABLE_NAVIGATION_MASK_PROFILING")]
-	private void EndSample()
+	private void EndSample(string region_name)
 	{
 	}
 

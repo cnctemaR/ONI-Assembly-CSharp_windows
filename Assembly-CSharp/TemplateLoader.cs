@@ -96,6 +96,7 @@ public static class TemplateLoader
 		BuildingComplete component = gameObject.GetComponent<BuildingComplete>();
 		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 		component2.AddTag(GameTags.TemplateBuilding, true);
+		Components.TemplateBuildings.Add(component);
 		Rotatable component3 = gameObject.GetComponent<Rotatable>();
 		if (component3 != null)
 		{
@@ -193,7 +194,7 @@ public static class TemplateLoader
 				{
 					Substance substance = ElementLoader.FindElementByHash(storageItem.element).substance;
 					gameObject2 = substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false, false);
-					goto IL_0518;
+					goto IL_0524;
 				}
 				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Ore);
 				if (gameObject2 == null)
@@ -211,21 +212,21 @@ public static class TemplateLoader
 					if (smi != null)
 					{
 						smi.RotValue = storageItem.rottable.rotAmount;
-						goto IL_0518;
+						goto IL_0524;
 					}
-					goto IL_0518;
+					goto IL_0524;
 				}
-				IL_0542:
+				IL_054E:
 				l++;
 				continue;
-				IL_0518:
+				IL_0524:
 				GameObject gameObject3 = component7.Store(gameObject2, true, true, true, false);
 				if (gameObject3 != null)
 				{
 					gameObject3.GetComponent<Pickupable>().OnStore(component7);
-					goto IL_0542;
+					goto IL_054E;
 				}
-				goto IL_0542;
+				goto IL_054E;
 			}
 		}
 		if (prefab.connections != 0)

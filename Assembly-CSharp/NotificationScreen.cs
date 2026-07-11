@@ -173,9 +173,9 @@ public class NotificationScreen : KScreen
 					List<Notification> list = this.notifications.FindAll((Notification n) => n.titleText == notification.titleText);
 					foreach (Notification notification2 in list)
 					{
-						MessageNotification messageNotification = (MessageNotification)notification2;
-						Messenger.Instance.RemoveMessage(messageNotification.message);
-						messageNotification.Clear();
+						MessageNotification messageNotification2 = (MessageNotification)notification2;
+						Messenger.Instance.RemoveMessage(messageNotification2.message);
+						messageNotification2.Clear();
 					}
 				});
 			}
@@ -216,9 +216,20 @@ public class NotificationScreen : KScreen
 					componentInChildren.sprite = this.icon_warning;
 					break;
 				case NotificationType.Messages:
+				{
 					locText.color = this.messageColor;
 					componentInChildren.sprite = this.icon_message;
+					MessageNotification messageNotification = notification as MessageNotification;
+					if (messageNotification != null)
+					{
+						TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
+						if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
+						{
+							componentInChildren.sprite = this.icon_video;
+						}
+					}
 					break;
+				}
 				case NotificationType.DuplicantThreatening:
 					locText.color = this.badColor;
 					componentInChildren.sprite = this.icon_bad;
@@ -308,7 +319,7 @@ public class NotificationScreen : KScreen
 		}
 		if (notification.playSound)
 		{
-			EventInstance eventInstance = KFMOD.BeginOneShot(text2, Vector3.zero);
+			EventInstance eventInstance = KFMOD.BeginOneShot(text2, Vector3.zero, 1f);
 			eventInstance.setParameterValue("timeSinceLast", num2);
 			KFMOD.EndOneShot(eventInstance);
 		}
@@ -466,6 +477,8 @@ public class NotificationScreen : KScreen
 	public Sprite icon_bad;
 
 	public Sprite icon_message;
+
+	public Sprite icon_video;
 
 	private List<Notification> pendingNotifications = new List<Notification>();
 

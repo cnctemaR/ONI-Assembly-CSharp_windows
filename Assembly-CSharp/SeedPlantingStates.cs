@@ -224,23 +224,23 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 		Navigator component = smi.GetComponent<Navigator>();
 		Pickupable pickupable = null;
 		int num = 100;
-		IEnumerator enumerator = Components.Pickupables.GetEnumerator();
+		IEnumerator enumerator = Components.PlantableSeeds.GetEnumerator();
 		try
 		{
 			while (enumerator.MoveNext())
 			{
 				object obj = enumerator.Current;
-				Pickupable pickupable2 = (Pickupable)obj;
-				if (pickupable2.HasTag(GameTags.Seed) || pickupable2.HasTag(GameTags.CropSeed))
+				PlantableSeed plantableSeed = (PlantableSeed)obj;
+				if (plantableSeed.HasTag(GameTags.Seed) || plantableSeed.HasTag(GameTags.CropSeed))
 				{
-					if (!pickupable2.HasTag(GameTags.Creatures.ReservedByCreature))
+					if (!plantableSeed.HasTag(GameTags.Creatures.ReservedByCreature))
 					{
-						if (Vector2.Distance(smi.transform.position, pickupable2.transform.position) <= 25f)
+						if (Vector2.Distance(smi.transform.position, plantableSeed.transform.position) <= 25f)
 						{
-							int navigationCost = component.GetNavigationCost(Grid.PosToCell(pickupable2));
+							int navigationCost = component.GetNavigationCost(Grid.PosToCell(plantableSeed));
 							if (navigationCost != -1 && navigationCost < num)
 							{
-								pickupable = pickupable2;
+								pickupable = plantableSeed.GetComponent<Pickupable>();
 								num = navigationCost;
 							}
 						}

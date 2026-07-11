@@ -185,7 +185,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 			num = 0f;
 		}
 		float num2 = (Time.time - num) / this.soundDecayTime;
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()));
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()), 1f);
 		eventInstance.setParameterValue("timeSinceLast", num2);
 		KFMOD.EndOneShot(eventInstance);
 		this.lastTimeSoundPlayed[state] = Time.time;

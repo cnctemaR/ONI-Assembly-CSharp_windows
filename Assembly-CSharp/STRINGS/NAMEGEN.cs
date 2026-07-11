@@ -525,6 +525,10 @@ namespace STRINGS
 					public static LocString BROOK = "Brook";
 
 					public static LocString RICARDO = "Ricardo";
+
+					public static LocString BEARDOO = "Beardoo";
+
+					public static LocString GEOFF = "Geoff";
 				}
 
 				public class FEMALE

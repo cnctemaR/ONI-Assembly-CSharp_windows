@@ -57,9 +57,17 @@ public class PauseScreen : KModalButtonMenu
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.clipboard.GetText = new Func<string>(this.GetClipboardText);
 		this.title.SetText(UI.FRONTEND.PAUSE_SCREEN.TITLE);
-		this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, SaveLoader.Instance.worldDetailSave.globalWorldSeed));
-		this.worldSeed.transform.SetAsLastSibling();
+		string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
+		string[] array = CustomGameSettings.Instance.ParseSettingCoordinate(settingsCoordinate);
+		this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, settingsCoordinate));
+		this.worldSeed.GetComponent<ToolTip>().toolTip = string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED_TOOLTIP, array[1], array[2], array[3]);
+	}
+
+	private string GetClipboardText()
+	{
+		return CustomGameSettings.Instance.GetSettingsCoordinate();
 	}
 
 	private void OnResume()
@@ -239,6 +247,9 @@ public class PauseScreen : KModalButtonMenu
 
 	[SerializeField]
 	private LocText worldSeed;
+
+	[SerializeField]
+	private CopyTextFieldToClipboard clipboard;
 
 	private float originalTimeScale;
 

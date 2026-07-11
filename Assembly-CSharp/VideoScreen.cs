@@ -118,7 +118,7 @@ public class VideoScreen : KModalScreen
 			KFMOD.EndOneShot(this.audioHandle);
 			this.audioHandle.clearHandle();
 		}
-		this.audioHandle = KFMOD.BeginOneShot(GlobalAssets.GetSound("vid_" + clip.name, false), Vector3.zero);
+		this.audioHandle = KFMOD.BeginOneShot(GlobalAssets.GetSound("vid_" + clip.name, false), Vector3.zero, 1f);
 		KFMOD.EndOneShot(this.audioHandle);
 		this.videoSkippable = !unskippable;
 		this.closeButton.gameObject.SetActive(this.videoSkippable);

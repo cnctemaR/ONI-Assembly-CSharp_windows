@@ -22,6 +22,18 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 		this.timeUntilSelfPlant = Util.RandomVariance(2400f, 600f);
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		Components.PlantableSeeds.Add(this);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.PlantableSeeds.Remove(this);
+		base.OnCleanUp();
+	}
+
 	private void OnAbsorb(object data)
 	{
 	}

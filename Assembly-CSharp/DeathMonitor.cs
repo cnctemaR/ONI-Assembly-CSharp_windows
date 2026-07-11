@@ -19,16 +19,18 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			if (smi.IsDuplicant)
 			{
 				DeathMessage deathMessage = new DeathMessage(smi.gameObject, death);
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_localized", false), smi.master.transform.GetPosition());
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_ST", false));
+				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_localized", false), smi.master.transform.GetPosition(), 1f);
+				KFMOD.PlayUISound(GlobalAssets.GetSound("Death_Notification_ST", false));
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
 		}).GoTo(this.dead);
-		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).defaultState = this.dead.ground.TriggerOnEnter(GameHashes.Died, null).ToggleTag(GameTags.Dead).Enter(delegate(DeathMonitor.Instance smi)
-		{
-			smi.ApplyDeath();
-			Game.Instance.Trigger(282337316, smi.gameObject);
-		});
+		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.dead.ground).TriggerOnEnter(GameHashes.Died, null)
+			.ToggleTag(GameTags.Dead)
+			.Enter(delegate(DeathMonitor.Instance smi)
+			{
+				smi.ApplyDeath();
+				Game.Instance.Trigger(282337316, smi.gameObject);
+			});
 		this.dead.ground.Enter(delegate(DeathMonitor.Instance smi)
 		{
 			Death death2 = this.death.Get(smi);

@@ -67,7 +67,7 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 			{
 				return;
 			}
-			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), Grid.CellToPos(this.cell));
+			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), Grid.CellToPos(this.cell), 1f);
 			eventInstance.setParameterValue("wireCount", (float)(networkForCell.Wires.Count % 24));
 			eventInstance.setParameterValue("enabled", (float)new_value);
 			KFMOD.EndOneShot(eventInstance);

@@ -343,7 +343,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		text = GlobalAssets.GetSound(text, false);
 		if (CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text))
 		{
-			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos));
+			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
 		}
 	}
 
@@ -360,7 +360,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			}
 			if (text2 != null && CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text2))
 			{
-				KFMOD.PlayOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(pos));
+				KFMOD.PlayOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
 			}
 		}
 	}
@@ -421,7 +421,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		string sound = GlobalAssets.GetSound(this.impactSound, false);
 		if (CameraController.Instance.IsAudibleSound(pos, sound))
 		{
-			EventInstance eventInstance = KFMOD.BeginOneShot(sound, pos);
+			EventInstance eventInstance = KFMOD.BeginOneShot(sound, pos, 1f);
 			eventInstance.setParameterValue("userVolume_SFX", KPlayerPrefs.GetFloat("Volume_SFX"));
 			KFMOD.EndOneShot(eventInstance);
 		}

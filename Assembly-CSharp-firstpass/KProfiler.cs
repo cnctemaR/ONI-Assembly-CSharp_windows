@@ -6,11 +6,29 @@ using UnityEngine;
 
 public static class KProfiler
 {
-	public static void BeginThreadProfiling(string threadGroupName, string threadName)
+	public static bool IsEnabled()
+	{
+		return KProfiler.enabled;
+	}
+
+	public static void Enable()
+	{
+		KProfiler.enabled = true;
+	}
+
+	public static void Disable()
 	{
 	}
 
-	public static void EndThreadProfiling()
+	public static void BeginThread(string name, string group)
+	{
+	}
+
+	public static void BeginFrame()
+	{
+	}
+
+	public static void EndFrame()
 	{
 	}
 
@@ -21,11 +39,10 @@ public static class KProfiler
 		return num;
 	}
 
-	public static int BeginSampleI(string region_name, global::UnityEngine.Object profiler_obj)
+	public static int EndSampleI(string region_name = null)
 	{
-		int num = KProfiler.counter;
-		KProfiler.counter++;
-		return num;
+		KProfiler.counter--;
+		return KProfiler.counter;
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
@@ -35,9 +52,28 @@ public static class KProfiler
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
+	public static void EndSample(string region_name = null)
+	{
+		KProfiler.EndSampleI(region_name);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void EndSample(string region_name, int count)
+	{
+		KProfiler.EndSampleI(region_name);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
 	public static void BeginSample(string region_name, int count)
 	{
 		KProfiler.BeginSampleI(region_name);
+	}
+
+	public static int BeginSampleI(string region_name, global::UnityEngine.Object profiler_obj)
+	{
+		int num = KProfiler.counter;
+		KProfiler.counter++;
+		return num;
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
@@ -47,37 +83,51 @@ public static class KProfiler
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
-	public static void EndSample()
-	{
-		KProfiler.EndSampleI();
-	}
-
-	public static int EndSampleI()
-	{
-		KProfiler.counter--;
-		return KProfiler.counter;
-	}
-
 	public static void AddEvent(string event_name)
 	{
 	}
 
+	[Conditional("ENABLE_KPROFILER")]
 	public static void AddCounter(string event_name, List<KeyValuePair<string, int>> series_name_counts)
 	{
+		foreach (KeyValuePair<string, int> keyValuePair in series_name_counts)
+		{
+			KProfiler.EndSampleI(null);
+		}
 	}
 
+	[Conditional("ENABLE_KPROFILER")]
 	public static void AddCounter(string event_name, string series_name, int count)
 	{
+		KProfiler.EndSampleI(series_name);
 	}
 
+	[Conditional("ENABLE_KPROFILER")]
 	public static void AddCounter(string event_name, int count)
 	{
-		KProfiler.AddCounter(event_name, event_name, count);
 	}
 
-	public static int counter;
+	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginThreadProfiling(string threadGroupName, string threadName)
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void EndThreadProfiling()
+	{
+	}
+
+	private static bool enabled = false;
+
+	public static int counter = 0;
 
 	public static Thread main_thread;
+
+	public static KProfilerEndpoint AppEndpoint = new KProfilerPluginEndpoint();
+
+	public static KProfilerEndpoint UnityEndpoint = new KProfilerEndpoint();
+
+	public static KProfilerEndpoint ChromeEndpoint = new KProfilerEndpoint();
 
 	public struct Region : IDisposable
 	{

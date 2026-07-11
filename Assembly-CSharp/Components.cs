@@ -105,6 +105,16 @@ public class Components
 
 	public static Components.Cmps<MonumentPart> MonumentParts = new Components.Cmps<MonumentPart>();
 
+	public static Components.Cmps<PlantableSeed> PlantableSeeds = new Components.Cmps<PlantableSeed>();
+
+	public static Components.Cmps<IBasicBuilding> BasicBuildings = new Components.Cmps<IBasicBuilding>();
+
+	public static Components.Cmps<Painting> Paintings = new Components.Cmps<Painting>();
+
+	public static Components.Cmps<BuildingComplete> TemplateBuildings = new Components.Cmps<BuildingComplete>();
+
+	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
+
 	public class Cmps<T> : ICollection, IEnumerable
 	{
 		public Cmps()

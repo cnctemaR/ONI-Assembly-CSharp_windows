@@ -16,16 +16,12 @@ namespace Database
 
 		public override bool Success()
 		{
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+			foreach (BuildingComplete buildingComplete in Components.TemplateBuildings.Items)
 			{
-				KPrefabID component = buildingComplete.GetComponent<KPrefabID>();
-				if (component.HasTag(GameTags.TemplateBuilding))
+				Unsealable component = buildingComplete.GetComponent<Unsealable>();
+				if (component != null && component.unsealed)
 				{
-					Unsealable component2 = buildingComplete.GetComponent<Unsealable>();
-					if (component2 != null && component2.unsealed)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;

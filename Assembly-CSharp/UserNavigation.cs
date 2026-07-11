@@ -40,7 +40,7 @@ public class UserNavigation : KMonoBehaviour
 			pos = pos,
 			orthoSize = ortho_size
 		};
-		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("UserNavPoint_set", false), CameraController.Instance.GetVerticallyScaledPosition(pos));
+		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("UserNavPoint_set", false), CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
 		eventInstance.setParameterValue("userNavPoint_ID", (float)index);
 		KFMOD.EndOneShot(eventInstance);
 	}
@@ -57,7 +57,7 @@ public class UserNavigation : KMonoBehaviour
 		{
 			CameraController instance = CameraController.Instance;
 			instance.SetTargetPos(navPoint.pos, navPoint.orthoSize, true);
-			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("UserNavPoint_recall", false), instance.GetVerticallyScaledPosition(instance.transform.GetPosition()));
+			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("UserNavPoint_recall", false), instance.GetVerticallyScaledPosition(instance.transform.GetPosition()), 1f);
 			eventInstance.setParameterValue("userNavPoint_ID", (float)index);
 			KFMOD.EndOneShot(eventInstance);
 		}

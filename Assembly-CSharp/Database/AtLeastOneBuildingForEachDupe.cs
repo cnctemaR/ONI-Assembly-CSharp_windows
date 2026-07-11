@@ -16,12 +16,14 @@ namespace Database
 		public override bool Success()
 		{
 			int num = 0;
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+			foreach (IBasicBuilding basicBuilding in Components.BasicBuildings.Items)
 			{
-				if (this.validBuildingTypes.Contains(buildingComplete.prefabid.PrefabTag))
+				KPrefabID component = basicBuilding.transform.GetComponent<KPrefabID>();
+				Tag prefabTag = component.PrefabTag;
+				if (this.validBuildingTypes.Contains(prefabTag))
 				{
 					num++;
-					if (buildingComplete.prefabid.PrefabTag == "FlushToilet" || buildingComplete.prefabid.PrefabTag == "Outhouse")
+					if (prefabTag == "FlushToilet" || prefabTag == "Outhouse")
 					{
 						return true;
 					}
@@ -66,9 +68,10 @@ namespace Database
 				return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILT_ONE_BED_PER_DUPLICANT;
 			}
 			int num = 0;
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+			foreach (IBasicBuilding basicBuilding in Components.BasicBuildings.Items)
 			{
-				if (this.validBuildingTypes.Contains(buildingComplete.prefabid.PrefabTag))
+				KPrefabID component = basicBuilding.transform.GetComponent<KPrefabID>();
+				if (this.validBuildingTypes.Contains(component.PrefabTag))
 				{
 					num++;
 				}

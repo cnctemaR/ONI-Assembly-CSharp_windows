@@ -67,7 +67,7 @@ public class AchievementWidget : KMonoBehaviour
 		refs.GetReference<Image>("iconBorder").color = this.color_gold;
 		refs.GetReference<Image>("icon").color = this.color_gold;
 		bool colorChanged = false;
-		EventInstance achievementUnlockedSound = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero);
+		EventInstance achievementUnlockedSound = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero, 1f);
 		int pitchParamValue = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
 		achievementUnlockedSound.setParameterValue("num_achievements", (float)pitchParamValue);
 		global::Debug.Log("parameter: " + pitchParamValue);

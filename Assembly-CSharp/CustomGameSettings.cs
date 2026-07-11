@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using Klei;
 using Klei.CustomSettings;
 using KSerialization;
@@ -58,7 +59,6 @@ public class CustomGameSettings : KMonoBehaviour
 	public void SetSurvivalDefaults()
 	{
 		this.customGameMode = CustomGameSettings.CustomGameMode.Survival;
-		this.LoadWorlds();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
 			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.default_level_id);
@@ -68,7 +68,6 @@ public class CustomGameSettings : KMonoBehaviour
 	public void SetNosweatDefaults()
 	{
 		this.customGameMode = CustomGameSettings.CustomGameMode.Nosweat;
-		this.LoadWorlds();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
 			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.nosweat_default_level_id);
@@ -397,12 +396,61 @@ public class CustomGameSettings : KMonoBehaviour
 		return flag;
 	}
 
+	public string[] ParseSettingCoordinate(string coord)
+	{
+		Regex regex = new Regex("(.*)-(.*)-(.*)");
+		Match match = regex.Match(coord);
+		string[] array = new string[match.Groups.Count];
+		for (int i = 0; i < match.Groups.Count; i++)
+		{
+			array[i] = match.Groups[i].Value;
+		}
+		return array;
+	}
+
 	public string GetSettingsCoordinate()
 	{
 		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id);
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
 		string otherSettingsCode = this.GetOtherSettingsCode();
 		return string.Format("{0}-{1}-{2}", worldData.GetCoordinatePrefix(), currentQualitySetting.id, otherSettingsCode);
+	}
+
+	public void ParseAndApplySettingsCode(string code)
+	{
+		int num = this.Base36toBase10(code);
+		Dictionary<SettingConfig, string> dictionary = new Dictionary<SettingConfig, string>();
+		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
+		{
+			SettingConfig settingConfig = this.QualitySettings[keyValuePair.Key];
+			if (settingConfig.coordinate_dimension >= 0 && settingConfig.coordinate_dimension_width >= 0)
+			{
+				int num2 = 0;
+				int num3 = settingConfig.coordinate_dimension * settingConfig.coordinate_dimension_width;
+				int num4 = num;
+				if (num4 >= num3)
+				{
+					int num5 = num4 / num3 * num3;
+					num4 -= num5;
+				}
+				if (num4 >= settingConfig.coordinate_dimension)
+				{
+					num2 = num4 / settingConfig.coordinate_dimension;
+				}
+				foreach (SettingLevel settingLevel in settingConfig.GetLevels())
+				{
+					if (settingLevel.coordinate_offset == num2)
+					{
+						dictionary[settingConfig] = settingLevel.id;
+						break;
+					}
+				}
+			}
+		}
+		foreach (KeyValuePair<SettingConfig, string> keyValuePair2 in dictionary)
+		{
+			this.SetQualitySetting(keyValuePair2.Key, keyValuePair2.Value);
+		}
 	}
 
 	private string GetOtherSettingsCode()
@@ -421,6 +469,22 @@ public class CustomGameSettings : KMonoBehaviour
 		return this.Base10toBase36(num);
 	}
 
+	private int Base36toBase10(string input)
+	{
+		if (input == "0")
+		{
+			return 0;
+		}
+		int num = 0;
+		for (int i = input.Length - 1; i >= 0; i--)
+		{
+			num *= 36;
+			int num2 = this.hexChars.IndexOf(input[i]);
+			num += num2;
+		}
+		return num;
+	}
+
 	private string Base10toBase36(int input)
 	{
 		if (input == 0)
@@ -428,14 +492,13 @@ public class CustomGameSettings : KMonoBehaviour
 			return "0";
 		}
 		int i = input;
-		string text = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		string text2 = string.Empty;
+		string text = string.Empty;
 		while (i > 0)
 		{
-			text2 += text[i % 36];
+			text += this.hexChars[i % 36];
 			i /= 36;
 		}
-		return text2;
+		return text;
 	}
 
 	private static CustomGameSettings instance;
@@ -450,6 +513,8 @@ public class CustomGameSettings : KMonoBehaviour
 	private Dictionary<string, string> CurrentQualityLevelsBySetting = new Dictionary<string, string>();
 
 	public Dictionary<string, SettingConfig> QualitySettings = new Dictionary<string, SettingConfig>();
+
+	private string hexChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	public enum CustomGameMode
 	{

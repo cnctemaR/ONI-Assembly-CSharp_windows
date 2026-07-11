@@ -9,6 +9,7 @@ public class PowerTransformer : Generator
 		base.OnSpawn();
 		this.battery = base.GetComponent<Battery>();
 		base.Subscribe<PowerTransformer>(-592767678, PowerTransformer.OnOperationalChangedDelegate);
+		this.UpdateJoulesLostPerSecond();
 	}
 
 	public override void ApplyDeltaJoules(float joules_delta, bool can_over_power = false)
@@ -25,24 +26,26 @@ public class PowerTransformer : Generator
 
 	private void OnOperationalChanged(object data)
 	{
-		if (!(bool)data)
+		this.UpdateJoulesLostPerSecond();
+	}
+
+	private void UpdateJoulesLostPerSecond()
+	{
+		if (this.operational.IsOperational)
 		{
-			this.battery.joulesLostPerSecond = 3.3333333f;
-			base.ResetJoules();
+			this.battery.joulesLostPerSecond = 0f;
 		}
 		else
 		{
-			this.battery.joulesLostPerSecond = 0f;
+			this.battery.joulesLostPerSecond = 3.3333333f;
 		}
 	}
 
 	public override void EnergySim200ms(float dt)
 	{
 		base.EnergySim200ms(dt);
-		if (this.operational.IsOperational)
-		{
-			base.AssignJoulesAvailable(Math.Min(this.battery.JoulesAvailable, base.WattageRating * dt));
-		}
+		float num = ((!this.operational.IsOperational) ? 0f : Math.Min(this.battery.JoulesAvailable, base.WattageRating * dt));
+		base.AssignJoulesAvailable(num);
 		ushort circuitID = this.battery.CircuitID;
 		ushort circuitID2 = base.CircuitID;
 		bool flag = circuitID == circuitID2 && circuitID != ushort.MaxValue;

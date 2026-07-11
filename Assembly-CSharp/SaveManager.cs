@@ -109,7 +109,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(11);
+		writer.Write(12);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -208,9 +208,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 11)
+		if (num != 7 || num2 > 12)
 		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 11, num, num2 }) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 12, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -285,7 +285,9 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MINOR_VERSION_TRACK_NAV_DISTANCE = 11;
 
-	public const int SAVE_MINOR_VERSION = 11;
+	public const int SAVE_MINOR_VERSION_EXPANDED_WORLD_INFO = 12;
+
+	public const int SAVE_MINOR_VERSION = 12;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 

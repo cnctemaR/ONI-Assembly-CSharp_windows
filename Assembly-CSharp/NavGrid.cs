@@ -141,8 +141,8 @@ public class NavGrid
 			}
 		}
 		this.UpdateGraph(this.ExpandedDirtyCells);
-		this.DirtyCells.Clear();
-		this.ExpandedDirtyCells.Clear();
+		this.DirtyCells = new HashSet<int>();
+		this.ExpandedDirtyCells = new HashSet<int>();
 	}
 
 	public void UpdateGraph(HashSet<int> dirty_nav_cells)

@@ -7,6 +7,7 @@ public class CodexImage : CodexWidget<CodexImage>
 {
 	public CodexImage()
 	{
+		this.color = Color.white;
 	}
 
 	public CodexImage(int preferredWidth, int preferredHeight, Sprite sprite, Color color)

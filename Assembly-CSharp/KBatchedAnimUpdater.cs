@@ -31,19 +31,19 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	public void Clear()
 	{
-		for (int i = 0; i < this.updateList.Count; i++)
+		foreach (KBatchedAnimController kbatchedAnimController in this.updateList)
 		{
-			if (this.updateList[i] != null)
+			if (kbatchedAnimController != null)
 			{
-				global::UnityEngine.Object.DestroyImmediate(this.updateList[i]);
+				global::UnityEngine.Object.DestroyImmediate(kbatchedAnimController);
 			}
 		}
 		this.updateList.Clear();
-		for (int j = 0; j < this.alwaysUpdateList.Count; j++)
+		foreach (KBatchedAnimController kbatchedAnimController2 in this.alwaysUpdateList)
 		{
-			if (this.alwaysUpdateList[j] != null)
+			if (kbatchedAnimController2 != null)
 			{
-				global::UnityEngine.Object.DestroyImmediate(this.alwaysUpdateList[j]);
+				global::UnityEngine.Object.DestroyImmediate(kbatchedAnimController2);
 			}
 		}
 		this.alwaysUpdateList.Clear();
@@ -64,8 +64,8 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			{
 				if (updateRegistrationState == KBatchedAnimUpdater.RegistrationState.Unregistered)
 				{
-					List<KBatchedAnimController> list = ((controller.visibilityType != KAnimControllerBase.VisibilityType.Always) ? this.updateList : this.alwaysUpdateList);
-					list.Add(controller);
+					LinkedList<KBatchedAnimController> linkedList = ((controller.visibilityType != KAnimControllerBase.VisibilityType.Always) ? this.updateList : this.alwaysUpdateList);
+					linkedList.AddLast(controller);
 					controller.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Registered;
 				}
 			}
@@ -138,33 +138,37 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		this.CleanUp();
 		float num = Time.unscaledDeltaTime;
 		int count = this.alwaysUpdateList.Count;
-		for (int i = 0; i < count; i++)
-		{
-			if (this.alwaysUpdateList[i].updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
-			{
-				this.alwaysUpdateList[i].updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
-				this.alwaysUpdateList[i] = null;
-			}
-			else
-			{
-				this.alwaysUpdateList[i].UpdateAnim(num);
-			}
-		}
+		KBatchedAnimUpdater.UpdateRegisteredAnims(this.alwaysUpdateList, num);
 		if (this.DoGridProcessing())
 		{
 			num = Time.deltaTime;
-			int count2 = this.updateList.Count;
-			for (int j = 0; j < count2; j++)
+			if (num > 0f)
 			{
-				if (this.updateList[j].updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
-				{
-					this.updateList[j].updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
-					this.updateList[j] = null;
-				}
-				else
-				{
-					this.updateList[j].UpdateAnim(num);
-				}
+				int count2 = this.updateList.Count;
+				KBatchedAnimUpdater.UpdateRegisteredAnims(this.updateList, num);
+			}
+		}
+	}
+
+	private static void UpdateRegisteredAnims(LinkedList<KBatchedAnimController> list, float dt)
+	{
+		LinkedListNode<KBatchedAnimController> next;
+		for (LinkedListNode<KBatchedAnimController> linkedListNode = list.First; linkedListNode != null; linkedListNode = next)
+		{
+			next = linkedListNode.Next;
+			KBatchedAnimController value = linkedListNode.Value;
+			if (value == null)
+			{
+				list.Remove(linkedListNode);
+			}
+			else if (value.updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
+			{
+				value.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
+				list.Remove(linkedListNode);
+			}
+			else
+			{
+				value.UpdateAnim(dt);
 			}
 		}
 	}
@@ -390,8 +394,6 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private void CleanUp()
 	{
-		this.updateList.RemoveAll((KBatchedAnimController item) => item == null);
-		this.alwaysUpdateList.RemoveAll((KBatchedAnimController item) => item == null);
 		if (!this.DoGridProcessing())
 		{
 			return;
@@ -432,9 +434,9 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private List<KBatchedAnimController>[,] controllerGrid;
 
-	private List<KBatchedAnimController> updateList = new List<KBatchedAnimController>();
+	private LinkedList<KBatchedAnimController> updateList = new LinkedList<KBatchedAnimController>();
 
-	private List<KBatchedAnimController> alwaysUpdateList = new List<KBatchedAnimController>();
+	private LinkedList<KBatchedAnimController> alwaysUpdateList = new LinkedList<KBatchedAnimController>();
 
 	private bool[,] visibleChunkGrid;
 

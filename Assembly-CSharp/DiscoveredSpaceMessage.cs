@@ -47,7 +47,7 @@ public class DiscoveredSpaceMessage : Message
 
 	private void OnDiscoveredSpaceClicked()
 	{
-		KFMOD.PlayOneShot(GlobalAssets.GetSound(this.GetSound(), false));
+		KFMOD.PlayUISound(GlobalAssets.GetSound(this.GetSound(), false));
 		MusicManager.instance.PlaySong("Stinger_Surface", false);
 		CameraController.Instance.SetTargetPos(this.cameraFocusPos, 8f, true);
 		SeasonManager component = SaveGame.Instance.GetComponent<SeasonManager>();

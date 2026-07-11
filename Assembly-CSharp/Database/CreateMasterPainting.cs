@@ -8,15 +8,11 @@ namespace Database
 	{
 		public override bool Success()
 		{
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+			foreach (Painting painting in Components.Paintings.Items)
 			{
-				if (buildingComplete.isArtable)
+				if (painting != null && painting.CurrentStatus == Artable.Status.Great)
 				{
-					Painting component = buildingComplete.GetComponent<Painting>();
-					if (component != null && component.CurrentStatus == Artable.Status.Great)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;

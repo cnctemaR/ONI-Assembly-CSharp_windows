@@ -54,7 +54,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		}
 		if (this.targetFab.CurrentWorkingOrder != null)
 		{
-			this.currentOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CURRENT_ORDER, this.targetFab.CurrentWorkingOrder.GetUIName());
+			this.currentOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CURRENT_ORDER, this.targetFab.CurrentWorkingOrder.GetUIName(false));
 		}
 		else
 		{
@@ -62,7 +62,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		}
 		if (this.targetFab.NextOrder != null)
 		{
-			this.nextOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.NEXT_ORDER, this.targetFab.NextOrder.GetUIName());
+			this.nextOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.NEXT_ORDER, this.targetFab.NextOrder.GetUIName(false));
 		}
 		else
 		{
@@ -184,7 +184,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
-					goto IL_061E;
+					goto IL_061F;
 				case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 				{
 					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonQueueHybrid, this.recipeGrid, false);
@@ -201,7 +201,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 						image.sprite = uisprite2.first;
 						image.color = uisprite2.second;
 					}
-					entryGO.GetComponentInChildren<LocText>().text = <Initialize>c__AnonStorey2.recipe.GetUIName();
+					entryGO.GetComponentInChildren<LocText>().text = <Initialize>c__AnonStorey2.recipe.GetUIName(false);
 					bool flag2 = this.HasAllRecipeRequirements(<Initialize>c__AnonStorey2.recipe);
 					image.material = ((!flag2) ? Assets.UIPrefabs.TableScreenWidgets.DesaturatedUIMaterial : Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial);
 					this.RefreshQueueCountDisplay(entryGO, this.targetFab);
@@ -219,9 +219,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				default:
-					goto IL_061E;
+					goto IL_061F;
 				}
-				IL_06C1:
+				IL_06C2:
 				if (this.targetFab.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator)
 				{
 					newToggle.GetComponentInChildren<LocText>().text = <Initialize>c__AnonStorey2.recipe.results[0].material.ProperName();
@@ -236,7 +236,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				component3.tooltipPivot = new Vector2(1f, 1f);
 				component3.tooltipPositionOffset = new Vector2(-24f, 20f);
 				component3.ClearMultiStringTooltip();
-				component3.AddMultiStringTooltip(<Initialize>c__AnonStorey2.recipe.GetUIName(), this.styleTooltipHeader);
+				component3.AddMultiStringTooltip(<Initialize>c__AnonStorey2.recipe.GetUIName(false), this.styleTooltipHeader);
 				component3.AddMultiStringTooltip(<Initialize>c__AnonStorey2.recipe.description, this.styleTooltipBody);
 				newToggle.onClick += delegate
 				{
@@ -244,8 +244,8 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				};
 				entryGO.SetActive(true);
 				this.recipeToggles.Add(entryGO);
-				goto IL_082A;
-				IL_061E:
+				goto IL_082C;
+				IL_061F:
 				newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 				entryGO = newToggle.gameObject;
 				Image componentInChildrenOnly = newToggle.gameObject.GetComponentInChildrenOnly<Image>();
@@ -259,9 +259,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					componentInChildrenOnly.sprite = uisprite2.first;
 					componentInChildrenOnly.color = uisprite2.second;
 				}
-				goto IL_06C1;
+				goto IL_06C2;
 			}
-			IL_082A:;
+			IL_082C:;
 		}
 		if (this.recipeToggles.Count > 0)
 		{

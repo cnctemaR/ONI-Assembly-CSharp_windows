@@ -73,6 +73,11 @@ public class NewGameSettingsPanel : KMonoBehaviour
 		}
 	}
 
+	public void ConsumeSettingsCode(string code)
+	{
+		this.settings.ParseAndApplySettingsCode(code);
+	}
+
 	public void SetSetting(SettingConfig setting, string level)
 	{
 		this.settings.SetQualitySetting(setting, level);

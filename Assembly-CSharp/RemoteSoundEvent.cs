@@ -25,7 +25,7 @@ public class RemoteSoundEvent : SoundEvent
 				{
 					num = 0f;
 				}
-				EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
+				EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position, 1f);
 				eventInstance.setParameterValue("State", num);
 				SoundEvent.EndOneShot(eventInstance);
 			}

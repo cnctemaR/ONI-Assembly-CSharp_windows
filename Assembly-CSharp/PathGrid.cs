@@ -56,7 +56,6 @@ public class PathGrid
 		{
 			return;
 		}
-		KProfiler.AddEvent("PathGrid.BeginUpdate");
 		if (this.applyOffset)
 		{
 			Grid.CellToXY(root_cell, out this.rootX, out this.rootY);
@@ -86,7 +85,6 @@ public class PathGrid
 			this.groupProber.SetValidSerialNos(this, this.serialNo, this.serialNo);
 		}
 		this.previousSerialNo = this.serialNo;
-		KProfiler.AddEvent("PathGrid.EndUpdate");
 	}
 
 	private bool IsValidSerialNo(int serialNo)

@@ -308,6 +308,10 @@ public class ToolTipScreen : KScreen
 
 	private GameObject multiTooltipContainer;
 
+	public TextStyleSetting defaultTooltipHeaderStyle;
+
+	public TextStyleSetting defaultTooltipBodyStyle;
+
 	private bool toolTipIsBlank;
 
 	private Vector2 ScreenEdgePadding = new Vector2(8f, 8f);

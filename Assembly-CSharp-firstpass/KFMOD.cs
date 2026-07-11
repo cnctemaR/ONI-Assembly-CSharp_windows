@@ -32,18 +32,18 @@ public class KFMOD
 		KFMOD.CollectSoundDescriptions();
 	}
 
-	public static void PlayOneShot(string sound, Vector3 position)
+	public static void PlayOneShot(string sound, Vector3 position, float volume = 1f)
 	{
-		EventInstance eventInstance = KFMOD.BeginOneShot(sound, position);
+		EventInstance eventInstance = KFMOD.BeginOneShot(sound, position, volume);
 		KFMOD.EndOneShot(eventInstance);
 	}
 
-	public static void PlayOneShot(string sound)
+	public static void PlayUISound(string sound)
 	{
-		KFMOD.PlayOneShot(sound, Vector3.zero);
+		KFMOD.PlayOneShot(sound, Vector3.zero, 1f);
 	}
 
-	public static EventInstance BeginOneShot(string sound, Vector3 position)
+	public static EventInstance BeginOneShot(string sound, Vector3 position, float volume = 1f)
 	{
 		if (string.IsNullOrEmpty(sound) || App.IsExiting || !RuntimeManager.IsInitialized)
 		{
@@ -63,7 +63,7 @@ public class KFMOD
 		}
 		ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
 		eventInstance.set3DAttributes(attributes_3D);
-		eventInstance.setVolume(1f);
+		eventInstance.setVolume(volume);
 		return eventInstance;
 	}
 

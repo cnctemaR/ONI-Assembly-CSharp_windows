@@ -358,14 +358,16 @@ public class ProductInfoScreen : KScreen
 			global::Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!");
 			return false;
 		}
+		bool flag = true;
 		for (int i = 0; i < recipe.Ingredients.Count; i++)
 		{
 			if (MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag).kgAvailable < recipe.Ingredients[i].amount)
 			{
-				return false;
+				flag = false;
+				break;
 			}
 		}
-		return true;
+		return flag;
 	}
 
 	public void Close()

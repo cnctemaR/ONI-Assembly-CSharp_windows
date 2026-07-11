@@ -12,7 +12,12 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 		{
 			int num = Grid.PosToCell(this);
 			ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-			return flowManager.GetContents(num).temperature;
+			ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+			if (contents.mass > 0f)
+			{
+				this.lastValue = contents.temperature;
+			}
+			return this.lastValue;
 		}
 	}
 
@@ -147,4 +152,7 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 	public float rangeMin;
 
 	public float rangeMax = 373.15f;
+
+	[Serialize]
+	private float lastValue;
 }

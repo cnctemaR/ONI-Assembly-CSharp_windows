@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
+public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISlicedSim1000ms
 {
 	private OccupyArea occupyArea
 	{
@@ -89,8 +89,15 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		SlicedUpdaterSim1000ms<TemperatureVulnerable>.instance.RegisterUpdate1000ms(this);
 		base.smi.sm.internalTemp.Set(this.primaryElement.Temperature, base.smi);
 		base.smi.StartSM();
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		SlicedUpdaterSim1000ms<TemperatureVulnerable>.instance.UnregisterUpdate1000ms(this);
 	}
 
 	public void Configure(float tempWarningLow, float tempLethalLow, float tempWarningHigh, float tempLethalHigh)
@@ -107,7 +114,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		return averageTemperature > -1f && averageTemperature > this.internalTemperatureLethal_Low && averageTemperature < this.internalTemperatureLethal_High;
 	}
 
-	public void Sim1000ms(float dt)
+	public void SlicedSim1000ms(float dt)
 	{
 		int num = Grid.PosToCell(base.gameObject);
 		if (!Grid.IsValidCell(num))

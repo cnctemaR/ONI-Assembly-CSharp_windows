@@ -18,7 +18,7 @@ public class WallDamageSoundEvent : SoundEvent
 			this.tile = smi.sm.wallCellToBreak;
 			int audioCategory = WallDamageSoundEvent.GetAudioCategory(this.tile);
 			vector = Grid.CellToPos(this.tile);
-			EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, 1f);
 			eventInstance.setParameterValue("material_ID", (float)audioCategory);
 			SoundEvent.EndOneShot(eventInstance);
 		}

@@ -15,25 +15,20 @@ namespace Database
 
 		public override bool Success()
 		{
-			bool flag = Db.Get().TechItems.IsTechItemComplete(this.upgradeBuilding.Name);
-			if (flag)
+			bool flag = false;
+			foreach (IBasicBuilding basicBuilding in Components.BasicBuildings.Items)
 			{
-				bool flag2 = false;
-				foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+				KPrefabID component = basicBuilding.transform.GetComponent<KPrefabID>();
+				if (component.HasTag(this.basicBuilding))
 				{
-					KPrefabID component = buildingComplete.GetComponent<KPrefabID>();
-					if (component.HasTag(this.basicBuilding))
-					{
-						return false;
-					}
-					if (component.HasTag(this.upgradeBuilding))
-					{
-						flag2 = true;
-					}
+					return false;
 				}
-				return flag2;
+				if (component.HasTag(this.upgradeBuilding))
+				{
+					flag = true;
+				}
 			}
-			return false;
+			return flag;
 		}
 
 		public override void Deserialize(IReader reader)

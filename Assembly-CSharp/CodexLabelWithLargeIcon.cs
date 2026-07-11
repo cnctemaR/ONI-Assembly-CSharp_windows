@@ -6,6 +6,10 @@ using UnityEngine.UI;
 
 public class CodexLabelWithLargeIcon : CodexLabelWithIcon
 {
+	public CodexLabelWithLargeIcon()
+	{
+	}
+
 	public CodexLabelWithLargeIcon(string text, CodexTextStyle style, Tuple<Sprite, Color> coloredSprite, string targetEntrylinkID)
 		: base(text, style, coloredSprite, 128, 128)
 	{

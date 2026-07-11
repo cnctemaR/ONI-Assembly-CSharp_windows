@@ -15,7 +15,7 @@ public class HatchDrillSoundEvent : SoundEvent
 		int num = Grid.PosToCell(position);
 		int num2 = Grid.CellBelow(num);
 		float num3 = (float)HatchDrillSoundEvent.GetAudioCategory(num2);
-		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position, 1f);
 		eventInstance.setParameterValue("material_ID", num3);
 		SoundEvent.EndOneShot(eventInstance);
 	}

@@ -55,7 +55,9 @@ namespace ProcGen
 			return this.coordinatePrefix;
 		}
 
-		public bool skip { get; private set; }
+		public World.Skip skip { get; private set; }
+
+		public bool noStart { get; private set; }
 
 		public Vector2I worldsize { get; private set; }
 
@@ -90,6 +92,15 @@ namespace ProcGen
 		}
 
 		public string filePath;
+
+		public enum Skip
+		{
+			Never,
+			False = 0,
+			Always = 99,
+			True = 99,
+			EditorOnly
+		}
 
 		public enum LayoutMethod
 		{

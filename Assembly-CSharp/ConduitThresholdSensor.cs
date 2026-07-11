@@ -27,11 +27,12 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 	protected override void ConduitUpdate(float dt)
 	{
 		float containedMass = this.GetContainedMass();
-		if (containedMass <= 0f)
+		if (containedMass <= 0f && !this.dirty)
 		{
 			return;
 		}
 		float currentValue = this.CurrentValue;
+		this.dirty = false;
 		if (this.activateAboveThreshold)
 		{
 			if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
@@ -61,6 +62,7 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 		set
 		{
 			this.threshold = value;
+			this.dirty = true;
 		}
 	}
 
@@ -73,6 +75,7 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 		set
 		{
 			this.activateAboveThreshold = value;
+			this.dirty = true;
 		}
 	}
 
@@ -83,6 +86,9 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 	[SerializeField]
 	[Serialize]
 	protected bool activateAboveThreshold = true;
+
+	[Serialize]
+	private bool dirty = true;
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;

@@ -258,11 +258,11 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			{
 				if (SoundListenerController.Instance == null)
 				{
-					KFMOD.PlayOneShot(sound);
+					KFMOD.PlayUISound(sound);
 				}
 				else
 				{
-					KFMOD.PlayOneShot(sound, SoundListenerController.Instance.transform.GetPosition());
+					KFMOD.PlayOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f);
 				}
 			}
 			catch
@@ -278,7 +278,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		{
 			try
 			{
-				KFMOD.PlayOneShot(sound, location);
+				KFMOD.PlayOneShot(sound, location, 1f);
 			}
 			catch
 			{
@@ -291,7 +291,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 	{
 		try
 		{
-			KFMOD.PlayOneShot(asset, this.transform.GetPosition());
+			KFMOD.PlayOneShot(asset, this.transform.GetPosition(), 1f);
 		}
 		catch
 		{

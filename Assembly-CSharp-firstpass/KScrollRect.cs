@@ -34,7 +34,7 @@ public class KScrollRect : ScrollRect
 		}
 		if (Mathf.Abs(data.scrollDelta.y) > 0.2f)
 		{
-			EventInstance eventInstance = KFMOD.BeginOneShot(this.currentSounds[KScrollRect.SoundType.OnMouseScroll], Vector3.zero);
+			EventInstance eventInstance = KFMOD.BeginOneShot(this.currentSounds[KScrollRect.SoundType.OnMouseScroll], Vector3.zero, 1f);
 			float boundsExceedAmount = this.GetBoundsExceedAmount();
 			eventInstance.setParameterValue("scrollbarPosition", boundsExceedAmount);
 			KFMOD.EndOneShot(eventInstance);
@@ -78,7 +78,7 @@ public class KScrollRect : ScrollRect
 	{
 		if (this.currentSounds.ContainsKey(soundType))
 		{
-			KFMOD.PlayOneShot(this.currentSounds[soundType]);
+			KFMOD.PlayUISound(this.currentSounds[soundType]);
 		}
 	}
 

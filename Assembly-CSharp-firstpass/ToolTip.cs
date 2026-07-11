@@ -135,6 +135,15 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 				this.AddMultiStringTooltip(text, PluginAssets.Instance.defaultTextStyleSetting);
 			}
 		}
+		else if (this.OnComplexToolTip != null)
+		{
+			this.ClearMultiStringTooltip();
+			List<Tuple<string, ScriptableObject>> list = this.OnComplexToolTip();
+			foreach (Tuple<string, ScriptableObject> tuple in list)
+			{
+				this.AddMultiStringTooltip(tuple.first, tuple.second);
+			}
+		}
 	}
 
 	public void OnPointerEnter(PointerEventData data)
@@ -257,6 +266,8 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	public float WrapWidth = 256f;
 
 	private Func<string> _OnToolTip;
+
+	public Func<List<Tuple<string, ScriptableObject>>> OnComplexToolTip;
 
 	private static readonly global::EventSystem.IntraObjectHandler<ToolTip> OnClickDelegate = new global::EventSystem.IntraObjectHandler<ToolTip>(delegate(ToolTip component, object data)
 	{

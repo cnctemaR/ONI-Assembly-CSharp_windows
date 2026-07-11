@@ -15,7 +15,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 		Worker component = behaviour.GetComponent<Worker>();
 		if (component == null)
 		{
-			SoundEvent.PlayOneShot(GlobalAssets.GetSound("Building_Dmg_Metal", false), position);
+			SoundEvent.PlayOneShot(GlobalAssets.GetSound("Building_Dmg_Metal", false), position, 1f);
 			return;
 		}
 		Workable workable = component.workable;
@@ -34,7 +34,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 				}
 				if (text2 != null)
 				{
-					SoundEvent.PlayOneShot(text2, position);
+					SoundEvent.PlayOneShot(text2, position, 1f);
 				}
 			}
 		}

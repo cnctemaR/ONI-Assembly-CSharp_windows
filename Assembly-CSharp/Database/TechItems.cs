@@ -43,14 +43,16 @@ namespace Database
 
 		public bool IsTechItemComplete(string id)
 		{
+			bool flag = true;
 			foreach (TechItem techItem in this.resources)
 			{
 				if (techItem.Id == id)
 				{
-					return techItem.IsComplete();
+					flag = techItem.IsComplete();
+					break;
 				}
 			}
-			return true;
+			return flag;
 		}
 
 		public Tech LookupGroupForID(string itemID)

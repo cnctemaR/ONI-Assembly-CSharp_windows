@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -45,6 +46,11 @@ namespace Database
 				string text = reader.ReadKleiString();
 				this.skillsToMaster.Add(Db.Get().Skills.Get(text));
 			}
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.SKILL_BRANCH;
 		}
 
 		private List<Skill> skillsToMaster;

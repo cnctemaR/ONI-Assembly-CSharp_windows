@@ -80,9 +80,9 @@ public class OverlayScreen : KMonoBehaviour
 		this.currentModeInfo.mode.Update();
 	}
 
-	public void ToggleOverlay(HashedString newMode)
+	public void ToggleOverlay(HashedString newMode, bool allowSound = true)
 	{
-		bool flag = !(this.currentModeInfo.mode.ViewMode() == newMode);
+		bool flag = allowSound && !(this.currentModeInfo.mode.ViewMode() == newMode);
 		if (newMode != OverlayModes.None.ID)
 		{
 			ManagementMenu.Instance.CloseAll();

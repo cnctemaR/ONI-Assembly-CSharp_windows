@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
 
 namespace Database
 {
@@ -30,6 +31,16 @@ namespace Database
 		public override void Serialize(BinaryWriter writer)
 		{
 			writer.Write(this.kelvinToCoolTo);
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			float num = float.MaxValue;
+			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+			{
+				num = Math.Min(num, buildingComplete.GetComponent<PrimaryElement>().Temperature);
+			}
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.KELVIN_COOLING, num);
 		}
 
 		private int kelvinToCoolTo;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation.Data>, IKComponentManager
@@ -23,10 +24,35 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 			{
 				this.OnSolidChanged(h);
 			};
-			Vector2I vector2I = Grid.CellToXY(num);
-			int xoffset = BuildingDef.GetXOffset(def.WidthInCells);
-			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.solidChangedLayer, action);
-			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.objectLayers[1], action);
+			Rotatable component = data.go.GetComponent<Rotatable>();
+			Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
+			int num2 = -(def.WidthInCells - 1) / 2;
+			int num3 = def.WidthInCells / 2;
+			List<int> list = new List<int>();
+			for (int i = num2; i <= num3; i++)
+			{
+				CellOffset cellOffset = new CellOffset(i, -1);
+				if (def.BuildLocationRule == BuildLocationRule.OnWall)
+				{
+					cellOffset = new CellOffset(i - 1, 0);
+				}
+				else if (def.BuildLocationRule == BuildLocationRule.OnCeiling || def.BuildLocationRule == BuildLocationRule.InCorner)
+				{
+					cellOffset = new CellOffset(i, def.HeightInCells);
+				}
+				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+				int num4 = Grid.OffsetCell(num, rotatedCellOffset);
+				list.Add(num4);
+			}
+			Vector2I vector2I = Grid.CellToXY(list[0]);
+			Vector2I vector2I2 = Grid.CellToXY(list[list.Count - 1]);
+			float num5 = (float)((vector2I.x <= vector2I2.x) ? vector2I.x : vector2I2.x);
+			float num6 = (float)((vector2I.x >= vector2I2.x) ? vector2I.x : vector2I2.x);
+			float num7 = (float)((vector2I.y <= vector2I2.y) ? vector2I.y : vector2I2.y);
+			float num8 = (float)((vector2I.y >= vector2I2.y) ? vector2I.y : vector2I2.y);
+			Rect rect = Rect.MinMaxRect(num5, num7, num6, num8);
+			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.solidChangedLayer, action);
+			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, (int)rect.x, (int)rect.y, (int)rect.width + 1, (int)rect.height + 1, GameScenePartitioner.Instance.objectLayers[1], action);
 			base.SetData(h, data);
 			this.OnSolidChanged(h);
 		}

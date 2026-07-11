@@ -535,6 +535,11 @@ public static class Localization
 		});
 	}
 
+	public static Localization.Locale GetLocale()
+	{
+		return Localization.sLocale;
+	}
+
 	private static string GetFontParam(string line)
 	{
 		string text = null;

@@ -42,7 +42,11 @@ public class Timelapser : KMonoBehaviour
 
 	private void RefreshRenderTextureSize(object data = null)
 	{
-		if (this.timelapseUserEnabled)
+		if (this.previewScreenshot)
+		{
+			this.bufferRenderTexture = new RenderTexture(this.previewScreenshotResolution.x, this.previewScreenshotResolution.y, 32, RenderTextureFormat.ARGB32);
+		}
+		else if (this.timelapseUserEnabled)
 		{
 			this.bufferRenderTexture = new RenderTexture(SaveGame.Instance.TimelapseResolution.x, SaveGame.Instance.TimelapseResolution.y, 32, RenderTextureFormat.ARGB32);
 		}
@@ -115,17 +119,24 @@ public class Timelapser : KMonoBehaviour
 					this.freezeCamera.gameObject.GetComponent<FillRenderTargetEffect>().SetFillTexture(this.freezeTexture);
 					this.freezeCamera.enabled = true;
 					this.screenshotActive = true;
+					this.RefreshRenderTextureSize(null);
 					this.SetPostionAndOrtho();
 					DebugHandler.SetHideUI(true);
+					this.activeOverlay = OverlayScreen.Instance.mode;
+					OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID, false);
 				}
 				else
 				{
+					this.RefreshRenderTextureSize(null);
 					this.RenderAndPrint();
 					this.freezeCamera.enabled = false;
 					DebugHandler.SetHideUI(false);
 					this.screenshotPending = false;
+					this.previewScreenshot = false;
 					this.screenshotActive = false;
 					this.debugScreenShot = false;
+					this.previewSaveGamePath = string.Empty;
+					OverlayScreen.Instance.ToggleOverlay(this.activeOverlay, false);
 				}
 			}
 		}
@@ -134,8 +145,14 @@ public class Timelapser : KMonoBehaviour
 
 	public void SaveScreenshot()
 	{
-		global::Debug.Log("Screenshot!");
 		this.screenshotPending = true;
+	}
+
+	public void SaveColonyPreview(string saveFileName)
+	{
+		this.previewSaveGamePath = saveFileName;
+		this.previewScreenshot = true;
+		this.SaveScreenshot();
 	}
 
 	private void SetPostionAndOrtho()
@@ -205,41 +222,57 @@ public class Timelapser : KMonoBehaviour
 			Directory.CreateDirectory(text);
 		}
 		string text2 = RetireColonyUtility.StripInvalidCharacters(SaveGame.Instance.BaseName);
-		string text3 = Path.Combine(text, text2);
-		if (!Directory.Exists(text3))
+		if (!this.previewScreenshot)
 		{
-			Directory.CreateDirectory(text3);
-		}
-		string text4 = Path.Combine(text3, text2);
-		DebugUtil.LogArgs(new object[] { "Saving screenshot to", text4 });
-		string text5 = "0000.##";
-		text4 = text4 + "_cycle_" + GameClock.Instance.GetCycle().ToString(text5);
-		if (this.debugScreenShot)
-		{
-			string text6 = text4;
-			text4 = string.Concat(new object[]
+			string text3 = Path.Combine(text, text2);
+			if (!Directory.Exists(text3))
 			{
-				text6,
-				"_",
-				global::System.DateTime.Now.Day,
-				"-",
-				global::System.DateTime.Now.Month,
-				"_",
-				global::System.DateTime.Now.Hour,
-				"-",
-				global::System.DateTime.Now.Minute,
-				"-",
-				global::System.DateTime.Now.Second
-			});
+				Directory.CreateDirectory(text3);
+			}
+			string text4 = Path.Combine(text3, text2);
+			DebugUtil.LogArgs(new object[] { "Saving screenshot to", text4 });
+			string text5 = "0000.##";
+			text4 = text4 + "_cycle_" + GameClock.Instance.GetCycle().ToString(text5);
+			if (this.debugScreenShot)
+			{
+				string text6 = text4;
+				text4 = string.Concat(new object[]
+				{
+					text6,
+					"_",
+					global::System.DateTime.Now.Day,
+					"-",
+					global::System.DateTime.Now.Month,
+					"_",
+					global::System.DateTime.Now.Hour,
+					"-",
+					global::System.DateTime.Now.Minute,
+					"-",
+					global::System.DateTime.Now.Second
+				});
+			}
+			File.WriteAllBytes(text4 + ".png", array);
 		}
-		File.WriteAllBytes(text4 + ".png", array);
+		else
+		{
+			string text7 = this.previewSaveGamePath;
+			text7 = Path.ChangeExtension(text7, ".png");
+			DebugUtil.LogArgs(new object[] { "Saving screenshot to", text7 });
+			File.WriteAllBytes(text7, array);
+		}
 	}
 
 	private bool screenshotActive;
 
 	private bool screenshotPending;
 
+	private bool previewScreenshot;
+
+	private string previewSaveGamePath = string.Empty;
+
 	private bool screenshotToday = true;
+
+	private HashedString activeOverlay;
 
 	private Camera freezeCamera;
 
@@ -250,6 +283,8 @@ public class Timelapser : KMonoBehaviour
 	private float camSize;
 
 	private bool debugScreenShot;
+
+	private Vector2Int previewScreenshotResolution = new Vector2Int(Grid.WidthInCells * 2, Grid.HeightInCells * 2);
 
 	private const int DEFAULT_SCREENSHOT_INTERVAL = 10;
 

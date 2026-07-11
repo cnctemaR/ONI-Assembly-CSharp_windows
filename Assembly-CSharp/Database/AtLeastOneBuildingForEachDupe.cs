@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -20,6 +21,10 @@ namespace Database
 				if (this.validBuildingTypes.Contains(buildingComplete.prefabid.PrefabTag))
 				{
 					num++;
+					if (buildingComplete.prefabid.PrefabTag == "FlushToilet" || buildingComplete.prefabid.PrefabTag == "Outhouse")
+					{
+						return true;
+					}
 				}
 			}
 			return Components.LiveMinionIdentities.Items.Count > 0 && num >= Components.LiveMinionIdentities.Items.Count;
@@ -48,6 +53,27 @@ namespace Database
 			{
 				writer.WriteKleiString(tag.ToString());
 			}
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			if (this.validBuildingTypes.Contains("FlushToilet"))
+			{
+				return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILT_ONE_TOILET;
+			}
+			if (complete)
+			{
+				return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILT_ONE_BED_PER_DUPLICANT;
+			}
+			int num = 0;
+			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
+			{
+				if (this.validBuildingTypes.Contains(buildingComplete.prefabid.PrefabTag))
+				{
+					num++;
+				}
+			}
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILING_BEDS, (!complete) ? num : Components.LiveMinionIdentities.Items.Count, Components.LiveMinionIdentities.Items.Count);
 		}
 
 		private List<Tag> validBuildingTypes = new List<Tag>();

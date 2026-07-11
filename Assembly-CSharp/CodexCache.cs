@@ -439,7 +439,14 @@ public static class CodexCache
 				});
 			}
 		}
-		list.Sort((CodexEntry x, CodexEntry y) => x.title.CompareTo(y.title));
+		foreach (CodexEntry codexEntry2 in list)
+		{
+			if (string.IsNullOrEmpty(codexEntry2.sortString))
+			{
+				codexEntry2.sortString = Strings.Get(codexEntry2.title);
+			}
+		}
+		list.Sort((CodexEntry x, CodexEntry y) => x.sortString.CompareTo(y.sortString));
 		return list;
 	}
 

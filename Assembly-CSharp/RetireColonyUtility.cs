@@ -26,26 +26,8 @@ public static class RetireColonyUtility
 			Directory.CreateDirectory(text3);
 		}
 		string text4 = Path.Combine(text3, text2 + ".json");
-		MinionAssignablesProxy[] array = new MinionAssignablesProxy[Components.MinionAssignablesProxy.Count];
-		for (int i = 0; i < array.Length; i++)
-		{
-			array[i] = Components.MinionAssignablesProxy[i];
-		}
-		List<string> list = new List<string>();
-		foreach (KeyValuePair<string, ColonyAchievementStatus> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievements)
-		{
-			if (keyValuePair.Value.success)
-			{
-				list.Add(keyValuePair.Key);
-			}
-		}
-		BuildingComplete[] array2 = new BuildingComplete[Components.BuildingCompletes.Count];
-		for (int j = 0; j < array2.Length; j++)
-		{
-			array2[j] = Components.BuildingCompletes[j];
-		}
-		RetiredColonyData retiredColonyData = new RetiredColonyData(SaveGame.Instance.BaseName, GameClock.Instance.GetCycle(), global::System.DateTime.Now.ToShortDateString(), list.ToArray(), array, array2);
-		string text5 = JsonConvert.SerializeObject(retiredColonyData);
+		RetiredColonyData currentColonyRetiredColonyData = RetireColonyUtility.GetCurrentColonyRetiredColonyData();
+		string text5 = JsonConvert.SerializeObject(currentColonyRetiredColonyData);
 		bool flag = false;
 		int num = 0;
 		while (!flag && num < 5)
@@ -74,7 +56,227 @@ public static class RetireColonyUtility
 		return flag;
 	}
 
-	public static RetiredColonyData[] LoadRetiredColonies()
+	public static RetiredColonyData GetCurrentColonyRetiredColonyData()
+	{
+		MinionAssignablesProxy[] array = new MinionAssignablesProxy[Components.MinionAssignablesProxy.Count];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i] = Components.MinionAssignablesProxy[i];
+		}
+		List<string> list = new List<string>();
+		foreach (KeyValuePair<string, ColonyAchievementStatus> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievements)
+		{
+			if (keyValuePair.Value.success)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		BuildingComplete[] array2 = new BuildingComplete[Components.BuildingCompletes.Count];
+		for (int j = 0; j < array2.Length; j++)
+		{
+			array2[j] = Components.BuildingCompletes[j];
+		}
+		return new RetiredColonyData(SaveGame.Instance.BaseName, GameClock.Instance.GetCycle(), global::System.DateTime.Now.ToShortDateString(), list.ToArray(), array, array2);
+	}
+
+	private static RetiredColonyData LoadRetiredColony(string file, bool skipStats, Encoding enc)
+	{
+		RetiredColonyData retiredColonyData = new RetiredColonyData();
+		using (FileStream fileStream = File.Open(file, FileMode.Open))
+		{
+			using (StreamReader streamReader = new StreamReader(fileStream, enc))
+			{
+				using (JsonReader jsonReader = new JsonTextReader(streamReader))
+				{
+					string text = string.Empty;
+					List<string> list = new List<string>();
+					List<MinionAssignablesProxy> list2 = new List<MinionAssignablesProxy>();
+					List<Tuple<string, int>> list3 = new List<Tuple<string, int>>();
+					List<RetiredColonyData.RetiredDuplicantData> list4 = new List<RetiredColonyData.RetiredDuplicantData>();
+					List<RetiredColonyData.RetiredColonyStatistic> list5 = new List<RetiredColonyData.RetiredColonyStatistic>();
+					while (jsonReader.Read())
+					{
+						JsonToken jsonToken = jsonReader.TokenType;
+						if (jsonToken == JsonToken.PropertyName)
+						{
+							text = jsonReader.Value.ToString();
+						}
+						if (jsonToken == JsonToken.String && text == "colonyName")
+						{
+							retiredColonyData.colonyName = jsonReader.Value.ToString();
+						}
+						if (jsonToken == JsonToken.String && text == "date")
+						{
+							retiredColonyData.date = jsonReader.Value.ToString();
+						}
+						if (jsonToken == JsonToken.Integer && text == "cycleCount")
+						{
+							retiredColonyData.cycleCount = int.Parse(jsonReader.Value.ToString());
+						}
+						if (jsonToken == JsonToken.String && text == "achievements")
+						{
+							list.Add(jsonReader.Value.ToString());
+						}
+						if (jsonToken == JsonToken.StartObject && text == "Duplicants")
+						{
+							string text2 = null;
+							RetiredColonyData.RetiredDuplicantData retiredDuplicantData = new RetiredColonyData.RetiredDuplicantData();
+							retiredDuplicantData.accessories = new Dictionary<string, string>();
+							while (jsonReader.Read())
+							{
+								jsonToken = jsonReader.TokenType;
+								if (jsonToken == JsonToken.EndObject)
+								{
+									break;
+								}
+								if (jsonToken == JsonToken.PropertyName)
+								{
+									text2 = jsonReader.Value.ToString();
+								}
+								if (text2 == "name" && jsonToken == JsonToken.String)
+								{
+									retiredDuplicantData.name = jsonReader.Value.ToString();
+								}
+								if (text2 == "age" && jsonToken == JsonToken.Integer)
+								{
+									retiredDuplicantData.age = int.Parse(jsonReader.Value.ToString());
+								}
+								if (text2 == "skillPointsGained" && jsonToken == JsonToken.Integer)
+								{
+									retiredDuplicantData.skillPointsGained = int.Parse(jsonReader.Value.ToString());
+								}
+								if (text2 == "accessories")
+								{
+									string text3 = null;
+									while (jsonReader.Read())
+									{
+										jsonToken = jsonReader.TokenType;
+										if (jsonToken == JsonToken.EndObject)
+										{
+											break;
+										}
+										if (jsonToken == JsonToken.PropertyName)
+										{
+											text3 = jsonReader.Value.ToString();
+										}
+										if (text3 != null && jsonReader.Value != null && jsonToken == JsonToken.String)
+										{
+											string text4 = jsonReader.Value.ToString();
+											retiredDuplicantData.accessories.Add(text3, text4);
+										}
+									}
+								}
+							}
+							list4.Add(retiredDuplicantData);
+						}
+						if (jsonToken == JsonToken.StartObject && text == "buildings")
+						{
+							string text5 = null;
+							string text6 = null;
+							int num = 0;
+							while (jsonReader.Read())
+							{
+								jsonToken = jsonReader.TokenType;
+								if (jsonToken == JsonToken.EndObject)
+								{
+									break;
+								}
+								if (jsonToken == JsonToken.PropertyName)
+								{
+									text5 = jsonReader.Value.ToString();
+								}
+								if (text5 == "first" && jsonToken == JsonToken.String)
+								{
+									text6 = jsonReader.Value.ToString();
+								}
+								if (text5 == "second" && jsonToken == JsonToken.Integer)
+								{
+									num = int.Parse(jsonReader.Value.ToString());
+								}
+							}
+							Tuple<string, int> tuple = new Tuple<string, int>(text6, num);
+							list3.Add(tuple);
+						}
+						if (jsonToken == JsonToken.StartObject && text == "Stats")
+						{
+							if (skipStats)
+							{
+								break;
+							}
+							string text7 = null;
+							RetiredColonyData.RetiredColonyStatistic retiredColonyStatistic = new RetiredColonyData.RetiredColonyStatistic();
+							List<Tuple<float, float>> list6 = new List<Tuple<float, float>>();
+							while (jsonReader.Read())
+							{
+								jsonToken = jsonReader.TokenType;
+								if (jsonToken == JsonToken.EndObject)
+								{
+									break;
+								}
+								if (jsonToken == JsonToken.PropertyName)
+								{
+									text7 = jsonReader.Value.ToString();
+								}
+								if (text7 == "id" && jsonToken == JsonToken.String)
+								{
+									retiredColonyStatistic.id = jsonReader.Value.ToString();
+								}
+								if (text7 == "name" && jsonToken == JsonToken.String)
+								{
+									retiredColonyStatistic.name = jsonReader.Value.ToString();
+								}
+								if (text7 == "nameX" && jsonToken == JsonToken.String)
+								{
+									retiredColonyStatistic.nameX = jsonReader.Value.ToString();
+								}
+								if (text7 == "nameY" && jsonToken == JsonToken.String)
+								{
+									retiredColonyStatistic.nameY = jsonReader.Value.ToString();
+								}
+								if (text7 == "value" && jsonToken == JsonToken.StartObject)
+								{
+									string text8 = null;
+									float num2 = 0f;
+									float num3 = 0f;
+									while (jsonReader.Read())
+									{
+										jsonToken = jsonReader.TokenType;
+										if (jsonToken == JsonToken.EndObject)
+										{
+											break;
+										}
+										if (jsonToken == JsonToken.PropertyName)
+										{
+											text8 = jsonReader.Value.ToString();
+										}
+										if (text8 == "first" && (jsonToken == JsonToken.Float || jsonToken == JsonToken.Integer))
+										{
+											num2 = float.Parse(jsonReader.Value.ToString());
+										}
+										if (text8 == "second" && (jsonToken == JsonToken.Float || jsonToken == JsonToken.Integer))
+										{
+											num3 = float.Parse(jsonReader.Value.ToString());
+										}
+									}
+									Tuple<float, float> tuple2 = new Tuple<float, float>(num2, num3);
+									list6.Add(tuple2);
+								}
+							}
+							retiredColonyStatistic.value = list6.ToArray();
+							list5.Add(retiredColonyStatistic);
+						}
+					}
+					retiredColonyData.Duplicants = list4.ToArray();
+					retiredColonyData.Stats = list5.ToArray();
+					retiredColonyData.achievements = list.ToArray();
+					retiredColonyData.buildings = list3;
+				}
+			}
+		}
+		return retiredColonyData;
+	}
+
+	public static RetiredColonyData[] LoadRetiredColonies(bool skipStats = false)
 	{
 		List<RetiredColonyData> list = new List<RetiredColonyData>();
 		if (!Directory.Exists(Util.RootFolder()))
@@ -98,8 +300,7 @@ public static class RetireColonyUtility
 						Encoding encoding = RetireColonyUtility.attempt_encodings[k];
 						try
 						{
-							string text4 = File.ReadAllText(text3, encoding);
-							RetiredColonyData retiredColonyData = JsonConvert.DeserializeObject<RetiredColonyData>(text4);
+							RetiredColonyData retiredColonyData = RetireColonyUtility.LoadRetiredColony(text3, skipStats, encoding);
 							if (retiredColonyData != null)
 							{
 								if (retiredColonyData.colonyName == null)
@@ -126,6 +327,28 @@ public static class RetireColonyUtility
 		return list.ToArray();
 	}
 
+	public static string[] LoadColonySlideshowFiles(string colonyName)
+	{
+		string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
+		string text2 = Path.Combine(Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName()), text);
+		List<string> list = new List<string>();
+		if (Directory.Exists(text2))
+		{
+			foreach (string text3 in Directory.GetFiles(text2))
+			{
+				if (text3.EndsWith(".png"))
+				{
+					list.Add(text3);
+				}
+			}
+		}
+		else
+		{
+			global::Debug.LogWarningFormat("LoadColonySlideshow path does not exist or is not directory [{0}]", new object[] { text2 });
+		}
+		return list.ToArray();
+	}
+
 	public static Sprite[] LoadColonySlideshow(string colonyName)
 	{
 		string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
@@ -140,7 +363,7 @@ public static class RetireColonyUtility
 					Texture2D texture2D = new Texture2D(512, 768);
 					texture2D.filterMode = FilterMode.Point;
 					texture2D.LoadImage(File.ReadAllBytes(text3));
-					list.Add(Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f)));
+					list.Add(Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f), 100f, 0U, SpriteMeshType.FullRect));
 				}
 			}
 		}
@@ -151,7 +374,7 @@ public static class RetireColonyUtility
 		return list.ToArray();
 	}
 
-	public static Sprite LoadColonyPreview(string colonyName)
+	public static Sprite LoadRetiredColonyPreview(string colonyName)
 	{
 		string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
 		string text2 = Path.Combine(Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName()), text);
@@ -174,9 +397,30 @@ public static class RetireColonyUtility
 		{
 			Texture2D texture2D = new Texture2D(512, 768);
 			texture2D.LoadImage(File.ReadAllBytes(list[list.Count - 1]));
-			return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f));
+			return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f), 100f, 0U, SpriteMeshType.FullRect);
 		}
 		return null;
+	}
+
+	public static Sprite LoadColonyPreview(string colonyName)
+	{
+		string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
+		string text2 = text + ".png";
+		string text3 = Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), text2);
+		if (File.Exists(text3))
+		{
+			try
+			{
+				Texture2D texture2D = new Texture2D(512, 768);
+				texture2D.LoadImage(File.ReadAllBytes(text3));
+				return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f), 100f, 0U, SpriteMeshType.FullRect);
+			}
+			catch (Exception ex)
+			{
+				global::Debug.Log("failed to load preview image!? " + ex);
+			}
+		}
+		return RetireColonyUtility.LoadRetiredColonyPreview(colonyName);
 	}
 
 	public static string StripInvalidCharacters(string source)

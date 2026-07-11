@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
 
 namespace Database
 {
@@ -28,6 +29,11 @@ namespace Database
 		public override void Deserialize(IReader reader)
 		{
 			this.surplusAmount = reader.ReadDouble();
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CALORIE_SURPLUS, GameUtil.GetFormattedCalories((!complete) ? RationTracker.Get().CountRations(null, true) : ((float)this.surplusAmount), GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories((float)this.surplusAmount, GameUtil.TimeSlice.None, true));
 		}
 
 		private double surplusAmount;

@@ -66,6 +66,11 @@ namespace Database
 			this.minimumMorale = reader.ReadInt32();
 		}
 
-		private int minimumMorale;
+		public override string GetProgress(bool complete)
+		{
+			return this.Description();
+		}
+
+		public int minimumMorale;
 	}
 }

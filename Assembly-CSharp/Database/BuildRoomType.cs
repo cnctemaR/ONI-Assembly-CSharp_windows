@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -32,6 +33,11 @@ namespace Database
 		{
 			string text = reader.ReadKleiString();
 			this.roomType = Db.Get().RoomTypes.Get(text);
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.BUILT_A_ROOM, this.roomType.Name);
 		}
 
 		private RoomType roomType;

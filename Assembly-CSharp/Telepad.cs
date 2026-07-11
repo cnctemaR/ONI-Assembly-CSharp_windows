@@ -24,6 +24,11 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 				")"
 			}));
 		}
+		if (GameUtil.GetTelepad() != null)
+		{
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, string.Format(BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.UNIQUE_POPTEXT, this.GetProperName()), null, base.transform.GetPosition(), 1.5f, false, false);
+			Util.KDestroyGameObject(base.gameObject);
+		}
 	}
 
 	protected override void OnSpawn()

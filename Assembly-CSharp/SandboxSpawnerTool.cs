@@ -31,6 +31,11 @@ public class SandboxSpawnerTool : InterfaceTool
 		{
 			this.SpawnMinion();
 		}
+		else if (SandboxToolParameterMenu.instance.settings.Entity.GetComponent<Building>() != null)
+		{
+			BuildingDef def = SandboxToolParameterMenu.instance.settings.Entity.GetComponent<Building>().Def;
+			def.Build(cell, Orientation.Neutral, null, def.DefaultElements(), 298.15f, true);
+		}
 		else
 		{
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(SandboxToolParameterMenu.instance.settings.Entity.PrefabTag), Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0);

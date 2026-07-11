@@ -18,16 +18,6 @@ public class DragTool : InterfaceTool
 		return this.mode;
 	}
 
-	public static void SetLayerMask(int mask)
-	{
-		DragTool.layerMask = mask;
-	}
-
-	public static void ClearLayerMask()
-	{
-		DragTool.layerMask = DragTool.defaultLayerMask;
-	}
-
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
@@ -49,8 +39,6 @@ public class DragTool : InterfaceTool
 	protected override void OnPrefabInit()
 	{
 		Game.Instance.Subscribe(1634669191, new Action<object>(this.OnTutorialOpened));
-		DragTool.defaultLayerMask = 1 | LayerMask.GetMask(new string[] { "World", "Pickupable", "Place", "PlaceWithDepth", "BlockSelection", "Construction" });
-		DragTool.layerMask = DragTool.defaultLayerMask;
 		base.OnPrefabInit();
 		if (this.visualizer != null)
 		{
@@ -460,8 +448,6 @@ public class DragTool : InterfaceTool
 
 	protected bool interceptNumberKeysForPriority;
 
-	private new static int defaultLayerMask;
-
 	private bool dragging;
 
 	private Vector3 previousCursorPos;
@@ -473,8 +459,6 @@ public class DragTool : InterfaceTool
 	protected bool canChangeDragAxis = true;
 
 	protected Vector3 downPos;
-
-	protected new static int layerMask;
 
 	private enum DragAxis
 	{

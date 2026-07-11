@@ -13,7 +13,6 @@ public class ParkSign : KMonoBehaviour
 	private void TriggerRoomEffects(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
 		if (roomOfGameObject != null)
 		{

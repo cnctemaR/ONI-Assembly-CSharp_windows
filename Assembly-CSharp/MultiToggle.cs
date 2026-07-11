@@ -193,6 +193,10 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	{
 		if (this.clickHeldDown)
 		{
+			if (this.play_sound_on_release && this.states[this.state].on_release_override_sound_path != string.Empty)
+			{
+				KFMOD.PlayOneShot(GlobalAssets.GetSound(this.states[this.state].on_release_override_sound_path, false));
+			}
 			this.clickHeldDown = false;
 			if (this.onStopHold != null)
 			{
@@ -207,6 +211,8 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	public ToggleState[] states;
 
 	public bool play_sound_on_click = true;
+
+	public bool play_sound_on_release;
 
 	public Image toggle_image;
 

@@ -34,12 +34,15 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 			this.tracker.Clear();
 			this.tracker = null;
 		}
-		for (int i = 0; i < this.workables.Length; i++)
+		if (this.workables != null)
 		{
-			if (this.workables[i])
+			for (int i = 0; i < this.workables.Length; i++)
 			{
-				Util.KDestroyGameObject(this.workables[i]);
-				this.workables[i] = null;
+				if (this.workables[i])
+				{
+					Util.KDestroyGameObject(this.workables[i]);
+					this.workables[i] = null;
+				}
 			}
 		}
 		base.OnCleanUp();

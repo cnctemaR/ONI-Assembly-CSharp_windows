@@ -52,7 +52,5 @@ public class SquirrelConfig : IEntityConfig
 
 	private static float MIN_POOP_SIZE_KG = 40f;
 
-	private static float MIN_POOP_SIZE_CALORIES = SquirrelConfig.CALORIES_PER_DAY_OF_PLANT_EATEN * SquirrelConfig.MIN_POOP_SIZE_KG / SquirrelConfig.KG_POOP_PER_DAY_OF_PLANT;
-
 	public static int EGG_SORT_ORDER = 0;
 }

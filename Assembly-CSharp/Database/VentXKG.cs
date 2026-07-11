@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
 
 namespace Database
 {
@@ -43,6 +44,28 @@ namespace Database
 		{
 			this.element = (SimHashes)reader.ReadInt32();
 			this.kilogramsToVent = reader.ReadSingle();
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			float num = 0f;
+			IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(ConduitType.Gas);
+			foreach (UtilityNetwork utilityNetwork in networkManager.GetNetworks())
+			{
+				FlowUtilityNetwork flowUtilityNetwork = utilityNetwork as FlowUtilityNetwork;
+				if (flowUtilityNetwork != null)
+				{
+					foreach (FlowUtilityNetwork.IItem item in flowUtilityNetwork.sinks)
+					{
+						Vent component = item.GameObject.GetComponent<Vent>();
+						if (component != null)
+						{
+							num += component.GetVentedMass(this.element);
+						}
+					}
+				}
+			}
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.VENTED_MASS, GameUtil.GetFormattedMass((!complete) ? num : this.kilogramsToVent, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(this.kilogramsToVent, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
 		}
 
 		private SimHashes element;

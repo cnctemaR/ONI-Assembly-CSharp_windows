@@ -4,59 +4,8 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicCritterCountSensor : Switch, ISaveLoadable, ISim200ms, IIntSliderControl, ISliderControl
+public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
-	public string SliderTitleKey
-	{
-		get
-		{
-			return "STRINGS.UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TITLE";
-		}
-	}
-
-	public string SliderUnits
-	{
-		get
-		{
-			return UI.UNITSUFFIXES.CRITTERS;
-		}
-	}
-
-	public int SliderDecimalPlaces(int index)
-	{
-		return 0;
-	}
-
-	public float GetSliderMin(int index)
-	{
-		return 0f;
-	}
-
-	public float GetSliderMax(int index)
-	{
-		return 64f;
-	}
-
-	public float GetSliderValue(int index)
-	{
-		return (float)this.countThreshold;
-	}
-
-	public void SetSliderValue(float value, int index)
-	{
-		this.countThreshold = Mathf.RoundToInt(value);
-	}
-
-	public string GetSliderTooltipKey(int index)
-	{
-		return "STRINGS.UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TOOLTIP";
-	}
-
-	string ISliderControl.GetSliderTooltip()
-	{
-		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TOOLTIP"), this.countThreshold);
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -71,6 +20,7 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, ISim200ms, IIntSli
 		if (component != null)
 		{
 			this.countThreshold = component.countThreshold;
+			this.activateOnGreaterThan = component.activateOnGreaterThan;
 		}
 	}
 
@@ -88,12 +38,14 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, ISim200ms, IIntSli
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
 		if (roomOfGameObject != null)
 		{
-			int num = roomOfGameObject.cavity.creatures.Count;
+			this.currentCount = roomOfGameObject.cavity.creatures.Count;
 			if (this.countEggs)
 			{
-				num += roomOfGameObject.cavity.eggs.Count;
+				this.currentCount += roomOfGameObject.cavity.eggs.Count;
 			}
-			this.SetState(num > this.countThreshold);
+			this.SetState(this.currentCount > this.countThreshold);
+			bool flag = ((!this.activateOnGreaterThan) ? (this.currentCount < this.countThreshold) : (this.currentCount > this.countThreshold));
+			this.SetState(flag);
 			if (this.selectable.HasStatusItem(Db.Get().BuildingStatusItems.NotInAnyRoom))
 			{
 				this.selectable.RemoveStatusItem(this.roomStatusGUID, false);
@@ -138,12 +90,151 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, ISim200ms, IIntSli
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
 	}
 
+	public float Threshold
+	{
+		get
+		{
+			return (float)this.countThreshold;
+		}
+		set
+		{
+			this.countThreshold = (int)value;
+		}
+	}
+
+	public bool ActivateAboveThreshold
+	{
+		get
+		{
+			return this.activateOnGreaterThan;
+		}
+		set
+		{
+			this.activateOnGreaterThan = value;
+		}
+	}
+
+	public float CurrentValue
+	{
+		get
+		{
+			return (float)this.currentCount;
+		}
+	}
+
+	public float RangeMin
+	{
+		get
+		{
+			return 0f;
+		}
+	}
+
+	public float RangeMax
+	{
+		get
+		{
+			return 64f;
+		}
+	}
+
+	public float GetRangeMinInputField()
+	{
+		return this.RangeMin;
+	}
+
+	public float GetRangeMaxInputField()
+	{
+		return this.RangeMax;
+	}
+
+	public LocString Title
+	{
+		get
+		{
+			return UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TITLE;
+		}
+	}
+
+	public LocString ThresholdValueName
+	{
+		get
+		{
+			return UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.VALUE_NAME;
+		}
+	}
+
+	public string AboveToolTip
+	{
+		get
+		{
+			return UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TOOLTIP_ABOVE;
+		}
+	}
+
+	public string BelowToolTip
+	{
+		get
+		{
+			return UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TOOLTIP_BELOW;
+		}
+	}
+
+	public string Format(float value, bool units)
+	{
+		return value.ToString();
+	}
+
+	public float ProcessedSliderValue(float input)
+	{
+		return Mathf.Round(input);
+	}
+
+	public float ProcessedInputValue(float input)
+	{
+		return Mathf.Round(input);
+	}
+
+	public LocString ThresholdValueUnits()
+	{
+		return string.Empty;
+	}
+
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.SliderBar;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 1;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return NonLinearSlider.GetDefaultRange(this.RangeMax);
+		}
+	}
+
 	private bool wasOn;
 
 	private bool countEggs = true;
 
 	[Serialize]
 	public int countThreshold;
+
+	[Serialize]
+	public bool activateOnGreaterThan = true;
+
+	private int currentCount;
 
 	private KSelectable selectable;
 

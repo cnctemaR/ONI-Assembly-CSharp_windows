@@ -68,6 +68,15 @@ namespace Database
 			}
 		}
 
+		public override string GetProgress(bool completed)
+		{
+			if (this.destinationType == null)
+			{
+				return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.LAUNCHED_ROCKET;
+			}
+			return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.LAUNCHED_ROCKET_TO_WORMHOLE;
+		}
+
 		private SpaceDestinationType destinationType;
 	}
 }

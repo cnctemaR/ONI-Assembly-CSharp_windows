@@ -17,18 +17,21 @@ namespace Database
 			Dictionary<int, int> fetchDupeChoreDeliveries = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().fetchDupeChoreDeliveries;
 			Dictionary<int, int> fetchAutomatedChoreDeliveries = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().fetchAutomatedChoreDeliveries;
 			int num = 0;
-			for (int i = 0; i < GameClock.Instance.GetCycle(); i++)
+			this.currentCycleCount = 0;
+			for (int i = GameClock.Instance.GetCycle() - this.numCycles; i < GameClock.Instance.GetCycle(); i++)
 			{
 				if (fetchAutomatedChoreDeliveries.ContainsKey(i) && (!fetchDupeChoreDeliveries.ContainsKey(i) || (float)fetchDupeChoreDeliveries[i] < (float)fetchAutomatedChoreDeliveries[i] * this.percentage))
 				{
 					num++;
 					if (num >= this.numCycles)
 					{
+						this.currentCycleCount = this.numCycles;
 						return true;
 					}
 				}
 				else
 				{
+					this.currentCycleCount = Math.Max(this.currentCycleCount, num);
 					num = 0;
 				}
 			}
@@ -47,8 +50,12 @@ namespace Database
 			this.percentage = reader.ReadSingle();
 		}
 
-		private float percentage;
+		public float percentage;
 
-		private int numCycles;
+		public int numCycles;
+
+		public int currentCycleCount;
+
+		public bool armsOutPerformingDupesThisCycle;
 	}
 }

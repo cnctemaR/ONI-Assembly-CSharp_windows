@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -47,6 +48,13 @@ namespace Database
 		{
 			writer.WriteKleiString(this.basicBuilding.ToString());
 			writer.WriteKleiString(this.upgradeBuilding.ToString());
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			BuildingDef buildingDef = Assets.GetBuildingDef(this.basicBuilding.Name);
+			BuildingDef buildingDef2 = Assets.GetBuildingDef(this.upgradeBuilding.Name);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.UPGRADE_ALL_BUILDINGS, buildingDef.Name, buildingDef2.Name);
 		}
 
 		private Tag basicBuilding;

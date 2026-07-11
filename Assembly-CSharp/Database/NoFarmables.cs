@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
 
 namespace Database
 {
@@ -34,6 +35,11 @@ namespace Database
 
 		public override void Serialize(BinaryWriter writer)
 		{
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.NO_FARM_TILES;
 		}
 	}
 }

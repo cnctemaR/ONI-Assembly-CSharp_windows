@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -37,6 +38,20 @@ namespace Database
 			string text = reader.ReadKleiString();
 			this.equipmentSlot = Db.Get().AssignableSlots.Get(text);
 			this.numToEquip = reader.ReadInt32();
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			int num = 0;
+			foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
+			{
+				Equipment equipment = minionIdentity.GetEquipment();
+				if (equipment != null && equipment.IsSlotOccupied(this.equipmentSlot))
+				{
+					num++;
+				}
+			}
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CLOTHE_DUPES, (!complete) ? num : this.numToEquip, this.numToEquip);
 		}
 
 		private AssignableSlot equipmentSlot;

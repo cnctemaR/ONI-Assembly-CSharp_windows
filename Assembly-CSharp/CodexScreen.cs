@@ -230,29 +230,40 @@ public class CodexScreen : KScreen
 		string text = string.Empty;
 		GameObject gameObject = this.navigatorContent.gameObject;
 		Dictionary<string, GameObject> dictionary = new Dictionary<string, GameObject>();
+		List<Tuple<string, CodexEntry>> list = new List<Tuple<string, CodexEntry>>();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
-			text = keyValuePair.Value.category;
+			if (string.IsNullOrEmpty(keyValuePair.Value.sortString))
+			{
+				keyValuePair.Value.sortString = UI.StripLinkFormatting(Strings.Get(keyValuePair.Value.title));
+			}
+			list.Add(new Tuple<string, CodexEntry>(keyValuePair.Key, keyValuePair.Value));
+		}
+		list.Sort((Tuple<string, CodexEntry> a, Tuple<string, CodexEntry> b) => string.Compare(a.second.sortString, b.second.sortString));
+		for (int i = 0; i < list.Count; i++)
+		{
+			Tuple<string, CodexEntry> tuple = list[i];
+			text = tuple.second.category;
 			if (text == string.Empty || text == "Root")
 			{
 				text = "Root";
 			}
 			if (!dictionary.ContainsKey(text))
 			{
-				this.NewCategoryHeader(keyValuePair, dictionary);
+				this.NewCategoryHeader(new KeyValuePair<string, CodexEntry>(tuple.first, tuple.second), dictionary);
 			}
 			GameObject gameObject2 = Util.KInstantiateUI(this.prefabNavigatorEntry, dictionary[text], true);
-			string id = keyValuePair.Key;
+			string id = tuple.second.id;
 			gameObject2.GetComponent<KButton>().onClick += delegate
 			{
 				this.ChangeArticle(id, false);
 			};
-			if (string.IsNullOrEmpty(keyValuePair.Value.name))
+			if (string.IsNullOrEmpty(tuple.second.name))
 			{
-				keyValuePair.Value.name = Strings.Get(keyValuePair.Value.title);
+				tuple.second.name = Strings.Get(tuple.second.title);
 			}
-			gameObject2.GetComponentInChildren<LocText>().text = keyValuePair.Value.name;
-			this.entryButtons.Add(keyValuePair.Value, gameObject2);
+			gameObject2.GetComponentInChildren<LocText>().text = tuple.second.name;
+			this.entryButtons.Add(tuple.second, gameObject2);
 		}
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
 		{
@@ -261,15 +272,15 @@ public class CodexScreen : KScreen
 				keyValuePair2.Value.searchOnly = true;
 			}
 		}
-		List<KeyValuePair<string, GameObject>> list = new List<KeyValuePair<string, GameObject>>();
+		List<KeyValuePair<string, GameObject>> list2 = new List<KeyValuePair<string, GameObject>>();
 		foreach (KeyValuePair<string, GameObject> keyValuePair3 in dictionary)
 		{
-			list.Add(keyValuePair3);
+			list2.Add(keyValuePair3);
 		}
-		list.Sort((KeyValuePair<string, GameObject> a, KeyValuePair<string, GameObject> b) => string.Compare(a.Value.name, b.Value.name));
-		for (int i = 0; i < list.Count; i++)
+		list2.Sort((KeyValuePair<string, GameObject> a, KeyValuePair<string, GameObject> b) => string.Compare(a.Value.name, b.Value.name));
+		for (int j = 0; j < list2.Count; j++)
 		{
-			list[i].Value.transform.parent.SetSiblingIndex(i);
+			list2[j].Value.transform.parent.SetSiblingIndex(j);
 		}
 		CodexScreen.SetupCategory(dictionary, "PLANTS");
 		CodexScreen.SetupCategory(dictionary, "CREATURES");

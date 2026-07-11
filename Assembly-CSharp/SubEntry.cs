@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class SubEntry
@@ -19,6 +20,17 @@ public class SubEntry
 			foreach (ContentContainer contentContainer in contentContainers)
 			{
 				contentContainer.lockID = this.lockID;
+			}
+		}
+		if (string.IsNullOrEmpty(this.sortString))
+		{
+			if (!string.IsNullOrEmpty(this.title))
+			{
+				this.sortString = UI.StripLinkFormatting(this.title);
+			}
+			else
+			{
+				this.sortString = UI.StripLinkFormatting(name);
 			}
 		}
 	}
@@ -42,6 +54,8 @@ public class SubEntry
 	public bool disabled { get; set; }
 
 	public string lockID { get; set; }
+
+	public string sortString { get; set; }
 
 	public ContentContainer lockedContentContainer;
 

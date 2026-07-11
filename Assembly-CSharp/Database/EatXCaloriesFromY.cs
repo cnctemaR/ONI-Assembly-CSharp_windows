@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -38,6 +39,11 @@ namespace Database
 			{
 				writer.WriteKleiString(this.fromFoodType[i]);
 			}
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CALORIES_FROM_MEAT, GameUtil.GetFormattedCalories((!complete) ? (RationTracker.Get().GetCaloiresConsumedByFood(this.fromFoodType) / 1000f) : ((float)this.numCalories), GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories((float)this.numCalories, GameUtil.TimeSlice.None, true));
 		}
 
 		private int numCalories;

@@ -68,7 +68,7 @@ namespace Database
 			this.trait = GameTags.Creatures.Wild;
 		}
 
-		private Dictionary<Tag, bool> critterTypesToCheck = new Dictionary<Tag, bool>();
+		public Dictionary<Tag, bool> critterTypesToCheck = new Dictionary<Tag, bool>();
 
 		private Tag trait;
 

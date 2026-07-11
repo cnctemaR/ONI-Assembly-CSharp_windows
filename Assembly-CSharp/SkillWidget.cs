@@ -338,7 +338,7 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHan
 			if (component != null && !component.HasMasteredSkill(this.skillID) && flag)
 			{
 				component.MasterSkill(this.skillID);
-				this.skillsScreen.RefreshSkillWidgets();
+				this.skillsScreen.RefreshAll();
 			}
 		}
 	}

@@ -434,6 +434,10 @@ namespace Database
 				str = str.Replace("{RESEARCH_MENU_KEY}", text14);
 				return str;
 			}));
+			this.NoResearchSelected.notificationClickCallback = delegate(object d)
+			{
+				ManagementMenu.Instance.OpenResearch();
+			};
 			this.NoApplicableResearchSelected = this.CreateStatusItem("NoApplicableResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.NoApplicableResearchSelected.AddNotification(null, null, null, 0f);
 			this.NoApplicableAnalysisSelected = this.CreateStatusItem("NoApplicableAnalysisSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
@@ -445,6 +449,10 @@ namespace Database
 				str = str.Replace("{STARMAP_MENU_KEY}", text15);
 				return str;
 			}));
+			this.NoApplicableAnalysisSelected.notificationClickCallback = delegate(object d)
+			{
+				ManagementMenu.Instance.OpenStarmap();
+			};
 			this.NoResearchOrDestinationSelected = this.CreateStatusItem("NoResearchOrDestinationSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.NoResearchOrDestinationSelected.AddNotification(null, null, null, 0f);
 			this.ValveRequest = this.CreateStatusItem("ValveRequest", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);

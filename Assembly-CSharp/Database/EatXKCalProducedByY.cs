@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -18,7 +19,6 @@ namespace Database
 		{
 			List<string> list = new List<string>();
 			List<ComplexRecipe> recipes = ComplexRecipeManager.Get().recipes;
-			List<ComplexRecipe> list2 = new List<ComplexRecipe>();
 			foreach (ComplexRecipe complexRecipe in recipes)
 			{
 				foreach (Tag tag in this.foodProducers)
@@ -56,6 +56,21 @@ namespace Database
 				this.foodProducers.Add(new Tag(text));
 			}
 			this.numCalories = reader.ReadInt32();
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			string text = string.Empty;
+			for (int i = 0; i < this.foodProducers.Count; i++)
+			{
+				if (i != 0)
+				{
+					text += COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.PREPARED_SEPARATOR;
+				}
+				BuildingDef buildingDef = Assets.GetBuildingDef(this.foodProducers[i].Name);
+				text += buildingDef.Name;
+			}
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CONSUME_ITEM, text);
 		}
 
 		private int numCalories;

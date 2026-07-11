@@ -493,12 +493,12 @@ public class EconomyDetails
 			{
 				foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
 				{
-					EconomyDetails.Resource resource5 = this.CreateResource(recipeElement.material, this.amountResourceType);
+					this.CreateResource(recipeElement.material, this.amountResourceType);
 					transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(recipeElement.material), -recipeElement.amount));
 				}
 				foreach (ComplexRecipe.RecipeElement recipeElement2 in complexRecipe.results)
 				{
-					EconomyDetails.Resource resource5 = this.CreateResource(recipeElement2.material, this.amountResourceType);
+					this.CreateResource(recipeElement2.material, this.amountResourceType);
 					transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(recipeElement2.material), recipeElement2.amount));
 				}
 			}
@@ -515,8 +515,8 @@ public class EconomyDetails
 				{
 					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def3.consumedElements)
 					{
-						EconomyDetails.Resource resource6 = this.CreateResource(consumeInfo.tag, this.massResourceType);
-						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource6, -consumeInfo.massConsumptionRate * transformation.timeInSeconds));
+						EconomyDetails.Resource resource5 = this.CreateResource(consumeInfo.tag, this.massResourceType);
+						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource5, -consumeInfo.massConsumptionRate * transformation.timeInSeconds));
 					}
 				}
 			}
@@ -526,8 +526,8 @@ public class EconomyDetails
 				{
 					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo2 in def4.consumedElements)
 					{
-						EconomyDetails.Resource resource7 = this.CreateResource(consumeInfo2.tag, this.massResourceType);
-						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource7, -consumeInfo2.massConsumptionRate * transformation.timeInSeconds));
+						EconomyDetails.Resource resource6 = this.CreateResource(consumeInfo2.tag, this.massResourceType);
+						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource6, -consumeInfo2.massConsumptionRate * transformation.timeInSeconds));
 					}
 				}
 			}
@@ -570,8 +570,8 @@ public class EconomyDetails
 				Effect effect = component16.CreateEffect();
 				foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 				{
-					EconomyDetails.Resource resource8 = this.CreateResource(new Tag(attributeModifier.AttributeId), this.attributeResourceType);
-					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource8, attributeModifier.Value));
+					EconomyDetails.Resource resource7 = this.CreateResource(new Tag(attributeModifier.AttributeId), this.attributeResourceType);
+					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource7, attributeModifier.Value));
 				}
 			}
 			if (def != null)

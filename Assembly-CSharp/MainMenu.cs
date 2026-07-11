@@ -5,6 +5,7 @@ using Klei;
 using Steamworks;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainMenu : KScreen
 {
@@ -42,9 +43,50 @@ public class MainMenu : KScreen
 		this.CheckPlayerPrefsCorruption();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
-			this.patchNotesScreen.SetActive(true);
+			this.patchNotesScreen.gameObject.SetActive(true);
 		}
 		this.CheckDoubleBoundKeys();
+		this.topLeftAlphaMessage.gameObject.SetActive(false);
+		this.nextUpdateTimer.gameObject.SetActive(false);
+		this.m_motdServerClient = new MotdServerClient();
+		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
+		{
+			if (error == null)
+			{
+				this.topLeftAlphaMessage.gameObject.SetActive(true);
+				this.nextUpdateTimer.gameObject.SetActive(true);
+				this.motdImageHeader.text = response.image_header_text;
+				this.motdNewsHeader.text = response.news_header_text;
+				this.motdNewsBody.text = response.news_body_text;
+				this.patchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
+				this.nextUpdateTimer.UpdateReleaseTimes(response.last_update_time, response.next_update_time, response.update_text_override);
+				if (this.motdImage != null && response.image_texture != null)
+				{
+					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
+					if (this.motdImage.sprite.rect.height != 0f)
+					{
+						AspectRatioFitter component = this.motdImage.gameObject.GetComponent<AspectRatioFitter>();
+						if (component != null)
+						{
+							float num = this.motdImage.sprite.rect.width / this.motdImage.sprite.rect.height;
+							component.aspectRatio = num;
+						}
+						else
+						{
+							global::Debug.LogWarning("Missing AspectRatioFitter on MainMenu motd image.");
+						}
+					}
+					this.motdImageButton.onClick.AddListener(delegate
+					{
+						Application.OpenURL(response.image_link_url);
+					});
+				}
+			}
+			else
+			{
+				global::Debug.LogWarning("Motd Request error: " + error);
+			}
+		});
 		this.lastUpdateTime = Time.unscaledTime;
 		this.activateOnSpawn = true;
 	}
@@ -110,6 +152,21 @@ public class MainMenu : KScreen
 		}
 	}
 
+	private void UnregisterMotdRequest()
+	{
+		if (this.m_motdServerClient != null)
+		{
+			this.m_motdServerClient.UnregisterCallback();
+			this.m_motdServerClient = null;
+		}
+	}
+
+	protected override void OnDeactivate()
+	{
+		base.OnDeactivate();
+		this.UnregisterMotdRequest();
+	}
+
 	public override void ScreenUpdate(bool topLevel)
 	{
 		this.refreshResumeButton = topLevel;
@@ -118,6 +175,7 @@ public class MainMenu : KScreen
 	protected override void OnLoadLevel()
 	{
 		base.OnLoadLevel();
+		this.UnregisterMotdRequest();
 	}
 
 	private void ShowLanguageConfirmation()
@@ -173,7 +231,7 @@ public class MainMenu : KScreen
 	{
 		if (RetiredColonyInfoScreen.Instance == null)
 		{
-			GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
+			Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
 		}
 		RetiredColonyInfoScreen.Instance.Show(true);
 		if (!string.IsNullOrEmpty(colonyID))
@@ -184,6 +242,16 @@ public class MainMenu : KScreen
 			}
 			RetiredColonyInfoScreen.Instance.LoadColony(RetiredColonyInfoScreen.Instance.GetColonyDataByBaseName(colonyID));
 		}
+	}
+
+	public static void ActivateRetiredColoniesScreenFromData(GameObject parent, RetiredColonyData data)
+	{
+		if (RetiredColonyInfoScreen.Instance == null)
+		{
+			Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
+		}
+		RetiredColonyInfoScreen.Instance.Show(true);
+		RetiredColonyInfoScreen.Instance.LoadColony(data);
 	}
 
 	private void SpawnVideoScreen()
@@ -233,7 +301,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 359645U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 361684U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -401,11 +469,11 @@ public class MainMenu : KScreen
 
 	public KButton Button_ResumeGame;
 
-	public GameObject patchNotesScreen;
-
 	public GameObject topLeftAlphaMessage;
 
 	private float lastUpdateTime;
+
+	private MotdServerClient m_motdServerClient;
 
 	private GameObject GameSettingsScreen;
 
@@ -414,6 +482,27 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	private GameObject buttonParent;
+
+	[SerializeField]
+	private LocText motdImageHeader;
+
+	[SerializeField]
+	private Button motdImageButton;
+
+	[SerializeField]
+	private Image motdImage;
+
+	[SerializeField]
+	private LocText motdNewsHeader;
+
+	[SerializeField]
+	private LocText motdNewsBody;
+
+	[SerializeField]
+	private PatchNotesScreen patchNotesScreen;
+
+	[SerializeField]
+	private NextUpdateTimer nextUpdateTimer;
 
 	private static bool HasAutoresumedOnce;
 

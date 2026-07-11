@@ -579,6 +579,11 @@ public static class Util
 		return Util.GetKleiRootPath();
 	}
 
+	public static string CacheFolder()
+	{
+		return Path.Combine(Util.defaultRootFolder, "cache");
+	}
+
 	public static Transform FindTransformRecursive(Transform node, string name)
 	{
 		if (node.name == name)

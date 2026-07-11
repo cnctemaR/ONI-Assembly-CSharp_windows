@@ -23,7 +23,11 @@ public class SkillsScreen : KModalScreen
 		set
 		{
 			this.currentlySelectedMinion = value;
-			this.RefreshSelectedMinion();
+			if (base.IsActive())
+			{
+				this.RefreshSelectedMinion();
+				this.RefreshSkillWidgets();
+			}
 		}
 	}
 
@@ -69,7 +73,7 @@ public class SkillsScreen : KModalScreen
 		base.OnShow(show);
 	}
 
-	private void RefreshAll()
+	public void RefreshAll()
 	{
 		this.dirty = false;
 		this.RefreshSkillWidgets();
@@ -111,7 +115,7 @@ public class SkillsScreen : KModalScreen
 			float num2 = MinionResume.CalculateNextExperienceBar(component2.TotalSkillPointsGained);
 			float num3 = (component2.TotalExperienceGained - num) / (num2 - num);
 			this.EXPCount.text = Mathf.RoundToInt(component2.TotalExperienceGained - num) + " / " + Mathf.RoundToInt(num2 - num);
-			this.duplicantLevelIndicator.text = (component2.TotalSkillPointsGained - component2.SkillsMastered).ToString();
+			this.duplicantLevelIndicator.text = component2.AvailableSkillpoints.ToString();
 			this.experienceProgressFill.fillAmount = num3;
 			this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.SKILLS_SCREEN.EXPERIENCE_TOOLTIP, Mathf.RoundToInt(num2 - num) - Mathf.RoundToInt(component2.TotalExperienceGained - num)));
 			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component2);
@@ -405,7 +409,7 @@ public class SkillsScreen : KModalScreen
 		base.OnKeyDown(e);
 	}
 
-	public void RefreshSkillWidgets()
+	private void RefreshSkillWidgets()
 	{
 		int num = 1;
 		foreach (SkillGroup skillGroup in Db.Get().SkillGroups.resources)

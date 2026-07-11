@@ -5,6 +5,10 @@ using UnityEngine;
 
 public class RetiredColonyData
 {
+	public RetiredColonyData()
+	{
+	}
+
 	public RetiredColonyData(string colonyName, int cycleCount, string date, string[] achievements, MinionAssignablesProxy[] minions, BuildingComplete[] buildingCompletes)
 	{
 		this.colonyName = colonyName;
@@ -256,6 +260,10 @@ public class RetiredColonyData
 
 	public class RetiredColonyStatistic
 	{
+		public RetiredColonyStatistic()
+		{
+		}
+
 		public RetiredColonyStatistic(string id, Tuple<float, float>[] data, string name, string axisNameX, string axisNameY)
 		{
 			this.id = id;

@@ -7,7 +7,6 @@ namespace Klei.AI
 	{
 		public PeriodicEmoteSickness(HashedString kanim, HashedString[] anims, float cooldown)
 		{
-			this.kanim = kanim;
 			this.anims = anims;
 			this.cooldown = cooldown;
 		}
@@ -24,8 +23,6 @@ namespace Klei.AI
 			PeriodicEmoteSickness.StatesInstance statesInstance = (PeriodicEmoteSickness.StatesInstance)instance_data;
 			statesInstance.StopSM("Cured");
 		}
-
-		private HashedString kanim;
 
 		private HashedString[] anims;
 

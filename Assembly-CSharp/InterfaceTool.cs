@@ -46,7 +46,7 @@ public class InterfaceTool : KMonoBehaviour
 	{
 		if (OverlayScreen.Instance != null && this.viewMode != OverlayModes.None.ID)
 		{
-			OverlayScreen.Instance.ToggleOverlay(this.viewMode);
+			OverlayScreen.Instance.ToggleOverlay(this.viewMode, true);
 			InterfaceTool.toolActivatedViewMode = this.viewMode;
 		}
 		this.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
@@ -57,7 +57,7 @@ public class InterfaceTool : KMonoBehaviour
 		this.OnDeactivateTool(new_tool);
 		if ((new_tool == null || new_tool == SelectTool.Instance) && InterfaceTool.toolActivatedViewMode != OverlayModes.None.ID && InterfaceTool.toolActivatedViewMode == SimDebugView.Instance.GetMode())
 		{
-			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
+			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID, true);
 			InterfaceTool.toolActivatedViewMode = OverlayModes.None.ID;
 		}
 	}
@@ -434,8 +434,6 @@ public class InterfaceTool : KMonoBehaviour
 	private KSelectable hoverOverride;
 
 	public KSelectable hover;
-
-	protected int defaultLayerMask;
 
 	protected int layerMask;
 

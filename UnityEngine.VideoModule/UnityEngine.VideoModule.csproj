@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B067829F-8247-451E-91B6-ADA706DB92DA}</ProjectGuid>
+    <ProjectGuid>{8509D200-4EC1-4AA0-A5C1-A96E87FB9AB7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.VideoModule</RootNamespace>
     <AssemblyName>UnityEngine.VideoModule</AssemblyName>
@@ -33,27 +33,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{B067829F-8247-451E-91B6-ADA706DB9291}</Project>
+      <Project>{8509D200-4EC1-4AA0-A5C1-A96E87FB9A6E}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{B067829F-8247-451E-91B6-ADA706DB9294}</Project>
+      <Project>{8509D200-4EC1-4AA0-A5C1-A96E87FB9A71}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{B067829F-8247-451E-91B6-ADA706DB9296}</Project>
+      <Project>{8509D200-4EC1-4AA0-A5C1-A96E87FB9A73}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{B067829F-8247-451E-91B6-ADA706DB92A3}</Project>
+      <Project>{8509D200-4EC1-4AA0-A5C1-A96E87FB9A80}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{B067829F-8247-451E-91B6-ADA706DB92A9}</Project>
+      <Project>{8509D200-4EC1-4AA0-A5C1-A96E87FB9A86}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{B067829F-8247-451E-91B6-ADA706DB92BF}</Project>
+      <Project>{8509D200-4EC1-4AA0-A5C1-A96E87FB9A9C}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

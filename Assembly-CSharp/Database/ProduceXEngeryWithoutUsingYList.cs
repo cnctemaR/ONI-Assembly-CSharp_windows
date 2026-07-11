@@ -65,9 +65,22 @@ namespace Database
 			this.usedDisallowedBuilding = reader.ReadByte() != 0;
 		}
 
-		private List<Tag> disallowedBuildings = new List<Tag>();
+		public float GetProductionAmount(bool complete)
+		{
+			float num = 0f;
+			foreach (KeyValuePair<Tag, float> keyValuePair in Game.Instance.savedInfo.powerCreatedbyGeneratorType)
+			{
+				if (!this.disallowedBuildings.Contains(keyValuePair.Key))
+				{
+					num += keyValuePair.Value;
+				}
+			}
+			return (!complete) ? num : this.amountToProduce;
+		}
 
-		private float amountToProduce;
+		public List<Tag> disallowedBuildings = new List<Tag>();
+
+		public float amountToProduce;
 
 		private float amountProduced;
 

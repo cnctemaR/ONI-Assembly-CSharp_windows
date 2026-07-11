@@ -103,7 +103,7 @@ public class KModalScreen : KScreen
 
 	public void SetBackgroundActive(bool active)
 	{
-		int num = ((!active) ? 0 : 70);
+		int num = ((!active) ? 0 : 190);
 		base.GetComponent<Image>().color = new Color32(0, 0, 0, (byte)num);
 	}
 

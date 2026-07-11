@@ -66,7 +66,6 @@ public abstract class OverlayModes
 			this.partition = OverlayModes.Mode.PopulatePartition<SaveLoadRoot>(this.targetIDs);
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
-			DragTool.SetLayerMask(this.selectionMask);
 			GridCompositor.Instance.ToggleMinor(false);
 			base.Enable();
 		}
@@ -99,7 +98,6 @@ public abstract class OverlayModes
 			OverlayModes.Mode.ResetDisplayValues<SaveLoadRoot>(this.layerTargets);
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			SelectTool.Instance.ClearLayerMask();
-			DragTool.ClearLayerMask();
 			base.UnregisterSaveLoadListeners();
 			this.partition.Clear();
 			this.layerTargets.Clear();
@@ -470,7 +468,6 @@ public abstract class OverlayModes
 			this.partition = OverlayModes.Mode.PopulatePartition<HarvestDesignatable>(this.targetIDs);
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
-			DragTool.SetLayerMask(this.selectionMask);
 		}
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
@@ -514,7 +511,6 @@ public abstract class OverlayModes
 			this.partition.Clear();
 			this.layerTargets.Clear();
 			SelectTool.Instance.ClearLayerMask();
-			DragTool.ClearLayerMask();
 		}
 
 		protected UniformGrid<HarvestDesignatable> partition;
@@ -1080,7 +1076,6 @@ public abstract class OverlayModes
 		{
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
-			DragTool.SetLayerMask(this.selectionMask);
 			base.RegisterSaveLoadListeners();
 			this.gameObjPartition = OverlayModes.Mode.PopulatePartition<SaveLoadRoot>(OverlayModes.Logic.HighlightItemIDs);
 			this.ioPartition = this.CreateLogicUIPartition();
@@ -1117,7 +1112,6 @@ public abstract class OverlayModes
 			}
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			SelectTool.Instance.ClearLayerMask();
-			DragTool.ClearLayerMask();
 			base.UnregisterSaveLoadListeners();
 			foreach (OverlayModes.Logic.UIInfo uiinfo in this.uiInfo.GetDataList())
 			{
@@ -2173,7 +2167,6 @@ public abstract class OverlayModes
 		{
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
-			DragTool.SetLayerMask(this.selectionMask);
 			base.RegisterSaveLoadListeners();
 			this.partition = OverlayModes.Mode.PopulatePartition<SaveLoadRoot>(OverlayScreen.WireIDs);
 			GridCompositor.Instance.ToggleMinor(true);
@@ -2184,7 +2177,6 @@ public abstract class OverlayModes
 			OverlayModes.Mode.ResetDisplayValues<SaveLoadRoot>(this.layerTargets);
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			SelectTool.Instance.ClearLayerMask();
-			DragTool.ClearLayerMask();
 			base.UnregisterSaveLoadListeners();
 			this.partition.Clear();
 			this.layerTargets.Clear();
@@ -2695,7 +2687,6 @@ public abstract class OverlayModes
 			this.partition = OverlayModes.Mode.PopulatePartition<SaveLoadRoot>(this.targetIDs);
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
-			DragTool.SetLayerMask(this.selectionMask);
 			GridCompositor.Instance.ToggleMinor(false);
 			base.Enable();
 		}
@@ -2728,7 +2719,6 @@ public abstract class OverlayModes
 			OverlayModes.Mode.ResetDisplayValues<SaveLoadRoot>(this.layerTargets);
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			SelectTool.Instance.ClearLayerMask();
-			DragTool.ClearLayerMask();
 			base.UnregisterSaveLoadListeners();
 			this.partition.Clear();
 			this.layerTargets.Clear();
@@ -2954,7 +2944,6 @@ public abstract class OverlayModes
 			base.RegisterSaveLoadListeners();
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
-			DragTool.SetLayerMask(this.selectionMask);
 			GridCompositor.Instance.ToggleMinor(false);
 			base.Enable();
 		}
@@ -2965,7 +2954,6 @@ public abstract class OverlayModes
 			OverlayModes.Mode.ResetDisplayValues<SaveLoadRoot>(this.layerTargets);
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			SelectTool.Instance.ClearLayerMask();
-			DragTool.ClearLayerMask();
 			this.partition.Clear();
 			this.partition = null;
 			this.layerTargets.Clear();

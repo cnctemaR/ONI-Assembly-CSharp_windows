@@ -55,6 +55,7 @@ public class HeadquartersConfig : IBuildingConfig
 		light2D.shape = LightShape.Circle;
 		light2D.drawOverlay = true;
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Experimental, false);
 		RoleStation roleStation = go.AddOrGet<RoleStation>();
 		roleStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_hqbase_skill_upgrade_kanim") };
 		roleStation.workAnims = new HashedString[] { "upgrade" };

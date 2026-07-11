@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using UnityEngine;
 
 public class PatchNotesScreen : KModalScreen
@@ -7,18 +6,15 @@ public class PatchNotesScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.changesLabel.text = string.Format(UI.FRONTEND.PATCHNOTESSCREEN.BODY, UI.FRONTEND.PATCHNOTESSCREEN.PATCHNOTES);
+		this.changesLabel.text = this.m_patchNotesText;
 		this.closeButton.onClick += this.MarkAsReadAndClose;
 		this.closeButton.soundPlayer.widget_sound_events()[0].OverrideAssetName = "HUD_Click_Close";
 		this.okButton.onClick += this.MarkAsReadAndClose;
-		this.fullPatchNotes.onClick += delegate
-		{
-			Application.OpenURL("http://forums.kleientertainment.com/forum/137-oxygen-not-included-latest-content-update/");
-		};
 		this.previousVersion.onClick += delegate
 		{
 			Application.OpenURL("http://support.kleientertainment.com/customer/portal/articles/2776550");
 		};
+		this.fullPatchNotes.onClick += this.OnPatchNotesClick;
 	}
 
 	public static bool ShouldShowScreen()
@@ -30,6 +26,18 @@ public class PatchNotesScreen : KModalScreen
 	{
 		KPlayerPrefs.SetInt("PatchNotesVersion", PatchNotesScreen.PatchNotesVersion);
 		base.gameObject.SetActive(false);
+	}
+
+	public void UpdatePatchNotes(string patchNotesSummary, string url)
+	{
+		this.m_patchNotesUrl = url;
+		this.m_patchNotesText = patchNotesSummary;
+		this.changesLabel.text = this.m_patchNotesText;
+	}
+
+	private void OnPatchNotesClick()
+	{
+		Application.OpenURL(this.m_patchNotesUrl);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -58,6 +66,10 @@ public class PatchNotesScreen : KModalScreen
 
 	[SerializeField]
 	private LocText changesLabel;
+
+	private string m_patchNotesUrl;
+
+	private string m_patchNotesText;
 
 	private static int PatchNotesVersion = 9;
 }

@@ -172,7 +172,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			};
 			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringDeposit).ToString();
 			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
-			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
+			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle]);
 			this.requestSelectedEntityBtn.isInteractable = flag;
 			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
 			this.ToggleObjectPicker(true);
@@ -223,9 +223,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			ReceptacleSideScreen.SelectableEntity selectableEntity;
 			if (this.depositObjectMap.TryGetValue(this.selectedEntityToggle, out selectableEntity))
 			{
-				flag = this.ValidRotationForDeposit(selectableEntity.direction);
-				flag = flag && this.GetAvailableAmount(selectableEntity.tag) > 0f;
-				flag = flag && this.AdditionalCanDepositTest();
+				flag = this.CanDepositEntity(selectableEntity);
 			}
 			if (!flag)
 			{
@@ -237,7 +235,17 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 	}
 
+	private bool CanDepositEntity(ReceptacleSideScreen.SelectableEntity entity)
+	{
+		return this.ValidRotationForDeposit(entity.direction) && (!this.RequiresAvailableAmountToDeposit() || this.GetAvailableAmount(entity.tag) > 0f) && this.AdditionalCanDepositTest();
+	}
+
 	protected virtual bool AdditionalCanDepositTest()
+	{
+		return true;
+	}
+
+	protected virtual bool RequiresAvailableAmountToDeposit()
 	{
 		return true;
 	}
@@ -418,7 +426,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 		if (this.selectedEntityToggle != null)
 		{
-			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
+			bool flag = this.CanDepositEntity(this.depositObjectMap[this.selectedEntityToggle]);
 			this.requestSelectedEntityBtn.isInteractable = flag;
 			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
 		}

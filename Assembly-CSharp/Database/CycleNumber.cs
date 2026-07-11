@@ -36,6 +36,11 @@ namespace Database
 			this.cycleNumber = reader.ReadInt32();
 		}
 
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CYCLE_NUMBER, (!complete) ? (GameClock.Instance.GetCycle() + 1) : this.cycleNumber, this.cycleNumber);
+		}
+
 		private int cycleNumber;
 	}
 }

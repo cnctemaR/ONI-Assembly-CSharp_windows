@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
 
 namespace Database
 {
@@ -12,6 +13,7 @@ namespace Database
 
 		public override bool Success()
 		{
+			this.amountRevealed = 0f;
 			float num = 0f;
 			for (int i = 0; i < Grid.Visible.Length; i++)
 			{
@@ -20,6 +22,7 @@ namespace Database
 					num += 1f;
 				}
 			}
+			this.amountRevealed = num / (float)Grid.Visible.Length;
 			return num / (float)Grid.Visible.Length > this.percentToReveal;
 		}
 
@@ -33,6 +36,13 @@ namespace Database
 			this.percentToReveal = reader.ReadSingle();
 		}
 
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.REVEALED, this.amountRevealed * 100f, this.percentToReveal * 100f);
+		}
+
 		private float percentToReveal;
+
+		private float amountRevealed;
 	}
 }

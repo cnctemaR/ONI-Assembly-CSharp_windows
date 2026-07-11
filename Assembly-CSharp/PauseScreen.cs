@@ -151,8 +151,8 @@ public class PauseScreen : KModalButtonMenu
 
 	private void OnColonySummary()
 	{
-		RetireColonyUtility.SaveColonySummaryData();
-		MainMenu.ActivateRetiredColoniesScreen(base.transform.parent.gameObject, SaveGame.Instance.BaseName, null);
+		RetiredColonyData currentColonyRetiredColonyData = RetireColonyUtility.GetCurrentColonyRetiredColonyData();
+		MainMenu.ActivateRetiredColoniesScreenFromData(PauseScreen.Instance.transform.parent.gameObject, currentColonyRetiredColonyData);
 	}
 
 	private void OnQuit()

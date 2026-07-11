@@ -46,7 +46,6 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 	public void OnPointerClick(PointerEventData eventData)
 	{
 		this.skillsScreen.CurrentlySelectedMinion = this.minion;
-		this.skillsScreen.RefreshSkillWidgets();
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
 	}
 

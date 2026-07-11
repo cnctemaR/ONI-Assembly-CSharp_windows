@@ -9,6 +9,8 @@ namespace STRINGS
 			public class HEADQUARTERSCOMPLETE
 			{
 				public static LocString NAME = UI.FormatAsLink("Printing Pod", "HEADQUARTERS");
+
+				public static LocString UNIQUE_POPTEXT = "Only one {0} allowed!";
 			}
 
 			public class AIRCONDITIONER
@@ -530,7 +532,7 @@ namespace STRINGS
 					UI.FormatAsLink("Light", "LIGHT"),
 					" when ",
 					UI.FormatAsLink("Powered", "POWER"),
-					".\n\nDuplicants can operate buildings more quickly the building is lit."
+					".\n\nDuplicants can operate buildings more quickly when the building is lit."
 				});
 			}
 

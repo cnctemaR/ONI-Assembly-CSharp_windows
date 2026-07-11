@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
+using UnityEngine;
 
 namespace Database
 {
@@ -28,6 +30,11 @@ namespace Database
 		public override void Deserialize(IReader reader)
 		{
 			this.cycleNumber = reader.ReadInt32();
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.REMAINING_CYCLES, Mathf.Max(this.cycleNumber - GameClock.Instance.GetCycle(), 0), this.cycleNumber);
 		}
 
 		private int cycleNumber;

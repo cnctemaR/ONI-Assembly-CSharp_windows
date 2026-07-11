@@ -3708,9 +3708,9 @@ namespace STRINGS
 
 			public class CODEX_DISCOVERED_MESSAGE
 			{
-				public static LocString TITLE = "Database Update Discovered";
+				public static LocString TITLE = "New Log Entry";
 
-				public static LocString BODY = "Database Update Discovered: {codex}\n";
+				public static LocString BODY = "I've added a new entry to my log: {codex}\n";
 			}
 
 			public class GEYSERS
@@ -5855,9 +5855,9 @@ namespace STRINGS
 
 			public class CRITTER_COUNT_SIDE_SCREEN
 			{
-				public static LocString TITLE = "Critter Count";
+				public static LocString TITLE = "Critter Count Sensor";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
+				public static LocString TOOLTIP_ABOVE = string.Concat(new string[]
 				{
 					"Will send a ",
 					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
@@ -5872,9 +5872,26 @@ namespace STRINGS
 					" in the room"
 				});
 
+				public static LocString TOOLTIP_BELOW = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if there are fewer than <b>{0}</b> ",
+					UI.PRE_KEYWORD,
+					"Critters",
+					UI.PST_KEYWORD,
+					" or ",
+					UI.PRE_KEYWORD,
+					"Eggs",
+					UI.PST_KEYWORD,
+					" in the room"
+				});
+
 				public static LocString START = "Turn On";
 
 				public static LocString STOP = "Turn Off";
+
+				public static LocString VALUE_NAME = "Critter / Egg Count";
 			}
 
 			public class OIL_WELL_CAP_SIDE_SCREEN
@@ -7767,7 +7784,7 @@ namespace STRINGS
 						{
 							public static LocString TITLE = "    • <b>Dying off: {0}</b>";
 
-							public static LocString TOOLTIP = "Low germ count in this area is causing germs to die rapidly\n\nLess than {0} germs are on this {1} of material.\n({2} germs/Kg)";
+							public static LocString TOOLTIP = "Low germ count in this area is causing germs to die rapidly\n\nFewer than {0} germs are on this {1} of material.\n({2} germs/Kg)";
 						}
 
 						public class OVERPOPULATED

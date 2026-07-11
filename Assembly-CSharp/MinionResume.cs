@@ -360,6 +360,11 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		{
 			this.ownedHats.Add(Db.Get().Skills.Get(skillId).hat, false);
 		}
+		if (this.AvailableSkillpoints == 0 && this.lastSkillNotification != null)
+		{
+			Game.Instance.GetComponent<Notifier>().Remove(this.lastSkillNotification);
+			this.lastSkillNotification = null;
+		}
 	}
 
 	public void UnmasterSkill(string skillId)
@@ -454,20 +459,14 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	private void OnSkillPointGained()
 	{
 		Game.Instance.Trigger(1505456302, this);
-		SkillMasteredMessage skillMasteredMessage = new SkillMasteredMessage(this);
-		Transform transform = global::UnityEngine.Object.FindObjectOfType<Telepad>().transform;
-		Transform transform2 = null;
-		if (transform != null)
+		if (this.AvailableSkillpoints == 1)
 		{
-			transform2 = transform.transform;
+			this.lastSkillNotification = new Notification(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip), null, true, 0f, delegate(object d)
+			{
+				ManagementMenu.Instance.OpenSkills(this.identity);
+			}, null, null);
+			Game.Instance.GetComponent<Notifier>().Add(this.lastSkillNotification, string.Empty);
 		}
-		Notifier component = Game.Instance.GetComponent<Notifier>();
-		string text = MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME;
-		NotificationType notificationType = NotificationType.Good;
-		HashedString invalid = HashedString.Invalid;
-		Func<List<Notification>, object, string> func = new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip);
-		Transform transform3 = transform2;
-		component.Add(new Notification(text, notificationType, invalid, func, null, true, 0f, null, null, transform3), string.Empty);
 		if (PopFXManager.Instance != null)
 		{
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
@@ -693,6 +692,8 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	[Serialize]
 	private float totalExperienceGained;
+
+	private Notification lastSkillNotification;
 
 	private AttributeModifier skillsMoraleExpectationModifier;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using STRINGS;
 
 namespace Database
 {
@@ -34,6 +35,7 @@ namespace Database
 					}
 				}
 			}
+			this.choresCompleted = Math.Abs(num);
 			return Math.Abs(num) >= this.numChoreseToComplete;
 		}
 
@@ -47,6 +49,13 @@ namespace Database
 			this.numChoreseToComplete = reader.ReadSingle();
 		}
 
+		public override string GetProgress(bool complete)
+		{
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CHORES_OF_TYPE, (!complete) ? this.choresCompleted : this.numChoreseToComplete, this.numChoreseToComplete, Db.Get().ChoreTypes.PowerTinker.Name);
+		}
+
 		private float numChoreseToComplete;
+
+		private float choresCompleted;
 	}
 }

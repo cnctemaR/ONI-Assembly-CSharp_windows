@@ -7,8 +7,6 @@ public class NextUpdateTimer : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.currentReleaseDate = new global::System.DateTime(2019, 4, 16, 17, 0, 0, DateTimeKind.Utc);
-		this.nextReleaseDate = new global::System.DateTime(2019, 7, 14, 17, 0, 0, DateTimeKind.Utc);
 		this.initialAnimScale = this.UpdateAnimController.animScale;
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
@@ -24,14 +22,33 @@ public class NextUpdateTimer : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.RefreshReleaseTimes();
+	}
+
+	public void UpdateReleaseTimes(string lastUpdateTime, string nextUpdateTime, string textOverride)
+	{
+		if (!global::System.DateTime.TryParse(lastUpdateTime, out this.currentReleaseDate))
+		{
+			global::Debug.LogWarning("Failed to parse last_update_time: " + lastUpdateTime);
+		}
+		if (!global::System.DateTime.TryParse(nextUpdateTime, out this.nextReleaseDate))
+		{
+			global::Debug.LogWarning("Failed to parse next_update_time: " + nextUpdateTime);
+		}
+		this.m_releaseTextOverride = textOverride;
+		this.RefreshReleaseTimes();
+	}
+
+	private void RefreshReleaseTimes()
+	{
 		TimeSpan timeSpan = this.nextReleaseDate - this.currentReleaseDate;
 		TimeSpan timeSpan2 = this.nextReleaseDate - global::System.DateTime.UtcNow;
 		TimeSpan timeSpan3 = global::System.DateTime.UtcNow - this.currentReleaseDate;
 		string text = string.Empty;
 		string text2 = "4";
-		if (this.useSpecificDate)
+		if (!string.IsNullOrEmpty(this.m_releaseTextOverride))
 		{
-			text = UI.DEVELOPMENTBUILDS.UPDATES.SPECIFIC_DATE;
+			text = this.m_releaseTextOverride;
 		}
 		else if (timeSpan2.TotalHours < 8.0)
 		{
@@ -61,9 +78,7 @@ public class NextUpdateTimer : KMonoBehaviour
 		this.TimerText.text = text;
 		this.UpdateAnimController.Play(text2, KAnim.PlayMode.Loop, 1f, 0f);
 		double num3 = timeSpan3.TotalSeconds / timeSpan.TotalSeconds;
-		DebugUtil.LogArgs(new object[] { "ANIM PERCENT", num3 });
 		float num4 = Mathf.Clamp01((float)num3);
-		DebugUtil.LogArgs(new object[] { "ANIM PERCENT FLOAT", num4 });
 		this.UpdateAnimMeterController.SetPositionPercent(num4);
 	}
 
@@ -88,9 +103,9 @@ public class NextUpdateTimer : KMonoBehaviour
 
 	public float initialAnimScale;
 
-	private bool useSpecificDate = true;
-
 	public global::System.DateTime nextReleaseDate;
 
 	public global::System.DateTime currentReleaseDate;
+
+	private string m_releaseTextOverride;
 }

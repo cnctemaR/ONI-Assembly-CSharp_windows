@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class CodexEntry
@@ -13,6 +14,10 @@ public class CodexEntry
 		this.category = category;
 		this.name = name;
 		this.contentContainers = contentContainers;
+		if (string.IsNullOrEmpty(this.sortString))
+		{
+			this.sortString = UI.StripLinkFormatting(name);
+		}
 	}
 
 	public CodexEntry(string category, string titleKey, List<ContentContainer> contentContainers)
@@ -20,6 +25,10 @@ public class CodexEntry
 		this.category = category;
 		this.title = titleKey;
 		this.contentContainers = contentContainers;
+		if (string.IsNullOrEmpty(this.sortString))
+		{
+			this.sortString = UI.StripLinkFormatting(this.title);
+		}
 	}
 
 	public List<ContentContainer> contentContainers { get; set; }
@@ -59,6 +68,8 @@ public class CodexEntry
 	public string iconPrefabID { get; set; }
 
 	public bool disabled { get; set; }
+
+	public string sortString { get; set; }
 
 	public List<SubEntry> subEntries = new List<SubEntry>();
 

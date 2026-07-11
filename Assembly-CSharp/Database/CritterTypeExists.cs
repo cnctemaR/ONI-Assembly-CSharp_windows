@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using STRINGS;
 
 namespace Database
 {
@@ -42,6 +43,11 @@ namespace Database
 				string text = reader.ReadKleiString();
 				this.critterTypes.Add(new Tag(text));
 			}
+		}
+
+		public override string GetProgress(bool complete)
+		{
+			return COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.HATCH_A_MORPH;
 		}
 
 		private List<Tag> critterTypes = new List<Tag>();

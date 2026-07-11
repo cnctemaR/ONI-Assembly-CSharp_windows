@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LoadScreen : KModalScreen
 {
@@ -25,7 +26,7 @@ public class LoadScreen : KModalScreen
 		}
 		if (this.onClick == null)
 		{
-			this.onClick = new Action<string>(this.SetSelectedGame);
+			this.onClick = new Action<string, string>(this.SetSelectedGame);
 		}
 		if (this.closeButton != null)
 		{
@@ -159,19 +160,42 @@ public class LoadScreen : KModalScreen
 		base.OnDeactivate();
 	}
 
+	private void SetHeaderButtonActive(KButton headerButton, bool activeState)
+	{
+		ImageToggleState component = headerButton.GetComponent<ImageToggleState>();
+		if (component != null)
+		{
+			component.SetActiveState(activeState);
+		}
+	}
+
+	private void SetChildrenActive(HierarchyReferences hierarchy, bool state)
+	{
+		for (int i = 0; i < hierarchy.transform.childCount; i++)
+		{
+			GameObject gameObject = hierarchy.transform.GetChild(i).gameObject;
+			if (gameObject != null)
+			{
+				gameObject.SetActive(state);
+			}
+		}
+	}
+
 	private void AddExistingSaveFile(string savename, List<LoadScreen.SaveGameFileDetails> fileDetailsList)
 	{
 		HierarchyReferences savenameRow = this.savenameRowPool.GetFreeElement(this.saveButtonRoot, true);
-		KButton component = savenameRow.GetReference<RectTransform>("Button").GetComponent<KButton>();
-		component.ClearOnClick();
+		KButton headerButton = savenameRow.GetReference<RectTransform>("Button").GetComponent<KButton>();
+		headerButton.ClearOnClick();
 		LocText headerTitle = savenameRow.GetReference<RectTransform>("HeaderTitle").GetComponent<LocText>();
+		LocText component = savenameRow.GetReference<RectTransform>("SaveTitle").GetComponent<LocText>();
 		LocText component2 = savenameRow.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>();
 		RectTransform saveDetailsRow = savenameRow.GetReference<RectTransform>("SaveDetailsRow");
 		LocText component3 = savenameRow.GetReference<RectTransform>("SaveDetailsBaseName").GetComponent<LocText>();
 		RectTransform savefileRowTemplate = savenameRow.GetReference<RectTransform>("SavefileRowTemplate");
 		fileDetailsList.Sort((LoadScreen.SaveGameFileDetails x, LoadScreen.SaveGameFileDetails y) => y.FileDate.CompareTo(x.FileDate));
-		headerTitle.text = savename;
-		component2.text = string.Format("{0:H:mm:ss} " + Localization.GetFileDateFormat(0), fileDetailsList[0].FileDate);
+		headerTitle.text = fileDetailsList[0].BaseName;
+		component.text = savename;
+		component2.text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), fileDetailsList[0].FileDate);
 		component3.text = string.Format("{0}: {1}", UI.FRONTEND.LOADSCREEN.BASE_NAME, fileDetailsList[0].BaseName);
 		for (int i = 0; i < savenameRow.transform.childCount; i++)
 		{
@@ -198,40 +222,44 @@ public class LoadScreen : KModalScreen
 				flag = false;
 				reference2.gameObject.SetActive(fileDetails.FileInfo.isAutoSave);
 				component6.text = Path.GetFileNameWithoutExtension(fileDetails.FileName);
-				component7.text = string.Format("{0:H:mm:ss} " + Localization.GetFileDateFormat(0), fileDetails.FileDate);
+				component7.text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), fileDetails.FileDate);
 				component5.onClick += delegate
 				{
-					this.onClick(fileDetails.FileName);
+					this.onClick(fileDetails.FileName, savename);
 				};
 				component5.onDoubleClick += delegate
 				{
-					this.onClick(fileDetails.FileName);
+					this.onClick(fileDetails.FileName, savename);
 					this.Load();
 				};
 				this.fileButtonMap.Add(fileDetails.FileName, component5);
 			}
 		}
-		component.onClick += delegate
+		headerButton.onClick += delegate
 		{
 			bool activeSelf = saveDetailsRow.gameObject.activeSelf;
-			for (int j = 0; j < savenameRow.transform.childCount; j++)
+			bool flag2 = headerButton == this.currentExpanded;
+			if (flag2)
 			{
-				GameObject gameObject2 = savenameRow.transform.GetChild(j).gameObject;
-				if (gameObject2 != null)
-				{
-					gameObject2.SetActive(!activeSelf);
-				}
+				this.SetChildrenActive(savenameRow, !activeSelf);
 			}
+			else if (!activeSelf && !flag2)
+			{
+				this.SetChildrenActive(savenameRow, true);
+			}
+			if (this.currentExpanded != null && !flag2)
+			{
+				this.SetHeaderButtonActive(this.currentExpanded, false);
+			}
+			this.currentExpanded = headerButton;
+			this.SetHeaderButtonActive(this.currentExpanded, true);
 			headerTitle.transform.parent.gameObject.SetActive(true);
 			savefileRowTemplate.gameObject.SetActive(false);
-			if (!activeSelf)
-			{
-				this.onClick(fileDetailsList[0].FileName);
-			}
+			this.onClick(fileDetailsList[0].FileName, savename);
 		};
-		component.onDoubleClick += delegate
+		headerButton.onDoubleClick += delegate
 		{
-			this.onClick(fileDetailsList[0].FileName);
+			this.onClick(fileDetailsList[0].FileName, savename);
 			LoadingOverlay.Load(new global::System.Action(this.DoLoad));
 		};
 		savenameRow.transform.SetAsLastSibling();
@@ -247,10 +275,10 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 359645U;
+		return header.buildVersion > 361684U;
 	}
 
-	private void SetSelectedGame(string filename)
+	private void SetSelectedGame(string filename, string savename)
 	{
 		if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
 		{
@@ -270,6 +298,17 @@ public class LoadScreen : KModalScreen
 		kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
 		try
 		{
+			Sprite sprite = RetireColonyUtility.LoadColonyPreview(savename);
+			Image component = this.previewImageRoot.GetComponent<Image>();
+			component.sprite = sprite;
+			component.color = ((!sprite) ? Color.black : Color.white);
+		}
+		catch (Exception ex)
+		{
+			global::Debug.Log(ex);
+		}
+		try
+		{
 			SaveGame.Header header;
 			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 			string text = Path.GetFileName(filename);
@@ -282,7 +321,7 @@ public class LoadScreen : KModalScreen
 			this.InfoText.text = string.Empty;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 359645U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 361684U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -302,9 +341,9 @@ public class LoadScreen : KModalScreen
 				this.InfoText.text = UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
 			}
 		}
-		catch (Exception ex)
+		catch (Exception ex2)
 		{
-			global::Debug.LogWarning(ex);
+			global::Debug.LogWarning(ex2);
 			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
 			if (this.loadButton.isInteractable)
 			{
@@ -334,10 +373,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 359645U)
+		if (header.buildVersion > 361684U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 359645U.ToString();
+			text2 = 361684U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -424,6 +463,9 @@ public class LoadScreen : KModalScreen
 	private KButton deleteButton;
 
 	[SerializeField]
+	private GameObject previewImageRoot;
+
+	[SerializeField]
 	private ColorStyleSetting validSaveFileStyle;
 
 	[SerializeField]
@@ -437,7 +479,7 @@ public class LoadScreen : KModalScreen
 
 	public LocText InfoText;
 
-	public Action<string> onClick;
+	public Action<string, string> onClick;
 
 	public bool requireConfirmation = true;
 
@@ -448,6 +490,8 @@ public class LoadScreen : KModalScreen
 	private ConfirmDialogScreen confirmScreen;
 
 	private string selectedFileName;
+
+	private KButton currentExpanded;
 
 	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> saveFiles;
 

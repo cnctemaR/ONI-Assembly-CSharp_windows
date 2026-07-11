@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Database;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
+public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, ISim33ms
 {
 	public List<string> achievementsToDisplay
 	{
@@ -34,7 +35,29 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
 			}
 		}
 		this.forceCheckAchievementHandle = Game.Instance.Subscribe(395452326, new Action<object>(this.CheckAchievements));
-		GameScheduler.Instance.Schedule("CheckColonyAchievements", 5f, new Action<object>(this.CheckAchievements), null, null);
+		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
+	}
+
+	public void Sim33ms(float dt)
+	{
+		if (this.updatingAchievement >= this.achievements.Count)
+		{
+			this.updatingAchievement = 0;
+		}
+		KeyValuePair<string, ColonyAchievementStatus> keyValuePair = this.achievements.ElementAt<KeyValuePair<string, ColonyAchievementStatus>>(this.updatingAchievement);
+		this.updatingAchievement++;
+		if (keyValuePair.Value.success || keyValuePair.Value.failed)
+		{
+			return;
+		}
+		keyValuePair.Value.UpdateAchievement();
+		if (keyValuePair.Value.success && !keyValuePair.Value.failed)
+		{
+			ColonyAchievementTracker.UnlockPlatformAchievement(keyValuePair.Key);
+			this.completedAchievementsToDisplay.Add(keyValuePair.Key);
+			this.TriggerNewAchievementCompleted(null);
+			RetireColonyUtility.SaveColonySummaryData();
+		}
 	}
 
 	private void CheckAchievements(object data = null)
@@ -61,7 +84,6 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
 			RetireColonyUtility.SaveColonySummaryData();
 		}
 		this.newlyCompletedAchievements.Clear();
-		this.checkAchievementsHandle = GameScheduler.Instance.Schedule("CheckColonyAchievements", 12f, new Action<object>(this.CheckAchievements), null, null);
 	}
 
 	private static void UnlockPlatformAchievement(string achievement_id)
@@ -250,6 +272,66 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
 		}
 	}
 
+	public void LogSuitChore(ChoreDriver driver)
+	{
+		if (driver == null || driver.GetComponent<MinionIdentity>() == null)
+		{
+			return;
+		}
+		bool flag = false;
+		Equipment equipment = driver.GetComponent<MinionIdentity>().GetEquipment();
+		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
+		{
+			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
+			Equippable equippable = equipmentSlotInstance.assignable as Equippable;
+			if (equippable && equippable.GetComponent<KPrefabID>().HasTag(GameTags.AtmoSuit))
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (flag)
+		{
+			int cycle = GameClock.Instance.GetCycle();
+			int instanceID = driver.GetComponent<KPrefabID>().InstanceID;
+			if (!this.dupesCompleteChoresInSuits.ContainsKey(cycle))
+			{
+				this.dupesCompleteChoresInSuits.Add(cycle, new List<int> { instanceID });
+			}
+			else if (!this.dupesCompleteChoresInSuits[cycle].Contains(instanceID))
+			{
+				this.dupesCompleteChoresInSuits[cycle].Add(instanceID);
+			}
+		}
+	}
+
+	public void OnNewDay(object data)
+	{
+		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
+		{
+			if (minionStorage.GetComponent<CommandModule>() != null)
+			{
+				List<MinionStorage.Info> storedMinionInfo = minionStorage.GetStoredMinionInfo();
+				if (storedMinionInfo.Count > 0)
+				{
+					int cycle = GameClock.Instance.GetCycle();
+					if (!this.dupesCompleteChoresInSuits.ContainsKey(cycle))
+					{
+						this.dupesCompleteChoresInSuits.Add(cycle, new List<int>());
+					}
+					for (int i = 0; i < storedMinionInfo.Count; i++)
+					{
+						KPrefabID kprefabID = storedMinionInfo[i].serializedMinion.Get();
+						if (kprefabID != null)
+						{
+							this.dupesCompleteChoresInSuits[cycle].Add(kprefabID.InstanceID);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public Dictionary<string, ColonyAchievementStatus> achievements = new Dictionary<string, ColonyAchievementStatus>();
 
 	[Serialize]
@@ -258,9 +340,15 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
 	[Serialize]
 	public Dictionary<int, int> fetchDupeChoreDeliveries = new Dictionary<int, int>();
 
+	[Serialize]
+	public Dictionary<int, List<int>> dupesCompleteChoresInSuits = new Dictionary<int, List<int>>();
+
 	private SchedulerHandle checkAchievementsHandle;
 
 	private int forceCheckAchievementHandle = -1;
+
+	[Serialize]
+	private int updatingAchievement;
 
 	[Serialize]
 	private List<string> completedAchievementsToDisplay = new List<string>();
